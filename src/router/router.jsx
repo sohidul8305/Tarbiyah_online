@@ -6,6 +6,9 @@ import Course from "../Page/Home/Course/Course";
 import Consultancy from "../Page/Home/Consultancy/Consultancy";
 import Blog from "../Page/Home/Blog/Blog";
 import Sponsorship from "../Page/Home/Sponsorship/Sponsorship";
+import Teacher from "../Page/Home/Teacher/Teacher";
+import Admin from "../Page/Admin/Admin";
+import Student from "../Page/Student/Student";
 
 
 
@@ -39,6 +42,18 @@ export const router = createBrowserRouter([
       {
        path: "/sponsorship",
         Component: Sponsorship,
+      },
+      {
+       path: "/teacher",
+        Component: Teacher,
+      },
+      {
+       path: "/admin",
+        Component: Admin,
+      },
+      {
+       path: "/student",
+        Component: Student,
       },
 
     ]

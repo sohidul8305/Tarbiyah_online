@@ -39,9 +39,9 @@ const Navbar = () => {
           <div className="relative group cursor-pointer hover:text-teal-700">
             <span className="flex items-center gap-1">Portal Login ▾</span>
             <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-md border border-gray-100 hidden group-hover:block z-50">
-              <a href="#" className="block px-4 py-3 hover:bg-gray-50 border-b">Teacher Login</a>
-              <a href="#" className="block px-4 py-3 hover:bg-gray-50 border-b">Admin Login</a>
-              <a href="#" className="block px-4 py-3 hover:bg-gray-50">Student Login</a>
+              <a href="/teacher" className="block px-4 py-3 hover:bg-gray-50 border-b">Teacher Login</a>
+              <a href="/admin" className="block px-4 py-3 hover:bg-gray-50 border-b">Admin Login</a>
+              <a href="/student" className="block px-4 py-3 hover:bg-gray-50">Student Login</a>
             </div>
           </div>
 
