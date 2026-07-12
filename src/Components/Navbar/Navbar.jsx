@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router';
 
 const Navbar = () => {
   return (
@@ -45,9 +46,11 @@ const Navbar = () => {
             </div>
           </div>
 
-          <button className="bg-[#004d4d] text-white px-6 py-2 rounded-md hover:bg-teal-900 transition">
+        <Link to="/register">
+              <button className="bg-[#004d4d] text-white px-6 py-2 rounded-md hover:bg-teal-900 transition">
             Join Now
           </button>
+        </Link>
         </div>
       </div>
     </nav>

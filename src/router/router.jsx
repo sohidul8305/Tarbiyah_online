@@ -9,6 +9,8 @@ import Sponsorship from "../Page/Home/Sponsorship/Sponsorship";
 import Teacher from "../Page/Home/Teacher/Teacher";
 import Admin from "../Page/Admin/Admin";
 import Student from "../Page/Student/Student";
+import Register from "../Page/Register/Register";
+import Login from "../Page/Login/Login";
 
 
 
@@ -54,6 +56,14 @@ export const router = createBrowserRouter([
       {
        path: "/student",
         Component: Student,
+      },
+      {
+       path: "/register",
+        Component: Register,
+      },
+      {
+       path: "/login",
+        Component: Login,
       },
 
     ]
