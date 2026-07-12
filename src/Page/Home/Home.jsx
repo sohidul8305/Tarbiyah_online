@@ -1,9 +1,12 @@
 import React from 'react';
+import StatsSection from '../../Components/Navbar/StatsSection/StatsSection';
+import VideoSection from '../../Components/Navbar/VideoSection/VideoSection';
 
 const Home = () => {
     return (
         <div>
-        <p>Home page </p>
+        <StatsSection></StatsSection>
+        <VideoSection></VideoSection>
         </div>
     );
 };
