@@ -9,14 +9,14 @@ import Sponsorship from "../Page/Home/Sponsorship/Sponsorship";
 import Teacher from "../Page/Home/Teacher/Teacher";
 import Admin from "../Page/Admin/Admin";
 import Student from "../Page/Student/Student";
-import Register from "../Page/Register/Register";
-import Login from "../Page/Login/Login";
 import Management from "../Page/Management/Management";
 import Faculty from "../Components/Faculty/Faculty";
 import Live_course from "../Page/Live_course/Live_course";
 import Recorded_course from "../Page/Recorded_course/Recorded_course";
 import Events from "../Page/Events/Events";
 import Gallery from "../Page/Gallery/Gallery";
+
+
 
 
 
@@ -63,14 +63,7 @@ export const router = createBrowserRouter([
        path: "/student",
         Component: Student,
       },
-      {
-       path: "/register",
-        Component: Register,
-      },
-      {
-       path: "/login",
-        Component: Login,
-      },
+
       {
        path: "/management",
         Component: Management,
@@ -95,6 +88,7 @@ export const router = createBrowserRouter([
        path: "/gallery",
         Component: Gallery,
       },
+
 
     ]
   },
