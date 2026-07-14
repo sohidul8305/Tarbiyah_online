@@ -17,7 +17,10 @@
     "react-dom": "^19.2.7",
     "react-hook-form": "^7.81.0",
     "react-router": "^7.18.1",
+<<<<<<< HEAD
     "swiper": "^14.0.5",
+=======
+>>>>>>> 8a244edf2be928f2d8c87acdf199ba27d8dbbae2
     "tailwindcss": "^4.3.2"
   },
   "devDependencies": {

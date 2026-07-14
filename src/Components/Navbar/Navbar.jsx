@@ -1,5 +1,9 @@
+
 import React from "react";
 import { Link } from "react-router";
+
+import React from 'react';
+import { Link } from 'react-router';
 
 const Navbar = () => {
   return (
@@ -14,11 +18,15 @@ const Navbar = () => {
         </div>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2 cursor-pointer">
+<<<<<<< HEAD
             <span>BD</span> <span>বাংলা</span>
           </div>
           <Link to="/login">
             <div className="cursor-pointer font-medium">Log In</div>
           </Link>
+            <span>🇧🇩</span> <span>বাংলা</span>
+          </div>
+          <div className="cursor-pointer font-medium">Log In</div>
         </div>
       </div>
 
@@ -31,6 +39,7 @@ const Navbar = () => {
 
         {/* Navigation Items */}
         <div className="flex items-center gap-8 text-[#004d4d] font-bold">
+<<<<<<< HEAD
           <Link to="/" className="hover:text-teal-700">
             Home
           </Link>
@@ -54,6 +63,16 @@ const Navbar = () => {
               >
                 Faculty
               </Link>
+=======
+          <Link to="/" className="hover:text-teal-700">Home</Link>
+
+          {/* About Dropdown */}
+          <div className="relative group cursor-pointer hover:text-teal-700">
+           <Link to="/about"> <span className="flex items-center gap-1">About ▾</span></Link>
+            <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-md border border-gray-100 hidden group-hover:block z-50">
+              <Link to="/management" className="block px-4 py-3 hover:bg-gray-50 border-b text-[#004d4d]">Management</Link>
+              <Link to="/faculty" className="block px-4 py-3 hover:bg-gray-50 text-[#004d4d]">Faculty</Link>
+>>>>>>> 8a244edf2be928f2d8c87acdf199ba27d8dbbae2
             </div>
           </div>
 
@@ -61,6 +80,7 @@ const Navbar = () => {
           <div className="relative group cursor-pointer hover:text-teal-700">
             <span className="flex items-center gap-1">Courses ▾</span>
             <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-md border border-gray-100 hidden group-hover:block z-50">
+<<<<<<< HEAD
               <Link
                 to="/live-course"
                 className="block px-4 py-3 hover:bg-gray-50 border-b text-[#004d4d]"
@@ -79,11 +99,20 @@ const Navbar = () => {
           <Link to="/consultancy" className="hover:text-teal-700">
             Consultancy
           </Link>
+=======
+              <Link to="/live-course" className="block px-4 py-3 hover:bg-gray-50 border-b text-[#004d4d]">Live Course</Link>
+              <Link to="/recorded-course" className="block px-4 py-3 hover:bg-gray-50 text-[#004d4d]">Recorded Course</Link>
+            </div>
+          </div>
+
+          <Link to="/consultancy" className="hover:text-teal-700">Consultancy</Link>
+>>>>>>> 8a244edf2be928f2d8c87acdf199ba27d8dbbae2
 
           {/* Blog Dropdown */}
           <div className="relative group cursor-pointer hover:text-teal-700">
             <span className="flex items-center gap-1">Blog ▾</span>
             <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-md border border-gray-100 hidden group-hover:block z-50">
+<<<<<<< HEAD
               <Link
                 to="/events"
                 className="block px-4 py-3 hover:bg-gray-50 border-b text-[#004d4d]"
@@ -102,11 +131,20 @@ const Navbar = () => {
           <Link to="/sponsorship" className="hover:text-teal-700">
             Sponsorship
           </Link>
+=======
+              <Link to="/events" className="block px-4 py-3 hover:bg-gray-50 border-b text-[#004d4d]">Events</Link>
+              <Link to="/gallery" className="block px-4 py-3 hover:bg-gray-50 text-[#004d4d]">Gallery</Link>
+            </div>
+          </div>
+
+          <Link to="/sponsorship" className="hover:text-teal-700">Sponsorship</Link>
+>>>>>>> 8a244edf2be928f2d8c87acdf199ba27d8dbbae2
 
           {/* Portal Login Dropdown */}
           <div className="relative group cursor-pointer hover:text-teal-700">
             <span className="flex items-center gap-1">Portal Login ▾</span>
             <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-md border border-gray-100 hidden group-hover:block z-50">
+<<<<<<< HEAD
               <Link
                 to="/teacher"
                 className="block px-4 py-3 hover:bg-gray-50 border-b text-[#004d4d]"
@@ -125,6 +163,11 @@ const Navbar = () => {
               >
                 Student Login
               </Link>
+=======
+              <Link to="/teacher" className="block px-4 py-3 hover:bg-gray-50 border-b text-[#004d4d]">Teacher Login</Link>
+              <Link to="/admin" className="block px-4 py-3 hover:bg-gray-50 border-b text-[#004d4d]">Admin Login</Link>
+              <Link to="/student" className="block px-4 py-3 hover:bg-gray-50 text-[#004d4d]">Student Login</Link>
+>>>>>>> 8a244edf2be928f2d8c87acdf199ba27d8dbbae2
             </div>
           </div>
 
@@ -139,4 +182,8 @@ const Navbar = () => {
   );
 };
 
+<<<<<<< HEAD
 export default Navbar;
+=======
+export default Navbar;
+>>>>>>> 8a244edf2be928f2d8c87acdf199ba27d8dbbae2
