@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router";
-
+import logo from "../../image/";
 const Navbar = () => {
   return (
     <nav className="w-full">
