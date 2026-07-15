@@ -18,6 +18,7 @@ import Gallery from "../Page/Gallery/Gallery";
 import Register from "../Page/Register/Register";
 import Dashboard from "../Page/Dashboard/Dashboard";
 import Login from "../Page/Login/Login";
+import Member from "../Components/Member/Member";
 
 export const router = createBrowserRouter([
   // Main Layout Routes
@@ -84,6 +85,10 @@ export const router = createBrowserRouter([
       {
         path: "management",
         element: <Management />,
+      },
+      {
+        path: "member",
+        element: <Member />,
       },
     ],
   },

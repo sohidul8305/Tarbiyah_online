@@ -26,7 +26,9 @@ const Navbar = () => {
       <div className="bg-white py-4 px-6 flex justify-between items-center shadow-sm">
         {/* Logo */}
         <div className="flex items-center">
-          <img src={logo} alt="Tarbiyah logo" className="h-12" />
+          <Link to="/">
+            <img src={logo} alt="Tarbiyah logo" className="h-12 mr-50" />
+          </Link>
         </div>
 
         {/* Navigation Items */}
@@ -53,6 +55,12 @@ const Navbar = () => {
                 className="block px-4 py-3 hover:bg-gray-50 text-[#004d4d]"
               >
                 Faculty
+              </Link>
+              <Link
+                to="/member"
+                className="block px-4 py-3 hover:bg-gray-50 text-[#004d4d]"
+              >
+                Our Member
               </Link>
             </div>
           </div>
