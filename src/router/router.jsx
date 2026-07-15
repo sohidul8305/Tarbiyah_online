@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter } from "react-router-dom";
 import RootLayouts from "../RootLayouts/RootLayouts";
 import Home from "../Page/Home/Home";
 import About from "../Page/Home/About/About";
@@ -19,79 +19,81 @@ import Login from "../Page/Login/Login";
 import Register from "../Page/Register/Register";
 
 export const router = createBrowserRouter([
+  // Main Layout Routes
   {
     path: "/",
-    Component: RootLayouts,
+    element: <RootLayouts />,
     children: [
       {
         index: true,
-        Component: Home,
+        element: <Home />,
       },
       {
-        path: "/about",
-        Component: About,
+        path: "about",
+        element: <About />,
       },
       {
-        path: "/course",
-        Component: Course,
+        path: "course",
+        element: <Course />,
       },
       {
-        path: "/login",
-        Component: Login,
+        path: "consultancy",
+        element: <Consultancy />,
       },
       {
-        path: "/register",
-        Component: Register,
+        path: "blog",
+        element: <Blog />,
       },
       {
-        path: "/consultancy",
-        Component: Consultancy,
+        path: "sponsorship",
+        element: <Sponsorship />,
       },
       {
-        path: "/blog",
-        Component: Blog,
+        path: "teacher",
+        element: <Teacher />,
       },
       {
-        path: "/sponsorship",
-        Component: Sponsorship,
+        path: "faculty",
+        element: <Faculty />,
       },
       {
-        path: "/teacher",
-        Component: Teacher,
+        path: "live-course",
+        element: <Live_course />,
       },
       {
-        path: "/admin",
-        Component: Admin,
+        path: "recorded-course",
+        element: <Recorded_course />,
       },
       {
-        path: "/student",
-        Component: Student,
+        path: "events",
+        element: <Events />,
       },
       {
-        path: "/management",
-        Component: Management,
+        path: "gallery",
+        element: <Gallery />,
       },
       {
-        path: "/faculty",
-        Component: Faculty,
+        path: "admin",
+        element: <Admin />,
       },
       {
-        path: "/live-course",
-        Component: Live_course,
+        path: "student",
+        element: <Student />,
       },
       {
-        path: "/recorded-course",
-        Component: Recorded_course,
-      },
-      {
-        path: "/events",
-        Component: Events,
-      },
-      {
-        path: "/gallery",
-        Component: Gallery,
+        path: "management",
+        element: <Management />,
       },
     ],
+  },
+  // Login/Register আলাদা Routes (Layout ছাড়া)
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
   },
 ]);
 

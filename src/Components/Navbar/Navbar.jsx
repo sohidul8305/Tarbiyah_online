@@ -1,6 +1,5 @@
 import React from "react";
 import { Link } from "react-router";
-import logo from "../../image/";
 const Navbar = () => {
   return (
     <nav className="w-full">
@@ -14,7 +13,7 @@ const Navbar = () => {
         </div>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2 cursor-pointer">
-            <span>🇧🇩</span> <span>বাংলা</span>
+            <span>BD</span> <span>বাংলা</span>
           </div>
           <Link to="/login">
             <div className="cursor-pointer font-medium">Log In</div>
