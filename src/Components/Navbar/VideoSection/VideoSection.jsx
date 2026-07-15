@@ -7,7 +7,7 @@ const VideoSection = () => {
       {/* Left Side: Video Thumbnail with Play Button */}
       <div className="w-full md:w-1/2 relative group cursor-pointer">
         <img
-          src="https://images.unsplash.com/photo-1544725176-7c45e5a712c7?q=80&w=800&auto=format&fit=crop"
+          src="https://i.ibb.co.com/DDFrLBbJ/hero-bg.jpg"
           alt="Video Thumbnail"
           className="w-full rounded-lg shadow-lg"
         />

@@ -15,8 +15,9 @@ import Live_course from "../Page/Live_course/Live_course";
 import Recorded_course from "../Page/Recorded_course/Recorded_course";
 import Events from "../Page/Events/Events";
 import Gallery from "../Page/Gallery/Gallery";
-import Login from "../Page/Login/Login";
 import Register from "../Page/Register/Register";
+import Dashboard from "../Page/Dashboard/Dashboard";
+import Login from "../Page/Login/Login";
 
 export const router = createBrowserRouter([
   // Main Layout Routes
@@ -94,6 +95,10 @@ export const router = createBrowserRouter([
   {
     path: "/register",
     element: <Register />,
+  },
+  {
+    path: "/dashboard",
+    element: <Dashboard />,
   },
 ]);
 

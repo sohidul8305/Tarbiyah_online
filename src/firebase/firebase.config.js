@@ -3,15 +3,18 @@ import { getAuth } from "firebase/auth";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_apiKey,
-  authDomain: import.meta.env.VITE_authDomain,
-  projectId: import.meta.env.VITE_projectId,
-  storageBucket: import.meta.env.VITE_storageBucket,
-  messagingSenderId: import.meta.env.VITE_messagingSenderId,
-  appId: import.meta.env.VITE_appId,
+  apiKey: "AIzaSyCLRNZwhifwhKBqh2GewvPcBbgB0BjDnZM",
+  authDomain: "tarbiyah-online-e0fc3.firebaseapp.com",
+  projectId: "tarbiyah-online-e0fc3",
+  storageBucket: "tarbiyah-online-e0fc3.firebasestorage.app",
+  messagingSenderId: "248281133257",
+  appId: "1:248281133257:web:114a433a2bf961d9155d18",
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase services
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 

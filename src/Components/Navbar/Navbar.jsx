@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router";
+import logo from "../../image/logo.jpg";
 const Navbar = () => {
   return (
     <nav className="w-full">
@@ -25,7 +26,7 @@ const Navbar = () => {
       <div className="bg-white py-4 px-6 flex justify-between items-center shadow-sm">
         {/* Logo */}
         <div className="flex items-center">
-          <img src="/logo.png" alt="Tarbiyah Online" className="h-12" />
+          <img src={logo} alt="Tarbiyah logo" className="h-12" />
         </div>
 
         {/* Navigation Items */}
