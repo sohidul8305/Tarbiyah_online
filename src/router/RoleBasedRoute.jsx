@@ -1,7 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../Provider/AuthContext";
 
-const PrivateRoute = ({ children }) => {
+const RoleBasedRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -14,10 +14,7 @@ const PrivateRoute = ({ children }) => {
           height: "100vh",
         }}
       >
-        <div style={{ textAlign: "center" }}>
-          <div className="animate-spin inline-block w-12 h-12 border-4 border-[#004d4d] border-t-transparent rounded-full"></div>
-          <p className="mt-4 text-gray-600 font-medium">Loading...</p>
-        </div>
+        <h2>⏳ লোড হচ্ছে...</h2>
       </div>
     );
   }
@@ -26,7 +23,11 @@ const PrivateRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
+  if (!allowedRoles.includes(user.role)) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
   return children;
 };
 
-export default PrivateRoute;
+export default RoleBasedRoute;
