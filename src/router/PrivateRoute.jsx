@@ -14,18 +14,18 @@ const PrivateRoute = ({ children }) => {
           height: "100vh",
         }}
       >
-        <div style={{ textAlign: "center" }}>
-          <div className="animate-spin inline-block w-12 h-12 border-4 border-[#004d4d] border-t-transparent rounded-full"></div>
-          <p className="mt-4 text-gray-600 font-medium">Loading...</p>
-        </div>
+        <div className="animate-spin inline-block w-12 h-12 border-4 border-[#004d4d] border-t-transparent rounded-full"></div>
+        <p className="mt-4 text-gray-600 font-medium">Loading...</p>
       </div>
     );
   }
 
   if (!user) {
+    console.log("🔒 No user, redirecting to login");
     return <Navigate to="/login" replace />;
   }
 
+  console.log("✅ User authenticated:", user.email, "Role:", user.role);
   return children;
 };
 

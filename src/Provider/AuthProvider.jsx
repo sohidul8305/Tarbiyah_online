@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState, useContext } from "react";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -15,6 +15,18 @@ export const AuthContext = createContext(null);
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // 📌 ইউজারের রোল নির্ধারণ (ইমেইল ভিত্তিক)
+  const getUserRole = (email) => {
+    if (!email) return "student";
+
+    const roleMap = {
+      "admin@tarabiyah.com": "admin",
+      "teacher@tarabiyah.com": "teacher",
+    };
+
+    return roleMap[email] || "student";
+  };
 
   // Register new user
   const registerUser = (email, password) => {
@@ -36,9 +48,16 @@ const AuthProvider = ({ children }) => {
   };
 
   // Log out user
-  const logOut = () => {
+  const logOut = async () => {
     setLoading(true);
-    return signOut(auth);
+    try {
+      await signOut(auth);
+      setUser(null);
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Update user profile
@@ -54,22 +73,34 @@ const AuthProvider = ({ children }) => {
 
   // Track auth state changes
   useEffect(() => {
+    console.log("🔥 AuthProvider mounted");
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      console.log("📡 Auth state changed:", currentUser?.email || "No user");
+
       if (currentUser) {
-        // User object এ সব তথ্য আছে
-        console.log("User from Firebase:", {
-          uid: currentUser.uid,
-          email: currentUser.email,
-          displayName: currentUser.displayName,
-          photoURL: currentUser.photoURL,
-          emailVerified: currentUser.emailVerified,
+        const role = getUserRole(currentUser.email);
+        const userWithRole = {
+          ...currentUser,
+          role: role,
+        };
+
+        console.log("✅ User from Firebase:", {
+          uid: userWithRole.uid,
+          email: userWithRole.email,
+          displayName: userWithRole.displayName,
+          photoURL: userWithRole.photoURL,
+          role: userWithRole.role,
         });
-        setUser(currentUser);
+
+        setUser(userWithRole);
       } else {
+        console.log("❌ No user logged in");
         setUser(null);
       }
       setLoading(false);
     });
+
     return () => unsubscribe();
   }, []);
 
@@ -86,6 +117,15 @@ const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
   );
+};
+
+// 📌 useAuth Hook
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };
 
 export default AuthProvider;

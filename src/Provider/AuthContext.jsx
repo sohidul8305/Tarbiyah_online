@@ -10,7 +10,6 @@ import {
 } from "firebase/auth";
 import { auth } from "../firebase/firebase.config";
 
-// Context তৈরি
 export const AuthContext = createContext(null);
 
 const AuthProvider = ({ children }) => {
@@ -53,18 +52,47 @@ const AuthProvider = ({ children }) => {
     });
   };
 
+  // 📌 ইউজারের রোল নির্ধারণ (ইমেইল ভিত্তিক)
+  const getUserRole = (email) => {
+    if (!email) return "student";
+
+    // predefined roles
+    const roleMap = {
+      "admin@tarabiyah.com": "admin",
+      "teacher@tarabiyah.com": "teacher",
+    };
+
+    // Check if email matches predefined roles
+    if (roleMap[email]) {
+      return roleMap[email];
+    }
+
+    // Default role
+    return "student";
+  };
+
   // Track auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
+        // ইউজারের রোল নির্ধারণ
+        const role = getUserRole(currentUser.email);
+
+        // ইউজার অবজেক্টে role যোগ করুন
+        const userWithRole = {
+          ...currentUser,
+          role: role,
+        };
+
         console.log("User from Firebase:", {
-          uid: currentUser.uid,
-          email: currentUser.email,
-          displayName: currentUser.displayName,
-          photoURL: currentUser.photoURL,
-          emailVerified: currentUser.emailVerified,
+          uid: userWithRole.uid,
+          email: userWithRole.email,
+          displayName: userWithRole.displayName,
+          photoURL: userWithRole.photoURL,
+          role: userWithRole.role,
         });
-        setUser(currentUser);
+
+        setUser(userWithRole);
       } else {
         setUser(null);
       }
@@ -88,9 +116,7 @@ const AuthProvider = ({ children }) => {
   );
 };
 
-// ==========================================
-// ⭐ গুরুত্বপূর্ণ: useAuth Hook export করুন
-// ==========================================
+// useAuth Hook
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

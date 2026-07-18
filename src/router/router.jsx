@@ -1,19 +1,16 @@
-import { createBrowserRouter } from "react-router-dom"; // ← dom যোগ করুন
+import { createBrowserRouter } from "react-router-dom";
 
 // ===== লেআউট =====
 import RootLayouts from "../Layouts/RootLayouts";
-// import DashboardLayout from "../Layouts/DashboardLayout";
 
 // ===== রাউট প্রটেক্টর =====
 import PrivateRoute from "./PrivateRoute";
-
 import Unauthorized from "./Unauthorized";
 
 // ===== পাবলিক পেজ =====
 import Home from "../Page/Home/Home";
 import About from "../Page/Home/About/About";
 import Course from "../Page/Home/Course/Course";
-import Student from "../Page/Student/Student";
 import Consultancy from "../Page/Home/Consultancy/Consultancy";
 import Blog from "../Page/Home/Blog/Blog";
 import Sponsorship from "../Page/Home/Sponsorship/Sponsorship";
@@ -24,38 +21,41 @@ import RecordedCourse from "../Page/Recorded_course/Recorded_course";
 import Events from "../Page/Events/Events";
 import Gallery from "../Page/Gallery/Gallery";
 import Member from "../Components/Member/Member";
+import Management from "../Page/Management/Management";
 
 // ===== অথ পেজ =====
+import Login from "../Page/Login/Login";
+import Register from "../Page/Register/Register";
 
 // ===== ড্যাশবোর্ড পেজ =====
 import Dashboard from "../Page/Dashboard/Dashboard";
 import Admin from "../Page/Admin/Admin";
+import Student from "../Page/Student/Student";
 
-// ==========================================
-// ⚠️ সব ড্যাশবোর্ড চাইল্ড পেজ কমেন্ট (ফাইল নেই)
-// ==========================================
-import Reports from "../Page/Dashboard/Admin/Reports";
+// ===== ড্যাশবোর্ড চাইল্ড পেজ =====
+// Student
 import MyCourse from "../Page/Dashboard/Student/MyCourse";
 import MyAssignments from "../Page/Dashboard/Student/MyAssignments";
 import MyQuizzes from "../Page/Dashboard/Student/MyQuizzes";
 import Certificates from "../Page/Dashboard/Student/Certificates";
 import CoursePlayer from "../Page/Dashboard/Student/CoursePlayer";
+
+// Teacher
 import TeacherCourses from "../Page/Dashboard/Teacher/TeacherCourses";
 import CreateCourse from "../Page/Dashboard/Teacher/CreateCourse";
 import ReviewAssignments from "../Page/Dashboard/Teacher/ReviewAssignments";
 import StudentsList from "../Page/Dashboard/Teacher/StudentsList";
 import EditCourse from "../Page/Dashboard/Teacher/EditCourse";
+
+// Admin
 import UsersManagement from "../Page/Dashboard/Admin/UsersManagement";
 import CoursesManagement from "../Page/Dashboard/Admin/CoursesManagement";
 import TeachersManagement from "../Page/Dashboard/Admin/TeachersManagement";
-import Recorded_course from "../Page/Recorded_course/Recorded_course";
-import Management from "../Page/Management/Management";
-import Login from "../Page/Login/Login";
-import Register from "../Page/Register/Register";
+import Reports from "../Page/Dashboard/Admin/Reports";
 
 export const router = createBrowserRouter([
   // ==========================================
-  // ১. পাবলিক রাউট
+  // ১. পাবলিক রাউট (RootLayouts - হেডার/ফুটার সহ)
   // ==========================================
   {
     path: "/",
@@ -70,110 +70,173 @@ export const router = createBrowserRouter([
       { path: "teacher", element: <Teacher /> },
       { path: "faculty", element: <Faculty /> },
       { path: "live-course", element: <LiveCourse /> },
-
+      { path: "recorded-course", element: <RecordedCourse /> },
       { path: "events", element: <Events /> },
       { path: "gallery", element: <Gallery /> },
       { path: "member", element: <Member /> },
       { path: "management", element: <Management /> },
-      { path: "recorded-course", element: <RecordedCourse /> },
     ],
   },
 
-  // admin , teacher, student
-  //===========================================
-
+  // ==========================================
+  // ২. অথ রাউট (হেডার/ফুটার ছাড়া)
+  // ==========================================
   {
-    path: "my-course",
-    element: <MyCourse></MyCourse>,
+    path: "/login",
+    element: <Login />,
   },
   {
-    path: "my-assignments",
-    element: <MyAssignments></MyAssignments>,
-  },
-  {
-    path: "my-quizzes",
-    element: <MyQuizzes></MyQuizzes>,
-  },
-  {
-    path: "certificate",
-    element: <Certificates></Certificates>,
-  },
-  {
-    path: "course-player",
-    element: <CoursePlayer></CoursePlayer>,
-  },
-  {
-    path: "teacher-course",
-    element: <TeacherCourses></TeacherCourses>,
-  },
-
-  {
-    path: "create-course",
-    element: <CreateCourse></CreateCourse>,
-  },
-  {
-    path: "review-assignment",
-    element: <ReviewAssignments></ReviewAssignments>,
-  },
-  {
-    path: "student-list",
-    element: <StudentsList></StudentsList>,
-  },
-  {
-    path: "edit-course",
-    element: <EditCourse></EditCourse>,
-  },
-  {
-    path: "user-management",
-    element: <UsersManagement></UsersManagement>,
-  },
-  {
-    path: "course-management",
-    element: <CoursesManagement></CoursesManagement>,
-  },
-  {
-    path: "teacher-management",
-    element: <TeachersManagement></TeachersManagement>,
-  },
-  {
-    path: "record-course",
-    element: <Recorded_course></Recorded_course>,
+    path: "/register",
+    element: <Register />,
   },
 
   // ==========================================
-  // ২. অথ রাউট
+  // ৩. রোল বেসড লগইন পেজ (হেডার/ফুটার সহ)
   // ==========================================
-  {
-    path: "login",
-    element: <Login></Login>,
-  },
-  {
-    path: "register",
-    element: <Register></Register>,
-  },
-
-  // ==========================================
-  // ৩. ড্যাশবোর্ড রাউট (শুধু বেসিক)
-  // ==========================================
-  {
-    path: "dashboard",
-    element: <Dashboard></Dashboard>,
-  },
-
-  //==========================================
-  //potral login
-  //==========================================
   {
     path: "/admin",
-    element: <Admin></Admin>,
+    element: <Admin />,
   },
   {
     path: "/student",
-    element: <Student></Student>,
+    element: <Student />,
   },
 
   // ==========================================
-  // ৪. আনঅথরাইজড
+  // ৪. ড্যাশবোর্ড (প্রাইভেট - লগইন লাগবে)
+  // ==========================================
+  {
+    path: "/dashboard",
+    element: (
+      <PrivateRoute>
+        <Dashboard />
+      </PrivateRoute>
+    ),
+  },
+
+  // ==========================================
+  // ৫. ড্যাশবোর্ড চাইল্ড পেজ (প্রাইভেট - লগইন লাগবে)
+  // ==========================================
+  // Student Dashboard Pages
+  {
+    path: "/dashboard/my-courses",
+    element: (
+      <PrivateRoute>
+        <MyCourse />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/dashboard/my-assignments",
+    element: (
+      <PrivateRoute>
+        <MyAssignments />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/dashboard/my-quizzes",
+    element: (
+      <PrivateRoute>
+        <MyQuizzes />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/dashboard/certificates",
+    element: (
+      <PrivateRoute>
+        <Certificates />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/dashboard/course-player/:courseId/:lessonId",
+    element: (
+      <PrivateRoute>
+        <CoursePlayer />
+      </PrivateRoute>
+    ),
+  },
+
+  // Teacher Dashboard Pages
+  {
+    path: "/dashboard/teacher-courses",
+    element: (
+      <PrivateRoute>
+        <TeacherCourses />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/dashboard/create-course",
+    element: (
+      <PrivateRoute>
+        <CreateCourse />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/dashboard/edit-course/:courseId",
+    element: (
+      <PrivateRoute>
+        <EditCourse />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/dashboard/review-assignments",
+    element: (
+      <PrivateRoute>
+        <ReviewAssignments />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/dashboard/students",
+    element: (
+      <PrivateRoute>
+        <StudentsList />
+      </PrivateRoute>
+    ),
+  },
+
+  // Admin Dashboard Pages
+  {
+    path: "/dashboard/users",
+    element: (
+      <PrivateRoute>
+        <UsersManagement />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/dashboard/courses",
+    element: (
+      <PrivateRoute>
+        <CoursesManagement />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/dashboard/teachers",
+    element: (
+      <PrivateRoute>
+        <TeachersManagement />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/dashboard/reports",
+    element: (
+      <PrivateRoute>
+        <Reports />
+      </PrivateRoute>
+    ),
+  },
+
+  // ==========================================
+  // ৬. আনঅথরাইজড পেজ
   // ==========================================
   {
     path: "/unauthorized",
@@ -181,7 +244,7 @@ export const router = createBrowserRouter([
   },
 
   // ==========================================
-  // ৫. ৪০৪
+  // ৭. ৪০৪ নট ফাউন্ড
   // ==========================================
   {
     path: "*",
