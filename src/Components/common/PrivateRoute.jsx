@@ -1,22 +1,25 @@
-import { Navigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+// AuthProvider.js
+const [user, setUser] = useState(null);
+const [loading, setLoading] = useState(true);
 
-const PrivateRoute = ({ children, allowedRoles }) => {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return <div>লোড হচ্ছে...</div>;
+// ধরুন আপনার API সার্ভার এখানে
+const fetchUserRole = async (email) => {
+  try {
+    const res = await fetch(`YOUR_API_URL/users/${email}`);
+    const data = await res.json();
+    return data.role; // ব্যাকএন্ড থেকে role আনুন
+  } catch (err) {
+    return null;
   }
-
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/unauthorized" />;
-  }
-
-  return children;
 };
 
-export default PrivateRoute;
+const signInUser = async (email, password) => {
+  setLoading(true);
+  const result = await signInWithEmailAndPassword(auth, email, password);
+  const role = await fetchUserRole(result.user.email);
+
+  // ইউজার অবজেক্টে রোল সেট করে দিন
+  setUser({ ...result.user, role });
+  setLoading(false);
+  return result;
+};

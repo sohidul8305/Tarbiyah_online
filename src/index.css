@@ -1,13 +1,17 @@
-@import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Inter:wght@400;500;700&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+body {
+  font-family: "Inter", "Hind Siliguri", sans-serif;
+}
 :root {
   /* ফন্ট ভেরিয়েবল */
-  --sans: "Hind Siliguri", Roboto, system-ui, sans-serif;
-  --heading: "Hind Siliguri", Roboto, system-ui, sans-serif;
+  --sans-bn: "Hind Siliguri", system-ui, sans-serif;
+  --sans-en: "Outfit", system-ui, sans-serif;
 
   /* কালার ভেরিয়েবল */
   --text: #6b6375;
@@ -19,9 +23,44 @@
 
 body {
   margin: 0;
-  font-family: var(--sans);
+  font-family: var(--sans-bn);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* আপনার অন্যান্য কাস্টম স্টাইল এখানে যোগ করুন */
+html[lang="bn"] body {
+  font-family: var(--sans-bn);
+}
+
+html[lang="en"] body {
+  font-family: var(--sans-en);
+}
+
+/* Custom premium transitions and animation utilities */
+.dropdown-animate {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.group:hover .dropdown-animate {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}

@@ -23,6 +23,14 @@ import Gallery from "../Page/Gallery/Gallery";
 import Member from "../Components/Member/Member";
 import Management from "../Page/Management/Management";
 
+// ===== নতুন পেজ সমূহ =====
+import StudentOpinion from "../Page/Home/About/StudentOpinion";
+import TermsConditions from "../Page/Home/About/TermsConditions";
+import DiplomaIslamicStudies from "../Page/Home/Course/DiplomaIslamicStudies";
+import TarbiyahAlemiyah from "../Page/Home/Course/TarbiyahAlemiyah";
+import ArabiyahKids from "../Page/Home/Course/ArabiyahKids";
+import QuranElders from "../Page/Home/Course/QuranElders";
+
 // ===== অথ পেজ =====
 import Login from "../Page/Login/Login";
 import Register from "../Page/Register/Register";
@@ -52,6 +60,15 @@ import UsersManagement from "../Page/Dashboard/Admin/UsersManagement";
 import CoursesManagement from "../Page/Dashboard/Admin/CoursesManagement";
 import TeachersManagement from "../Page/Dashboard/Admin/TeachersManagement";
 import Reports from "../Page/Dashboard/Admin/Reports";
+import TeacherDashboard from "../Page/Dashboard/TeacherDashboard";
+import AdminDashboard from "../Page/Dashboard/AdminDashboard";
+import StudentDashboard from "../Page/Dashboard/StudentDashboard";
+import Student_opinion from "../Page/Student_opinion/Student_opinion";
+import Terms from "../Page/Terms/Terms";
+import Diploma from "../Page/Diploma/Diploma";
+import Alemiah from "../Page/Alemiah/Alemiah";
+import Kids from "../Page/Kids/Kids";
+import Quran from "../Page/Quran/Quran";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -75,6 +92,12 @@ export const router = createBrowserRouter([
       { path: "gallery", element: <Gallery /> },
       { path: "member", element: <Member /> },
       { path: "management", element: <Management /> },
+      { path: "student-opinion", element: <Student_opinion /> },
+      { path: "terms", element: <Terms /> },
+      { path: "/course/diploma", element: <Diploma /> },
+      { path: "/course/alemiah", element: <Alemiah /> },
+      { path: "/course/kids", element: <Kids /> },
+      { path: "/course/quran", element: <Quran /> },
     ],
   },
 
@@ -235,6 +258,32 @@ export const router = createBrowserRouter([
     ),
   },
 
+  // teacher, admin, student login portal
+  // router.js
+  {
+    path: "/teacher-dashboard",
+    element: (
+      <PrivateRoute role="teacher">
+        <TeacherDashboard />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/admin-dashboard",
+    element: (
+      <PrivateRoute role="admin">
+        <AdminDashboard />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/student-dashboard",
+    element: (
+      <PrivateRoute role="admin">
+        <StudentDashboard />
+      </PrivateRoute>
+    ),
+  },
   // ==========================================
   // ৬. আনঅথরাইজড পেজ
   // ==========================================
