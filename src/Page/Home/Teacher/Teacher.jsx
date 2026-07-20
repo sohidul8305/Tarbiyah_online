@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-// import Navbar from "../../../Components/Navbar/Navbar";
-// import Footer from "../../../Components/Navbar/Footer/Footer";
 import { useAuth } from "../../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 
 const TeacherLogin = () => {
-  const { signInUser } = useAuth();
+  const auth = useAuth() || {};
+  const signInUser =
+    auth.signInUser ||
+    (() => Promise.reject(new Error("Auth not initialized")));
+
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -22,19 +24,15 @@ const TeacherLogin = () => {
     console.log("📝 Attempting Teacher login with:", email);
 
     try {
-      const result = await signInUser(email, password);
-      const user = result.user;
+      // শুধু signInUser কল করলেই যথেষ্ট, পাসওয়ার্ড ভুল হলে সরাসরি catch ব্লকে চলে যাবে
+      await signInUser(email.trim(), password.trim());
 
-      console.log("✅ Teacher Login successful:", {
-        email: user.email,
-        displayName: user.displayName,
-        uid: user.uid,
-      });
+      console.log("✅ Teacher Login successful!");
 
       await Swal.fire({
         icon: "success",
         title: "Login Successful! 🎉",
-        text: `Welcome ${user.displayName || "Teacher"}!`,
+        text: "Welcome Teacher!",
         timer: 1500,
         showConfirmButton: false,
       });
@@ -85,10 +83,8 @@ const TeacherLogin = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
-      {/* <Navbar /> */}
-
       <div className="flex-grow flex items-center justify-center p-4">
-        <div className="bg-white/80 backdrop-blur-sm p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
+        <div className="bg-white/85 backdrop-blur-sm p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
           <div className="text-center mb-8">
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
               <span className="text-white text-3xl font-bold">👨‍🏫</span>
@@ -101,7 +97,7 @@ const TeacherLogin = () => {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4 text-sm">
               {error}
             </div>
           )}
@@ -184,8 +180,6 @@ const TeacherLogin = () => {
           </form>
         </div>
       </div>
-
-      {/* <Footer /> */}
     </div>
   );
 };

@@ -46,34 +46,29 @@ const Register = () => {
 
   // ImageBB তে ইমেজ আপলোড
   const uploadImageToImageBB = async (file) => {
-    try {
-      const formData = new FormData();
-      formData.append("image", file);
+    const formData = new FormData();
+    formData.append("image", file);
 
-      const apiKey = import.meta.env.VITE_IMAGEBB_API_KEY;
+    const apiKey = import.meta.env.VITE_IMAGEBB_API_KEY;
 
-      if (!apiKey) {
-        throw new Error("ImageBB API Key not found");
-      }
+    if (!apiKey) {
+      throw new Error("ImageBB API Key not found in environment variables.");
+    }
 
-      const response = await fetch(
-        `https://api.imgbb.com/1/upload?key=${apiKey}`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
+    const response = await fetch(
+      `https://api.imgbb.com/1/upload?key=${apiKey}`,
+      {
+        method: "POST",
+        body: formData,
+      },
+    );
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (data.success) {
-        return data.data.url;
-      } else {
-        throw new Error(data.error?.message || "Image upload failed");
-      }
-    } catch (error) {
-      console.error("ImageBB upload error:", error);
-      throw error;
+    if (data.success) {
+      return data.data.url;
+    } else {
+      throw new Error(data.error?.message || "Image upload failed");
     }
   };
 
@@ -120,14 +115,17 @@ const Register = () => {
     setUploadProgress(0);
 
     try {
-      console.log("📝 Registering user with email:", data.email);
-
-      // 1. Register user
+      console.log("📝 Registering with:", data.email);
       const result = await registerUser(data.email, data.password);
+
+      if (!result || !result.user) {
+        throw new Error("Failed to create user. Please try again.");
+      }
+
       const user = result.user;
       console.log("✅ User registered:", user.uid);
 
-      // 2. Upload image to ImageBB (if selected)
+      // ১. ইমেজ আপলোড (যদি সিলেক্ট করা থাকে)
       let photoURL = "";
       if (profileImage) {
         try {
@@ -135,20 +133,19 @@ const Register = () => {
           photoURL = await uploadImageToImageBB(profileImage);
           setUploadProgress(100);
           console.log("✅ Image uploaded:", photoURL);
-        } catch (error) {
-          console.error("Image upload error:", error);
+        } catch (imgError) {
+          console.error("Image upload error:", imgError);
+          // Optional: decide if you want image failure to block registration or continue without photo
+          // For now, it will proceed with empty photoURL or you can throw to stop.
         }
       }
 
-      // 3. Update user profile with name and photo
-      const fullName = data.firstName + " " + data.lastName;
+      // ২. ইউজারের প্রফাইল আপডেট (নাম ও ছবি যুক্ত করা)
+      const fullName = `${data.firstName} ${data.lastName}`;
       await updateUserProfile(fullName, photoURL);
-      console.log("✅ Profile updated with name:", fullName);
+      console.log("✅ Profile updated successfully");
 
-      // 4. Force refresh user data
-      await authContext.user;
-      console.log("✅ User data refreshed");
-
+      // ৩. সফল মেসেজ ও রিডাইরেক্ট
       await Swal.fire({
         icon: "success",
         title: "Registration Successful! 🎉",
@@ -160,38 +157,18 @@ const Register = () => {
 
       navigate("/dashboard");
     } catch (error) {
-      console.error("❌ Registration error:", error);
+      console.error("Firebase Auth Error Details:", error);
 
       let errorMessage = "Registration failed. Please try again.";
-
-      switch (error.code) {
-        case "auth/email-already-in-use":
-          errorMessage = "This email is already registered. Please login.";
-          break;
-        case "auth/invalid-email":
-          errorMessage = "Invalid email format. Please enter a valid email.";
-          break;
-        case "auth/operation-not-allowed":
-          errorMessage =
-            "Email/Password sign-up is not enabled in Firebase Console.";
-          break;
-        case "auth/weak-password":
-          errorMessage =
-            "Password must be at least 6 characters with letters and numbers.";
-          break;
-        case "auth/network-request-failed":
-          errorMessage =
-            "Network error. Please check your internet connection.";
-          break;
-        case "auth/too-many-requests":
-          errorMessage = "Too many attempts. Please try again later.";
-          break;
-        default:
-          errorMessage =
-            error.message || "Registration failed. Please try again.";
+      if (error.code === "auth/email-already-in-use") {
+        errorMessage = "This email is already registered. Please log in.";
+      } else if (error.code === "auth/weak-password") {
+        errorMessage = "Password should be at least 6 characters.";
+      } else {
+        errorMessage = error.message || errorMessage;
       }
 
-      await Swal.fire({
+      Swal.fire({
         icon: "error",
         title: "Registration Failed ❌",
         text: errorMessage,
@@ -205,10 +182,8 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      {/* Navbar - উপরে */}
       <Navbar />
 
-      {/* Main Content - মাঝখানে (ভার্টিক্যালি সেন্টার) */}
       <div className="flex-grow flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
         <div className="w-full max-w-md">
           <div className="bg-white p-6 sm:p-8 rounded-2xl shadow-xl">
@@ -313,7 +288,6 @@ const Register = () => {
                       },
                     })}
                     id="firstName"
-                    name="firstName"
                     type="text"
                     autoComplete="given-name"
                     disabled={loading}
@@ -337,7 +311,6 @@ const Register = () => {
                       },
                     })}
                     id="lastName"
-                    name="lastName"
                     type="text"
                     autoComplete="family-name"
                     disabled={loading}
@@ -361,7 +334,6 @@ const Register = () => {
                       },
                     })}
                     id="email"
-                    name="email"
                     type="email"
                     autoComplete="email"
                     disabled={loading}
@@ -390,7 +362,6 @@ const Register = () => {
                       },
                     })}
                     id="password"
-                    name="password"
                     type={showPass ? "text" : "password"}
                     autoComplete="new-password"
                     disabled={loading}
@@ -424,7 +395,6 @@ const Register = () => {
                         value === password || "Passwords do not match",
                     })}
                     id="confirmPassword"
-                    name="confirmPassword"
                     type={showConfirmPass ? "text" : "password"}
                     autoComplete="new-password"
                     disabled={loading}
@@ -459,7 +429,6 @@ const Register = () => {
                       required: "You must accept the terms and conditions",
                     })}
                     id="terms"
-                    name="terms"
                     type="checkbox"
                     disabled={loading}
                     className="h-4 w-4 text-[#004d4d] focus:ring-[#004d4d] border-gray-300 rounded mt-0.5 disabled:opacity-50"
@@ -552,10 +521,20 @@ const Register = () => {
         </div>
       </div>
 
-      {/* Footer - নিচে */}
       <Footer />
     </div>
   );
 };
+
+export class ErrorBoundary extends React.Component {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) return <h2>Something went wrong.</h2>;
+    return this.props.children;
+  }
+}
 
 export default Register;

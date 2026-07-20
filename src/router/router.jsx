@@ -24,21 +24,24 @@ import Member from "../Components/Member/Member";
 import Management from "../Page/Management/Management";
 
 // ===== নতুন পেজ সমূহ =====
-import StudentOpinion from "../Page/Home/About/StudentOpinion";
-import TermsConditions from "../Page/Home/About/TermsConditions";
-import DiplomaIslamicStudies from "../Page/Home/Course/DiplomaIslamicStudies";
-import TarbiyahAlemiyah from "../Page/Home/Course/TarbiyahAlemiyah";
-import ArabiyahKids from "../Page/Home/Course/ArabiyahKids";
-import QuranElders from "../Page/Home/Course/QuranElders";
+import Student_opinion from "../Page/Student_opinion/Student_opinion";
+import Terms from "../Page/Terms/Terms";
+import Diploma from "../Page/Diploma/Diploma";
+import Alemiah from "../Page/Alemiah/Alemiah";
+import Kids from "../Page/Kids/Kids";
+import Quran from "../Page/Quran/Quran";
 
-// ===== অথ পেজ =====
+// ===== অথ ও লগইন পেজ =====
 import Login from "../Page/Login/Login";
 import Register from "../Page/Register/Register";
+import StudentLogin from "../Page/Login/StudentLogin";
 
-// ===== ড্যাশবোর্ড পেজ =====
+// ===== ড্যাশবোর্ড ও রোল বেসড পেজ =====
 import Dashboard from "../Page/Dashboard/Dashboard";
 import Admin from "../Page/Admin/Admin";
-import Student from "../Page/Student/Student";
+import TeacherDashboard from "../Page/Dashboard/TeacherDashboard";
+import AdminDashboard from "../Page/Dashboard/AdminDashboard";
+import StudentDashboard from "../Page/Student/StudentDashboard"; // সঠিক পাথ থেকে একবারই ইমপোর্ট করা হলো
 
 // ===== ড্যাশবোর্ড চাইল্ড পেজ =====
 // Student
@@ -60,15 +63,6 @@ import UsersManagement from "../Page/Dashboard/Admin/UsersManagement";
 import CoursesManagement from "../Page/Dashboard/Admin/CoursesManagement";
 import TeachersManagement from "../Page/Dashboard/Admin/TeachersManagement";
 import Reports from "../Page/Dashboard/Admin/Reports";
-import TeacherDashboard from "../Page/Dashboard/TeacherDashboard";
-import AdminDashboard from "../Page/Dashboard/AdminDashboard";
-import StudentDashboard from "../Page/Dashboard/StudentDashboard";
-import Student_opinion from "../Page/Student_opinion/Student_opinion";
-import Terms from "../Page/Terms/Terms";
-import Diploma from "../Page/Diploma/Diploma";
-import Alemiah from "../Page/Alemiah/Alemiah";
-import Kids from "../Page/Kids/Kids";
-import Quran from "../Page/Quran/Quran";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -94,15 +88,15 @@ export const router = createBrowserRouter([
       { path: "management", element: <Management /> },
       { path: "student-opinion", element: <Student_opinion /> },
       { path: "terms", element: <Terms /> },
-      { path: "/course/diploma", element: <Diploma /> },
-      { path: "/course/alemiah", element: <Alemiah /> },
-      { path: "/course/kids", element: <Kids /> },
-      { path: "/course/quran", element: <Quran /> },
+      { path: "course/diploma", element: <Diploma /> },
+      { path: "course/alemiah", element: <Alemiah /> },
+      { path: "course/kids", element: <Kids /> },
+      { path: "course/quran", element: <Quran /> },
     ],
   },
 
   // ==========================================
-  // ২. অথ রাউট (হেডার/ফুটার ছাড়া)
+  // ২. অথ রাউট (হেডার/ফুটার ছাড়া)
   // ==========================================
   {
     path: "/login",
@@ -114,15 +108,15 @@ export const router = createBrowserRouter([
   },
 
   // ==========================================
-  // ৩. রোল বেসড লগইন পেজ (হেডার/ফুটার সহ)
+  // ৩. রোল বেসড ও স্টুডেন্ট লগইন পেজ
   // ==========================================
   {
     path: "/admin",
     element: <Admin />,
   },
   {
-    path: "/student",
-    element: <Student />,
+    path: "/student-login",
+    element: <StudentLogin />,
   },
 
   // ==========================================
@@ -138,7 +132,7 @@ export const router = createBrowserRouter([
   },
 
   // ==========================================
-  // ৫. ড্যাশবোর্ড চাইল্ড পেজ (প্রাইভেট - লগইন লাগবে)
+  // ৫. ড্যাশবোর্ড চাইল্ড পেজ (প্রাইভেট)
   // ==========================================
   // Student Dashboard Pages
   {
@@ -258,8 +252,7 @@ export const router = createBrowserRouter([
     ),
   },
 
-  // teacher, admin, student login portal
-  // router.js
+  // Role Based Portals
   {
     path: "/teacher-dashboard",
     element: (
@@ -279,11 +272,12 @@ export const router = createBrowserRouter([
   {
     path: "/student-dashboard",
     element: (
-      <PrivateRoute role="admin">
+      <PrivateRoute role="student">
         <StudentDashboard />
       </PrivateRoute>
     ),
   },
+
   // ==========================================
   // ৬. আনঅথরাইজড পেজ
   // ==========================================
@@ -303,7 +297,7 @@ export const router = createBrowserRouter([
         path: "*",
         element: (
           <div style={{ textAlign: "center", padding: "100px" }}>
-            <h1>❓ 404 - পৃষ্ঠা পাওয়া যায়নি</h1>
+            <h1>❓ 404 - পৃষ্ঠা পাওয়া যায়নি</h1>
             <p>আপনি যে পৃষ্ঠাটি খুঁজছেন তা আমাদের কাছে নেই।</p>
             <a href="/" style={{ color: "#4CAF50" }}>
               হোম পেজে ফিরে যান

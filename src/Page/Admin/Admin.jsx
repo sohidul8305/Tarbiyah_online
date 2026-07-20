@@ -6,7 +6,11 @@ import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 
 const AdminLogin = () => {
-  const { signInUser } = useAuth();
+  const auth = useAuth() || {};
+  const signInUser =
+    auth.signInUser ||
+    (() => Promise.reject(new Error("Auth not initialized")));
+
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -18,15 +22,15 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      const result = await signInUser(email, password);
-      const user = result.user;
+      const result = await signInUser(email.trim(), password.trim());
+      const user = result?.user || result;
 
-      console.log("✅ Admin Login successful:", user.email);
+      console.log("✅ Admin Login successful:", user?.email);
 
       await Swal.fire({
         icon: "success",
         title: "Login Successful! 🎉",
-        text: `Welcome ${user.displayName || "Admin"}!`,
+        text: `Welcome ${user?.displayName || "Admin"}!`,
         timer: 1500,
         showConfirmButton: false,
       });
@@ -43,6 +47,8 @@ const AdminLogin = () => {
         errorMessage = "Incorrect password. Please try again.";
       } else if (err.code === "auth/too-many-requests") {
         errorMessage = "Too many attempts. Please try again later.";
+      } else if (err.message) {
+        errorMessage = err.message;
       }
 
       await Swal.fire({
@@ -107,6 +113,7 @@ const AdminLogin = () => {
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
                   required
                 />
+                {/* সঠিক ছোটহাতের </button> ট্যাগ ব্যবহার করা হয়েছে */}
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
