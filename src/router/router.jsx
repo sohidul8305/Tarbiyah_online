@@ -63,6 +63,10 @@ import UsersManagement from "../Page/Dashboard/Admin/UsersManagement";
 import CoursesManagement from "../Page/Dashboard/Admin/CoursesManagement";
 import TeachersManagement from "../Page/Dashboard/Admin/TeachersManagement";
 import Reports from "../Page/Dashboard/Admin/Reports";
+import Campus from "../Page/Campus/Campus";
+import Class_routine from "../Page/Class-routine/Class_routine";
+import Notice_board from "../Page/Notice-board/Notice_board";
+import Support from "../Page/Support/Support";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -92,11 +96,14 @@ export const router = createBrowserRouter([
       { path: "course/alemiah", element: <Alemiah /> },
       { path: "course/kids", element: <Kids /> },
       { path: "course/quran", element: <Quran /> },
+      { path: "campus", element: <Campus /> },
+      { path: "class-routine", element: <Class_routine /> },
+      { path: "notice-board", element: <Notice_board /> },
+      { path: "support", element: <Support /> },
     ],
   },
 
   // ==========================================
-  // ২. অথ রাউট (হেডার/ফুটার ছাড়া)
   // ==========================================
   {
     path: "/login",

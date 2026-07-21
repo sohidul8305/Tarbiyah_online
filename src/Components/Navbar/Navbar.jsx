@@ -39,6 +39,10 @@ const Navbar = () => {
       adminLogin: "Admin Login",
       studentLogin: "Student Login",
       joinNow: "Join Now",
+      academicHub: "Academic Hub",
+      campus: "Campus",
+      classRoutine: "Class Routine",
+      noticeBoard: "Notice Board",
     },
     bn: {
       address: "৪০/১, সাফা গার্ডেন, মোহাম্মদপুর - ১২০৭",
@@ -58,8 +62,8 @@ const Navbar = () => {
       recordedCourse: "রেকর্ডেড কোর্স",
       courses: "কোর্সসমূহ",
       diploma: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
-      alemiah: "তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
-      kids: "তারবিয়াহ স্টাডিজ ফর কিডস",
+      alemiah: "তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
+      kids: "তারবিয়াহ স্টাডিজ ফর কিডস",
       quran: "কুরআন ফর এল্ডারস",
       consultancy: "পরামর্শ",
       blog: "ব্লগ",
@@ -71,6 +75,10 @@ const Navbar = () => {
       adminLogin: "অ্যাডমিন লগইন",
       studentLogin: "শিক্ষার্থী লগইন",
       joinNow: "যুক্ত হোন",
+      academicHub: "একাডেমিক হাব",
+      campus: "ক্যাম্পাস",
+      classRoutine: "ক্লাস রুটিন",
+      noticeBoard: "নোটিশ বোর্ড",
     },
   };
 
@@ -158,28 +166,9 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Department Dropdown */}
+          {/* Department Dropdown (ডিপ্লোমা, আলেমিয়াহ, কিডস, কুরআন) */}
           <div className="relative group cursor-pointer">
             <span className="flex items-center gap-1">{t.department} ▾</span>
-            <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-md hidden group-hover:block z-50 p-2">
-              <Link
-                to="/live-course"
-                className="block px-4 py-2 hover:bg-gray-100"
-              >
-                {t.liveCourse}
-              </Link>
-              <Link
-                to="/recorded-course"
-                className="block px-4 py-2 hover:bg-gray-100"
-              >
-                {t.recordedCourse}
-              </Link>
-            </div>
-          </div>
-
-          {/* Courses Dropdown */}
-          <div className="relative group cursor-pointer">
-            <span className="flex items-center gap-1">{t.courses} ▾</span>
             <div className="absolute top-full left-0 w-60 bg-white shadow-xl rounded-md hidden group-hover:block z-50 p-2">
               <Link
                 to="/course/diploma"
@@ -204,6 +193,50 @@ const Navbar = () => {
                 className="block px-4 py-2 hover:bg-gray-100"
               >
                 {t.quran}
+              </Link>
+            </div>
+          </div>
+
+          {/* Courses Dropdown (লাইভ ও রেকর্ডেড কোর্স) */}
+          <div className="relative group cursor-pointer">
+            <span className="flex items-center gap-1">{t.courses} ▾</span>
+            <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-md hidden group-hover:block z-50 p-2">
+              <Link
+                to="/live-course"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                {t.liveCourse}
+              </Link>
+              <Link
+                to="/recorded-course"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                {t.recordedCourse}
+              </Link>
+            </div>
+          </div>
+
+          {/* Academic Hub Dropdown (স্টুডেন্ট বা কর্নার শব্দ ছাড়া নতুন নাম) */}
+          <div className="relative group cursor-pointer">
+            <span className="flex items-center gap-1">{t.academicHub} ▾</span>
+            <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-md hidden group-hover:block z-50 p-2">
+              <Link to="/campus" className="block px-4 py-2 hover:bg-gray-100">
+                {t.campus}
+              </Link>
+              <Link
+                to="/class-routine"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                {t.classRoutine}
+              </Link>
+              <Link
+                to="/notice-board"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                {t.noticeBoard}
+              </Link>
+              <Link to="/support" className="block px-4 py-2 hover:bg-gray-100">
+                {t.support}
               </Link>
             </div>
           </div>
