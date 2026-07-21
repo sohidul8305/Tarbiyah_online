@@ -1,6 +1,16 @@
 import React, { useContext, useState, useRef } from "react";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff, Upload, X, User, Camera } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Upload,
+  X,
+  User,
+  Camera,
+  Phone,
+  BookOpen,
+  Users,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
@@ -135,8 +145,6 @@ const Register = () => {
           console.log("✅ Image uploaded:", photoURL);
         } catch (imgError) {
           console.error("Image upload error:", imgError);
-          // Optional: decide if you want image failure to block registration or continue without photo
-          // For now, it will proceed with empty photoURL or you can throw to stop.
         }
       }
 
@@ -145,7 +153,10 @@ const Register = () => {
       await updateUserProfile(fullName, photoURL);
       console.log("✅ Profile updated successfully");
 
-      // ৩. সফল মেসেজ ও রিডাইরেক্ট
+      // ৩. (ঐচ্ছিক) অতিরিক্ত তথ্য ডাটাবেজে সেভ করার জন্য ব্যাকএন্ড API কল করতে পারেন
+      // যেমন: phone, gender, selectedCourse ইত্যাদি ডাটাবেজে পাঠাতে পারেন।
+
+      // ৪. সফল মেসেজ ও রিডাইরেক্ট
       await Swal.fire({
         icon: "success",
         title: "Registration Successful! 🎉",
@@ -210,7 +221,7 @@ const Register = () => {
             </div>
 
             {/* Form */}
-            <form className="mt-6 space-y-5" onSubmit={handleSubmit(onSubmit)}>
+            <form className="mt-6 space-y-4" onSubmit={handleSubmit(onSubmit)}>
               {/* Profile Image Upload */}
               <div className="flex flex-col items-center">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -278,6 +289,7 @@ const Register = () => {
 
               {/* Form Fields */}
               <div className="space-y-3">
+                {/* First Name */}
                 <div>
                   <input
                     {...register("firstName", {
@@ -301,6 +313,7 @@ const Register = () => {
                   )}
                 </div>
 
+                {/* Last Name */}
                 <div>
                   <input
                     {...register("lastName", {
@@ -324,6 +337,75 @@ const Register = () => {
                   )}
                 </div>
 
+                {/* Phone Number (নতুন যুক্ত করা ফিল্ড) */}
+                <div>
+                  <input
+                    {...register("phone", {
+                      required: "Phone number is required",
+                      pattern: {
+                        value: /^[0-9+\-\s()]{10,15}$/,
+                        message: "Please enter a valid phone number",
+                      },
+                    })}
+                    id="phone"
+                    type="tel"
+                    autoComplete="tel"
+                    disabled={loading}
+                    className="appearance-none relative block w-full px-3 py-2.5 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-[#004d4d] focus:border-[#004d4d] sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder="Phone Number *"
+                  />
+                  {errors.phone && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.phone.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Gender / লিঙ্গ (নতুন যুক্ত করা ফিল্ড) */}
+                <div>
+                  <select
+                    {...register("gender", {
+                      required: "Please select your gender",
+                    })}
+                    id="gender"
+                    disabled={loading}
+                    className="appearance-none relative block w-full px-3 py-2.5 border border-gray-300 text-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#004d4d] focus:border-[#004d4d] sm:text-sm bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Select Gender *</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                  {errors.gender && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.gender.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Preferred Course / পছন্দের কোর্স (নতুন যুক্ত করা ফিল্ড) */}
+                <div>
+                  <select
+                    {...register("course", {
+                      required: "Please select a course",
+                    })}
+                    id="course"
+                    disabled={loading}
+                    className="appearance-none relative block w-full px-3 py-2.5 border border-gray-300 text-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#004d4d] focus:border-[#004d4d] sm:text-sm bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Select Interested Course *</option>
+                    <option value="Diploma">Diploma Course</option>
+                    <option value="Alemiah">Alemiah Course</option>
+                    <option value="Kids">Kids Quran & Arabic</option>
+                    <option value="Quran For Elders">Quran For Elders</option>
+                  </select>
+                  {errors.course && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.course.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Email */}
                 <div>
                   <input
                     {...register("email", {
@@ -347,6 +429,7 @@ const Register = () => {
                   )}
                 </div>
 
+                {/* Password */}
                 <div className="relative">
                   <input
                     {...register("password", {
@@ -387,6 +470,7 @@ const Register = () => {
                   )}
                 </div>
 
+                {/* Confirm Password */}
                 <div className="relative">
                   <input
                     {...register("confirmPassword", {

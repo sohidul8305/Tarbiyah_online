@@ -67,6 +67,11 @@ import Campus from "../Page/Campus/Campus";
 import Class_routine from "../Page/Class-routine/Class_routine";
 import Notice_board from "../Page/Notice-board/Notice_board";
 import Support from "../Page/Support/Support";
+import Student_result from "../Page/Studentresult/Student_result";
+import Online_payment from "../Page/Online_payment/Online_payment";
+import Student_acedemic from "../Page/Student-acedemic/Student_acedemic";
+import Student_profile from "../Page/Student_profile/Student_profile";
+import Due_payment from "../Page/Due_payment/Due_payment";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -100,6 +105,11 @@ export const router = createBrowserRouter([
       { path: "class-routine", element: <Class_routine /> },
       { path: "notice-board", element: <Notice_board /> },
       { path: "support", element: <Support /> },
+      { path: "studentprofile", element: <Student_profile /> },
+      { path: "studentresult", element: <Student_result /> },
+      { path: "student-acedemic", element: <Student_acedemic /> },
+      { path: "online-payment", element: <Online_payment /> },
+      { path: "due-payment", element: <Due_payment /> },
     ],
   },
 
@@ -136,6 +146,13 @@ export const router = createBrowserRouter([
         <Dashboard />
       </PrivateRoute>
     ),
+  },
+
+  // Student dashboard
+
+  {
+    path: "/academic",
+    element: <Student_acedemic></Student_acedemic>,
   },
 
   // ==========================================
