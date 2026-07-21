@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import Navbar from "../../Components/Navbar/Navbar";
@@ -9,14 +9,12 @@ const StudentLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // 'login' এর পরিবর্তে সঠিক ফাংশন নাম 'signInUser' ডিস্ট্রাকচার করা হলো
   const { signInUser } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // ফায়ারবেস থেকে লগইন করা হচ্ছে
       await signInUser(email, password);
 
       await Swal.fire({
@@ -26,7 +24,7 @@ const StudentLogin = () => {
         showConfirmButton: false,
       });
 
-      // লগইন সফল হওয়ার পর সরাসরি স্টুডেন্ট ড্যাশবোর্ডে রিডায়রেক্ট হবে
+      // সফলভাবে লগইন হওয়ার পর সরাসরি স্টুডেন্ট ড্যাশবোর্ডে যাবে
       navigate("/student-dashboard");
     } catch (err) {
       console.error("Student Login error:", err);
@@ -73,14 +71,14 @@ const StudentLogin = () => {
                 placeholder="Enter your password"
               />
             </div>
-            <Link to="/student-dashboard">
-              <button
-                type="submit"
-                className="w-full bg-[#004d4d] text-white py-2.5 rounded-lg font-bold hover:bg-teal-900 transition-all shadow-md"
-              >
-                Log In
-              </button>
-            </Link>
+
+            {/* লিংক ট্যাগ বাদ দিয়ে শুধু সাবমিট বাটন রাখা হয়েছে */}
+            <button
+              type="submit"
+              className="w-full mt-10 bg-[#004d4d] text-white py-2.5 rounded-lg font-bold hover:bg-teal-900 transition-all shadow-md"
+            >
+              Log In Student
+            </button>
           </form>
         </div>
       </div>
