@@ -249,10 +249,16 @@ const Navbar = () => {
           <div className="relative group cursor-pointer">
             <span className="flex items-center gap-1">{t.portalLogin} ▾</span>
             <div className="absolute top-full left-0 w-40 bg-white shadow-xl rounded-md hidden group-hover:block z-50 p-2">
-              <Link to="/teacher" className="block px-4 py-2 hover:bg-gray-100">
+              <Link
+                to="/teacher-login"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
                 {t.teacherLogin}
               </Link>
-              <Link to="/admin" className="block px-4 py-2 hover:bg-gray-100">
+              <Link
+                to="/admin-login"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
                 {t.adminLogin}
               </Link>
               <Link

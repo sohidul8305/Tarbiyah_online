@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../Provider/AuthProvider";
 import Swal from "sweetalert2";
+import Footer from "../../../Components/Navbar/Footer/Footer";
+import Navbar from "../../../Components/Navbar/Navbar";
 
 const TeacherLogin = () => {
   const auth = useAuth() || {};
@@ -83,6 +85,7 @@ const TeacherLogin = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+      <Navbar></Navbar>
       <div className="flex-grow flex items-center justify-center p-4">
         <div className="bg-white/85 backdrop-blur-sm p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
           <div className="text-center mb-8">
@@ -180,6 +183,7 @@ const TeacherLogin = () => {
           </form>
         </div>
       </div>
+      <Footer></Footer>
     </div>
   );
 };

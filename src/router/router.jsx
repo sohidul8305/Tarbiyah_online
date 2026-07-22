@@ -72,6 +72,10 @@ import Online_payment from "../Page/Online_payment/Online_payment";
 import Student_acedemic from "../Page/Student-acedemic/Student_acedemic";
 import Student_profile from "../Page/Student_profile/Student_profile";
 import Due_payment from "../Page/Due_payment/Due_payment";
+import AdminLogin from "../Page/Admin/Admin";
+import TeacherLogin from "../Page/Home/Teacher/Teacher";
+import Teacher_profile from "../Page/Teacher_profile/Teacher_profile";
+import Teacher_courses from "../Page/Teacher_courses/Teacher_courses";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -110,6 +114,8 @@ export const router = createBrowserRouter([
       { path: "student-acedemic", element: <Student_acedemic /> },
       { path: "online-payment", element: <Online_payment /> },
       { path: "due-payment", element: <Due_payment /> },
+      { path: "teacher-profile", element: <Teacher_profile /> },
+      { path: "teacher-courses", element: <Teacher_courses /> },
     ],
   },
 
@@ -127,6 +133,15 @@ export const router = createBrowserRouter([
   {
     path: "/student-login",
     element: <StudentLogin />,
+  },
+
+  {
+    path: "/admin-login",
+    element: <AdminLogin />,
+  },
+  {
+    path: "/teacher-login",
+    element: <TeacherLogin />,
   },
 
   // ==========================================
@@ -156,10 +171,13 @@ export const router = createBrowserRouter([
   // ==========================================
   // ৫. অ্যাডমিন ড্যাশবোর্ড (প্রাইভেট)
   // ==========================================
+  // ৫. অ্যাডমিন ড্যাশবোর্ড (প্রাইভেট)
   {
     path: "/admin-dashboard",
     element: (
       <PrivateRoute role="admin">
+        {" "}
+        {/* ✅ এখানে role="admin" যোগ করুন */}
         <AdminDashboard />
       </PrivateRoute>
     ),
