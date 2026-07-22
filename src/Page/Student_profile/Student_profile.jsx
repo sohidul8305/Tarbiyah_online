@@ -1,288 +1,365 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+// src/Page/Student_profile/Student_profile.jsx
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
+import {
+  FaUser,
+  FaUniversity,
+  FaFileAlt,
+  FaCreditCard,
+  FaMoneyBillWave,
+} from "react-icons/fa";
+import { MdDashboard } from "react-icons/md";
 
-const Student_profile = () => {
-  const { user, logOut } = useAuth();
-  const navigate = useNavigate();
+const StudentProfile = () => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const [isEditing, setIsEditing] = useState(false);
+  const [profile, setProfile] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    class: "",
+    roll: "",
+    admissionDate: "",
+    fatherName: "",
+    motherName: "",
+    address: "",
+    bloodGroup: "",
+  });
 
-  // লোকাল স্টোরেজ বা ডেমো থেকে স্টুডেন্টের তথ্য সংগ্রহ
-  const studentEmail =
-    localStorage.getItem("studentEmail") ||
-    user?.email ||
-    "student@tarabiyah.com";
-  const studentPhone = localStorage.getItem("studentPhone") || "01700000000";
-
-  // সাইডবার মেনু স্টেট
-  const [activeMenu, setActiveMenu] = useState("profile");
-
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isStudentLoggedIn");
-      localStorage.removeItem("studentEmail");
-      localStorage.removeItem("studentPhone");
-
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
+  useEffect(() => {
+    const savedProfile = localStorage.getItem("studentInfo");
+    if (savedProfile) {
+      setProfile(JSON.parse(savedProfile));
+    } else {
+      setProfile({
+        name: user?.displayName || "Sohidul Islam",
+        email: user?.email || "student@tarabiyah.com",
+        phone: "01700000000",
+        class: "Class 8",
+        roll: "2024-001",
+        admissionDate: "January 2024",
+        fatherName: "Mr. Abdul Karim",
+        motherName: "Mrs. Fatema Begum",
+        address: "Dhaka, Bangladesh",
+        bloodGroup: "A+",
       });
-      navigate("/student-login");
-    } catch (err) {
-      console.error("Logout error:", err);
     }
+  }, [user]);
+
+  const handleChange = (e) => {
+    setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Main Layout Container (Sidebar + Content) */}
-      <div className="flex flex-grow">
-        {/* ================= LEFT SIDEBAR ================= */}
-        <aside className="w-64 bg-white border-r border-gray-200 hidden md:block shadow-sm">
-          <div className="p-4 bg-[#004d4d] text-white font-bold text-sm tracking-wide">
-            Islamic Online Madrasah (IOM)
-          </div>
-          <nav className="p-2 space-y-1 text-sm font-medium text-gray-700">
-            <button
-              onClick={() => {
-                setActiveMenu("dashboard");
-                navigate("/student-dashboard");
-              }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeMenu === "dashboard" ? "bg-teal-50 text-[#004d4d] font-bold" : "hover:bg-gray-50"}`}
-            >
-              <span>🏠</span> Dashboard
-            </button>
-            <button
-              onClick={() => setActiveMenu("profile")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeMenu === "profile" ? "bg-teal-50 text-[#004d4d] font-bold" : "hover:bg-gray-50"}`}
-            >
-              <span>👤</span> Profile
-            </button>
-            <button
-              onClick={() => setActiveMenu("academic")}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all ${activeMenu === "academic" ? "bg-teal-50 text-[#004d4d] font-bold" : "hover:bg-gray-50"}`}
-            >
-              <div className="flex items-center gap-3">
-                <span>🏛️</span> Academic
-              </div>
-              <span>&rsaquo;</span>
-            </button>
-            <button
-              onClick={() => setActiveMenu("exam")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeMenu === "exam" ? "bg-teal-50 text-[#004d4d] font-bold" : "hover:bg-gray-50"}`}
-            >
-              <span>📄</span> Regular Exam Result
-            </button>
-            <button
-              onClick={() => setActiveMenu("online-payment")}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeMenu === "online-payment" ? "bg-teal-50 text-[#004d4d] font-bold" : "hover:bg-gray-50"}`}
-            >
-              <span>💳</span> Monthly Online Payment
-            </button>
-            <button
-              onClick={() => {
-                setActiveMenu("financial");
-                navigate("/student-dashboard");
-              }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeMenu === "financial" ? "bg-teal-50 text-[#004d4d] font-bold" : "hover:bg-gray-50"}`}
-            >
-              <span>💰</span> Due & Payments
-            </button>
-          </nav>
-          <div className="p-4 text-xs text-gray-400 mt-20 border-t border-gray-100">
-            2026 © Pipilika Soft
-          </div>
-        </aside>
+  const handleSave = () => {
+    localStorage.setItem("studentInfo", JSON.stringify(profile));
+    setIsEditing(false);
+    Swal.fire({
+      icon: "success",
+      title: "Profile Updated",
+      text: "Your profile has been updated successfully.",
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  };
 
-        {/* ================= RIGHT MAIN CONTENT AREA (Detailed Admission & Profile Info) ================= */}
-        <main className="flex-grow p-4 md:p-6 overflow-x-auto">
-          {/* Top Bar inside Content */}
-          <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
-            <h1 className="text-lg font-bold text-gray-800">
-              Complete Student & Admission Profile
-            </h1>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-gray-700">
-                {user?.displayName || "Sohidul Islam"}
+  // সাইডবার মেনু আইটেমসমূহ
+  const menuItems = [
+    {
+      id: "dashboard",
+      path: "/student-dashboard",
+      icon: <MdDashboard className="text-xl" />,
+      label: "Dashboard",
+    },
+    {
+      id: "profile",
+      path: "/student-profile",
+      icon: <FaUser className="text-xl" />,
+      label: "Profile",
+    },
+    {
+      id: "academic",
+      path: "/student-acedemic",
+      icon: <FaUniversity className="text-xl" />,
+      label: "Academic",
+    },
+    {
+      id: "result",
+      path: "/student-result",
+      icon: <FaFileAlt className="text-xl" />,
+      label: "Exam Result",
+    },
+    {
+      id: "payment",
+      path: "/online-payment",
+      icon: <FaCreditCard className="text-xl" />,
+      label: "Online Payment",
+    },
+    {
+      id: "due",
+      path: "/due-payment",
+      icon: <FaMoneyBillWave className="text-xl" />,
+      label: "Due & Payments",
+    },
+  ];
+
+  return (
+    <div className="flex gap-6">
+      {/* বাম পাশের সাইডবার (Desktop View) */}
+      <aside className="hidden md:block w-64 bg-white border border-gray-200 rounded-xl shadow-sm h-fit overflow-hidden">
+        {/* Sidebar Header */}
+        <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <span className="text-xl font-bold">
+                {profile.name?.charAt(0) || "S"}
               </span>
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow"
-              >
-                Logout
-              </button>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm truncate">{profile.name}</p>
+              <p className="text-xs opacity-80 truncate">{profile.class}</p>
             </div>
           </div>
+        </div>
 
-          {/* Profile Card Box */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-6">
-            <div className="flex items-center gap-4 border-b pb-4">
-              <div className="w-16 h-16 bg-[#004d4d] text-white rounded-full flex items-center justify-center text-2xl font-bold shadow">
-                👤
-              </div>
+        {/* Navigation Menu */}
+        <nav className="p-3 space-y-1">
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link key={item.id} to={item.path}>
+                <button
+                  className={`
+                    w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all mt-1
+                    ${
+                      isActive
+                        ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                        : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                    }
+                  `}
+                >
+                  <span className="text-gray-600">{item.icon}</span>
+                  <span className="text-sm">{item.label}</span>
+                </button>
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+
+      {/* মূল প্রোফাইল কন্টেন্ট */}
+      <div className="flex-1 max-w-4xl mx-auto">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] p-6 text-white">
+            <div className="flex justify-between items-center">
               <div>
-                <h2 className="text-xl font-bold text-gray-800">
-                  {user?.displayName || "Sohidul Islam"}
-                </h2>
-                <p className="text-sm text-gray-500">
-                  Student ID: TRB-2026-9821 | Status:{" "}
-                  <span className="text-green-600 font-bold">Active</span>
+                <h2 className="text-2xl font-bold">Student Profile</h2>
+                <p className="text-sm opacity-80">
+                  Manage your personal information
                 </p>
               </div>
-            </div>
-
-            {/* ফর্মের তথ্যাদি সেকশন অনুযায়ী সাজানো */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-              {/* 1. Personal Information */}
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
-                <h3 className="font-bold text-[#004d4d] border-b pb-2 flex items-center gap-2">
-                  <span>👤</span> Personal Information
-                </h3>
-                <div>
-                  <p className="text-gray-500">Full Name (Bangla / English):</p>
-                  <p className="font-semibold text-gray-800">
-                    {user?.displayName || "Sohidul Islam"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Father's Name:</p>
-                  <p className="font-semibold text-gray-800">Md. Abdul Karim</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Mother's Name:</p>
-                  <p className="font-semibold text-gray-800">
-                    Mst. Fatema Begum
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Date of Birth & Gender:</p>
-                  <p className="font-semibold text-gray-800">
-                    15 January 2002 | Male
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Email Address:</p>
-                  <p className="font-semibold text-gray-800">{studentEmail}</p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Phone / WhatsApp Number:</p>
-                  <p className="font-semibold text-gray-800">{studentPhone}</p>
-                </div>
-              </div>
-
-              {/* 2. Academic & Course Choice Information */}
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
-                <h3 className="font-bold text-[#004d4d] border-b pb-2 flex items-center gap-2">
-                  <span>🏛️</span> Academic & Course Choice
-                </h3>
-                <div>
-                  <p className="text-gray-500">Enrolled Program / Course:</p>
-                  <p className="font-semibold text-[#004d4d]">
-                    Diploma in Islamic Studies
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Academic Session / Semester:</p>
-                  <p className="font-semibold text-gray-800">
-                    Fall 2026 (Jul-Dec)
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Shift / Batch Preference:</p>
-                  <p className="font-semibold text-gray-800">
-                    Evening Batch (Online)
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Educational Qualification:</p>
-                  <p className="font-semibold text-gray-800">
-                    HSC / Alim Passed
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Admission / Enrollment Date:</p>
-                  <p className="font-semibold text-gray-800">15 January 2026</p>
-                </div>
-              </div>
-
-              {/* 3. Address Information */}
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
-                <h3 className="font-bold text-[#004d4d] border-b pb-2 flex items-center gap-2">
-                  <span>🏠</span> Address Details
-                </h3>
-                <div>
-                  <p className="text-gray-500">Present Address:</p>
-                  <p className="font-semibold text-gray-800">
-                    Mirpur-10, Dhaka, Bangladesh
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Permanent Address:</p>
-                  <p className="font-semibold text-gray-800">
-                    Sadar Upazila, District - Sylhet
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Nationality & Religion:</p>
-                  <p className="font-semibold text-gray-800">
-                    Bangladeshi | Islam
-                  </p>
-                </div>
-              </div>
-
-              {/* 4. Payment & Transaction Info (ভর্তি ও পেমেন্ট ফর্মের তথ্য) */}
-              <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
-                <h3 className="font-bold text-[#004d4d] border-b pb-2 flex items-center gap-2">
-                  <span>💳</span> Admission Payment Info
-                </h3>
-                <div>
-                  <p className="text-gray-500">Payment Method Used:</p>
-                  <p className="font-semibold text-gray-800">
-                    bKash Merchant / Online Gateway
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Transaction ID (TrxID):</p>
-                  <p className="font-semibold text-teal-700 font-mono">
-                    TRX9821XYZ76
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Admission Fee Status:</p>
-                  <p className="font-semibold text-green-600">
-                    Paid (Verified)
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-500">Current Semester Due:</p>
-                  <p className="font-semibold text-red-600">2,280.00 BDT</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Edit / Update Profile Button */}
-            <div className="flex justify-end pt-4 border-t gap-3">
               <button
-                onClick={() =>
-                  Swal.fire(
-                    "Notice",
-                    "Profile update request form will open here.",
-                    "info",
-                  )
-                }
-                className="bg-[#004d4d] hover:bg-teal-900 text-white font-bold text-sm px-6 py-2 rounded-lg shadow transition-all"
+                onClick={() => setIsEditing(!isEditing)}
+                className="bg-white text-[#004d4d] px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition"
               >
-                Update Profile Info
+                {isEditing ? "Cancel" : "Edit Profile"}
               </button>
             </div>
           </div>
-        </main>
+
+          {/* Profile Content */}
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase">
+                    Full Name
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="name"
+                      value={profile.name}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:border-[#004d4d]"
+                    />
+                  ) : (
+                    <p className="text-gray-800 font-medium">{profile.name}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase">
+                    Email
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="email"
+                      name="email"
+                      value={profile.email}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:border-[#004d4d]"
+                    />
+                  ) : (
+                    <p className="text-gray-800">{profile.email}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase">
+                    Phone
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={profile.phone}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:border-[#004d4d]"
+                    />
+                  ) : (
+                    <p className="text-gray-800">{profile.phone}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase">
+                    Class
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="class"
+                      value={profile.class}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:border-[#004d4d]"
+                    />
+                  ) : (
+                    <p className="text-gray-800 font-medium">{profile.class}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase">
+                    Roll Number
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="roll"
+                      value={profile.roll}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:border-[#004d4d]"
+                    />
+                  ) : (
+                    <p className="text-gray-800 font-medium">{profile.roll}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase">
+                    Admission Date
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="admissionDate"
+                      value={profile.admissionDate}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:border-[#004d4d]"
+                    />
+                  ) : (
+                    <p className="text-gray-800">{profile.admissionDate}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase">
+                    Father's Name
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="fatherName"
+                      value={profile.fatherName}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:border-[#004d4d]"
+                    />
+                  ) : (
+                    <p className="text-gray-800">{profile.fatherName}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase">
+                    Blood Group
+                  </label>
+                  {isEditing ? (
+                    <select
+                      name="bloodGroup"
+                      value={profile.bloodGroup}
+                      onChange={handleChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:border-[#004d4d]"
+                    >
+                      <option>A+</option>
+                      <option>A-</option>
+                      <option>B+</option>
+                      <option>B-</option>
+                      <option>AB+</option>
+                      <option>AB-</option>
+                      <option>O+</option>
+                      <option>O-</option>
+                    </select>
+                  ) : (
+                    <p className="text-gray-800">{profile.bloodGroup}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <label className="text-xs font-semibold text-gray-500 uppercase">
+                Address
+              </label>
+              {isEditing ? (
+                <textarea
+                  name="address"
+                  value={profile.address}
+                  onChange={handleChange}
+                  rows="2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:outline-none focus:border-[#004d4d]"
+                />
+              ) : (
+                <p className="text-gray-800">{profile.address}</p>
+              )}
+            </div>
+
+            {isEditing && (
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={handleSave}
+                  className="bg-[#004d4d] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#003333] transition"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-bold hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Student_profile;
+export default StudentProfile;

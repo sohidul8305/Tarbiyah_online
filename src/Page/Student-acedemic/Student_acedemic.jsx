@@ -1,489 +1,274 @@
+// src/Page/Student-acedemic/Student_acedemic.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../Provider/AuthProvider";
-import Swal from "sweetalert2";
+import { Link, useLocation } from "react-router-dom";
+import {
+  FaUser,
+  FaUniversity,
+  FaFileAlt,
+  FaCreditCard,
+  FaMoneyBillWave,
+} from "react-icons/fa";
+import { MdDashboard } from "react-icons/md";
 
-const Student_acedemic = () => {
-  const { user, logOut } = useAuth();
-  const navigate = useNavigate();
+const StudentAcademic = () => {
+  const location = useLocation();
+  const [selectedSemester, setSelectedSemester] = useState("fall2026");
 
-  // লোকাল স্টোরেজ বা ডেমো থেকে স্টুডেন্টের তথ্য সংগ্রহ
-  const studentEmail =
-    localStorage.getItem("studentEmail") ||
-    user?.email ||
-    "student@tarabiyah.com";
+  const courses = [
+    {
+      id: 1,
+      name: "Arabic Language",
+      code: "AR-101",
+      credit: 3,
+      grade: "A",
+      status: "Completed",
+    },
+    {
+      id: 2,
+      name: "Quran Studies",
+      code: "QS-201",
+      credit: 4,
+      grade: "A+",
+      status: "Completed",
+    },
+    {
+      id: 3,
+      name: "Islamic History",
+      code: "IH-101",
+      credit: 3,
+      grade: "B+",
+      status: "Completed",
+    },
+    {
+      id: 4,
+      name: "Fiqh & Usul",
+      code: "FU-301",
+      credit: 4,
+      grade: "A-",
+      status: "Ongoing",
+    },
+    {
+      id: 5,
+      name: "Tafseer",
+      code: "TF-201",
+      credit: 3,
+      grade: "-",
+      status: "Ongoing",
+    },
+    {
+      id: 6,
+      name: "Hadith Studies",
+      code: "HS-101",
+      credit: 4,
+      grade: "-",
+      status: "Upcoming",
+    },
+  ];
 
-  // সাইডবার মেনু স্টেট
-  const [activeMenu, setActiveMenu] = useState("academic");
-  // একাডেমিক সাব-ট্যাব স্টেট (courses, routine, syllabus, teachers)
-  const [academicTab, setAcademicTab] = useState("courses");
-
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isStudentLoggedIn");
-      localStorage.removeItem("studentEmail");
-      localStorage.removeItem("studentPhone");
-
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-      navigate("/student-login");
-    } catch (err) {
-      console.error("Logout error:", err);
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Completed":
+        return "bg-green-100 text-green-700";
+      case "Ongoing":
+        return "bg-yellow-100 text-yellow-700";
+      case "Upcoming":
+        return "bg-blue-100 text-blue-700";
+      default:
+        return "bg-gray-100 text-gray-700";
     }
   };
 
+  // সাইডবার মেনু আইটেমসমূহ
+  const menuItems = [
+    {
+      id: "dashboard",
+      path: "/student-dashboard",
+      icon: <MdDashboard className="text-xl" />,
+      label: "Dashboard",
+    },
+    {
+      id: "profile",
+      path: "/student-profile",
+      icon: <FaUser className="text-xl" />,
+      label: "Profile",
+    },
+    {
+      id: "academic",
+      path: "/student-acedemic",
+      icon: <FaUniversity className="text-xl" />,
+      label: "Academic",
+    },
+    {
+      id: "result",
+      path: "/student-result",
+      icon: <FaFileAlt className="text-xl" />,
+      label: "Exam Result",
+    },
+    {
+      id: "payment",
+      path: "/online-payment",
+      icon: <FaCreditCard className="text-xl" />,
+      label: "Online Payment",
+    },
+    {
+      id: "due",
+      path: "/due-payment",
+      icon: <FaMoneyBillWave className="text-xl" />,
+      label: "Due & Payments",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
-      {/* Main Layout Container (Sidebar + Content) */}
-      <div className="flex flex-grow">
-        {/* ================= LEFT SIDEBAR ================= */}
-        <aside className="w-64 bg-white border-r border-gray-200 hidden md:block shadow-sm">
-          <div className="p-4 bg-[#004d4d] text-white font-bold text-sm tracking-wide">
-            Islamic Online Madrasah (IOM)
+    <div className="flex gap-6">
+      {/* বাম পাশের সাইডবার (Desktop View) */}
+      <aside className="hidden md:block w-64 bg-white border border-gray-200 rounded-xl shadow-sm h-fit overflow-hidden">
+        {/* Sidebar Header */}
+        <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+              <span className="text-xl font-bold">S</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-sm truncate">Sohidul Islam</p>
+              <p className="text-xs opacity-80 truncate">Class 8</p>
+            </div>
           </div>
-          <nav className="p-2 space-y-1 text-sm font-medium text-gray-700">
-            <button
-              onClick={() => {
-                setActiveMenu("dashboard");
-                navigate("/student-dashboard");
-              }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeMenu === "dashboard" ? "bg-teal-50 text-[#004d4d] font-bold" : "hover:bg-gray-50"}`}
-            >
-              <span>🏠</span> Dashboard
-            </button>
-            <button
-              onClick={() => {
-                setActiveMenu("profile");
-                navigate("/student-profile");
-              }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeMenu === "profile" ? "bg-teal-50 text-[#004d4d] font-bold" : "hover:bg-gray-50"}`}
-            >
-              <span>👤</span> Profile
-            </button>
-            <button
-              onClick={() => setActiveMenu("academic")}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-all ${activeMenu === "academic" ? "bg-teal-50 text-[#004d4d] font-bold" : "hover:bg-gray-50"}`}
-            >
-              <div className="flex items-center gap-3">
-                <span>🏛️</span> Academic
-              </div>
-              <span>&rsaquo;</span>
-            </button>
-            <button
-              onClick={() => {
-                setActiveMenu("exam");
-                navigate("/student-dashboard");
-              }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeMenu === "exam" ? "bg-teal-50 text-[#004d4d] font-bold" : "hover:bg-gray-50"}`}
-            >
-              <span>📄</span> Regular Exam Result
-            </button>
-            <button
-              onClick={() => {
-                setActiveMenu("online-payment");
-                navigate("/student-dashboard");
-              }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeMenu === "online-payment" ? "bg-teal-50 text-[#004d4d] font-bold" : "hover:bg-gray-50"}`}
-            >
-              <span>💳</span> Monthly Online Payment
-            </button>
-            <button
-              onClick={() => {
-                setActiveMenu("financial");
-                navigate("/student-dashboard");
-              }}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${activeMenu === "financial" ? "bg-teal-50 text-[#004d4d] font-bold" : "hover:bg-gray-50"}`}
-            >
-              <span>💰</span> Due & Payments
-            </button>
-          </nav>
-          <div className="p-4 text-xs text-gray-400 mt-20 border-t border-gray-100">
-            2026 © Pipilika Soft
-          </div>
-        </aside>
+        </div>
 
-        {/* ================= RIGHT MAIN CONTENT AREA (Academic Information) ================= */}
-        <main className="flex-grow p-4 md:p-6 overflow-x-auto">
-          {/* Top Bar inside Content */}
-          <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6">
-            <h1 className="text-lg font-bold text-gray-800">
-              Student Academic Information Portal
-            </h1>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-gray-700">
-                {user?.displayName || "Sohidul Islam"}
-              </span>
+        {/* Navigation Menu */}
+        <nav className="p-3 space-y-1">
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link key={item.id} to={item.path}>
+                <button
+                  className={`
+                    w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all mt-1
+                    ${
+                      isActive
+                        ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                        : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                    }
+                  `}
+                >
+                  <span className="text-gray-600">{item.icon}</span>
+                  <span className="text-sm">{item.label}</span>
+                </button>
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+
+      {/* মূল একাডেমিক কন্টেন্ট */}
+      <div className="flex-1 max-w-4xl mx-auto">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] p-6 text-white">
+            <h2 className="text-2xl font-bold">Academic Information</h2>
+            <p className="text-sm opacity-80">
+              View your courses and academic progress
+            </p>
+          </div>
+
+          {/* Semester Selector */}
+          <div className="p-4 border-b border-gray-200 flex flex-wrap gap-2">
+            {["fall2026", "spring2026", "all"].map((sem) => (
               <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow"
+                key={sem}
+                onClick={() => setSelectedSemester(sem)}
+                className={`px-4 py-2 rounded-lg font-medium text-sm transition ${
+                  selectedSemester === sem
+                    ? "bg-[#004d4d] text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
               >
-                Logout
+                {sem === "fall2026"
+                  ? "Fall 2026"
+                  : sem === "spring2026"
+                    ? "Spring 2026"
+                    : "All Semesters"}
               </button>
+            ))}
+          </div>
+
+          {/* Academic Summary Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50">
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <p className="text-xs text-gray-500">Total Courses</p>
+              <p className="text-2xl font-bold text-[#004d4d]">6</p>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <p className="text-xs text-gray-500">Completed</p>
+              <p className="text-2xl font-bold text-green-600">3</p>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <p className="text-xs text-gray-500">Ongoing</p>
+              <p className="text-2xl font-bold text-yellow-600">2</p>
+            </div>
+            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <p className="text-xs text-gray-500">CGPA</p>
+              <p className="text-2xl font-bold text-[#004d4d]">3.75</p>
             </div>
           </div>
 
-          {/* Academic Sub-Tabs Navigation */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-6">
-            <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-3 text-sm">
-              <button
-                onClick={() => setAcademicTab("courses")}
-                className={`px-4 py-1.5 rounded border transition-all ${academicTab === "courses" ? "bg-teal-50 text-[#004d4d] font-bold border-teal-300" : "bg-white text-gray-600 hover:bg-gray-50 border-gray-200"}`}
-              >
-                My Courses
-              </button>
-              <button
-                onClick={() => setAcademicTab("routine")}
-                className={`px-4 py-1.5 rounded border transition-all ${academicTab === "routine" ? "bg-teal-50 text-[#004d4d] font-bold border-teal-300" : "bg-white text-gray-600 hover:bg-gray-50 border-gray-200"}`}
-              >
-                Class Routine
-              </button>
-              <button
-                onClick={() => setAcademicTab("syllabus")}
-                className={`px-4 py-1.5 rounded border transition-all ${academicTab === "syllabus" ? "bg-teal-50 text-[#004d4d] font-bold border-teal-300" : "bg-white text-gray-600 hover:bg-gray-50 border-gray-200"}`}
-              >
-                Syllabus & Materials
-              </button>
-              <button
-                onClick={() => setAcademicTab("teachers")}
-                className={`px-4 py-1.5 rounded border transition-all ${academicTab === "teachers" ? "bg-teal-50 text-[#004d4d] font-bold border-teal-300" : "bg-white text-gray-600 hover:bg-gray-50 border-gray-200"}`}
-              >
-                Course Teachers
-              </button>
-            </div>
-          </div>
-
-          {/* Tab 1: My Courses (With Images & Card Grid View) */}
-          {academicTab === "courses" && (
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-6">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2 border-b pb-3">
-                <span>📚</span> My Enrolled Courses (Fall 2026)
-              </h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Course Card 1 */}
-                <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                  <div>
-                    <img
-                      src="https://images.unsplash.com/photo-1609599006353-e629aaabfeae?auto=format&fit=crop&w=500&q=80"
-                      alt="Al-Quran"
-                      className="w-full h-36 object-cover"
-                    />
-                    <div className="p-4 space-y-2">
-                      <span className="text-xs font-mono font-bold bg-teal-100 text-[#004d4d] px-2 py-0.5 rounded">
-                        ISL-101
-                      </span>
-                      <h3 className="font-bold text-gray-800 text-base">
-                        Al-Quran Studies & Tafseer
-                      </h3>
-                      <p className="text-xs text-gray-500">
-                        Credit: 3.0 | Type: Core
-                      </p>
-                    </div>
-                  </div>
-                  <div className="p-4 pt-0">
-                    <span className="inline-block bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold mb-3">
-                      Ongoing
-                    </span>
-                    <button
-                      onClick={() =>
-                        Swal.fire(
-                          "Course Details",
-                          "Opening Al-Quran course portal...",
-                          "info",
-                        )
-                      }
-                      className="w-full bg-[#004d4d] hover:bg-teal-900 text-white text-xs py-2 rounded-lg font-bold transition-all"
+          {/* Course List */}
+          <div className="p-4">
+            <h3 className="font-bold text-gray-800 mb-4">Course List</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="text-left p-3 font-semibold text-gray-600">
+                      #
+                    </th>
+                    <th className="text-left p-3 font-semibold text-gray-600">
+                      Course Name
+                    </th>
+                    <th className="text-left p-3 font-semibold text-gray-600">
+                      Code
+                    </th>
+                    <th className="text-left p-3 font-semibold text-gray-600">
+                      Credit
+                    </th>
+                    <th className="text-left p-3 font-semibold text-gray-600">
+                      Grade
+                    </th>
+                    <th className="text-left p-3 font-semibold text-gray-600">
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {courses.map((course, index) => (
+                    <tr
+                      key={course.id}
+                      className="border-b border-gray-100 hover:bg-gray-50 transition"
                     >
-                      View Details
-                    </button>
-                  </div>
-                </div>
-
-                {/* Course Card 2 */}
-                <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                  <div>
-                    <img
-                      src="https://images.unsplash.com/photo-1584286595398-a79f1cf44329?auto=format&fit=crop&w=500&q=80"
-                      alt="Hadith"
-                      className="w-full h-36 object-cover"
-                    />
-                    <div className="p-4 space-y-2">
-                      <span className="text-xs font-mono font-bold bg-teal-100 text-[#004d4d] px-2 py-0.5 rounded">
-                        ISL-102
-                      </span>
-                      <h3 className="font-bold text-gray-800 text-base">
-                        Hadith Methodology & Sunnah
-                      </h3>
-                      <p className="text-xs text-gray-500">
-                        Credit: 3.0 | Type: Core
-                      </p>
-                    </div>
-                  </div>
-                  <div className="p-4 pt-0">
-                    <span className="inline-block bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold mb-3">
-                      Ongoing
-                    </span>
-                    <button
-                      onClick={() =>
-                        Swal.fire(
-                          "Course Details",
-                          "Opening Hadith course portal...",
-                          "info",
-                        )
-                      }
-                      className="w-full bg-[#004d4d] hover:bg-teal-900 text-white text-xs py-2 rounded-lg font-bold transition-all"
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </div>
-
-                {/* Course Card 3 */}
-                <div className="bg-gray-50 border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col justify-between">
-                  <div>
-                    <img
-                      src="https://images.unsplash.com/photo-1546410531-bb4caa6b424d?auto=format&fit=crop&w=500&q=80"
-                      alt="Arabic"
-                      className="w-full h-36 object-cover"
-                    />
-                    <div className="p-4 space-y-2">
-                      <span className="text-xs font-mono font-bold bg-teal-100 text-[#004d4d] px-2 py-0.5 rounded">
-                        ARAB-101
-                      </span>
-                      <h3 className="font-bold text-gray-800 text-base">
-                        Classic Arabic Grammar & Syntax
-                      </h3>
-                      <p className="text-xs text-gray-500">
-                        Credit: 4.0 | Type: Core
-                      </p>
-                    </div>
-                  </div>
-                  <div className="p-4 pt-0">
-                    <span className="inline-block bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold mb-3">
-                      Ongoing
-                    </span>
-                    <button
-                      onClick={() =>
-                        Swal.fire(
-                          "Course Details",
-                          "Opening Arabic course portal...",
-                          "info",
-                        )
-                      }
-                      className="w-full bg-[#004d4d] hover:bg-teal-900 text-white text-xs py-2 rounded-lg font-bold transition-all"
-                    >
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Tab 2: Class Routine */}
-          {academicTab === "routine" && (
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2 border-b pb-3">
-                <span>⏰</span> Weekly Class Routine (Online Live Classes)
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-gray-700">
-                  <thead className="bg-gray-100 text-gray-800 uppercase text-xs">
-                    <tr>
-                      <th className="p-3">Day</th>
-                      <th className="p-3">Time (BST)</th>
-                      <th className="p-3">Course</th>
-                      <th className="p-3">Platform / Link</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b">
-                      <td className="p-3 font-bold text-gray-800">Saturday</td>
-                      <td className="p-3">08:00 PM - 09:30 PM</td>
-                      <td className="p-3">Al-Quran Studies (ISL-101)</td>
+                      <td className="p-3">{index + 1}</td>
+                      <td className="p-3 font-medium">{course.name}</td>
+                      <td className="p-3 text-gray-600">{course.code}</td>
+                      <td className="p-3">{course.credit}</td>
+                      <td className="p-3 font-bold">{course.grade}</td>
                       <td className="p-3">
-                        <button
-                          onClick={() =>
-                            Swal.fire(
-                              "Zoom Link",
-                              "Joining link active 10 mins before class.",
-                              "info",
-                            )
-                          }
-                          className="text-teal-700 font-bold hover:underline"
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                            course.status,
+                          )}`}
                         >
-                          Join Zoom Class
-                        </button>
+                          {course.status}
+                        </span>
                       </td>
                     </tr>
-                    <tr className="border-b">
-                      <td className="p-3 font-bold text-gray-800">Monday</td>
-                      <td className="p-3">08:00 PM - 09:30 PM</td>
-                      <td className="p-3">Hadith Methodology (ISL-102)</td>
-                      <td className="p-3">
-                        <button
-                          onClick={() =>
-                            Swal.fire(
-                              "Zoom Link",
-                              "Joining link active 10 mins before class.",
-                              "info",
-                            )
-                          }
-                          className="text-teal-700 font-bold hover:underline"
-                        >
-                          Join Zoom Class
-                        </button>
-                      </td>
-                    </tr>
-                    <tr className="border-b">
-                      <td className="p-3 font-bold text-gray-800">Wednesday</td>
-                      <td className="p-3">08:00 PM - 09:30 PM</td>
-                      <td className="p-3">Arabic Grammar (ARAB-101)</td>
-                      <td className="p-3">
-                        <button
-                          onClick={() =>
-                            Swal.fire(
-                              "Zoom Link",
-                              "Joining link active 10 mins before class.",
-                              "info",
-                            )
-                          }
-                          className="text-teal-700 font-bold hover:underline"
-                        >
-                          Join Zoom Class
-                        </button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-
-          {/* Tab 3: Syllabus & Materials */}
-          {academicTab === "syllabus" && (
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2 border-b pb-3">
-                <span>📁</span> Semester Syllabus & Study Materials
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gray-50 border p-4 rounded-lg space-y-2">
-                  <h3 className="font-bold text-gray-800">
-                    Al-Quran Syllabus PDF
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Detailed lesson plan and reading list for Fall 2026.
-                  </p>
-                  <button
-                    onClick={() =>
-                      Swal.fire(
-                        "Download",
-                        "Downloading syllabus...",
-                        "success",
-                      )
-                    }
-                    className="bg-[#004d4d] text-white text-xs px-3 py-1.5 rounded font-bold"
-                  >
-                    Download PDF
-                  </button>
-                </div>
-                <div className="bg-gray-50 border p-4 rounded-lg space-y-2">
-                  <h3 className="font-bold text-gray-800">
-                    Hadith Notes & Handouts
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Weekly lecture notes uploaded by instructors.
-                  </p>
-                  <button
-                    onClick={() =>
-                      Swal.fire("Download", "Downloading notes...", "success")
-                    }
-                    className="bg-[#004d4d] text-white text-xs px-3 py-1.5 rounded font-bold"
-                  >
-                    Download Notes
-                  </button>
-                </div>
-                <div className="bg-gray-50 border p-4 rounded-lg space-y-2">
-                  <h3 className="font-bold text-gray-800">
-                    Arabic Grammar Guide
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Reference book and vocabulary sheets.
-                  </p>
-                  <button
-                    onClick={() =>
-                      Swal.fire("Download", "Downloading guide...", "success")
-                    }
-                    className="bg-[#004d4d] text-white text-xs px-3 py-1.5 rounded font-bold"
-                  >
-                    Download Guide
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Tab 4: Course Teachers */}
-          {academicTab === "teachers" && (
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
-              <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2 border-b pb-3">
-                <span>👨‍🏫</span> Course Instructors & Mentors
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gray-50 border p-4 rounded-lg space-y-1 text-center">
-                  <div className="w-12 h-12 bg-teal-100 text-[#004d4d] rounded-full flex items-center justify-center text-lg font-bold mx-auto mb-2">
-                    👨‍⚖️
-                  </div>
-                  <h3 className="font-bold text-gray-800">
-                    Sheikh Dr. Ahmadullah
-                  </h3>
-                  <p className="text-xs text-[#004d4d] font-semibold">
-                    Al-Quran Studies
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Ph.D in Quranic Sciences, Medina University
-                  </p>
-                </div>
-                <div className="bg-gray-50 border p-4 rounded-lg space-y-1 text-center">
-                  <div className="w-12 h-12 bg-teal-100 text-[#004d4d] rounded-full flex items-center justify-center text-lg font-bold mx-auto mb-2">
-                    👨‍⚖️
-                  </div>
-                  <h3 className="font-bold text-gray-800">
-                    Mufti Mahmud Hasan
-                  </h3>
-                  <p className="text-xs text-[#004d4d] font-semibold">
-                    Hadith Methodology
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    Senior Lecturer & Ifta Specialist
-                  </p>
-                </div>
-                <div className="bg-gray-50 border p-4 rounded-lg space-y-1 text-center">
-                  <div className="w-12 h-12 bg-teal-100 text-[#004d4d] rounded-full flex items-center justify-center text-lg font-bold mx-auto mb-2">
-                    👨‍⚖️
-                  </div>
-                  <h3 className="font-bold text-gray-800">
-                    Ustadh Ibrahim Khalil
-                  </h3>
-                  <p className="text-xs text-[#004d4d] font-semibold">
-                    Classic Arabic Grammar
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    MA in Arabic Language & Literature
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-        </main>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-export default Student_acedemic;
+export default StudentAcademic;
