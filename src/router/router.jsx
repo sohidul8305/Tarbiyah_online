@@ -50,7 +50,6 @@ import Certificates from "../Page/Dashboard/Student/Certificates";
 import CoursePlayer from "../Page/Dashboard/Student/CoursePlayer";
 
 // Teacher
-import TeacherCourses from "../Page/Dashboard/Teacher/TeacherCourses";
 import CreateCourse from "../Page/Dashboard/Teacher/CreateCourse";
 import ReviewAssignments from "../Page/Dashboard/Teacher/ReviewAssignments";
 import StudentsList from "../Page/Dashboard/Teacher/StudentsList";
@@ -75,7 +74,19 @@ import Due_payment from "../Page/Due_payment/Due_payment";
 import AdminLogin from "../Page/Admin/Admin";
 import TeacherLogin from "../Page/Home/Teacher/Teacher";
 import Teacher_profile from "../Page/Teacher_profile/Teacher_profile";
+import Teacher_classes from "../Page/Teacher_Classes/Teacher_classes";
 import Teacher_courses from "../Page/Teacher_courses/Teacher_courses";
+import TeacherCourses from "../Page/Teacher_courses/Teacher_courses";
+import Teacher_homework from "../Page/Teacher_homework/Teacher_homework";
+import Teacher_notifications from "../Page/Teacher_notifications/Teacher_notifications";
+import Teacher_students from "../Page/Teacher_students/Teacher_students";
+import Teacher_results from "../Page/Teacher_results/Teacher_results";
+import Teacher_leave from "../Page/Teacher_leave/Teacher_leave";
+import Teacher_salary from "../Page/Teacher_salary/Teacher_salary";
+import Upload_videos from "../Page/Upload_videos/Upload_videos";
+import Teacher_assignments from "../Page/Teacher_assignments/Teacher_assignments";
+import Teacher_quizzes from "../Page/Teacher_quizzes/Teacher_quizzes";
+import Short_questions from "../Page/Short_questions/Short_questions";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -115,7 +126,18 @@ export const router = createBrowserRouter([
       { path: "online-payment", element: <Online_payment /> },
       { path: "due-payment", element: <Due_payment /> },
       { path: "teacher-profile", element: <Teacher_profile /> },
-      { path: "teacher-courses", element: <Teacher_courses /> },
+      { path: "/teacher-courses", element: <Teacher_courses /> },
+      { path: "/teacher-classes", element: <Teacher_classes /> },
+      { path: "/teacher-homework", element: <Teacher_homework /> },
+      { path: "/teacher-notifications", element: <Teacher_notifications /> },
+      { path: "/teacher-students", element: <Teacher_students /> },
+      { path: "/teacher-results", element: <Teacher_results /> },
+      { path: "/teacher-leave", element: <Teacher_leave /> },
+      { path: "/teacher-salary", element: <Teacher_salary /> },
+      { path: "/teacher-videos", element: <Upload_videos /> },
+      { path: "/teacher-assignments", element: <Teacher_assignments /> },
+      { path: "/teacher-quizzes", element: <Teacher_quizzes /> },
+      { path: "/teacher-short-questions", element: <Short_questions /> },
     ],
   },
 

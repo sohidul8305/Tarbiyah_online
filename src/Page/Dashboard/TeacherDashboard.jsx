@@ -36,6 +36,12 @@ import {
   FaPoll,
   FaAward,
   FaCertificate,
+  FaChalkboardTeacher,
+  FaGraduationCap,
+  FaTasks,
+  FaCalendarCheck,
+  FaListUl,
+  FaFolderOpen,
 } from "react-icons/fa";
 import { MdDashboard, MdAssignment, MdGrade, MdQuiz } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -58,6 +64,108 @@ const TeacherDashboard = () => {
     subjects: [],
     classes: [],
   });
+  const [leaveApplications, setLeaveApplications] = useState([
+    {
+      id: 1,
+      date: "2026-07-20",
+      reason: "Personal Emergency",
+      status: "pending",
+    },
+    { id: 2, date: "2026-07-15", reason: "Medical Leave", status: "approved" },
+  ]);
+  const [totalLeave, setTotalLeave] = useState(12);
+  const [salaryData, setSalaryData] = useState({
+    totalSalary: 45000,
+    dueSalary: 15000,
+    lastPaid: "2026-06-30",
+    nextPayment: "2026-07-31",
+  });
+  const [homeworkPending, setHomeworkPending] = useState([
+    {
+      id: 1,
+      title: "Tajweed Lesson 5",
+      class: "Class 8",
+      dueDate: "2026-07-28",
+      submissions: 12,
+      total: 30,
+    },
+    {
+      id: 2,
+      title: "Tafsir Chapter 3",
+      class: "Class 9",
+      dueDate: "2026-07-30",
+      submissions: 5,
+      total: 25,
+    },
+    {
+      id: 3,
+      title: "Hadith Assignment 2",
+      class: "Class 10",
+      dueDate: "2026-08-01",
+      submissions: 8,
+      total: 28,
+    },
+  ]);
+  const [todayClasses, setTodayClasses] = useState([
+    {
+      id: 1,
+      subject: "Tajweed",
+      class: "Class 8",
+      time: "09:00 AM - 10:00 AM",
+      link: "https://meet.google.com/abc-defg-hij",
+      status: "upcoming",
+    },
+    {
+      id: 2,
+      subject: "Tafsir",
+      class: "Class 9",
+      time: "11:00 AM - 12:00 PM",
+      link: "https://meet.google.com/klm-nopq-rst",
+      status: "upcoming",
+    },
+  ]);
+  const [examResults, setExamResults] = useState([
+    {
+      id: 1,
+      title: "Mid Term Exam 2026",
+      class: "Class 8",
+      subject: "Tajweed",
+      date: "2026-06-15",
+      totalStudents: 30,
+      passed: 25,
+      failed: 5,
+    },
+    {
+      id: 2,
+      title: "Weekly Test - Week 3",
+      class: "Class 9",
+      subject: "Tafsir",
+      date: "2026-07-10",
+      totalStudents: 25,
+      passed: 20,
+      failed: 5,
+    },
+  ]);
+  const [notifications, setNotifications] = useState([
+    {
+      id: 1,
+      message: "New student enrolled in Class 8",
+      time: "2 hours ago",
+      read: false,
+    },
+    {
+      id: 2,
+      message: "Assignment submission deadline today",
+      time: "5 hours ago",
+      read: false,
+    },
+    {
+      id: 3,
+      message: "Staff meeting tomorrow at 10:00 AM",
+      time: "1 day ago",
+      read: true,
+    },
+  ]);
 
   // লোকেশন থেকে active menu সেট করা
   useEffect(() => {
@@ -125,6 +233,20 @@ const TeacherDashboard = () => {
       path === "/teacher-dashboard/settings"
     )
       setActiveMenu("settings");
+    else if (path === "/teacher-leave" || path === "/teacher-dashboard/leave")
+      setActiveMenu("leave");
+    else if (path === "/teacher-salary" || path === "/teacher-dashboard/salary")
+      setActiveMenu("salary");
+    else if (
+      path === "/teacher-homework" ||
+      path === "/teacher-dashboard/homework"
+    )
+      setActiveMenu("homework");
+    else if (
+      path === "/teacher-notifications" ||
+      path === "/teacher-dashboard/notifications"
+    )
+      setActiveMenu("notifications");
   }, [location]);
 
   // লোড টিচার ইনফো
@@ -174,19 +296,19 @@ const TeacherDashboard = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // সাইডবার মেনু আইটেম
+  // সাইডবার মেনু আইটেম - Updated to match the image
   const menuItems = [
-    {
-      id: "dashboard",
-      path: "/teacher-dashboard",
-      icon: <MdDashboard className="text-xl" />,
-      label: "Dashboard",
-    },
     {
       id: "profile",
       path: "/teacher-profile",
       icon: <FaUser className="text-xl" />,
       label: "Profile",
+    },
+    {
+      id: "dashboard",
+      path: "/teacher-dashboard",
+      icon: <MdDashboard className="text-xl" />,
+      label: "Dashboard",
     },
     {
       id: "courses",
@@ -197,9 +319,48 @@ const TeacherDashboard = () => {
     {
       id: "classes",
       path: "/teacher-classes",
-      icon: <FaVideo className="text-xl" />,
-      label: "Live Classes",
+      icon: <FaChalkboardTeacher className="text-xl" />,
+      label: "My Classes",
     },
+
+    {
+      id: "homework",
+      path: "/teacher-homework",
+      icon: <FaTasks className="text-xl" />,
+      label: "Homework",
+    },
+    {
+      id: "notifications",
+      path: "/teacher-notifications",
+      icon: <FaBell className="text-xl" />,
+      label: "Notification",
+    },
+    {
+      id: "students",
+      path: "/teacher-students",
+      icon: <FaUsers className="text-xl" />,
+      label: "Student Progress Report",
+    },
+    {
+      id: "results",
+      path: "/teacher-results",
+      icon: <FaAward className="text-xl" />,
+      label: "Exam Result",
+    },
+    {
+      id: "leave",
+      path: "/teacher-leave",
+      icon: <FaCalendarCheck className="text-xl" />,
+      label: "Leave KP",
+    },
+    {
+      id: "salary",
+      path: "/teacher-salary",
+      icon: <FaMoneyBillWave className="text-xl" />,
+      label: "Salary Overview",
+    },
+
+    // এই নতুন আইটেমগুলো যোগ করুন
     {
       id: "videos",
       path: "/teacher-videos",
@@ -223,48 +384,6 @@ const TeacherDashboard = () => {
       path: "/teacher-short-questions",
       icon: <FaPen className="text-xl" />,
       label: "Short Questions",
-    },
-    {
-      id: "students",
-      path: "/teacher-students",
-      icon: <FaUsers className="text-xl" />,
-      label: "Students",
-    },
-    {
-      id: "attendance",
-      path: "/teacher-attendance",
-      icon: <FaClipboardList className="text-xl" />,
-      label: "Attendance",
-    },
-    {
-      id: "exams",
-      path: "/teacher-exams",
-      icon: <FaFileAlt className="text-xl" />,
-      label: "Exams",
-    },
-    {
-      id: "results",
-      path: "/teacher-results",
-      icon: <MdGrade className="text-xl" />,
-      label: "Results",
-    },
-    {
-      id: "payment",
-      path: "/teacher-payment",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Payment",
-    },
-    {
-      id: "notice",
-      path: "/teacher-notice",
-      icon: <FaBell className="text-xl" />,
-      label: "Notice Board",
-    },
-    {
-      id: "settings",
-      path: "/teacher-settings",
-      icon: <FaCog className="text-xl" />,
-      label: "Settings",
     },
   ];
 
@@ -394,9 +513,48 @@ const TeacherDashboard = () => {
 
           {/* ================= DYNAMIC CONTENT ================= */}
           {activeMenu === "dashboard" ? (
-            <DashboardContent teacherInfo={teacherInfo} />
+            <DashboardContent
+              teacherInfo={teacherInfo}
+              todayClasses={todayClasses}
+              homeworkPending={homeworkPending}
+              notifications={notifications}
+              setNotifications={setNotifications}
+            />
           ) : activeMenu === "profile" ? (
             <TeacherProfile />
+          ) : activeMenu === "classes" ? (
+            <MyClassesContent
+              todayClasses={todayClasses}
+              setTodayClasses={setTodayClasses}
+              teacherInfo={teacherInfo}
+            />
+          ) : activeMenu === "homework" ? (
+            <HomeworkContent
+              homeworkPending={homeworkPending}
+              setHomeworkPending={setHomeworkPending}
+            />
+          ) : activeMenu === "notifications" ? (
+            <NotificationContent
+              notifications={notifications}
+              setNotifications={setNotifications}
+            />
+          ) : activeMenu === "students" ? (
+            <StudentProgressContent />
+          ) : activeMenu === "results" ? (
+            <ExamResultContent
+              examResults={examResults}
+              setExamResults={setExamResults}
+            />
+          ) : activeMenu === "leave" ? (
+            <LeaveKPContent
+              leaveApplications={leaveApplications}
+              setLeaveApplications={setLeaveApplications}
+              totalLeave={totalLeave}
+            />
+          ) : activeMenu === "salary" ? (
+            <SalaryOverviewContent salaryData={salaryData} />
+          ) : activeMenu === "courses" ? (
+            <MyCoursesContent teacherInfo={teacherInfo} />
           ) : activeMenu === "videos" ? (
             <VideoUploadContent />
           ) : activeMenu === "assignments" ? (
@@ -426,56 +584,67 @@ const TeacherDashboard = () => {
 // ==========================================
 // 1. DASHBOARD CONTENT
 // ==========================================
-const DashboardContent = ({ teacherInfo }) => {
+const DashboardContent = ({
+  teacherInfo,
+  todayClasses,
+  homeworkPending,
+  notifications,
+  setNotifications,
+}) => {
   const stats = [
     {
-      label: "Total Students",
-      value: "156",
-      icon: <FaUsers className="text-2xl" />,
+      label: "My Department",
+      value: teacherInfo.department || "Islamic Studies",
+      icon: <FaFolderOpen className="text-2xl" />,
       color: "bg-blue-50",
       textColor: "text-blue-600",
+      isText: true,
     },
     {
-      label: "Active Courses",
-      value: "4",
-      icon: <FaBook className="text-2xl" />,
+      label: "My Classes",
+      value: teacherInfo.classes?.length || 0,
+      icon: <FaChalkboardTeacher className="text-2xl" />,
       color: "bg-green-50",
       textColor: "text-green-600",
     },
     {
-      label: "Video Lectures",
-      value: "24",
-      icon: <FaVideo className="text-2xl" />,
+      label: "Today's Classes",
+      value: todayClasses?.length || 0,
+      icon: <FaCalendarAlt className="text-2xl" />,
       color: "bg-purple-50",
       textColor: "text-purple-600",
     },
     {
-      label: "Assignments",
-      value: "12",
-      icon: <MdAssignment className="text-2xl" />,
+      label: "Homework Pending",
+      value: homeworkPending?.length || 0,
+      icon: <FaTasks className="text-2xl" />,
       color: "bg-orange-50",
       textColor: "text-orange-600",
     },
-    {
-      label: "Quizzes",
-      value: "8",
-      icon: <MdQuiz className="text-2xl" />,
-      color: "bg-red-50",
-      textColor: "text-red-600",
-    },
-    {
-      label: "Pending Reviews",
-      value: "15",
-      icon: <FaClock className="text-2xl" />,
-      color: "bg-yellow-50",
-      textColor: "text-yellow-600",
-    },
   ];
+
+  // Mark notification as read
+  const markAsRead = (id) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    );
+  };
+
+  // Mark all as read
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    Swal.fire({
+      icon: "success",
+      title: "All notifications marked as read",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
 
   return (
     <div className="space-y-6">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {/* Stats Grid - Updated to match image */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {stats.map((stat, index) => (
           <div
             key={index}
@@ -484,7 +653,7 @@ const DashboardContent = ({ teacherInfo }) => {
             <div className="flex items-center justify-between">
               <span className={stat.textColor}>{stat.icon}</span>
               <span className="text-lg font-bold text-gray-800">
-                {stat.value}
+                {stat.isText ? stat.value : stat.value}
               </span>
             </div>
             <p className="text-xs text-gray-600 mt-1 font-medium">
@@ -494,127 +663,125 @@ const DashboardContent = ({ teacherInfo }) => {
         ))}
       </div>
 
-      {/* Quick Actions */}
+      {/* Today's Classes Section */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
         <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-          <span className="text-teal-600">⚡</span> Quick Actions
+          <FaCalendarAlt className="text-purple-600" /> Today's Classes
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-          {[
-            { label: "Upload Video", icon: "🎥", color: "bg-purple-50" },
-            { label: "Create Assignment", icon: "📄", color: "bg-blue-50" },
-            { label: "Create Quiz", icon: "📝", color: "bg-green-50" },
-            { label: "Add Short Question", icon: "✏️", color: "bg-yellow-50" },
-            { label: "Start Live Class", icon: "📺", color: "bg-red-50" },
-            { label: "Take Attendance", icon: "📋", color: "bg-orange-50" },
-            { label: "Post Notice", icon: "📢", color: "bg-teal-50" },
-          ].map((action, index) => (
-            <button
-              key={index}
-              onClick={() => {
-                if (action.label === "Upload Video") {
-                  document.getElementById("video-upload-tab")?.click();
-                } else if (action.label === "Create Assignment") {
-                  document.getElementById("assignments-tab")?.click();
-                } else if (action.label === "Create Quiz") {
-                  document.getElementById("quizzes-tab")?.click();
-                } else if (action.label === "Add Short Question") {
-                  document.getElementById("short-questions-tab")?.click();
-                } else {
-                  Swal.fire({
-                    icon: "info",
-                    title: action.label,
-                    text: "This feature is coming soon!",
-                    confirmButtonColor: "#004d4d",
-                  });
-                }
-              }}
-              className={`${action.color} p-3 rounded-lg border border-gray-200 hover:shadow-md transition-all text-center`}
-            >
-              <div className="text-2xl">{action.icon}</div>
-              <p className="text-xs font-medium text-gray-700 mt-1">
-                {action.label}
-              </p>
-            </button>
-          ))}
-        </div>
+        {todayClasses.length > 0 ? (
+          <div className="space-y-3">
+            {todayClasses.map((cls) => (
+              <div
+                key={cls.id}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100"
+              >
+                <div>
+                  <p className="font-semibold text-sm text-gray-800">
+                    {cls.subject}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {cls.class} • {cls.time}
+                  </p>
+                </div>
+                <a
+                  href={cls.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1"
+                >
+                  <FaLink size={12} /> Join
+                </a>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-sm">
+            No classes scheduled for today
+          </p>
+        )}
       </div>
 
-      {/* Recent Activities */}
+      {/* Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Homework Pending */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
           <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-            <span className="text-blue-600">🔄</span> Recent Activities
+            <FaTasks className="text-orange-600" /> Homework Pending
           </h3>
-          <div className="space-y-3">
-            {[
-              {
-                action: "Uploaded new video",
-                detail: "Tajweed - Lesson 5",
-                time: "2 hours ago",
-                icon: "🎥",
-              },
-              {
-                action: "Created quiz",
-                detail: "Tafsir - Chapter 3 Quiz",
-                time: "4 hours ago",
-                icon: "📝",
-              },
-              {
-                action: "Posted assignment",
-                detail: "Hadith - Assignment 2",
-                time: "Yesterday",
-                icon: "📄",
-              },
-              {
-                action: "Added short questions",
-                detail: "Fiqh - 10 questions",
-                time: "Yesterday",
-                icon: "✏️",
-              },
-            ].map((activity, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-xl">{activity.icon}</span>
+          {homeworkPending.length > 0 ? (
+            <div className="space-y-3">
+              {homeworkPending.map((hw) => (
+                <div
+                  key={hw.id}
+                  className="flex items-center justify-between p-2 border-b border-gray-100 last:border-0"
+                >
                   <div>
                     <p className="text-sm font-medium text-gray-800">
-                      {activity.action}
+                      {hw.title}
                     </p>
-                    <p className="text-xs text-gray-500">{activity.detail}</p>
+                    <p className="text-xs text-gray-500">
+                      {hw.class} • Due: {hw.dueDate}
+                    </p>
                   </div>
+                  <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full">
+                    {hw.submissions}/{hw.total}
+                  </span>
                 </div>
-                <span className="text-xs text-gray-400">{activity.time}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No pending homework</p>
+          )}
+          <Link
+            to="/teacher-homework"
+            className="text-xs text-teal-600 hover:text-teal-700 font-medium mt-3 inline-block"
+          >
+            View All →
+          </Link>
         </div>
 
+        {/* Notifications */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-          <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-            <span className="text-green-600">📊</span> Pending Reviews
-          </h3>
-          <div className="space-y-3">
-            {[
-              { type: "Assignments", count: "5", color: "blue" },
-              { type: "Quizzes", count: "3", color: "purple" },
-              { type: "Short Questions", count: "7", color: "orange" },
-            ].map((item, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+              <FaBell className="text-yellow-600" /> Notifications
+            </h3>
+            {notifications.some((n) => !n.read) && (
+              <button
+                onClick={markAllAsRead}
+                className="text-xs text-teal-600 hover:text-teal-700 font-medium"
               >
-                <span className="text-sm text-gray-700">{item.type}</span>
-                <span
-                  className={`bg-${item.color}-100 text-${item.color}-700 px-3 py-1 rounded-full text-sm font-bold`}
-                >
-                  {item.count}
-                </span>
-              </div>
-            ))}
+                Mark all as read
+              </button>
+            )}
           </div>
+          {notifications.length > 0 ? (
+            <div className="space-y-2">
+              {notifications.slice(0, 3).map((notif) => (
+                <div
+                  key={notif.id}
+                  className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-colors ${!notif.read ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                  onClick={() => markAsRead(notif.id)}
+                >
+                  <div
+                    className={`w-2 h-2 rounded-full mt-1.5 ${!notif.read ? "bg-blue-500" : "bg-gray-300"}`}
+                  ></div>
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-700">{notif.message}</p>
+                    <p className="text-xs text-gray-400">{notif.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">No notifications</p>
+          )}
+          <Link
+            to="/teacher-notifications"
+            className="text-xs text-teal-600 hover:text-teal-700 font-medium mt-3 inline-block"
+          >
+            View All →
+          </Link>
         </div>
       </div>
     </div>
@@ -622,7 +789,1513 @@ const DashboardContent = ({ teacherInfo }) => {
 };
 
 // ==========================================
-// 2. VIDEO UPLOAD CONTENT
+// 2. MY CLASSES CONTENT
+// ==========================================
+const MyClassesContent = ({ todayClasses, setTodayClasses, teacherInfo }) => {
+  const [showAddClass, setShowAddClass] = useState(false);
+  const [newClass, setNewClass] = useState({
+    subject: "",
+    class: "",
+    time: "",
+    link: "",
+  });
+
+  const handleAddClass = (e) => {
+    e.preventDefault();
+    if (
+      !newClass.subject ||
+      !newClass.class ||
+      !newClass.time ||
+      !newClass.link
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+    setTodayClasses([
+      ...todayClasses,
+      {
+        id: Date.now(),
+        ...newClass,
+        status: "upcoming",
+      },
+    ]);
+    setShowAddClass(false);
+    setNewClass({ subject: "", class: "", time: "", link: "" });
+    Swal.fire({
+      icon: "success",
+      title: "Class Added!",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  const handleDeleteClass = (id) => {
+    Swal.fire({
+      title: "Delete Class?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setTodayClasses(todayClasses.filter((c) => c.id !== id));
+        Swal.fire("Deleted!", "Class has been deleted.", "success");
+      }
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <FaChalkboardTeacher className="text-purple-600" /> My Classes
+          </h2>
+          <p className="text-sm text-gray-500">Manage your class schedule</p>
+        </div>
+        <button
+          onClick={() => setShowAddClass(true)}
+          className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-sm"
+        >
+          <FaPlusCircle /> Add Class
+        </button>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Subject
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Class
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Time
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Meeting Link
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {todayClasses.length > 0 ? (
+                todayClasses.map((cls) => (
+                  <tr
+                    key={cls.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-4 py-3 text-sm font-medium text-gray-800">
+                      {cls.subject}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-600">
+                      {cls.class}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-600">
+                      {cls.time}
+                    </td>
+                    <td className="px-4 py-3">
+                      <a
+                        href={cls.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-teal-600 hover:text-teal-800 text-sm flex items-center gap-1"
+                      >
+                        <FaLink size={12} /> Join
+                      </a>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${
+                          cls.status === "upcoming"
+                            ? "bg-green-100 text-green-700"
+                            : cls.status === "ongoing"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {cls.status || "upcoming"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <button className="text-green-600 hover:text-green-800 p-1">
+                          <FaEdit />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClass(cls.id)}
+                          className="text-red-600 hover:text-red-800 p-1"
+                        >
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="px-4 py-8 text-center text-gray-500"
+                  >
+                    No classes scheduled yet
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Add Class Modal */}
+      {showAddClass && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-gray-800">Add New Class</h3>
+              <button
+                onClick={() => setShowAddClass(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleAddClass} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Subject *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newClass.subject}
+                  onChange={(e) =>
+                    setNewClass({ ...newClass, subject: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="e.g., Tajweed"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Class *
+                </label>
+                <select
+                  required
+                  value={newClass.class}
+                  onChange={(e) =>
+                    setNewClass({ ...newClass, class: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="">Select Class</option>
+                  <option value="Class 6">Class 6</option>
+                  <option value="Class 7">Class 7</option>
+                  <option value="Class 8">Class 8</option>
+                  <option value="Class 9">Class 9</option>
+                  <option value="Class 10">Class 10</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Time *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newClass.time}
+                  onChange={(e) =>
+                    setNewClass({ ...newClass, time: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="e.g., 09:00 AM - 10:00 AM"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Meeting Link *
+                </label>
+                <input
+                  type="url"
+                  required
+                  value={newClass.link}
+                  onChange={(e) =>
+                    setNewClass({ ...newClass, link: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="https://meet.google.com/..."
+                />
+              </div>
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-semibold transition-all"
+                >
+                  Add Class
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddClass(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ==========================================
+// 3. HOMEWORK CONTENT
+// ==========================================
+const HomeworkContent = ({ homeworkPending, setHomeworkPending }) => {
+  const [showAddHomework, setShowAddHomework] = useState(false);
+  const [newHomework, setNewHomework] = useState({
+    title: "",
+    class: "",
+    dueDate: "",
+    description: "",
+    total: 30,
+  });
+
+  const handleAddHomework = (e) => {
+    e.preventDefault();
+    if (!newHomework.title || !newHomework.class || !newHomework.dueDate) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all required fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+    setHomeworkPending([
+      ...homeworkPending,
+      {
+        id: Date.now(),
+        ...newHomework,
+        submissions: 0,
+      },
+    ]);
+    setShowAddHomework(false);
+    setNewHomework({
+      title: "",
+      class: "",
+      dueDate: "",
+      description: "",
+      total: 30,
+    });
+    Swal.fire({
+      icon: "success",
+      title: "Homework Added!",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  const handleDeleteHomework = (id) => {
+    Swal.fire({
+      title: "Delete Homework?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setHomeworkPending(homeworkPending.filter((h) => h.id !== id));
+        Swal.fire("Deleted!", "Homework has been deleted.", "success");
+      }
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <FaTasks className="text-orange-600" /> Homework
+          </h2>
+          <p className="text-sm text-gray-500">Manage homework assignments</p>
+        </div>
+        <button
+          onClick={() => setShowAddHomework(true)}
+          className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-sm"
+        >
+          <FaPlusCircle /> Add Homework
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {homeworkPending.length > 0 ? (
+          homeworkPending.map((hw) => (
+            <div
+              key={hw.id}
+              className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 hover:shadow-md transition-all"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-800 text-sm mb-1">
+                    {hw.title}
+                  </h3>
+                  <p className="text-xs text-gray-500">{hw.class}</p>
+                </div>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                  {hw.submissions || 0}/{hw.total || 30}
+                </span>
+              </div>
+              <div className="mt-3 text-sm text-gray-600">
+                <p>📅 Due: {hw.dueDate}</p>
+                {hw.description && (
+                  <p className="text-xs text-gray-400 mt-1">{hw.description}</p>
+                )}
+              </div>
+              <div className="mt-3 flex items-center gap-2 pt-3 border-t border-gray-100">
+                <button className="text-blue-600 hover:text-blue-800 text-xs font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all">
+                  View Submissions
+                </button>
+                <button
+                  onClick={() => handleDeleteHomework(hw.id)}
+                  className="text-red-600 hover:text-red-800 p-1"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-8 text-gray-500 bg-white rounded-xl border border-gray-200">
+            No homework assigned yet
+          </div>
+        )}
+      </div>
+
+      {/* Add Homework Modal */}
+      {showAddHomework && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-gray-800">Add Homework</h3>
+              <button
+                onClick={() => setShowAddHomework(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleAddHomework} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newHomework.title}
+                  onChange={(e) =>
+                    setNewHomework({ ...newHomework, title: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Enter homework title"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Class *
+                </label>
+                <select
+                  required
+                  value={newHomework.class}
+                  onChange={(e) =>
+                    setNewHomework({ ...newHomework, class: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                >
+                  <option value="">Select Class</option>
+                  <option value="Class 6">Class 6</option>
+                  <option value="Class 7">Class 7</option>
+                  <option value="Class 8">Class 8</option>
+                  <option value="Class 9">Class 9</option>
+                  <option value="Class 10">Class 10</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Due Date *
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={newHomework.dueDate}
+                  onChange={(e) =>
+                    setNewHomework({ ...newHomework, dueDate: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Total Students
+                </label>
+                <input
+                  type="number"
+                  value={newHomework.total}
+                  onChange={(e) =>
+                    setNewHomework({
+                      ...newHomework,
+                      total: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="30"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={newHomework.description}
+                  onChange={(e) =>
+                    setNewHomework({
+                      ...newHomework,
+                      description: e.target.value,
+                    })
+                  }
+                  rows="3"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  placeholder="Enter homework description"
+                />
+              </div>
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-2 rounded-lg font-semibold transition-all"
+                >
+                  Add Homework
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddHomework(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ==========================================
+// 4. NOTIFICATION CONTENT
+// ==========================================
+const NotificationContent = ({ notifications, setNotifications }) => {
+  const markAsRead = (id) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
+    );
+  };
+
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    Swal.fire({
+      icon: "success",
+      title: "All notifications marked as read",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  const deleteNotification = (id) => {
+    Swal.fire({
+      title: "Delete Notification?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setNotifications(notifications.filter((n) => n.id !== id));
+        Swal.fire("Deleted!", "Notification has been deleted.", "success");
+      }
+    });
+  };
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <FaBell className="text-yellow-600" /> Notifications
+            {unreadCount > 0 && (
+              <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                {unreadCount} new
+              </span>
+            )}
+          </h2>
+          <p className="text-sm text-gray-500">
+            Stay updated with your notifications
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllAsRead}
+              className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+            >
+              Mark All as Read
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        {notifications.length > 0 ? (
+          <div className="divide-y divide-gray-100">
+            {notifications.map((notif) => (
+              <div
+                key={notif.id}
+                className={`p-4 flex items-start gap-3 ${!notif.read ? "bg-blue-50" : "hover:bg-gray-50"} transition-colors`}
+              >
+                <div
+                  className={`w-2.5 h-2.5 rounded-full mt-2 flex-shrink-0 ${!notif.read ? "bg-blue-500" : "bg-gray-300"}`}
+                ></div>
+                <div className="flex-1">
+                  <p className="text-sm text-gray-700">{notif.message}</p>
+                  <p className="text-xs text-gray-400 mt-1">{notif.time}</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {!notif.read && (
+                    <button
+                      onClick={() => markAsRead(notif.id)}
+                      className="text-teal-600 hover:text-teal-800 text-xs font-medium"
+                    >
+                      Mark as read
+                    </button>
+                  )}
+                  <button
+                    onClick={() => deleteNotification(notif.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <FaTrash size={14} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-8 text-center text-gray-500">
+            <FaBell className="text-4xl text-gray-300 mx-auto mb-2" />
+            <p>No notifications</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 5. STUDENT PROGRESS CONTENT
+// ==========================================
+const StudentProgressContent = () => {
+  const [students] = useState([
+    {
+      id: 1,
+      name: "Ahmed Hasan",
+      class: "Class 8",
+      subject: "Tajweed",
+      attendance: 92,
+      assignments: 85,
+      quiz: 78,
+      exam: 88,
+      progress: 85,
+    },
+    {
+      id: 2,
+      name: "Fatima Begum",
+      class: "Class 8",
+      subject: "Tajweed",
+      attendance: 88,
+      assignments: 90,
+      quiz: 82,
+      exam: 91,
+      progress: 87,
+    },
+    {
+      id: 3,
+      name: "Mohammad Ali",
+      class: "Class 9",
+      subject: "Tafsir",
+      attendance: 75,
+      assignments: 70,
+      quiz: 65,
+      exam: 72,
+      progress: 70,
+    },
+    {
+      id: 4,
+      name: "Aisha Rahman",
+      class: "Class 9",
+      subject: "Tafsir",
+      attendance: 95,
+      assignments: 88,
+      quiz: 85,
+      exam: 90,
+      progress: 89,
+    },
+    {
+      id: 5,
+      name: "Abdullah Karim",
+      class: "Class 10",
+      subject: "Hadith",
+      attendance: 82,
+      assignments: 78,
+      quiz: 72,
+      exam: 76,
+      progress: 77,
+    },
+  ]);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <FaUsers className="text-teal-600" /> Student Progress Report
+        </h2>
+        <p className="text-sm text-gray-500">
+          Track student performance across all subjects
+        </p>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Student
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Class
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Attendance
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Assignments
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Quizzes
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Exams
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Progress
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {students.map((student) => (
+                <tr
+                  key={student.id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
+                  <td className="px-4 py-3 text-sm font-medium text-gray-800">
+                    {student.name}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    {student.class}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`text-sm font-medium ${student.attendance >= 80 ? "text-green-600" : student.attendance >= 70 ? "text-yellow-600" : "text-red-600"}`}
+                    >
+                      {student.attendance}%
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    {student.assignments}%
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    {student.quiz}%
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    {student.exam}%
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-20 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${student.progress >= 80 ? "bg-green-500" : student.progress >= 70 ? "bg-yellow-500" : "bg-red-500"}`}
+                          style={{ width: `${student.progress}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-sm font-medium">
+                        {student.progress}%
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 6. EXAM RESULT CONTENT
+// ==========================================
+const ExamResultContent = ({ examResults, setExamResults }) => {
+  const [showAddResult, setShowAddResult] = useState(false);
+  const [newResult, setNewResult] = useState({
+    title: "",
+    class: "",
+    subject: "",
+    date: "",
+    totalStudents: "",
+    passed: "",
+    failed: "",
+  });
+
+  const handleAddResult = (e) => {
+    e.preventDefault();
+    if (
+      !newResult.title ||
+      !newResult.class ||
+      !newResult.subject ||
+      !newResult.date ||
+      !newResult.totalStudents ||
+      !newResult.passed ||
+      !newResult.failed
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+    setExamResults([
+      ...examResults,
+      {
+        id: Date.now(),
+        ...newResult,
+        totalStudents: parseInt(newResult.totalStudents),
+        passed: parseInt(newResult.passed),
+        failed: parseInt(newResult.failed),
+      },
+    ]);
+    setShowAddResult(false);
+    setNewResult({
+      title: "",
+      class: "",
+      subject: "",
+      date: "",
+      totalStudents: "",
+      passed: "",
+      failed: "",
+    });
+    Swal.fire({
+      icon: "success",
+      title: "Result Added!",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  const handleDeleteResult = (id) => {
+    Swal.fire({
+      title: "Delete Result?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setExamResults(examResults.filter((r) => r.id !== id));
+        Swal.fire("Deleted!", "Result has been deleted.", "success");
+      }
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <FaAward className="text-teal-600" /> Exam Results
+          </h2>
+          <p className="text-sm text-gray-500">Manage exam results</p>
+        </div>
+        <button
+          onClick={() => setShowAddResult(true)}
+          className="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-sm"
+        >
+          <FaPlusCircle /> Add Result
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {examResults.length > 0 ? (
+          examResults.map((result) => (
+            <div
+              key={result.id}
+              className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 hover:shadow-md transition-all"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-800 text-sm mb-1">
+                    {result.title}
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    {result.subject} • {result.class}
+                  </p>
+                </div>
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
+                  {result.date}
+                </span>
+              </div>
+              <div className="mt-3 space-y-1 text-sm">
+                <p className="text-gray-600">
+                  👥 Total: {result.totalStudents}
+                </p>
+                <p className="text-green-600">✅ Passed: {result.passed}</p>
+                <p className="text-red-600">❌ Failed: {result.failed}</p>
+              </div>
+              <div className="mt-3 flex items-center gap-2 pt-3 border-t border-gray-100">
+                <button className="text-blue-600 hover:text-blue-800 text-xs font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all">
+                  View Details
+                </button>
+                <button
+                  onClick={() => handleDeleteResult(result.id)}
+                  className="text-red-600 hover:text-red-800 p-1"
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="col-span-full text-center py-8 text-gray-500 bg-white rounded-xl border border-gray-200">
+            No exam results available
+          </div>
+        )}
+      </div>
+
+      {/* Add Result Modal */}
+      {showAddResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-gray-800">
+                Add Exam Result
+              </h3>
+              <button
+                onClick={() => setShowAddResult(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleAddResult} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Exam Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newResult.title}
+                  onChange={(e) =>
+                    setNewResult({ ...newResult, title: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  placeholder="e.g., Mid Term Exam 2026"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Class *
+                  </label>
+                  <select
+                    required
+                    value={newResult.class}
+                    onChange={(e) =>
+                      setNewResult({ ...newResult, class: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  >
+                    <option value="">Select</option>
+                    <option value="Class 6">Class 6</option>
+                    <option value="Class 7">Class 7</option>
+                    <option value="Class 8">Class 8</option>
+                    <option value="Class 9">Class 9</option>
+                    <option value="Class 10">Class 10</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Subject *
+                  </label>
+                  <select
+                    required
+                    value={newResult.subject}
+                    onChange={(e) =>
+                      setNewResult({ ...newResult, subject: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  >
+                    <option value="">Select</option>
+                    <option value="Tajweed">Tajweed</option>
+                    <option value="Tafsir">Tafsir</option>
+                    <option value="Hadith">Hadith</option>
+                    <option value="Fiqh">Fiqh</option>
+                    <option value="Aqeedah">Aqeedah</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Exam Date *
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={newResult.date}
+                  onChange={(e) =>
+                    setNewResult({ ...newResult, date: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Total *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={newResult.totalStudents}
+                    onChange={(e) =>
+                      setNewResult({
+                        ...newResult,
+                        totalStudents: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    placeholder="30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Passed *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={newResult.passed}
+                    onChange={(e) =>
+                      setNewResult({ ...newResult, passed: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    placeholder="25"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Failed *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={newResult.failed}
+                    onChange={(e) =>
+                      setNewResult({ ...newResult, failed: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    placeholder="5"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-lg font-semibold transition-all"
+                >
+                  Add Result
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddResult(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ==========================================
+// 7. LEAVE KP CONTENT
+// ==========================================
+const LeaveKPContent = ({
+  leaveApplications,
+  setLeaveApplications,
+  totalLeave,
+}) => {
+  const [showApplyLeave, setShowApplyLeave] = useState(false);
+  const [newLeave, setNewLeave] = useState({
+    date: "",
+    reason: "",
+  });
+
+  const handleApplyLeave = (e) => {
+    e.preventDefault();
+    if (!newLeave.date || !newLeave.reason) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+    setLeaveApplications([
+      ...leaveApplications,
+      {
+        id: Date.now(),
+        ...newLeave,
+        status: "pending",
+      },
+    ]);
+    setShowApplyLeave(false);
+    setNewLeave({ date: "", reason: "" });
+    Swal.fire({
+      icon: "success",
+      title: "Leave Application Submitted!",
+      text: "Your leave application is pending approval.",
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "approved":
+        return "bg-green-100 text-green-700";
+      case "rejected":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-yellow-100 text-yellow-700";
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case "approved":
+        return "✅ Approved";
+      case "rejected":
+        return "❌ Rejected";
+      default:
+        return "⏳ Pending";
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <FaCalendarCheck className="text-blue-600" /> Leave KP
+          </h2>
+          <p className="text-sm text-gray-500">
+            Manage your leave applications
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-50 px-4 py-2 rounded-lg">
+            <p className="text-xs text-gray-500">Total Leave</p>
+            <p className="text-xl font-bold text-blue-600">{totalLeave}</p>
+          </div>
+          <button
+            onClick={() => setShowApplyLeave(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all shadow-sm"
+          >
+            <FaPlusCircle /> Apply
+          </button>
+        </div>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Date
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Reason
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Status
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {leaveApplications.length > 0 ? (
+                leaveApplications.map((leave) => (
+                  <tr
+                    key={leave.id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-4 py-3 text-sm text-gray-600">
+                      {leave.date}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-800">
+                      {leave.reason}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full ${getStatusColor(leave.status)}`}
+                      >
+                        {getStatusText(leave.status)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {leave.status === "pending" && (
+                        <button
+                          onClick={() => {
+                            setLeaveApplications(
+                              leaveApplications.filter(
+                                (l) => l.id !== leave.id,
+                              ),
+                            );
+                            Swal.fire({
+                              icon: "info",
+                              title: "Application Cancelled",
+                              timer: 1500,
+                              showConfirmButton: false,
+                            });
+                          }}
+                          className="text-red-600 hover:text-red-800 text-sm"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                      {leave.status !== "pending" && (
+                        <span className="text-xs text-gray-400">-</span>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td
+                    colSpan="4"
+                    className="px-4 py-8 text-center text-gray-500"
+                  >
+                    No leave applications
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Apply Leave Modal */}
+      {showApplyLeave && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-gray-800">
+                Apply for Leave
+              </h3>
+              <button
+                onClick={() => setShowApplyLeave(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleApplyLeave} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date *
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={newLeave.date}
+                  onChange={(e) =>
+                    setNewLeave({ ...newLeave, date: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Reason *
+                </label>
+                <textarea
+                  required
+                  value={newLeave.reason}
+                  onChange={(e) =>
+                    setNewLeave({ ...newLeave, reason: e.target.value })
+                  }
+                  rows="3"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter reason for leave"
+                />
+              </div>
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
+                >
+                  Apply
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowApplyLeave(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ==========================================
+// 8. SALARY OVERVIEW CONTENT
+// ==========================================
+const SalaryOverviewContent = ({ salaryData }) => {
+  const [salaryHistory] = useState([
+    { month: "January 2026", amount: 45000, status: "Paid" },
+    { month: "February 2026", amount: 45000, status: "Paid" },
+    { month: "March 2026", amount: 45000, status: "Paid" },
+    { month: "April 2026", amount: 45000, status: "Paid" },
+    { month: "May 2026", amount: 45000, status: "Paid" },
+    { month: "June 2026", amount: 45000, status: "Pending" },
+  ]);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <FaMoneyBillWave className="text-green-600" /> Salary Overview
+        </h2>
+        <p className="text-sm text-gray-500">Track your salary and payments</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 text-center">
+          <p className="text-sm text-gray-500">Total Salary</p>
+          <p className="text-3xl font-bold text-green-600 mt-2">
+            ৳{salaryData.totalSalary.toLocaleString()}
+          </p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 text-center">
+          <p className="text-sm text-gray-500">Due Salary</p>
+          <p className="text-3xl font-bold text-red-600 mt-2">
+            ৳{salaryData.dueSalary.toLocaleString()}
+          </p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 text-center">
+          <p className="text-sm text-gray-500">Next Payment</p>
+          <p className="text-xl font-bold text-blue-600 mt-2">
+            {salaryData.nextPayment}
+          </p>
+        </div>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-gray-200">
+          <h3 className="font-bold text-gray-800">Salary History</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Month
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Amount
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-600 uppercase">
+                  Status
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {salaryHistory.map((item, index) => (
+                <tr key={index} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-4 py-3 text-sm text-gray-800">
+                    {item.month}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    ৳{item.amount.toLocaleString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        item.status === "Paid"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {item.status === "Paid" ? "✅ Paid" : "⏳ Pending"}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 9. MY COURSES CONTENT
+// ==========================================
+const MyCoursesContent = ({ teacherInfo }) => {
+  const [courses] = useState([
+    {
+      id: 1,
+      name: "Tajweed - Beginner",
+      students: 30,
+      classes: "Class 8",
+      status: "Active",
+    },
+    {
+      id: 2,
+      name: "Tafsir - Quranic Studies",
+      students: 25,
+      classes: "Class 9",
+      status: "Active",
+    },
+    {
+      id: 3,
+      name: "Hadith - Sahih Bukhari",
+      students: 28,
+      classes: "Class 10",
+      status: "Active",
+    },
+    {
+      id: 4,
+      name: "Fiqh - Islamic Jurisprudence",
+      students: 20,
+      classes: "Class 7",
+      status: "Draft",
+    },
+  ]);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <FaBook className="text-teal-600" /> My Courses
+        </h2>
+        <p className="text-sm text-gray-500">
+          Manage your courses and subjects
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {courses.map((course) => (
+          <div
+            key={course.id}
+            className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 hover:shadow-md transition-all"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-800 text-sm mb-1">
+                  {course.name}
+                </h3>
+                <p className="text-xs text-gray-500">{course.classes}</p>
+              </div>
+              <span
+                className={`text-xs px-2 py-1 rounded-full ${
+                  course.status === "Active"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-yellow-100 text-yellow-700"
+                }`}
+              >
+                {course.status}
+              </span>
+            </div>
+            <div className="mt-3 text-sm text-gray-600">
+              <p>👥 {course.students} Students</p>
+            </div>
+            <div className="mt-3 flex items-center gap-2 pt-3 border-t border-gray-100">
+              <button className="text-teal-600 hover:text-teal-800 text-xs font-medium flex-1 text-center py-1 rounded border border-teal-200 hover:bg-teal-50 transition-all">
+                View Details
+              </button>
+              <button className="text-green-600 hover:text-green-800 p-1">
+                <FaEdit />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// 10. VIDEO UPLOAD CONTENT
 // ==========================================
 const VideoUploadContent = () => {
   const [videos, setVideos] = useState([
@@ -634,7 +2307,6 @@ const VideoUploadContent = () => {
       duration: "45:20",
       views: 120,
       uploadDate: "2024-01-15",
-      thumbnail: "https://img.youtube.com/vi/placeholder/mqdefault.jpg",
     },
     {
       id: 2,
@@ -644,7 +2316,6 @@ const VideoUploadContent = () => {
       duration: "55:10",
       views: 85,
       uploadDate: "2024-01-20",
-      thumbnail: "https://img.youtube.com/vi/placeholder/mqdefault.jpg",
     },
   ]);
 
@@ -655,20 +2326,17 @@ const VideoUploadContent = () => {
     class: "",
     description: "",
     videoUrl: "",
-    thumbnail: "",
     videoFile: null,
   });
 
   const handleVideoUpload = async (e) => {
     e.preventDefault();
-
     await Swal.fire({
       icon: "success",
       title: "Video Uploaded!",
       text: "Your video has been uploaded successfully.",
       confirmButtonColor: "#004d4d",
     });
-
     setVideos([
       ...videos,
       {
@@ -679,10 +2347,8 @@ const VideoUploadContent = () => {
         duration: "45:00",
         views: 0,
         uploadDate: new Date().toISOString().split("T")[0],
-        thumbnail: "https://img.youtube.com/vi/placeholder/mqdefault.jpg",
       },
     ]);
-
     setShowUploadModal(false);
     setNewVideo({
       title: "",
@@ -690,7 +2356,6 @@ const VideoUploadContent = () => {
       class: "",
       description: "",
       videoUrl: "",
-      thumbnail: "",
       videoFile: null,
     });
   };
@@ -827,7 +2492,6 @@ const VideoUploadContent = () => {
                 <FiX size={24} />
               </button>
             </div>
-
             <form onSubmit={handleVideoUpload} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -844,7 +2508,6 @@ const VideoUploadContent = () => {
                   placeholder="Enter video title"
                 />
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -886,7 +2549,6 @@ const VideoUploadContent = () => {
                   </select>
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
@@ -901,7 +2563,6 @@ const VideoUploadContent = () => {
                   placeholder="Enter video description"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Video File (MP4) *
@@ -933,7 +2594,6 @@ const VideoUploadContent = () => {
                   </label>
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   YouTube URL (Optional)
@@ -951,7 +2611,6 @@ const VideoUploadContent = () => {
                   Or upload video file above
                 </p>
               </div>
-
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
@@ -976,7 +2635,7 @@ const VideoUploadContent = () => {
 };
 
 // ==========================================
-// 3. ASSIGNMENTS CONTENT
+// 11. ASSIGNMENTS CONTENT
 // ==========================================
 const AssignmentsContent = () => {
   const [assignments, setAssignments] = useState([
@@ -1107,7 +2766,6 @@ const AssignmentsContent = () => {
         ))}
       </div>
 
-      {/* Create Assignment Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -1122,7 +2780,6 @@ const AssignmentsContent = () => {
                 <FiX size={24} />
               </button>
             </div>
-
             <form onSubmit={handleCreateAssignment} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1142,7 +2799,6 @@ const AssignmentsContent = () => {
                   placeholder="Enter assignment title"
                 />
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1190,7 +2846,6 @@ const AssignmentsContent = () => {
                   </select>
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description *
@@ -1209,7 +2864,6 @@ const AssignmentsContent = () => {
                   placeholder="Enter assignment details, instructions, etc."
                 />
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1246,7 +2900,6 @@ const AssignmentsContent = () => {
                   />
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Attachment (Optional)
@@ -1267,7 +2920,6 @@ const AssignmentsContent = () => {
                   PDF, DOC, DOCX (Max 10MB)
                 </p>
               </div>
-
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
@@ -1292,7 +2944,7 @@ const AssignmentsContent = () => {
 };
 
 // ==========================================
-// 4. QUIZZES CONTENT
+// 12. QUIZZES CONTENT
 // ==========================================
 const QuizzesContent = () => {
   const [quizzes, setQuizzes] = useState([
@@ -1328,7 +2980,6 @@ const QuizzesContent = () => {
       answer: "",
     },
   ]);
-
   const [newQuiz, setNewQuiz] = useState({
     title: "",
     course: "",
@@ -1430,7 +3081,6 @@ const QuizzesContent = () => {
         ))}
       </div>
 
-      {/* Create Quiz Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -1445,7 +3095,6 @@ const QuizzesContent = () => {
                 <FiX size={24} />
               </button>
             </div>
-
             <form onSubmit={handleQuizSubmit} className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -1483,7 +3132,6 @@ const QuizzesContent = () => {
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1535,7 +3183,6 @@ const QuizzesContent = () => {
                   />
                 </div>
               </div>
-
               <div>
                 <div className="flex justify-between items-center mb-3">
                   <h4 className="font-bold text-gray-800">Questions</h4>
@@ -1547,7 +3194,6 @@ const QuizzesContent = () => {
                     <FaPlusCircle /> Add Question
                   </button>
                 </div>
-
                 {questions.map((q, index) => (
                   <div
                     key={q.id}
@@ -1565,7 +3211,6 @@ const QuizzesContent = () => {
                         <FaTrash />
                       </button>
                     </div>
-
                     <div className="space-y-3">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1584,7 +3229,6 @@ const QuizzesContent = () => {
                           placeholder="Enter your question"
                         />
                       </div>
-
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Question Type
@@ -1603,7 +3247,6 @@ const QuizzesContent = () => {
                           <option value="short">Short Answer</option>
                         </select>
                       </div>
-
                       {q.type === "multiple" && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                           {q.options.map((option, optIndex) => (
@@ -1627,7 +3270,6 @@ const QuizzesContent = () => {
                           ))}
                         </div>
                       )}
-
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Correct Answer *
@@ -1683,7 +3325,6 @@ const QuizzesContent = () => {
                   </div>
                 ))}
               </div>
-
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
@@ -1708,7 +3349,7 @@ const QuizzesContent = () => {
 };
 
 // ==========================================
-// 5. SHORT QUESTIONS CONTENT
+// 13. SHORT QUESTIONS CONTENT
 // ==========================================
 const ShortQuestionsContent = () => {
   const [shortQuestions, setShortQuestions] = useState([
@@ -1857,7 +3498,6 @@ const ShortQuestionsContent = () => {
         </div>
       </div>
 
-      {/* Create Question Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -1872,7 +3512,6 @@ const ShortQuestionsContent = () => {
                 <FiX size={24} />
               </button>
             </div>
-
             <form onSubmit={handleCreateQuestion} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1889,7 +3528,6 @@ const ShortQuestionsContent = () => {
                   placeholder="Enter the question"
                 />
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1947,7 +3585,6 @@ const ShortQuestionsContent = () => {
                   />
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Model Answer
@@ -1962,7 +3599,6 @@ const ShortQuestionsContent = () => {
                   placeholder="Enter model answer (optional)"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Reference (Optional)
@@ -1980,7 +3616,6 @@ const ShortQuestionsContent = () => {
                   placeholder="Book name or reference"
                 />
               </div>
-
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
