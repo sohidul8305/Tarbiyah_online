@@ -1,0 +1,1255 @@
+// src/Page/Admin/Add_student.jsx
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+
+import { useAuth } from "../../Provider/AuthProvider";
+import Swal from "sweetalert2";
+import {
+  FaUser,
+  FaUsers,
+  FaChalkboardTeacher,
+  FaMoneyBillWave,
+  FaSignOutAlt,
+  FaBell,
+  FaCalendarAlt,
+  FaClock,
+  FaBook,
+  FaFileAlt,
+  FaChartLine,
+  FaUserGraduate,
+  FaUserPlus,
+  FaClipboardList,
+  FaCalendarCheck,
+  FaIdCard,
+  FaUsersCog,
+  FaUserTimes,
+  FaDollarSign,
+  FaFileInvoice,
+  FaFileInvoiceDollar,
+  FaCertificate,
+  FaDatabase,
+  FaUserCog,
+  FaListAlt,
+  FaClock as FaClockIcon,
+  FaEye,
+  FaEdit,
+  FaTrash,
+  FaSearch,
+  FaFilter,
+  FaPlusCircle,
+  FaDownload,
+  FaPrint,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaArrowRight,
+  FaArrowLeft,
+  FaHome,
+  FaCog,
+  FaBars,
+  FaLayerGroup,
+  FaSchool,
+  FaBookOpen,
+  FaRoute,
+  FaCalendarPlus,
+  FaBuilding,
+  FaUniversity,
+  FaGraduationCap,
+  FaGlobe,
+  FaVideo,
+  FaLink,
+  FaWallet,
+  FaCreditCard,
+  FaHistory,
+  FaFileInvoice as FaFileInvoiceIcon,
+  FaReceipt,
+  FaEnvelope,
+  FaPaperPlane,
+  FaExclamationTriangle,
+  FaInfoCircle,
+  FaThumbsUp,
+  FaStar,
+  FaComment,
+  FaUserTag,
+  FaPhoneAlt,
+  FaMapMarkerAlt,
+  FaBirthdayCake,
+  FaTransgender,
+  FaSave,
+  FaUndo,
+  FaUpload,
+  FaCamera,
+} from "react-icons/fa";
+import {
+  MdDashboard,
+  MdAssignment,
+  MdGrade,
+  MdQuiz,
+  MdVerified,
+} from "react-icons/md";
+import { FiMenu, FiX } from "react-icons/fi";
+
+const Add_student = () => {
+  const { user, logOut } = useAuth();
+  const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [activeMenu, setActiveMenu] = useState("dashboard");
+  const [activeSubMenu, setActiveSubMenu] = useState(null);
+  const [adminInfo, setAdminInfo] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    designation: "",
+    department: "",
+    joinDate: "",
+  });
+
+  const [formData, setFormData] = useState({
+    name: "",
+    fatherName: "",
+    motherName: "",
+    class: "",
+    subject: "",
+    roll: "",
+    phone: "",
+    email: "",
+    address: "",
+    dob: "",
+    gender: "Male",
+    bloodGroup: "A+",
+    nationality: "Bangladeshi",
+    religion: "Islam",
+    previousSchool: "",
+    guardianContact: "",
+    status: "Active",
+    paymentStatus: "Unpaid",
+    admissionDate: "",
+    photo: null,
+  });
+
+  const [students, setStudents] = useState([
+    {
+      id: 1,
+      name: "Ahmed Hasan",
+      fatherName: "Abdul Hasan",
+      class: "Class 8",
+      subject: "Tajweed",
+      roll: "01",
+      phone: "+880 1712 345678",
+      email: "ahmed@example.com",
+      status: "Active",
+      admissionDate: "2026-01-15",
+    },
+    {
+      id: 2,
+      name: "Fatima Begum",
+      fatherName: "Mohammad Ali",
+      class: "Class 9",
+      subject: "Tafsir",
+      roll: "02",
+      phone: "+880 1723 456789",
+      email: "fatima@example.com",
+      status: "Active",
+      admissionDate: "2026-02-01",
+    },
+    {
+      id: 3,
+      name: "Mohammad Ali",
+      fatherName: "Karim Ali",
+      class: "Class 10",
+      subject: "Hadith",
+      roll: "05",
+      phone: "+880 1734 567890",
+      email: "ali@example.com",
+      status: "Pending",
+      admissionDate: "2026-07-20",
+    },
+  ]);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterClass, setFilterClass] = useState("All");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [showStudentList, setShowStudentList] = useState(true);
+
+  // Load admin info
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminInfo");
+    if (savedAdmin) {
+      setAdminInfo(JSON.parse(savedAdmin));
+    } else {
+      setAdminInfo({
+        name: user?.displayName || "Admin",
+        email: user?.email || "admin@tarabiyah.com",
+        phone: "01700000000",
+        designation: "Administrator",
+        department: "Administration",
+        joinDate: "January 2024",
+      });
+    }
+  }, [user]);
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("adminInfo");
+      localStorage.removeItem("adminEmail");
+
+      await Swal.fire({
+        icon: "success",
+        title: "Logged Out Successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      navigate("/admin-login");
+    } catch (err) {
+      console.error("Logout error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Logout Failed",
+        text: "Please try again",
+      });
+    }
+  };
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
+  const toggleSubMenu = (menu) => {
+    if (activeSubMenu === menu) {
+      setActiveSubMenu(null);
+    } else {
+      setActiveSubMenu(menu);
+    }
+  };
+
+  // Sidebar Menu Items
+  const menuItems = [
+    {
+      id: "profile",
+      path: "/admin-profile",
+      icon: <FaUser className="text-xl" />,
+      label: "Profile",
+    },
+    {
+      id: "dashboard",
+      path: "/admin-dashboard",
+      icon: <MdDashboard className="text-xl" />,
+      label: "Dashboard",
+      subItems: [
+        {
+          id: "department",
+          path: "/admin-dashboard/department",
+          label: "Department",
+        },
+        {
+          id: "today-class",
+          path: "/admin-dashboard/today-class",
+          label: "Today's Class",
+        },
+        {
+          id: "payment-overview",
+          path: "/admin-dashboard/payment-overview",
+          label: "Payment Overview",
+        },
+        {
+          id: "new-admission",
+          path: "/admin-dashboard/new-admission",
+          label: "New Admission",
+        },
+        {
+          id: "notification",
+          path: "/admin-dashboard/notification",
+          label: "Notification",
+        },
+      ],
+    },
+    {
+      id: "student-management",
+      path: "/admin-students",
+      icon: <FaUsers className="text-xl" />,
+      label: "Student Management",
+      subItems: [
+        {
+          id: "student-add",
+          path: "/admin-students/add",
+          label: "Student Add",
+        },
+        {
+          id: "batch-manual",
+          path: "/admin-students/batch",
+          label: "Batch Maintain",
+        },
+        {
+          id: "student-profile",
+          path: "/admin-students/profile",
+          label: "Student Profile",
+        },
+        {
+          id: "admission-permission",
+          path: "/admin-students/admission",
+          label: "Admission Permission",
+        },
+      ],
+    },
+    {
+      id: "teacher-management",
+      path: "/admin-teachers",
+      icon: <FaChalkboardTeacher className="text-xl" />,
+      label: "Teacher Management",
+      subItems: [
+        {
+          id: "teacher-assign",
+          path: "/admin-teachers/assign",
+          label: "Teacher Assign",
+        },
+        {
+          id: "class-schedule",
+          path: "/admin-teachers/schedule",
+          label: "Class Schedule",
+        },
+        {
+          id: "teacher-attendance",
+          path: "/admin-teachers/attendance",
+          label: "Teacher Attendance",
+        },
+        {
+          id: "teacher-overview",
+          path: "/admin-teachers/overview",
+          label: "Teacher Overview",
+        },
+      ],
+    },
+    {
+      id: "batch-course",
+      path: "/admin-batch-course",
+      icon: <FaLayerGroup className="text-xl" />,
+      label: "Batch & Course",
+      subItems: [
+        {
+          id: "batch-make",
+          path: "/admin-batch-course/batch-make",
+          label: "Batch Make",
+        },
+        {
+          id: "course-make",
+          path: "/admin-batch-course/course-make",
+          label: "Course Make",
+        },
+        {
+          id: "syllabus",
+          path: "/admin-batch-course/syllabus",
+          label: "Syllabus",
+        },
+        {
+          id: "clear-routine",
+          path: "/admin-batch-course/clear-routine",
+          label: "Clear Routine",
+        },
+      ],
+    },
+    {
+      id: "absence-student",
+      path: "/admin-absence",
+      icon: <FaUserTimes className="text-xl" />,
+      label: "Absence Student Community",
+    },
+    {
+      id: "finance",
+      path: "/admin-finance",
+      icon: <FaMoneyBillWave className="text-xl" />,
+      label: "Finance",
+      subItems: [
+        {
+          id: "admin-on-fee",
+          path: "/admin-finance/admin-fee",
+          label: "Admin on Fee",
+        },
+        {
+          id: "monthly-fee",
+          path: "/admin-finance/monthly-fee",
+          label: "Monthly Fee",
+        },
+        { id: "invoice", path: "/admin-finance/invoice", label: "Invoice" },
+        { id: "report", path: "/admin-finance/report", label: "Report" },
+      ],
+    },
+    {
+      id: "exam",
+      path: "/admin-exam",
+      icon: <FaCalendarCheck className="text-xl" />,
+      label: "Exam",
+      subItems: [
+        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
+        {
+          id: "result-publish",
+          path: "/admin-exam/result",
+          label: "Result Publish",
+        },
+        {
+          id: "certificate-permission",
+          path: "/admin-exam/certificate",
+          label: "Certificate Permission",
+        },
+      ],
+    },
+    {
+      id: "report-analytics",
+      path: "/admin-reports",
+      icon: <FaChartLine className="text-xl" />,
+      label: "Report & Analytics",
+      subItems: [
+        {
+          id: "admission-report",
+          path: "/admin-reports/admission",
+          label: "Admission Report",
+        },
+        {
+          id: "attendance-report",
+          path: "/admin-reports/attendance",
+          label: "Attendance Report",
+        },
+        { id: "income", path: "/admin-reports/income", label: "Income" },
+      ],
+    },
+    {
+      id: "crm-management",
+      path: "/admin-crm",
+      icon: <FaDatabase className="text-xl" />,
+      label: "CRM Management",
+      subItems: [
+        {
+          id: "data-entry",
+          path: "/admin-crm/data-entry",
+          label: "Data Entry",
+        },
+      ],
+    },
+    {
+      id: "salary",
+      path: "/admin-salary",
+      icon: <FaMoneyBillWave className="text-xl" />,
+      label: "Salary",
+      subItems: [
+        {
+          id: "total-salary",
+          path: "/admin-salary/total",
+          label: "Total Salary",
+        },
+        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
+      ],
+    },
+  ];
+
+  // Handle input change
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  // Handle file change
+  const handleFileChange = (e) => {
+    if (e.target.files[0]) {
+      setFormData({ ...formData, photo: e.target.files[0] });
+    }
+  };
+
+  // Handle form submit
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (
+      !formData.name ||
+      !formData.fatherName ||
+      !formData.class ||
+      !formData.subject ||
+      !formData.phone
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all required fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const newStudent = {
+      id: Date.now(),
+      ...formData,
+      admissionDate:
+        formData.admissionDate || new Date().toISOString().split("T")[0],
+    };
+
+    setStudents([newStudent, ...students]);
+    Swal.fire({
+      icon: "success",
+      title: "Student Added!",
+      text: `Student ${formData.name} has been added successfully.`,
+      timer: 2000,
+      showConfirmButton: false,
+    });
+
+    // Reset form
+    setFormData({
+      name: "",
+      fatherName: "",
+      motherName: "",
+      class: "",
+      subject: "",
+      roll: "",
+      phone: "",
+      email: "",
+      address: "",
+      dob: "",
+      gender: "Male",
+      bloodGroup: "A+",
+      nationality: "Bangladeshi",
+      religion: "Islam",
+      previousSchool: "",
+      guardianContact: "",
+      status: "Active",
+      paymentStatus: "Unpaid",
+      admissionDate: "",
+      photo: null,
+    });
+
+    setShowStudentList(true);
+  };
+
+  // Handle cancel
+  const handleCancel = () => {
+    setFormData({
+      name: "",
+      fatherName: "",
+      motherName: "",
+      class: "",
+      subject: "",
+      roll: "",
+      phone: "",
+      email: "",
+      address: "",
+      dob: "",
+      gender: "Male",
+      bloodGroup: "A+",
+      nationality: "Bangladeshi",
+      religion: "Islam",
+      previousSchool: "",
+      guardianContact: "",
+      status: "Active",
+      paymentStatus: "Unpaid",
+      admissionDate: "",
+      photo: null,
+    });
+    setShowStudentList(true);
+  };
+
+  // Filter students
+  const filteredStudents = students.filter((student) => {
+    const matchesSearch =
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.fatherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.class.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesClass = filterClass === "All" || student.class === filterClass;
+    const matchesStatus =
+      filterStatus === "All" || student.status === filterStatus;
+    return matchesSearch && matchesClass && matchesStatus;
+  });
+
+  // Get unique classes for filter
+  const uniqueClasses = ["All", ...new Set(students.map((s) => s.class))];
+
+  // Get status badge color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Active":
+        return "bg-green-100 text-green-700";
+      case "Pending":
+        return "bg-yellow-100 text-yellow-700";
+      case "Inactive":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  return (
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Mobile Header */}
+        <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
+          <h1 className="text-sm font-bold text-gray-800">Add Student</h1>
+          <button
+            onClick={toggleSidebar}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          >
+            {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+          </button>
+        </div>
+
+        {/* Sidebar */}
+        <aside
+          className={`
+            fixed md:relative z-50
+            w-72 md:w-64 
+            bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm
+            transition-all duration-300 ease-in-out
+            h-full
+            overflow-hidden
+            flex-shrink-0
+            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
+          `}
+        >
+          <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <span className="text-xl font-bold">
+                  {adminInfo.name?.charAt(0) || "A"}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-sm truncate">{adminInfo.name}</p>
+                <p className="text-xs opacity-80 truncate">
+                  {adminInfo.designation}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+            {menuItems.map((item) => (
+              <div key={item.id}>
+                {item.subItems ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        setActiveMenu(item.id);
+                        toggleSubMenu(item.id);
+                        setIsSidebarOpen(false);
+                      }}
+                      className={`
+                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
+                        ${
+                          activeMenu === item.id
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }
+                      `}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-gray-600">{item.icon}</span>
+                        <span>{item.label}</span>
+                      </div>
+                      <span
+                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
+                      >
+                        <FaArrowRight size={12} />
+                      </span>
+                    </button>
+                    {activeSubMenu === item.id && (
+                      <div className="ml-6 space-y-1 mt-1">
+                        {item.subItems.map((sub) => (
+                          <Link
+                            key={sub.id}
+                            to={sub.path}
+                            onClick={() => {
+                              setActiveSubMenu(item.id);
+                              setIsSidebarOpen(false);
+                            }}
+                            className="block w-full text-left px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-gray-50 hover:text-[#004d4d] transition-all"
+                          >
+                            {sub.label}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Link
+                    to={item.path}
+                    onClick={() => {
+                      setActiveMenu(item.id);
+                      setIsSidebarOpen(false);
+                    }}
+                  >
+                    <button
+                      className={`
+                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
+                        ${
+                          activeMenu === item.id
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }
+                      `}
+                    >
+                      <span className="text-gray-600">{item.icon}</span>
+                      <span>{item.label}</span>
+                    </button>
+                  </Link>
+                )}
+              </div>
+            ))}
+
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
+            >
+              <FaSignOutAlt className="text-xl" />
+              <span className="text-sm font-medium">Logout</span>
+            </button>
+          </nav>
+
+          <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
+            <p>© 2026 Pipilika Soft</p>
+          </div>
+        </aside>
+
+        {/* Overlay for mobile */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+
+        {/* Main Content */}
+        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+          {/* Top Bar */}
+          <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div>
+              <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
+                <FaUserPlus className="text-blue-600" /> Add Student
+              </h1>
+              <p className="text-xs text-gray-500">
+                Add new student to the system
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
+                {adminInfo.name}
+              </span>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+
+          {/* Toggle View */}
+          <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => setShowStudentList(true)}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                showStudentList
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+              }`}
+            >
+              <FaListAlt className="inline mr-1" size={12} /> Student List
+            </button>
+            <button
+              onClick={() => setShowStudentList(false)}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                !showStudentList
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
+              }`}
+            >
+              <FaUserPlus className="inline mr-1" size={12} /> Add Student
+            </button>
+          </div>
+
+          {showStudentList ? (
+            // Student List View
+            <div className="space-y-3 overflow-hidden h-[calc(100vh-240px)]">
+              {/* Filters */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2">
+                <div className="flex flex-col md:flex-row gap-2">
+                  <div className="flex-1 relative">
+                    <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                    <input
+                      type="text"
+                      placeholder="Search students..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <select
+                      value={filterClass}
+                      onChange={(e) => setFilterClass(e.target.value)}
+                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      {uniqueClasses.map((cls) => (
+                        <option key={cls} value={cls}>
+                          {cls}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="All">All Status</option>
+                      <option value="Active">Active</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Students Table */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Name
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Father
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Class
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Roll
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Status
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {filteredStudents.length > 0 ? (
+                        filteredStudents.map((student) => (
+                          <tr
+                            key={student.id}
+                            className="hover:bg-gray-50 transition-colors"
+                          >
+                            <td className="px-3 py-2">
+                              <div>
+                                <p className="text-xs font-medium text-gray-800">
+                                  {student.name}
+                                </p>
+                                <p className="text-[10px] text-gray-500">
+                                  {student.email}
+                                </p>
+                              </div>
+                            </td>
+                            <td className="px-3 py-2 text-xs text-gray-600">
+                              {student.fatherName}
+                            </td>
+                            <td className="px-3 py-2 text-xs text-gray-600">
+                              {student.class}
+                            </td>
+                            <td className="px-3 py-2 text-xs text-gray-600">
+                              {student.roll}
+                            </td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(student.status)}`}
+                              >
+                                {student.status}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="flex items-center gap-1">
+                                <button
+                                  className="text-blue-600 hover:text-blue-800 p-0.5"
+                                  title="View"
+                                >
+                                  <FaEye size={12} />
+                                </button>
+                                <button
+                                  className="text-green-600 hover:text-green-800 p-0.5"
+                                  title="Edit"
+                                >
+                                  <FaEdit size={12} />
+                                </button>
+                                <button
+                                  className="text-red-600 hover:text-red-800 p-0.5"
+                                  title="Delete"
+                                >
+                                  <FaTrash size={12} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan="6"
+                            className="px-4 py-8 text-center text-gray-500 text-sm"
+                          >
+                            No students found
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Add Student Form
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 overflow-y-auto h-[calc(100vh-240px)]">
+              <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <FaUserPlus className="text-blue-600" /> New Student
+                Registration
+              </h2>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Photo Upload */}
+                <div className="flex items-center gap-4">
+                  <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                    {formData.photo ? (
+                      <img
+                        src={URL.createObjectURL(formData.photo)}
+                        alt="Student"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <FaCamera className="text-gray-400 text-2xl" />
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Student Photo
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="text-xs border border-gray-300 rounded-lg px-3 py-1.5"
+                    />
+                    <p className="text-[10px] text-gray-400 mt-0.5">
+                      JPG, PNG (Max 2MB)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Student Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      required
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter student name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Father's Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="fatherName"
+                      required
+                      value={formData.fatherName}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter father's name"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Mother's Name
+                    </label>
+                    <input
+                      type="text"
+                      name="motherName"
+                      value={formData.motherName}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter mother's name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Class *
+                    </label>
+                    <select
+                      name="class"
+                      required
+                      value={formData.class}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select Class</option>
+                      <option value="Class 6">Class 6</option>
+                      <option value="Class 7">Class 7</option>
+                      <option value="Class 8">Class 8</option>
+                      <option value="Class 9">Class 9</option>
+                      <option value="Class 10">Class 10</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Subject *
+                    </label>
+                    <select
+                      name="subject"
+                      required
+                      value={formData.subject}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Select Subject</option>
+                      <option value="Tajweed">Tajweed</option>
+                      <option value="Tafsir">Tafsir</option>
+                      <option value="Hadith">Hadith</option>
+                      <option value="Fiqh">Fiqh</option>
+                      <option value="Aqeedah">Aqeedah</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Roll Number
+                    </label>
+                    <input
+                      type="text"
+                      name="roll"
+                      value={formData.roll}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter roll number"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Phone *
+                    </label>
+                    <input
+                      type="text"
+                      name="phone"
+                      required
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter phone number"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter email address"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Date of Birth
+                    </label>
+                    <input
+                      type="date"
+                      name="dob"
+                      value={formData.dob}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Gender
+                    </label>
+                    <select
+                      name="gender"
+                      value={formData.gender}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Blood Group
+                    </label>
+                    <select
+                      name="bloodGroup"
+                      value={formData.bloodGroup}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="A+">A+</option>
+                      <option value="A-">A-</option>
+                      <option value="B+">B+</option>
+                      <option value="B-">B-</option>
+                      <option value="AB+">AB+</option>
+                      <option value="AB-">AB-</option>
+                      <option value="O+">O+</option>
+                      <option value="O-">O-</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Religion
+                    </label>
+                    <select
+                      name="religion"
+                      value={formData.religion}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="Islam">Islam</option>
+                      <option value="Hinduism">Hinduism</option>
+                      <option value="Christianity">Christianity</option>
+                      <option value="Buddhism">Buddhism</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address
+                  </label>
+                  <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    rows="2"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter current address"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Previous School
+                    </label>
+                    <input
+                      type="text"
+                      name="previousSchool"
+                      value={formData.previousSchool}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Previous school name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Guardian Contact
+                    </label>
+                    <input
+                      type="text"
+                      name="guardianContact"
+                      value={formData.guardianContact}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Guardian contact number"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Admission Date
+                    </label>
+                    <input
+                      type="date"
+                      name="admissionDate"
+                      value={formData.admissionDate}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Status
+                    </label>
+                    <select
+                      name="status"
+                      value={formData.status}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="Active">Active</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Payment Status
+                    </label>
+                    <select
+                      name="paymentStatus"
+                      value={formData.paymentStatus}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="Paid">Paid</option>
+                      <option value="Partial">Partial</option>
+                      <option value="Unpaid">Unpaid</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                  >
+                    <FaSave size={14} /> Add Student
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                  >
+                    <FaUndo size={14} /> Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default Add_student;

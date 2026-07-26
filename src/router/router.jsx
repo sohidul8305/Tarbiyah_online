@@ -87,6 +87,38 @@ import Upload_videos from "../Page/Upload_videos/Upload_videos";
 import Teacher_assignments from "../Page/Teacher_assignments/Teacher_assignments";
 import Teacher_quizzes from "../Page/Teacher_quizzes/Teacher_quizzes";
 import Short_questions from "../Page/Short_questions/Short_questions";
+import Admin_profile from "../Page/Admin_profile/Admin_profile";
+import Department from "../Page/Department/Department";
+import Today_class from "../Page/Today_class/Today_class";
+import Payment_overview from "../Page/Payment-overview/Payment_overview";
+import New_notification from "../Page/New-admission/New_admission";
+import Admin_notification from "../Page/Admin-notification/Admin_notification";
+import New_admission from "../Page/New-admission/New_admission";
+import Add_student from "../Page/Add-student/Add_student";
+import Student_batch from "../Page/Student-batch/Student_batch";
+import Adminstudent_profile from "../Page/Student-profile/Adminstudent_profile";
+import Student_admission from "../Page/Student-admission/Student_admission";
+import Teacher_assign from "../Page/Teacher-assign/Teacher_assign";
+import Class_shedule from "../Page/Teacher-shedule/Teacher_shedule";
+import Teacher_attence from "../Page/Teacher-Attence/Teacher_attence";
+import Teacher_overview from "../Page/Teacher-overview/Teacher_overview";
+import Batch_make from "../Page/Batch_make/Batch_make";
+import Syllabus from "../Page/Syllabus/Syllabus";
+import Clear_routing from "../Page/Clear_routing/Clear_routing";
+import Admin_fee from "../Page/Admin_fee/Admin_fee";
+import Monthly_fee from "../Page/Monthly_fee/Monthly_fee";
+import Invoice from "../Page/Invoice/Invoice";
+import Report from "../Page/Report/Report";
+import Exam_make from "../Page/Exam_make/Exam_make";
+import Result_publish from "../Page/Result_publish/Result_publish";
+import Certificate_permission from "../Page/Certificate_permission/Certificate_permission";
+import Admission_report from "../Page/Admission_report/Admission_report";
+import Attantence_report from "../Page/Attantence_report/Attantence_report";
+import Income from "../Page/Income/Income";
+import Data_enty from "../Page/Data-enty/Data_enty";
+import Total_salary from "../Page/Total-salary/Total_salary";
+import Due_salary from "../Page/Due_salary/Due_salary";
+import Student_absence from "../Page/Student_absence/Student_absence";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -138,6 +170,55 @@ export const router = createBrowserRouter([
       { path: "/teacher-assignments", element: <Teacher_assignments /> },
       { path: "/teacher-quizzes", element: <Teacher_quizzes /> },
       { path: "/teacher-short-questions", element: <Short_questions /> },
+      { path: "/admin-profile", element: <Admin_profile /> },
+      { path: "/admin-dashboard/department", element: <Department /> },
+      { path: "/admin-dashboard/today-class", element: <Today_class /> },
+      { path: "/admin-students/add", element: <Add_student /> },
+      { path: "/admin-students/batch", element: <Student_batch /> },
+      { path: "/admin-students/profile", element: <Adminstudent_profile /> },
+      { path: "/admin-students/admission", element: <Student_admission /> },
+      { path: "/admin-teachers/assign", element: <Teacher_assign /> },
+      { path: "/admin-teachers/schedule", element: <Class_shedule /> },
+      { path: "/admin-teachers/attendance", element: <Teacher_attence /> },
+      { path: "/admin-teachers/overview", element: <Teacher_overview /> },
+      { path: "/admin-batch-course/batch-make", element: <Batch_make /> },
+      { path: "/admin-batch-course/syllabus", element: <Syllabus /> },
+      { path: "/admin-batch-course/clear-routine", element: <Clear_routing /> },
+      { path: "/admin-finance/admin-fee", element: <Admin_fee /> },
+      { path: "/admin-finance/monthly-fee", element: <Monthly_fee /> },
+      { path: "/admin-finance/invoice", element: <Invoice /> },
+      { path: "/admin-finance/report", element: <Report /> },
+      { path: "/admin-exam/make", element: <Exam_make /> },
+      { path: "/admin-exam/result", element: <Result_publish /> },
+      { path: "/admin-exam/certificate", element: <Certificate_permission /> },
+      { path: "/admin-reports/admission", element: <Admission_report /> },
+      { path: "/admin-reports/attendance", element: <Attantence_report /> },
+      { path: "/admin-reports/income", element: <Income /> },
+      { path: "/admin-crm/data-entry", element: <Data_enty /> },
+      { path: "/admin-salary/total", element: <Total_salary /> },
+      { path: "/admin-salary/due", element: <Due_salary /> },
+      { path: "/admin-absence", element: <Student_absence /> },
+
+      {
+        path: "/admin-batch-course/course-make",
+        element: <Teacher_overview />,
+      },
+      {
+        path: "/admin-dashboard/new-admission",
+        element: <New_notification />,
+      },
+      {
+        path: "/admin-dashboard/payment-overview",
+        element: <Payment_overview />,
+      },
+      {
+        path: "/admin-dashboard/new-admission",
+        element: <New_admission />,
+      },
+      {
+        path: "/admin-dashboard/notification",
+        element: <Admin_notification />,
+      },
     ],
   },
 
