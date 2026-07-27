@@ -113,6 +113,7 @@ import {
   FaGlobe as FaGlobeIcon,
   FaEnvelope as FaEnvelopeIcon,
   FaPhone as FaPhoneIcon,
+  FaPlus,
 } from "react-icons/fa";
 import {
   MdDashboard,
@@ -337,6 +338,63 @@ const Teacher_overview = () => {
   // State for selected teacher
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+
+  // Form data for adding teacher
+  const [formData, setFormData] = useState({
+    name: "",
+    teacherId: "",
+    subject: "",
+    department: "",
+    email: "",
+    phone: "",
+    address: "",
+    joinDate: "",
+    status: "Active",
+    gender: "Male",
+    dob: "",
+    qualification: "",
+    experience: "",
+    specialization: "",
+    bio: "",
+    socialMedia: {
+      facebook: "",
+      twitter: "",
+      linkedin: "",
+      website: "",
+    },
+    totalStudents: 0,
+    classes: [],
+    attendance: 0,
+    rating: 0,
+    reviews: 0,
+    salary: 0,
+    performance: "Good",
+  });
+
+  // Available options
+  const departments = [
+    "Islamic Studies",
+    "Islamic Law",
+    "Arabic Language",
+    "Quranic Sciences",
+    "Tafsir",
+    "Hadith",
+    "Fiqh",
+  ];
+  const subjects = [
+    "Tajweed",
+    "Tafsir",
+    "Hadith",
+    "Fiqh",
+    "Aqeedah",
+    "Arabic Grammar",
+    "Quranic Sciences",
+  ];
+  const statuses = ["Active", "Inactive", "On Leave"];
+  const genders = ["Male", "Female", "Other"];
+  const performances = ["Excellent", "Good", "Average", "Poor"];
+  const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
 
   // Load admin info
   useEffect(() => {
@@ -354,6 +412,11 @@ const Teacher_overview = () => {
       });
     }
   }, [user]);
+
+  // Save teachers to localStorage
+  useEffect(() => {
+    localStorage.setItem("teachers", JSON.stringify(teachers));
+  }, [teachers]);
 
   const handleLogout = async () => {
     try {
@@ -711,8 +774,127 @@ const Teacher_overview = () => {
     setShowDetailsModal(true);
   };
 
+  // Open add modal
+  const openAddModal = () => {
+    setFormData({
+      name: "",
+      teacherId: "",
+      subject: "",
+      department: "",
+      email: "",
+      phone: "",
+      address: "",
+      joinDate: new Date().toISOString().split("T")[0],
+      status: "Active",
+      gender: "Male",
+      dob: "",
+      qualification: "",
+      experience: "",
+      specialization: "",
+      bio: "",
+      socialMedia: {
+        facebook: "",
+        twitter: "",
+        linkedin: "",
+        website: "",
+      },
+      totalStudents: 0,
+      classes: [],
+      attendance: 0,
+      rating: 0,
+      reviews: 0,
+      salary: 0,
+      performance: "Good",
+    });
+    setShowAddModal(true);
+  };
+
+  // Handle add teacher
+  const handleAddTeacher = (e) => {
+    e.preventDefault();
+
+    if (
+      !formData.name ||
+      !formData.subject ||
+      !formData.department ||
+      !formData.email ||
+      !formData.phone
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all required fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const newTeacher = {
+      id: Date.now(),
+      name: formData.name,
+      teacherId:
+        formData.teacherId ||
+        `TCH${String(teachers.length + 1).padStart(3, "0")}`,
+      subject: formData.subject,
+      department: formData.department,
+      email: formData.email,
+      phone: formData.phone,
+      address: formData.address || "",
+      joinDate: formData.joinDate || new Date().toISOString().split("T")[0],
+      status: formData.status,
+      gender: formData.gender,
+      dob: formData.dob || "",
+      qualification: formData.qualification || "",
+      experience: formData.experience || "0 years",
+      specialization: formData.specialization || "",
+      bio: formData.bio || "",
+      socialMedia: {
+        facebook: formData.socialMedia?.facebook || "",
+        twitter: formData.socialMedia?.twitter || "",
+        linkedin: formData.socialMedia?.linkedin || "",
+        website: formData.socialMedia?.website || "",
+      },
+      totalStudents: parseInt(formData.totalStudents) || 0,
+      classes: formData.classes || [],
+      attendance: parseInt(formData.attendance) || 0,
+      rating: parseFloat(formData.rating) || 0,
+      reviews: parseInt(formData.reviews) || 0,
+      salary: parseInt(formData.salary) || 0,
+      performance: formData.performance || "Good",
+    };
+
+    setTeachers([...teachers, newTeacher]);
+    setShowAddModal(false);
+    Swal.fire({
+      icon: "success",
+      title: "Teacher Added!",
+      text: `${formData.name} has been added successfully.`,
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  // Handle delete teacher
+  const handleDeleteTeacher = (id) => {
+    Swal.fire({
+      title: "Delete Teacher?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setTeachers(teachers.filter((t) => t.id !== id));
+        Swal.fire("Deleted!", "Teacher has been deleted.", "success");
+      }
+    });
+  };
+
   // Format date
   const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-US", {
       year: "numeric",
@@ -888,7 +1070,13 @@ const Teacher_overview = () => {
                 Complete overview of all teachers and their performance
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={openAddModal}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+              >
+                <FaPlus size={12} /> Add Teacher
+              </button>
               <button
                 onClick={() => {
                   Swal.fire({
@@ -1146,6 +1334,457 @@ const Teacher_overview = () => {
           </div>
         </main>
       </div>
+
+      {/* Add Teacher Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaPlus className="text-blue-600" /> Add New Teacher
+              </h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleAddTeacher} className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter full name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Teacher ID
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.teacherId}
+                    onChange={(e) =>
+                      setFormData({ ...formData, teacherId: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Auto-generated"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Subject *
+                  </label>
+                  <select
+                    required
+                    value={formData.subject}
+                    onChange={(e) =>
+                      setFormData({ ...formData, subject: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Subject</option>
+                    {subjects.map((subject) => (
+                      <option key={subject} value={subject}>
+                        {subject}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Department *
+                  </label>
+                  <select
+                    required
+                    value={formData.department}
+                    onChange={(e) =>
+                      setFormData({ ...formData, department: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Department</option>
+                    {departments.map((dept) => (
+                      <option key={dept} value={dept}>
+                        {dept}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter email address"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter phone number"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Gender
+                  </label>
+                  <select
+                    value={formData.gender}
+                    onChange={(e) =>
+                      setFormData({ ...formData, gender: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {genders.map((gender) => (
+                      <option key={gender} value={gender}>
+                        {gender}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.dob}
+                    onChange={(e) =>
+                      setFormData({ ...formData, dob: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Address
+                </label>
+                <textarea
+                  value={formData.address}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address: e.target.value })
+                  }
+                  rows="2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter address"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Qualification
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.qualification}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        qualification: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter qualification"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Experience
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.experience}
+                    onChange={(e) =>
+                      setFormData({ ...formData, experience: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., 5 years"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Specialization
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.specialization}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        specialization: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter specialization"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {statuses.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Join Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.joinDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, joinDate: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Salary (৳)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.salary}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        salary: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter salary"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Performance
+                  </label>
+                  <select
+                    value={formData.performance}
+                    onChange={(e) =>
+                      setFormData({ ...formData, performance: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {performances.map((perf) => (
+                      <option key={perf} value={perf}>
+                        {perf}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Classes
+                  </label>
+                  <select
+                    multiple
+                    value={formData.classes}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        classes: Array.from(
+                          e.target.selectedOptions,
+                          (option) => option.value,
+                        ),
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent h-20"
+                  >
+                    {classes.map((cls) => (
+                      <option key={cls} value={cls}>
+                        {cls}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    Hold Ctrl/Cmd to select multiple
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Bio
+                </label>
+                <textarea
+                  value={formData.bio}
+                  onChange={(e) =>
+                    setFormData({ ...formData, bio: e.target.value })
+                  }
+                  rows="3"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Enter teacher bio..."
+                />
+              </div>
+
+              <div className="border-t border-gray-200 pt-4">
+                <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                  Social Media Links
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Facebook
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.socialMedia?.facebook || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          socialMedia: {
+                            ...formData.socialMedia,
+                            facebook: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://facebook.com/username"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Twitter
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.socialMedia?.twitter || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          socialMedia: {
+                            ...formData.socialMedia,
+                            twitter: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://twitter.com/username"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      LinkedIn
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.socialMedia?.linkedin || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          socialMedia: {
+                            ...formData.socialMedia,
+                            linkedin: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://linkedin.com/in/username"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Website
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.socialMedia?.website || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          socialMedia: {
+                            ...formData.socialMedia,
+                            website: e.target.value,
+                          },
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://yourwebsite.com"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
+                >
+                  <FaSave className="inline mr-2" size={14} /> Add Teacher
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Teacher Details Modal */}
       {showDetailsModal && selectedTeacher && (

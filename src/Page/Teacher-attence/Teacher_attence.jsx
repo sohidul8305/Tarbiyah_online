@@ -106,6 +106,7 @@ import {
   FaRegClock,
   FaRegCalendarAlt,
   FaRegCalendarCheck,
+  FaPlus,
 } from "react-icons/fa";
 import {
   MdDashboard,
@@ -271,6 +272,7 @@ const Teacher_attence = () => {
   const [filterDepartment, setFilterDepartment] = useState("All");
 
   // State for modals
+  const [showAddModal, setShowAddModal] = useState(false);
   const [showMarkModal, setShowMarkModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
@@ -278,7 +280,21 @@ const Teacher_attence = () => {
   const [markNote, setMarkNote] = useState("");
 
   // State for view mode
-  const [viewMode, setViewMode] = useState("daily"); // daily, monthly
+  const [viewMode, setViewMode] = useState("daily");
+
+  // Form data for add attendance
+  const [formData, setFormData] = useState({
+    teacherId: "",
+    teacherName: "",
+    date: "",
+    status: "Present",
+    checkIn: "",
+    checkOut: "",
+    note: "",
+  });
+
+  // Available options
+  const statuses = ["Present", "Absent", "Late", "Leave"];
 
   // Load admin info
   useEffect(() => {
@@ -622,7 +638,7 @@ const Teacher_attence = () => {
     );
   };
 
-  // Handle mark attendance
+  // Handle mark attendance (existing functionality)
   const handleMarkAttendance = (teacher) => {
     setSelectedTeacher(teacher);
     const existing = getTeacherAttendance(teacher.id, selectedDate);
@@ -636,14 +652,13 @@ const Teacher_attence = () => {
     setShowMarkModal(true);
   };
 
-  // Save attendance
+  // Save attendance (existing functionality)
   const saveAttendance = () => {
     if (!selectedTeacher) return;
 
     const existing = getTeacherAttendance(selectedTeacher.id, selectedDate);
 
     if (existing) {
-      // Update existing record
       setAttendanceRecords(
         attendanceRecords.map((record) =>
           record.id === existing.id
@@ -664,7 +679,6 @@ const Teacher_attence = () => {
         ),
       );
     } else {
-      // Create new record
       const newRecord = {
         id: `${selectedDate}-${selectedTeacher.id}`,
         teacherId: selectedTeacher.id,
@@ -684,6 +698,80 @@ const Teacher_attence = () => {
       icon: "success",
       title: "Attendance Marked!",
       text: `${selectedTeacher.name} marked as ${markStatus}`,
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  // Open add modal for new attendance
+  const openAddModal = () => {
+    setFormData({
+      teacherId: "",
+      teacherName: "",
+      date: new Date().toISOString().split("T")[0],
+      status: "Present",
+      checkIn: "",
+      checkOut: "",
+      note: "",
+    });
+    setShowAddModal(true);
+  };
+
+  // Handle add attendance
+  const handleAddAttendance = (e) => {
+    e.preventDefault();
+
+    if (!formData.teacherId || !formData.date) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please select teacher and date",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const teacher = teachers.find((t) => t.id === parseInt(formData.teacherId));
+    if (!teacher) {
+      Swal.fire({
+        icon: "error",
+        title: "Teacher not found",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    // Check if attendance already exists for this teacher on this date
+    const existing = getTeacherAttendance(teacher.id, formData.date);
+    if (existing) {
+      Swal.fire({
+        icon: "warning",
+        title: "Attendance Already Exists",
+        text: `${teacher.name} already has attendance marked for ${formatDate(formData.date)}`,
+        confirmButtonColor: "#3b82f6",
+      });
+      return;
+    }
+
+    const newRecord = {
+      id: `${formData.date}-${teacher.id}`,
+      teacherId: teacher.id,
+      date: formData.date,
+      status: formData.status,
+      checkIn:
+        formData.status !== "Absent" ? formData.checkIn || "09:00 AM" : null,
+      checkOut:
+        formData.status !== "Absent" ? formData.checkOut || "04:00 PM" : null,
+      note: formData.note || "",
+    };
+
+    setAttendanceRecords([...attendanceRecords, newRecord]);
+    setShowAddModal(false);
+    Swal.fire({
+      icon: "success",
+      title: "Attendance Added!",
+      text: `${teacher.name} marked as ${formData.status} for ${formatDate(formData.date)}`,
       timer: 1500,
       showConfirmButton: false,
     });
@@ -958,7 +1046,14 @@ const Teacher_attence = () => {
                 Mark and manage teacher attendance
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Add Attendance Button - This is the button you need */}
+              <button
+                onClick={openAddModal}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-4 py-2 rounded-lg font-bold transition-all shadow-md flex items-center gap-2"
+              >
+                <FaPlus size={14} /> Add Attendance
+              </button>
               <button
                 onClick={() =>
                   setViewMode(viewMode === "daily" ? "monthly" : "daily")
@@ -1297,6 +1392,158 @@ const Teacher_attence = () => {
           )}
         </main>
       </div>
+
+      {/* Add Attendance Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaPlus className="text-blue-600" /> Add Attendance Record
+              </h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleAddAttendance} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Teacher *
+                </label>
+                <select
+                  required
+                  value={formData.teacherId}
+                  onChange={(e) => {
+                    const teacherId = e.target.value;
+                    const teacher = teachers.find(
+                      (t) => t.id === parseInt(teacherId),
+                    );
+                    setFormData({
+                      ...formData,
+                      teacherId: teacherId,
+                      teacherName: teacher ? teacher.name : "",
+                    });
+                  }}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select Teacher</option>
+                  {teachers.map((teacher) => (
+                    <option key={teacher.id} value={teacher.id}>
+                      {teacher.name} ({teacher.teacherId}) - {teacher.subject}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date *
+                </label>
+                <input
+                  type="date"
+                  required
+                  value={formData.date}
+                  onChange={(e) =>
+                    setFormData({ ...formData, date: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status *
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {statuses.map((status) => (
+                    <button
+                      key={status}
+                      type="button"
+                      onClick={() =>
+                        setFormData({ ...formData, status: status })
+                      }
+                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                        formData.status === status
+                          ? `${getStatusColor(status)} border-2 border-blue-500`
+                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
+                    >
+                      {status}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {formData.status !== "Absent" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Check In
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.checkIn}
+                      onChange={(e) =>
+                        setFormData({ ...formData, checkIn: e.target.value })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., 09:00 AM"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Check Out
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.checkOut}
+                      onChange={(e) =>
+                        setFormData({ ...formData, checkOut: e.target.value })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., 04:00 PM"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Note
+                </label>
+                <textarea
+                  value={formData.note}
+                  onChange={(e) =>
+                    setFormData({ ...formData, note: e.target.value })
+                  }
+                  rows="2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Add note..."
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
+                >
+                  <FaSave className="inline mr-2" size={14} /> Add Attendance
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Mark Attendance Modal */}
       {showMarkModal && selectedTeacher && (

@@ -61,6 +61,7 @@ import {
   FaHistory,
   FaFileInvoice as FaFileInvoiceIcon,
   FaReceipt,
+  FaPlus,
 } from "react-icons/fa";
 import {
   MdDashboard,
@@ -176,7 +177,59 @@ const Payment_overview = () => {
   const [filterClass, setFilterClass] = useState("All");
   const [filterMonth, setFilterMonth] = useState("All");
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [selectedPayment, setSelectedPayment] = useState(null);
+
+  // Form data for add payment
+  const [formData, setFormData] = useState({
+    student: "",
+    class: "",
+    amount: 0,
+    month: "",
+    status: "Pending",
+    paymentMethod: "",
+    dueDate: "",
+    transactionId: "",
+  });
+
+  // Available options
+  const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
+  const months = [
+    "January 2026",
+    "February 2026",
+    "March 2026",
+    "April 2026",
+    "May 2026",
+    "June 2026",
+    "July 2026",
+    "August 2026",
+    "September 2026",
+    "October 2026",
+    "November 2026",
+    "December 2026",
+  ];
+  const paymentMethods = [
+    "Cash",
+    "Bank Transfer",
+    "Mobile Banking",
+    "bKash",
+    "Nagad",
+    "Rocket",
+    "Credit Card",
+  ];
+  const statuses = ["Paid", "Pending", "Overdue"];
+  const students = [
+    "Ahmed Hasan",
+    "Fatima Begum",
+    "Mohammad Ali",
+    "Aisha Rahman",
+    "Abdullah Karim",
+    "Maryam Akter",
+    "Rahim Uddin",
+    "Sadia Afrin",
+    "Hasan Mahmud",
+    "Khadija Akhter",
+  ];
 
   // Load admin info
   useEffect(() => {
@@ -194,6 +247,11 @@ const Payment_overview = () => {
       });
     }
   }, [user]);
+
+  // Save payments to localStorage
+  useEffect(() => {
+    localStorage.setItem("payments", JSON.stringify(payments));
+  }, [payments]);
 
   const handleLogout = async () => {
     try {
@@ -500,6 +558,111 @@ const Payment_overview = () => {
     setShowDetailsModal(true);
   };
 
+  // Open add modal
+  const openAddModal = () => {
+    setFormData({
+      student: "",
+      class: "",
+      amount: 0,
+      month: months[6],
+      status: "Pending",
+      paymentMethod: "",
+      dueDate: new Date(new Date().setDate(new Date().getDate() + 15))
+        .toISOString()
+        .split("T")[0],
+      transactionId: "",
+    });
+    setShowAddModal(true);
+  };
+
+  // Handle add payment
+  const handleAddPayment = (e) => {
+    e.preventDefault();
+
+    if (
+      !formData.student ||
+      !formData.class ||
+      !formData.amount ||
+      !formData.month
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all required fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const newPayment = {
+      id: Date.now(),
+      student: formData.student,
+      class: formData.class,
+      amount: parseFloat(formData.amount),
+      month: formData.month,
+      status: formData.status,
+      date:
+        formData.status === "Paid"
+          ? new Date().toISOString().split("T")[0]
+          : "-",
+      paymentMethod: formData.status === "Paid" ? formData.paymentMethod : "-",
+      transactionId:
+        formData.status === "Paid"
+          ? formData.transactionId || `TRX-${Date.now()}`
+          : "-",
+      dueDate:
+        formData.dueDate ||
+        new Date(new Date().setDate(new Date().getDate() + 15))
+          .toISOString()
+          .split("T")[0],
+    };
+
+    setPayments([...payments, newPayment]);
+
+    // Update stats
+    const totalIncome =
+      payments.reduce((sum, p) => sum + p.amount, 0) + newPayment.amount;
+    const collected =
+      payments
+        .filter((p) => p.status === "Paid")
+        .reduce((sum, p) => sum + p.amount, 0) +
+      (newPayment.status === "Paid" ? newPayment.amount : 0);
+    const pendingFees =
+      payments
+        .filter((p) => p.status === "Pending")
+        .reduce((sum, p) => sum + p.amount, 0) +
+      (newPayment.status === "Pending" ? newPayment.amount : 0);
+    const dueFees =
+      payments
+        .filter((p) => p.status === "Overdue")
+        .reduce((sum, p) => sum + p.amount, 0) +
+      (newPayment.status === "Overdue" ? newPayment.amount : 0);
+    const paidStudents =
+      payments.filter((p) => p.status === "Paid").length +
+      (newPayment.status === "Paid" ? 1 : 0);
+    const totalStudents = payments.length + 1;
+
+    setPaymentStats({
+      ...paymentStats,
+      totalIncome: totalIncome,
+      collected: collected,
+      pendingFees: pendingFees,
+      dueFees: dueFees,
+      totalStudents: totalStudents,
+      paidStudents: paidStudents,
+      unpaidStudents: totalStudents - paidStudents,
+    });
+
+    setShowAddModal(false);
+    Swal.fire({
+      icon: "success",
+      title: "Payment Added!",
+      text: `Payment record for ${formData.student} has been added.`,
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
   // Handle payment action
   const handlePaymentAction = (payment, action) => {
     if (action === "mark-paid") {
@@ -526,6 +689,20 @@ const Payment_overview = () => {
                 : p,
             ),
           );
+
+          // Update stats
+          const collected = paymentStats.collected + payment.amount;
+          const pendingFees = paymentStats.pendingFees - payment.amount;
+          const paidStudents = paymentStats.paidStudents + 1;
+
+          setPaymentStats({
+            ...paymentStats,
+            collected: collected,
+            pendingFees: pendingFees,
+            paidStudents: paidStudents,
+            unpaidStudents: paymentStats.totalStudents - paidStudents,
+          });
+
           Swal.fire({
             icon: "success",
             title: "Payment Marked as Paid!",
@@ -543,6 +720,59 @@ const Payment_overview = () => {
         showConfirmButton: false,
       });
     }
+  };
+
+  // Handle delete payment
+  const handleDeletePayment = (id) => {
+    Swal.fire({
+      title: "Delete Payment Record?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const deleted = payments.find((p) => p.id === id);
+        setPayments(payments.filter((p) => p.id !== id));
+
+        // Update stats
+        if (deleted) {
+          const totalIncome = paymentStats.totalIncome - deleted.amount;
+          const collected =
+            deleted.status === "Paid"
+              ? paymentStats.collected - deleted.amount
+              : paymentStats.collected;
+          const pendingFees =
+            deleted.status === "Pending"
+              ? paymentStats.pendingFees - deleted.amount
+              : paymentStats.pendingFees;
+          const dueFees =
+            deleted.status === "Overdue"
+              ? paymentStats.dueFees - deleted.amount
+              : paymentStats.dueFees;
+          const paidStudents =
+            deleted.status === "Paid"
+              ? paymentStats.paidStudents - 1
+              : paymentStats.paidStudents;
+          const totalStudents = paymentStats.totalStudents - 1;
+
+          setPaymentStats({
+            ...paymentStats,
+            totalIncome: totalIncome,
+            collected: collected,
+            pendingFees: pendingFees,
+            dueFees: dueFees,
+            totalStudents: totalStudents,
+            paidStudents: paidStudents,
+            unpaidStudents: totalStudents - paidStudents,
+          });
+        }
+
+        Swal.fire("Deleted!", "Payment record has been deleted.", "success");
+      }
+    });
   };
 
   return (
@@ -697,7 +927,13 @@ const Payment_overview = () => {
                 View and manage all student payments
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={openAddModal}
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+              >
+                <FaPlus size={12} /> Add Payment
+              </button>
               <span className="text-xs font-semibold text-gray-700 hidden sm:block">
                 {adminInfo.name}
               </span>
@@ -810,7 +1046,7 @@ const Payment_overview = () => {
 
           {/* Payments Table */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto max-h-[calc(100vh-400px)] overflow-y-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                   <tr>
@@ -838,85 +1074,291 @@ const Payment_overview = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filteredPayments.map((payment) => (
-                    <tr
-                      key={payment.id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-3 py-2 text-xs font-medium text-gray-800">
-                        {payment.student}
-                      </td>
-                      <td className="px-3 py-2 text-xs text-gray-600">
-                        {payment.class}
-                      </td>
-                      <td className="px-3 py-2 text-xs font-semibold text-gray-800">
-                        ৳{payment.amount}
-                      </td>
-                      <td className="px-3 py-2 text-xs text-gray-600">
-                        {payment.month}
-                      </td>
-                      <td className="px-3 py-2">
-                        <span
-                          className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(payment.status)}`}
-                        >
-                          {getStatusIcon(payment.status)} {payment.status}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 text-xs text-gray-600">
-                        {payment.date}
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => openDetailsModal(payment)}
-                            className="text-blue-600 hover:text-blue-800 p-0.5"
-                            title="View Details"
+                  {filteredPayments.length > 0 ? (
+                    filteredPayments.map((payment) => (
+                      <tr
+                        key={payment.id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-3 py-2 text-xs font-medium text-gray-800">
+                          {payment.student}
+                        </td>
+                        <td className="px-3 py-2 text-xs text-gray-600">
+                          {payment.class}
+                        </td>
+                        <td className="px-3 py-2 text-xs font-semibold text-gray-800">
+                          ৳{payment.amount}
+                        </td>
+                        <td className="px-3 py-2 text-xs text-gray-600">
+                          {payment.month}
+                        </td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(payment.status)}`}
                           >
-                            <FaEye size={12} />
-                          </button>
-                          {payment.status !== "Paid" && (
+                            {getStatusIcon(payment.status)} {payment.status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-xs text-gray-600">
+                          {payment.date}
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => openDetailsModal(payment)}
+                              className="text-blue-600 hover:text-blue-800 p-0.5"
+                              title="View Details"
+                            >
+                              <FaEye size={12} />
+                            </button>
+                            {payment.status !== "Paid" && (
+                              <button
+                                onClick={() =>
+                                  handlePaymentAction(payment, "mark-paid")
+                                }
+                                className="text-green-600 hover:text-green-800 p-0.5"
+                                title="Mark as Paid"
+                              >
+                                <FaCheckCircle size={12} />
+                              </button>
+                            )}
                             <button
                               onClick={() =>
-                                handlePaymentAction(payment, "mark-paid")
+                                handlePaymentAction(payment, "send-reminder")
                               }
-                              className="text-green-600 hover:text-green-800 p-0.5"
-                              title="Mark as Paid"
+                              className="text-yellow-600 hover:text-yellow-800 p-0.5"
+                              title="Send Reminder"
                             >
-                              <FaCheckCircle size={12} />
+                              <FaBell size={12} />
                             </button>
-                          )}
-                          <button
-                            onClick={() =>
-                              handlePaymentAction(payment, "send-reminder")
-                            }
-                            className="text-yellow-600 hover:text-yellow-800 p-0.5"
-                            title="Send Reminder"
-                          >
-                            <FaBell size={12} />
-                          </button>
-                        </div>
+                            <button
+                              onClick={() => handleDeletePayment(payment.id)}
+                              className="text-red-600 hover:text-red-800 p-0.5"
+                              title="Delete"
+                            >
+                              <FaTrash size={12} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="7"
+                        className="px-3 py-8 text-center text-gray-500"
+                      >
+                        <FaMoneyBillWave className="text-4xl text-gray-300 mx-auto mb-2" />
+                        <p>No payments found</p>
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          Try adjusting your search or filter criteria
+                        </p>
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
           </div>
-
-          {/* No Results */}
-          {filteredPayments.length === 0 && (
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center">
-              <FaMoneyBillWave className="text-5xl text-gray-300 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                No Payments Found
-              </h3>
-              <p className="text-xs text-gray-500">
-                Try adjusting your search or filter criteria
-              </p>
-            </div>
-          )}
         </main>
       </div>
+
+      {/* Add Payment Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaPlus className="text-green-600" /> Add Payment Record
+              </h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleAddPayment} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Student Name *
+                </label>
+                <select
+                  required
+                  value={formData.student}
+                  onChange={(e) =>
+                    setFormData({ ...formData, student: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="">Select Student</option>
+                  {students.map((student) => (
+                    <option key={student} value={student}>
+                      {student}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Class *
+                </label>
+                <select
+                  required
+                  value={formData.class}
+                  onChange={(e) =>
+                    setFormData({ ...formData, class: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="">Select Class</option>
+                  {classes.map((cls) => (
+                    <option key={cls} value={cls}>
+                      {cls}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Amount (৳) *
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={formData.amount}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      amount: parseFloat(e.target.value) || 0,
+                    })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="Enter amount"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Month *
+                </label>
+                <select
+                  required
+                  value={formData.month}
+                  onChange={(e) =>
+                    setFormData({ ...formData, month: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="">Select Month</option>
+                  {months.map((month) => (
+                    <option key={month} value={month}>
+                      {month}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  {statuses.map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Due Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.dueDate}
+                  onChange={(e) =>
+                    setFormData({ ...formData, dueDate: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+
+              {formData.status === "Paid" && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Payment Method
+                    </label>
+                    <select
+                      value={formData.paymentMethod}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          paymentMethod: e.target.value,
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    >
+                      <option value="">Select Payment Method</option>
+                      {paymentMethods.map((method) => (
+                        <option key={method} value={method}>
+                          {method}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Transaction ID
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.transactionId}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          transactionId: e.target.value,
+                        })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Enter transaction ID"
+                    />
+                  </div>
+                </>
+              )}
+
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 rounded-lg font-semibold transition-all"
+                >
+                  <FaSave className="inline mr-2" size={14} /> Add Payment
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Payment Details Modal */}
       {showDetailsModal && selectedPayment && (

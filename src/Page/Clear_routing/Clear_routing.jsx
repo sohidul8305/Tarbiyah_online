@@ -158,6 +158,7 @@ import {
   FaSync,
   FaExclamationCircle,
   FaInfoCircle as FaInfoCircleIcon,
+  FaPlus,
 } from "react-icons/fa";
 import {
   MdDashboard,
@@ -403,6 +404,7 @@ const Clear_routing = () => {
   const [selectAll, setSelectAll] = useState(false);
 
   // State for modals
+  const [showAddModal, setShowAddModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -427,6 +429,8 @@ const Clear_routing = () => {
     semester: "",
     startDate: "",
     endDate: "",
+    students: 0,
+    status: "Pending",
   });
 
   // Available options
@@ -806,6 +810,25 @@ const Clear_routing = () => {
     }
   };
 
+  // Open add modal
+  const openAddModal = () => {
+    setFormData({
+      teacher: "",
+      subject: "",
+      class: "",
+      batch: "",
+      day: daysOfWeek[0],
+      time: "",
+      room: "",
+      semester: "Fall 2026",
+      startDate: new Date().toISOString().split("T")[0],
+      endDate: "",
+      students: 0,
+      status: "Pending",
+    });
+    setShowAddModal(true);
+  };
+
   // Clear single routine
   const clearSingleRoutine = (routine) => {
     setSelectedRoutine(routine);
@@ -938,8 +961,59 @@ const Clear_routing = () => {
       semester: routine.semester,
       startDate: routine.startDate,
       endDate: routine.endDate,
+      students: routine.students,
+      status: routine.status,
     });
     setShowEditModal(true);
+  };
+
+  // Handle add routine
+  const handleAddRoutine = (e) => {
+    e.preventDefault();
+
+    if (
+      !formData.teacher ||
+      !formData.subject ||
+      !formData.class ||
+      !formData.day ||
+      !formData.time
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all required fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const newRoutine = {
+      id: Date.now(),
+      teacher: formData.teacher,
+      subject: formData.subject,
+      class: formData.class,
+      batch: formData.batch || "Not Assigned",
+      day: formData.day,
+      time: formData.time,
+      room: formData.room || "TBD",
+      status: formData.status,
+      semester: formData.semester || "Fall 2026",
+      startDate: formData.startDate || new Date().toISOString().split("T")[0],
+      endDate: formData.endDate || "",
+      students: parseInt(formData.students) || 0,
+      createdBy: adminInfo.name,
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+
+    setRoutines([...routines, newRoutine]);
+    setShowAddModal(false);
+    Swal.fire({
+      icon: "success",
+      title: "Routine Added!",
+      text: `New routine for ${formData.teacher} - ${formData.subject} has been added.`,
+      timer: 1500,
+      showConfirmButton: false,
+    });
   };
 
   // Handle edit routine
@@ -977,6 +1051,8 @@ const Clear_routing = () => {
               semester: formData.semester || "Fall 2026",
               startDate: formData.startDate || r.startDate,
               endDate: formData.endDate || r.endDate,
+              students: parseInt(formData.students) || 0,
+              status: formData.status,
             }
           : r,
       ),
@@ -993,6 +1069,7 @@ const Clear_routing = () => {
 
   // Format date
   const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-US", {
       year: "numeric",
@@ -1166,6 +1243,12 @@ const Clear_routing = () => {
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={openAddModal}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+              >
+                <FaPlus size={12} /> Add Routine
+              </button>
               <button
                 onClick={clearSelectedRoutines}
                 className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
@@ -1418,6 +1501,257 @@ const Clear_routing = () => {
           </div>
         </main>
       </div>
+
+      {/* Add Routine Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaPlus className="text-blue-600" /> Add New Routine
+              </h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleAddRoutine} className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Teacher *
+                  </label>
+                  <select
+                    required
+                    value={formData.teacher}
+                    onChange={(e) =>
+                      setFormData({ ...formData, teacher: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Teacher</option>
+                    {teachers.map((teacher) => (
+                      <option key={teacher} value={teacher}>
+                        {teacher}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Subject *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.subject}
+                    onChange={(e) =>
+                      setFormData({ ...formData, subject: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter subject"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Class *
+                  </label>
+                  <select
+                    required
+                    value={formData.class}
+                    onChange={(e) =>
+                      setFormData({ ...formData, class: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select Class</option>
+                    {classes.map((cls) => (
+                      <option key={cls} value={cls}>
+                        {cls}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Batch
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.batch}
+                    onChange={(e) =>
+                      setFormData({ ...formData, batch: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., Batch 2026-A"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Day *
+                  </label>
+                  <select
+                    required
+                    value={formData.day}
+                    onChange={(e) =>
+                      setFormData({ ...formData, day: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {daysOfWeek.map((day) => (
+                      <option key={day} value={day}>
+                        {day}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Time *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.time}
+                    onChange={(e) =>
+                      setFormData({ ...formData, time: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., 10:00 AM - 11:30 AM"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Room
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.room}
+                    onChange={(e) =>
+                      setFormData({ ...formData, room: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="e.g., Room 201"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Semester
+                  </label>
+                  <select
+                    value={formData.semester}
+                    onChange={(e) =>
+                      setFormData({ ...formData, semester: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {semesters.map((semester) => (
+                      <option key={semester} value={semester}>
+                        {semester}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.startDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, startDate: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.endDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, endDate: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Students
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.students}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        students: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Number of students"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {statuses.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
+                >
+                  <FaSave className="inline mr-2" size={14} /> Add Routine
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Confirm Clear Modal */}
       {showConfirmModal && (
@@ -1758,6 +2092,45 @@ const Clear_routing = () => {
                     }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Students
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.students}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        students: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Number of students"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    {statuses.map((status) => (
+                      <option key={status} value={status}>
+                        {status}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
