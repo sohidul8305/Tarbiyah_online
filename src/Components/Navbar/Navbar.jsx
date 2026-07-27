@@ -26,7 +26,7 @@ const Navbar = () => {
       recordedCourse: "Recorded Course",
       courses: "Courses",
       diploma: "Diploma in Islamic Studies",
-      alemiah: "Tarbiyah Alemiah Program",
+      alemiah: "Tarbiyah Allimiyah",
       kids: "Tarbiyah Studies for Kids",
       quran: "Quran for Elders",
       consultancy: "Consultancy",

@@ -119,6 +119,8 @@ import Data_enty from "../Page/Data-enty/Data_enty";
 import Total_salary from "../Page/Total-salary/Total_salary";
 import Due_salary from "../Page/Due_salary/Due_salary";
 import Student_absence from "../Page/Student_absence/Student_absence";
+import DiplomaDetails from "../Components/DiplomaDetails/DiplomaDetails";
+import Enroll from "../Components/Enroll/Enroll";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -220,6 +222,17 @@ export const router = createBrowserRouter([
         element: <Admin_notification />,
       },
     ],
+  },
+
+  // Details page all  route
+
+  {
+    path: "/course/diploma/details",
+    element: <DiplomaDetails></DiplomaDetails>,
+  },
+  {
+    path: "/course/diploma/enroll",
+    element: <Enroll></Enroll>,
   },
 
   // ==========================================
