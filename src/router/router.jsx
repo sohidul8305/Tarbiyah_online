@@ -125,6 +125,16 @@ import AlimiyahKidsDetails from "../Components/AlimiyahKidsDetails/AlimiyahKidsD
 import AlimiyahProgramDetails from "../Components/AlimiyahProgramDetails/AlimiyahProgramDetails";
 import AlimiyahProgramEnroll from "../Components/AlimiyahProgramEnroll/AlimiyahProgramEnroll";
 import AlimiyahKidsEnroll from "../Components/AlimiyahKidsEnroll/AlimiyahKidsEnroll";
+import QuidaNuraniDetails from "../Components/QuidaNuraniDetails/QuidaNuraniDetails";
+import NazeraDetails from "../Components/NazeraDetails/NazeraDetails";
+import HifzDetail from "../Components/HifzDetail/HifzDetail";
+import HifzRevisionDetails from "../Components/HifzRevisionDetails/HifzRevisionDetails";
+import OneToOneDetails from "../Components/OneToOneDetails/OneToOneDetails";
+import QuidaEnroll from "../Components/QuidaEnroll/QuidaEnroll";
+import NazeraEnroll from "../Components/NazeraEnroll/NazeraEnroll";
+import HifzEnroll from "../Components/HifzEnroll/HifzEnroll";
+import HifzRevisionEnroll from "../Components/HifzRevisionEnroll/HifzRevisionEnroll";
+import OneToOneEnroll from "../Components/OneToOneEnroll/OneToOneEnroll";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -253,6 +263,46 @@ export const router = createBrowserRouter([
   {
     path: "/course/alemiah/program/enroll",
     element: <AlimiyahKidsEnroll></AlimiyahKidsEnroll>,
+  },
+  {
+    path: "/course/kids/quida-nurani",
+    element: <QuidaNuraniDetails></QuidaNuraniDetails>,
+  },
+  {
+    path: "/course/kids/nazera",
+    element: <NazeraDetails></NazeraDetails>,
+  },
+  {
+    path: "/course/kids/hifz",
+    element: <HifzDetail></HifzDetail>,
+  },
+  {
+    path: "/course/kids/hifz-revision",
+    element: <HifzRevisionDetails></HifzRevisionDetails>,
+  },
+  {
+    path: "/course/kids/one-to-one",
+    element: <OneToOneDetails></OneToOneDetails>,
+  },
+  {
+    path: "/course/kids/quida/enroll",
+    element: <QuidaEnroll></QuidaEnroll>,
+  },
+  {
+    path: "/course/kids/nazera/enroll",
+    element: <NazeraEnroll></NazeraEnroll>,
+  },
+  {
+    path: "/course/kids/hifz/enroll",
+    element: <HifzEnroll></HifzEnroll>,
+  },
+  {
+    path: "/course/kids/revision/enroll",
+    element: <HifzRevisionEnroll></HifzRevisionEnroll>,
+  },
+  {
+    path: "/course/kids/one-to-one/enroll",
+    element: <OneToOneEnroll></OneToOneEnroll>,
   },
 
   // ==========================================
