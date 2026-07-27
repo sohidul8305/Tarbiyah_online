@@ -121,6 +121,10 @@ import Due_salary from "../Page/Due_salary/Due_salary";
 import Student_absence from "../Page/Student_absence/Student_absence";
 import DiplomaDetails from "../Components/DiplomaDetails/DiplomaDetails";
 import Enroll from "../Components/Enroll/Enroll";
+import AlimiyahKidsDetails from "../Components/AlimiyahKidsDetails/AlimiyahKidsDetails";
+import AlimiyahProgramDetails from "../Components/AlimiyahProgramDetails/AlimiyahProgramDetails";
+import AlimiyahProgramEnroll from "../Components/AlimiyahProgramEnroll/AlimiyahProgramEnroll";
+import AlimiyahKidsEnroll from "../Components/AlimiyahKidsEnroll/AlimiyahKidsEnroll";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -233,6 +237,22 @@ export const router = createBrowserRouter([
   {
     path: "/course/diploma/enroll",
     element: <Enroll></Enroll>,
+  },
+  {
+    path: "/course/alemiah/alimiyah-kids",
+    element: <AlimiyahKidsDetails></AlimiyahKidsDetails>,
+  },
+  {
+    path: "/course/alemiah/alimiyah-program",
+    element: <AlimiyahProgramDetails></AlimiyahProgramDetails>,
+  },
+  {
+    path: "/course/alemiah/kids/enroll",
+    element: <AlimiyahProgramEnroll></AlimiyahProgramEnroll>,
+  },
+  {
+    path: "/course/alemiah/program/enroll",
+    element: <AlimiyahKidsEnroll></AlimiyahKidsEnroll>,
   },
 
   // ==========================================
