@@ -136,6 +136,8 @@ import HifzEnroll from "../Components/HifzEnroll/HifzEnroll";
 import HifzRevisionEnroll from "../Components/HifzRevisionEnroll/HifzRevisionEnroll";
 import OneToOneEnroll from "../Components/OneToOneEnroll/OneToOneEnroll";
 import EldersQuidaDetails from "../Components/EldersQuidaDetails/EldersQuidaDetails";
+import Bangla_version from "../Components/Bangla-version/Bangla_version";
+import English_version from "../Components/English_version/English_version";
 import Course_apply_from from "../Components/Course_apply_from/Course_apply_from";
 
 export const router = createBrowserRouter([
@@ -238,6 +240,14 @@ export const router = createBrowserRouter([
         element: <Admin_notification />,
       },
       {
+        path: "/enroll/bangla-version",
+        element: <Bangla_version />,
+      },
+      {
+        path: "/enroll/english-version",
+        element: <English_version />,
+      },
+      {
         path: "/Course-apply-from",
         element: <Course_apply_from />,
       },
@@ -309,6 +319,10 @@ export const router = createBrowserRouter([
   {
     path: "/course/kids/one-to-one/enroll",
     element: <OneToOneEnroll></OneToOneEnroll>,
+  },
+  {
+    path: "/course/quran/elders-quida",
+    element: <EldersQuidaDetails></EldersQuidaDetails>,
   },
   {
     path: "/course/quran/elders-quida",

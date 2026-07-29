@@ -35,8 +35,7 @@ const Diploma = () => {
   // শুধুমাত্র title ও subtitle সহ ডিপ্লোমা কোর্স ডাটা
   const diplomaCourse = {
     id: 1,
-    image:
-      "https://i.ibb.co.com/XZVH4YPP/images-q-tbn-ANd9-Gc-Ri56q-JX-78-BRlii-E9-ZR857-O7r-BIFLMs1-Sc-Uh-A4-EKw-J-AGMGZ1bt-PS1h8c-s-10.jpg",
+    image: "https://i.ibb.co.com/SzV4rgk/diploma-2-1-jpg.jpg",
     topBadge: "Islamic Diploma",
     title: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
     subtitle:

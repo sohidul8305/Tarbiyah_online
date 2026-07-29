@@ -32,7 +32,7 @@ const Alemiah = () => {
       title: "আলিমিয়াহ ফর কিডস",
       subtitle: "বাচ্চাদের জন্য ইসলামিক শিক্ষা",
       image:
-        "https://i.ibb.co.com/XZVH4YPP/images-q-tbn-ANd9-Gc-Ri56q-JX-78-BRlii-E9-ZR857-O7r-BIFLMs1-Sc-Uh-A4-EKw-J-AGMGZ1bt-PS1h8c-s-10.jpg",
+        "https://i.ibb.co.com/MTCtR32/E0-A6-86-E0-A6-B2-E0-A6-BF-E0-A6-AE-E0-A6-BF-E0-A6-AF-E0-A6-BC-E0-A7-8-D-E0-A6-AF-E0-A6-BE-E0-A6-B9.jpg",
       topBadge: "Kids Program",
     },
     {

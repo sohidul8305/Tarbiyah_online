@@ -1,74 +1,52 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router";
+import AlemiyahBanner from "../../image/allemiyahkidsbanner.jpeg";
+import AlemyahCourse from "../../image/allemiyahcourse.jpeg";
 import {
   FaArrowLeft,
-  FaCheckCircle,
-  FaClock,
-  FaUserGraduate,
-  FaBookOpen,
-  FaVideo,
-  FaCalendarAlt,
-  FaAward,
   FaUsers,
   FaStar,
-  FaArrowRight,
-  FaFileAlt,
-  FaCertificate,
   FaMosque,
-  FaQuran,
-  FaHands,
-  FaHeart,
-  FaLightbulb,
-  FaRocket,
+  FaFileAlt,
+  FaChevronDown,
+  FaChevronUp,
+  FaDownload,
+  FaShare,
+  FaBookmark,
+  FaInfoCircle,
+  FaCommentDots,
+  FaCheckCircle,
   FaChild,
   FaBook,
-  FaPen,
-  FaSmile,
-  FaUsers as FaUsersIcon,
-  FaChalkboardTeacher,
+  FaLightbulb,
+  FaClock,
+  FaCalendarAlt,
+  FaVideo,
+  FaCertificate,
+  FaRocket,
+  FaArrowRight,
   FaUserTie,
   FaGraduationCap,
+  FaChalkboardTeacher,
+  FaQuestionCircle,
+  FaRegListAlt,
+  FaRegCalendarCheck,
+  FaRegClipboard,
+  FaDownload as FaRegDownload,
+  FaExternalLinkAlt,
 } from "react-icons/fa";
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 
 const AlimiyahKidsDetails = () => {
-  const courseDetails = {
-    title: "আলিমিয়াহ ফর কিডস",
-    subtitle: "বাচ্চাদের জন্য ইসলামিক শিক্ষা",
-    description: `
-      বাচ্চাদের কুরআন, হাদীস, আরবি ভাষা ও ইসলামি আকিদার মৌলিক শিক্ষা 
-      প্রদান করা হয় এই কোর্সে। সহজ ও আনন্দদায়ক পদ্ধতিতে ইসলামি জ্ঞান 
-      অর্জন। খেলার ছলে শেখানো হয় ইসলামের মৌলিক বিষয়সমূহ।
-    `,
-    objectives: [
-      "কুরআন তিলাওয়াত ও তাজবিদ শেখা",
-      "আরবি বর্ণমালা ও মৌলিক শব্দ শেখা",
-      "ইসলামি আদব ও আখলাক শিক্ষা",
-      "নবীদের গল্প ও ইসলামি ইতিহাস জানা",
-      "সহজ হাদীস ও দোয়া শিক্ষা",
-    ],
-    benefits: [
-      "অভিজ্ঞ ও প্রশিক্ষিত শিক্ষকমণ্ডলী",
-      "খেলার ছলে আনন্দদায়ক শিক্ষা",
-      "প্রাইভেট ফেসবুক গ্রুপে অভিভাবক সাপোর্ট",
-      "মাসিক প্রগ্রেস রিপোর্ট",
-      "সার্টিফিকেট ও পুরস্কার",
-    ],
-    schedule: {
-      duration: "২ বছর",
-      classes: "সপ্তাহে ৩ দিন",
-      time: "সকাল ১০:০০ - ১১:৩০",
-      totalClasses: "২৪০টি ক্লাস",
-    },
-    price: {
-      original: "৮,০০০ টাকা",
-      discount: "৫,৫০০ টাকা",
-      save: "৩১%",
-    },
+  const [openSemester, setOpenSemester] = useState(null);
+  const [activeTab, setActiveTab] = useState("info");
+
+  const toggleSemester = (index) => {
+    setOpenSemester(openSemester === index ? null : index);
   };
 
-  // কিডস প্রোগ্রামের ইনস্ট্রাক্টর
+  // Alimiyah Kids এর ইনস্ট্রাক্টর
   const instructors = [
     {
       id: 1,
@@ -104,69 +82,179 @@ const AlimiyahKidsDetails = () => {
     },
   ];
 
+  // Alimiyah Kids এর মূল ডাটা
+  const courseDetails = {
+    title: "Alimiyah for Kids",
+    subtitle: "বাচ্চাদের জন্য ইসলামিক শিক্ষা",
+    description: `
+     Alimiyah Basic Islam Course is basically designed for Muslim children and teenagers. Which will help the student to acquire basic knowledge of Islam as well as to implement it. This course will play a great role in knowing the Islamic solutions and procedures in all the necessary areas based on the 10 basic subjects. This course will develop positive mindset in children.
+    `,
+    objectives: [
+      "ছোটদের সিরাহ",
+      "বিশুদ্ধ আকিদাহ সম্পর্কিত জ্ঞানলাভ",
+      "ব্যাসিক মাসাআলা-মাসায়েল",
+      "ছোটদের উপযোগী দ্বীনের মৌলিক জ্ঞানার্জন",
+      "ছোটদের আরবি ভাষায় শিক্ষার আসর",
+      "সম্পূর্ণ অনলাইন ভিত্তিক কোর্স",
+      "লাইভ ক্লাস, মাশক্ব, লেকচার শীট ও রেকর্ডেড ক্লাস",
+    ],
+    benefits: [
+      "প্রবাসে বসবাসের ফলে যারা দ্বীনী শিক্ষার্জনের সুবিধা হতে বঞ্চিত",
+      "ইংলিশ মিডিয়ামের শিক্ষার্থীদের জন্য রয়েছে প্রফেশনাল ইংলিশ ভার্সন",
+      "জেনারেল শিক্ষার পাশাপাশি যারা দ্বীনি শিক্ষার আগ্রহ লালন করেন",
+      "৮-১২ বছরের সকল শিক্ষার্থীর জন্য এই কোর্সটি বিশেষভাবে ডিজাইন করা হয়েছে",
+      "যারা নিজেদের সন্তানকে প্র্যাক্টিসিং মুসলিম হিসেবে গড়ে তুলতে চান",
+    ],
+    schedule: {
+      duration: "২ বছর",
+      classes: "সপ্তাহে ৩ দিন",
+      time: "সকাল ১০:০০ - ১১:৩০",
+      totalClasses: "২৪০টি ক্লাস",
+    },
+    price: {
+      original: "৮,০০০ টাকা",
+      discount: "৫,৫০০ টাকা",
+      save: "৩১%",
+    },
+  };
+
+  // Materials Included (ইমেজের ডাটা অনুযায়ী)
+  const materialsData = [
+    {
+      text: "সপ্তাহে ২ দিন ৪টি ক্লাস",
+      icon: <FaClock className="text-[#00ADD2]" />,
+    },
+    {
+      text: "প্রতিটি ক্লাস ৪০ মিনিট",
+      icon: <FaClock className="text-[#00ADD2]" />,
+    },
+    {
+      text: "প্রতিটি ক্লাসের লাইভ ক্লাস রেকর্ড",
+      icon: <FaVideo className="text-[#00ADD2]" />,
+    },
+    {
+      text: "প্রতিটি ক্লাসের রেকর্ডেড ভিডিও",
+      icon: <FaRegDownload className="text-[#00ADD2]" />,
+    },
+    {
+      text: "কুইজ ও মিডটার্ম পরীক্ষা",
+      icon: <FaQuestionCircle className="text-[#00ADD2]" />,
+    },
+    {
+      text: "সেমিস্টার ফাইনাল পরীক্ষা",
+      icon: <FaRegClipboard className="text-[#00ADD2]" />,
+    },
+    {
+      text: "কোর্স ডিউরেশন এর নোট",
+      icon: <FaFileAlt className="text-[#00ADD2]" />,
+    },
+    {
+      text: "সার্টিফিকেট ও ইজাযাহ প্রদান",
+      icon: <FaCertificate className="text-[#00ADD2]" />,
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <Navbar />
       <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
+          {/* Back Button */}
           <Link
             to="/course/alemiah"
             className="inline-flex items-center gap-2 text-[#002b2b] hover:text-yellow-600 mb-6 transition-colors group"
           >
             <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">আলেমিয়াহ পেজে ফিরে যান</span>
+            <span className="font-medium">আলিমিয়াহ পেজে ফিরে যান</span>
           </Link>
 
-          {/* Hero Section */}
-          <div className="bg-gradient-to-br from-[#002b2b] via-[#003d3d] to-[#004d4d] rounded-3xl shadow-2xl overflow-hidden text-white p-8 md:p-12">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <FaChild className="text-yellow-400 text-2xl" />
-                  <span className="bg-yellow-500/20 text-yellow-300 px-3 py-1 rounded-full text-sm font-semibold">
-                    কিডস প্রোগ্রাম
-                  </span>
-                </div>
-                <h1 className="text-3xl md:text-4xl font-bold">
-                  {courseDetails.title}
-                </h1>
-                <p className="text-yellow-400 text-lg mt-1">
-                  {courseDetails.subtitle}
+          {/* Banner Image - Same size as Diploma */}
+          <img
+            src={AlemiyahBanner}
+            alt="Alimiyah Kids Banner"
+            className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
+          />
+
+          {/* Course Info Section - Below Banner (Same structure as Diploma) */}
+          <div className="ml-8 mr-72">
+            {/* Share & Wishlist */}
+            <div className="flex items-center gap-4 py-3">
+              <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
+                <FaShare className="text-lg" />
+                <span className="font-medium">Share</span>
+              </button>
+              <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
+                <FaBookmark className="text-lg" />
+                <span className="font-medium">Wishlist</span>
+              </button>
+            </div>
+
+            {/* Course Title */}
+            <h1 className="text-2xl font-bold text-[#00ADD2] mb-3">
+              {courseDetails.title}
+            </h1>
+
+            {/* Tabs */}
+            <div className="flex items-center gap-6 border-b border-gray-200">
+              <button
+                onClick={() => setActiveTab("info")}
+                className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all ${
+                  activeTab === "info"
+                    ? "border-[#002b2b] text-[#002b2b] font-semibold"
+                    : "border-transparent text-gray-500 hover:text-[#002b2b]"
+                }`}
+              >
+                <FaInfoCircle />
+                <span>Course Info</span>
+              </button>
+              <button
+                onClick={() => setActiveTab("reviews")}
+                className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all ${
+                  activeTab === "reviews"
+                    ? "border-[#002b2b] text-[#002b2b] font-semibold"
+                    : "border-transparent text-gray-500 hover:text-[#002b2b]"
+                }`}
+              >
+                <FaCommentDots />
+                <span>Reviews</span>
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            {activeTab === "reviews" && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                <p className="text-gray-500 text-center">
+                  এখনো কোনো রিভিউ নেই। প্রথম রিভিউ দিন!
                 </p>
               </div>
-              <div className="flex gap-3">
-                <span className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm border border-white/10 flex items-center gap-2">
-                  <FaUsers className="text-yellow-400" />
-                  ৫০০+ ছাত্র
-                </span>
-                <span className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm border border-white/10 flex items-center gap-2">
-                  <FaStar className="text-yellow-400" />
-                  ৪.৮ রেটিং
-                </span>
-              </div>
-            </div>
+            )}
           </div>
 
-          {/* Main Content */}
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Content Layout: Left 2 Columns, Right 1 Column */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Content - 2 Columns */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Description */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-[#002b2b] mb-4 flex items-center gap-3">
+              {/* 1. ABOUT COURSE */}
+              <div className="p-8 mt-10">
+                <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  কোর্সের বিবরণ
-                </h2>
-                <p className="text-gray-600 leading-relaxed">
+                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                    ABOUT COURSE
+                  </h2>
+                </div>
+                <p className="text-gray-700 leading-relaxed text-lg">
                   {courseDetails.description}
                 </p>
               </div>
 
-              {/* Objectives */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-[#002b2b] mb-4 flex items-center gap-3">
+              {/* 2. WHAT YOU WILL GAIN */}
+              <div className="bg-white rounded-3xl p-8 space-y-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-2">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  শেখার উদ্দেশ্য
-                </h2>
+                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                    WHAT YOU WILL GAIN
+                  </h2>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {courseDetails.objectives.map((objective, index) => (
                     <div
@@ -180,262 +268,374 @@ const AlimiyahKidsDetails = () => {
                 </div>
               </div>
 
-              {/* Benefits */}
-              <div className="bg-gradient-to-r from-blue-50 to-teal-50 rounded-2xl p-8 border border-blue-100">
-                <h2 className="text-2xl font-bold text-[#002b2b] mb-4 flex items-center gap-3">
-                  <FaLightbulb className="text-yellow-500 text-3xl" />
-                  বিশেষ সুবিধাসমূহ
+              {/* 3. Ready To Apply Button */}
+              <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-3xl p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-xl font-bold text-[#002b2b]">
+                    Ready To Apply Your Course
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    এখনই এনরোল করুন এবং আপনার শেখার যাত্রা শুরু করুন।
+                  </p>
+                </div>
+                <Link to="/Course-apply-from">
+                  <button className="bg-[#002b2b] hover:bg-teal-900 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all">
+                    Start Now
+                  </button>
+                </Link>
+              </div>
+
+              {/* 4. TARGET AUDIENCE (Exactly as before) */}
+              <div>
+                <h2 className="text-lg font-bold text-[#00ADD2] mb-4">
+                  TARGET AUDIENCE
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {courseDetails.benefits.map((benefit, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-3 bg-white/70 p-3 rounded-xl"
+                      className="flex items-start gap-2 text-gray-700"
                     >
-                      <FaCheckCircle className="text-green-500 text-lg flex-shrink-0" />
-                      <span className="text-gray-700 text-sm">{benefit}</span>
+                      <span className="text-[#00ADD2] mt-1 text-xs">●</span>
+                      <span className="text-sm">{benefit}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Curriculum */}
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-[#002b2b] mb-6 flex items-center gap-3">
-                  <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  সম্পূর্ণ পাঠ্যক্রম
+              {/* 5. MATERIALS INCLUDED (From Screenshot Style) */}
+              <div>
+                <h2 className="text-lg font-bold text-[#00ADD2] mb-4">
+                  MATERIALS INCLUDED
                 </h2>
-                <div className="space-y-4">
-                  {[
-                    {
-                      module: "পর্ব ১: কুরআন শিক্ষা",
-                      topics: [
-                        "নূরানী পদ্ধতি",
-                        "তাজবিদের প্রাথমিক ধারণা",
-                        "ছোট সূরা সমূহ",
-                      ],
-                    },
-                    {
-                      module: "পর্ব ২: আরবি ভাষা",
-                      topics: [
-                        "আরবি বর্ণমালা",
-                        "মৌলিক শব্দভাণ্ডার",
-                        "সহজ বাক্য গঠন",
-                      ],
-                    },
-                    {
-                      module: "পর্ব ৩: ইসলামি আদব",
-                      topics: [
-                        "দৈনন্দিন দোয়া",
-                        "ইসলামি আচরণ",
-                        "পাঁচ ওয়াক্ত নামাজ",
-                      ],
-                    },
-                    {
-                      module: "পর্ব ৪: নবীদের গল্প",
-                      topics: [
-                        "আদম থেকে মুহাম্মদ ﷺ",
-                        "ইসলামি ইতিহাস",
-                        "সাহাবীদের জীবনী",
-                      ],
-                    },
-                  ].map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-gray-50 p-4 rounded-xl hover:bg-yellow-50 transition-all border border-gray-100"
-                    >
-                      <h4 className="font-bold text-[#002b2b] mb-2 flex items-center gap-2">
-                        <FaBook className="text-yellow-500" />
-                        {item.module}
-                      </h4>
-                      <div className="flex flex-wrap gap-2">
-                        {item.topics.map((topic, i) => (
-                          <span
-                            key={i}
-                            className="bg-white px-3 py-1 rounded-full text-xs text-gray-600 border border-gray-200"
-                          >
-                            {topic}
-                          </span>
-                        ))}
-                      </div>
+                <div className="grid grid-cols-2 gap-y-4 gap-x-4">
+                  {materialsData.map((item, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <div className="text-lg">{item.icon}</div>
+                      <span className="text-[#002b2b] text-[15px] font-medium">
+                        {item.text}
+                      </span>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* 6. COURSE CURRICULUM (From Screenshot Style with Working YouTube Links) */}
+              <div>
+                <h2 className="text-lg font-bold text-[#00ADD2] mb-4">
+                  COURSE CURRICULUM
+                </h2>
+                <div className="border border-gray-300 rounded-sm">
+                  {/* Curriculum Item 1 */}
+                  <div className="border-b border-gray-300">
+                    <div
+                      onClick={() => toggleSemester(1)}
+                      className="flex items-center gap-3 px-4 py-3 bg-white cursor-pointer hover:bg-gray-50 transition"
+                    >
+                      <span className="text-[#00ADD2] text-sm">
+                        {openSemester === 1 ? (
+                          <FaChevronUp />
+                        ) : (
+                          <FaChevronDown />
+                        )}
+                      </span>
+                      <span className="text-[#002b2b] font-semibold">
+                        কুরআন
+                      </span>
+                    </div>
+                    {openSemester === 1 && (
+                      <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
+                        <p className="font-semibold text-[#002b2b]">
+                          আরবি বর্ণমালা পরিচিতি
+                        </p>
+                        <p className="font-semibold text-[#002b2b]">
+                          আরবি বর্ণমালার বিশুদ্ধ উচ্চারণ
+                        </p>
+                        <p className="font-semibold text-[#002b2b]">
+                          তাজবিদের সাধারণ বিষয় ও বিশুদ্ধ তিলাওয়াত
+                        </p>
+                        <p className="font-semibold text-[#002b2b]">
+                          সালাতে পড়া সূরাগুলো মুখস্থ করা
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Curriculum Item 2 */}
+                  <div className="border-b border-gray-300">
+                    <div
+                      onClick={() => toggleSemester(2)}
+                      className="flex items-center gap-3 px-4 py-3 bg-white cursor-pointer hover:bg-gray-50 transition"
+                    >
+                      <span className="text-[#00ADD2] text-sm">
+                        {openSemester === 2 ? (
+                          <FaChevronUp />
+                        ) : (
+                          <FaChevronDown />
+                        )}
+                      </span>
+                      <span className="text-[#002b2b] font-semibold">
+                        হিফজুল হাদিস
+                      </span>
+                    </div>
+                    {openSemester === 2 && (
+                      <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
+                        <a
+                          href="https://youtu.be/ISn4YoagkLA?si=xb21YNXxplHDjIOt"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-[#00ADD2] underline hover:text-[#002b2b] transition-colors mb-2"
+                        >
+                          <FaExternalLinkAlt className="text-xs" /> ভিডিও লিংক
+                          দেখুন
+                        </a>
+                        <p>
+                          ২০ টি জীবনঘনিষ্ট হাদিস মুখস্তকরণ
+                          <br /> অর্থসহ সহীহ হাদিসের মৌলিক শিক্ষা <br />
+                          আকিদা-আখলাক ও আত্মিক বিশুদ্ধতায় হাদিসের প্রভাব
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Curriculum Item 3 */}
+                  <div className="border-b border-gray-300">
+                    <div
+                      onClick={() => toggleSemester(3)}
+                      className="flex items-center gap-3 px-4 py-3 bg-white cursor-pointer hover:bg-gray-50 transition"
+                    >
+                      <span className="text-[#00ADD2] text-sm">
+                        {openSemester === 3 ? (
+                          <FaChevronUp />
+                        ) : (
+                          <FaChevronDown />
+                        )}
+                      </span>
+                      <span className="text-[#002b2b] font-semibold">
+                        ছোটদের আকিদাহ
+                      </span>
+                    </div>
+                    {openSemester === 3 && (
+                      <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
+                        <p className="text-[#002b2b]">
+                          আল্লাহ ও মালাইকা সম্পর্কে মৌলিক আকিদাহ <br /> রাসুল ও
+                          কিতাব সম্পর্কে সঠিক আকিদাহ <br /> মালাইকা ও রাসুলদের
+                          সম্পর্কে সঠিক আকিদাহ <br /> আখিরাত ও তাকদীর ও তার
+                          কিতাব সম্পর্কে সঠিক আকিদাহ
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Curriculum Item 4 */}
+                  <div className="border-b border-gray-300">
+                    <div
+                      onClick={() => toggleSemester(4)}
+                      className="flex items-center gap-3 px-4 py-3 bg-white cursor-pointer hover:bg-gray-50 transition"
+                    >
+                      <span className="text-[#00ADD2] text-sm">
+                        {openSemester === 4 ? (
+                          <FaChevronUp />
+                        ) : (
+                          <FaChevronDown />
+                        )}
+                      </span>
+                      <span className="text-[#002b2b] font-semibold">
+                        ইসলামিক ছালাত ও ইবাদতের দুয়া
+                      </span>
+                    </div>
+                    {openSemester === 4 && (
+                      <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
+                        <a
+                          href="https://youtu.be/iYVjpe_ySWg?si=HXVb32bhb8ofy5AW"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-[#00ADD2] underline hover:text-[#002b2b] transition-colors mb-2"
+                        >
+                          <FaExternalLinkAlt className="text-xs" /> ভিডিও লিংক
+                          দেখুন
+                        </a>
+                        <p>
+                          সুন্নাহভিত্তিক জীবন যাপনের মৌলিক ধারণা
+                          <br /> প্রতি কাজে সুন্নাহ মেনে চলা
+                          <br /> ঘুমোতে যাওয়া ও ঘুম থেকে ওঠার নিয়ম ও দুয়া
+                          <br /> ওয়াশরুমে যাওয়া ও বের হবার নিয়ম ও দুয়া <br />
+                          মসজিদে প্রবেশ ও বের হবার নিয়ম ও দুয়া
+                          <br /> কথা বলার আদব ও শিষ্টাচার
+                          <br /> অন্যের ঘরে প্রবেশের আদব, ইত্যাদি
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Curriculum Item 5 */}
+                  <div>
+                    <div
+                      onClick={() => toggleSemester(5)}
+                      className="flex items-center gap-3 px-4 py-3 bg-white cursor-pointer hover:bg-gray-50 transition"
+                    >
+                      <span className="text-[#00ADD2] text-sm">
+                        {openSemester === 5 ? (
+                          <FaChevronUp />
+                        ) : (
+                          <FaChevronDown />
+                        )}
+                      </span>
+                      <span className="text-[#002b2b] font-semibold">
+                        সিরাহ
+                      </span>
+                    </div>
+                    {openSemester === 5 && (
+                      <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
+                        <p className="text-[#002b2b]">
+                          রাসুলের বংশ পরিচিতি <br />
+                          আরব ও আরবজাতীর জীবন দর্শন <br />
+                          রাসুলের জন্মকালীন আশ্চর্য ঘটনাপ্রবাহ
+                          <br /> রাসুলের বাল্যকাল ও শৈশব
+                          <br /> রাসুলের তারুণ্য ও বিবাহ
+                          <br />
+                          নবুওয়াতপ্রাপ্তি ও দাওয়াত
+                          <br /> সংগ্রামী কর্মজীবন ও পরলোকগমন
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 7. FEE STRUCTURE (From Screenshot Style) */}
+              <div>
+                <h2 className="text-lg font-bold text-[#00ADD2] mb-4">
+                  FEE STRUCTURE
+                </h2>
+                <div className="grid grid-cols-2 gap-10 text-sm">
+                  {/* Left Column - Bangla Medium */}
+                  <div>
+                    <p className="text-[#002b2b] font-medium mb-3">
+                      বাংলা মিডিয়াম:
+                    </p>
+                    <div className="flex items-start gap-3 mb-2">
+                      <FaCheckCircle className="text-[#00ADD2] mt-1" />
+                      <div>
+                        <span className="block text-[#002b2b] font-medium">
+                          ভর্তি ফি ২০০০ টাকা
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <FaCheckCircle className="text-[#00ADD2] mt-1" />
+                      <div>
+                        <span className="block text-[#002b2b] font-medium">
+                          মাসিক ফি ২০০০ টাকা (৬ মাস)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column - English Medium */}
+                  <div>
+                    <p className="text-[#002b2b] font-medium mb-3">
+                      ইংরেজি মিডিয়াম:
+                    </p>
+                    <div className="flex items-start gap-3 mb-2">
+                      <FaCheckCircle className="text-[#00ADD2] mt-1" />
+                      <div>
+                        <span className="block text-[#002b2b] font-medium">
+                          ভর্তি ফি ৩০০০ টাকা
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <FaCheckCircle className="text-[#00ADD2] mt-1" />
+                      <div>
+                        <span className="block text-[#002b2b] font-medium">
+                          মাসিক ফি ৩০০০ টাকা (৬ মাস)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Note below fee structure */}
+                <div className="mt-4 text-sm text-gray-500">
+                  <p>
+                    * সেমিস্টার ফি মাসিক ইনস্টলমেন্ট এর মাধ্যমে প্রদান করার
+                    সুযোগ আছে।
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Right Sidebar */}
-            <div className="space-y-6">
-              {/* Instructors Section */}
-              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h3 className="text-xl font-bold text-[#002b2b] flex items-center gap-2">
-                    <FaUserTie className="text-yellow-500" />
-                    আমাদের ইন্সট্রাক্টরগণ
-                  </h3>
-                </div>
-
-                <div className="space-y-4">
-                  {instructors.map((instructor) => (
-                    <div
-                      key={instructor.id}
-                      className="bg-gradient-to-r from-gray-50 to-white p-4 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-yellow-300 hover:scale-[1.02] group"
+            {/* Right Sidebar - 1 Column (Unchanged) */}
+            <div className="space-y-4 -mt-[305px]">
+              {/* Video Thumbnail */}
+              <a
+                href="https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer"
+              >
+                <img
+                  src={AlemyahCourse}
+                  alt="Course Video"
+                  className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-colors group-hover:bg-black/40">
+                  <div className="w-12 h-12 bg-[#008080] rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
+                    <svg
+                      className="w-6 h-6 fill-current translate-x-0.5"
+                      viewBox="0 0 24 24"
                     >
-                      <div className="flex items-center gap-4">
-                        {/* Profile Image */}
-                        <div className="relative">
-                          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-500 p-[2px]">
-                            <div className="w-full h-full rounded-full bg-white overflow-hidden">
-                              <img
-                                src={instructor.image}
-                                alt={instructor.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                    instructor.name,
-                                  )}&background=random&size=64`;
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className="absolute -bottom-1 -right-1 bg-green-500 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center">
-                            <FaCheckCircle className="text-white text-xs" />
-                          </div>
-                        </div>
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  </div>
+                </div>
+              </a>
 
-                        {/* Instructor Info */}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-[#002b2b] text-sm truncate group-hover:text-yellow-600 transition-colors">
-                            {instructor.name}
-                          </h4>
-                          <p className="text-xs text-gray-600 font-medium">
-                            {instructor.title}
-                          </p>
-                          {instructor.subtitle && (
-                            <p className="text-xs text-yellow-600 mt-0.5 flex items-center gap-1">
-                              <FaGraduationCap className="text-[10px]" />
-                              {instructor.subtitle}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-1 mt-1">
-                            <span className="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
-                              {instructor.expertise}
-                            </span>
-                          </div>
-                        </div>
+              {/* Pricing & Enrollment Card */}
+              {/* Enrollment & Info Card (New Design from Image) */}
+              <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-[#007a91]">
+                {/* Enrollment & Info Card (New Design from Image) */}
+                <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-[#007a91]">
+                  <h1 className="text-2xl font-bold text-[#007a91] mb-5">
+                    ENROLL NOW
+                  </h1>
 
-                        <div className="text-yellow-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <FaChalkboardTeacher className="text-xl" />
-                        </div>
-                      </div>
+                  {/* Split Button with Links */}
+                  <div className="flex items-center justify-center mb-6 relative">
+                    {/* Left Half - Link */}
+                    <Link to="/enroll/bangla-version" className="w-1/2">
+                      <button className="w-full bg-[#007a91] text-white font-bold py-3 rounded-l-md hover:opacity-90 transition">
+                        Bangla Version
+                      </button>
+                    </Link>
+
+                    {/* Middle Or Circle */}
+                    <div className="absolute w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#002b2b] font-medium shadow-md z-10 text-[10px]">
+                      Or
                     </div>
-                  ))}
-                </div>
 
-                <button className="w-full mt-4 text-center text-sm text-yellow-600 font-semibold hover:text-yellow-700 transition-colors flex items-center justify-center gap-2 group">
-                  <span>সকল ইন্সট্রাক্টর দেখুন</span>
-                  <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
+                    {/* Right Half - Link */}
+                    <Link to="/enroll/english-version" className="w-1/2">
+                      <button className="w-full bg-[#003d3d] text-white font-bold py-3 rounded-r-md hover:opacity-90 transition">
+                        English Version
+                      </button>
+                    </Link>
+                  </div>
 
-              {/* Quick Info Card */}
-              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 sticky top-24">
-                <div className="text-center mb-6">
-                  <div className="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-yellow-200">
-                    <FaChild className="text-4xl text-[#002b2b]" />
-                  </div>
-                  <h3 className="text-xl font-bold text-[#002b2b]">
-                    কোর্সের তথ্য
-                  </h3>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                    <span className="text-gray-600 flex items-center gap-2">
-                      <FaClock className="text-yellow-500" /> সময়কাল
-                    </span>
-                    <span className="font-semibold">
-                      {courseDetails.schedule.duration}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                    <span className="text-gray-600 flex items-center gap-2">
-                      <FaCalendarAlt className="text-yellow-500" /> ক্লাস
-                    </span>
-                    <span className="font-semibold">
-                      {courseDetails.schedule.classes}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                    <span className="text-gray-600 flex items-center gap-2">
-                      <FaVideo className="text-yellow-500" /> সময়
-                    </span>
-                    <span className="font-semibold">
-                      {courseDetails.schedule.time}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                    <span className="text-gray-600 flex items-center gap-2">
-                      <FaFileAlt className="text-yellow-500" /> মোট ক্লাস
-                    </span>
-                    <span className="font-semibold">
-                      {courseDetails.schedule.totalClasses}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600 flex items-center gap-2">
-                      <FaCertificate className="text-yellow-500" /> সার্টিফিকেট
-                    </span>
-                    <span className="font-semibold text-green-600">
-                      ✓ ভেরিফাইড
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-6 bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-xl border-2 border-yellow-200">
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600">কোর্স ফি</p>
-                    <p className="text-3xl font-bold text-yellow-600">
-                      {courseDetails.price.discount}
-                    </p>
-                    <p className="text-sm text-gray-500 line-through">
-                      {courseDetails.price.original}
-                    </p>
-                    <span className="inline-block bg-red-500 text-white text-xs px-2 py-1 rounded-full mt-1">
-                      সেভ {courseDetails.price.save}
-                    </span>
-                  </div>
-                </div>
-
-                <Link to="/course/alemiah/kids/enroll">
-                  <button className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-yellow-400 text-black font-bold py-4 px-6 rounded-xl hover:shadow-2xl transition-all transform hover:scale-105 flex items-center justify-center gap-3">
-                    <FaRocket /> <span>এনরোল করুন</span>
-                    <FaArrowRight />
-                  </button>
-                </Link>
-
-                <button className="w-full mt-3 bg-white border-2 border-[#002b2b] text-[#002b2b] font-medium py-3 px-4 rounded-xl hover:bg-[#002b2b] hover:text-white transition-all duration-300 flex items-center justify-center gap-2">
-                  <FaVideo className="text-yellow-500" />
-                  ফ্রি ট্রায়াল ক্লাস
-                </button>
-              </div>
-
-              {/* Trust Badge */}
-              <div className="bg-gradient-to-r from-teal-50 to-blue-50 p-4 rounded-xl border-2 border-teal-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center border-2 border-teal-300">
-                    <FaHands className="text-teal-600 text-2xl" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-[#002b2b] text-sm flex items-center gap-1">
-                      <FaCheckCircle className="text-green-600 text-xs" />
-                      ১০০% বিশ্বস্ত ইনস্টিটিউট
-                    </h4>
-                    <p className="text-xs text-gray-600 mt-1">
-                      অভিজ্ঞ ওলামায়ে কেরামের সরাসরি তত্ত্বাবধান ও মানসম্মত
-                      শিক্ষা
-                    </p>
+                  {/* Info Details */}
+                  <div className="space-y-3 text-left px-1 text-[#002b2b]">
+                    <div className="flex items-center gap-2 text-[15px]">
+                      <span className="font-medium">Course Level:</span>
+                      <span className="font-bold">Intermediate</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[15px]">
+                      <span className="font-medium">Enrolled:</span>
+                      <span className="font-bold">325</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-[15px]">
+                      <span className="font-medium">Last Updated:</span>
+                      <span className="font-bold">12/24/2024</span>
+                    </div>
                   </div>
                 </div>
               </div>
