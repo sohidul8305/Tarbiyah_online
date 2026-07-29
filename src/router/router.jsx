@@ -135,6 +135,8 @@ import NazeraEnroll from "../Components/NazeraEnroll/NazeraEnroll";
 import HifzEnroll from "../Components/HifzEnroll/HifzEnroll";
 import HifzRevisionEnroll from "../Components/HifzRevisionEnroll/HifzRevisionEnroll";
 import OneToOneEnroll from "../Components/OneToOneEnroll/OneToOneEnroll";
+import EldersQuidaDetails from "../Components/EldersQuidaDetails/EldersQuidaDetails";
+import Course_apply_from from "../Components/Course_apply_from/Course_apply_from";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -235,6 +237,10 @@ export const router = createBrowserRouter([
         path: "/admin-dashboard/notification",
         element: <Admin_notification />,
       },
+      {
+        path: "/Course-apply-from",
+        element: <Course_apply_from />,
+      },
     ],
   },
 
@@ -303,6 +309,10 @@ export const router = createBrowserRouter([
   {
     path: "/course/kids/one-to-one/enroll",
     element: <OneToOneEnroll></OneToOneEnroll>,
+  },
+  {
+    path: "/course/quran/elders-quida",
+    element: <EldersQuidaDetails></EldersQuidaDetails>,
   },
 
   // ==========================================

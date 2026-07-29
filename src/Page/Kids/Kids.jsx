@@ -32,120 +32,37 @@ import {
 import KidsImg from "../../image/kids.jpg";
 
 const Kids = () => {
-  // কোর্সের তথ্য
+  // কোর্সের তথ্য (শুধুমাত্র title ও subtitle রাখা হয়েছে)
   const courses = [
     {
       id: "quida-nurani",
       title: "কায়দা নুরানী",
       subtitle: "কুরআন শেখার প্রথম ধাপ",
-      description: "নূরানী পদ্ধতিতে আরবি বর্ণমালা ও উচ্চারণ শেখার মৌলিক কোর্স।",
       image: KidsImg,
-      duration: "৩-৬ মাস",
-      classes: "সপ্তাহে ৪ দিন",
-      time: "সকাল ৯:০০ - ১০:০০",
-      price: "৩,০০০ টাকা",
-      discount: "২,০০০ টাকা",
-      save: "৩৩%",
-      students: "১,৫০০+",
-      rating: "৪.৯",
-      age: "৪-১০ বছর",
-      features: [
-        "আরবি বর্ণমালা পরিচিতি",
-        "সঠিক উচ্চারণ ও মাখরাজ",
-        "মৌলিক তাজবিদের নিয়ম",
-        "সূরা ফাতিহা ও ছোট সূরা",
-      ],
     },
     {
       id: "nazera",
       title: "নাজেরা",
       subtitle: "কুরআন তিলাওয়াত প্রশিক্ষণ",
-      description: "সঠিক উচ্চারণে কুরআন তিলাওয়াত করার প্রশিক্ষণ।",
       image: KidsImg,
-      duration: "৬-১২ মাস",
-      classes: "সপ্তাহে ৫ দিন",
-      time: "সকাল ১০:০০ - ১১:৩০",
-      price: "৪,৫০০ টাকা",
-      discount: "৩,৫০০ টাকা",
-      save: "২২%",
-      students: "১,২০০+",
-      rating: "৪.৮",
-      age: "৬-১২ বছর",
-      features: [
-        "তাজবিদের সম্পূর্ণ নিয়ম",
-        "কুরআনের সঠিক তিলাওয়াত",
-        "মাখরাজ ও সিফাত",
-        "স্তরে স্তরে উন্নতি",
-      ],
     },
     {
       id: "hifz",
       title: "হিফজুল কুরআন",
       subtitle: "পবিত্র কুরআন মুখস্থকরণ",
-      description:
-        "সঠিক উচ্চারণ ও তাজবিদ সহ সম্পূর্ণ কুরআন মুখস্থ করার বিশেষ প্রশিক্ষণ।",
       image: KidsImg,
-      duration: "২-৩ বছর",
-      classes: "সপ্তাহে ৬ দিন",
-      time: "সকাল ৮:০০ - ১০:০০",
-      price: "৮,০০০ টাকা",
-      discount: "৬,০০০ টাকা",
-      save: "২৫%",
-      students: "৮০০+",
-      rating: "৪.৯",
-      age: "৭-১৫ বছর",
-      features: [
-        "প্রতিদিন নতুন পারা মুখস্থ",
-        "পূর্ববর্তী মুখস্থ পর্যালোচনা",
-        "তাজবিদ সহ উচ্চারণ",
-        "ব্যক্তিগত মেন্টরশিপ",
-      ],
     },
     {
       id: "hifz-revision",
       title: "হিফজ রিভিশন",
       subtitle: "মুখস্থ কুরআন পুনর্বীক্ষণ",
-      description:
-        "মুখস্থকৃত কুরআন পাকা ও মজবুত করার জন্য বিশেষ রিভিশন প্রোগ্রাম।",
       image: KidsImg,
-      duration: "৬-১২ মাস",
-      classes: "সপ্তাহে ৫ দিন",
-      time: "সন্ধ্যা ৬:০০ - ৮:০০",
-      price: "৫,০০০ টাকা",
-      discount: "৪,০০০ টাকা",
-      save: "২০%",
-      students: "৬০০+",
-      rating: "৪.৭",
-      age: "হিফজ সম্পন্ন",
-      features: [
-        "পূর্ণ কুরআনের পুনরাবৃত্তি",
-        "দূর্বল স্থান চিহ্নিতকরণ",
-        "তাজবিদের উন্নতি",
-        "মাশায়েখদের তত্ত্বাবধান",
-      ],
     },
     {
       id: "one-to-one",
       title: "ওয়ান টু ওয়ান",
       subtitle: "ব্যক্তিগত কুরআন শিক্ষা",
-      description:
-        "শিক্ষার্থীর প্রয়োজন অনুযায়ী ব্যক্তিগত কুরআন শিক্ষা প্রদান।",
       image: KidsImg,
-      duration: "নিজস্ব সময়",
-      classes: "সপ্তাহে ৩-৫ দিন",
-      time: "শিক্ষার্থীর সুবিধামতো",
-      price: "৬,০০০ টাকা",
-      discount: "৫,০০০ টাকা",
-      save: "১৭%",
-      students: "৫০০+",
-      rating: "৫.০",
-      age: "সকল স্তর",
-      features: [
-        "সম্পূর্ণ ব্যক্তিগত ক্লাস",
-        "শিক্ষার্থীর গতি অনুযায়ী",
-        "যেকোনো বিষয়ের উপর ফোকাস",
-        "সরাসরি মেন্টরশিপ",
-      ],
     },
   ];
 
@@ -248,7 +165,7 @@ const Kids = () => {
             {courses.map((course, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 group"
+                className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 group flex flex-col justify-between"
               >
                 {/* Course Image */}
                 <div className="relative h-48 overflow-hidden">
@@ -259,78 +176,22 @@ const Kids = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                   <div className="absolute bottom-4 left-4 right-4">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-yellow-400 text-black text-xs px-2 py-1 rounded-full font-bold">
-                        ⭐ জনপ্রিয়
-                      </span>
-                      <span className="bg-white/20 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full border border-white/20">
-                        {course.age}
-                      </span>
-                    </div>
-                    <h3 className="text-lg font-bold text-white mt-2">
+                    <h3 className="text-xl font-bold text-white mt-2">
                       {course.title}
                     </h3>
                   </div>
                 </div>
 
-                {/* Course Content */}
-                <div className="p-5">
-                  <p className="text-xs text-yellow-600 font-semibold mb-1">
-                    {course.subtitle}
-                  </p>
-                  <p className="text-gray-600 text-xs leading-relaxed mb-3 line-clamp-2">
-                    {course.description}
-                  </p>
-
-                  {/* Quick Stats */}
-                  <div className="grid grid-cols-3 gap-1 mb-3">
-                    <div className="bg-teal-50 p-1.5 rounded-lg text-center">
-                      <FaClock className="text-teal-500 mx-auto text-xs" />
-                      <p className="text-[10px] text-gray-500 mt-0.5">
-                        {course.duration}
-                      </p>
-                    </div>
-                    <div className="bg-teal-50 p-1.5 rounded-lg text-center">
-                      <FaUsers className="text-teal-500 mx-auto text-xs" />
-                      <p className="text-[10px] text-gray-500 mt-0.5">
-                        {course.students}
-                      </p>
-                    </div>
-                    <div className="bg-teal-50 p-1.5 rounded-lg text-center">
-                      <FaStar className="text-teal-500 mx-auto text-xs" />
-                      <p className="text-[10px] text-gray-500 mt-0.5">
-                        {course.rating}
-                      </p>
-                    </div>
+                {/* Course Content - Only Subtitle and Details Button */}
+                <div className="p-5 flex flex-col flex-grow justify-between">
+                  <div className="mb-4">
+                    <p className="text-sm text-yellow-600 font-semibold">
+                      {course.subtitle}
+                    </p>
                   </div>
 
-                  {/* Features */}
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {course.features.slice(0, 2).map((feature, idx) => (
-                      <span
-                        key={idx}
-                        className="text-[10px] bg-gray-50 px-2 py-0.5 rounded-full text-gray-600 border border-gray-200"
-                      >
-                        {feature}
-                      </span>
-                    ))}
-                    {course.features.length > 2 && (
-                      <span className="text-[10px] bg-yellow-50 px-2 py-0.5 rounded-full text-yellow-600 border border-yellow-200">
-                        +{course.features.length - 2} আরও
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Price & Button */}
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                    <div>
-                      <p className="text-[10px] text-gray-400 line-through">
-                        {course.price}
-                      </p>
-                      <p className="text-xl font-bold text-teal-600">
-                        {course.discount}
-                      </p>
-                    </div>
+                  {/* Button */}
+                  <div className="pt-3 border-t border-gray-100 flex justify-end">
                     <Link to={`/course/kids/${course.id}`}>
                       <button className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold px-4 py-2 rounded-full hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-1 text-xs">
                         <span>বিস্তারিত</span>
@@ -388,30 +249,6 @@ const Kids = () => {
                 <p className="text-sm text-gray-200">{item.desc}</p>
               </div>
             ))}
-          </div>
-        </div>
-
-        {/* CTA Section */}
-        <div className="mt-12 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-2xl p-8 text-center">
-          <h3 className="text-2xl font-bold text-teal-900 mb-3">
-            আজই আপনার কুরআন শিক্ষার যাত্রা শুরু করুন
-          </h3>
-          <p className="text-teal-800/80 mb-6 max-w-2xl mx-auto">
-            সঠিক পদ্ধতিতে কুরআন শিক্ষার সুযোগ হাতছাড়া করবেন না।
-          </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/course/kids/quida-nurani">
-              <button className="bg-teal-700 text-white px-6 py-3 rounded-full font-bold hover:bg-teal-800 transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
-                <FaBook className="inline mr-2" />
-                কায়দা নুরানী
-              </button>
-            </Link>
-            <Link to="/course/kids/hifz">
-              <button className="bg-white text-teal-700 px-6 py-3 rounded-full font-bold hover:bg-gray-100 transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
-                <FaMemory className="inline mr-2" />
-                হিফজ প্রোগ্রাম
-              </button>
-            </Link>
           </div>
         </div>
       </div>

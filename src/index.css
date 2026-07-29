@@ -1,5 +1,5 @@
-@import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Inter:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Delius&family=Hind+Siliguri:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Delius&family=Hind+Siliguri:wght@400;600;700&family=Inter:wght@400;500;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -12,6 +12,7 @@ body {
   /* ফন্ট ভেরিয়েবল */
   --sans-bn: "Hind Siliguri", system-ui, sans-serif;
   --sans-en: "Outfit", system-ui, sans-serif;
+  --font-delius: "Delius", cursive;
 
   /* কালার ভেরিয়েবল */
   --text: #6b6375;
@@ -63,4 +64,10 @@ html[lang="en"] body {
 
 .animate-fade-in {
   animation: fadeIn 0.2s ease-out forwards;
+}
+
+.delius-regular {
+  font-family: "Delius", cursive;
+  font-weight: 400;
+  font-style: normal;
 }
