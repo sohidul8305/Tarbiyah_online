@@ -39,8 +39,7 @@ const Alemiah = () => {
       id: "alimiyah-program",
       title: "আলিমিয়াহ প্রোগ্রাম",
       subtitle: "পূর্ণাঙ্গ ইসলামি উচ্চ শিক্ষা",
-      image:
-        "https://i.ibb.co.com/XZVH4YPP/images-q-tbn-ANd9-Gc-Ri56q-JX-78-BRlii-E9-ZR857-O7r-BIFLMs1-Sc-Uh-A4-EKw-J-AGMGZ1bt-PS1h8c-s-10.jpg",
+      image: "https://i.ibb.co.com/7xnC6p7d/banner-2.jpg",
       topBadge: "Allemiyah Program",
     },
   ];

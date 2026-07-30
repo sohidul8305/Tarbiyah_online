@@ -123,7 +123,6 @@ import DiplomaDetails from "../Components/DiplomaDetails/DiplomaDetails";
 import Enroll from "../Components/Enroll/Enroll";
 import AlimiyahKidsDetails from "../Components/AlimiyahKidsDetails/AlimiyahKidsDetails";
 import AlimiyahProgramDetails from "../Components/AlimiyahProgramDetails/AlimiyahProgramDetails";
-import AlimiyahProgramEnroll from "../Components/AlimiyahProgramEnroll/AlimiyahProgramEnroll";
 import AlimiyahKidsEnroll from "../Components/AlimiyahKidsEnroll/AlimiyahKidsEnroll";
 import QuidaNuraniDetails from "../Components/QuidaNuraniDetails/QuidaNuraniDetails";
 import NazeraDetails from "../Components/NazeraDetails/NazeraDetails";
@@ -139,6 +138,8 @@ import EldersQuidaDetails from "../Components/EldersQuidaDetails/EldersQuidaDeta
 import Bangla_version from "../Components/Bangla-version/Bangla_version";
 import English_version from "../Components/English_version/English_version";
 import Course_apply_from from "../Components/Course_apply_from/Course_apply_from";
+import AlimiyahProgramEnrollBangla from "../Components/AlimiyahProgramEnrollBangla/AlimiyahProgramEnrollBangla";
+import Enroll_alemiyah_english_version from "../Components/Enroll_alemiyah_english_version/Enroll_alemiyah_english_version";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -274,7 +275,7 @@ export const router = createBrowserRouter([
   },
   {
     path: "/course/alemiah/kids/enroll",
-    element: <AlimiyahProgramEnroll></AlimiyahProgramEnroll>,
+    element: <AlimiyahProgramEnrollBangla></AlimiyahProgramEnrollBangla>,
   },
   {
     path: "/course/alemiah/program/enroll",
@@ -327,6 +328,12 @@ export const router = createBrowserRouter([
   {
     path: "/course/quran/elders-quida",
     element: <EldersQuidaDetails></EldersQuidaDetails>,
+  },
+  {
+    path: "/enroll/alemiyah/english-version",
+    element: (
+      <Enroll_alemiyah_english_version></Enroll_alemiyah_english_version>
+    ),
   },
 
   // ==========================================
