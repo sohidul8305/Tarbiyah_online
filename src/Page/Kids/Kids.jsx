@@ -1,5 +1,10 @@
 import React from "react";
 import { Link } from "react-router";
+import KidsImg from "../../image/kids.jpg";
+import NuraniyaCourseImg from "../../image/nuranicourse.jpg";
+import NuraniyaBannerIMG from "../../image/nuranibanner.jpg";
+import NazeraBannerImg from "../../image/najerabanner.png";
+import HifjulBannerImg from "../../image/hifjulbanner.png";
 import {
   FaCheckCircle,
   FaClock,
@@ -29,7 +34,6 @@ import {
   FaSmile,
   FaPaintBrush,
 } from "react-icons/fa";
-import KidsImg from "../../image/kids.jpg";
 
 const Kids = () => {
   // কোর্সের তথ্য (শুধুমাত্র title ও subtitle রাখা হয়েছে)
@@ -38,19 +42,19 @@ const Kids = () => {
       id: "quida-nurani",
       title: "কায়দা নুরানী",
       subtitle: "কুরআন শেখার প্রথম ধাপ",
-      image: KidsImg,
+      image: NuraniyaBannerIMG,
     },
     {
       id: "nazera",
       title: "নাজেরা",
       subtitle: "কুরআন তিলাওয়াত প্রশিক্ষণ",
-      image: KidsImg,
+      image: NazeraBannerImg,
     },
     {
       id: "hifz",
       title: "হিফজুল কুরআন",
       subtitle: "পবিত্র কুরআন মুখস্থকরণ",
-      image: KidsImg,
+      image: HifjulBannerImg,
     },
     {
       id: "hifz-revision",
@@ -83,7 +87,7 @@ const Kids = () => {
                 <img
                   src={KidsImg}
                   alt="Kids Program Banner"
-                  className="w-full h-80 lg:h-96 object-cover rounded-xl shadow-xl"
+                  className="w-full max-w-[250px] h-auto object-contain rounded-xl shadow-xl"
                 />
                 <div className="absolute -top-3 -right-3 bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-bold shadow-lg animate-bounce">
                   🕌 তারবিয়াহ কুরআন স্টাডিজ

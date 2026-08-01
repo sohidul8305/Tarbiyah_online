@@ -1,343 +1,334 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router";
 import {
   FaArrowLeft,
   FaCheckCircle,
-  FaClock,
-  FaUserGraduate,
-  FaBookOpen,
-  FaVideo,
-  FaCalendarAlt,
-  FaAward,
-  FaUsers,
   FaStar,
-  FaArrowRight,
-  FaFileAlt,
   FaCertificate,
-  FaMosque,
-  FaQuran,
-  FaHands,
-  FaHeart,
-  FaLightbulb,
-  FaRocket,
-  FaChild,
-  FaBook,
-  FaPen,
-  FaMemory,
-  FaSync,
-  FaUserTie,
-  FaGraduationCap,
-  FaChalkboardTeacher,
-  FaSmile,
-  FaPaintBrush,
+  FaChevronDown,
+  FaChevronUp,
+  FaShareAlt,
+  FaRegHeart,
+  FaPlay,
 } from "react-icons/fa";
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 import KidsImg from "../../image/kids.jpg";
 
 const OneToOneDetails = () => {
-  const course = {
-    title: "ওয়ান টু ওয়ান",
-    subtitle: "ব্যক্তিগত কুরআন শিক্ষা",
-    description: `
-      শিক্ষার্থীর প্রয়োজন অনুযায়ী ব্যক্তিগত কুরআন শিক্ষা 
-      প্রদান। সম্পূর্ণ নিজস্ব সময় ও গতিতে শেখার সুযোগ।
-    `,
-    objectives: [
-      "শিক্ষার্থীর গতি অনুযায়ী শেখা",
-      "যেকোনো বিষয়ের উপর ফোকাস করা",
-      "সরাসরি মেন্টরশিপ পাওয়া",
-      "নমনীয় সময়সূচি মেনে চলা",
-      "ব্যক্তিগত লক্ষ্য অর্জন",
-    ],
-    benefits: [
-      "সম্পূর্ণ ব্যক্তিগত ক্লাস",
-      "শিক্ষার্থীর সময় অনুযায়ী ক্লাস",
-      "যেকোনো বিষয়ের উপর ফোকাস",
-      "সরাসরি ওলামায়ে কেরামের তত্ত্বাবধান",
-      "আন্তর্জাতিক মানের সার্টিফিকেট",
-    ],
-    schedule: {
-      duration: "নিজস্ব সময়",
-      classes: "সপ্তাহে ৩-৫ দিন",
-      time: "শিক্ষার্থীর সুবিধামতো",
-      totalClasses: "নিজস্ব",
-    },
-    price: {
-      original: "৬,০০০ টাকা",
-      discount: "৫,০০০ টাকা",
-      save: "১৭%",
-    },
-    icon: <FaUserTie className="text-4xl text-rose-600" />,
-    color: "from-rose-500 to-pink-600",
-    age: "সকল স্তর",
-    students: "৫০০+",
-    rating: "৫.০",
+  const [showMore, setShowMore] = useState(false);
+  const [openAccordion, setOpenAccordion] = useState(null);
+
+  const toggleAccordion = (index) => {
+    setOpenAccordion(openAccordion === index ? null : index);
   };
 
-  const instructors = [
-    {
-      id: 1,
-      name: "হাফেজ মাওলানা আব্দুর রহমান",
-      title: "প্রধান কুরআন শিক্ষক",
-      subtitle: "বিশেষজ্ঞ: তাজবিদ ও কিরাত",
-      image: "https://i.pravatar.cc/150?img=11",
-      expertise: "তাজবিদ ও কিরাত",
+  const course = {
+    title: "অনলাইন হিফজ কোর্স",
+    subtitle: "অনলাইন কুরআন তরতিব হিফজ",
+    description: `আল্লাহ তায়ালা বলেন, আমিই যিকর (কুরআন) নাযিল করেছি এবং আমিই উহার সংরক্ষণ। 
+হিফজ- অধ্যায়: এটি সর্বসাকুল্যে precious বরকত পূর্ণ সমৃদ্ধ বিষয় তথা ক্ষেত্র। তাই 
+প্রত্যেক মুসলিম হিসেবে আল্লাহর কালামের সঠিক কুরআনুল কারীমকে মুখস্থ করার মাধ্যমে হেফাযত 
+করা। কুরআনুল কারীম হিফযকরণের সওয়াব ও ফজিলত অনেক বেশি। তাই আমরা 
+প্রস্তুত করেছি "অনলাইন কুরআন তরতিব হিফজ" এই প্রজেক্টটি। প্রজেক্টের মাধ্যমে একজন 
+শিক্ষার্থী খুব সহজেই কুরআনুল কারীম হিফজ সমাপ্ত করতে পারার ইনশাআল্লাহ।`,
+    shortDesc: `আল্লাহ তায়ালা বলেন, আমিই যিকর (কুরআন) নাযিল করেছি এবং আমিই উহার সংরক্ষণ...`,
+    objectives: [
+      "হিফজের বিষয়াবলী ও অনুশীলনী",
+      "ব্যবহারিক তাজবিদ ও সার্টিফাইড ইন্সট্রাক্টর",
+      "সাপ্তাহিক সেশন ও মাসিক মূল্যায়ন",
+      "নিয়মিত প্রগ্রেস ও মৌখিক টিপস",
+    ],
+    materials: [
+      "প্রোডাক্ট হোপ্লেট || ক্লাস ভিডিও রেকর্ডিং",
+      "ক্লাসের সময়কাল: ১২০ মিনিট প্রতি ক্লাস",
+      "সার্টিফিকেট ও ইনরাইট প্রদান",
+      "পরীক্ষা: সিলেক্টিভ এবং ট্রায়াল",
+      "সাপ্তাহিক ক্লাসের দিন: ৪ দিন [নিয়মিত ব্যাচের জন্য]",
+      "সাপ্তাহিক ক্লাসের দিন: ২ দিন [ভিপিসী ব্যাচের জন্য]",
+    ],
+    curriculum: [
+      {
+        title: "পূর্ণ কুরআন হিফজ",
+        desc: "সম্পূর্ণ কুরআনুল কারীম হিফজ সম্পন্ন করার বিশেষ পরিকল্পনা।",
+      },
+      {
+        title: "৩০ পাড়া সম্পূর্ণ হিফজ",
+        desc: "ধারাবাহিকভাবে ৩০ পাড়া মুখস্থ করার নিয়ম ও মাশক।",
+      },
+      {
+        title: "অ্যারাবিক সুয় হিফজ",
+        desc: "আরবি উচ্চারণ ও হিফজের বিশেষ অনুশীলন।",
+      },
+    ],
+    targetAudience: [
+      "যাঁরা শুদ্ধ মাত্রায় কুরআনকে পড়তে পারে এমন শিক্ষার্থীদের জন্য।",
+      "যে কোনো বয়সের যে কেউ হাজী বা হাফেজ হতে পারে।",
+      "বসে না থেকে ঘরে বসে কুরআন হিফজ করতে আগ্রহী।",
+      "কর্মব্যস্ত জীবনের পাশাপাশি ঘরে কুরআন হিফজ প্রতি আগ্রহীদের জন্য।",
+    ],
+    feeStructure: {
+      bd: {
+        title: "ফি স্ট্রাকচার",
+        admission: "ভর্তি ফি: ২০০০ টাকা",
+        monthly: "মাসিক ফি: ২০০০ টাকা",
+      },
+      overseas: {
+        title: "অন্যান্য তথ্য",
+        admission: "সময়কাল: ১২০ মিনিট প্রতি ক্লাস",
+        monthly: "সাপ্তাহিক ক্লাস: ৪ দিন / ২ দিন",
+      },
     },
-    {
-      id: 2,
-      name: "হাফেজ মাওলানা ইউনুস আলী",
-      title: "হিফজ বিভাগের প্রধান",
-      subtitle: "বিশেষজ্ঞ: হিফজ ও রিভিশন",
-      image: "https://i.pravatar.cc/150?img=13",
-      expertise: "হিফজ ও রিভিশন",
-    },
-    {
-      id: 3,
-      name: "মাওলানা সাদিকুর রহমান",
-      title: "কায়দা ও নাজেরা শিক্ষক",
-      subtitle: "বিশেষজ্ঞ: মাখরাজ ও সিফাত",
-      image: "https://i.pravatar.cc/150?img=14",
-      expertise: "মাখরাজ ও সিফাত",
-    },
-  ];
+    rating: "0 (0 Ratings)",
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <Link
-            to="/course/kids"
-            className="inline-flex items-center gap-2 text-rose-700 hover:text-rose-900 mb-6 transition-colors group"
-          >
-            <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">কোর্স পেজে ফিরে যান</span>
-          </Link>
+      <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        {/* Back Link */}
+        <Link
+          to="/course/kids"
+          className="inline-flex items-center gap-2 text-cyan-700 hover:text-cyan-900 mb-4 transition-colors text-sm font-medium"
+        >
+          <FaArrowLeft />
+          <span>কোর্স পেজে ফিরে যান</span>
+        </Link>
 
-          <div
-            className={`bg-gradient-to-br ${course.color} rounded-3xl shadow-2xl overflow-hidden text-white p-8 md:p-12`}
-          >
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  {course.icon}
-                  <span className="bg-white/20 text-white px-3 py-1 rounded-full text-sm font-semibold backdrop-blur-sm">
-                    {course.subtitle}
-                  </span>
-                </div>
-                <h1 className="text-3xl md:text-4xl font-bold">
+        {/* Main Grid Layout with Sidebar Alignment Correction */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          {/* Left Details Section */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Top Banner Image */}
+            <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-md bg-cyan-900 relative">
+              <img
+                src={KidsImg}
+                alt={course.title}
+                className="w-full h-full object-cover opacity-90"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
+                <h1 className="text-2xl md:text-3xl font-bold text-white">
                   {course.title}
                 </h1>
-                <p className="text-white/80 text-lg mt-1">{course.subtitle}</p>
               </div>
-              <div className="flex gap-3">
-                <span className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm border border-white/10 flex items-center gap-2">
-                  <FaUserGraduate className="text-yellow-300" />
-                  {course.age}
-                </span>
-                <span className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm border border-white/10 flex items-center gap-2">
-                  <FaUsers className="text-yellow-300" />
-                  {course.students}
-                </span>
-                <span className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm border border-white/10 flex items-center gap-2">
-                  <FaStar className="text-yellow-300" />
+            </div>
+
+            {/* Share, Wishlist, Rating bar */}
+            <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-sm">
+              <div className="flex items-center gap-4 text-cyan-700">
+                <button className="flex items-center gap-1.5 hover:underline font-medium">
+                  <FaShareAlt /> Share
+                </button>
+                <button className="flex items-center gap-1.5 hover:underline font-medium">
+                  <FaRegHeart /> Wishlist
+                </button>
+              </div>
+              <div className="flex items-center gap-1 text-amber-400">
+                <FaStar />
+                <FaStar />
+                <FaStar />
+                <FaStar />
+                <FaStar />
+                <span className="text-gray-600 text-xs ml-1">
                   {course.rating}
                 </span>
               </div>
             </div>
-          </div>
 
-          <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-rose-800 mb-4 flex items-center gap-3">
-                  <div className="w-1 h-8 bg-rose-500 rounded-full"></div>
-                  কোর্সের বিবরণ
+            {/* ABOUT COURSE */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-3 tracking-wide">
+                ABOUT COURSE
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                {showMore ? course.description : course.shortDesc}
+              </p>
+              <button
+                onClick={() => setShowMore(!showMore)}
+                className="text-cyan-600 text-sm font-semibold mt-3 hover:underline flex items-center gap-1"
+              >
+                {showMore ? "- কম প্রদর্শন করুন" : "+ আরও দেখুন"}
+              </button>
+            </div>
+
+            {/* WHAT YOU WILL GAIN */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                WHAT YOU WILL GAIN
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 text-sm text-gray-700">
+                {course.objectives.map((obj, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-cyan-600 font-bold leading-tight">
+                      »
+                    </span>
+                    <span className="leading-snug">{obj}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* EARN A CERTIFICATE */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-1">
+                <h2 className="text-cyan-700 font-bold text-lg mb-2 tracking-wide">
+                  EARN A CERTIFICATE
                 </h2>
-                <p className="text-gray-600 leading-relaxed">
-                  {course.description}
+                <p className="text-gray-600 text-xs leading-relaxed">
+                  Add this certificate to your resume to demonstrate your skills
+                  & increase your chances of getting noticed.
                 </p>
               </div>
-
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                <h2 className="text-2xl font-bold text-rose-800 mb-4 flex items-center gap-3">
-                  <div className="w-1 h-8 bg-rose-500 rounded-full"></div>
-                  শেখার উদ্দেশ্য
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {course.objectives.map((objective, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-3 bg-gray-50 p-3 rounded-xl hover:bg-rose-50 transition-colors"
-                    >
-                      <FaCheckCircle className="text-rose-500 text-lg flex-shrink-0 mt-0.5" />
-                      <span className="text-gray-700">{objective}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-2xl p-8 border border-rose-100">
-                <h2 className="text-2xl font-bold text-rose-800 mb-4 flex items-center gap-3">
-                  <FaLightbulb className="text-yellow-500 text-3xl" />
-                  বিশেষ সুবিধাসমূহ
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {course.benefits.map((benefit, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-3 bg-white/70 p-3 rounded-xl"
-                    >
-                      <FaCheckCircle className="text-green-500 text-lg flex-shrink-0" />
-                      <span className="text-gray-700 text-sm">{benefit}</span>
-                    </div>
-                  ))}
+              <div className="w-48 bg-cyan-50 border border-cyan-200 rounded-lg p-3 shadow-inner text-center flex-shrink-0">
+                <div className="w-full h-28 bg-white border border-cyan-300 rounded flex flex-col items-center justify-center text-cyan-800 text-xs font-bold shadow-sm p-2">
+                  <FaCertificate className="text-3xl text-cyan-600 mb-1" />
+                  <span className="text-[10px] text-gray-500">
+                    কোর্স সার্টিফিকেট
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-8 bg-rose-500 rounded-full"></div>
-                  <h3 className="text-xl font-bold text-rose-800 flex items-center gap-2">
-                    <FaUserTie className="text-rose-500" />
-                    আমাদের ইন্সট্রাক্টরগণ
-                  </h3>
-                </div>
+            {/* Ready To Apply Banner */}
+            <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-5 flex items-center justify-between shadow-sm">
+              <span className="text-cyan-800 font-bold text-base md:text-lg">
+                Ready To Apply Your Course
+              </span>
+              <Link to="/course/kids/one-to-one/enroll">
+                <button className="bg-cyan-700 hover:bg-cyan-800 text-white font-bold px-6 py-2.5 rounded-lg text-sm shadow transition-all">
+                  Start Now
+                </button>
+              </Link>
+            </div>
 
-                <div className="space-y-4">
-                  {instructors.map((instructor) => (
-                    <div
-                      key={instructor.id}
-                      className="bg-gradient-to-r from-gray-50 to-white p-4 rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-300 hover:border-rose-300 hover:scale-[1.02] group"
+            {/* MATERIALS INCLUDED */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                MATERIALS INCLUDED
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 text-xs md:text-sm text-gray-700">
+                {course.materials.map((mat, i) => (
+                  <div key={i} className="flex items-start gap-2.5">
+                    <FaCheckCircle className="text-cyan-600 text-sm flex-shrink-0 mt-0.5" />
+                    <span className="leading-snug">{mat}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* INTER COURSES (COURSE CURRICULUM) */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                INTER COURSES
+              </h2>
+              <div className="space-y-3">
+                {course.curriculum.map((item, index) => (
+                  <div
+                    key={index}
+                    className="border border-cyan-200 rounded-lg overflow-hidden"
+                  >
+                    <button
+                      onClick={() => toggleAccordion(index)}
+                      className="w-full flex items-center justify-between p-3.5 bg-cyan-50/50 hover:bg-cyan-50 text-cyan-800 font-semibold text-sm transition-colors text-left"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="relative">
-                          <div className="w-16 h-16 rounded-full bg-gradient-to-r from-rose-400 to-pink-500 p-[2px]">
-                            <div className="w-full h-full rounded-full bg-white overflow-hidden">
-                              <img
-                                src={instructor.image}
-                                alt={instructor.name}
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                                    instructor.name,
-                                  )}&background=random&size=64`;
-                                }}
-                              />
-                            </div>
-                          </div>
-                          <div className="absolute -bottom-1 -right-1 bg-green-500 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center">
-                            <FaCheckCircle className="text-white text-xs" />
-                          </div>
-                        </div>
-
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-rose-800 text-sm truncate group-hover:text-rose-600 transition-colors">
-                            {instructor.name}
-                          </h4>
-                          <p className="text-xs text-gray-600 font-medium">
-                            {instructor.title}
-                          </p>
-                          {instructor.subtitle && (
-                            <p className="text-xs text-rose-600 mt-0.5 flex items-center gap-1">
-                              <FaGraduationCap className="text-[10px]" />
-                              {instructor.subtitle}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-1 mt-1">
-                            <span className="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">
-                              {instructor.expertise}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <FaChalkboardTeacher className="text-xl" />
-                        </div>
+                      <span>- {item.title}</span>
+                      {openAccordion === index ? (
+                        <FaChevronUp className="text-xs flex-shrink-0 ml-2" />
+                      ) : (
+                        <FaChevronDown className="text-xs flex-shrink-0 ml-2" />
+                      )}
+                    </button>
+                    {openAccordion === index && (
+                      <div className="p-3.5 bg-white text-xs md:text-sm text-gray-600 border-t border-cyan-100">
+                        {item.desc}
                       </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100 sticky top-24">
-                <div className="text-center mb-6">
-                  <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-rose-200">
-                    {course.icon}
+                    )}
                   </div>
-                  <h3 className="text-xl font-bold text-rose-800">
-                    কোর্সের তথ্য
+                ))}
+              </div>
+            </div>
+
+            {/* TARGET AUDIENCE */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                TARGET AUDIENCE
+              </h2>
+              <div className="space-y-2.5 text-xs md:text-sm text-gray-700">
+                {course.targetAudience.map((target, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-cyan-600 font-bold leading-tight">
+                      »
+                    </span>
+                    <span className="leading-snug">{target}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* FEE STRUCTURE */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                FEE STRUCTURE
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-cyan-50/50 p-4 rounded-xl border border-cyan-100">
+                  <h3 className="font-bold text-cyan-800 text-sm mb-3">
+                    {course.feeStructure.bd.title}
                   </h3>
+                  <p className="text-xs text-gray-700 mb-1.5 flex items-center gap-1.5">
+                    <span className="text-cyan-600 font-bold">»</span>{" "}
+                    {course.feeStructure.bd.admission}
+                  </p>
+                  <p className="text-xs text-gray-700 flex items-center gap-1.5">
+                    <span className="text-cyan-600 font-bold">»</span>{" "}
+                    {course.feeStructure.bd.monthly}
+                  </p>
                 </div>
-
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                    <span className="text-gray-600 flex items-center gap-2">
-                      <FaClock className="text-rose-500" /> সময়কাল
-                    </span>
-                    <span className="font-semibold">
-                      {course.schedule.duration}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                    <span className="text-gray-600 flex items-center gap-2">
-                      <FaCalendarAlt className="text-rose-500" /> ক্লাস
-                    </span>
-                    <span className="font-semibold">
-                      {course.schedule.classes}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                    <span className="text-gray-600 flex items-center gap-2">
-                      <FaVideo className="text-rose-500" /> সময়
-                    </span>
-                    <span className="font-semibold">
-                      {course.schedule.time}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                    <span className="text-gray-600 flex items-center gap-2">
-                      <FaFileAlt className="text-rose-500" /> মোট ক্লাস
-                    </span>
-                    <span className="font-semibold">
-                      {course.schedule.totalClasses}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600 flex items-center gap-2">
-                      <FaCertificate className="text-rose-500" /> সার্টিফিকেট
-                    </span>
-                    <span className="font-semibold text-green-600">
-                      ✓ ভেরিফাইড
-                    </span>
-                  </div>
+                <div className="bg-cyan-50/50 p-4 rounded-xl border border-cyan-100">
+                  <h3 className="font-bold text-cyan-800 text-sm mb-3">
+                    {course.feeStructure.overseas.title}
+                  </h3>
+                  <p className="text-xs text-gray-700 mb-1.5 flex items-center gap-1.5">
+                    <span className="text-cyan-600 font-bold">»</span>{" "}
+                    {course.feeStructure.overseas.admission}
+                  </p>
+                  <p className="text-xs text-gray-700 flex items-center gap-1.5">
+                    <span className="text-cyan-600 font-bold">»</span>{" "}
+                    {course.feeStructure.overseas.monthly}
+                  </p>
                 </div>
-
-                <div className="mt-6 bg-gradient-to-r from-rose-50 to-pink-50 p-4 rounded-xl border-2 border-rose-200">
-                  <div className="text-center">
-                    <p className="text-sm text-gray-600">কোর্স ফি</p>
-                    <p className="text-3xl font-bold text-rose-600">
-                      {course.price.discount}
-                    </p>
-                    <p className="text-sm text-gray-500 line-through">
-                      {course.price.original}
-                    </p>
-                    <span className="inline-block bg-red-500 text-white text-xs px-2 py-1 rounded-full mt-1">
-                      সেভ {course.price.save}
-                    </span>
-                  </div>
-                </div>
-
-                <Link to="/course/kids/one-to-one/enroll">
-                  <button className="w-full mt-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white font-bold py-4 px-6 rounded-xl hover:shadow-2xl transition-all transform hover:scale-105 flex items-center justify-center gap-3">
-                    <FaRocket /> <span>এনরোল করুন</span>
-                    <FaArrowRight />
-                  </button>
-                </Link>
               </div>
+            </div>
+          </div>
+
+          {/* Right Sidebar (Video Preview & Apply Card) - Aligned to top with left column */}
+          <div className="space-y-6 lg:sticky lg:top-24">
+            <div className="bg-white rounded-xl shadow-md p-4 border border-cyan-100">
+              {/* Thumbnail / Video Box */}
+              <div className="relative rounded-lg overflow-hidden shadow mb-4 bg-black group cursor-pointer h-40">
+                <img
+                  src={KidsImg}
+                  alt="Thumbnail"
+                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-10 h-10 bg-cyan-700 text-white rounded-full flex items-center justify-center shadow-lg group-hover:bg-cyan-600 transition-colors">
+                    <FaPlay className="text-xs ml-0.5" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <span className="text-xs font-bold text-cyan-800 tracking-wider uppercase block mb-1">
+                  Apply This Course
+                </span>
+              </div>
+
+              <Link to="/course/kids/one-to-one/enroll">
+                <button className="w-full bg-cyan-700 hover:bg-cyan-800 text-white font-bold py-3 px-4 rounded-lg shadow transition-all text-sm flex items-center justify-center gap-2">
+                  <span>Apply Now</span>
+                </button>
+              </Link>
             </div>
           </div>
         </div>

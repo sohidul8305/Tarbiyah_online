@@ -1,38 +1,13 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
-import {
-  FaArrowLeft,
-  FaUser,
-  FaEnvelope,
-  FaPhone,
-  FaCreditCard,
-  FaMobileAlt,
-  FaLock,
-  FaSpinner,
-  FaShieldAlt,
-  FaUniversity,
-  FaBuilding,
-  FaTag,
-  FaArrowRight,
-  FaUserPlus,
-  FaBook,
-  FaGraduationCap,
-  FaMapMarkerAlt,
-  FaCity,
-  FaGlobe,
-  FaTruck,
-} from "react-icons/fa";
-import Footer from "../Navbar/Footer/Footer";
-import Navbar from "../Navbar/Navbar";
+import { FaLock, FaSpinner, FaShieldAlt } from "react-icons/fa";
 
-const QuidaEnroll = () => {
+const Enroll_quida_english_version = () => {
   const [loading, setLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("bkash");
-  const [createAccount, setCreateAccount] = useState(false);
-  const [couponCode, setCouponCode] = useState("");
   const [showOrderSummary, setShowOrderSummary] = useState(true);
 
-  // স্ক্রিনশটে থাকা হুবহু ৩টি আইটেম/কোর্স (এখানে আপনার ইচ্ছমতো আরও আইটেম যোগ করতে পারেন)
+  // স্ক্রিনশটের সাথে মিলিয়ে ৪টি কোর্স বা আইটেম
   const [cartItems, setCartItems] = useState([
     {
       id: 1,
@@ -40,24 +15,31 @@ const QuidaEnroll = () => {
       price: 3000,
       signupFee: 6000,
       quantity: 3,
-      image: "https://i.ibb.co.com/7xnC6p7d/banner-2.jpg",
+      image: "https://via.placeholder.com/60",
     },
     {
       id: 2,
       name: "Tarbiyah Alimiyah Program (Overseas)",
       price: 9000,
       signupFee: 9000,
-      quantity: 3,
-      image: "https://i.ibb.co.com/7xnC6p7d/banner-2.jpg",
+      quantity: 2,
+      image: "https://via.placeholder.com/60",
     },
     {
       id: 3,
       name: "Qaida Nuraniyah Course (Bangladesh)",
-      price: 1000,
-      signupFee: 1000,
+      price: 2000,
+      signupFee: 2000,
+      quantity: 2,
+      image: "https://via.placeholder.com/60",
+    },
+    {
+      id: 4,
+      name: "Tarbiyah Najera Course (Overseas)",
+      price: 2000,
+      signupFee: 2000,
       quantity: 1,
-      image:
-        "https://i.ibb.co.com/MTCtR32/E0-A6-86-E0-A6-B2-E0-A6-BF-E0-A6-AE-E0-A6-BF-E0-A6-AF-E0-A6-BC-E0-A7-8-D-E0-A6-AF-E0-A6-BE-E0-A6-B9.jpg",
+      image: "https://via.placeholder.com/60",
     },
   ]);
 
@@ -71,8 +53,6 @@ const QuidaEnroll = () => {
     postcode: "",
     country: "bangladesh",
     state: "",
-    password: "",
-    confirmPassword: "",
   });
   const [formErrors, setFormErrors] = useState({});
 
@@ -82,11 +62,7 @@ const QuidaEnroll = () => {
       (acc, item) => acc + (item.price * item.quantity + item.signupFee),
       0,
     );
-    let recurringTotal = cartItems.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0,
-    );
-    return { subtotal, recurringTotal, bkashCharge: 0, total: subtotal };
+    return { subtotal, bkashCharge: 0, total: subtotal };
   };
 
   const totals = calculateTotals();
@@ -105,11 +81,12 @@ const QuidaEnroll = () => {
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.firstName) errors.firstName = "প্রথম নাম প্রয়োজন";
-    if (!formData.lastName) errors.lastName = "শেষ নাম প্রয়োজন";
-    if (!formData.phone) errors.phone = "ফোন নম্বর প্রয়োজন";
-    if (!formData.email) errors.email = "ইমেইল প্রয়োজন";
-    if (!formData.streetAddress) errors.streetAddress = "ঠিকানা প্রয়োজন";
+    if (!formData.firstName) errors.firstName = "First name is required";
+    if (!formData.lastName) errors.lastName = "Last name is required";
+    if (!formData.phone) errors.phone = "Phone is required";
+    if (!formData.email) errors.email = "Email is required";
+    if (!formData.streetAddress)
+      errors.streetAddress = "Street address is required";
     return errors;
   };
 
@@ -130,14 +107,14 @@ const QuidaEnroll = () => {
             "https://sandbox.sslcommerz.com/gwprocess/v4/index.php";
         } else {
           alert(
-            `${paymentMethod.toUpperCase()} পেমেন্ট প্রক্রিয়াকরণ সফল হয়েছে।`,
+            `${paymentMethod.toUpperCase()} Payment processing successful.`,
           );
           setLoading(false);
         }
       }, 1500);
     } catch (error) {
       console.error("Payment Error:", error);
-      alert("পেমেন্ট প্রক্রিয়ায় ত্রুটি হয়েছে।");
+      alert("Payment processing failed.");
       setLoading(false);
     }
   };
@@ -157,7 +134,6 @@ const QuidaEnroll = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-sans">
-      <Navbar />
       <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-10">
         {/* Top Toggleable Order Summary Bar */}
         <div className="border border-gray-200 rounded-lg p-4 mb-8 flex justify-between items-center bg-white shadow-xs">
@@ -209,7 +185,7 @@ const QuidaEnroll = () => {
                   <div className="flex items-center border rounded overflow-hidden">
                     <button
                       onClick={() => handleQuantityChange(item.id, -1)}
-                      className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-xs"
+                      className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-xs cursor-pointer"
                     >
                       -
                     </button>
@@ -218,7 +194,7 @@ const QuidaEnroll = () => {
                     </span>
                     <button
                       onClick={() => handleQuantityChange(item.id, 1)}
-                      className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-xs"
+                      className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 text-xs cursor-pointer"
                     >
                       +
                     </button>
@@ -270,7 +246,7 @@ const QuidaEnroll = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <h3 className="text-sm font-bold text-blue-900 tracking-wider uppercase border-b pb-2">
-            Shipping Information
+            SHIPPING INFORMATION
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -281,7 +257,7 @@ const QuidaEnroll = () => {
                 value={formData.firstName}
                 onChange={handleInputChange}
                 placeholder="FIRST NAME *"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-500 uppercase"
               />
               {formErrors.firstName && (
                 <p className="text-red-500 text-xs mt-1">
@@ -296,7 +272,7 @@ const QuidaEnroll = () => {
                 value={formData.lastName}
                 onChange={handleInputChange}
                 placeholder="LAST NAME *"
-                className="w-full px-4 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-500"
+                className="w-full px-4 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-500 uppercase"
               />
               {formErrors.lastName && (
                 <p className="text-red-500 text-xs mt-1">
@@ -345,7 +321,7 @@ const QuidaEnroll = () => {
               value={formData.streetAddress}
               onChange={handleInputChange}
               placeholder="STREET ADDRESS *"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-500"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-500 uppercase"
             />
           </div>
 
@@ -367,7 +343,7 @@ const QuidaEnroll = () => {
               value={formData.postcode}
               onChange={handleInputChange}
               placeholder="POSTCODE"
-              className="w-full px-4 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-500"
+              className="w-full px-4 py-2.5 border border-gray-300 rounded text-sm focus:outline-none focus:border-teal-500 uppercase"
             />
             <select
               name="country"
@@ -392,7 +368,7 @@ const QuidaEnroll = () => {
           {/* Lower Order Summary Section as in Screenshot */}
           <div className="pt-6 border-t border-gray-200">
             <h3 className="text-sm font-bold text-blue-900 tracking-wider uppercase mb-4">
-              Order Summary
+              ORDER SUMMARY
             </h3>
             <div className="text-xs text-teal-600 mb-4 cursor-pointer">
               Have a coupon? Click here to enter your code
@@ -437,7 +413,7 @@ const QuidaEnroll = () => {
               </div>
               <div className="flex justify-between text-xs text-gray-500">
                 <span>Subtotal</span>
-                <span>৳ 13,000 / month</span>
+                <span>৳ 16,000 / month</span>
               </div>
             </div>
 
@@ -447,7 +423,7 @@ const QuidaEnroll = () => {
               </span>
               <div className="text-right">
                 <span className="font-bold text-teal-700 text-base">
-                  ৳ 13,000 / month
+                  ৳ 16,000 / month
                 </span>
                 <p className="text-[10px] text-gray-400">
                   First renewal: 08/30/2026
@@ -459,7 +435,7 @@ const QuidaEnroll = () => {
           {/* Payment Section */}
           <div className="pt-4">
             <h3 className="text-sm font-bold text-blue-900 tracking-wider uppercase mb-1">
-              Payment
+              PAYMENT
             </h3>
             <p className="text-[11px] text-gray-400 mb-4 flex items-center gap-1">
               <FaShieldAlt className="text-green-500" /> ALL TRANSACTIONS ARE
@@ -521,7 +497,7 @@ const QuidaEnroll = () => {
             <input
               type="checkbox"
               required
-              className="accent-teal-600 w-4 h-4"
+              className="accent-teal-600 w-4 h-4 cursor-pointer"
             />
             <span className="text-xs text-gray-600">
               I've read and accept the{" "}
@@ -549,7 +525,7 @@ const QuidaEnroll = () => {
             {loading ? (
               <>
                 <FaSpinner className="animate-spin" />
-                প্রক্রিয়াকরণ...
+                Processing...
               </>
             ) : (
               <>
@@ -560,9 +536,8 @@ const QuidaEnroll = () => {
           </button>
         </form>
       </div>
-      <Footer />
     </div>
   );
 };
 
-export default QuidaEnroll;
+export default Enroll_quida_english_version;

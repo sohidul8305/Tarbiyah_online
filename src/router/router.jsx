@@ -129,7 +129,6 @@ import NazeraDetails from "../Components/NazeraDetails/NazeraDetails";
 import HifzDetail from "../Components/HifzDetail/HifzDetail";
 import HifzRevisionDetails from "../Components/HifzRevisionDetails/HifzRevisionDetails";
 import OneToOneDetails from "../Components/OneToOneDetails/OneToOneDetails";
-import QuidaEnroll from "../Components/QuidaEnroll/QuidaEnroll";
 import NazeraEnroll from "../Components/NazeraEnroll/NazeraEnroll";
 import HifzEnroll from "../Components/HifzEnroll/HifzEnroll";
 import HifzRevisionEnroll from "../Components/HifzRevisionEnroll/HifzRevisionEnroll";
@@ -137,9 +136,11 @@ import OneToOneEnroll from "../Components/OneToOneEnroll/OneToOneEnroll";
 import EldersQuidaDetails from "../Components/EldersQuidaDetails/EldersQuidaDetails";
 import Bangla_version from "../Components/Bangla-version/Bangla_version";
 import English_version from "../Components/English_version/English_version";
+import QuidaEnroll from "../Components/QuidaEnroll/QuidaEnroll";
 import Course_apply_from from "../Components/Course_apply_from/Course_apply_from";
 import AlimiyahProgramEnrollBangla from "../Components/AlimiyahProgramEnrollBangla/AlimiyahProgramEnrollBangla";
 import Enroll_alemiyah_english_version from "../Components/Enroll_alemiyah_english_version/Enroll_alemiyah_english_version";
+import Enroll_quida_english_version from "../Components/Enroll_quida_english_version/Enroll_quida_english_version";
 
 export const router = createBrowserRouter([
   // ==========================================
@@ -252,6 +253,10 @@ export const router = createBrowserRouter([
         path: "/Course-apply-from",
         element: <Course_apply_from />,
       },
+      {
+        path: "/enroll/quida/english-version",
+        element: <Enroll_quida_english_version />,
+      },
     ],
   },
 
@@ -302,7 +307,7 @@ export const router = createBrowserRouter([
     element: <OneToOneDetails></OneToOneDetails>,
   },
   {
-    path: "/course/kids/quida/enroll",
+    path: "/course/kids/quida/enrollbnagla",
     element: <QuidaEnroll></QuidaEnroll>,
   },
   {
