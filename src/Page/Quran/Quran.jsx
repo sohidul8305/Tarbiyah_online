@@ -1,5 +1,9 @@
 import React from "react";
 import { Link } from "react-router";
+import Quranforeldersbanner from "../../image/Quranforeldersbanner.jpg";
+import Najeraadlatsbanner from "../../image/Najeraadlatsbanner.png";
+import Adalthifzbanner from "../../image/adalthifzbanner.jpg";
+import adaltsbannerImg from "../../image/tajweedbanner - Copy.png";
 import {
   FaCheckCircle,
   FaClock,
@@ -37,25 +41,25 @@ const Quran = () => {
       id: "elders-quida",
       title: "এল্ডার্স কায়দা নুরানী",
       subtitle: "প্রবীণদের জন্য কুরআন শিক্ষার প্রথম ধাপ",
-      image: QuraneldersImg,
+      image: Quranforeldersbanner,
     },
     {
       id: "elders-nazera",
       title: "এল্ডার্স নাজেরা",
       subtitle: "প্রবীণদের কুরআন তিলাওয়াত প্রশিক্ষণ",
-      image: QuraneldersImg,
+      image: Najeraadlatsbanner,
     },
     {
       id: "elders-hifz",
       title: "এল্ডার্স হিফজ",
       subtitle: "প্রবীণদের জন্য কুরআন মুখস্থকরণ",
-      image: QuraneldersImg,
+      image: Adalthifzbanner,
     },
     {
       id: "elders-tajweed",
       title: "এল্ডার্স তাজউইদ",
       subtitle: "প্রবীণদের জন্য তাজউইদ শিক্ষা",
-      image: QuraneldersImg,
+      image: adaltsbannerImg,
     },
   ];
 

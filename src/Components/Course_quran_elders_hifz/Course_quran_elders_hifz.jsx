@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import ElderscourseImg from "../../image/Quranforelderscourse.jpg";
-import EldersbannerImg from "../../image/Quranforeldersbanner.jpg";
+import HifzadaltsBannerImg from "../../image/adalthifzbanner.jpg";
+import HIfzadaltscoursImg from "../../image/adaltfifzcourse.jpg";
 import {
   FaArrowLeft,
   FaUsers,
@@ -34,7 +34,7 @@ import {
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 
-const EldersQuidaDetails = () => {
+const Course_quran_elders_hifz = () => {
   const [openSemester, setOpenSemester] = useState(0);
   const [activeTab, setActiveTab] = useState("info");
 
@@ -42,56 +42,57 @@ const EldersQuidaDetails = () => {
     setOpenSemester(openSemester === index ? null : index);
   };
 
-  // Elders Quida এর ইনস্ট্রাক্টর
+  // Hifz Course এর ইনস্ট্রাক্টর
   const instructors = [
     {
       id: 1,
       name: "হাফেজ মাওলানা আব্দুর রহমান",
-      title: "প্রধান কুরআন শিক্ষক",
-      subtitle: "বিশেষজ্ঞ: তাজবিদ ও কিরাত",
+      title: "প্রধান হিফজ শিক্ষক",
+      subtitle: "বিশেষজ্ঞ: তাজবিদ ও হিফজ",
       image: "https://i.pravatar.cc/150?img=11",
-      expertise: "তাজবিদ ও কিরাত",
+      expertise: "তাজবিদ ও হিফজ",
     },
     {
       id: 2,
       name: "মাওলানা সাদিকুর রহমান",
-      title: "কায়দা শিক্ষক",
-      subtitle: "বিশেষজ্ঞ: মাখরাজ ও সিফাত",
+      title: "হিফজ কোচ",
+      subtitle: "বিশেষজ্ঞ: মুখস্থকরণ কৌশল",
       image: "https://i.pravatar.cc/150?img=14",
-      expertise: "মাখরাজ ও সিফাত",
+      expertise: "মুখস্থকরণ কৌশল",
     },
   ];
 
-  // Elders Quida এর Course Data
+  // Hifz Course Data
   const courseDetails = {
-    title: "কুরআন স্টাডিজ ফর এল্ডার্স",
-    description: `Narrated by Abu Hurairah [RA]: The Messenger of Allah [SAW] said, "Whoever does not recite the Qur'an with proper pronunciation is not considered part of my Ummah." - Sahih Bukhari 7527. Therefore, it is essential for all of us to learn how to recite the Qur'an correctly and to ensure that our elders can also learn the Quran with proper tajweed and pronunciation. This course is specially designed for elderly people who want to learn Quran from the basics.`,
+    title: "আদিল হিফজ কোর্স",
+    description: `Narrated by Abu Hurairah [RA]: The Messenger of Allah [SAW] said, "Whoever does not recite the Qur'an with proper pronunciation is not considered part of my Ummah." - Sahih Bukhari 7527. This Hifz course is specially designed for those who want to memorize the Quran with proper tajweed and pronunciation. The course focuses on systematic memorization techniques and daily revision to ensure long-term retention of the Quranic verses.`,
     objectives: [
-      "মসজিদে নববীর পদ্ধতিতে পাঠদান",
-      "ধাপে ধাপে বেসিক তাজউইদ শিক্ষা",
-      "শেষ ১০টি ছোট সূরা মাশক",
-      "বিশুদ্ধ উচ্চারণ শিক্ষায় মাশক্ব ও তাল্ক্বীন",
-      "মাতৃভাষার দোয়া ও আমলজাত শিক্ষা",
-      "হাদীস মুখস্থ শিক্ষা",
-      "বয়স্কদের জন্য বিশেষ পাঠদান পদ্ধতি",
+      "মসজিদে নববীর পদ্ধতিতে হিফজ প্রশিক্ষণ",
+      "ধাপে ধাপে হিফজের সঠিক পদ্ধতি",
+      "পারা ৩০ থেকে শুরু করে ধারাবাহিক হিফজ",
+      "সঠিক উচ্চারণ ও তাজবিদ সহ হিফজ",
+      "নিয়মিত মুরাজিয়া ও তালকীন",
+      "হিফজের জন্য বিশেষ টেকনিক ও টিপস",
+      "কুরআন মুখস্থের আধুনিক পদ্ধতি",
+      "প্রতিদিনের রিভিউ ও তেলাওয়াত প্রশিক্ষণ",
     ],
   };
 
-  // Curriculum Data for Elders
+  // Curriculum Data for Hifz
   const semestersData = [
-    { title: "হুরুফুল হিজাইল মুফরাদাহ (বর্ণমালা শেখা)" },
-    { title: "হুরুফুল হিজাইল মুরাক্কাবাহ (যুক্তবর্ণ শেখা)" },
-    { title: "হুরুফুল মুক্বাত্তাআ'ত" },
-    { title: "হারাকাতের পরিচিতি (ফাতহা, কাসরা, দম্মাহ)" },
-    { title: "তানউইনের পরিচিতি" },
-    { title: "হারাকাত ও তানউইনের অনুশীলন" },
-    { title: "আলিফ সাগীরা, ইয়া সাগীরা, ওয়াও সাগীরা" },
-    { title: "হুরুফুল মাদ্দ ও লীন (অনুশীলন)" },
-    { title: "সূকূনের পরিচিতি ও অনুশীলন" },
-    { title: "সাদ্দাহ পরিচিতি ও অনুশীলন" },
-    { title: "সূকূন ও সাদ্দাহর সাথে মাদ্দ" },
-    { title: "সকল তাজউইদের অনুশীলন" },
-    { title: "ছোট সূরাহ সমূহের প্রাকটিস" },
+    { title: "তাজবিদের মৌলিক নিয়মাবলী ও হিফজ প্রস্তুতি" },
+    { title: "পারা ৩০ - সূরা নাস থেকে সূরা যিলযাল" },
+    { title: "পারা ৩০ - সূরা বাইয়্যিনা থেকে সূরা তাকাসুর" },
+    { title: "পারা ৩০ - সূরা ক্বারিয়াহ থেকে সূরা ফীল" },
+    { title: "পারা ৩০ - সূরা হুমাযাহ থেকে সূরা শরহ" },
+    { title: "পারা ২৯ - সূরা মুলক থেকে সূরা ক্বালাম" },
+    { title: "পারা ২৯ - সূরা হাক্কাহ থেকে সূরা জিন" },
+    { title: "পারা ২৮ - সূরা মুজাদিলা থেকে সূরা হাশর" },
+    { title: "পারা ২৭ - সূরা যারিয়াত থেকে সূরা নাজম" },
+    { title: "পারা ২৬ - সূরা আহকাফ থেকে সূরা ফুসিলাত" },
+    { title: "পারা ২৫ - সূরা ফুসিলাত থেকে সূরা সেজদাহ" },
+    { title: "সম্পূর্ণ কুরআন হিফজের রিভিউ ও মুরাজিয়া" },
+    { title: "হিফজ সম্পূর্ণ করার পর খতম ও সার্টিফিকেট" },
   ];
 
   return (
@@ -110,8 +111,8 @@ const EldersQuidaDetails = () => {
 
           {/* Hero Section Banner */}
           <img
-            src={EldersbannerImg}
-            alt="Elders Quida Banner"
+            src={HifzadaltsBannerImg}
+            alt="Adil Hifz Banner"
             className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
           />
 
@@ -230,10 +231,11 @@ const EldersQuidaDetails = () => {
                 </h2>
                 <div className="space-y-2">
                   {[
-                    "দেশ ও প্রবাস থেকে কুরআনের সঠিক তিলাওয়াত শিখতে আগ্রহী প্রবীণ মুসলিম",
-                    "যারা নিজেদের সন্তান ও নাতি-নাতনিদের কুরআন শিক্ষা দিতে চান",
-                    "যারা বৃদ্ধ বয়সেও কুরআন শিক্ষার প্রতি আগ্রহ লালন করেন",
-                    "জেনারেল শিক্ষার পাশাপাশি যারা কুরআন শিক্ষার প্রতি আগ্রহ লালন করেন",
+                    "যারা কুরআন মুখস্থ করতে আগ্রহী",
+                    "যারা নিজেদের সন্তানদের হাফিজ বানাতে চান",
+                    "যারা সঠিক তাজবিদ সহ কুরআন মুখস্থ করতে চান",
+                    "যারা হিফজ সম্পূর্ণ করে হাফিজ হতে চান",
+                    "যারা নিয়মিত মুরাজিয়া ও তালকীনের মাধ্যমে হিফজ বজায় রাখতে চান",
                   ].map((feature, index) => (
                     <div
                       key={index}
@@ -253,13 +255,14 @@ const EldersQuidaDetails = () => {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4 text-sm">
                   {[
-                    "কোর্সের মেয়াদঃ ৪ মাস (প্রতিটি সেশন)",
-                    "সাপ্তাহিক ক্লাসের দিন: 4 দিন (নিয়মিত ব্যাচের জন্য)",
+                    "কোর্সের মেয়াদঃ ১২ মাস (প্রতিটি সেশন)",
+                    "সাপ্তাহিক ক্লাসের দিন: 6 দিন (নিয়মিত ব্যাচের জন্য)",
                     "ক্লাসের সময়কাল: 120 মিনিট (প্রতি ক্লাস)",
-                    "পরীক্ষা: মিডটার্ম এবং ফাইনাল",
-                    "সাপ্তাহিক ক্লাসের দিন: 4 দিন (নিয়মিত ব্যাচের জন্য)",
-                    "কোর্স শেষে সার্টিফিকেট প্রদান",
-                    "বয়স্কদের জন্য বিশেষ সাপোর্ট",
+                    "পরীক্ষা: মাসিক মূল্যায়ন ও ফাইনাল",
+                    "প্রতিদিনের তেলাওয়াত ও রিভিউ সেশন",
+                    "কোর্স শেষে হিফজ সার্টিফিকেট প্রদান",
+                    "হিফজ সম্পূর্ণ করার বিশেষ খতম সমারোহ",
+                    "নিয়মিত মুরাজিয়া ও তালকীন সেশন",
                   ].map((item, index) => (
                     <div key={index} className="flex items-start gap-2">
                       <span className="text-[#00ADD2] mt-1 font-bold">✔</span>
@@ -320,7 +323,7 @@ const EldersQuidaDetails = () => {
                       <FaCheckCircle className="text-[#00ADD2] mt-1" />
                       <div>
                         <span className="block text-[#002b2b] font-medium">
-                          ভর্তি ফি ১০০০ টাকা
+                          ভর্তি ফি ২০০০ টাকা
                         </span>
                       </div>
                     </div>
@@ -328,7 +331,7 @@ const EldersQuidaDetails = () => {
                       <FaCheckCircle className="text-[#00ADD2] mt-1" />
                       <div>
                         <span className="block text-[#002b2b] font-medium">
-                          মাসিক ফি ১০০০ টাকা
+                          মাসিক ফি ২০০০ টাকা
                         </span>
                       </div>
                     </div>
@@ -343,7 +346,7 @@ const EldersQuidaDetails = () => {
                       <FaCheckCircle className="text-[#00ADD2] mt-1" />
                       <div>
                         <span className="block text-[#002b2b] font-medium">
-                          ভর্তি ফি ২০০০ টাকা
+                          ভর্তি ফি ৩৫০০ টাকা
                         </span>
                       </div>
                     </div>
@@ -351,7 +354,7 @@ const EldersQuidaDetails = () => {
                       <FaCheckCircle className="text-[#00ADD2] mt-1" />
                       <div>
                         <span className="block text-[#002b2b] font-medium">
-                          মাসিক ফি ২০০০ টাকা
+                          মাসিক ফি ৩৫০০ টাকা
                         </span>
                       </div>
                     </div>
@@ -376,7 +379,7 @@ const EldersQuidaDetails = () => {
                 className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer"
               >
                 <img
-                  src={ElderscourseImg}
+                  src={HIfzadaltscoursImg}
                   alt="Course Video"
                   className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
@@ -400,10 +403,7 @@ const EldersQuidaDetails = () => {
 
                 {/* Split Button with Links */}
                 <div className="flex items-center justify-center mb-6 relative">
-                  <Link
-                    to="/course/kids/quidaelders/enrollbnagla"
-                    className="w-1/2"
-                  >
+                  <Link to="/course/kids/hifz/enrollbnagla" className="w-1/2">
                     <button className="w-full bg-[#007a91] text-white font-bold py-3 text-xs rounded-l-md hover:opacity-90 transition">
                       Bangla Version
                     </button>
@@ -413,10 +413,7 @@ const EldersQuidaDetails = () => {
                     Or
                   </div>
 
-                  <Link
-                    to="/enroll/quidaelders/english-version"
-                    className="w-1/2"
-                  >
+                  <Link to="/enroll/hifz/english-version" className="w-1/2">
                     <button className="w-full bg-[#003d3d] text-white font-bold py-3 text-xs rounded-r-md hover:opacity-90 transition">
                       English Version
                     </button>
@@ -427,11 +424,11 @@ const EldersQuidaDetails = () => {
                 <div className="space-y-3 text-left px-1 text-[#002b2b]">
                   <div className="flex items-center gap-2 text-[15px]">
                     <span className="font-medium">Course Level:</span>
-                    <span className="font-bold">Beginner</span>
+                    <span className="font-bold">Beginner to Advanced</span>
                   </div>
                   <div className="flex items-center gap-2 text-[15px]">
                     <span className="font-medium">Enrolled:</span>
-                    <span className="font-bold">180</span>
+                    <span className="font-bold">150</span>
                   </div>
                   <div className="flex items-center gap-2 text-[15px]">
                     <span className="font-medium">Last Updated:</span>
@@ -448,4 +445,4 @@ const EldersQuidaDetails = () => {
   );
 };
 
-export default EldersQuidaDetails;
+export default Course_quran_elders_hifz;

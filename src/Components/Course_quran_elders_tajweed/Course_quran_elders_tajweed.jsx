@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import ElderscourseImg from "../../image/Quranforelderscourse.jpg";
-import EldersbannerImg from "../../image/Quranforeldersbanner.jpg";
+import TajwidbannerImg from "../../image/tajweedbanner - Copy.png";
+import TajwidcourseImg from "../../image/tajweedcourse.png";
 import {
   FaArrowLeft,
   FaUsers,
@@ -34,7 +34,7 @@ import {
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 
-const EldersQuidaDetails = () => {
+const Course_quran_elders_tajweed = () => {
   const [openSemester, setOpenSemester] = useState(0);
   const [activeTab, setActiveTab] = useState("info");
 
@@ -42,12 +42,12 @@ const EldersQuidaDetails = () => {
     setOpenSemester(openSemester === index ? null : index);
   };
 
-  // Elders Quida এর ইনস্ট্রাক্টর
+  // Tajweed Course এর ইনস্ট্রাক্টর
   const instructors = [
     {
       id: 1,
       name: "হাফেজ মাওলানা আব্দুর রহমান",
-      title: "প্রধান কুরআন শিক্ষক",
+      title: "প্রধান তাজবিদ শিক্ষক",
       subtitle: "বিশেষজ্ঞ: তাজবিদ ও কিরাত",
       image: "https://i.pravatar.cc/150?img=11",
       expertise: "তাজবিদ ও কিরাত",
@@ -55,43 +55,44 @@ const EldersQuidaDetails = () => {
     {
       id: 2,
       name: "মাওলানা সাদিকুর রহমান",
-      title: "কায়দা শিক্ষক",
+      title: "তাজবিদ কোচ",
       subtitle: "বিশেষজ্ঞ: মাখরাজ ও সিফাত",
       image: "https://i.pravatar.cc/150?img=14",
       expertise: "মাখরাজ ও সিফাত",
     },
   ];
 
-  // Elders Quida এর Course Data
+  // Tajweed Course Data
   const courseDetails = {
-    title: "কুরআন স্টাডিজ ফর এল্ডার্স",
-    description: `Narrated by Abu Hurairah [RA]: The Messenger of Allah [SAW] said, "Whoever does not recite the Qur'an with proper pronunciation is not considered part of my Ummah." - Sahih Bukhari 7527. Therefore, it is essential for all of us to learn how to recite the Qur'an correctly and to ensure that our elders can also learn the Quran with proper tajweed and pronunciation. This course is specially designed for elderly people who want to learn Quran from the basics.`,
+    title: "তাজবিদ কোর্স",
+    description: `Narrated by Abu Hurairah [RA]: The Messenger of Allah [SAW] said, "Whoever does not recite the Qur'an with proper pronunciation is not considered part of my Ummah." - Sahih Bukhari 7527. Therefore, it is essential for all of us to learn how to recite the Qur'an correctly. This Tajweed course is specially designed for those who want to learn the rules of Tajweed and apply them in their Quran recitation. The course covers all the essential rules of Tajweed with practical application.`,
     objectives: [
-      "মসজিদে নববীর পদ্ধতিতে পাঠদান",
-      "ধাপে ধাপে বেসিক তাজউইদ শিক্ষা",
-      "শেষ ১০টি ছোট সূরা মাশক",
-      "বিশুদ্ধ উচ্চারণ শিক্ষায় মাশক্ব ও তাল্ক্বীন",
-      "মাতৃভাষার দোয়া ও আমলজাত শিক্ষা",
-      "হাদীস মুখস্থ শিক্ষা",
-      "বয়স্কদের জন্য বিশেষ পাঠদান পদ্ধতি",
+      "মসজিদে নববীর পদ্ধতিতে তাজবিদ শিক্ষা",
+      "ধাপে ধাপে তাজবিদের সকল নিয়ম",
+      "মাখরাজ ও সিফাতের সঠিক উচ্চারণ",
+      "তাজবিদের সব নিয়ম প্রাকটিক্যালি প্রয়োগ",
+      "কুরআন তিলাওয়াতে তাজবিদের প্রয়োগ",
+      "তাজবিদের সকল গুরুত্বপূর্ণ বিষয়",
+      "প্রাকটিক্যাল তাজবিদ প্রশিক্ষণ",
+      "তাজবিদ সহ কুরআন তিলাওয়াতের দক্ষতা অর্জন",
     ],
   };
 
-  // Curriculum Data for Elders
+  // Curriculum Data for Tajweed
   const semestersData = [
-    { title: "হুরুফুল হিজাইল মুফরাদাহ (বর্ণমালা শেখা)" },
-    { title: "হুরুফুল হিজাইল মুরাক্কাবাহ (যুক্তবর্ণ শেখা)" },
-    { title: "হুরুফুল মুক্বাত্তাআ'ত" },
-    { title: "হারাকাতের পরিচিতি (ফাতহা, কাসরা, দম্মাহ)" },
-    { title: "তানউইনের পরিচিতি" },
-    { title: "হারাকাত ও তানউইনের অনুশীলন" },
-    { title: "আলিফ সাগীরা, ইয়া সাগীরা, ওয়াও সাগীরা" },
-    { title: "হুরুফুল মাদ্দ ও লীন (অনুশীলন)" },
-    { title: "সূকূনের পরিচিতি ও অনুশীলন" },
-    { title: "সাদ্দাহ পরিচিতি ও অনুশীলন" },
-    { title: "সূকূন ও সাদ্দাহর সাথে মাদ্দ" },
-    { title: "সকল তাজউইদের অনুশীলন" },
-    { title: "ছোট সূরাহ সমূহের প্রাকটিস" },
+    { title: "তাজবিদের পরিচয় ও গুরুত্ব" },
+    { title: "মাখরাজের পরিচিতি ও অনুশীলন" },
+    { title: "সিফাতের পরিচিতি ও অনুশীলন" },
+    { title: "হারাকাত ও তানউইনের বিস্তারিত" },
+    { title: "নুন সাকিন ও তানউইনের নিয়মাবলী" },
+    { title: "মীম সাকিনের নিয়মাবলী" },
+    { title: "গুন্নাহ ও ইখফার বিস্তারিত" },
+    { title: "ইদগাম ও ইকলাবের নিয়ম" },
+    { title: "মাদ্দের প্রকারভেদ ও প্রয়োগ" },
+    { title: "ক্বলকালাহ ও তাফখীমের নিয়ম" },
+    { title: "সূরা ফাতিহার তাজবিদ বিশ্লেষণ" },
+    { title: "ছোট সূরার তাজবিদ বিশ্লেষণ" },
+    { title: "কুরআন তিলাওয়াতে তাজবিদের প্রয়োগ" },
   ];
 
   return (
@@ -110,8 +111,8 @@ const EldersQuidaDetails = () => {
 
           {/* Hero Section Banner */}
           <img
-            src={EldersbannerImg}
-            alt="Elders Quida Banner"
+            src={TajwidbannerImg}
+            alt="Tajweed Banner"
             className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
           />
 
@@ -230,10 +231,11 @@ const EldersQuidaDetails = () => {
                 </h2>
                 <div className="space-y-2">
                   {[
-                    "দেশ ও প্রবাস থেকে কুরআনের সঠিক তিলাওয়াত শিখতে আগ্রহী প্রবীণ মুসলিম",
-                    "যারা নিজেদের সন্তান ও নাতি-নাতনিদের কুরআন শিক্ষা দিতে চান",
-                    "যারা বৃদ্ধ বয়সেও কুরআন শিক্ষার প্রতি আগ্রহ লালন করেন",
-                    "জেনারেল শিক্ষার পাশাপাশি যারা কুরআন শিক্ষার প্রতি আগ্রহ লালন করেন",
+                    "যারা কুরআন তিলাওয়াতে তাজবিদ শিখতে আগ্রহী",
+                    "যারা নিজেদের তিলাওয়াতকে আরও সুন্দর করতে চান",
+                    "যারা তাজবিদের সকল নিয়ম শিখতে চান",
+                    "যারা তাজবিদ সহ কুরআন তিলাওয়াত করতে চান",
+                    "যারা তাজবিদের প্রাকটিক্যাল প্রয়োগ শিখতে চান",
                   ].map((feature, index) => (
                     <div
                       key={index}
@@ -255,11 +257,12 @@ const EldersQuidaDetails = () => {
                   {[
                     "কোর্সের মেয়াদঃ ৪ মাস (প্রতিটি সেশন)",
                     "সাপ্তাহিক ক্লাসের দিন: 4 দিন (নিয়মিত ব্যাচের জন্য)",
-                    "ক্লাসের সময়কাল: 120 মিনিট (প্রতি ক্লাস)",
+                    "ক্লাসের সময়কাল: 90 মিনিট (প্রতি ক্লাস)",
                     "পরীক্ষা: মিডটার্ম এবং ফাইনাল",
                     "সাপ্তাহিক ক্লাসের দিন: 4 দিন (নিয়মিত ব্যাচের জন্য)",
                     "কোর্স শেষে সার্টিফিকেট প্রদান",
-                    "বয়স্কদের জন্য বিশেষ সাপোর্ট",
+                    "তাজবিদ প্রশিক্ষণের জন্য বিশেষ ক্লাস",
+                    "কুরআন তিলাওয়াতের প্র্যাকটিস সেশন",
                   ].map((item, index) => (
                     <div key={index} className="flex items-start gap-2">
                       <span className="text-[#00ADD2] mt-1 font-bold">✔</span>
@@ -320,7 +323,7 @@ const EldersQuidaDetails = () => {
                       <FaCheckCircle className="text-[#00ADD2] mt-1" />
                       <div>
                         <span className="block text-[#002b2b] font-medium">
-                          ভর্তি ফি ১০০০ টাকা
+                          ভর্তি ফি ১৩০০ টাকা
                         </span>
                       </div>
                     </div>
@@ -328,7 +331,7 @@ const EldersQuidaDetails = () => {
                       <FaCheckCircle className="text-[#00ADD2] mt-1" />
                       <div>
                         <span className="block text-[#002b2b] font-medium">
-                          মাসিক ফি ১০০০ টাকা
+                          মাসিক ফি ১৩০০ টাকা
                         </span>
                       </div>
                     </div>
@@ -376,7 +379,7 @@ const EldersQuidaDetails = () => {
                 className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer"
               >
                 <img
-                  src={ElderscourseImg}
+                  src={TajwidcourseImg}
                   alt="Course Video"
                   className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
@@ -401,7 +404,7 @@ const EldersQuidaDetails = () => {
                 {/* Split Button with Links */}
                 <div className="flex items-center justify-center mb-6 relative">
                   <Link
-                    to="/course/kids/quidaelders/enrollbnagla"
+                    to="/course/kids/tajweed/enrollbnagla"
                     className="w-1/2"
                   >
                     <button className="w-full bg-[#007a91] text-white font-bold py-3 text-xs rounded-l-md hover:opacity-90 transition">
@@ -413,10 +416,7 @@ const EldersQuidaDetails = () => {
                     Or
                   </div>
 
-                  <Link
-                    to="/enroll/quidaelders/english-version"
-                    className="w-1/2"
-                  >
+                  <Link to="/enroll/tajweed/english-version" className="w-1/2">
                     <button className="w-full bg-[#003d3d] text-white font-bold py-3 text-xs rounded-r-md hover:opacity-90 transition">
                       English Version
                     </button>
@@ -427,11 +427,11 @@ const EldersQuidaDetails = () => {
                 <div className="space-y-3 text-left px-1 text-[#002b2b]">
                   <div className="flex items-center gap-2 text-[15px]">
                     <span className="font-medium">Course Level:</span>
-                    <span className="font-bold">Beginner</span>
+                    <span className="font-bold">Beginner to Intermediate</span>
                   </div>
                   <div className="flex items-center gap-2 text-[15px]">
                     <span className="font-medium">Enrolled:</span>
-                    <span className="font-bold">180</span>
+                    <span className="font-bold">200</span>
                   </div>
                   <div className="flex items-center gap-2 text-[15px]">
                     <span className="font-medium">Last Updated:</span>
@@ -448,4 +448,4 @@ const EldersQuidaDetails = () => {
   );
 };
 
-export default EldersQuidaDetails;
+export default Course_quran_elders_tajweed;

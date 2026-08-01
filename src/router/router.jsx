@@ -141,7 +141,20 @@ import Course_apply_from from "../Components/Course_apply_from/Course_apply_from
 import AlimiyahProgramEnrollBangla from "../Components/AlimiyahProgramEnrollBangla/AlimiyahProgramEnrollBangla";
 import Enroll_alemiyah_english_version from "../Components/Enroll_alemiyah_english_version/Enroll_alemiyah_english_version";
 import Enroll_quida_english_version from "../Components/Enroll_quida_english_version/Enroll_quida_english_version";
+import Course_kids_quidaelders_enrollbnagla from "../Components/Course_kids_quidaelders_enrollbnagla/Course_kids_quidaelders_enrollbnagla";
+import Enroll_quidaelders_english_version from "../Components/Enroll_quidaelders_english_version/Enroll_quidaelders_english_version";
+import Course_quran_elders_nazeradetails from "../Components/Course_quran_elders_nazeradetails/Course_quran_elders_nazeradetails";
+import Course_kids_najera_enrollbnagla from "../Components/Course_kids_najera_enrollbnagla/Course_kids_najera_enrollbnagla";
+import Enroll_bajeraelders_english_version from "../Components/Enroll_bajeraelders_english_version/Enroll_bajeraelders_english_version";
+import Course_quran_elders_hifz from "../Components/Course_quran_elders_hifz/Course_quran_elders_hifz";
+import Course_kids_hifz_enrollbnagla from "../Components/Course_kids_hifz_enrollbnagla/Course_kids_hifz_enrollbnagla";
+import Enroll_hifz_english_version from "../Components/Enroll_hifz_english_version/Enroll_hifz_english_version";
+import Course_kids_tajweed_enrollbnagla from "../Components/Course_kids_tajweed_enrollbnagla/Course_kids_tajweed_enrollbnagla";
+import Course_quran_elders_tajweed from "../Components/Course_quran_elders_tajweed/Course_quran_elders_tajweed";
+import Enroll_tajweed_english_version from "../Components/Enroll_tajweed_english_version/Enroll_tajweed_english_version";
 
+// Course_kids_tajweed_enrollbnagla.jsx;
+//
 export const router = createBrowserRouter([
   // ==========================================
   // ১. পাবলিক রাউট (RootLayouts - হেডার/ফুটার সহ)
@@ -334,6 +347,69 @@ export const router = createBrowserRouter([
     path: "/course/quran/elders-quida",
     element: <EldersQuidaDetails></EldersQuidaDetails>,
   },
+  {
+    path: "/course/quran/elders-hifz",
+    element: <Course_quran_elders_hifz></Course_quran_elders_hifz>,
+  },
+  {
+    path: "/course/kids/hifz/enrollbnagla",
+    element: <Course_kids_hifz_enrollbnagla></Course_kids_hifz_enrollbnagla>,
+  },
+  {
+    path: "/enroll/hifz/english-version",
+    element: <Enroll_hifz_english_version></Enroll_hifz_english_version>,
+  },
+  {
+    path: "/course/quran/elders-tajweed",
+    element: <Course_quran_elders_tajweed></Course_quran_elders_tajweed>,
+  },
+  {
+    path: "/enroll/tajweed/english-version",
+    element: <Enroll_tajweed_english_version></Enroll_tajweed_english_version>,
+  },
+  {
+    path: "/course/kids/tajweed/enrollbnagla",
+    element: (
+      <Course_kids_tajweed_enrollbnagla></Course_kids_tajweed_enrollbnagla>
+    ),
+  },
+  {
+    path: "Course_kids_tajweed_enrollbnagla",
+    element: (
+      <Course_kids_tajweed_enrollbnagla></Course_kids_tajweed_enrollbnagla>
+    ),
+  },
+  {
+    path: "/enroll/bajeraelders/english-version",
+    element: (
+      <Enroll_bajeraelders_english_version></Enroll_bajeraelders_english_version>
+    ),
+  },
+  {
+    path: "/course/kids/najera/enrollbnagla",
+    element: (
+      <Course_kids_najera_enrollbnagla></Course_kids_najera_enrollbnagla>
+    ),
+  },
+  {
+    path: "/course/quran/elders-nazera",
+    element: (
+      <Course_quran_elders_nazeradetails></Course_quran_elders_nazeradetails>
+    ),
+  },
+  {
+    path: "/enroll/quidaelders/english-version",
+    element: (
+      <Enroll_quidaelders_english_version></Enroll_quidaelders_english_version>
+    ),
+  },
+  {
+    path: "/course/kids/quidaelders/enrollbnagla",
+    element: (
+      <Course_kids_quidaelders_enrollbnagla></Course_kids_quidaelders_enrollbnagla>
+    ),
+  },
+
   {
     path: "/enroll/alemiyah/english-version",
     element: (
