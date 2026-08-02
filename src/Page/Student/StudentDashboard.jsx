@@ -13,6 +13,12 @@ import {
   FaCreditCard,
   FaMoneyBillWave,
   FaSignOutAlt,
+  FaDollarSign,
+  FaPaperPlane,
+  FaGraduationCap,
+  FaInfoCircle,
+  FaExpand,
+  FaMinus,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -242,7 +248,6 @@ const StudentDashboard = () => {
           {/* ================= DASHBOARD CONTENT ================= */}
           <Outlet />
 
-          {/* বা, এখানে সরাসরি ড্যাশবোর্ড কন্টেন্ট */}
           {activeMenu === "dashboard" && (
             <DashboardContent studentInfo={studentInfo} />
           )}
@@ -258,50 +263,209 @@ const StudentDashboard = () => {
 // ড্যাশবোর্ড কন্টেন্ট (সব ট্যাবের কন্টেন্ট)
 // ==========================================
 
-// 1. Dashboard Home Content
+// 1. Dashboard Home Content (Updated based on provided Image)
 const DashboardContent = ({ studentInfo }) => {
   const [paymentTab, setPaymentTab] = useState("summary");
 
-  // স্ট্যাটিস্টিকস কার্ড
-  const stats = [
-    { label: "Total Courses", value: "6", icon: "📚", color: "bg-blue-50" },
-    { label: "Completed", value: "4", icon: "✅", color: "bg-green-50" },
-    { label: "Pending", value: "2", icon: "⏳", color: "bg-yellow-50" },
-    { label: "Due Payment", value: "৳2,280", icon: "💰", color: "bg-red-50" },
+  // ডেমো কোর্স লিস্ট
+  const courses = [
+    { id: 1, code: "AQD-101", title: "Aqeedah", section: "[Brother-A-B16]" },
+    {
+      id: 2,
+      code: "ATI-101",
+      title: "Adabu Talibil Il'm",
+      section: "[Brother-A-B16]",
+    },
+    {
+      id: 3,
+      code: "DNS-101",
+      title: "Da'wah & Sunnah",
+      section: "[Brother-A-B16]",
+    },
+    { id: 4, code: "FQH-101", title: "Fiqh-I", section: "[Brother-A-B16]" },
+    { id: 5, code: "TAJ-101", title: "Tajweed-I", section: "[Brother-A-B16]" },
   ];
 
   return (
-    <div className="space-y-6">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className={`${stat.color} p-4 rounded-xl shadow-sm border border-gray-100`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-2xl">{stat.icon}</span>
-              <span className="text-sm font-bold text-gray-800">
-                {stat.value}
-              </span>
-            </div>
-            <p className="text-xs text-gray-600 mt-1">{stat.label}</p>
+    <div className="space-y-4">
+      {/* Purple Welcome Banner */}
+      <div className="bg-[#8e24aa] text-white p-3 rounded-sm shadow-sm text-sm flex items-center">
+        <p>
+          Assalamu alaikum wa rahmatullahi wa barakatuh. Ahlan wa Sahlan WA
+          Masa'al Khair!{" "}
+          <strong>
+            {studentInfo.name} [{studentInfo.roll}]
+          </strong>
+        </p>
+      </div>
+
+      {/* Important Links Section */}
+      <div className="border border-blue-200 bg-white rounded-sm shadow-sm">
+        {/* Header */}
+        <div className="bg-[#3498db] text-white px-3 py-2 flex justify-between items-center rounded-t-sm">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <FaInfoCircle /> Important Links
           </div>
-        ))}
+          <div className="flex gap-3 text-xs">
+            <button className="hover:opacity-80">
+              <FaExpand />
+            </button>
+            <button className="hover:opacity-80">
+              <FaMinus />
+            </button>
+          </div>
+        </div>
+
+        {/* Content Body */}
+        <div className="p-4 bg-[#f8f9fa]">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {/* Card 1: Check Due & Payments */}
+            <div className="bg-[#78b866] text-white rounded-sm relative flex flex-col justify-between h-[100px] hover:brightness-105 transition-all">
+              <div className="p-3 z-10">
+                <h3 className="font-semibold text-lg leading-tight">
+                  Check Due & <br /> Payments
+                </h3>
+              </div>
+              <FaDollarSign className="absolute right-2 top-2 text-[60px] opacity-20 z-0" />
+              <Link
+                to="/due-payment"
+                className="bg-black/10 py-1 text-center text-xs hover:bg-black/20 cursor-pointer block transition-colors w-full mt-auto z-10"
+              >
+                View ➔
+              </Link>
+            </div>
+
+            {/* Card 2: Semester Result */}
+            <div className="bg-[#8c1c44] text-white rounded-sm relative flex flex-col justify-between h-[100px] hover:brightness-105 transition-all">
+              <div className="p-3 z-10">
+                <h3 className="font-semibold text-lg leading-tight">
+                  Semester <br /> Result
+                </h3>
+              </div>
+              <FaFileAlt className="absolute right-2 top-2 text-[60px] opacity-20 z-0" />
+              <Link
+                to="/student-result"
+                className="bg-black/10 py-1 text-center text-xs hover:bg-black/20 cursor-pointer block transition-colors w-full mt-auto z-10"
+              >
+                View ➔
+              </Link>
+            </div>
+
+            {/* Card 3: Online Registration */}
+            <div className="bg-[#00a65a] text-white rounded-sm relative flex flex-col justify-between h-[100px] hover:brightness-105 transition-all">
+              <div className="p-3 z-10">
+                <h3 className="font-semibold text-lg leading-tight">
+                  Online <br /> Registration
+                </h3>
+              </div>
+              <FaPaperPlane className="absolute right-2 top-2 text-[60px] opacity-20 z-0" />
+              <Link
+                to="#"
+                className="bg-black/10 py-1 text-center text-xs hover:bg-black/20 cursor-pointer block transition-colors w-full mt-auto z-10"
+              >
+                Apply Online ➔
+              </Link>
+            </div>
+
+            {/* Card 4: Monthly Online Payment */}
+            <div className="bg-[#0073b7] text-white rounded-sm relative flex flex-col justify-between h-[100px] hover:brightness-105 transition-all">
+              <div className="p-3 z-10">
+                <h3 className="font-semibold text-lg leading-tight">
+                  Monthly Online <br /> Payment
+                </h3>
+              </div>
+              <FaDollarSign className="absolute right-2 top-2 text-[60px] opacity-20 z-0" />
+              <Link
+                to="/online-payment"
+                className="bg-black/10 py-1 text-center text-xs hover:bg-black/20 cursor-pointer block transition-colors w-full mt-auto z-10"
+              >
+                Payment ➔
+              </Link>
+            </div>
+
+            {/* Orange Warning Text */}
+            <div className="col-span-1 md:col-span-1 bg-[#f39c12] text-white text-xs p-2 rounded-sm leading-relaxed mt-2">
+              আপনার পোর্টাল এবং ক্যাম্পাসের পাসওয়ার্ড যদি একই থাকে সে ক্ষেত্রে
+              আপনি সরাসরি ক্যাম্পাসে লগইন হয়ে যেতে পারবেন, অন্যথায় আপনাকে
+              ক্যাম্পাসে পাসওয়ার্ড দিয়ে লগইন করতে হবে।
+            </div>
+
+            {/* Campus Login Card */}
+            <div className="col-span-1 md:col-span-1 bg-[#00a65a] text-white rounded-sm relative flex flex-col justify-between h-[100px] mt-2 hover:brightness-105 transition-all">
+              <div className="p-3 z-10">
+                <h3 className="font-semibold text-lg mb-1">Campus</h3>
+                <Link to="/campus-login">
+                  <button className="bg-[#008d4c] hover:bg-[#00733e] text-white text-xs px-3 py-1 rounded shadow-sm transition-colors border border-transparent">
+                    Login to Campus
+                  </button>
+                </Link>
+              </div>
+              <FaGraduationCap className="absolute right-2 top-2 text-[60px] opacity-20 z-0" />
+              <Link
+                to="#"
+                className="bg-black/10 py-1 text-center text-xs hover:bg-black/20 cursor-pointer block transition-colors w-full mt-auto z-10"
+              >
+                Go to Campus ➔
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Important Notice */}
-      <div className="bg-[#5cb85c] text-white p-3 rounded-t-lg shadow-sm flex items-center gap-2 font-medium text-sm">
-        <span>ℹ️</span> Important Notice
-      </div>
-      <div className="bg-white p-4 border border-t-0 border-gray-200 rounded-b-lg shadow-sm mb-6 text-sm text-gray-700 flex items-center gap-2">
-        <span className="bg-gray-800 text-white text-xs px-2 py-0.5 rounded font-mono font-bold">
-          Note:
-        </span>
-        Dear students: Please pay your payment to bKash.
+      {/* Registered Courses Section */}
+      <div className="border border-blue-200 bg-white rounded-sm shadow-sm mb-6">
+        <div className="flex items-center gap-2 p-2 border-b border-blue-200 text-sm bg-[#f4f6f9] font-medium text-gray-700">
+          <FaFileAlt className="text-gray-500" /> Registered Courses of
+          <select className="border border-gray-300 rounded px-2 py-0.5 text-xs bg-white focus:outline-none">
+            <option>Fall 2026 (Jul-Dec)</option>
+          </select>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left text-gray-600">
+            <thead className="text-xs text-gray-700 bg-gray-100 border-b border-gray-200">
+              <tr>
+                <th className="px-4 py-2 font-semibold w-12 border-r border-gray-200 text-center">
+                  Ser
+                </th>
+                <th className="px-4 py-2 font-semibold">Title</th>
+              </tr>
+            </thead>
+            <tbody>
+              {courses.map((course, index) => (
+                <tr
+                  key={course.id}
+                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                >
+                  <td className="px-4 py-3 align-top border-r border-gray-200 text-center">
+                    {index + 1}
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-[#3498db]">
+                      {course.code}: {course.title} {course.section}
+                    </p>
+                    <div className="text-[11px] text-[#3498db] flex gap-2 mt-1">
+                      <span className="cursor-pointer hover:underline">
+                        [Attendances]
+                      </span>
+                      <span className="cursor-pointer hover:underline">
+                        [Course Materials]
+                      </span>
+                      <span className="cursor-pointer hover:underline">
+                        [Course Notices]
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 italic mt-1 font-serif">
+                      BA in Dawah and Islamic Studies (Fall 2026 (Jul-Dec))
+                    </p>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Payment Section */}
+      {/* Payment Section (Unchanged) */}
       <PaymentSection paymentTab={paymentTab} setPaymentTab={setPaymentTab} />
     </div>
   );
@@ -457,7 +621,7 @@ const OnlinePaymentHistory = () => (
       Make Online Payment via bKash / SSLCommerz
     </p>
     <p className="text-gray-600 text-sm">
-      আপনার বকেয়া <span className="font-bold text-red-600">২,২৮০.০০ টাকা</span>{" "}
+      আপনার বকেয়া <span className="font-bold text-red-600">২,২৮০.০০ টাকা</span>{" "}
       অনলাইনে পরিশোধ করতে নিচের বাটনে ক্লিক করুন।
     </p>
     <button

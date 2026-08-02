@@ -19,11 +19,11 @@ const SpecialBundleCourse = () => {
         <div className="flex flex-col md:flex-row items-center gap-10 bg-white/90 p-6 rounded-2xl shadow-xl backdrop-blur-sm border border-white">
           {/* Left: Image Card */}
           <Link to="/enroll" className="w-full md:w-1/2 group">
-            <div className="overflow-hidden rounded-xl shadow-md transition-transform duration-300 group-hover:scale-[1.02]">
+            <div className=" rounded-xl shadow-md transition-transform duration-300 group-hover:scale-[1.02]">
               <img
-                src="https://i.ibb.co.com/ycd8GqsQ/sir-png.png"
+                src="https://i.ibb.co.com/RknJskDM/Screenshot-2026-08-02-124952.png"
                 alt="Hadith and Taharah"
-                className="w-[150px] h-auto mr-10"
+                className="w-[300px] md:w-[400px] lg:w-[500px] h-auto mr-10 object-contain"
               />
               <div className="p-4">
                 <h3 className="text-xl font-bold text-gray-800">

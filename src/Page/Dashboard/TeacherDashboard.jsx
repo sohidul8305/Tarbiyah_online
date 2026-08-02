@@ -4,6 +4,7 @@ import { Link, useNavigate, Outlet, useLocation } from "react-router-dom";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Navbar/Footer/Footer";
 import { useAuth } from "../../Provider/AuthProvider";
+import ServiceApi from "../../services/api";
 import Swal from "sweetalert2";
 import {
   FaHome,

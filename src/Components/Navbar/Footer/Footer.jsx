@@ -1,66 +1,143 @@
-import React from 'react';
+import React from "react";
+import Tarbiyahlogo from "../../../image/Logo-tarbiyah-Online-Academy.png";
+import {
+  FaFacebookF,
+  FaYoutube,
+  FaLinkedinIn,
+  FaInstagram,
+  FaMapMarkerAlt,
+  FaPhoneAlt,
+  FaEnvelope,
+} from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="bg-[#004d4d] text-white py-12 px-6 md:px-12">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10">
-        
+    <footer className="bg-[#00313A] text-white pt-16 pb-8 px-6 md:px-12 font-sans">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
         {/* Column 1: Logo & About */}
         <div>
-          <div className="flex items-center gap-3 mb-4">
-             {/* লোগো ইমেজ পাথ এখানে বসাবেন */}
-             <img src="/logo.png" alt="Tarbiyah Online" className="h-14" />
+          <div className="flex items-center gap-3 mb-6">
+            <img
+              src={Tarbiyahlogo}
+              alt="Tarbiyah Online"
+              className="h-16 object-contain"
+            />
           </div>
-          <p className="text-sm leading-relaxed opacity-90">
-            "At Tarbiyah Online We Believe That Education Should Be Accessible To Everyone, Regardless Of Their Background Or Circumstances. That's Why We Offer A Range Of Online Courses That Are Designed To Help You Learn New Skills, At Any Time That Suits You."
+          <p className="text-sm leading-relaxed text-gray-200">
+            "তারবিয়াহ অনলাইনে আমরা বিশ্বাস করি যে শিক্ষা প্রত্যেকের কাছে
+            অ্যাক্সেসযোগ্য হওয়া উচিত, তাদের পটভূমি বা পরিস্থিতি নির্বিশেষে। তাই
+            আমরা অনলাইন কোর্সের একটি পরিসর অফার করি যা আপনাকে নতুন দক্ষতা শিখতে
+            সাহায্য করার জন্য ডিজাইন করা হয়েছে, যে কোনো সময়ে আপনার জন্য
+            উপযুক্ত।"
           </p>
         </div>
 
-        {/* Column 2: Useful Links */}
+        {/* Column 2: Useful Links & Payment Methods */}
         <div>
-          <h3 className="font-bold text-lg mb-6 uppercase tracking-wider">Useful Links</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm mb-6">
-            <a href="#" className="hover:text-teal-200">Terms & Conditions</a>
-            <a href="#" className="hover:text-teal-200">Apply Online</a>
-            <a href="#" className="hover:text-teal-200">Privacy Policy</a>
-            <a href="#" className="hover:text-teal-200">My account</a>
-            <a href="#" className="hover:text-teal-200">Refund Policy</a>
-            <a href="#" className="hover:text-teal-200">Cart</a>
-            <a href="#" className="hover:text-teal-200">Career</a>
-            <a href="#" className="hover:text-teal-200">Contact</a>
+          <h3 className="font-bold text-lg mb-6 uppercase tracking-wider border-b border-teal-700/50 pb-2 inline-block">
+            প্রয়োজনীয় লিংক
+          </h3>
+          <div className="grid grid-cols-2 gap-y-3 gap-x-6 text-sm mb-8 text-gray-200">
+            <a href="#" className="hover:text-teal-300 transition-colors">
+              শর্তাবলী ও শর্তসমূহ
+            </a>
+            <a href="#" className="hover:text-teal-300 transition-colors">
+              অনলাইন আবেদন
+            </a>
+            <a href="#" className="hover:text-teal-300 transition-colors">
+              গোপনীয়তা নীতি
+            </a>
+            <a href="#" className="hover:text-teal-300 transition-colors">
+              আমার একাউন্ট
+            </a>
+            <a href="#" className="hover:text-teal-300 transition-colors">
+              রিফান্ড নীতি
+            </a>
+            <a href="#" className="hover:text-teal-300 transition-colors">
+              কার্টপেজ
+            </a>
+            <a href="#" className="hover:text-teal-300 transition-colors">
+              ক্যারিয়ার
+            </a>
+            <a href="#" className="hover:text-teal-300 transition-colors">
+              কনটাক্ট
+            </a>
           </div>
+
           {/* Payment Methods */}
-          <div className="bg-white p-2 rounded shadow-sm">
-            <img src="/payment-gateways.png" alt="Payment Methods" className="w-full" />
+          <div className="bg-white p-2 rounded-lg shadow-md max-w-sm">
+            <img
+              src="https://i.ibb.co.com/84Z9Xv5/payment-gateways.png"
+              alt="Payment Methods"
+              className="w-full object-contain h-10"
+            />
           </div>
         </div>
 
         {/* Column 3: Get Touch With Us */}
         <div>
-          <h3 className="font-bold text-lg mb-6 uppercase tracking-wider">Get Touch With Us</h3>
-          <div className="space-y-4 text-sm">
-            <p className="flex gap-3">
-              <span>📍</span> 40/1 Safa Gerden Satmasjid Housing, Mohammadpur Dhaka-1207
+          <h3 className="font-bold text-lg mb-6 uppercase tracking-wider border-b border-teal-700/50 pb-2 inline-block">
+            আমাদের সাথে যোগাযোগ করুন
+          </h3>
+          <div className="space-y-4 text-sm text-gray-200">
+            <p className="flex items-start gap-3">
+              <FaMapMarkerAlt className="text-teal-300 mt-1 flex-shrink-0 text-base" />
+              <span>
+                ৪০/১ সাফা গার্ডেন সাতমসজিদ হাউজিং, মোহাম্মদপুর ঢাকা-১২০৭
+              </span>
             </p>
-            <p className="flex gap-3">
-              <span>📞</span> 
-              <span>(+88) 01841515454 <br/> (+88) 01841513434 <br/> (+88) 01841516565</span>
+            <p className="flex items-start gap-3">
+              <FaPhoneAlt className="text-teal-300 mt-1 flex-shrink-0 text-base" />
+              <span>
+                (+88) 01841515454 <br />
+                (+88) 01841513434 <br />
+                (+88) 01841516565
+              </span>
             </p>
-            <p className="flex gap-3">
-              <span>✉️</span> info@tarbiyahonline.com
+            <p className="flex items-center gap-3">
+              <FaEnvelope className="text-teal-300 flex-shrink-0 text-base" />
+              <span>info@tarbiyahonline.com</span>
             </p>
           </div>
-          
+
           {/* Social Icons */}
           <div className="flex gap-3 mt-6">
-            {['f', 'in', 'in', 'ig'].map((icon, i) => (
-              <div key={i} className="w-10 h-10 bg-white text-[#004d4d] rounded-full flex items-center justify-center font-bold cursor-pointer hover:bg-teal-100">
-                {icon}
-              </div>
-            ))}
+            <a
+              href="#"
+              className="w-10 h-10 bg-white text-[#00313A] rounded-full flex items-center justify-center font-bold shadow-md hover:bg-teal-100 transition-colors"
+            >
+              <FaFacebookF />
+            </a>
+            <a
+              href="#"
+              className="w-10 h-10 bg-white text-[#00313A] rounded-full flex items-center justify-center font-bold shadow-md hover:bg-teal-100 transition-colors"
+            >
+              <FaYoutube />
+            </a>
+            <a
+              href="#"
+              className="w-10 h-10 bg-white text-[#00313A] rounded-full flex items-center justify-center font-bold shadow-md hover:bg-teal-100 transition-colors"
+            >
+              <FaLinkedinIn />
+            </a>
+            <a
+              href="#"
+              className="w-10 h-10 bg-white text-[#00313A] rounded-full flex items-center justify-center font-bold shadow-md hover:bg-teal-100 transition-colors"
+            >
+              <FaInstagram />
+            </a>
           </div>
         </div>
+      </div>
 
+      {/* Bottom Copyright Bar */}
+      <div className="max-w-7xl mx-auto border-t border-teal-800/60 pt-6 text-center text-sm text-gray-300">
+        <p>
+          © २०२६ সর্বস্বত্ব সংরক্ষিত |{" "}
+          <span className="text-teal-300 font-semibold">
+            tarbiyahonline.com
+          </span>
+        </p>
       </div>
     </footer>
   );

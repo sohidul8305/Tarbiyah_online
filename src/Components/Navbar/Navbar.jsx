@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import logo from "../../image/logo.jpg";
+import logo from "../../image/Logo-tarbiyah-Online-Academy.png";
 
 const Navbar = () => {
   const [language, setLanguage] = useState(
@@ -9,8 +9,10 @@ const Navbar = () => {
 
   const translations = {
     en: {
-      address: "40/1, safa garden, mohammadpur - 1207",
+      address: "40/1, safa garden, satmasjid housing, mohammadpur, Dhaka-1207",
       email: "info@tarbiyahonline.com",
+      phone1: "+880 1841-514545",
+      phone2: "+880 1841-516565",
       login: "Log In",
       support: "Support",
       donate: "Donate",
@@ -45,8 +47,10 @@ const Navbar = () => {
       noticeBoard: "Notice Board",
     },
     bn: {
-      address: "৪০/১, সাফা গার্ডেন, মোহাম্মদপুর - ১২০৭",
+      address: "৪০/১, সাফা গার্ডেন সাতমসজিদ হাউজিং মোহাম্মদপুর ঢাকা-১২০৭",
       email: "info@tarbiyahonline.com",
+      phone1: "+880 1841-514545",
+      phone2: "+880 1841-516565",
       login: "লগইন",
       support: "সাপোর্ট",
       donate: "দান করুন",
@@ -93,10 +97,12 @@ const Navbar = () => {
   return (
     <nav className="w-full">
       {/* টপ বার */}
-      <div className="bg-[#004d4d] text-white py-2 px-6 flex justify-between items-center text-[13px]">
-        <div className="flex gap-6 flex-wrap">
+      <div className="bg-[#004d5a] text-white py-2 px-6 flex justify-between items-center text-[13px]">
+        <div className="flex gap-6 flex-wrap items-center">
           <span>{t.address}</span>
           <span>{t.email}</span>
+          <span>{t.phone1}</span>
+          <span>{t.phone2}</span>
         </div>
         <div className="flex items-center gap-4">
           <Link to="/support" className="hover:text-teal-200">
@@ -109,7 +115,7 @@ const Navbar = () => {
             {t.donate}
           </Link>
           <button
-            className="bg-[#003d3d] px-3 py-1 rounded hover:bg-[#005555] transition-all"
+            className="bg-[#003842] px-3 py-1 rounded hover:bg-[#005f70] transition-all"
             onClick={() => setLanguage(language === "en" ? "bn" : "en")}
           >
             {language === "en" ? "বাংলা" : "English"}
@@ -130,7 +136,7 @@ const Navbar = () => {
           />
         </Link>
 
-        <div className="flex items-center gap-6 text-[#004d4d] font-bold">
+        <div className="flex items-center gap-6 text-[#004d5a] font-bold">
           <Link to="/" className="hover:text-teal-700">
             {t.home}
           </Link>
@@ -166,7 +172,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Department Dropdown (ডিপ্লোমা, আলেমিয়াহ, কিডস, কুরআন) */}
+          {/* Department Dropdown */}
           <div className="relative group cursor-pointer">
             <span className="flex items-center gap-1">{t.department} ▾</span>
             <div className="absolute top-full left-0 w-60 bg-white shadow-xl rounded-md hidden group-hover:block z-50 p-2">
@@ -197,7 +203,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Courses Dropdown (লাইভ ও রেকর্ডেড কোর্স) */}
+          {/* Courses Dropdown */}
           <div className="relative group cursor-pointer">
             <span className="flex items-center gap-1">{t.courses} ▾</span>
             <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-md hidden group-hover:block z-50 p-2">
@@ -216,7 +222,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Academic Hub Dropdown (স্টুডেন্ট বা কর্নার শব্দ ছাড়া নতুন নাম) */}
+          {/* Academic Hub Dropdown */}
           <div className="relative group cursor-pointer">
             <span className="flex items-center gap-1">{t.academicHub} ▾</span>
             <div className="absolute top-full left-0 w-48 bg-white shadow-xl rounded-md hidden group-hover:block z-50 p-2">
@@ -271,7 +277,7 @@ const Navbar = () => {
           </div>
 
           <Link to="/register">
-            <button className="bg-[#004d4d] text-white px-5 py-2 rounded-md hover:bg-teal-900 transition-all hover:scale-105">
+            <button className="bg-[#004d5a] text-white px-5 py-2 rounded-md hover:bg-[#003842] transition-all hover:scale-105">
               {t.joinNow}
             </button>
           </Link>

@@ -152,6 +152,7 @@ import Enroll_hifz_english_version from "../Components/Enroll_hifz_english_versi
 import Course_kids_tajweed_enrollbnagla from "../Components/Course_kids_tajweed_enrollbnagla/Course_kids_tajweed_enrollbnagla";
 import Course_quran_elders_tajweed from "../Components/Course_quran_elders_tajweed/Course_quran_elders_tajweed";
 import Enroll_tajweed_english_version from "../Components/Enroll_tajweed_english_version/Enroll_tajweed_english_version";
+import Campus_login from "../Page/Campus_login/Campus_login";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -440,6 +441,14 @@ export const router = createBrowserRouter([
   {
     path: "/teacher-login",
     element: <TeacherLogin />,
+  },
+  {
+    path: "/teacher-login",
+    element: <TeacherLogin />,
+  },
+  {
+    path: "/campus-login",
+    element: <Campus_login />,
   },
 
   // ==========================================
