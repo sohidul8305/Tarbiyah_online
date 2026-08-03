@@ -5,7 +5,7 @@ const videos = [
   {
     title: "নির্জনে আল্লাহকে স্মরণ",
     author: "Professor Mokhtar Ahmad",
-    youtubeId: "https://youtu.be/JSpmuLJjtwM?si=KSwHeKp5e1XISJes", // আপনার দেওয়া সঠিক ভিডিও আইডি এখানে বসানো হয়েছে
+    youtubeId: "https://img.youtube.com/vi/fSj6hz-j7Ok/hqdefault.jpg", // আপনার দেওয়া সঠিক ভিডিও আইডি এখানে বসানো হয়েছে
   },
   {
     title: "সাওয়াব অর্জনের রহস্য",

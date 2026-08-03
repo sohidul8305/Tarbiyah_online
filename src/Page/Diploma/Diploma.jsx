@@ -36,10 +36,8 @@ const Diploma = () => {
   const diplomaCourse = {
     id: 1,
     image: "https://i.ibb.co.com/SzV4rgk/diploma-2-1-jpg.jpg",
-    topBadge: "Islamic Diploma",
-    title: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
-    subtitle:
-      "কুরআন, সুন্নাহ এবং শরীয়াহর মৌলিক জ্ঞান অর্জনের মাধ্যমে পূর্ণাঙ্গ ইসলামিক শিক্ষা।",
+
+    subtitle: "দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম",
   };
 
   return (
@@ -54,10 +52,7 @@ const Diploma = () => {
 
           <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
             <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-bounce">
-              🔥 Limited Offer
-            </span>
-            <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-              ⭐ 4.9/5 Rating
+              ভর্তি চলছে <br></br> সীমিত আসন
             </span>
           </div>
 
@@ -85,11 +80,8 @@ const Diploma = () => {
             <div className="w-full lg:w-1/2 space-y-6">
               <div className="space-y-3">
                 <div className="flex flex-wrap gap-2">
-                  <span className="inline-block bg-yellow-500/20 text-yellow-300 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-yellow-500/30">
-                    🎓 প্রফেশনাল ডিপ্লোমা
-                  </span>
                   <span className="inline-block bg-blue-500/20 text-blue-300 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-blue-500/30">
-                    📚 ১২ মাসের কোর্স
+                    দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম
                   </span>
                 </div>
                 <h1 className="text-3xl md:text-5xl font-bold leading-tight">
@@ -112,9 +104,8 @@ const Diploma = () => {
               </div>
 
               <p className="text-base md:text-lg text-gray-200 leading-relaxed">
-                ইসলামিক জ্ঞান অর্জনের একটি পূর্ণাঙ্গ এবং পরিকল্পিত কোর্স। কুরআন,
-                সুন্নাহ এবং শরীয়াহর মৌলিক জ্ঞান অর্জনের মাধ্যমে নিজেকে গড়ে
-                তুলুন।
+                আকিদা, ফিকহ, তাফসির, হাদিস, সিরাহসহ ইসলামি জ্ঞানের বিভিন্ন
+                শাখায় সুসংগঠিত উচ্চতর শিক্ষা।
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
@@ -139,20 +130,6 @@ const Diploma = () => {
                   <p className="text-sm font-bold">১২০০+</p>
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-4">
-                <Link to="/course/diploma/details">
-                  <button className="group relative bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-8 py-3.5 rounded-full transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 flex items-center gap-3">
-                    <span>কোর্স ডিটেইলস</span>
-                    <FaArrowRight className="group-hover:translate-x-2 transition-transform" />
-                  </button>
-                </Link>
-                <Link to="/course/diploma/enroll">
-                  <button className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold px-8 py-3.5 rounded-full transition-all duration-300 border border-white/20 flex items-center gap-3">
-                    <span>এনরোল করুন</span>
-                  </button>
-                </Link>
-              </div>
             </div>
           </div>
         </div>
@@ -161,11 +138,8 @@ const Diploma = () => {
         <div className="mt-16">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-[#002b2b] mb-3">
-              আমাদের কোর্স
+              আমাদের কোর্স সমূহ
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              আপনার ইসলামিক জ্ঞান অর্জনের যাত্রা শুরু করুন সঠিক কোর্সের মাধ্যমে
-            </p>
           </div>
 
           {/* Single Course Card Display */}

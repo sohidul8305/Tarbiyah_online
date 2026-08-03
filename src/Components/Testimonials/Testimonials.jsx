@@ -1,44 +1,72 @@
-import React from 'react';
-import { Quote } from 'lucide-react';
+import React from "react";
+import { Quote } from "lucide-react";
+import {
+  FaCheckCircle,
+  FaUserTie,
+  FaVideo,
+  FaHeadset,
+  FaCertificate,
+  FaGlobe,
+} from "react-icons/fa";
 
 const Testimonials = () => {
-  const reviews = [
+  const reviews = [];
+
+  // Why Tarbiyah Diploma features
+  const whyFeatures = [
     {
-      name: "সুমি",
-      role: "১ম সেমিস্টার, ডিপ্লোমা ইন ইসলামিক স্টাডিজ কোর্স",
-      text: "সিরাহ- স্যার ক্লাসে আলোচনা করেছেন সুন্দরভাবে, আর সব শেষে আমাদেরকে ওমর পড়ার টপিকগুলোর সাজানো বই (নোট দিয়েছেন)। এতে করে এই Courseটির শিক্ষা সময়সাময়িক সময়ে ক্লাস থেকেই বুঝতে পেরেছি আলহামদুলিল্লাহ। পাশাপাশি এক্সাম যেহেতু আমাদের বড় একটা Concern এর জায়গা, সেটার প্রস্তুতি নিতে আমাদের অনেক মেটেরিয়াল ঘাটাঘাটি করতে হচ্ছে না, পরীক্ষার আগে। হাসি- ক্লাসের রেকর্ড অনেক গোছানো, নোট আছে। সিরাহ কোর্সের মতো সময়সাময়িক বিষয়ে হাদিসগুলোর প্রয়োগ বুঝতে পেরেছি। এই কোর্সের বড় একটা ভালো দিক- প্রতিটা লেসনের শেষে Sample Question আছে। এতে করে পরীক্ষা ভীতি দূর হয়েছে। আলহামদুলিল্লাহ।"
+      icon: <FaCheckCircle />,
+      text: "বিশুদ্ধ আকিদাভিত্তিক পাঠক্রম",
     },
     {
-      name: "মো: মাইনউদ্দিন",
-      role: "১ম সেমিস্টার, ডিপ্লোমা ইন ইসলামিক স্টাডিজ কোর্স",
-      text: "ইসলামি শরিয়াহ এর প্রাথমিক শিক্ষা গ্রহণের পর তারবিয়াহ প্ল্যাটফর্ম থেকে আকিদাহ, ফিকহ ও এরাবিক ল্যাঙ্গুয়েজের উপর মাস্টার্স-পিএইচডি করতে চাই।"
-    }
+      icon: <FaUserTie />,
+      text: "দেশবরেণ্য ইসলামি স্কলার",
+    },
+    {
+      icon: <FaVideo />,
+      text: "লাইভ ও রেকর্ডেড ক্লাস",
+    },
+    {
+      icon: <FaHeadset />,
+      text: "নিয়মিত একাডেমিক সাপোর্ট",
+    },
+    {
+      icon: <FaCertificate />,
+      text: "ইজাযাহ ও সার্টিফিকেট",
+    },
+    {
+      icon: <FaGlobe />,
+      text: "বিশ্বের যেকোনো দেশ থেকে অংশগ্রহণ",
+    },
   ];
 
   return (
     <section className="py-20 px-6 bg-[#e0f2f7]">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-center text-4xl font-bold text-teal-800 mb-2">Testimonial</h2>
-        <p className="text-center text-teal-600 mb-12">Nurturing Islamic Excellence from the Comfort of Home</p>
+        {/* কেন তারবিয়াহ ডিপ্লোমা ইন ইসলামিক স্ট্রাডিজ ? */}
+        <div className="bg-gradient-to-br from-[#002b2b] via-[#003d3d] to-[#004d4d] text-white rounded-3xl shadow-2xl p-6 md:p-12 mb-12">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl md:text-4xl font-bold mb-3 text-yellow-400">
+              কেন তারবিয়াহ ডিপ্লোমা ইন ইসলামিক স্ট্রাডিজ ?
+            </h2>
+            <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {reviews.map((review, index) => (
-            <div key={index} className="bg-white p-8 rounded-lg shadow-md relative border border-gray-100">
-              <div className="text-yellow-400 mb-4 text-xl">★★★★★</div>
-              <p className="text-gray-600 mb-6 leading-relaxed">{review.text}</p>
-              
-              <div className="flex items-center justify-between mt-auto">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
-                  <div>
-                    <h4 className="font-bold text-gray-800">{review.name}</h4>
-                    <p className="text-xs text-gray-500">{review.role}</p>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+            {whyFeatures.map((feature, index) => (
+              <div
+                key={index}
+                className="bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all shadow-lg"
+              >
+                <div className="w-12 h-12 rounded-xl bg-yellow-500/20 text-yellow-400 flex items-center justify-center shrink-0 text-xl">
+                  {feature.icon}
                 </div>
-                <Quote size={40} className="text-teal-200" />
+                <h3 className="text-base md:text-lg font-semibold text-gray-100">
+                  {feature.text}
+                </h3>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>
