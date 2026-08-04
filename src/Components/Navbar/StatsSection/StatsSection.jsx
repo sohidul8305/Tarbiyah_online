@@ -10,7 +10,6 @@ const StatsSection = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // আপনার ব্যাকএন্ড সার্ভারের URL অনুযায়ী ফেচ করুন (לocalhost অথবা লাইভ সার্ভার)
     fetch("http://localhost:5000/api/stats")
       .then((res) => res.json())
       .then((data) => {
@@ -38,7 +37,7 @@ const StatsSection = () => {
   }, []);
 
   return (
-    <div className="bg-white py-10 px-4">
+    <div className="bg-white py-10 px-4 mb-20">
       <div className="max-w-6xl mx-auto shadow-xl rounded-lg border border-gray-100 p-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, index) => (

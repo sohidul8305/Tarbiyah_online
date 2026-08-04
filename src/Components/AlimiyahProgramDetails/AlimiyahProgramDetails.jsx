@@ -2,6 +2,14 @@ import React, { useState } from "react";
 import { Link } from "react-router";
 import TabriyahBanner from "../../image/arbiyaprogrambabanner.jpg";
 import Tarbiyahcourse from "../../image/Tarbiyaprogram.jpg";
+// Swiper এবং প্রয়োজনীয় মডিউল ইমপোর্ট করুন
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination } from "swiper/modules";
+
+// Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
+import "swiper/css";
+import "swiper/css/pagination";
+
 import {
   FaArrowLeft,
   FaUsers,
@@ -24,6 +32,8 @@ import {
   FaUserTie,
   FaBook,
   FaPlayCircle,
+  FaHeadset,
+  FaGlobe,
 } from "react-icons/fa";
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
@@ -194,6 +204,137 @@ const AlimiyahProgramDetails = () => {
     window.open(prospectusLink, "_blank");
   };
 
+  // Why Tarbiyah Alimiyah for Kids features
+  const whyFeatures = [
+    { text: "কিডস ফেন্ডলি ওস্তাদ" },
+    { text: "লাইভ ও রেকর্ডেড ক্লাস" },
+    { text: "ওয়ান-টু-ওয়ান একাডেমিক সাপোর্ট" },
+    { text: "উওম চরিত্র গঠনের পরিবেশ" },
+    { text: "কিডস ফেন্ডলি কারিকুলাম" },
+    { text: "সার্টিফিকেট" },
+  ];
+
+  // Testimonials data
+  const testimonials = [
+    {
+      id: 1,
+      name: "আব্দুল্লাহ আল মামুন",
+      designation: "শিক্ষার্থী, ঢাকা",
+      quote:
+        "আলহামদুলিল্লাহ, এই কোর্সটি আমার ঈমানি দৃঢ়তা ও ইসলামি জ্ঞান বৃদ্ধিতে অসাধারণ ভূমিকা রেখেছে। শিক্ষকদের আন্তরিকতা সত্যিই প্রশংসনীয়।",
+      image: "https://i.pravatar.cc/150?img=11",
+    },
+    {
+      id: 2,
+      name: "মোঃ সাইফুল ইসলাম",
+      designation: "প্রবাসী, যুক্তরাজ্য",
+      quote:
+        "ব্যস্ত জীবনের মাঝেও আমি এই কোর্সটি সম্পন্ন করতে পেরেছি। লাইভ ক্লাস ও রেকর্ডেড ভিডিওগুলোর কারণে সময়ানুবর্তিতা বজায় রাখা সম্ভব হয়েছে।",
+      image: "https://i.pravatar.cc/150?img=12",
+    },
+    {
+      id: 3,
+      name: "মোঃ হাসান মিয়া",
+      designation: "ব্যবসায়ী, চট্টগ্রাম",
+      quote:
+        "দ্বীনি জ্ঞান অর্জনের পাশাপাশি দৈনন্দিন জীবনে ইসলামি আদব-আখলাক চর্চায় এই কোর্স আমাকে অনেক সাহায্য করেছে।",
+      image: "https://i.pravatar.cc/150?img=13",
+    },
+    {
+      id: 4,
+      name: "আমিনুল ইসলাম",
+      designation: "শিক্ষার্থী, সিলেট",
+      quote:
+        "শায়খ প্রফেসর মোখতার আহমাদের তত্ত্বাবধানে পড়ার সুযোগ পাওয়া আমার জন্য একটি বড় প্রাপ্তি। কারিকুলাম অত্যন্ত সুসংগঠিত।",
+      image: "https://i.pravatar.cc/150?img=14",
+    },
+    {
+      id: 5,
+      name: "মোঃ নাজমুল হক",
+      designation: "চাকরিজীবী, রাজশাহী",
+      quote:
+        "সপ্তাহে মাত্র ৩ দিন ক্লাস থাকায় চাকরির সাথে তাল মিলিয়ে পড়াশোনা করতে পারছি। একাডেমিক সাপোর্ট দল সবসময় পাশে আছে।",
+      image: "https://i.pravatar.cc/150?img=15",
+    },
+    {
+      id: 6,
+      name: "মোঃ ইব্রাহিম খলিল",
+      designation: "শিক্ষার্থী, খুলনা",
+      quote:
+        "ইজাজাহ ও সার্টিফিকেট পাওয়ার সুযোগ এই ডিপ্লোমাকে আরও মূল্যবান করেছে। ইনশাআল্লাহ, উচ্চশিক্ষার পথ সুগম হবে।",
+      image: "https://i.pravatar.cc/150?img=16",
+    },
+  ];
+
+  // Video Gallery Data
+  const videoGallery = [
+    {
+      id: 1,
+      title: "ভিডিও ১",
+      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
+      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+    },
+    {
+      id: 2,
+      title: "ভিডিও ২",
+      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
+      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+    },
+    {
+      id: 3,
+      title: "ভিডিও ৩",
+      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
+      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+    },
+    {
+      id: 4,
+      title: "ভিডিও ৪",
+      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
+      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+    },
+    {
+      id: 5,
+      title: "ভিডিও ৫",
+      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
+      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+    },
+    {
+      id: 6,
+      title: "ভিডিও ৬",
+      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
+      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+    },
+  ];
+
+  // FAQ Data
+  const faqs = [
+    {
+      question: "আলিমিয়াহ প্রোগ্রামটি কাদের জন্য?",
+      answer:
+        "এই প্রোগ্রামটি ৭-১২ বছর বয়সী শিশুদের জন্য বিশেষভাবে ডিজাইন করা হয়েছে। যারা ইসলামের মৌলিক থেকে গভীর জ্ঞান অর্জন করতে চান এবং প্র্যাক্টিসিং মুসলিম হিসেবে গড়ে উঠতে চান।",
+    },
+    {
+      question: "প্রোগ্রামের ভাষা কী?",
+      answer:
+        "আমাদের প্রোগ্রামটি বাংলা ও ইংরেজি উভয় ভাষায় উপলব্ধ। শিক্ষার্থীরা তাদের সুবিধামতো ভাষা নির্বাচন করতে পারেন।",
+    },
+    {
+      question: "ক্লাসগুলো কীভাবে পরিচালিত হয়?",
+      answer:
+        "ক্লাসগুলো সম্পূর্ণ অনলাইনে লাইভ পরিচালিত হয়। প্রতিটি ক্লাসের রেকর্ডিংও সংরক্ষণ করা হয়, যাতে শিক্ষার্থীরা প্রয়োজন অনুযায়ী আবার দেখতে পারেন।",
+    },
+    {
+      question: "প্রোগ্রাম শেষে কী পাওয়া যাবে?",
+      answer:
+        "সফলভাবে প্রোগ্রাম সম্পন্নকারীদের Tarbiyah Online Madrasah-এর পক্ষ থেকে সার্টিফিকেট প্রদান করা হবে।",
+    },
+    {
+      question: "ভর্তি ফি কত?",
+      answer:
+        "বাংলা মিডিয়ামের জন্য ভর্তি ফি ২০০০ টাকা এবং সেমিস্টার ফি ৪০০০ টাকা। ইংরেজি মিডিয়ামের জন্য ভর্তি ফি ৩০০০ টাকা এবং সেমিস্টার ফি ১২০০০ টাকা।",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <Navbar />
@@ -208,7 +349,7 @@ const AlimiyahProgramDetails = () => {
             <span className="font-medium">আলেমিয়াহ পেজে ফিরে যান</span>
           </Link>
 
-          {/* Hero Section - Same Size as Diploma Page */}
+          {/* Hero Section */}
           <img
             src={TabriyahBanner}
             alt="Diploma Banner"
@@ -566,7 +707,7 @@ const AlimiyahProgramDetails = () => {
                 </div>
               </div>
 
-              {/* FEE STRUCTURE (BDT) - UPDATED EXACTLY LIKE YOUR SS */}
+              {/* FEE STRUCTURE (BDT) */}
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
@@ -638,9 +779,182 @@ const AlimiyahProgramDetails = () => {
                   </h2>
                 </div>
               </div>
+
+              {/* ========== LAST 4 SECTIONS ========== */}
+
+              {/* 1. কেন তারবিয়াহ আলিমিয়াহ ফর কিডস ? */}
+              <div className="bg-gradient-to-br from-white via-white to-white text-black rounded-3xl shadow-2xl p-6 md:p-12 border border-gray-100">
+                <div className="text-center mb-10">
+                  <h2 className="text-2xl md:text-4xl font-bold mb-3 text-[#00ADD2]">
+                    কেন তারবিয়াহ আলিমিয়াহ ফর কিডস ?
+                  </h2>
+                  <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                  {whyFeatures.map((feature, index) => (
+                    <div
+                      key={index}
+                      className="bg-gray-50 border border-gray-200 backdrop-blur-sm p-5 rounded-2xl flex items-center gap-4 hover:bg-gray-100 transition-all shadow-md"
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-yellow-500/25 text-yellow-600 flex items-center justify-center shrink-0 text-xl font-bold">
+                        ✓
+                      </div>
+                      <h3 className="text-base md:text-lg font-semibold text-black">
+                        {feature.text}
+                      </h3>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 2. শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা */}
+              <div className="bg-white rounded-3xl p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
+                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                    শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা
+                  </h2>
+                </div>
+
+                <Swiper
+                  modules={[Autoplay, Pagination]}
+                  spaceBetween={20}
+                  slidesPerView={1}
+                  loop={true}
+                  autoplay={{
+                    delay: 4000,
+                    disableOnInteraction: false,
+                    reverseDirection: true,
+                  }}
+                  pagination={{
+                    clickable: true,
+                    dynamicBullets: true,
+                  }}
+                  breakpoints={{
+                    640: {
+                      slidesPerView: 2,
+                    },
+                    1024: {
+                      slidesPerView: 3,
+                    },
+                  }}
+                  className="testimonial-swiper"
+                >
+                  {testimonials.map((item) => (
+                    <SwiperSlide key={item.id}>
+                      <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 text-center border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 h-full">
+                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#002b2b] to-[#004d4d] mx-auto mb-4 flex items-center justify-center text-white text-3xl shadow-md overflow-hidden">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex justify-center mb-3">
+                          {[...Array(5)].map((_, i) => (
+                            <FaStar
+                              key={i}
+                              className="text-yellow-400 text-sm"
+                            />
+                          ))}
+                        </div>
+                        <p className="text-gray-700 text-sm italic leading-relaxed">
+                          "{item.quote}"
+                        </p>
+                        <p className="text-[#002b2b] font-bold mt-3">
+                          {item.name}
+                        </p>
+                        <p className="text-gray-500 text-xs">
+                          {item.designation}
+                        </p>
+                        <div className="mt-3 flex justify-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
+                          <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
+                          <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
+                        </div>
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
+
+              {/* 3. ভিডিও গ্যালারি */}
+              <div className="bg-white rounded-3xl p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
+                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                    ভিডিও গ্যালারি
+                  </h2>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {videoGallery.map((video) => (
+                    <a
+                      key={video.id}
+                      href={video.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300"
+                    >
+                      <div className="relative h-48 bg-gray-200">
+                        <img
+                          src={video.thumbnail}
+                          alt={video.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                          <div className="w-14 h-14 bg-[#008080] rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
+                            <FaPlayCircle className="text-3xl" />
+                          </div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                          <p className="text-white text-sm font-semibold">
+                            {video.title}
+                          </p>
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* 4. FAQ */}
+              <div className="bg-white rounded-3xl p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
+                  <h2 className="text-2xl font-bold text-[#00ADD2]">FAQ</h2>
+                </div>
+                <div className="space-y-4">
+                  {faqs.map((faq, index) => (
+                    <div
+                      key={index}
+                      className="border border-gray-200 rounded-xl overflow-hidden"
+                    >
+                      <button
+                        onClick={() => toggleSemester(`faq-${index}`)}
+                        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 text-left transition-colors"
+                      >
+                        <span className="font-bold text-[#002b2b]">
+                          {index + 1}. {faq.question}
+                        </span>
+                        {openSemester === `faq-${index}` ? (
+                          <FaChevronUp className="text-gray-500" />
+                        ) : (
+                          <FaChevronDown className="text-gray-500" />
+                        )}
+                      </button>
+                      {openSemester === `faq-${index}` && (
+                        <div className="p-4 bg-white border-t border-gray-200 text-gray-700">
+                          {faq.answer}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Right Sidebar - 1 Column (Fixed the Error) */}
+            {/* Right Sidebar - 1 Column */}
             <div className="space-y-4 -mt-[305px]">
               {/* Video Thumbnail */}
               <a
@@ -650,7 +964,7 @@ const AlimiyahProgramDetails = () => {
                 className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer"
               >
                 <img
-                  src={Tarbiyahcourse} // ✅ FIXED: Replaced 'AlemyahCourse' with 'Tarbiyahcourse'
+                  src={Tarbiyahcourse}
                   alt="Course Video"
                   className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
@@ -666,7 +980,7 @@ const AlimiyahProgramDetails = () => {
                 </div>
               </a>
 
-              {/* Pricing & Enrollment Card (Fixed Nested Div Error) */}
+              {/* Pricing & Enrollment Card */}
               <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-[#007a91]">
                 <h1 className="text-2xl font-bold text-[#007a91] mb-5">
                   ENROLL NOW

@@ -19,7 +19,6 @@ const Home = () => {
       <Banner />
       <StatsSection />
       <VideoSection />
-      <SpecialBundleCourse />
       <CourseSection />
       <ContactSection />
       <FeaturesSection />
@@ -27,8 +26,6 @@ const Home = () => {
       <SeminarSection />
       <BlogSection />
       <KhutbatulJuma />
-      <Testimonials />
-      <FAQSection />
     </div>
   );
 };

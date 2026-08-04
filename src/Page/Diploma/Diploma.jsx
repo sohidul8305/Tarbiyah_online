@@ -35,11 +35,10 @@ const Diploma = () => {
   // শুধুমাত্র title ও subtitle সহ ডিপ্লোমা কোর্স ডাটা
   const diplomaCourse = {
     id: 1,
-    image: "https://i.ibb.co.com/SzV4rgk/diploma-2-1-jpg.jpg",
+    image: "https://i.ibb.co.com/b5PhhPjP/Screenshot-2026-08-02-151525.png",
 
-    subtitle: "দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম",
+    subtitle: " ২ বছরের পূর্ণাঙ্গ ইসলামিক স্টাডিজ প্রোগ্রাম",
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -79,11 +78,7 @@ const Diploma = () => {
 
             <div className="w-full lg:w-1/2 space-y-6">
               <div className="space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  <span className="inline-block bg-blue-500/20 text-blue-300 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-blue-500/30">
-                    দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম
-                  </span>
-                </div>
+                <div className="flex flex-wrap gap-2"></div>
                 <h1 className="text-3xl md:text-5xl font-bold leading-tight">
                   ডিপ্লোমা ইন <br />
                   <span className="text-yellow-400 relative">
@@ -140,6 +135,7 @@ const Diploma = () => {
             <h2 className="text-3xl font-bold text-[#002b2b] mb-3">
               আমাদের কোর্স সমূহ
             </h2>
+            <p>দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম</p>
           </div>
 
           {/* Single Course Card Display */}

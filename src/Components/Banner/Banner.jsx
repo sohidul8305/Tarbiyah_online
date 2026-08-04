@@ -5,47 +5,77 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import DiplomaBanner from "../../image/Diplomabanner.png";
+import NajeraBanner from "../../image/najerabanner.png";
+import NuraniyahBanner from "../../image/nuranibanner.jpg";
+import HifjulBanner from "../../image/hifjulbanner.png";
 
 const Banner = () => {
   return (
-    <div className="my-10">
+    <div className="w-full my-15 mr-10">
+      {/* কাস্টম অ্যানিমেশনের জন্য স্টাইল ট্যাগ */}
+      <style>{`
+        @keyframes autoZoom {
+          0% {
+            transform: scale(1);
+          }
+          100% {
+            transform: scale(1.08);
+          }
+        }
+        .swiper-slide-active .auto-zoom-img {
+          animation: autoZoom 4s infinite alternate ease-in-out;
+        }
+      `}</style>
+
       <Swiper
         modules={[Navigation, Pagination, Autoplay]}
-        spaceBetween={30}
+        spaceBetween={0}
         slidesPerView={1}
         navigation
         pagination={{ clickable: true }}
         autoplay={{ delay: 3000, disableOnInteraction: false }}
-        className="h-[400px] w-full"
+        className="h-[350px] sm:h-[400px] md:h-[450px] w-full"
       >
         {/* ৪টি স্লাইড */}
         <SwiperSlide>
-          <img
-            src="https://i.ibb.co.com/7tWnV1pB/banner.jpg"
-            alt="Slider 1"
-            className="w-full h-full object-cover"
-          />
+          <div className="w-full h-full overflow-hidden bg-black">
+            <img
+              src={DiplomaBanner}
+              alt="Slider 1"
+              className="w-full h-full object-cover auto-zoom-img"
+            />
+          </div>
         </SwiperSlide>
+
         <SwiperSlide>
-          <img
-            src="https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png"
-            alt="Slider 2"
-            className="w-full h-full object-cover"
-          />
+          <div className="w-full h-full overflow-hidden bg-black">
+            <img
+              src={NajeraBanner}
+              alt="Slider 2"
+              className="w-full h-full object-cover auto-zoom-img"
+            />
+          </div>
         </SwiperSlide>
+
         <SwiperSlide>
-          <img
-            src="https://i.ibb.co.com/DgQ1K7kR/Quranforeldersbanner.jpg"
-            alt="Slider 3"
-            className="w-full h-full object-cover"
-          />
+          <div className="w-full h-full overflow-hidden bg-black">
+            <img
+              src={NuraniyahBanner}
+              alt="Slider 3"
+              className="w-full h-full object-cover auto-zoom-img"
+            />
+          </div>
         </SwiperSlide>
+
         <SwiperSlide>
-          <img
-            src="https://i.ibb.co.com/qFM5Lmb2/najerabanner.png"
-            alt="Slider 4"
-            className="w-full h-full object-cover"
-          />
+          <div className="w-full h-full overflow-hidden bg-black">
+            <img
+              src={HifjulBanner}
+              alt="Slider 4"
+              className="w-full h-full object-cover auto-zoom-img"
+            />
+          </div>
         </SwiperSlide>
       </Swiper>
     </div>

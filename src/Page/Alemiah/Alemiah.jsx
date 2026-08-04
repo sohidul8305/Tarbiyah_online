@@ -30,17 +30,15 @@ const Alemiah = () => {
     {
       id: "alimiyah-kids",
       title: "আলিমিয়াহ ফর কিডস",
-      subtitle: "বাচ্চাদের জন্য ইসলামিক শিক্ষা",
+      subtitle: "৬–১১ বছর বয়সী শিশুদের জন্য ইলম শেখার  আনন্দময় সূচনা",
       image:
         "https://i.ibb.co.com/MTCtR32/E0-A6-86-E0-A6-B2-E0-A6-BF-E0-A6-AE-E0-A6-BF-E0-A6-AF-E0-A6-BC-E0-A7-8-D-E0-A6-AF-E0-A6-BE-E0-A6-B9.jpg",
-      topBadge: "Kids Program",
     },
     {
       id: "alimiyah-program",
       title: "আলিমিয়াহ প্রোগ্রাম",
-      subtitle: "পূর্ণাঙ্গ ইসলামি উচ্চ শিক্ষা",
+      subtitle: "১২–১৮ বছর বয়সী শিক্ষার্থীদের জন্য আলিম হওয়ার পথচলা।",
       image: "https://i.ibb.co.com/7xnC6p7d/banner-2.jpg",
-      topBadge: "Allemiyah Program",
     },
   ];
 
@@ -65,17 +63,14 @@ const Alemiah = () => {
                   alt="Alemiah Program Banner"
                   className="w-full h-80 lg:h-96 object-cover rounded-xl shadow-xl"
                 />
-                <div className="absolute -top-3 -right-3 bg-yellow-500 text-black px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                  ✨ বিশেষ প্রোগ্রাম
-                </div>
               </div>
             </div>
 
             {/* Content */}
             <div className="w-full lg:w-1/2 space-y-6">
               <div className="space-y-3">
-                <span className="inline-block bg-yellow-500/20 text-yellow-300 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-yellow-500/30">
-                  🕌 তারবিয়াহ আলেমিয়াহ
+                <span className="inline-block bg-yellow-500/20 text-yellow-300 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-yellow-500/30 ml-100">
+                  ভর্তি চলছে<br></br> সীমিত আসন
                 </span>
                 <h1 className="text-3xl md:text-5xl font-bold leading-tight">
                   আলেমিয়াহ <br />
@@ -97,9 +92,8 @@ const Alemiah = () => {
               </div>
 
               <p className="text-base md:text-lg text-gray-200 leading-relaxed">
-                গভীর জ্ঞান ও আত্মশুদ্ধির সমন্বয়ে একটি বিশেষায়িত প্রোগ্রাম।
-                ইসলামি জ্ঞান অর্জনের মাধ্যমে নিজেকে ও সমাজকে আলোকিত করতে আমাদের
-                এই আলেমিয়াহ প্রোগ্রামে যোগ দিন।
+                স্কুল-কলেজের পড়াশোনার পাশাপাশি কুরআন, হাদিস, আকিদা, ফিকহ, আরবি
+                ভাষা, সিরাহ ও ইসলামি আদব শেখার একটি সুসংগঠিত অনলাইন প্রোগ্রাম
               </p>
 
               {/* Stats */}
@@ -186,53 +180,6 @@ const Alemiah = () => {
                     </Link>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Why Choose Section */}
-        <div className="mt-16 bg-gradient-to-br from-[#002b2b] to-[#004d4d] rounded-3xl p-8 md:p-12 text-white">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold mb-3">
-              কেন <span className="text-yellow-400">আলেমিয়াহ</span> বেছে নেবেন?
-            </h2>
-            <p className="text-gray-300 max-w-2xl mx-auto">
-              অভিজ্ঞ শিক্ষকমণ্ডলী ও আধুনিক শিক্ষাপদ্ধতিতে তৈরি করা হয়েছে এই
-              প্রোগ্রামটি
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                icon: <FaUserGraduate />,
-                title: "অভিজ্ঞ শিক্ষক",
-                desc: "দক্ষ ওলামায়ে কেরামের ক্লাস",
-              },
-              {
-                icon: <FaLaptop />,
-                title: "লাইভ ক্লাস",
-                desc: "প্রতিটি ক্লাস লাইভ ও রেকর্ডেড",
-              },
-              {
-                icon: <FaHands />,
-                title: "ব্যক্তিগত যত্ন",
-                desc: "প্রতিটি শিক্ষার্থীর জন্য বিশেষ মনোযোগ",
-              },
-              {
-                icon: <FaAward />,
-                title: "আলেমিয়াহ সনদ",
-                desc: "আন্তর্জাতিক মানের সার্টিফিকেট",
-              },
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                className="bg-white/5 backdrop-blur-sm p-6 rounded-xl border border-white/10 hover:bg-white/10 transition-all text-center"
-              >
-                <div className="text-4xl text-yellow-400 mb-3">{item.icon}</div>
-                <h4 className="font-bold text-lg mb-1">{item.title}</h4>
-                <p className="text-sm text-gray-300">{item.desc}</p>
               </div>
             ))}
           </div>

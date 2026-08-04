@@ -1272,9 +1272,9 @@ const DiplomaDetails = () => {
               {/* ========== LAST 4 SECTIONS ========== */}
 
               {/* 1. কেন তারবিয়াহ ডিপ্লোমা ইন ইসলামিক স্ট্রাডিজ ? */}
-              <div className="bg-gradient-to-br from-[#002b2b] via-[#003d3d] to-[#004d4d] text-white rounded-3xl shadow-2xl p-6 md:p-12">
+              <div className="bg-gradient-to-br text-black rounded-3xl shadow-2xl p-6 md:p-12">
                 <div className="text-center mb-10">
-                  <h2 className="text-2xl md:text-4xl font-bold mb-3 text-yellow-400">
+                  <h2 className="text-2xl md:text-4xl font-bold mb-3 text-[#00ADD2]">
                     কেন তারবিয়াহ ডিপ্লোমা ইন ইসলামিক স্ট্রাডিজ ?
                   </h2>
                   <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
@@ -1284,12 +1284,12 @@ const DiplomaDetails = () => {
                   {whyFeatures.map((feature, index) => (
                     <div
                       key={index}
-                      className="bg-white/5 border border-white/10 backdrop-blur-sm p-5 rounded-2xl flex items-center gap-4 hover:bg-white/10 transition-all shadow-lg"
+                      className="bg-gray-50 border border-gray-200 backdrop-blur-sm p-5 rounded-2xl flex items-center gap-4 hover:bg-gray-100 transition-all shadow-md"
                     >
-                      <div className="w-12 h-12 rounded-xl bg-yellow-500/20 text-yellow-400 flex items-center justify-center shrink-0 text-xl">
+                      <div className="w-12 h-12 rounded-xl bg-yellow-500/20 text-yellow-600 flex items-center justify-center shrink-0 text-xl">
                         {feature.icon}
                       </div>
-                      <h3 className="text-base md:text-lg font-semibold text-gray-100">
+                      <h3 className="text-base md:text-lg font-semibold text-black">
                         {feature.text}
                       </h3>
                     </div>
