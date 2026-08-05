@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
-import BannerImg from "../../image/diplomabanner.jpg";
-import CourseImg from "../../image/diplomaBanner.jpeg";
+import BannerImg from "../../image/diplomacover.png";
+import CourseImg from "../../image/diplomathumball.png";
 // Swiper এবং প্রয়োজনীয় মডিউল ইমপোর্ট করুন
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";

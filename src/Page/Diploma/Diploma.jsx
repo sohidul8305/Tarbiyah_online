@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import diplomaImg from "../../image/diploma.jpg";
+import diplomabanner from "../../image/diplomabanner.png";
+import diplomacover from "../../image/diplomacover.png";
 import { Link } from "react-router";
 import {
   FaCheckCircle,
@@ -35,9 +36,9 @@ const Diploma = () => {
   // শুধুমাত্র title ও subtitle সহ ডিপ্লোমা কোর্স ডাটা
   const diplomaCourse = {
     id: 1,
-    image: "https://i.ibb.co.com/b5PhhPjP/Screenshot-2026-08-02-151525.png",
-
-    subtitle: " ২ বছরের পূর্ণাঙ্গ ইসলামিক স্টাডিজ প্রোগ্রাম",
+    image: diplomabanner,
+    title: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
+    subtitle: "২ বছরের পূর্ণাঙ্গ ইসলামিক স্টাডিজ প্রোগ্রাম",
   };
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
@@ -59,7 +60,7 @@ const Diploma = () => {
             <div className="w-full lg:w-1/2">
               <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl p-3 border border-white/10 shadow-2xl">
                 <img
-                  src="https://i.ibb.co.com/XZVH4YPP/images-q-tbn-ANd9-Gc-Ri56q-JX-78-BRlii-E9-ZR857-O7r-BIFLMs1-Sc-Uh-A4-EKw-J-AGMGZ1bt-PS1h8c-s-10.jpg"
+                  src={diplomacover}
                   alt="Islamic Studies Banner"
                   className="w-full h-80 lg:h-96 object-cover rounded-xl shadow-xl"
                 />
@@ -149,24 +150,14 @@ const Diploma = () => {
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-
-                <div className="absolute top-3 left-3 right-3 flex justify-between items-center text-white text-xs font-semibold">
-                  <span className="flex items-center gap-1 drop-shadow">
-                    {diplomaCourse.topBadge}{" "}
-                    <FaStar className="text-yellow-400 inline" />
-                  </span>
-                </div>
-
-                <div className="absolute bottom-3 left-4 right-4">
-                  <h3 className="text-2xl font-bold text-white drop-shadow-md">
-                    {diplomaCourse.title}
-                  </h3>
-                </div>
               </div>
 
-              {/* Card Body with Only Subtitle and Details Button */}
+              {/* Card Body - Title, Subtitle and Details Button */}
               <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
                 <div className="space-y-2">
+                  <h3 className="text-xl font-bold text-[#002b2b]">
+                    {diplomaCourse.title}
+                  </h3>
                   <p className="text-gray-600 text-xs leading-relaxed">
                     {diplomaCourse.subtitle}
                   </p>

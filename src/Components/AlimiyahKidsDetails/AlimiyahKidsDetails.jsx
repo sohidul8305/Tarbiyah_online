@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
-import AlemiyahBanner from "../../image/allemiyahkidsbanner.jpeg";
-import AlemyahCourse from "../../image/allemiyahcourse.jpeg";
+import AlemiyahBanner from "../../image/alemiyahkidscover.png";
+import AlemyahCourse from "../../image/alemiyahkidsthumball.png";
 // Swiper এবং প্রয়োজনীয় মডিউল ইমপোর্ট করুন
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";

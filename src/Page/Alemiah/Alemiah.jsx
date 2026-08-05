@@ -1,4 +1,5 @@
 import React from "react";
+import alemiyahbanner from "../../image/alemiyahkidsbanner.png";
 import alemiaImg from "../../image/alemiyah.jpg";
 import { Link } from "react-router";
 import {
@@ -31,8 +32,7 @@ const Alemiah = () => {
       id: "alimiyah-kids",
       title: "আলিমিয়াহ ফর কিডস",
       subtitle: "৬–১১ বছর বয়সী শিশুদের জন্য ইলম শেখার  আনন্দময় সূচনা",
-      image:
-        "https://i.ibb.co.com/MTCtR32/E0-A6-86-E0-A6-B2-E0-A6-BF-E0-A6-AE-E0-A6-BF-E0-A6-AF-E0-A6-BC-E0-A7-8-D-E0-A6-AF-E0-A6-BE-E0-A6-B9.jpg",
+      image: alemiyahbanner,
     },
     {
       id: "alimiyah-program",

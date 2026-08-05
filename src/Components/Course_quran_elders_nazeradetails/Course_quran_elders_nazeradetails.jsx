@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import NajeraadaltabannerImg from "../../image/Najeraadlatsbanner.png";
-import NajeraadaltcourseImg from "../../image/Najeracourse (3).png";
+import Najeraadalcover from "../../image/najeracover.jpg";
+import Najeraadaltthambell from "../../image/najerathumball.jpg";
 import {
   FaArrowLeft,
   FaUsers,
@@ -111,7 +111,7 @@ const Course_quran_elders_nazeradetails = () => {
 
           {/* Hero Section Banner */}
           <img
-            src={NajeraadaltabannerImg}
+            src={Najeraadalcover}
             alt="Nazera Adilat Banner"
             className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
           />
@@ -379,7 +379,7 @@ const Course_quran_elders_nazeradetails = () => {
                 className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer"
               >
                 <img
-                  src={NajeraadaltcourseImg}
+                  src={Najeraadaltthambell}
                   alt="Course Video"
                   className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />

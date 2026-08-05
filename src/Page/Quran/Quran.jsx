@@ -1,9 +1,11 @@
 import React from "react";
 import { Link } from "react-router";
 import Quranforeldersbanner from "../../image/Quranforeldersbanner.jpg";
-import Najeraadlatsbanner from "../../image/Najeraadlatsbanner.png";
+// import Najeraadlatsbanner from "../../image/Najeraadlatsbanner.png";
 import Adalthifzbanner from "../../image/adalthifzbanner.jpg";
 import adaltsbannerImg from "../../image/tajweedbanner - Copy.png";
+import AdvancedtajweedImg from "../../image/tajweedbanner - Copy.png";
+import Qurannajeracover from "../../image/najeracover.jpg";
 import {
   FaCheckCircle,
   FaClock,
@@ -35,31 +37,38 @@ import {
 import QuraneldersImg from "../../image/quraneldars.jpg";
 
 const Quran = () => {
-  // কোর্সের তথ্য (শুধুমাত্র title ও subtitle রাখা হয়েছে)
+  // কোর্সের তথ্য
   const courses = [
     {
       id: "elders-quida",
-      title: "এল্ডার্স কায়দা নুরানী",
-      subtitle: "প্রবীণদের জন্য কুরআন শিক্ষার প্রথম ধাপ",
+      title: "কায়দায়ে নূরানিয়্যাহ",
+      subtitle: "সহি কুরআন শিক্ষার প্রথম ধাপ।",
       image: Quranforeldersbanner,
     },
     {
       id: "elders-nazera",
-      title: "এল্ডার্স নাজেরা",
-      subtitle: "প্রবীণদের কুরআন তিলাওয়াত প্রশিক্ষণ",
-      image: Najeraadlatsbanner,
+      title: "কুরআন নাজেরা",
+      subtitle: "তারতীলের সাথে সাবলীল কুরআন তিলাওয়াত।",
+      image: Qurannajeracover,
     },
     {
       id: "elders-hifz",
-      title: "এল্ডার্স হিফজ",
-      subtitle: "প্রবীণদের জন্য কুরআন মুখস্থকরণ",
+      title: "হিফজুল কুরআন",
+      subtitle:
+        "নিয়মিত মাশকের মাধ্যমে ধাপে ধাপে সম্পূর্ণ কুরআন মুখস্থ করার প্রোগ্রাম।",
       image: Adalthifzbanner,
     },
     {
       id: "elders-tajweed",
-      title: "এল্ডার্স তাজউইদ",
-      subtitle: "প্রবীণদের জন্য তাজউইদ শিক্ষা",
+      title: "বেসিক তাজউইদ (লেভেল–১)",
+      subtitle: "শুদ্ধ মাখরাজ ও তাজউইদের নিয়ম সহজভাবে শেখা।",
       image: adaltsbannerImg,
+    },
+    {
+      id: "elders-advanced-tajweed",
+      title: "অ্যাডভান্সড তাজউইদ",
+      subtitle: "তাজউইদের গভীর নিয়মে ধাপে ধাপে দক্ষতা অর্জন",
+      image: AdvancedtajweedImg,
     },
   ];
 
@@ -82,25 +91,19 @@ const Quran = () => {
                   alt="Quran for Elders Banner"
                   className="w-full h-80 lg:h-96 object-cover rounded-xl shadow-xl"
                 />
-                <div className="absolute -top-3 -right-3 bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-bold shadow-lg">
-                  👴 প্রবীণদের জন্য
-                </div>
-                <div className="absolute -bottom-4 left-4 bg-white/90 backdrop-blur-sm text-[#002b2b] px-4 py-2 rounded-xl shadow-lg flex items-center gap-2">
-                  <FaHeart className="text-rose-500 text-xl" />
-                  <span className="font-bold">ধৈর্য ও মমতার সাথে</span>
-                </div>
               </div>
             </div>
 
             <div className="w-full lg:w-1/2 space-y-6">
               <div className="space-y-3">
-                <span className="inline-block bg-yellow-400/20 text-yellow-300 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-yellow-400/30">
-                  📖 কুরআন ফর এল্ডার
+                <span className="inline-block ml-80 mr-90 bg-yellow-400/20 text-yellow-300 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-yellow-400/30">
+                  ভর্তি চলছে <br></br>সীমিত আসন
                 </span>
+
                 <h1 className="text-3xl md:text-5xl font-bold leading-tight">
-                  প্রবীণদের <br />
+                  কুরআন ফর <br />
                   <span className="text-yellow-400 relative">
-                    কুরআন শিক্ষা
+                    এল্ডার্স
                     <svg
                       className="absolute -bottom-2 left-0 w-full h-2"
                       viewBox="0 0 200 10"
@@ -117,16 +120,16 @@ const Quran = () => {
               </div>
 
               <p className="text-base md:text-lg text-gray-200 leading-relaxed">
-                প্রবীণদের জন্য বিশেষভাবে ডিজাইন করা কুরআন শিক্ষা প্রোগ্রাম।
-                ধৈর্য ও মমতার সাথে আমরা শেখাই কুরআন তিলাওয়াত ও শুদ্ধ উচ্চারণ,
-                যাতে এই বয়সেও আপনি কুরআনের নূর অর্জন করতে পারেন।
+                সময়, বয়স ও ব্যস্ততার সীমাবদ্ধতা পেরিয়ে প্রাপ্তবয়স্কদের জন্য
+                আধুনিক অনলাইন কুরআন শিক্ষা। কায়দা, তাজউইদ, নাজেরা ও হিফজ শেখার
+                বিশ্বস্ত প্ল্যাটফর্ম।
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
                 <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
                   <FaBook className="text-yellow-400 text-2xl mx-auto mb-1" />
-                  <p className="text-xs text-gray-300">কোর্স</p>
-                  <p className="text-sm font-bold">৪টি</p>
+                  <p className="text-xs text-gray-300">লাইভ</p>
+                  <p className="text-sm font-bold">ক্লাস</p>
                 </div>
                 <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
                   <FaUsers className="text-yellow-400 text-2xl mx-auto mb-1" />
@@ -155,7 +158,7 @@ const Quran = () => {
               আমাদের <span className="text-yellow-500">কোর্সসমূহ</span>
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              আপনার প্রয়োজন অনুযায়ী সঠিক কোর্সটি বেছে নিন
+              দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম
             </p>
           </div>
 
@@ -173,23 +176,21 @@ const Quran = () => {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <h3 className="text-lg font-bold text-white mt-2">
-                      {course.title}
-                    </h3>
-                  </div>
                 </div>
 
-                {/* Course Content - Only Subtitle and Details Button */}
+                {/* Course Content */}
                 <div className="p-5 flex flex-col flex-grow justify-between">
-                  <div className="mb-4">
-                    <p className="text-xs text-yellow-600 font-semibold">
+                  <div>
+                    <h3 className="text-lg font-bold text-[#002b2b] mb-2">
+                      {course.title}
+                    </h3>
+                    <p className="text-xs text-gray-600 font-medium leading-relaxed">
                       {course.subtitle}
                     </p>
                   </div>
 
                   {/* Button */}
-                  <div className="pt-3 border-t border-gray-100 flex justify-end">
+                  <div className="pt-3 mt-3 border-t border-gray-100 flex justify-end">
                     <Link to={`/course/quran/${course.id}`}>
                       <button className="bg-[#002b2b] text-white font-bold px-4 py-2 rounded-full hover:bg-[#003d3d] transition-all transform hover:scale-105 flex items-center gap-1 text-xs">
                         <span>বিস্তারিত</span>

@@ -28,7 +28,7 @@ import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 import KidsImg from "../../image/kids.jpg";
 
-const OneToOneDetails = () => {
+const Course_quran_elders_advanced_tajweed = () => {
   const [showMore, setShowMore] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [openFaq, setOpenFaq] = useState(null);
@@ -42,59 +42,68 @@ const OneToOneDetails = () => {
   };
 
   const course = {
-    title: "অনলাইন হিফজ কোর্স",
-    subtitle: "অনলাইন কুরআন তরতিব হিফজ",
-    description: `আল্লাহ তায়ালা বলেন, আমিই যিকর (কুরআন) নাযিল করেছি এবং আমিই উহার সংরক্ষণ। 
-হিফজ- অধ্যায়: এটি সর্বসাকুল্যে precious বরকত পূর্ণ সমৃদ্ধ বিষয় তথা ক্ষেত্র। তাই 
-প্রত্যেক মুসলিম হিসেবে আল্লাহর কালামের সঠিক কুরআনুল কারীমকে মুখস্থ করার মাধ্যমে হেফাযত 
-করা। কুরআনুল কারীম হিফযকরণের সওয়াব ও ফজিলত অনেক বেশি। তাই আমরা 
-প্রস্তুত করেছি "অনলাইন কুরআন তরতিব হিফজ" এই প্রজেক্টটি। প্রজেক্টের মাধ্যমে একজন 
-শিক্ষার্থী খুব সহজেই কুরআনুল কারীম হিফজ সমাপ্ত করতে পারার ইনশাআল্লাহ।`,
-    shortDesc: `আল্লাহ তায়ালা বলেন, আমিই যিকর (কুরআন) নাযিল করেছি এবং আমিই উহার সংরক্ষণ...`,
+    title: "অ্যাডভান্সড তাজউইদ",
+    subtitle: "তাজউইদের গভীর নিয়মে ধাপে ধাপে দক্ষতা অর্জন",
+    description: `তাজউইদ হলো কুরআন তিলাওয়াতের বিজ্ঞান। অ্যাডভান্সড তাজউইদ কোর্সটি তাদের জন্য যারা ইতিমধ্যে বেসিক তাজউইদ সম্পন্ন করেছেন এবং কুরআন তিলাওয়াতে আরও গভীরতা ও দক্ষতা অর্জন করতে চান। এই কোর্সে আপনি তাজউইদের জটিল নিয়মাবলী, মাখরাজের সূক্ষ্মতা, সিফাতের গভীরতা এবং কুরআন তিলাওয়াতের শৈলী সম্পর্কে বিস্তারিত জানতে পারবেন।`,
+    shortDesc: `তাজউইদের গভীর নিয়মে ধাপে ধাপে দক্ষতা অর্জন। অ্যাডভান্সড তাজউইদ কোর্সটি তাদের জন্য যারা ইতিমধ্যে বেসিক তাজউইদ সম্পন্ন করেছেন...`,
     objectives: [
-      "হিফজের বিষয়াবলী ও অনুশীলনী",
-      "ব্যবহারিক তাজবিদ ও সার্টিফাইড ইন্সট্রাক্টর",
-      "সাপ্তাহিক সেশন ও মাসিক মূল্যায়ন",
-      "নিয়মিত প্রগ্রেস ও মৌখিক টিপস",
+      "তাজউইদের জটিল নিয়মাবলী সম্পর্কে গভীর জ্ঞান অর্জন",
+      "মাখরাজ ও সিফাতের সূক্ষ্মতা সম্পর্কে বিস্তারিত জানা",
+      "কুরআন তিলাওয়াতের বিভিন্ন শৈলী ও পদ্ধতি শেখা",
+      "হুসনে তিলাওয়াত ও সুরের উন্নয়ন",
+      "প্র্যাকটিক্যাল তাজউইদ প্রয়োগের দক্ষতা বৃদ্ধি",
+      "কুরআন তিলাওয়াতে আত্মবিশ্বাস অর্জন",
     ],
     materials: [
-      "প্রোডাক্ট হোপ্লেট || ক্লাস ভিডিও রেকর্ডিং",
-      "ক্লাসের সময়কাল: ১২০ মিনিট প্রতি ক্লাস",
-      "সার্টিফিকেট ও ইনরাইট প্রদান",
-      "পরীক্ষা: সিলেক্টিভ এবং ট্রায়াল",
-      "সাপ্তাহিক ক্লাসের দিন: ৪ দিন [নিয়মিত ব্যাচের জন্য]",
-      "সাপ্তাহিক ক্লাসের দিন: ২ দিন [ভিপিসী ব্যাচের জন্য]",
+      "লাইভ জুম ক্লাস ও ভিডিও রেকর্ডিং (প্রতিটি ক্লাস)",
+      "প্রাইভেট টেলিগ্রাম বা জুম গ্রুপ সাপোর্ট",
+      "সাপ্তাহিক প্র্যাকটিস সেশন ও টেস্ট",
+      "প্র্যাকটিক্যাল তাজবীদ এবং মাখরাজ",
+      "বিস্তারিত লেকচার শীট ও নোট",
+      "কোর্স শেষে সার্টিফিকেট প্রদান",
     ],
     curriculum: [
       {
-        title: "পূর্ণ কুরআন হিফজ",
-        desc: "সম্পূর্ণ কুরআনুল কারীম হিফজ সম্পন্ন করার বিশেষ পরিকল্পনা।",
+        title: "মাখরাজের সূক্ষ্মতা ও বিস্তারিত আলোচনা",
+        desc: "হরফগুলোর সঠিক মাখরাজ ও উচ্চারণের গভীর বিশ্লেষণ।",
       },
       {
-        title: "৩০ পাড়া সম্পূর্ণ হিফজ",
-        desc: "ধারাবাহিকভাবে ৩০ পাড়া মুখস্থ করার নিয়ম ও মাশক।",
+        title: "সিফাতের গভীরতা ও প্রয়োগ",
+        desc: "সিফাতসমূহের বিস্তারিত আলোচনা ও প্রায়োগিক অনুশীলন।",
       },
       {
-        title: "অ্যারাবিক সুয় হিফজ",
-        desc: "আরবি উচ্চারণ ও হিফজের বিশেষ অনুশীলন।",
+        title: "তাজউইদের জটিল নিয়মাবলী",
+        desc: "ইদগাম, ইখফা, ইকলাব, ক্বালক্বালাহ সহ জটিল নিয়মসমূহ।",
+      },
+      {
+        title: "হুসনে তিলাওয়াত ও সুরের উন্নয়ন",
+        desc: "তিলাওয়াতের সৌন্দর্য ও সুরের নিয়ম সম্পর্কে বিস্তারিত।",
+      },
+      {
+        title: "প্র্যাকটিক্যাল তাজউইদ অনুশীলন",
+        desc: "প্রতিটি নিয়মের প্রায়োগিক অনুশীলন ও ফিডব্যাক।",
+      },
+      {
+        title: "কুরআন তিলাওয়াতের বিভিন্ন শৈলী",
+        desc: "কিরাআতের বিভিন্ন শৈলী ও তাদের প্রয়োগ পদ্ধতি।",
       },
     ],
     targetAudience: [
-      "যাঁরা শুদ্ধ মাত্রায় কুরআনকে পড়তে পারে এমন শিক্ষার্থীদের জন্য।",
-      "যে কোনো বয়সের যে কেউ হাজী বা হাফেজ হতে পারে।",
-      "বসে না থেকে ঘরে বসে কুরআন হিফজ করতে আগ্রহী।",
-      "কর্মব্যস্ত জীবনের পাশাপাশি ঘরে কুরআন হিফজ প্রতি আগ্রহীদের জন্য।",
+      "যারা বেসিক তাজউইদ সম্পন্ন করেছেন",
+      "যারা কুরআন তিলাওয়াতে আরও গভীরতা ও দক্ষতা অর্জন করতে চান",
+      "যারা হুসনে তিলাওয়াত ও সুরের উন্নয়ন করতে চান",
+      "যারা কুরআন তিলাওয়াতকে আরও সুন্দর ও শুদ্ধ করতে চান",
     ],
     feeStructure: {
       bd: {
-        title: "ফি স্ট্রাকচার",
-        admission: "ভর্তি ফি: ২০০০ টাকা",
+        title: "বাংলাদেশী ছাত্র",
+        admission: "ভর্তি ফি: ১৫০০ টাকা",
         monthly: "মাসিক ফি: ২০০০ টাকা",
       },
       overseas: {
-        title: "অন্যান্য তথ্য",
-        admission: "সময়কাল: ১২০ মিনিট প্রতি ক্লাস",
-        monthly: "সাপ্তাহিক ক্লাস: ৪ দিন / ২ দিন",
+        title: "প্রবাসী ছাত্র",
+        admission: "ভর্তি ফি: ২৫০০ টাকা",
+        monthly: "মাসিক ফি: ৩৫০০ টাকা",
       },
     },
     rating: "0 (0 Ratings)",
@@ -104,7 +113,7 @@ const OneToOneDetails = () => {
   const whyFeatures = [
     {
       icon: <FaUserTie className="text-xl" />,
-      text: "কিডস ফেন্ডলি উস্তাদ",
+      text: "অভিজ্ঞ তাজউইদ বিশেষজ্ঞ",
     },
     {
       icon: <FaVideo className="text-xl" />,
@@ -135,7 +144,7 @@ const OneToOneDetails = () => {
       name: "আব্দুল্লাহ আল মামুন",
       designation: "শিক্ষার্থী, ঢাকা",
       quote:
-        "আলহামদুলিল্লাহ, এই কোর্সটি আমার হিফজের যাত্রাকে অনেক সহজ করে দিয়েছে। উস্তাদের নির্দেশনায় আমি খুব দ্রুত অগ্রগতি করতে পেরেছি।",
+        "আলহামদুলিল্লাহ, এই কোর্সটি আমার তাজউইদ জ্ঞানকে অনেক গভীর করেছে। উস্তাদের নির্দেশনায় আমি তাজউইদের জটিল নিয়মগুলো সহজে বুঝতে পেরেছি।",
       image: "https://i.pravatar.cc/150?img=11",
     },
     {
@@ -151,7 +160,7 @@ const OneToOneDetails = () => {
       name: "মোঃ হাসান মিয়া",
       designation: "ব্যবসায়ী, চট্টগ্রাম",
       quote:
-        "হিফজ কোর্সটি আমার জন্য অনেক উপকারী হয়েছে। উস্তাদের শিক্ষা পদ্ধতি সত্যিই অসাধারণ।",
+        "অ্যাডভান্সড তাজউইদ কোর্সটি আমার তিলাওয়াতের মান অনেক উন্নত করেছে। উস্তাদের শিক্ষা পদ্ধতি সত্যিই অসাধারণ।",
       image: "https://i.pravatar.cc/150?img=13",
     },
     {
@@ -225,7 +234,7 @@ const OneToOneDetails = () => {
     {
       question: "এই কোর্সটি কাদের জন্য?",
       answer:
-        "এই কোর্সটি তাদের জন্য যারা শুদ্ধ মাত্রায় কুরআন পড়তে পারে এবং হিফজ করতে আগ্রহী। যে কোনো বয়সের যে কেউ হাফেজ হতে পারে। কর্মব্যস্ত জীবনের পাশাপাশি ঘরে বসে কুরআন হিফজ করতে আগ্রহীদের জন্য।",
+        "এই কোর্সটি তাদের জন্য যারা ইতিমধ্যে বেসিক তাজউইদ সম্পন্ন করেছেন এবং কুরআন তিলাওয়াতে আরও গভীরতা ও দক্ষতা অর্জন করতে চান। যারা হুসনে তিলাওয়াত ও সুরের উন্নয়ন করতে চান তাদের জন্য এই কোর্স।",
     },
     {
       question: "ক্লাসগুলো কীভাবে পরিচালিত হয়?",
@@ -239,7 +248,8 @@ const OneToOneDetails = () => {
     },
     {
       question: "ভর্তি ফি কত?",
-      answer: "ভর্তি ফি ২০০০ টাকা এবং মাসিক ফি ২০০০ টাকা।",
+      answer:
+        "বাংলাদেশীদের জন্য ভর্তি ফি ১৫০০ টাকা এবং মাসিক ফি ২০০০ টাকা। প্রবাসীদের জন্য ভর্তি ফি ২৫০০ টাকা এবং মাসিক ফি ৩৫০০ টাকা।",
     },
   ];
 
@@ -249,7 +259,7 @@ const OneToOneDetails = () => {
       <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Back Link */}
         <Link
-          to="/course/kids"
+          to="/course/quran"
           className="inline-flex items-center gap-2 text-cyan-700 hover:text-cyan-900 mb-4 transition-colors text-sm font-medium"
         >
           <FaArrowLeft />
@@ -301,14 +311,14 @@ const OneToOneDetails = () => {
               <h2 className="text-cyan-700 font-bold text-lg mb-3 tracking-wide">
                 ABOUT COURSE
               </h2>
-              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+              <p className="text-gray-600 text-sm leading-relaxed">
                 {showMore ? course.description : course.shortDesc}
               </p>
               <button
                 onClick={() => setShowMore(!showMore)}
                 className="text-cyan-600 text-sm font-semibold mt-3 hover:underline flex items-center gap-1"
               >
-                {showMore ? "- কম প্রদর্শন করুন" : "+ আরও দেখুন"}
+                {showMore ? "- Show Less" : "+ Show More"}
               </button>
             </div>
 
@@ -355,7 +365,7 @@ const OneToOneDetails = () => {
               <span className="text-cyan-800 font-bold text-base md:text-lg">
                 Ready To Apply Your Course
               </span>
-              <Link to="/course/kids/one-to-one/enroll">
+              <Link to="/course/quran/elders-advanced-tajweed/enroll">
                 <button className="bg-cyan-700 hover:bg-cyan-800 text-white font-bold px-6 py-2.5 rounded-lg text-sm shadow transition-all">
                   Start Now
                 </button>
@@ -377,10 +387,10 @@ const OneToOneDetails = () => {
               </div>
             </div>
 
-            {/* INTER COURSES (COURSE CURRICULUM) */}
+            {/* COURSE CURRICULUM (Accordion) */}
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
-                INTER COURSES
+                COURSE CURRICULUM
               </h2>
               <div className="space-y-3">
                 {course.curriculum.map((item, index) => (
@@ -655,9 +665,9 @@ const OneToOneDetails = () => {
                 </span>
               </div>
 
-              <Link to="/course/kids/one-to-one/enroll">
+              <Link to="/course/quran/elders-advanced-tajweed/enroll">
                 <button className="w-full bg-cyan-700 hover:bg-cyan-800 text-white font-bold py-3 px-4 rounded-lg shadow transition-all text-sm flex items-center justify-center gap-2">
-                  <span>Apply Now</span>
+                  <span>Enroll Now</span>
                 </button>
               </Link>
             </div>
@@ -669,4 +679,4 @@ const OneToOneDetails = () => {
   );
 };
 
-export default OneToOneDetails;
+export default Course_quran_elders_advanced_tajweed;

@@ -5,9 +5,10 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import DiplomaBanner from "../../image/Diplomabanner.png";
-import NajeraBanner from "../../image/najerabanner.png";
-import NuraniyahBanner from "../../image/nuranibanner.jpg";
+
+import DiplomaBanner from "../../image/diplomacover.png";
+import Alemiyah from "../../image/alemiyahkidsbanner.png";
+import Najeraadealts from "../../image/najerabanner.jpg";
 import HifjulBanner from "../../image/hifjulbanner.png";
 
 const Banner = () => {
@@ -51,7 +52,7 @@ const Banner = () => {
         <SwiperSlide>
           <div className="w-full h-full overflow-hidden bg-black">
             <img
-              src={NajeraBanner}
+              src={Alemiyah}
               alt="Slider 2"
               className="w-full h-full object-cover auto-zoom-img"
             />
@@ -61,7 +62,7 @@ const Banner = () => {
         <SwiperSlide>
           <div className="w-full h-full overflow-hidden bg-black">
             <img
-              src={NuraniyahBanner}
+              src={Najeraadealts}
               alt="Slider 3"
               className="w-full h-full object-cover auto-zoom-img"
             />

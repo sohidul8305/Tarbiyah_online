@@ -153,6 +153,8 @@ import Course_kids_tajweed_enrollbnagla from "../Components/Course_kids_tajweed_
 import Course_quran_elders_tajweed from "../Components/Course_quran_elders_tajweed/Course_quran_elders_tajweed";
 import Enroll_tajweed_english_version from "../Components/Enroll_tajweed_english_version/Enroll_tajweed_english_version";
 import Campus_login from "../Page/Campus_login/Campus_login";
+import Course_quran_elders_advanced_tajweed from "../Components/Course_quran_elders_advanced_tajweed/Course_quran_elders_advanced_tajweed";
+import Course_quran_elders_advanced_tajweed_enroll from "../Components/Course_quran_elders_advanced_tajweed_enroll/Course_quran_elders_advanced_tajweed_enroll";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -369,6 +371,12 @@ export const router = createBrowserRouter([
     element: <Enroll_tajweed_english_version></Enroll_tajweed_english_version>,
   },
   {
+    path: "/course/quran/elders-advanced-tajweed",
+    element: (
+      <Course_quran_elders_advanced_tajweed></Course_quran_elders_advanced_tajweed>
+    ),
+  },
+  {
     path: "/course/kids/tajweed/enrollbnagla",
     element: (
       <Course_kids_tajweed_enrollbnagla></Course_kids_tajweed_enrollbnagla>
@@ -415,6 +423,12 @@ export const router = createBrowserRouter([
     path: "/enroll/alemiyah/english-version",
     element: (
       <Enroll_alemiyah_english_version></Enroll_alemiyah_english_version>
+    ),
+  },
+  {
+    path: "/course/quran/elders-advanced-tajweed/enroll",
+    element: (
+      <Course_quran_elders_advanced_tajweed_enroll></Course_quran_elders_advanced_tajweed_enroll>
     ),
   },
 

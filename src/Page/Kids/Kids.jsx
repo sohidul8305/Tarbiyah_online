@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import KidsImg from "../../image/kids.jpg";
 import NuraniyaCourseImg from "../../image/nuranicourse.jpg";
 import NuraniyaBannerIMG from "../../image/nuranibanner.jpg";
-import NazeraBannerImg from "../../image/najerabanner.png";
+// import NazeraBannerImg from "../../image/najerabanner.png";
 import HifjulBannerImg from "../../image/hifjulbanner.png";
 import {
   FaCheckCircle,
@@ -36,36 +36,36 @@ import {
 } from "react-icons/fa";
 
 const Kids = () => {
-  // কোর্সের তথ্য (শুধুমাত্র title ও subtitle রাখা হয়েছে)
+  // কোর্সের তথ্য
   const courses = [
     {
       id: "quida-nurani",
       title: "কায়দা নুরানী",
-      subtitle: "কুরআন শেখার প্রথম ধাপ",
+      subtitle: "শিশুদের কুরআন শিক্ষার প্রথম ধাপ।",
       image: NuraniyaBannerIMG,
     },
     {
       id: "nazera",
       title: "নাজেরা",
-      subtitle: "কুরআন তিলাওয়াত প্রশিক্ষণ",
-      image: NazeraBannerImg,
+      subtitle: "সহি তাজউইথ ও সুন্দরভাবে কুরআন তিলাওয়াত শেখা।",
+      // image: NazeraBannerImg,
     },
     {
       id: "hifz",
       title: "হিফজুল কুরআন",
-      subtitle: "পবিত্র কুরআন মুখস্থকরণ",
+      subtitle: "ধাপে ধাপে সম্পূর্ণ কুরআন মুখস্থ করার প্রোগ্রাম।",
       image: HifjulBannerImg,
     },
     {
       id: "hifz-revision",
       title: "হিফজ রিভিশন",
-      subtitle: "মুখস্থ কুরআন পুনর্বীক্ষণ",
+      subtitle: "মুখস্থ কুরআনকে দৃঢ় ও নির্ভুল রাখার নিয়মিত অনুশীলন",
       image: KidsImg,
     },
     {
       id: "one-to-one",
       title: "ওয়ান টু ওয়ান",
-      subtitle: "ব্যক্তিগত কুরআন শিক্ষা",
+      subtitle: "ফ্লেক্সিবল  সময়ে পার্সোনালাইজড কুরআন লার্নিং",
       image: KidsImg,
     },
   ];
@@ -89,20 +89,13 @@ const Kids = () => {
                   alt="Kids Program Banner"
                   className="w-full max-w-[250px] h-auto object-contain rounded-xl shadow-xl"
                 />
-                <div className="absolute -top-3 -right-3 bg-yellow-400 text-black px-4 py-2 rounded-full text-sm font-bold shadow-lg animate-bounce">
-                  🕌 তারবিয়াহ কুরআন স্টাডিজ
-                </div>
-                <div className="absolute -bottom-4 left-4 bg-white/90 backdrop-blur-sm text-teal-800 px-4 py-2 rounded-xl shadow-lg flex items-center gap-2">
-                  <FaQuran className="text-emerald-600 text-xl" />
-                  <span className="font-bold">৫টি কোর্স</span>
-                </div>
               </div>
             </div>
 
             <div className="w-full lg:w-1/2 space-y-6">
               <div className="space-y-3">
-                <span className="inline-block bg-yellow-400/20 text-yellow-200 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-yellow-400/30">
-                  📖 কুরআন শিক্ষা প্রোগ্রাম
+                <span className="inline-block bg-yellow-400/20 text-yellow-200 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-yellow-400/30 mr-50">
+                  ভর্তি চলছে <br></br>সীমিত আসন
                 </span>
                 <h1 className="text-3xl md:text-5xl font-bold leading-tight">
                   তারবিয়াহ <br />
@@ -124,15 +117,15 @@ const Kids = () => {
               </div>
 
               <p className="text-base md:text-lg text-gray-200 leading-relaxed">
-                কুরআন শিক্ষার সকল স্তরের জন্য পূর্ণাঙ্গ প্রোগ্রাম। নূরানী পদ্ধতি
-                থেকে শুরু করে হিফজ ও রিভিশন পর্যন্ত সবকিছু একই প্ল্যাটফর্মে।
+                শিশুদের জন্য আনন্দময়, সহায়ক ও কিডস ফেন্ডলি পরিবেশে বিশুদ্ধ
+                তিলাওয়াত, তাজউথদ, নাজেরা ও হিফজ শিক্ষার বিশ্বস্ত প্ল্যাটফর্ম।
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
                 <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
                   <FaBook className="text-yellow-300 text-2xl mx-auto mb-1" />
-                  <p className="text-xs text-gray-300">কোর্স</p>
-                  <p className="text-sm font-bold">৫টি</p>
+                  <p className="text-xs text-gray-300">লাইভ</p>
+                  <p className="text-sm font-bold">ক্লাস</p>
                 </div>
                 <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
                   <FaUsers className="text-yellow-300 text-2xl mx-auto mb-1" />
@@ -161,7 +154,7 @@ const Kids = () => {
               আমাদের <span className="text-yellow-500">কোর্সসমূহ</span>
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              আপনার প্রয়োজন অনুযায়ী সঠিক কোর্সটি বেছে নিন
+              দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম
             </p>
           </div>
 
@@ -179,23 +172,21 @@ const Kids = () => {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <div className="absolute bottom-4 left-4 right-4">
-                    <h3 className="text-xl font-bold text-white mt-2">
-                      {course.title}
-                    </h3>
-                  </div>
                 </div>
 
-                {/* Course Content - Only Subtitle and Details Button */}
+                {/* Course Content */}
                 <div className="p-5 flex flex-col flex-grow justify-between">
-                  <div className="mb-4">
-                    <p className="text-sm text-yellow-600 font-semibold">
+                  <div>
+                    <h3 className="text-xl font-bold text-teal-800 mb-2">
+                      {course.title}
+                    </h3>
+                    <p className="text-sm text-gray-600 font-medium leading-relaxed">
                       {course.subtitle}
                     </p>
                   </div>
 
                   {/* Button */}
-                  <div className="pt-3 border-t border-gray-100 flex justify-end">
+                  <div className="pt-3 mt-3 border-t border-gray-100 flex justify-end">
                     <Link to={`/course/kids/${course.id}`}>
                       <button className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold px-4 py-2 rounded-full hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-1 text-xs">
                         <span>বিস্তারিত</span>
@@ -227,11 +218,6 @@ const Kids = () => {
                 icon: <FaUserTie />,
                 title: "অভিজ্ঞ শিক্ষক",
                 desc: "দক্ষ ওলামায়ে কেরামের ক্লাস",
-              },
-              {
-                icon: <FaLaptop />,
-                title: "লাইভ ক্লাস",
-                desc: "প্রতিটি ক্লাস লাইভ ও রেকর্ডেড",
               },
               {
                 icon: <FaHands />,
