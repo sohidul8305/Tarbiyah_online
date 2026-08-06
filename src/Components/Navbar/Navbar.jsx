@@ -14,6 +14,7 @@ const Navbar = () => {
       phone1: "+880 1841-514545",
       phone2: "+880 1841-516565",
       login: "Log In",
+      admission: "Admission Now",
       support: "Support",
       donate: "Donate",
       home: "Home",
@@ -29,7 +30,7 @@ const Navbar = () => {
       courses: "Courses",
       diploma: "Diploma in Islamic Studies",
       alemiah: "Tarbiyah Allimiyah",
-      kids: "Tarbiyah Quran Studies ",
+      kids: "Tarbiyah Quran Studies",
       quran: "Quran for Elder",
       consultancy: "Consultancy",
       blog: "Blog",
@@ -52,6 +53,7 @@ const Navbar = () => {
       phone1: "+880 1841-514545",
       phone2: "+880 1841-516565",
       login: "লগইন",
+      admission: "এডমিশন নাও",
       support: "সাপোর্ট",
       donate: "দান করুন",
       home: "হোম",
@@ -105,6 +107,12 @@ const Navbar = () => {
           <span>{t.phone2}</span>
         </div>
         <div className="flex items-center gap-4">
+          <Link
+            to="/admission-now"
+            className="bg-gradient-to-r from-[#004d5a] to-[#006b7a] text-white px-5 py-1.5 rounded-md font-bold hover:shadow-lg hover:scale-105 transition-all duration-300 shadow-md border border-[#006b7a]/30"
+          >
+            {t.admission}
+          </Link>
           <Link to="/support" className="hover:text-teal-200">
             {t.support}
           </Link>
@@ -240,6 +248,12 @@ const Navbar = () => {
                 className="block px-4 py-2 hover:bg-gray-100"
               >
                 {t.noticeBoard}
+              </Link>
+              <Link
+                to="/admission-now"
+                className="bg-gradient-to-r from-[#004d5a] to-[#006b7a] text-white px-4 py-1.5 rounded-md font-bold hover:shadow-lg hover:scale-105 transition-all duration-300 shadow-md border border-[#006b7a]/30"
+              >
+                {t.admission}
               </Link>
               <Link to="/support" className="block px-4 py-2 hover:bg-gray-100">
                 {t.support}
