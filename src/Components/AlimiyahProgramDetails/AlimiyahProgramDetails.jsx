@@ -41,9 +41,14 @@ import Navbar from "../Navbar/Navbar";
 const AlimiyahProgramDetails = () => {
   const [openSemester, setOpenSemester] = useState(0);
   const [activeTab, setActiveTab] = useState("info");
+  const [openFaq, setOpenFaq] = useState(null);
 
   const toggleSemester = (index) => {
     setOpenSemester(openSemester === index ? null : index);
+  };
+
+  const toggleFaq = (index) => {
+    setOpenFaq(openFaq === index ? null : index);
   };
 
   // Alimiyah Program এর ইনস্ট্রাক্টর
@@ -309,29 +314,37 @@ const AlimiyahProgramDetails = () => {
   // FAQ Data
   const faqs = [
     {
-      question: "আলিমিয়াহ প্রোগ্রামটি কাদের জন্য?",
+      question: "এই প্রোগ্রামের উদ্দেশ্য কী?",
       answer:
-        "এই প্রোগ্রামটি ৭-১২ বছর বয়সী শিশুদের জন্য বিশেষভাবে ডিজাইন করা হয়েছে। যারা ইসলামের মৌলিক থেকে গভীর জ্ঞান অর্জন করতে চান এবং প্র্যাক্টিসিং মুসলিম হিসেবে গড়ে উঠতে চান।",
+        "জেনারেল শিক্ষার পাশাপাশি শিশু-কিশোরদের সহিহ আকীদা, কুরআন-সুন্নাহভিত্তিক জ্ঞান ও উত্তম চরিত্রে গড়ে তোলা।",
     },
     {
-      question: "প্রোগ্রামের ভাষা কী?",
-      answer:
-        "আমাদের প্রোগ্রামটি বাংলা ও ইংরেজি উভয় ভাষায় উপলব্ধ। শিক্ষার্থীরা তাদের সুবিধামতো ভাষা নির্বাচন করতে পারেন।",
+      question: "কত বছরের শিক্ষার্থীরা এই প্রোগ্রামে ভর্তি হতে পারবে?",
+      answer: "১২–১৮ বছর বয়সী শিক্ষার্থীরা এই প্রোগ্রামে ভর্তি হতে পারবে।",
     },
     {
-      question: "ক্লাসগুলো কীভাবে পরিচালিত হয়?",
+      question: "এই প্রোগ্রামে কোন কোন বিষয় পড়ানো হবে?",
       answer:
-        "ক্লাসগুলো সম্পূর্ণ অনলাইনে লাইভ পরিচালিত হয়। প্রতিটি ক্লাসের রেকর্ডিংও সংরক্ষণ করা হয়, যাতে শিক্ষার্থীরা প্রয়োজন অনুযায়ী আবার দেখতে পারেন।",
+        "আকীদাহ, কুরআন, হাদিস, ফিকহ, সীরাহ, আরবি ভাষা, আদব-আখলাক এবং প্রয়োজনীয় ইসলামি বিষয়সমূহ।",
     },
     {
-      question: "প্রোগ্রাম শেষে কী পাওয়া যাবে?",
+      question: "অভিভাবকরা কেন তারবিয়াহকে বেছে নেবেন?",
       answer:
-        "সফলভাবে প্রোগ্রাম সম্পন্নকারীদের Tarbiyah Online Madrasah-এর পক্ষ থেকে সার্টিফিকেট প্রদান করা হবে।",
+        "কারণ এখানে আধুনিক অনলাইন শিক্ষাপদ্ধতির মাধ্যমে কিডস ফেন্ডলি কারিকুলাম, অভিজ্ঞ শিক্ষক, নিয়মিত মূল্যায়ন এবং অভিভাবকবান্ধব সাপোর্ট নিশ্চিত করা হয়।",
     },
     {
-      question: "ভর্তি ফি কত?",
+      question: "এটি কত বছরের প্রোগ্রাম?",
+      answer: "এটি একটি ৩ বছর মেয়াদি আলিমিয়্যাহ প্রোগ্রাম।",
+    },
+    {
+      question: "কোর্স শেষে শিক্ষার্থীদের আউটকাম কী হবে?",
       answer:
-        "বাংলা মিডিয়ামের জন্য ভর্তি ফি ২০০০ টাকা এবং সেমিস্টার ফি ৪০০০ টাকা। ইংরেজি মিডিয়ামের জন্য ভর্তি ফি ৩০০০ টাকা এবং সেমিস্টার ফি ১২০০০ টাকা।",
+        "শিক্ষার্থীরা ইসলাম সম্পর্কে মৌলিক ও মধ্যম স্তরের জ্ঞান অর্জন করবে, সহিহ আকীদা ও ইবাদতের ভিত্তি দৃঢ় হবে এবং ভবিষ্যতের উচ্চতর ইসলামি শিক্ষার জন্য প্রস্তুত হবে।",
+    },
+    {
+      question: "কোর্স শেষে সার্টিফিকেট দেওয়া হবে কি?",
+      answer:
+        "হ্যাঁ। সফলভাবে কোর্স সম্পন্নকারীদের Tarbiyah Online Madrasah-এর পক্ষ থেকে সার্টিফিকেট প্রদান করা হবে।",
     },
   ];
 
@@ -931,19 +944,19 @@ const AlimiyahProgramDetails = () => {
                       className="border border-gray-200 rounded-xl overflow-hidden"
                     >
                       <button
-                        onClick={() => toggleSemester(`faq-${index}`)}
+                        onClick={() => toggleFaq(index)}
                         className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 text-left transition-colors"
                       >
                         <span className="font-bold text-[#002b2b]">
                           {index + 1}. {faq.question}
                         </span>
-                        {openSemester === `faq-${index}` ? (
+                        {openFaq === index ? (
                           <FaChevronUp className="text-gray-500" />
                         ) : (
                           <FaChevronDown className="text-gray-500" />
                         )}
                       </button>
-                      {openSemester === `faq-${index}` && (
+                      {openFaq === index && (
                         <div className="p-4 bg-white border-t border-gray-200 text-gray-700">
                           {faq.answer}
                         </div>

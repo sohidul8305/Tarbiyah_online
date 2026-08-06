@@ -536,7 +536,7 @@ const EldersQuidaDetails = () => {
                 </div>
               </div>
 
-              {/* ========== LAST 3 SECTIONS ========== */}
+              {/* ========== LAST 3 SECTIONS (যেমন Course_quran_elders_nazeradetails page এ আছে) ========== */}
 
               {/* 1. কেন তারবিয়াহ কুরআন ফর এল্ডার্স */}
               <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-12 border border-gray-100">

@@ -35,9 +35,14 @@ import Navbar from "../Navbar/Navbar";
 const NazeraDetails = () => {
   const [openSemester, setOpenSemester] = useState(null);
   const [activeTab, setActiveTab] = useState("info");
+  const [openFaq, setOpenFaq] = useState(null);
 
   const toggleSemester = (index) => {
     setOpenSemester(openSemester === index ? null : index);
+  };
+
+  const toggleFaq = (index) => {
+    setOpenFaq(openFaq === index ? null : index);
   };
 
   const courseDetails = {
@@ -201,32 +206,42 @@ const NazeraDetails = () => {
     },
   ];
 
-  // FAQ Data
+  // FAQ Data - Tarbiyah Quran for Kids
   const faqs = [
     {
-      question: "এই কোর্সটি কাদের জন্য?",
+      question: "ইউরোপ, আমেরিকা বা মধ্যপ্রাচ্য থেকে কি এই কোর্সটি করা যাবে?",
       answer:
-        "এই কোর্সটি শিশু, তরুণ প্রজন্ম এবং প্রাপ্তবয়স্কদের জন্য উন্মুক্ত। যারা সঠিকভাবে কুরআন তেলাওয়াত করতে পারে না এবং যারা মুখস্থ করার স্বপ্ন দেখে তাদের জন্য ডিজাইন করা হয়েছে।",
+        "হ্যাঁ। বিশ্বের যেকোনো দেশ থেকে অনলাইনের মাধ্যমে এই প্রোগ্রামে অংশগ্রহণ করা যাবে।",
     },
     {
-      question: "কোর্সের ভাষা কী?",
+      question: "আপনাদের ওস্তাদরা বাচ্চাদের সঙ্গে কেমন আচরণ করেন?",
       answer:
-        "আমাদের কোর্সটি বাংলা ও ইংরেজি উভয় ভাষায় উপলব্ধ। শিক্ষার্থীরা তাদের সুবিধামতো ভাষা নির্বাচন করতে পারেন।",
+        "আমাদের শিক্ষকরা শিশুদের বয়স ও মানসিকতা অনুযায়ী ধৈর্য, আন্তরিকতা ও উৎসাহের সঙ্গে পাঠদান করেন, যাতে তারা আনন্দের সঙ্গে শিখতে পারে।",
     },
     {
-      question: "ক্লাসগুলো কীভাবে পরিচালিত হয়?",
+      question: "আপনাদের হিফজ ডিপার্টমেন্টের সাফল্য সম্পর্কে বলুন।",
       answer:
-        "ক্লাসগুলো সম্পূর্ণ অনলাইনে লাইভ পরিচালিত হয়। প্রতিটি ক্লাসের রেকর্ডিংও সংরক্ষণ করা হয়, যাতে শিক্ষার্থীরা প্রয়োজন অনুযায়ী আবার দেখতে পারেন।",
+        "আমাদের হিফজ ডিপার্টমেন্টে দেশ-বিদেশের অসংখ্য শিক্ষার্থী সফলভাবে নাজেরা, হিফজ ও হিফজ রিভিশন সম্পন্ন করেছে এবং নিয়মিত কুরআনের সঙ্গে সংযুক্ত রয়েছে।",
     },
     {
-      question: "কোর্স শেষে কী পাওয়া যাবে?",
+      question: "কত বছর বয়স থেকে বাচ্চারা শুরু করতে পারে?",
       answer:
-        "সফলভাবে কোর্স সম্পন্নকারীদের Tarbiyah Online Madrasah-এর পক্ষ থেকে সার্টিফিকেট প্রদান করা হবে।",
+        "সাধারণত ৪-৫ বছর বয়স থেকে শিশুদের কুরআন শিক্ষা শুরু করা যায়। তবে শিশুর প্রস্তুতি অনুযায়ী উপযুক্ত কোর্স নির্বাচন করা হয়।",
     },
     {
-      question: "ভর্তি ফি কত?",
+      question: "অভিভাবকরা কেন তারবিয়াহকে বেছে নেবেন?",
       answer:
-        "বাংলাদেশীদের জন্য ভর্তি ফি ১০০০ টাকা এবং মাসিক ফি ১০০০ টাকা। প্রবাসীদের জন্য ভর্তি ফি ২০০০ টাকা এবং মাসিক ফি ২০০০ টাকা।",
+        "কারণ আমরা শুধু কুরআন শেখাই না; বরং শিশুর তিলাওয়াত, আদব-আখলাক, নিয়মিত অনুশীলন এবং শেখার অগ্রগতির ওপর সমান গুরুত্ব দিই।",
+    },
+    {
+      question: "স্কুল কলেজের পড়াশোনার পাশাপাশি কি হিফজ করা সম্ভব?",
+      answer:
+        "হ্যাঁ। আমাদের ক্লাস রুটিন এমনভাবে পরিকল্পিত, যাতে শিক্ষার্থীরা জেনারেল শিক্ষার পাশাপাশি হিফজ চালিয়ে যেতে পারে।",
+    },
+    {
+      question: "বাচ্চাদের হিফজ করানো কেন গুরুত্বপূর্ণ?",
+      answer:
+        "শৈশব হলো মুখস্থ করার সর্বোত্তম সময়। এই সময়ে কুরআন হিফজ করলে তা দীর্ঘমেয়াদে সংরক্ষণ সহজ হয় এবং শিশুর নৈতিক, আত্মিক ও বুদ্ধিবৃত্তিক বিকাশেও ইতিবাচক ভূমিকা রাখে।",
     },
   ];
 
@@ -650,19 +665,19 @@ const NazeraDetails = () => {
                       className="border border-gray-200 rounded-xl overflow-hidden"
                     >
                       <button
-                        onClick={() => toggleSemester(`faq-${index}`)}
+                        onClick={() => toggleFaq(index)}
                         className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 text-left transition-colors cursor-pointer"
                       >
                         <span className="font-bold text-[#002b2b]">
                           {index + 1}. {faq.question}
                         </span>
-                        {openSemester === `faq-${index}` ? (
+                        {openFaq === index ? (
                           <FaChevronUp className="text-gray-500" />
                         ) : (
                           <FaChevronDown className="text-gray-500" />
                         )}
                       </button>
-                      {openSemester === `faq-${index}` && (
+                      {openFaq === index && (
                         <div className="p-4 bg-white border-t border-gray-200 text-gray-700">
                           {faq.answer}
                         </div>
