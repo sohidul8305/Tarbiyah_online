@@ -32,6 +32,8 @@ import {
   FaGraduationCap,
   FaMosque,
   FaQuran,
+  FaChevronUp,
+  FaChevronDown,
 } from "react-icons/fa";
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
@@ -44,19 +46,126 @@ const Enroll_quidaelders_english_version = () => {
   const [couponApplied, setCouponApplied] = useState(false);
   const [showEnrolmentSummaryMobile, setShowEnrolmentSummaryMobile] =
     useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedCourses, setSelectedCourses] = useState([]);
+
+  // Departments & Courses
+  const departments = {
+    "islamic-studies": {
+      name: "Diploma in Islamic Studies",
+      courses: [
+        {
+          id: "is1",
+          name: "Diploma in Islamic Studies",
+          price: 12000,
+          duration: "1 Year",
+        },
+      ],
+    },
+    alemiyah: {
+      name: "Tarbiyah Alemiyah",
+      courses: [
+        {
+          id: "al1",
+          name: "Alemiyah for Kids",
+          price: 8000,
+          duration: "6 Months",
+        },
+        {
+          id: "al2",
+          name: "Alemiyah Program",
+          price: 20000,
+          duration: "2 Years",
+        },
+      ],
+    },
+    "quran-studies": {
+      name: "Tarbiyah Quran Studies",
+      courses: [
+        { id: "qs1", name: "Qaida Noorani", price: 3000, duration: "2 Months" },
+        { id: "qs2", name: "Nazera", price: 4000, duration: "3 Months" },
+        { id: "qs3", name: "Hifzul Quran", price: 25000, duration: "2 Years" },
+        {
+          id: "qs4",
+          name: "Hifz Revision (One to One)",
+          price: 10000,
+          duration: "6 Months",
+        },
+      ],
+    },
+    "quran-elders": {
+      name: "Quran for Elders",
+      courses: [
+        {
+          id: "qe1",
+          name: "Qaida Nooraniyah",
+          price: 3000,
+          duration: "2 Months",
+        },
+        { id: "qe2", name: "Quran Nazera", price: 4000, duration: "3 Months" },
+        { id: "qe3", name: "Hifzul Quran", price: 20000, duration: "2 Years" },
+        {
+          id: "qe4",
+          name: "Basic Tajweed (Level-1)",
+          price: 3000,
+          duration: "2 Months",
+        },
+        {
+          id: "qe5",
+          name: "Advanced Tajweed",
+          price: 5000,
+          duration: "3 Months",
+        },
+      ],
+    },
+  };
 
   const [formData, setFormData] = useState({
+    // Personal Information
     firstName: "",
     lastName: "",
+    nationalId: "",
+    dateOfBirth: "",
+    age: "",
     phone: "",
     email: "",
+    gender: "",
+    religion: "",
+    bloodGroup: "",
+    occupation: "",
+    maritalStatus: "",
+    educationalQualification: "",
+    instituteName: "",
+
+    // Family Information
+    fatherName: "",
+    motherName: "",
+    guardianPhone: "",
+
+    // Address
     streetAddress: "",
+    presentAddress: "",
+    permanentAddress: "",
     townCity: "",
     postcode: "",
     country: "bangladesh",
     state: "",
+
+    // Account
     password: "",
     confirmPassword: "",
+
+    // Payment Information
+    paymentMethod: "bkash",
+    paymentType: "online",
+    transactionId: "",
+    paymentRemarks: "",
+    paidAmount: "",
+    bkashNumber: "",
+    nagodNumber: "",
+    rocketNumber: "",
+
+    // Additional
     previousEducation: "",
     interestedSubjects: "",
   });
@@ -74,16 +183,58 @@ const Enroll_quidaelders_english_version = () => {
     firstRenewal: "08/30/2026",
   };
 
+  const calculateTotal = () => {
+    let total = 0;
+    const currentCourses = departments[selectedDepartment]?.courses || [];
+    selectedCourses.forEach((courseId) => {
+      const course = currentCourses.find((c) => c.id === courseId);
+      if (course) total += course.price;
+    });
+    return total || courseInfo.total;
+  };
+
+  const getCurrentCourses = () => {
+    return departments[selectedDepartment]?.courses || [];
+  };
+
+  const calculateAge = (dob) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+    return age;
+  };
+
   // Form Validation
   const validateForm = () => {
     const errors = {};
     if (!formData.firstName) errors.firstName = "First name is required";
     if (!formData.lastName) errors.lastName = "Last name is required";
+    if (!formData.nationalId) errors.nationalId = "National ID is required";
     if (!formData.phone) errors.phone = "Phone number is required";
     if (formData.phone && formData.phone.length < 11)
       errors.phone = "Please enter a valid phone number";
     if (!formData.email) errors.email = "Email is required";
-    if (!formData.streetAddress) errors.streetAddress = "Address is required";
+    if (!formData.fatherName) errors.fatherName = "Father's name is required";
+    if (!formData.motherName) errors.motherName = "Mother's name is required";
+    if (!formData.guardianPhone)
+      errors.guardianPhone = "Guardian phone is required";
+    if (!formData.presentAddress)
+      errors.presentAddress = "Present address is required";
+    if (!formData.permanentAddress)
+      errors.permanentAddress = "Permanent address is required";
+    if (!formData.paymentMethod)
+      errors.paymentMethod = "Payment method is required";
+    if (!formData.paidAmount) errors.paidAmount = "Paid amount is required";
+    if (!formData.transactionId)
+      errors.transactionId = "Transaction ID is required";
+
     if (createAccount) {
       if (!formData.password) errors.password = "Password is required";
       if (formData.password !== formData.confirmPassword)
@@ -99,6 +250,7 @@ const Enroll_quidaelders_english_version = () => {
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
+      alert("Please fill in all required fields.");
       return;
     }
 
@@ -110,16 +262,27 @@ const Enroll_quidaelders_english_version = () => {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         phone: formData.phone,
-        address: formData.streetAddress,
+        address: formData.presentAddress,
         city: formData.townCity,
         country: formData.country,
         postcode: formData.postcode,
-        amount: courseInfo.total,
+        amount: calculateTotal(),
         currency: "BDT",
-        product_name: courseInfo.name,
+        product_name:
+          selectedCourses
+            .map((id) => {
+              const course = getCurrentCourses().find((c) => c.id === id);
+              return course ? course.name : "";
+            })
+            .join(", ") || courseInfo.name,
         product_category: "educational",
         payment_method: paymentMethod,
+        ...formData,
+        selectedDepartment,
+        selectedCourses,
       };
+
+      console.log("Payment Data:", paymentData);
 
       if (
         paymentMethod === "sslcommerz" ||
@@ -135,6 +298,7 @@ const Enroll_quidaelders_english_version = () => {
         }
       } else {
         alert(`${paymentMethod.toUpperCase()} payment processing...`);
+        alert("Your application has been submitted successfully!");
         setLoading(false);
       }
     } catch (error) {
@@ -156,14 +320,37 @@ const Enroll_quidaelders_english_version = () => {
   };
 
   const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-    if (formErrors[e.target.name]) {
+    const { name, value, type, checked } = e.target;
+
+    if (type === "checkbox" && name === "selectedCourses") {
+      if (checked) {
+        setSelectedCourses([...selectedCourses, value]);
+      } else {
+        setSelectedCourses(
+          selectedCourses.filter((course) => course !== value),
+        );
+      }
+    } else if (name === "selectedDepartment") {
+      setSelectedDepartment(value);
+      setSelectedCourses([]);
+    } else if (name === "dateOfBirth") {
+      const age = calculateAge(value);
+      setFormData({
+        ...formData,
+        dateOfBirth: value,
+        age: age,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
+
+    if (formErrors[name]) {
       setFormErrors({
         ...formErrors,
-        [e.target.name]: "",
+        [name]: "",
       });
     }
   };
@@ -195,37 +382,58 @@ const Enroll_quidaelders_english_version = () => {
                 ? "Hide Enrolment Summary"
                 : "Show Enrolment Summary"}
             </span>
-            <span className="text-xs">▲</span>
+            {showEnrolmentSummaryMobile ? (
+              <FaChevronUp className="text-xs" />
+            ) : (
+              <FaChevronDown className="text-xs" />
+            )}
           </button>
-          <span className="font-bold text-[#004d61]">৳ 5,000</span>
+          <span className="font-bold text-[#004d61]">
+            ৳ {calculateTotal().toLocaleString()}
+          </span>
         </div>
 
         {/* Expandable summary box */}
         {showEnrolmentSummaryMobile && (
           <div className="bg-white border border-gray-200 rounded-md p-4 mb-6 shadow-sm">
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gray-200 rounded overflow-hidden flex-shrink-0">
-                  <img
-                    src="https://i.ibb.co.com/7xnC6p7d/banner-2.jpg"
-                    alt="course"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-[#004d61]">
-                    Quran Studies for Elders × 1
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    ৳ 1,500 / month and a ৳ 3,500 sign-up fee
-                  </p>
-                </div>
+            {selectedCourses.length > 0 ? (
+              selectedCourses.map((courseId) => {
+                const course = getCurrentCourses().find(
+                  (c) => c.id === courseId,
+                );
+                return course ? (
+                  <div
+                    key={courseId}
+                    className="flex items-center justify-between pb-3 border-b border-gray-100"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                        <img
+                          src="https://i.ibb.co.com/7xnC6p7d/banner-2.jpg"
+                          alt={course.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-[#004d61]">
+                          {course.name} × 1
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          Duration: {course.duration}
+                        </p>
+                      </div>
+                    </div>
+                    <span className="font-bold text-sm">
+                      ৳ {course.price.toLocaleString()}
+                    </span>
+                  </div>
+                ) : null;
+              })
+            ) : (
+              <div className="text-center text-gray-500 py-2 text-sm">
+                No courses selected
               </div>
-              <span className="font-bold text-sm">৳ 5,000</span>
-            </div>
-            <div className="flex items-center justify-between pt-3 text-xs text-gray-500">
-              <span>- 1 +</span>
-            </div>
+            )}
           </div>
         )}
 
@@ -238,10 +446,10 @@ const Enroll_quidaelders_english_version = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* SHIPPING INFORMATION SECTION */}
+          {/* PERSONAL INFORMATION */}
           <div>
             <h2 className="text-[#004d61] font-bold text-sm tracking-wider mb-4 uppercase">
-              SHIPPING INFORMATION
+              PERSONAL INFORMATION
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -288,6 +496,49 @@ const Enroll_quidaelders_english_version = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-xs font-bold text-gray-600 mb-1">
+                  NATIONAL ID NUMBER <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="nationalId"
+                  value={formData.nationalId}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${
+                    formErrors.nationalId ? "border-red-500" : "border-gray-300"
+                  } rounded text-sm focus:outline-none focus:border-[#004d61]`}
+                />
+                {formErrors.nationalId && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {formErrors.nationalId}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  DATE OF BIRTH <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="date"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${
+                    formErrors.dateOfBirth
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  } rounded text-sm focus:outline-none focus:border-[#004d61]`}
+                />
+                {formData.age && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Age: {formData.age} years
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
                   +880 PHONE <span className="text-red-500">*</span>
                 </label>
                 <div className="flex border border-gray-300 rounded overflow-hidden">
@@ -300,7 +551,7 @@ const Enroll_quidaelders_english_version = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder=""
+                    placeholder="Phone Number"
                     className="w-full px-3 py-2 text-sm focus:outline-none"
                   />
                 </div>
@@ -331,43 +582,293 @@ const Enroll_quidaelders_english_version = () => {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  GENDER <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="gender"
+                  value={formData.gender}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:border-[#004d61]"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  BLOOD GROUP
+                </label>
+                <select
+                  name="bloodGroup"
+                  value={formData.bloodGroup}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:border-[#004d61]"
+                >
+                  <option value="">Select Blood Group</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  RELIGION
+                </label>
+                <input
+                  type="text"
+                  name="religion"
+                  value={formData.religion}
+                  onChange={handleInputChange}
+                  placeholder="Islam"
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-[#004d61]"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  EDUCATIONAL QUALIFICATION
+                </label>
+                <select
+                  name="educationalQualification"
+                  value={formData.educationalQualification}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:border-[#004d61]"
+                >
+                  <option value="">Select Qualification</option>
+                  <option value="ssc">SSC/Equivalent</option>
+                  <option value="hsc">HSC/Equivalent</option>
+                  <option value="graduate">Graduate/Equivalent</option>
+                  <option value="postgraduate">Postgraduate/Equivalent</option>
+                  <option value="others">Others</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  INSTITUTE NAME
+                </label>
+                <input
+                  type="text"
+                  name="instituteName"
+                  value={formData.instituteName}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-[#004d61]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  OCCUPATION
+                </label>
+                <input
+                  type="text"
+                  name="occupation"
+                  value={formData.occupation}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-[#004d61]"
+                />
+              </div>
+            </div>
+
             <div className="mb-4">
               <label className="block text-xs font-bold text-gray-600 mb-1">
-                STREET ADDRESS <span className="text-red-500">*</span>
+                MARITAL STATUS
               </label>
-              <input
-                type="text"
-                name="streetAddress"
-                value={formData.streetAddress}
+              <select
+                name="maritalStatus"
+                value={formData.maritalStatus}
                 onChange={handleInputChange}
-                placeholder="House number and street name"
+                className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:border-[#004d61]"
+              >
+                <option value="">Select Status</option>
+                <option value="single">Single</option>
+                <option value="married">Married</option>
+                <option value="divorced">Divorced</option>
+                <option value="widowed">Widowed</option>
+              </select>
+            </div>
+
+            <div className="mb-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={createAccount}
+                  onChange={() => setCreateAccount(!createAccount)}
+                  className="w-4 h-4 text-[#004d61] rounded border-gray-300"
+                />
+                <span className="text-sm text-gray-700">
+                  Create an account?
+                </span>
+              </label>
+
+              {createAccount && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 p-4 bg-gray-50 rounded border border-gray-200">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 mb-1">
+                      PASSWORD <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-600 mb-1">
+                      CONFIRM PASSWORD <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <hr className="border-gray-200 my-6" />
+
+          {/* FAMILY & ADDRESS INFORMATION */}
+          <div>
+            <h2 className="text-[#004d61] font-bold text-sm tracking-wider mb-4 uppercase">
+              FAMILY & ADDRESS INFORMATION
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  FATHER'S NAME <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="fatherName"
+                  value={formData.fatherName}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${
+                    formErrors.fatherName ? "border-red-500" : "border-gray-300"
+                  } rounded text-sm focus:outline-none focus:border-[#004d61]`}
+                />
+                {formErrors.fatherName && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {formErrors.fatherName}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  MOTHER'S NAME <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="motherName"
+                  value={formData.motherName}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${
+                    formErrors.motherName ? "border-red-500" : "border-gray-300"
+                  } rounded text-sm focus:outline-none focus:border-[#004d61]`}
+                />
+                {formErrors.motherName && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {formErrors.motherName}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  GUARDIAN PHONE <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="tel"
+                  name="guardianPhone"
+                  value={formData.guardianPhone}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${
+                    formErrors.guardianPhone
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  } rounded text-sm focus:outline-none focus:border-[#004d61]`}
+                />
+                {formErrors.guardianPhone && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {formErrors.guardianPhone}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-gray-600 mb-1">
+                PRESENT ADDRESS <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                name="presentAddress"
+                value={formData.presentAddress}
+                onChange={handleInputChange}
+                rows="2"
                 className={`w-full px-3 py-2 border ${
-                  formErrors.streetAddress
+                  formErrors.presentAddress
                     ? "border-red-500"
                     : "border-gray-300"
                 } rounded text-sm focus:outline-none focus:border-[#004d61]`}
               />
-              {formErrors.streetAddress && (
+              {formErrors.presentAddress && (
                 <p className="text-red-500 text-xs mt-1">
-                  {formErrors.streetAddress}
+                  {formErrors.presentAddress}
                 </p>
               )}
             </div>
 
             <div className="mb-4">
               <label className="block text-xs font-bold text-gray-600 mb-1">
-                TOWN / CITY
+                PERMANENT ADDRESS <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                name="townCity"
-                value={formData.townCity}
+              <textarea
+                name="permanentAddress"
+                value={formData.permanentAddress}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-[#004d61]"
+                rows="2"
+                className={`w-full px-3 py-2 border ${
+                  formErrors.permanentAddress
+                    ? "border-red-500"
+                    : "border-gray-300"
+                } rounded text-sm focus:outline-none focus:border-[#004d61]`}
               />
+              {formErrors.permanentAddress && (
+                <p className="text-red-500 text-xs mt-1">
+                  {formErrors.permanentAddress}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  TOWN / CITY
+                </label>
+                <input
+                  type="text"
+                  name="townCity"
+                  value={formData.townCity}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-[#004d61]"
+                />
+              </div>
               <div>
                 <label className="block text-xs font-bold text-gray-600 mb-1">
                   POSTCODE
@@ -390,23 +891,106 @@ const Enroll_quidaelders_english_version = () => {
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:border-[#004d61]"
                 >
-                  <option value="bangladesh">bangladesh</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-600 mb-1">
-                  state (optional)
-                </label>
-                <select
-                  name="state"
-                  value={formData.state}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:border-[#004d61]"
-                >
-                  <option value="">Select an option…</option>
+                  <option value="bangladesh">Bangladesh</option>
+                  <option value="india">India</option>
+                  <option value="pakistan">Pakistan</option>
+                  <option value="usa">USA</option>
+                  <option value="uk">UK</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
             </div>
+          </div>
+
+          <hr className="border-gray-200 my-6" />
+
+          {/* COURSE SELECTION */}
+          <div>
+            <h2 className="text-[#004d61] font-bold text-sm tracking-wider mb-4 uppercase">
+              DEPARTMENT & COURSE SELECTION
+            </h2>
+
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-gray-600 mb-1">
+                SELECT DEPARTMENT *
+              </label>
+              <select
+                name="selectedDepartment"
+                value={selectedDepartment}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:border-[#004d61]"
+              >
+                <option value="">Select Department</option>
+                <option value="islamic-studies">
+                  Diploma in Islamic Studies
+                </option>
+                <option value="alemiyah">Tarbiyah Alemiyah</option>
+                <option value="quran-studies">Tarbiyah Quran Studies</option>
+                <option value="quran-elders">Quran for Elders</option>
+              </select>
+            </div>
+
+            {selectedDepartment && (
+              <div className="mb-4">
+                <p className="text-xs font-semibold text-gray-700 mb-2">
+                  {departments[selectedDepartment]?.name} - Courses
+                </p>
+                <div className="space-y-2">
+                  {getCurrentCourses().map((course) => (
+                    <div
+                      key={course.id}
+                      className="flex items-center gap-2 border border-gray-200 rounded p-2"
+                    >
+                      <input
+                        type="checkbox"
+                        name="selectedCourses"
+                        value={course.id}
+                        checked={selectedCourses.includes(course.id)}
+                        onChange={handleInputChange}
+                        className="accent-[#004d61]"
+                      />
+                      <div className="flex-1">
+                        <p className="text-xs font-medium text-gray-800">
+                          {course.name}
+                        </p>
+                        <div className="flex justify-between">
+                          <span className="text-[10px] text-gray-500">
+                            Duration: {course.duration}
+                          </span>
+                          <span className="text-xs font-semibold text-[#004d61]">
+                            ৳{course.price.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedCourses.length > 0 && (
+              <div className="bg-gray-50 p-3 rounded border border-gray-200 mb-4">
+                <p className="text-xs font-semibold text-gray-700">
+                  Selected Courses:
+                </p>
+                <ul className="text-xs text-gray-600 list-disc list-inside">
+                  {selectedCourses.map((courseId) => {
+                    const course = getCurrentCourses().find(
+                      (c) => c.id === courseId,
+                    );
+                    return course ? (
+                      <li key={courseId}>
+                        {course.name} - {course.duration} - ৳
+                        {course.price.toLocaleString()}
+                      </li>
+                    ) : null;
+                  })}
+                </ul>
+                <p className="text-xs font-bold text-[#004d61] mt-1">
+                  Total: ৳{calculateTotal().toLocaleString()}
+                </p>
+              </div>
+            )}
           </div>
 
           <hr className="border-gray-200 my-6" />
@@ -430,29 +1014,47 @@ const Enroll_quidaelders_english_version = () => {
             </div>
 
             <div className="bg-[#fcfcfc] border border-gray-200 rounded p-4 mb-4">
-              <div className="flex items-center justify-between pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded overflow-hidden flex-shrink-0">
-                    <img
-                      src="https://i.ibb.co.com/7xnC6p7d/banner-2.jpg"
-                      alt="course"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <p className="text-xs font-bold text-[#004d61]">
-                    Quran Studies for Elders
-                  </p>
+              {selectedCourses.length > 0 ? (
+                selectedCourses.map((courseId) => {
+                  const course = getCurrentCourses().find(
+                    (c) => c.id === courseId,
+                  );
+                  return course ? (
+                    <div
+                      key={courseId}
+                      className="flex items-center justify-between pb-3 border-b border-gray-100"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-200 rounded overflow-hidden flex-shrink-0">
+                          <img
+                            src="https://i.ibb.co.com/7xnC6p7d/banner-2.jpg"
+                            alt={course.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <p className="text-xs font-bold text-[#004d61]">
+                          {course.name}
+                        </p>
+                      </div>
+                      <span className="text-xs font-semibold">
+                        ৳ {course.price.toLocaleString()}
+                      </span>
+                    </div>
+                  ) : null;
+                })
+              ) : (
+                <div className="text-center text-gray-500 py-2 text-xs">
+                  No courses selected
                 </div>
-                <span className="text-xs font-semibold">
-                  ৳ 1,500 / month and a ৳ 3,500 sign-up fee
-                </span>
-              </div>
+              )}
             </div>
 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between py-2 border-b border-gray-100">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">৳ 5,000</span>
+                <span className="font-medium">
+                  ৳ {calculateTotal().toLocaleString()}
+                </span>
               </div>
               <div className="flex justify-between py-2 border-b border-gray-100">
                 <span className="text-gray-600">bKash Charge</span>
@@ -460,24 +1062,9 @@ const Enroll_quidaelders_english_version = () => {
               </div>
               <div className="flex justify-between py-3 border-b border-gray-200 text-base font-bold text-[#004d61]">
                 <span>Total</span>
-                <span className="text-[#004d61]">৳ 5,000</span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-100 text-xs">
-                <span className="text-gray-600">Recurring totals</span>
-                <span></span>
-              </div>
-              <div className="flex justify-between py-2 border-b border-gray-100 text-xs">
-                <span className="text-gray-600">Subtotal</span>
-                <span>৳ 1,500 / month</span>
-              </div>
-              <div className="flex justify-between py-3 border-b border-gray-200 text-xs font-bold">
-                <span className="text-[#004d61]">Recurring totals</span>
-                <div className="text-right">
-                  <p className="text-[#004d61]">৳ 1,500 / month</p>
-                  <p className="text-gray-500 font-normal text-[11px]">
-                    First renewal: 08/30/2026
-                  </p>
-                </div>
+                <span className="text-[#004d61]">
+                  ৳ {calculateTotal().toLocaleString()}
+                </span>
               </div>
             </div>
           </div>
@@ -493,90 +1080,277 @@ const Enroll_quidaelders_english_version = () => {
               ALL TRANSACTIONS ARE SECURE AND ENCRYPTED.
             </p>
 
-            <div className="space-y-3 mb-6">
-              {/* Option 1: Direct bKash */}
-              <label
-                className={`flex flex-col p-3 border rounded cursor-pointer transition-all ${
-                  paymentMethod === "bkash"
-                    ? "border-[#004d61] bg-gray-50"
-                    : "border-gray-200"
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="radio"
-                      name="payment"
-                      value="bkash"
-                      checked={paymentMethod === "bkash"}
-                      onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-4 h-4 text-[#004d61]"
-                    />
-                    <span className="text-xs font-bold text-gray-800">
-                      Direct bKash Payment Automatic
-                    </span>
-                  </div>
-                  <img
-                    src="https://i.ibb.co.com/7xnC6p7d/banner-2.jpg"
-                    className="w-6 h-6 object-contain"
-                    alt="bkash"
-                  />
-                </div>
-                {paymentMethod === "bkash" && (
-                  <div className="mt-2 pl-7 text-xs text-gray-600">
-                    Pay via bKash Automatic
-                  </div>
+            {/* Payment Instructions */}
+            <div
+              className="p-3 rounded-lg border-2 mb-4"
+              style={{ backgroundColor: "#fff8e1", borderColor: "#ff9800" }}
+            >
+              <p className="font-bold text-orange-600 text-xs mb-1">
+                ⚠️ Payment Instructions:
+              </p>
+              <ul className="text-[10px] text-gray-700 space-y-0.5 list-disc list-inside">
+                <li>
+                  For bKash & Nagod, use{" "}
+                  <span className="font-bold text-red-600">"Merchant Pay"</span>{" "}
+                  option only.{" "}
+                  <span className="font-bold text-red-600">"Send Money"</span>{" "}
+                  will not work.
+                </li>
+                <li>
+                  Merchant Numbers:{" "}
+                  <span className="font-bold text-gray-800">
+                    bKash: 01841412525
+                  </span>{" "}
+                  and{" "}
+                  <span className="font-bold text-gray-800">
+                    Nagod: 01841512525
+                  </span>
+                </li>
+                <li>Bank Transfer is also available.</li>
+              </ul>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  PAYMENT METHOD <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="paymentMethod"
+                  value={formData.paymentMethod}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border ${
+                    formErrors.paymentMethod
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  } rounded text-sm bg-white focus:outline-none focus:border-[#004d61]`}
+                >
+                  <option value="bkash">bKash (Merchant Pay)</option>
+                  <option value="nagod">Nagod (Merchant Pay)</option>
+                  <option value="rocket">Rocket</option>
+                  <option value="bank">Bank Transfer</option>
+                  <option value="ssl">SSL Commerz</option>
+                </select>
+                {formErrors.paymentMethod && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {formErrors.paymentMethod}
+                  </p>
                 )}
-              </label>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  PAYMENT TYPE *
+                </label>
+                <select
+                  name="paymentType"
+                  value={formData.paymentType}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:border-[#004d61]"
+                >
+                  <option value="online">Online Payment</option>
+                  <option value="offline">Offline Payment</option>
+                </select>
+              </div>
+            </div>
 
-              {/* Option 2: Online/Card */}
-              <label
-                className={`flex items-center justify-between p-3 border rounded cursor-pointer transition-all ${
-                  paymentMethod === "sslcommerz"
-                    ? "border-[#004d61] bg-gray-50"
-                    : "border-gray-200"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="sslcommerz"
-                    checked={paymentMethod === "sslcommerz"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-4 h-4 text-[#004d61]"
-                  />
-                  <span className="text-xs font-semibold text-gray-800">
-                    Pay Online(Credit/Debit Card/MobileBanking/NetBanking/bkash)
+            {/* Merchant Number Display */}
+            {(formData.paymentMethod === "bkash" ||
+              formData.paymentMethod === "nagod") && (
+              <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 mb-4">
+                <p className="text-xs font-medium">
+                  📌 {formData.paymentMethod === "bkash" ? "bKash" : "Nagod"}{" "}
+                  Merchant Number:
+                  <span className="font-bold ml-1 text-gray-800">
+                    {formData.paymentMethod === "bkash"
+                      ? "01841412525"
+                      : "01841512525"}
                   </span>
-                </div>
-                <div className="bg-[#002f5b] text-white text-[9px] font-bold px-1.5 py-0.5 rounded">
-                  SSLCOMMERZ
-                </div>
-              </label>
+                </p>
+                <p className="text-[10px] text-red-600 mt-0.5">
+                  ⚠️ Use only "Merchant Pay" option. "Send Money" will not work.
+                </p>
+              </div>
+            )}
 
-              {/* Option 3: Bank Payment */}
-              <label
-                className={`flex items-center justify-between p-3 border rounded cursor-pointer transition-all ${
-                  paymentMethod === "bank"
-                    ? "border-[#004d61] bg-gray-50"
-                    : "border-gray-200"
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="bank"
-                    checked={paymentMethod === "bank"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-4 h-4 text-[#004d61]"
-                  />
-                  <span className="text-xs font-semibold text-gray-800">
-                    Bank Payment
-                  </span>
+            {/* Bank Information */}
+            {formData.paymentMethod === "bank" && (
+              <div className="p-3 rounded-lg border bg-blue-50 border-blue-200 mb-4">
+                <p className="text-xs font-bold text-gray-800">
+                  🏦 Bank Information:
+                </p>
+                <div className="grid grid-cols-2 gap-1 mt-1 text-[10px]">
+                  <div>
+                    <p>
+                      <span className="font-semibold">Account:</span> Tarbiyah
+                      Academy
+                    </p>
+                    <p>
+                      <span className="font-semibold">Account No:</span>{" "}
+                      401211100007923
+                    </p>
+                    <p>
+                      <span className="font-semibold">Bank:</span> Shahjalal
+                      Islami Bank Ltd
+                    </p>
+                  </div>
+                  <div>
+                    <p>
+                      <span className="font-semibold">Branch:</span> Satmasjid
+                      Road
+                    </p>
+                    <p>
+                      <span className="font-semibold">SWIFT:</span> SJBLBDDHSMR
+                    </p>
+                    <p>
+                      <span className="font-semibold">Routing:</span> 190264035
+                    </p>
+                  </div>
                 </div>
+              </div>
+            )}
+
+            {(formData.paymentMethod === "bkash" ||
+              formData.paymentMethod === "nagod" ||
+              formData.paymentMethod === "rocket") && (
+              <div className="mb-4">
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  {formData.paymentMethod === "bkash"
+                    ? "bKash"
+                    : formData.paymentMethod === "nagod"
+                      ? "Nagod"
+                      : "Rocket"}{" "}
+                  Number (Your) *
+                </label>
+                <input
+                  type="text"
+                  name={
+                    formData.paymentMethod === "bkash"
+                      ? "bkashNumber"
+                      : formData.paymentMethod === "nagod"
+                        ? "nagodNumber"
+                        : "rocketNumber"
+                  }
+                  value={
+                    formData.paymentMethod === "bkash"
+                      ? formData.bkashNumber
+                      : formData.paymentMethod === "nagod"
+                        ? formData.nagodNumber
+                        : formData.rocketNumber
+                  }
+                  onChange={handleInputChange}
+                  placeholder="01xxxxxxxxx"
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-[#004d61]"
+                />
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  PAID AMOUNT (৳) *
+                </label>
+                <input
+                  type="number"
+                  name="paidAmount"
+                  value={formData.paidAmount}
+                  onChange={handleInputChange}
+                  placeholder={
+                    calculateTotal() > 0
+                      ? `Total: ৳${calculateTotal()}`
+                      : "Enter amount"
+                  }
+                  className={`w-full px-3 py-2 border ${
+                    formErrors.paidAmount ? "border-red-500" : "border-gray-300"
+                  } rounded text-sm focus:outline-none focus:border-[#004d61]`}
+                />
+                {calculateTotal() > 0 && (
+                  <p className="text-[10px] text-gray-500 mt-0.5">
+                    Total to pay: ৳{calculateTotal().toLocaleString()}
+                  </p>
+                )}
+                {formErrors.paidAmount && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {formErrors.paidAmount}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-600 mb-1">
+                  TRANSACTION ID *
+                </label>
+                <input
+                  type="text"
+                  name="transactionId"
+                  value={formData.transactionId}
+                  onChange={handleInputChange}
+                  placeholder="Transaction ID"
+                  className={`w-full px-3 py-2 border ${
+                    formErrors.transactionId
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  } rounded text-sm focus:outline-none focus:border-[#004d61]`}
+                />
+                {formErrors.transactionId && (
+                  <p className="text-red-500 text-xs mt-1">
+                    {formErrors.transactionId}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-xs font-bold text-gray-600 mb-1">
+                PAYMENT REMARKS
               </label>
+              <textarea
+                name="paymentRemarks"
+                value={formData.paymentRemarks}
+                onChange={handleInputChange}
+                rows="2"
+                className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:border-[#004d61]"
+                placeholder="Additional payment information..."
+              />
+            </div>
+
+            {/* Payment Summary */}
+            <div className="p-3 rounded-lg border border-gray-200 bg-gray-50 mb-4">
+              <p className="text-xs font-semibold text-gray-700">
+                Payment Summary
+              </p>
+              <div className="flex justify-between text-xs mt-1">
+                <span>Total Course Fee:</span>
+                <span className="font-bold text-[#004d61]">
+                  ৳{calculateTotal().toLocaleString()}
+                </span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span>Selected Department:</span>
+                <span className="font-semibold">
+                  {selectedDepartment
+                    ? departments[selectedDepartment]?.name
+                    : "-"}
+                </span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span>Payment Method:</span>
+                <span className="font-semibold">
+                  {formData.paymentMethod === "bkash"
+                    ? "bKash"
+                    : formData.paymentMethod === "nagod"
+                      ? "Nagod"
+                      : formData.paymentMethod === "rocket"
+                        ? "Rocket"
+                        : formData.paymentMethod === "bank"
+                          ? "Bank"
+                          : formData.paymentMethod === "ssl"
+                            ? "SSL"
+                            : "-"}
+                </span>
+              </div>
+              <div className="flex justify-between text-xs">
+                <span>Payment Status:</span>
+                <span className="text-green-600 font-semibold">Pending</span>
+              </div>
             </div>
 
             {/* Terms and conditions */}
@@ -628,7 +1402,7 @@ const Enroll_quidaelders_english_version = () => {
               ) : (
                 <>
                   <FaLock className="text-xs" />
-                  <span>Enroll Now ৳ 5,000</span>
+                  <span>Enroll Now ৳ {calculateTotal().toLocaleString()}</span>
                 </>
               )}
             </button>
