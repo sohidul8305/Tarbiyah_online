@@ -156,6 +156,8 @@ import Campus_login from "../Page/Campus_login/Campus_login";
 import Course_quran_elders_advanced_tajweed from "../Components/Course_quran_elders_advanced_tajweed/Course_quran_elders_advanced_tajweed";
 import Course_quran_elders_advanced_tajweed_enroll from "../Components/Course_quran_elders_advanced_tajweed_enroll/Course_quran_elders_advanced_tajweed_enroll";
 import Admission_now from "../Components/Admission_now/Admission_now";
+import Dashboard from "../Page/Dashboard/Dashboard";
+import StudentRegistration from "../Page/Student/StudentRegistration";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -282,6 +284,10 @@ export const router = createBrowserRouter([
   {
     path: "/course/diploma/details",
     element: <DiplomaDetails></DiplomaDetails>,
+  },
+  {
+    path: "/dashboard",
+    element: <Dashboard></Dashboard>,
   },
   {
     path: "/course/diploma/enroll",
@@ -468,6 +474,10 @@ export const router = createBrowserRouter([
   {
     path: "/campus-login",
     element: <Campus_login />,
+  },
+  {
+    path: "/student-registration",
+    element: <StudentRegistration />,
   },
 
   // ==========================================

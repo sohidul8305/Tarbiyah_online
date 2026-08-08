@@ -2,6 +2,8 @@ import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
+import Navbar from "../../Components/Navbar/Navbar";
+import Footer from "../../Components/Navbar/Footer/Footer";
 
 const Dashboard = () => {
   const { user, logOut } = useContext(AuthContext);
@@ -28,23 +30,29 @@ const Dashboard = () => {
     }
   };
 
-  // User না থাকলে Loading দেখান
+  // Loading State with Navbar and Footer included for layout consistency
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin inline-block w-12 h-12 border-4 border-[#004d4d] border-t-transparent rounded-full"></div>
-          <p className="mt-4 text-gray-600">Loading user data...</p>
+      <div className="min-h-screen flex flex-col justify-between bg-gray-50">
+        <Navbar />
+        <div className="flex-grow flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin inline-block w-12 h-12 border-4 border-[#004d4d] border-t-transparent rounded-full"></div>
+            <p className="mt-4 text-gray-600">Loading user data...</p>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
-  console.log("Dashboard User:", user); // Console এ ইউজার ডেটা দেখুন
+  console.log("Dashboard User:", user);
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen flex flex-col justify-between bg-gray-100">
+      <Navbar />
+
+      <div className="max-w-7xl mx-auto w-full py-8 px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Header */}
           <div className="bg-[#004d4d] px-6 py-4 flex justify-between items-center">
@@ -119,14 +127,12 @@ const Dashboard = () => {
                   >
                     🏠 Go to Home
                   </Link>
-                  <Link to="/">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full bg-red-500 text-white py-2.5 px-4 rounded-md hover:bg-red-600 transition duration-150"
-                    >
-                      🚪 Logout
-                    </button>
-                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full bg-red-500 text-white py-2.5 px-4 rounded-md hover:bg-red-600 transition duration-150"
+                  >
+                    🚪 Logout
+                  </button>
                 </div>
               </div>
             </div>
@@ -140,6 +146,8 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

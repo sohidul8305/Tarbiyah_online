@@ -52,7 +52,7 @@ const StudentLogin = () => {
       <div className="max-md:px-4 flex items-center justify-center my-10">
         <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-gray-100">
           <h2 className="text-2xl font-bold text-center text-[#004d4d] mb-6">
-            🎓 Student Portal Login
+            Student Portal Login
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email Field */}
