@@ -245,9 +245,6 @@ const StudentProfile = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase">
-                    Roll Number
-                  </label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -277,11 +274,7 @@ const StudentProfile = () => {
                     <p className="text-gray-800">{profile.admissionDate}</p>
                   )}
                 </div>
-
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase">
-                    Father's Name
-                  </label>
                   {isEditing ? (
                     <input
                       type="text"
@@ -294,11 +287,7 @@ const StudentProfile = () => {
                     <p className="text-gray-800">{profile.fatherName}</p>
                   )}
                 </div>
-
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase">
-                    Blood Group
-                  </label>
                   {isEditing ? (
                     <select
                       name="bloodGroup"

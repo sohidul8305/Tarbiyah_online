@@ -7,8 +7,7 @@ import Footer from "../../Components/Navbar/Footer/Footer";
 import API from "../../services/api";
 
 const StudentLogin = () => {
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -17,102 +16,10 @@ const StudentLogin = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Master credentials check
-    const isMasterEmail =
-      email === "student@tarabiyah.com" && password === "student123S@";
-    const isMasterPhone =
-      phone === "01700000000" && password === "student123S@";
-
-    // If master login with email or phone
-    if (isMasterEmail || isMasterPhone) {
-      try {
-        // If phone number is provided, find student by phone
-        if (phone) {
-          const response = await API.get(`/auth/student/profile/${phone}`);
-
-          if (response.data.success) {
-            const student = response.data.user;
-
-            localStorage.setItem("isStudentLoggedIn", "true");
-            localStorage.setItem("studentPhone", phone);
-            localStorage.setItem("studentInfo", JSON.stringify(student));
-            localStorage.setItem("studentEmail", student.email || "");
-
-            await Swal.fire({
-              icon: "success",
-              title: "Student Portal Login Successful!",
-              text: `Welcome back, ${student.name}!`,
-              timer: 1500,
-              showConfirmButton: false,
-            });
-
-            navigate("/student-dashboard");
-            setLoading(false);
-            return;
-          }
-        }
-
-        // If only email login (master account)
-        if (email === "student@tarabiyah.com") {
-          const masterStudent = {
-            name: "Master Student",
-            email: "student@tarabiyah.com",
-            phone: "01700000000",
-            class: "Admin",
-          };
-
-          localStorage.setItem("isStudentLoggedIn", "true");
-          localStorage.setItem("studentEmail", "student@tarabiyah.com");
-          localStorage.setItem("studentPhone", "01700000000");
-          localStorage.setItem("studentInfo", JSON.stringify(masterStudent));
-
-          await Swal.fire({
-            icon: "success",
-            title: "Master Login Successful!",
-            timer: 1500,
-            showConfirmButton: false,
-          });
-
-          navigate("/student-dashboard");
-          setLoading(false);
-          return;
-        }
-      } catch (error) {
-        console.error("Error fetching student:", error);
-
-        if (error.response?.status === 404) {
-          const result = await Swal.fire({
-            icon: "info",
-            title: "Student Not Found",
-            text: `"${phone}" এই ফোন নম্বরটি রেজিস্টার করা নেই। আপনি কি রেজিস্টার করতে চান?`,
-            showCancelButton: true,
-            confirmButtonColor: "#004d4d",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "হ্যাঁ, রেজিস্টার করব",
-            cancelButtonText: "না, পরে করব",
-          });
-
-          if (result.isConfirmed) {
-            navigate("/student-registration");
-          }
-          setLoading(false);
-          return;
-        }
-
-        Swal.fire({
-          icon: "error",
-          title: "Login Failed",
-          text: "Student not found!",
-        });
-        setLoading(false);
-        return;
-      }
-    }
-
-    // Normal login with phone and password
     try {
-      const response = await API.post("/auth/login/student", {
-        phone: phone || email,
+      // API call to verify student login
+      const response = await API.post("/auth/student/login", {
+        username,
         password,
       });
 
@@ -120,14 +27,14 @@ const StudentLogin = () => {
         const { user, token } = response.data;
 
         localStorage.setItem("isStudentLoggedIn", "true");
-        localStorage.setItem("studentPhone", user.phone);
+        localStorage.setItem("studentUsername", username);
         localStorage.setItem("studentInfo", JSON.stringify(user));
         localStorage.setItem("studentEmail", user.email || "");
         localStorage.setItem("token", token);
 
         await Swal.fire({
           icon: "success",
-          title: "Login Successful!",
+          title: "✅ Login Successful!",
           text: `Welcome back, ${user.name}!`,
           timer: 1500,
           showConfirmButton: false,
@@ -140,9 +47,8 @@ const StudentLogin = () => {
       await Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text:
-          error.response?.data?.message ||
-          "ভুল ফোন নম্বর বা পাসওয়ার্ড প্রদান করা হয়েছে!",
+        text: error.response?.data?.message || "ভুল ইউজারনেম বা পাসওয়ার্ড!",
+        confirmButtonColor: "#004d4d",
       });
     } finally {
       setLoading(false);
@@ -159,39 +65,23 @@ const StudentLogin = () => {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email
+                Username <span className="text-red-500">*</span>
               </label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                placeholder="Enter email"
-              />
-            </div>
-
-            {/* Phone Number Field */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                placeholder="আপনার রেজিস্টারকৃত ফোন নম্বর দিন"
+                placeholder="Enter your username"
                 required
               />
               <p className="text-xs text-gray-400 mt-1">
-                ⚠️ যে ফোন নম্বর দিয়ে রেজিস্টার করেছেন সেটি দিন
+                💡 আপনার অ্যাডমিন দ্বারা প্রদত্ত ইউজারনেম ব্যবহার করুন
               </p>
             </div>
 
-            {/* Password Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Password <span className="text-red-500">*</span>
@@ -202,7 +92,7 @@ const StudentLogin = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                placeholder="Enter password"
+                placeholder="Enter your password"
               />
             </div>
 
@@ -213,21 +103,9 @@ const StudentLogin = () => {
                 loading ? "opacity-70 cursor-not-allowed" : ""
               }`}
             >
-              {loading ? "লগইন হচ্ছে..." : "Log In Student Portal"}
+              {loading ? "Logging in..." : "Log In Student Portal"}
             </button>
           </form>
-
-          <div className="mt-4 text-center">
-            <p className="text-sm text-gray-600">
-              অ্যাকাউন্ট নেই?{" "}
-              <button
-                onClick={() => navigate("/student-registration")}
-                className="text-[#004d4d] font-bold hover:underline"
-              >
-                রেজিস্টার করুন
-              </button>
-            </p>
-          </div>
         </div>
       </div>
       <Footer />

@@ -16,6 +16,7 @@ const StudentRegistration = () => {
     password: "",
     confirmPassword: "",
     class: "",
+    roll: "", // রোল নম্বর যোগ করা হয়েছে
     address: "",
     guardianName: "",
     guardianPhone: "",
@@ -71,6 +72,7 @@ const StudentRegistration = () => {
         email: formData.email,
         phone: formData.phone,
         class: formData.class,
+        roll: formData.roll,
       });
 
       const response = await API.post("/auth/register/student", {
@@ -79,6 +81,7 @@ const StudentRegistration = () => {
         phone: formData.phone,
         password: formData.password,
         class: formData.class,
+        roll: formData.roll, // রোল নম্বর পাঠানো হচ্ছে
         address: formData.address,
         guardianName: formData.guardianName,
         guardianPhone: formData.guardianPhone,
@@ -99,8 +102,8 @@ const StudentRegistration = () => {
         await Swal.fire({
           icon: "success",
           title: "🎉 রেজিস্ট্রেশন সফল!",
-          text: `স্বাগতম, ${user.name}! আপনি এখন লগইন হয়েছেন।`,
-          timer: 2000,
+          text: `স্বাগতম, ${user.name}! আপনার রোল নম্বর: ${user.roll || "শীঘ্রই দেওয়া হবে"}`,
+          timer: 3000,
           showConfirmButton: false,
         });
 
@@ -166,11 +169,6 @@ const StudentRegistration = () => {
                   অন্যান্য তথ্য অ্যাডমিশনের সময় দেওয়া তথ্যের সাথে মিল থাকতে
                   হবে।
                 </p>
-                <p className="text-xs text-red-500 mt-2">
-                  💡 রেজিস্ট্রেশনের পর আপনি আপনার ফোন নম্বর এবং মাস্টার
-                  পাসওয়ার্ড <strong>"student123S@"</strong> দিয়ে লগইন করতে
-                  পারবেন।
-                </p>
               </div>
             </div>
           </div>
@@ -196,7 +194,7 @@ const StudentRegistration = () => {
               {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email (Optional)
+                  Email
                 </label>
                 <input
                   type="email"

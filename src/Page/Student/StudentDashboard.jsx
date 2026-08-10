@@ -360,7 +360,7 @@ const DashboardContent = ({ studentInfo }) => {
               </div>
               <FaPaperPlane className="absolute right-2 top-2 text-[60px] opacity-20 z-0" />
               <Link
-                to="#"
+                to="/student-registration"
                 className="bg-black/10 py-1 text-center text-xs hover:bg-black/20 cursor-pointer block transition-colors w-full mt-auto z-10"
               >
                 Apply Online ➔

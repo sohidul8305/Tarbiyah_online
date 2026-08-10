@@ -889,108 +889,494 @@ const DashboardContent = ({ stats, notifications }) => {
 };
 
 // ==========================================
-// 2. STUDENT MANAGEMENT CONTENT
+// 2. STUDENT MANAGEMENT CONTENT - FIXED (No Static Data)
 // ==========================================
-const StudentManagementContent = ({ students }) => {
+const StudentManagementContent = () => {
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Load students from API
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+
+      console.log("🔄 Fetching students from API...");
+
+      const response = await fetch(
+        "http://localhost:5000/api/admin/students/all",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      const data = await response.json();
+
+      console.log("📥 API Response:", data);
+
+      if (data.success) {
+        setStudents(data.students);
+      } else {
+        console.error("Failed to fetch students:", data.message);
+        setStudents([]);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching students:", error);
+      setStudents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Approve Student
+  const handleApproveStudent = async () => {
+    try {
+      if (
+        !selectedStudent.username ||
+        !selectedStudent.password ||
+        !selectedStudent.roll
+      ) {
+        Swal.fire({
+          icon: "warning",
+          title: "Information Missing!",
+          text: "দয়া করে ইউজারনেম, পাসওয়ার্ড এবং রোল নম্বর দিন।",
+          confirmButtonColor: "#004d4d",
+        });
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:5000/api/admin/students/approve/${selectedStudent._id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: selectedStudent.username,
+            password: selectedStudent.password,
+            roll: selectedStudent.roll,
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        const updatedStudents = students.map((s) =>
+          s._id === selectedStudent._id
+            ? {
+                ...selectedStudent,
+                status: "Active",
+                username: selectedStudent.username,
+                roll: selectedStudent.roll,
+              }
+            : s,
+        );
+        setStudents(updatedStudents);
+        setShowApproveModal(false);
+        setSelectedStudent(null);
+
+        Swal.fire({
+          icon: "success",
+          title: "✅ Student Approved!",
+          html: `
+            <p>Student has been approved successfully!</p>
+            <p class="text-sm text-gray-600 mt-2">
+              Username: <strong>${selectedStudent.username}</strong><br/>
+              Password: <strong>${selectedStudent.password}</strong>
+            </p>
+            <p class="text-xs text-gray-400 mt-1">
+              📱 Phone: ${selectedStudent.phone}
+            </p>
+          `,
+          confirmButtonColor: "#004d4d",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Could not approve student.",
+          confirmButtonColor: "#004d4d",
+        });
+      }
+    } catch (error) {
+      console.error("❌ Error approving student:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed!",
+        text: "Could not approve student. Please try again.",
+        confirmButtonColor: "#004d4d",
+      });
+    }
+  };
+
+  // Delete Student
+  const handleDeleteStudent = async (id) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const token = localStorage.getItem("token");
+
+        await fetch(`http://localhost:5000/api/admin/students/delete/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        setStudents(students.filter((s) => s._id !== id));
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: "Student has been deleted.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } catch (error) {
+        console.error("❌ Error deleting student:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: "Could not delete student.",
+          confirmButtonColor: "#004d4d",
+        });
+      }
+    }
+  };
+
+  // Filter students
+  const filteredStudents = students
+    .filter((s) => {
+      if (filter === "all") return true;
+      if (filter === "pending") return s.status === "Pending";
+      if (filter === "active") return s.status === "Active";
+      if (filter === "inactive") return s.status === "Inactive";
+      return true;
+    })
+    .filter((s) => {
+      if (!searchTerm) return true;
+      const term = searchTerm.toLowerCase();
+      return (
+        s.name?.toLowerCase().includes(term) ||
+        s.phone?.includes(term) ||
+        s.email?.toLowerCase().includes(term)
+      );
+    });
+
+  const pendingCount = students.filter((s) => s.status === "Pending").length;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-sm text-gray-500 mt-3">Loading students...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <div className="flex justify-between items-center flex-shrink-0">
+      <div className="flex justify-between items-center flex-shrink-0 flex-wrap gap-2">
         <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
           <FaUsers className="text-blue-600" /> Student Management
+          <span className="text-xs font-normal text-gray-500">
+            (Total: {students.length})
+          </span>
         </h2>
-        <Link
-          to="/admin-students/add"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
-        >
-          <FaPlusCircle size={12} /> Add Student
-        </Link>
+        <div className="flex items-center gap-2 flex-wrap">
+          {pendingCount > 0 && (
+            <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-lg text-xs font-bold animate-pulse">
+              {pendingCount} Pending
+            </span>
+          )}
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="px-2 py-1 border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 w-28"
+          />
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            className="px-2 py-1 border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="all">All</option>
+            <option value="pending">Pending</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+          <button
+            onClick={fetchStudents}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+          >
+            🔄 Refresh
+          </button>
+        </div>
       </div>
 
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
         <div className="overflow-x-auto h-full">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Name
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Class
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Roll
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {students.map((student) => (
-                <tr
-                  key={student.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-3 py-2">
-                    <div>
+          {filteredStudents.length === 0 ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <FaUsers className="text-6xl text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-500 text-sm">No students found</p>
+                <p className="text-gray-400 text-xs mt-1">
+                  {filter === "all"
+                    ? "No students registered yet"
+                    : `No ${filter} students`}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                <tr>
+                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                    Name
+                  </th>
+                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                    Class
+                  </th>
+                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                    Phone
+                  </th>
+                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                    Username
+                  </th>
+                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                    Roll
+                  </th>
+                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                    Status
+                  </th>
+                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filteredStudents.map((student) => (
+                  <tr
+                    key={student._id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-3 py-2">
                       <p className="text-xs font-medium text-gray-800">
-                        {student.name}
+                        {student.name || "N/A"}
                       </p>
                       <p className="text-[10px] text-gray-500">
-                        {student.parentContact}
+                        {student.email || student.guardianName || "N/A"}
                       </p>
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {student.class}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {student.roll}
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${student.status === "Active" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                    >
-                      {student.status}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-1">
-                      <Link
-                        to="/admin-students/profile"
-                        className="text-blue-600 hover:text-blue-800 p-0.5"
-                        title="View"
+                    </td>
+                    <td className="px-3 py-2 text-xs text-gray-600">
+                      {student.class || "N/A"}
+                    </td>
+                    <td className="px-3 py-2 text-xs text-gray-600">
+                      {student.phone || "N/A"}
+                    </td>
+                    <td className="px-3 py-2 text-xs font-mono text-blue-600">
+                      {student.username || (
+                        <span className="text-gray-400">Not Set</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2 text-xs text-gray-600">
+                      {student.roll || (
+                        <span className="text-gray-400">N/A</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2">
+                      <span
+                        className={`text-[8px] px-1.5 py-0.5 rounded-full ${
+                          student.status === "Active"
+                            ? "bg-green-100 text-green-700"
+                            : student.status === "Pending"
+                              ? "bg-yellow-100 text-yellow-700 animate-pulse"
+                              : "bg-red-100 text-red-700"
+                        }`}
                       >
-                        <FaEye size={12} />
-                      </Link>
-                      <Link
-                        to="/admin-students/add"
-                        className="text-green-600 hover:text-green-800 p-0.5"
-                        title="Edit"
-                      >
-                        <FaEdit size={12} />
-                      </Link>
-                      <button
-                        className="text-red-600 hover:text-red-800 p-0.5"
-                        title="Delete"
-                      >
-                        <FaTrash size={12} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                        {student.status || "Pending"}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-1">
+                        {student.status === "Pending" && (
+                          <button
+                            onClick={() => {
+                              setSelectedStudent({
+                                ...student,
+                                username: "",
+                                password: "",
+                                roll: "",
+                              });
+                              setShowApproveModal(true);
+                            }}
+                            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-[10px] font-semibold flex items-center gap-1"
+                          >
+                            <FaCheckCircle size={12} /> Approve
+                          </button>
+                        )}
+                        {student.status === "Active" && (
+                          <button
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-semibold"
+                            title="View Details"
+                          >
+                            <FaEye size={12} />
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeleteStudent(student._id)}
+                          className="text-red-600 hover:text-red-800 p-1"
+                          title="Delete"
+                        >
+                          <FaTrash size={12} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
+
+      {/* Approve Student Modal */}
+      {showApproveModal && selectedStudent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold text-gray-800 mb-2">
+              ✅ Approve Student
+            </h3>
+            <div className="bg-gray-50 p-3 rounded-lg mb-4">
+              <p className="text-sm text-gray-700">
+                <strong>Name:</strong> {selectedStudent.name}
+              </p>
+              <p className="text-sm text-gray-700">
+                <strong>Phone:</strong> {selectedStudent.phone}
+              </p>
+              <p className="text-sm text-gray-700">
+                <strong>Class:</strong> {selectedStudent.class}
+              </p>
+              <p className="text-sm text-gray-700">
+                <strong>Registered:</strong>{" "}
+                {selectedStudent.createdAt
+                  ? new Date(selectedStudent.createdAt).toLocaleDateString()
+                  : "N/A"}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Roll Number *
+                </label>
+                <input
+                  type="text"
+                  value={selectedStudent.roll}
+                  onChange={(e) =>
+                    setSelectedStudent({
+                      ...selectedStudent,
+                      roll: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="e.g., 01"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Username *
+                </label>
+                <input
+                  type="text"
+                  value={selectedStudent.username}
+                  onChange={(e) =>
+                    setSelectedStudent({
+                      ...selectedStudent,
+                      username: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Enter username"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Student will use this to login
+                </p>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Password *
+                </label>
+                <input
+                  type="text"
+                  value={selectedStudent.password}
+                  onChange={(e) =>
+                    setSelectedStudent({
+                      ...selectedStudent,
+                      password: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Enter password"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Student will use this to login
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 mt-4">
+              <button
+                onClick={() => {
+                  setShowApproveModal(false);
+                  setSelectedStudent(null);
+                }}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleApproveStudent}
+                className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                Approve & Activate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
 // ==========================================
 // 3. TEACHER MANAGEMENT CONTENT
 // ==========================================
