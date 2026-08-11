@@ -8,8 +8,8 @@ import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 
-import ElderscourseImg from "../../image/Quranforelderscourse.jpg";
-import EldersbannerImg from "../../image/Quranforeldersbanner.jpg";
+import ElderscourseImg from "../../image/quidanuraniyahcourse.png";
+import EldersbannerImg from "../../image/quidanuraniyahbanner.png";
 import {
   FaArrowLeft,
   FaUsers,

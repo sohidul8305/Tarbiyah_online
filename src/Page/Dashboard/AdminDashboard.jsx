@@ -891,6 +891,9 @@ const DashboardContent = ({ stats, notifications }) => {
 // ==========================================
 // 2. STUDENT MANAGEMENT CONTENT - FIXED (No Static Data)
 // ==========================================
+// ==========================================
+// 2. STUDENT MANAGEMENT CONTENT - DYNAMIC
+// ==========================================
 const StudentManagementContent = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -898,6 +901,7 @@ const StudentManagementContent = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showStudentDetails, setShowStudentDetails] = useState(null);
 
   // Load students from API
   useEffect(() => {
@@ -930,10 +934,22 @@ const StudentManagementContent = () => {
       } else {
         console.error("Failed to fetch students:", data.message);
         setStudents([]);
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: data.message || "Could not fetch students",
+          confirmButtonColor: "#004d4d",
+        });
       }
     } catch (error) {
       console.error("❌ Error fetching students:", error);
       setStudents([]);
+      Swal.fire({
+        icon: "error",
+        title: "Connection Error!",
+        text: "Could not connect to server. Make sure backend is running.",
+        confirmButtonColor: "#004d4d",
+      });
     } finally {
       setLoading(false);
     }
@@ -950,7 +966,17 @@ const StudentManagementContent = () => {
         Swal.fire({
           icon: "warning",
           title: "Information Missing!",
-          text: "দয়া করে ইউজারনেম, পাসওয়ার্ড এবং রোল নম্বর দিন।",
+          text: "Please provide username, password and roll number.",
+          confirmButtonColor: "#004d4d",
+        });
+        return;
+      }
+
+      if (selectedStudent.password.length < 6) {
+        Swal.fire({
+          icon: "warning",
+          title: "Weak Password!",
+          text: "Password must be at least 6 characters long.",
           confirmButtonColor: "#004d4d",
         });
         return;
@@ -977,13 +1003,15 @@ const StudentManagementContent = () => {
       const data = await response.json();
 
       if (data.success) {
+        // Update student in the list
         const updatedStudents = students.map((s) =>
           s._id === selectedStudent._id
             ? {
-                ...selectedStudent,
+                ...s,
                 status: "Active",
                 username: selectedStudent.username,
                 roll: selectedStudent.roll,
+                password: undefined, // Don't show password in list
               }
             : s,
         );
@@ -995,14 +1023,20 @@ const StudentManagementContent = () => {
           icon: "success",
           title: "✅ Student Approved!",
           html: `
-            <p>Student has been approved successfully!</p>
-            <p class="text-sm text-gray-600 mt-2">
-              Username: <strong>${selectedStudent.username}</strong><br/>
-              Password: <strong>${selectedStudent.password}</strong>
-            </p>
-            <p class="text-xs text-gray-400 mt-1">
-              📱 Phone: ${selectedStudent.phone}
-            </p>
+            <div style="text-align: left;">
+              <p><strong>Student:</strong> ${selectedStudent.name}</p>
+              <p><strong>Class:</strong> ${selectedStudent.class}</p>
+              <p><strong>Roll:</strong> ${selectedStudent.roll}</p>
+              <hr style="margin: 10px 0;">
+              <p style="font-size: 14px;"><strong>🔑 Login Credentials:</strong></p>
+              <p style="font-size: 13px; background: #f0f0f0; padding: 8px; border-radius: 5px;">
+                Username: <strong>${selectedStudent.username}</strong><br/>
+                Password: <strong>${selectedStudent.password}</strong>
+              </p>
+              <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                📱 Phone: ${selectedStudent.phone}
+              </p>
+            </div>
           `,
           confirmButtonColor: "#004d4d",
         });
@@ -1026,9 +1060,9 @@ const StudentManagementContent = () => {
   };
 
   // Delete Student
-  const handleDeleteStudent = async (id) => {
+  const handleDeleteStudent = async (id, name) => {
     const result = await Swal.fire({
-      title: "Are you sure?",
+      title: `Delete ${name}?`,
       text: "You won't be able to revert this!",
       icon: "warning",
       showCancelButton: true,
@@ -1084,7 +1118,9 @@ const StudentManagementContent = () => {
       return (
         s.name?.toLowerCase().includes(term) ||
         s.phone?.includes(term) ||
-        s.email?.toLowerCase().includes(term)
+        s.email?.toLowerCase().includes(term) ||
+        s.username?.toLowerCase().includes(term) ||
+        s.roll?.toLowerCase().includes(term)
       );
     });
 
@@ -1112,7 +1148,8 @@ const StudentManagementContent = () => {
         </h2>
         <div className="flex items-center gap-2 flex-wrap">
           {pendingCount > 0 && (
-            <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-lg text-xs font-bold animate-pulse">
+            <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-lg text-xs font-bold animate-pulse flex items-center gap-1">
+              <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
               {pendingCount} Pending
             </span>
           )}
@@ -1135,7 +1172,7 @@ const StudentManagementContent = () => {
           </select>
           <button
             onClick={fetchStudents}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"
           >
             🔄 Refresh
           </button>
@@ -1154,6 +1191,11 @@ const StudentManagementContent = () => {
                     ? "No students registered yet"
                     : `No ${filter} students`}
                 </p>
+                {filter === "all" && (
+                  <p className="text-xs text-blue-500 mt-2">
+                    Students need to register from the student registration page
+                  </p>
+                )}
               </div>
             </div>
           ) : (
@@ -1161,13 +1203,10 @@ const StudentManagementContent = () => {
               <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                 <tr>
                   <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                    Name
+                    Name & Contact
                   </th>
                   <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                     Class
-                  </th>
-                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                    Phone
                   </th>
                   <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                     Username
@@ -1194,23 +1233,36 @@ const StudentManagementContent = () => {
                         {student.name || "N/A"}
                       </p>
                       <p className="text-[10px] text-gray-500">
-                        {student.email || student.guardianName || "N/A"}
+                        📱 {student.phone || "N/A"}
                       </p>
+                      {student.email && (
+                        <p className="text-[10px] text-gray-400">
+                          ✉️ {student.email}
+                        </p>
+                      )}
                     </td>
                     <td className="px-3 py-2 text-xs text-gray-600">
                       {student.class || "N/A"}
+                      {student.guardianName && (
+                        <p className="text-[10px] text-gray-400">
+                          👤 {student.guardianName}
+                        </p>
+                      )}
                     </td>
-                    <td className="px-3 py-2 text-xs text-gray-600">
-                      {student.phone || "N/A"}
-                    </td>
-                    <td className="px-3 py-2 text-xs font-mono text-blue-600">
-                      {student.username || (
-                        <span className="text-gray-400">Not Set</span>
+                    <td className="px-3 py-2 text-xs font-mono">
+                      {student.username ? (
+                        <span className="text-blue-600 font-semibold">
+                          {student.username}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-[10px]">
+                          Not assigned
+                        </span>
                       )}
                     </td>
                     <td className="px-3 py-2 text-xs text-gray-600">
                       {student.roll || (
-                        <span className="text-gray-400">N/A</span>
+                        <span className="text-gray-400 text-[10px]">N/A</span>
                       )}
                     </td>
                     <td className="px-3 py-2">
@@ -1225,36 +1277,47 @@ const StudentManagementContent = () => {
                       >
                         {student.status || "Pending"}
                       </span>
+                      {student.approvedAt && (
+                        <p className="text-[8px] text-gray-400 mt-0.5">
+                          ✅ {new Date(student.approvedAt).toLocaleDateString()}
+                        </p>
+                      )}
                     </td>
                     <td className="px-3 py-2">
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 flex-wrap">
                         {student.status === "Pending" && (
                           <button
                             onClick={() => {
+                              // Pre-fill username suggestion
+                              const suggestedUsername =
+                                student.name?.toLowerCase().replace(/\s/g, "") +
+                                Math.floor(Math.random() * 100);
                               setSelectedStudent({
                                 ...student,
-                                username: "",
-                                password: "",
+                                username: suggestedUsername,
+                                password: "student123",
                                 roll: "",
                               });
                               setShowApproveModal(true);
                             }}
-                            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-[10px] font-semibold flex items-center gap-1"
+                            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-[10px] font-semibold flex items-center gap-1 transition-all"
                           >
                             <FaCheckCircle size={12} /> Approve
                           </button>
                         )}
                         {student.status === "Active" && (
                           <button
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-semibold"
-                            title="View Details"
+                            onClick={() => setShowStudentDetails(student)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-semibold flex items-center gap-1 transition-all"
                           >
-                            <FaEye size={12} />
+                            <FaEye size={12} /> View
                           </button>
                         )}
                         <button
-                          onClick={() => handleDeleteStudent(student._id)}
-                          className="text-red-600 hover:text-red-800 p-1"
+                          onClick={() =>
+                            handleDeleteStudent(student._id, student.name)
+                          }
+                          className="text-red-600 hover:text-red-800 p-1 transition-all"
                           title="Delete"
                         >
                           <FaTrash size={12} />
@@ -1271,11 +1334,12 @@ const StudentManagementContent = () => {
 
       {/* Approve Student Modal */}
       {showApproveModal && selectedStudent && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold text-gray-800 mb-2">
-              ✅ Approve Student
+            <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
+              <FaCheckCircle className="text-green-600" /> Approve Student
             </h3>
+
             <div className="bg-gray-50 p-3 rounded-lg mb-4">
               <p className="text-sm text-gray-700">
                 <strong>Name:</strong> {selectedStudent.name}
@@ -1286,8 +1350,13 @@ const StudentManagementContent = () => {
               <p className="text-sm text-gray-700">
                 <strong>Class:</strong> {selectedStudent.class}
               </p>
-              <p className="text-sm text-gray-700">
-                <strong>Registered:</strong>{" "}
+              {selectedStudent.guardianName && (
+                <p className="text-sm text-gray-700">
+                  <strong>Guardian:</strong> {selectedStudent.guardianName}
+                </p>
+              )}
+              <p className="text-sm text-gray-500 mt-1">
+                📅 Registered:{" "}
                 {selectedStudent.createdAt
                   ? new Date(selectedStudent.createdAt).toLocaleDateString()
                   : "N/A"}
@@ -1334,7 +1403,7 @@ const StudentManagementContent = () => {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Password *
+                  Password * (min 6 chars)
                 </label>
                 <input
                   type="text"
@@ -1349,7 +1418,7 @@ const StudentManagementContent = () => {
                   placeholder="Enter password"
                 />
                 <p className="text-[10px] text-gray-400 mt-1">
-                  Student will use this to login
+                  ⚠️ Share this password with the student securely
                 </p>
               </div>
             </div>
@@ -1360,15 +1429,111 @@ const StudentManagementContent = () => {
                   setShowApproveModal(false);
                   setSelectedStudent(null);
                 }}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleApproveStudent}
-                className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2"
               >
-                Approve & Activate
+                <FaCheckCircle size={14} /> Approve & Activate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Student Details Modal */}
+      {showStudentDetails && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <FaUserGraduate className="text-blue-600" /> Student Details
+              </h3>
+              <button
+                onClick={() => setShowStudentDetails(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <p className="text-sm font-semibold text-gray-800">
+                  {showStudentDetails.name}
+                </p>
+                <p className="text-xs text-gray-600">
+                  📱 {showStudentDetails.phone}
+                </p>
+                {showStudentDetails.email && (
+                  <p className="text-xs text-gray-600">
+                    ✉️ {showStudentDetails.email}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-gray-50 p-2 rounded-lg">
+                  <p className="text-[10px] text-gray-500">Class</p>
+                  <p className="text-sm font-medium">
+                    {showStudentDetails.class || "N/A"}
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-2 rounded-lg">
+                  <p className="text-[10px] text-gray-500">Roll</p>
+                  <p className="text-sm font-medium">
+                    {showStudentDetails.roll || "N/A"}
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-2 rounded-lg">
+                  <p className="text-[10px] text-gray-500">Username</p>
+                  <p className="text-sm font-mono text-blue-600">
+                    {showStudentDetails.username || "Not set"}
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-2 rounded-lg">
+                  <p className="text-[10px] text-gray-500">Status</p>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full ${
+                      showStudentDetails.status === "Active"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {showStudentDetails.status || "Pending"}
+                  </span>
+                </div>
+              </div>
+
+              {showStudentDetails.guardianName && (
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-[10px] text-gray-500">Guardian</p>
+                  <p className="text-sm">{showStudentDetails.guardianName}</p>
+                  {showStudentDetails.guardianPhone && (
+                    <p className="text-xs text-gray-600">
+                      📱 {showStudentDetails.guardianPhone}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-[10px] text-gray-500">Address</p>
+                <p className="text-sm">
+                  {showStudentDetails.address || "Not provided"}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={() => setShowStudentDetails(null)}
+                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
+              >
+                Close
               </button>
             </div>
           </div>

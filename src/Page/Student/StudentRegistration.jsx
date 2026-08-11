@@ -16,7 +16,7 @@ const StudentRegistration = () => {
     password: "",
     confirmPassword: "",
     class: "",
-    roll: "", // রোল নম্বর যোগ করা হয়েছে
+    roll: "",
     address: "",
     guardianName: "",
     guardianPhone: "",

@@ -6,6 +6,7 @@ import Adalthifzbanner from "../../image/adalthifzbanner.jpg";
 import adaltsbannerImg from "../../image/tajweedbanner - Copy.png";
 import AdvancedtajweedImg from "../../image/tajweedbanner - Copy.png";
 import Qurannajeracover from "../../image/najeracover.jpg";
+import Quidanuraniyah from "../../image/quidanuraniyahcover.png";
 import {
   FaCheckCircle,
   FaClock,
@@ -43,7 +44,7 @@ const Quran = () => {
       id: "elders-quida",
       title: "কায়দায়ে নূরানিয়্যাহ",
       subtitle: "সহি কুরআন শিক্ষার প্রথম ধাপ।",
-      image: Quranforeldersbanner,
+      image: Quidanuraniyah,
     },
     {
       id: "elders-nazera",
