@@ -889,10 +889,7 @@ const DashboardContent = ({ stats, notifications }) => {
 };
 
 // ==========================================
-// 2. STUDENT MANAGEMENT CONTENT - FIXED (No Static Data)
-// ==========================================
-// ==========================================
-// 2. STUDENT MANAGEMENT CONTENT - DYNAMIC
+// 2. STUDENT MANAGEMENT CONTENT - FIXED
 // ==========================================
 const StudentManagementContent = () => {
   const [students, setStudents] = useState([]);
@@ -902,11 +899,12 @@ const StudentManagementContent = () => {
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [showStudentDetails, setShowStudentDetails] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Load students from API
   useEffect(() => {
     fetchStudents();
-  }, []);
+  }, [refreshKey]);
 
   const fetchStudents = async () => {
     try {
@@ -930,6 +928,7 @@ const StudentManagementContent = () => {
       console.log("📥 API Response:", data);
 
       if (data.success) {
+        console.log("✅ Students loaded:", data.students.length);
         setStudents(data.students);
       } else {
         console.error("Failed to fetch students:", data.message);
@@ -1003,7 +1002,7 @@ const StudentManagementContent = () => {
       const data = await response.json();
 
       if (data.success) {
-        // Update student in the list
+        // ✅ Update student in the list
         const updatedStudents = students.map((s) =>
           s._id === selectedStudent._id
             ? {
@@ -1011,7 +1010,6 @@ const StudentManagementContent = () => {
                 status: "Active",
                 username: selectedStudent.username,
                 roll: selectedStudent.roll,
-                password: undefined, // Don't show password in list
               }
             : s,
         );
@@ -1029,10 +1027,14 @@ const StudentManagementContent = () => {
               <p><strong>Roll:</strong> ${selectedStudent.roll}</p>
               <hr style="margin: 10px 0;">
               <p style="font-size: 14px;"><strong>🔑 Login Credentials:</strong></p>
-              <p style="font-size: 13px; background: #f0f0f0; padding: 8px; border-radius: 5px;">
-                Username: <strong>${selectedStudent.username}</strong><br/>
-                Password: <strong>${selectedStudent.password}</strong>
-              </p>
+              <div style="background: #f0f0f0; padding: 10px; border-radius: 5px; margin: 5px 0;">
+                <p style="font-size: 13px; margin: 2px 0;">
+                  <strong>Username:</strong> ${selectedStudent.username}
+                </p>
+                <p style="font-size: 13px; margin: 2px 0;">
+                  <strong>Password:</strong> ${selectedStudent.password}
+                </p>
+              </div>
               <p style="font-size: 12px; color: #666; margin-top: 5px;">
                 📱 Phone: ${selectedStudent.phone}
               </p>
@@ -1075,22 +1077,36 @@ const StudentManagementContent = () => {
       try {
         const token = localStorage.getItem("token");
 
-        await fetch(`http://localhost:5000/api/admin/students/delete/${id}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+        const response = await fetch(
+          `http://localhost:5000/api/admin/students/delete/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
           },
-        });
+        );
 
-        setStudents(students.filter((s) => s._id !== id));
-        Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          text: "Student has been deleted.",
-          timer: 1500,
-          showConfirmButton: false,
-        });
+        const data = await response.json();
+
+        if (data.success) {
+          setStudents(students.filter((s) => s._id !== id));
+          Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: "Student has been deleted.",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Failed!",
+            text: data.message || "Could not delete student.",
+            confirmButtonColor: "#004d4d",
+          });
+        }
       } catch (error) {
         console.error("❌ Error deleting student:", error);
         Swal.fire({
@@ -1120,7 +1136,8 @@ const StudentManagementContent = () => {
         s.phone?.includes(term) ||
         s.email?.toLowerCase().includes(term) ||
         s.username?.toLowerCase().includes(term) ||
-        s.roll?.toLowerCase().includes(term)
+        s.roll?.toLowerCase().includes(term) ||
+        s.class?.toLowerCase().includes(term)
       );
     });
 
@@ -1171,7 +1188,7 @@ const StudentManagementContent = () => {
             <option value="inactive">Inactive</option>
           </select>
           <button
-            onClick={fetchStudents}
+            onClick={() => setRefreshKey((prev) => prev + 1)}
             className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"
           >
             🔄 Refresh
@@ -1193,7 +1210,8 @@ const StudentManagementContent = () => {
                 </p>
                 {filter === "all" && (
                   <p className="text-xs text-blue-500 mt-2">
-                    Students need to register from the student registration page
+                    📌 Students need to register from the student registration
+                    page
                   </p>
                 )}
               </div>
@@ -1240,6 +1258,9 @@ const StudentManagementContent = () => {
                           ✉️ {student.email}
                         </p>
                       )}
+                      <p className="text-[10px] text-gray-400">
+                        🆔 {student._id?.slice(-6) || "N/A"}
+                      </p>
                     </td>
                     <td className="px-3 py-2 text-xs text-gray-600">
                       {student.class || "N/A"}
@@ -1248,6 +1269,12 @@ const StudentManagementContent = () => {
                           👤 {student.guardianName}
                         </p>
                       )}
+                      <p className="text-[10px] text-gray-400">
+                        📅{" "}
+                        {student.createdAt
+                          ? new Date(student.createdAt).toLocaleDateString()
+                          : "N/A"}
+                      </p>
                     </td>
                     <td className="px-3 py-2 text-xs font-mono">
                       {student.username ? (
@@ -1288,14 +1315,14 @@ const StudentManagementContent = () => {
                         {student.status === "Pending" && (
                           <button
                             onClick={() => {
-                              // Pre-fill username suggestion
+                              // Auto-generate username from name
                               const suggestedUsername =
                                 student.name?.toLowerCase().replace(/\s/g, "") +
                                 Math.floor(Math.random() * 100);
                               setSelectedStudent({
                                 ...student,
                                 username: suggestedUsername,
-                                password: "student123",
+                                password: "student123S@",
                                 roll: "",
                               });
                               setShowApproveModal(true);
@@ -1418,7 +1445,7 @@ const StudentManagementContent = () => {
                   placeholder="Enter password"
                 />
                 <p className="text-[10px] text-gray-400 mt-1">
-                  ⚠️ Share this password with the student securely
+                  ⚠️ Default: student123S@ (you can change it)
                 </p>
               </div>
             </div>
@@ -1524,6 +1551,15 @@ const StudentManagementContent = () => {
                 <p className="text-[10px] text-gray-500">Address</p>
                 <p className="text-sm">
                   {showStudentDetails.address || "Not provided"}
+                </p>
+              </div>
+
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-[10px] text-gray-500">Registration Date</p>
+                <p className="text-sm">
+                  {showStudentDetails.createdAt
+                    ? new Date(showStudentDetails.createdAt).toLocaleString()
+                    : "N/A"}
                 </p>
               </div>
             </div>

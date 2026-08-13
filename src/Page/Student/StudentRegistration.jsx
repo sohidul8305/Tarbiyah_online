@@ -1,4 +1,3 @@
-// src/Page/Student/StudentRegistration.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -16,7 +15,6 @@ const StudentRegistration = () => {
     password: "",
     confirmPassword: "",
     class: "",
-    roll: "",
     address: "",
     guardianName: "",
     guardianPhone: "",
@@ -72,7 +70,6 @@ const StudentRegistration = () => {
         email: formData.email,
         phone: formData.phone,
         class: formData.class,
-        roll: formData.roll,
       });
 
       const response = await API.post("/auth/register/student", {
@@ -81,7 +78,6 @@ const StudentRegistration = () => {
         phone: formData.phone,
         password: formData.password,
         class: formData.class,
-        roll: formData.roll, // রোল নম্বর পাঠানো হচ্ছে
         address: formData.address,
         guardianName: formData.guardianName,
         guardianPhone: formData.guardianPhone,
@@ -90,24 +86,31 @@ const StudentRegistration = () => {
       console.log("✅ Registration Response:", response.data);
 
       if (response.data.success) {
-        const { user, token } = response.data;
-
-        // Save student info to localStorage
-        localStorage.setItem("isStudentLoggedIn", "true");
-        localStorage.setItem("studentPhone", formData.phone);
-        localStorage.setItem("studentInfo", JSON.stringify(user));
-        localStorage.setItem("studentEmail", user.email || "");
-        localStorage.setItem("token", token);
-
+        // ✅ Show success message
         await Swal.fire({
           icon: "success",
           title: "🎉 রেজিস্ট্রেশন সফল!",
-          text: `স্বাগতম, ${user.name}! আপনার রোল নম্বর: ${user.roll || "শীঘ্রই দেওয়া হবে"}`,
-          timer: 3000,
-          showConfirmButton: false,
+          html: `
+            <div style="text-align: left;">
+              <p><strong>নাম:</strong> ${formData.name}</p>
+              <p><strong>ক্লাস:</strong> ${formData.class}</p>
+              <p><strong>ফোন:</strong> ${formData.phone}</p>
+              <hr style="margin: 10px 0;">
+              <p style="color: #004d4d; font-weight: bold;">
+                ⏳ আপনার অ্যাকাউন্ট অ্যাপ্রুভের অপেক্ষায় আছে।<br/>
+                অ্যাডমিন আপনাকে ইউজারনেম এবং পাসওয়ার্ড দিবে।
+              </p>
+              <p style="font-size: 12px; color: #666; margin-top: 5px;">
+                অ্যাডমিন অ্যাপ্রুভ করার পর আপনি লগইন করতে পারবেন।
+              </p>
+            </div>
+          `,
+          confirmButtonColor: "#004d4d",
+          confirmButtonText: "লগইন পেজে যান",
         });
 
-        navigate("/student-dashboard");
+        // ✅ Redirect to login page (NOT dashboard)
+        navigate("/student-login");
       }
     } catch (error) {
       console.error("❌ Registration Error:", error);
@@ -143,12 +146,40 @@ const StudentRegistration = () => {
             📝 Student Registration
           </h2>
 
-          {/* Warning Notice in Bengali */}
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg mb-4">
+          {/* Info Notice */}
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-4">
             <div className="flex items-start">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-5 w-5 text-red-500"
+                  className="h-5 w-5 text-blue-500"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-blue-700 font-medium">
+                  📌 রেজিস্ট্রেশন সম্পূর্ণ হলে:
+                </p>
+                <p className="text-sm text-blue-600 mt-1">
+                  অ্যাডমিন আপনার অ্যাকাউন্ট অ্যাপ্রুভ করবে এবং ইউজারনেম ও
+                  পাসওয়ার্ড দিবে। তারপর আপনি লগইন করতে পারবেন।
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Warning Notice */}
+          <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg mb-4">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-yellow-500"
                   viewBox="0 0 20 20"
                   fill="currentColor"
                 >
@@ -160,14 +191,12 @@ const StudentRegistration = () => {
                 </svg>
               </div>
               <div className="ml-3">
-                <p className="text-sm text-red-700 font-medium">
-                  ⚠️ গুরুত্বপূর্ণ সতর্কতা:
+                <p className="text-sm text-yellow-700 font-medium">
+                  ⚠️ গুরুত্বপূর্ণ:
                 </p>
-                <p className="text-sm text-red-600 mt-1">
+                <p className="text-sm text-yellow-600 mt-1">
                   আপনি যে তথ্য দিয়ে অ্যাডমিশন বা ভর্তি হয়েছেন, ঠিক সেই একই
-                  তথ্য দিয়ে রেজিস্ট্রেশন করুন। আপনার ফোন নম্বর, নাম এবং
-                  অন্যান্য তথ্য অ্যাডমিশনের সময় দেওয়া তথ্যের সাথে মিল থাকতে
-                  হবে।
+                  তথ্য দিয়ে রেজিস্ট্রেশন করুন।
                 </p>
               </div>
             </div>
@@ -220,9 +249,6 @@ const StudentRegistration = () => {
                   placeholder="017XXXXXXXX (Phone number used for admission)"
                   required
                 />
-                <p className="text-xs text-gray-400 mt-1">
-                  ⚠️ Use the same phone number you provided during admission
-                </p>
               </div>
 
               {/* Class */}
@@ -239,9 +265,6 @@ const StudentRegistration = () => {
                   placeholder="e.g., Class 8, Diploma 1st Year"
                   required
                 />
-                <p className="text-xs text-gray-400 mt-1">
-                  ⚠️ Enter the class you were admitted to
-                </p>
               </div>
 
               {/* Password */}
@@ -255,12 +278,9 @@ const StudentRegistration = () => {
                   value={formData.password}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                  placeholder="6+ characters (Choose your password)"
+                  placeholder="6+ characters"
                   required
                 />
-                <p className="text-xs text-gray-400 mt-1">
-                  💡 Remember this password for login
-                </p>
               </div>
 
               {/* Confirm Password */}

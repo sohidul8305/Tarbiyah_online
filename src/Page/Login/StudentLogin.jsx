@@ -1,4 +1,3 @@
-// src/Page/Student/StudentLogin.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -17,7 +16,6 @@ const StudentLogin = () => {
     setLoading(true);
 
     try {
-      // API call to verify student login
       const response = await API.post("/auth/student/login", {
         username,
         password,
@@ -44,10 +42,16 @@ const StudentLogin = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
+
+      let errorMessage = "ভুল ইউজারনেম বা পাসওয়ার্ড!";
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
       await Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text: error.response?.data?.message || "ভুল ইউজারনেম বা পাসওয়ার্ড!",
+        text: errorMessage,
         confirmButtonColor: "#004d4d",
       });
     } finally {
@@ -106,6 +110,18 @@ const StudentLogin = () => {
               {loading ? "Logging in..." : "Log In Student Portal"}
             </button>
           </form>
+
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{" "}
+              <button
+                onClick={() => navigate("/student-registration")}
+                className="text-[#004d4d] font-bold hover:underline"
+              >
+                Register Now
+              </button>
+            </p>
+          </div>
         </div>
       </div>
       <Footer />
