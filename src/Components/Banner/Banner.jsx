@@ -16,7 +16,7 @@ const Banner = () => {
   return (
     <div className="w-full my-15 mr-10">
       {/* কাস্টম অ্যানিমেশনের জন্য স্টাইল ট্যাগ */}
-      <p>hello</p>
+
       <style>{`
         @keyframes autoZoom {
           0% {
