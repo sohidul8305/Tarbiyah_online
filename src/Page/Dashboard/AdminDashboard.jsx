@@ -88,44 +88,6 @@ const AdminDashboard = () => {
   });
 
   // Students Data
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      name: "Ahmed Hasan",
-      class: "Class 8",
-      roll: "01",
-      status: "Active",
-      admissionDate: "2026-01-15",
-      parentContact: "+880 1712 345678",
-    },
-    {
-      id: 2,
-      name: "Fatima Begum",
-      class: "Class 9",
-      roll: "02",
-      status: "Active",
-      admissionDate: "2026-02-01",
-      parentContact: "+880 1723 456789",
-    },
-    {
-      id: 3,
-      name: "Mohammad Ali",
-      class: "Class 10",
-      roll: "05",
-      status: "Pending",
-      admissionDate: "2026-07-20",
-      parentContact: "+880 1734 567890",
-    },
-    {
-      id: 4,
-      name: "Aisha Rahman",
-      class: "Class 7",
-      roll: "06",
-      status: "Active",
-      admissionDate: "2026-03-01",
-      parentContact: "+880 1745 678901",
-    },
-  ]);
 
   // Teachers Data
   const [teachers, setTeachers] = useState([
@@ -891,6 +853,9 @@ const DashboardContent = ({ stats, notifications }) => {
 // ==========================================
 // 2. STUDENT MANAGEMENT CONTENT - FIXED
 // ==========================================
+// ==========================================
+// 2. STUDENT MANAGEMENT CONTENT - DEBUG
+// ==========================================
 const StudentManagementContent = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -900,6 +865,7 @@ const StudentManagementContent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showStudentDetails, setShowStudentDetails] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [debugInfo, setDebugInfo] = useState("");
 
   // Load students from API
   useEffect(() => {
@@ -912,6 +878,13 @@ const StudentManagementContent = () => {
       const token = localStorage.getItem("token");
 
       console.log("🔄 Fetching students from API...");
+      console.log("🔑 Token:", token ? "✅ Present" : "❌ Missing");
+
+      if (!token) {
+        setDebugInfo("❌ No token found! Please login again.");
+        setLoading(false);
+        return;
+      }
 
       const response = await fetch(
         "http://localhost:5000/api/admin/students/all",
@@ -923,16 +896,25 @@ const StudentManagementContent = () => {
         },
       );
 
-      const data = await response.json();
+      console.log("📥 Response Status:", response.status);
 
-      console.log("📥 API Response:", data);
+      const data = await response.json();
+      console.log("📥 Response Data:", data);
 
       if (data.success) {
         console.log("✅ Students loaded:", data.students.length);
         setStudents(data.students);
+        setDebugInfo(`✅ Found ${data.students.length} students`);
+
+        if (data.students.length === 0) {
+          setDebugInfo(
+            "⚠️ No students found in database. Please register a student first.",
+          );
+        }
       } else {
-        console.error("Failed to fetch students:", data.message);
+        console.error("❌ Failed to fetch students:", data.message);
         setStudents([]);
+        setDebugInfo(`❌ Error: ${data.message}`);
         Swal.fire({
           icon: "error",
           title: "Error!",
@@ -943,6 +925,7 @@ const StudentManagementContent = () => {
     } catch (error) {
       console.error("❌ Error fetching students:", error);
       setStudents([]);
+      setDebugInfo(`❌ Connection Error: ${error.message}`);
       Swal.fire({
         icon: "error",
         title: "Connection Error!",
@@ -1164,6 +1147,11 @@ const StudentManagementContent = () => {
           </span>
         </h2>
         <div className="flex items-center gap-2 flex-wrap">
+          {debugInfo && (
+            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+              {debugInfo}
+            </span>
+          )}
           {pendingCount > 0 && (
             <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-lg text-xs font-bold animate-pulse flex items-center gap-1">
               <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
@@ -1209,10 +1197,21 @@ const StudentManagementContent = () => {
                     : `No ${filter} students`}
                 </p>
                 {filter === "all" && (
-                  <p className="text-xs text-blue-500 mt-2">
-                    📌 Students need to register from the student registration
-                    page
-                  </p>
+                  <div className="mt-3">
+                    <p className="text-xs text-blue-500">
+                      📌 Students need to register from the student registration
+                      page
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      💡 After registration, refresh this page to see them
+                    </p>
+                    <button
+                      onClick={() => setRefreshKey((prev) => prev + 1)}
+                      className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all"
+                    >
+                      🔄 Refresh Now
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -1315,7 +1314,6 @@ const StudentManagementContent = () => {
                         {student.status === "Pending" && (
                           <button
                             onClick={() => {
-                              // Auto-generate username from name
                               const suggestedUsername =
                                 student.name?.toLowerCase().replace(/\s/g, "") +
                                 Math.floor(Math.random() * 100);

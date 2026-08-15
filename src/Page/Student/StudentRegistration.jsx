@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Navbar/Footer/Footer";
-import API from "../../services/api";
+import API, { testConnection } from "../../services/api";
 
 const StudentRegistration = () => {
   const navigate = useNavigate();
@@ -27,11 +27,22 @@ const StudentRegistration = () => {
     });
   };
 
+  // ✅ Check server connection first
+  const checkServer = async () => {
+    try {
+      await testConnection();
+      return true;
+    } catch (error) {
+      console.error("❌ Server not reachable");
+      return false;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // Validate passwords
+    // ✅ Validate passwords
     if (formData.password !== formData.confirmPassword) {
       Swal.fire({
         icon: "error",
@@ -42,7 +53,7 @@ const StudentRegistration = () => {
       return;
     }
 
-    // Validate phone number
+    // ✅ Validate phone number
     if (formData.phone.length < 11) {
       Swal.fire({
         icon: "error",
@@ -53,7 +64,7 @@ const StudentRegistration = () => {
       return;
     }
 
-    // Validate password length
+    // ✅ Validate password length
     if (formData.password.length < 6) {
       Swal.fire({
         icon: "error",
@@ -65,6 +76,14 @@ const StudentRegistration = () => {
     }
 
     try {
+      // ✅ Check server connection first
+      const isServerRunning = await checkServer();
+      if (!isServerRunning) {
+        throw new Error(
+          "সার্ভারে সংযোগ করা যায়নি! ব্যাকএন্ড সার্ভার চালু আছে কিনা চেক করুন।",
+        );
+      }
+
       console.log("📤 Sending Registration Data:", {
         name: formData.name,
         email: formData.email,
@@ -86,7 +105,6 @@ const StudentRegistration = () => {
       console.log("✅ Registration Response:", response.data);
 
       if (response.data.success) {
-        // ✅ Show success message
         await Swal.fire({
           icon: "success",
           title: "🎉 রেজিস্ট্রেশন সফল!",
@@ -100,30 +118,38 @@ const StudentRegistration = () => {
                 ⏳ আপনার অ্যাকাউন্ট অ্যাপ্রুভের অপেক্ষায় আছে।<br/>
                 অ্যাডমিন আপনাকে ইউজারনেম এবং পাসওয়ার্ড দিবে।
               </p>
-              <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                অ্যাডমিন অ্যাপ্রুভ করার পর আপনি লগইন করতে পারবেন।
-              </p>
             </div>
           `,
           confirmButtonColor: "#004d4d",
           confirmButtonText: "লগইন পেজে যান",
         });
 
-        // ✅ Redirect to login page (NOT dashboard)
         navigate("/student-login");
       }
     } catch (error) {
       console.error("❌ Registration Error:", error);
 
       let errorMessage = "আবার চেষ্টা করুন।";
+
       if (error.response) {
+        // Server responded with error
         errorMessage =
           error.response.data?.message ||
           error.response.data?.error ||
-          errorMessage;
+          `Server Error: ${error.response.status}`;
+        console.error("📦 Server Response:", error.response.data);
       } else if (error.request) {
+        // No response from server
         errorMessage =
           "সার্ভারে সংযোগ করা যায়নি! ব্যাকএন্ড সার্ভার চালু আছে কিনা চেক করুন।";
+        console.error("📤 No response from server");
+        console.error("💡 Check:");
+        console.error("1. Backend running: cd backend && node index.js");
+        console.error("2. Port: http://localhost:5000");
+        console.error("3. Test: http://localhost:5000/api/auth/test");
+      } else {
+        // Other errors
+        errorMessage = error.message || errorMessage;
       }
 
       await Swal.fire({
@@ -131,6 +157,7 @@ const StudentRegistration = () => {
         title: "রেজিস্ট্রেশন ব্যর্থ!",
         text: errorMessage,
         confirmButtonColor: "#004d4d",
+        confirmButtonText: "আবার চেষ্টা করুন",
       });
     } finally {
       setLoading(false);
@@ -145,6 +172,14 @@ const StudentRegistration = () => {
           <h2 className="text-2xl font-bold text-center text-[#004d4d] mb-6">
             📝 Student Registration
           </h2>
+
+          {/* ✅ Server Status */}
+          <div className="bg-green-50 border-l-4 border-green-500 p-3 rounded-lg mb-4">
+            <p className="text-sm text-green-700">
+              ✅ Backend:{" "}
+              <span className="font-bold">http://localhost:5000</span>
+            </p>
+          </div>
 
           {/* Info Notice */}
           <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-4">
@@ -168,35 +203,7 @@ const StudentRegistration = () => {
                 </p>
                 <p className="text-sm text-blue-600 mt-1">
                   অ্যাডমিন আপনার অ্যাকাউন্ট অ্যাপ্রুভ করবে এবং ইউজারনেম ও
-                  পাসওয়ার্ড দিবে। তারপর আপনি লগইন করতে পারবেন।
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Warning Notice */}
-          <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg mb-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-yellow-500"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-yellow-700 font-medium">
-                  ⚠️ গুরুত্বপূর্ণ:
-                </p>
-                <p className="text-sm text-yellow-600 mt-1">
-                  আপনি যে তথ্য দিয়ে অ্যাডমিশন বা ভর্তি হয়েছেন, ঠিক সেই একই
-                  তথ্য দিয়ে রেজিস্ট্রেশন করুন।
+                  পাসওয়ার্ড দিবে।
                 </p>
               </div>
             </div>
@@ -204,7 +211,6 @@ const StudentRegistration = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Full Name <span className="text-red-500">*</span>
@@ -220,7 +226,6 @@ const StudentRegistration = () => {
                 />
               </div>
 
-              {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
@@ -235,7 +240,6 @@ const StudentRegistration = () => {
                 />
               </div>
 
-              {/* Phone */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Phone Number <span className="text-red-500">*</span>
@@ -246,12 +250,11 @@ const StudentRegistration = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                  placeholder="017XXXXXXXX (Phone number used for admission)"
+                  placeholder="017XXXXXXXX"
                   required
                 />
               </div>
 
-              {/* Class */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Class <span className="text-red-500">*</span>
@@ -262,12 +265,11 @@ const StudentRegistration = () => {
                   value={formData.class}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                  placeholder="e.g., Class 8, Diploma 1st Year"
+                  placeholder="e.g., Class 8"
                   required
                 />
               </div>
 
-              {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password <span className="text-red-500">*</span>
@@ -283,7 +285,6 @@ const StudentRegistration = () => {
                 />
               </div>
 
-              {/* Confirm Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Confirm Password <span className="text-red-500">*</span>
@@ -300,7 +301,6 @@ const StudentRegistration = () => {
               </div>
             </div>
 
-            {/* Additional Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -312,7 +312,7 @@ const StudentRegistration = () => {
                   value={formData.address}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                  placeholder="Your current address"
+                  placeholder="Your address"
                 />
               </div>
 
@@ -326,7 +326,7 @@ const StudentRegistration = () => {
                   value={formData.guardianName}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                  placeholder="Guardian's full name"
+                  placeholder="Guardian's name"
                 />
               </div>
 
@@ -340,7 +340,7 @@ const StudentRegistration = () => {
                   value={formData.guardianPhone}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                  placeholder="Guardian's phone number"
+                  placeholder="Guardian's phone"
                 />
               </div>
             </div>
