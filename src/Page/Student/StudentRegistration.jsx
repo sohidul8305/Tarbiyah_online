@@ -44,6 +44,8 @@ const StudentRegistration = () => {
     });
   };
 
+  // StudentRegistration.jsx - শুধু এই একটি handleSubmit রাখুন, অন্যটি ডিলিট করুন
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -89,63 +91,94 @@ const StudentRegistration = () => {
         course: formData.course,
       });
 
-      const response = await API.post("/auth/register/student", {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        password: formData.password,
-        course: formData.course,
-        presentAddress: formData.presentAddress,
-        permanentAddress: formData.permanentAddress,
-        dobOrNid: formData.dobOrNid,
-        guardianName: formData.guardianName,
-        guardianPhone: formData.guardianPhone,
-      });
+      const response = await fetch(
+        "http://localhost:5000/api/students/register/student",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            password: formData.password,
+            course: formData.course,
+            presentAddress: formData.presentAddress || "",
+            permanentAddress: formData.permanentAddress || "",
+            dobOrNid: formData.dobOrNid || "",
+            guardianName: formData.guardianName || "",
+            guardianPhone: formData.guardianPhone || "",
+          }),
+        },
+      );
 
-      console.log("✅ Registration Response:", response.data);
+      console.log("📥 Response Status:", response.status);
 
-      if (response.data.success) {
-        // ✅ Show success message
+      if (!response.ok) {
+        const text = await response.text();
+        console.error("❌ Error Response:", text.substring(0, 200));
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("📥 Response Data:", data);
+
+      if (data.success) {
         await Swal.fire({
           icon: "success",
           title: "🎉 রেজিস্ট্রেশন সফল!",
           html: `
-            <div style="text-align: left;">
-              <p><strong>নাম:</strong> ${formData.name}</p>
-              <p><strong>কোর্স:</strong> ${formData.course}</p>
-              <p><strong>ফোন:</strong> ${formData.phone}</p>
-              <hr style="margin: 10px 0;">
-              <p style="color: #004d4d; font-weight: bold;">
-                ⏳ আপনার অ্যাকাউন্ট অ্যাপ্রুভের অপেক্ষায় আছে。<br/>
-                অ্যাডমিন আপনাকে ইউজারনেম এবং পাসওয়ার্ড দিবে।
-              </p>
-              <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                অ্যাডমিন অ্যাপ্রুভ করার পর আপনি লগইন করতে পারবেন।
-              </p>
-            </div>
-          `,
+          <div style="text-align: left; max-height: 400px; overflow-y: auto;">
+            <p><strong>নাম:</strong> ${formData.name}</p>
+            <p><strong>ইমেইল:</strong> ${formData.email}</p>
+            <p><strong>ফোন:</strong> ${formData.phone}</p>
+            <p><strong>কোর্স:</strong> ${formData.course}</p>
+            <p><strong>বর্তমান ঠিকানা:</strong> ${formData.presentAddress || "N/A"}</p>
+            <p><strong>স্থায়ী ঠিকানা:</strong> ${formData.permanentAddress || "N/A"}</p>
+            <p><strong>পরিচয়পত্র:</strong> ${formData.dobOrNid || "N/A"}</p>
+            <p><strong>অভিভাবক:</strong> ${formData.guardianName || "N/A"}</p>
+            <p><strong>অভিভাবক ফোন:</strong> ${formData.guardianPhone || "N/A"}</p>
+            <hr style="margin: 10px 0;">
+            <p style="color: #004d4d; font-weight: bold;">
+              ⏳ আপনার অ্যাকাউন্ট অ্যাপ্রুভের অপেক্ষায় আছে।
+            </p>
+            <p style="font-size: 12px; color: #666; margin-top: 5px;">
+              অ্যাডমিন অ্যাপ্রুভ করার পর আপনি লগইন করতে পারবেন।
+            </p>
+          </div>
+        `,
           confirmButtonColor: "#004d4d",
           confirmButtonText: "লগইন পেজে যান",
         });
 
-        // ✅ Redirect to login page (NOT dashboard)
         navigate("/student-login");
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "রেজিস্ট্রেশন ব্যর্থ!",
+          text: data.message || "আবার চেষ্টা করুন।",
+          confirmButtonColor: "#004d4d",
+        });
       }
     } catch (error) {
       console.error("❌ Registration Error:", error);
 
       let errorMessage = "আবার চেষ্টা করুন।";
-      if (error.response) {
+      if (
+        error.message.includes("Failed to fetch") ||
+        error.message.includes("ECONNREFUSED")
+      ) {
         errorMessage =
-          error.response.data?.message ||
-          error.response.data?.error ||
-          errorMessage;
-      } else if (error.request) {
+          "ব্যাকএন্ড সার্ভার চালু নেই! \n\nটার্মিনালে cd backend && node simple-server.js চালান।";
+      } else if (error.message.includes("HTTP 404")) {
         errorMessage =
-          "সার্ভারে সংযোগ করা যায়নি! ব্যাকএন্ড সার্ভার চালু আছে কিনা চেক করুন।";
+          "API route পাওয়া যায়নি! \n\nব্যাকএন্ড সার্ভার চালু আছে কিনা চেক করুন।";
+      } else {
+        errorMessage = error.message || "আবার চেষ্টা করুন।";
       }
 
-      await Swal.fire({
+      Swal.fire({
         icon: "error",
         title: "রেজিস্ট্রেশন ব্যর্থ!",
         text: errorMessage,
@@ -165,62 +198,6 @@ const StudentRegistration = () => {
             📝 Student Registration
           </h2>
 
-          {/* Info Notice */}
-          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-blue-500"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-blue-700 font-medium">
-                  📌 রেজিস্ট্রেশন সম্পূর্ণ হলে:
-                </p>
-                <p className="text-sm text-blue-600 mt-1">
-                  অ্যাডমিন আপনার অ্যাকাউন্ট অ্যাপ্রুভ করবে এবং ইউজারনেম ও
-                  পাসওয়ার্ড দিবে। তারপর আপনি লগইন করতে পারবেন।
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Warning Notice */}
-          <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg mb-4">
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-yellow-500"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-yellow-700 font-medium">
-                  ⚠️ গুরুত্বপূর্ণ:
-                </p>
-                <p className="text-sm text-yellow-600 mt-1">
-                  আপনি যে তথ্য দিয়ে অ্যাডমিশন বা ভর্তি হয়েছেন, ঠিক সেই একই
-                  তথ্য দিয়ে রেজিস্ট্রেশন করুন।
-                </p>
-              </div>
-            </div>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Name */}
@@ -239,7 +216,7 @@ const StudentRegistration = () => {
                 />
               </div>
 
-              {/* Email (Required added) */}
+              {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email <span className="text-red-500">*</span>
@@ -266,12 +243,12 @@ const StudentRegistration = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                  placeholder="017XXXXXXXX (Phone number used for admission)"
+                  placeholder="017XXXXXXXX"
                   required
                 />
               </div>
 
-              {/* Course (Dropdown instead of Class) */}
+              {/* Course */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Select Course <span className="text-red-500">*</span>
@@ -327,7 +304,6 @@ const StudentRegistration = () => {
 
             {/* Additional Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Date of Birth or NID / Birth Certificate Number */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Date of Birth / NID / Birth Certificate No.{" "}
@@ -339,12 +315,11 @@ const StudentRegistration = () => {
                   value={formData.dobOrNid}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                  placeholder="e.g., DD-MM-YYYY or NID/Birth Reg No."
+                  placeholder="e.g., DD-MM-YYYY"
                   required
                 />
               </div>
 
-              {/* Present Address */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Present Address <span className="text-red-500">*</span>
@@ -360,7 +335,6 @@ const StudentRegistration = () => {
                 />
               </div>
 
-              {/* Permanent Address */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Permanent Address <span className="text-red-500">*</span>
@@ -376,7 +350,6 @@ const StudentRegistration = () => {
                 />
               </div>
 
-              {/* Guardian's Name (Optional) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Guardian's Name
@@ -391,7 +364,6 @@ const StudentRegistration = () => {
                 />
               </div>
 
-              {/* Guardian's Phone */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Guardian's Phone <span className="text-red-500">*</span>
