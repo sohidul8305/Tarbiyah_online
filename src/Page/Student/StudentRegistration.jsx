@@ -14,11 +14,28 @@ const StudentRegistration = () => {
     phone: "",
     password: "",
     confirmPassword: "",
-    class: "",
-    address: "",
+    course: "",
+    presentAddress: "",
+    permanentAddress: "",
+    dobOrNid: "",
     guardianName: "",
     guardianPhone: "",
   });
+
+  const coursesList = [
+    "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
+    "আলিমিয়াহ ফর কিডস",
+    "আলিমিয়াহ প্রোগ্রাম",
+    "কায়দা নুরানী",
+    "নাজেরা",
+    "হিফজুল কুরআন",
+    "হিফজ রিভিশন",
+    "ওয়ান টু ওয়ান",
+    "কায়দায়ে নূরানিয়্যাহ",
+    "কুরআন নাজেরা",
+    "বেসিক তাজউইদ (লেভেল–১)",
+    "অ্যাডভান্সড তাজউইদ",
+  ];
 
   const handleChange = (e) => {
     setFormData({
@@ -69,7 +86,7 @@ const StudentRegistration = () => {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        class: formData.class,
+        course: formData.course,
       });
 
       const response = await API.post("/auth/register/student", {
@@ -77,8 +94,10 @@ const StudentRegistration = () => {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        class: formData.class,
-        address: formData.address,
+        course: formData.course,
+        presentAddress: formData.presentAddress,
+        permanentAddress: formData.permanentAddress,
+        dobOrNid: formData.dobOrNid,
         guardianName: formData.guardianName,
         guardianPhone: formData.guardianPhone,
       });
@@ -93,11 +112,11 @@ const StudentRegistration = () => {
           html: `
             <div style="text-align: left;">
               <p><strong>নাম:</strong> ${formData.name}</p>
-              <p><strong>ক্লাস:</strong> ${formData.class}</p>
+              <p><strong>কোর্স:</strong> ${formData.course}</p>
               <p><strong>ফোন:</strong> ${formData.phone}</p>
               <hr style="margin: 10px 0;">
               <p style="color: #004d4d; font-weight: bold;">
-                ⏳ আপনার অ্যাকাউন্ট অ্যাপ্রুভের অপেক্ষায় আছে।<br/>
+                ⏳ আপনার অ্যাকাউন্ট অ্যাপ্রুভের অপেক্ষায় আছে。<br/>
                 অ্যাডমিন আপনাকে ইউজারনেম এবং পাসওয়ার্ড দিবে।
               </p>
               <p style="font-size: 12px; color: #666; margin-top: 5px;">
@@ -220,10 +239,10 @@ const StudentRegistration = () => {
                 />
               </div>
 
-              {/* Email */}
+              {/* Email (Required added) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
+                  Email <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -231,7 +250,8 @@ const StudentRegistration = () => {
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                  placeholder="Enter email (if available)"
+                  placeholder="Enter your email"
+                  required
                 />
               </div>
 
@@ -251,20 +271,25 @@ const StudentRegistration = () => {
                 />
               </div>
 
-              {/* Class */}
+              {/* Course (Dropdown instead of Class) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Class <span className="text-red-500">*</span>
+                  Select Course <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
-                  name="class"
-                  value={formData.class}
+                <select
+                  name="course"
+                  value={formData.course}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                  placeholder="e.g., Class 8, Diploma 1st Year"
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d] bg-white"
                   required
-                />
+                >
+                  <option value="">-- Select your course --</option>
+                  {coursesList.map((courseName, index) => (
+                    <option key={index} value={courseName}>
+                      {courseName}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Password */}
@@ -302,20 +327,56 @@ const StudentRegistration = () => {
 
             {/* Additional Fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Date of Birth or NID / Birth Certificate Number */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
+                  Date of Birth / NID / Birth Certificate No.{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  name="address"
-                  value={formData.address}
+                  name="dobOrNid"
+                  value={formData.dobOrNid}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
-                  placeholder="Your current address"
+                  placeholder="e.g., DD-MM-YYYY or NID/Birth Reg No."
+                  required
                 />
               </div>
 
+              {/* Present Address */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Present Address <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="presentAddress"
+                  value={formData.presentAddress}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
+                  placeholder="Your present address"
+                  required
+                />
+              </div>
+
+              {/* Permanent Address */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Permanent Address <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="permanentAddress"
+                  value={formData.permanentAddress}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
+                  placeholder="Your permanent address"
+                  required
+                />
+              </div>
+
+              {/* Guardian's Name (Optional) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Guardian's Name
@@ -330,9 +391,10 @@ const StudentRegistration = () => {
                 />
               </div>
 
+              {/* Guardian's Phone */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Guardian's Phone
+                  Guardian's Phone <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="tel"
@@ -341,6 +403,7 @@ const StudentRegistration = () => {
                   onChange={handleChange}
                   className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d]"
                   placeholder="Guardian's phone number"
+                  required
                 />
               </div>
             </div>
