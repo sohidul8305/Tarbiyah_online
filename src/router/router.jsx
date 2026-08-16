@@ -158,6 +158,7 @@ import Course_quran_elders_advanced_tajweed_enroll from "../Components/Course_qu
 import Admission_now from "../Components/Admission_now/Admission_now";
 import Dashboard from "../Page/Dashboard/Dashboard";
 import StudentRegistration from "../Page/Student/StudentRegistration";
+import NotFoundPage from "../Page/NotFoundPage/NotFoundPage";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -660,15 +661,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "*",
-        element: (
-          <div style={{ textAlign: "center", padding: "100px" }}>
-            <h1>❓ ৪০৪ - পৃষ্ঠা পাওয়া যায়নি</h1>
-            <p>আপনি যে পৃষ্ঠাটি খুঁজছেন তা আমাদের কাছে নেই।</p>
-            <a href="/" style={{ color: "#4CAF50" }}>
-              হোম পেজে ফিরে যান
-            </a>
-          </div>
-        ),
+        element: <NotFoundPage></NotFoundPage>,
       },
     ],
   },

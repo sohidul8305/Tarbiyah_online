@@ -9,7 +9,6 @@ import FeaturesSection from "../../Components/Navbar/FeaturesSection/FeaturesSec
 import FivePillars from "../../Components/FivePillars/FivePillars";
 import SeminarSection from "../../Components/SeminarSection/SeminarSection";
 import BlogSection from "../../Components/BlogSection/BlogSection";
-import KhutbatulJuma from "../../Components/KhutbatulJuma/KhutbatulJuma";
 import Testimonials from "../../Components/Testimonials/Testimonials";
 import FAQSection from "../../Components/FAQSection/FAQSection";
 
@@ -25,7 +24,6 @@ const Home = () => {
       <FivePillars />
       <SeminarSection />
       <BlogSection />
-      <KhutbatulJuma />
     </div>
   );
 };

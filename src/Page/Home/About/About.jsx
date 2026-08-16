@@ -18,7 +18,7 @@ const About = () => {
           <div className="chairman-grid">
             <div className="chairman-photo">
               <img
-                src="https://ui-avatars.com/api/?name=Ahmadullah&size=200&background=2a7d4f&color=fff&font-size=0.5"
+                src="https://i.ibb.co.com/w5hF3js/images-q-tbn-ANd9-Gc-Q46lu-UI2-Xv-YN4u-OOKnapk-RDQYn3-WTQPPWEr1q-A3lj-Cj-B3-Uwn-OKv8ka-IOKb1-Tyi9m-Ughpl5.webp"
                 alt="Ahmadullah - Chairman"
               />
               <div className="photo-border"></div>
@@ -251,8 +251,11 @@ const About = () => {
           text-align: center;
           box-shadow: 0 8px 28px rgba(30, 58, 47, 0.06);
           border-top: 6px solid #2a7d4f;
-          transition: transform 0.3s ease, box-shadow 0.4s ease,
-            border-color 0.3s ease, background 0.3s ease;
+          transition:
+            transform 0.3s ease,
+            box-shadow 0.4s ease,
+            border-color 0.3s ease,
+            background 0.3s ease;
           display: flex;
           flex-direction: column;
           align-items: center;

@@ -1,7 +1,6 @@
 // src/Page/Admin/Add_student.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -30,7 +29,6 @@ import {
   FaDatabase,
   FaUserCog,
   FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
   FaEdit,
   FaTrash,
@@ -60,8 +58,6 @@ import {
   FaWallet,
   FaCreditCard,
   FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
   FaEnvelope,
   FaPaperPlane,
   FaExclamationTriangle,
@@ -92,8 +88,8 @@ const Add_student = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("dashboard");
-  const [activeSubMenu, setActiveSubMenu] = useState(null);
+  const [activeMenu, setActiveMenu] = useState("student-management");
+  const [activeSubMenu, setActiveSubMenu] = useState("student-add");
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -102,6 +98,11 @@ const Add_student = () => {
     department: "",
     joinDate: "",
   });
+
+  // ✅ API থেকে ডেটা লোড করার জন্য state - স্ট্যাটিক ডেটা নেই
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -126,49 +127,11 @@ const Add_student = () => {
     photo: null,
   });
 
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      name: "Ahmed Hasan",
-      fatherName: "Abdul Hasan",
-      class: "Class 8",
-      subject: "Tajweed",
-      roll: "01",
-      phone: "+880 1712 345678",
-      email: "ahmed@example.com",
-      status: "Active",
-      admissionDate: "2026-01-15",
-    },
-    {
-      id: 2,
-      name: "Fatima Begum",
-      fatherName: "Mohammad Ali",
-      class: "Class 9",
-      subject: "Tafsir",
-      roll: "02",
-      phone: "+880 1723 456789",
-      email: "fatima@example.com",
-      status: "Active",
-      admissionDate: "2026-02-01",
-    },
-    {
-      id: 3,
-      name: "Mohammad Ali",
-      fatherName: "Karim Ali",
-      class: "Class 10",
-      subject: "Hadith",
-      roll: "05",
-      phone: "+880 1734 567890",
-      email: "ali@example.com",
-      status: "Pending",
-      admissionDate: "2026-07-20",
-    },
-  ]);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [filterClass, setFilterClass] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
   const [showStudentList, setShowStudentList] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Load admin info
   useEffect(() => {
@@ -186,6 +149,160 @@ const Add_student = () => {
       });
     }
   }, [user]);
+
+  // ✅ API থেকে ডেটা লোড করুন - শুধু রেজিস্টার করা ডেটা
+  useEffect(() => {
+    fetchStudentsFromAPI();
+  }, [refreshKey]);
+
+  const fetchStudentsFromAPI = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      console.log("🔄 Fetching students from API...");
+
+      const response = await fetch("http://localhost:5000/api/students/all", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("📥 Response Status:", response.status);
+
+      if (response.status === 404) {
+        setError(
+          "API endpoint not found! Please check if server is running on port 5000",
+        );
+        setStudents([]);
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("📥 Response Data:", data);
+
+      if (data.success) {
+        const studentList = data.students || [];
+        console.log(`✅ Found ${studentList.length} students from API`);
+        setStudents(studentList);
+
+        if (studentList.length === 0) {
+          setError("No students found. Please register a student first.");
+        }
+      } else {
+        setError(data.message || "Failed to fetch students");
+        setStudents([]);
+      }
+    } catch (error) {
+      console.error("❌ Error fetching students:", error);
+      setError(`Error: ${error.message}`);
+      setStudents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Register new student to API
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validation
+    if (
+      !formData.name ||
+      !formData.fatherName ||
+      !formData.class ||
+      !formData.subject ||
+      !formData.phone
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all required fields",
+        text: "Name, Father's Name, Class, Subject and Phone are required.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/students/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: formData.name,
+            phone: formData.phone,
+            email: formData.email || "",
+            class: formData.class,
+            guardianName: formData.fatherName,
+            guardianPhone: formData.guardianContact || formData.phone,
+            address: formData.address || "",
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "✅ Student Registered!",
+          text: `Student ${formData.name} has been registered successfully.`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
+
+        // Reset form
+        setFormData({
+          name: "",
+          fatherName: "",
+          motherName: "",
+          class: "",
+          subject: "",
+          roll: "",
+          phone: "",
+          email: "",
+          address: "",
+          dob: "",
+          gender: "Male",
+          bloodGroup: "A+",
+          nationality: "Bangladeshi",
+          religion: "Islam",
+          previousSchool: "",
+          guardianContact: "",
+          status: "Active",
+          paymentStatus: "Unpaid",
+          admissionDate: "",
+          photo: null,
+        });
+
+        // Refresh student list
+        setRefreshKey((prev) => prev + 1);
+        setShowStudentList(true);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Registration Failed!",
+          text: data.message || "Could not register student.",
+        });
+      }
+    } catch (error) {
+      console.error("❌ Registration Error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: "Could not connect to server. Please try again.",
+      });
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -220,6 +337,156 @@ const Add_student = () => {
       setActiveSubMenu(null);
     } else {
       setActiveSubMenu(menu);
+    }
+  };
+
+  // Handle input change
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  // Handle file change
+  const handleFileChange = (e) => {
+    if (e.target.files[0]) {
+      setFormData({ ...formData, photo: e.target.files[0] });
+    }
+  };
+
+  // Handle cancel
+  const handleCancel = () => {
+    setFormData({
+      name: "",
+      fatherName: "",
+      motherName: "",
+      class: "",
+      subject: "",
+      roll: "",
+      phone: "",
+      email: "",
+      address: "",
+      dob: "",
+      gender: "Male",
+      bloodGroup: "A+",
+      nationality: "Bangladeshi",
+      religion: "Islam",
+      previousSchool: "",
+      guardianContact: "",
+      status: "Active",
+      paymentStatus: "Unpaid",
+      admissionDate: "",
+      photo: null,
+    });
+    setShowStudentList(true);
+  };
+
+  // ✅ Delete student from API
+  const handleDelete = async (id, name) => {
+    const result = await Swal.fire({
+      title: `Delete ${name}?`,
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/students/delete/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: "Student has been deleted.",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+          setRefreshKey((prev) => prev + 1);
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Failed!",
+            text: data.message || "Could not delete student.",
+          });
+        }
+      } catch (error) {
+        console.error("❌ Error deleting student:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: "Could not delete student.",
+        });
+      }
+    }
+  };
+
+  // ✅ View student details
+  const handleView = (student) => {
+    Swal.fire({
+      title: `Student Details: ${student.name}`,
+      html: `
+        <div style="text-align: left; font-size: 14px;">
+          <p><strong>Name:</strong> ${student.name}</p>
+          <p><strong>Phone:</strong> ${student.phone}</p>
+          <p><strong>Email:</strong> ${student.email || "N/A"}</p>
+          <p><strong>Class:</strong> ${student.class || "N/A"}</p>
+          <p><strong>Roll:</strong> ${student.roll || "N/A"}</p>
+          <p><strong>Username:</strong> ${student.username || "Not assigned"}</p>
+          <p><strong>Status:</strong> ${student.status || "Pending"}</p>
+          <p><strong>Guardian:</strong> ${student.guardianName || "N/A"}</p>
+          <p><strong>Guardian Phone:</strong> ${student.guardianPhone || "N/A"}</p>
+          <p><strong>Address:</strong> ${student.address || "N/A"}</p>
+          <p><strong>Registered:</strong> ${student.createdAt ? new Date(student.createdAt).toLocaleString() : "N/A"}</p>
+        </div>
+      `,
+      confirmButtonColor: "#3b82f6",
+      confirmButtonText: "Close",
+    });
+  };
+
+  // Filter students
+  const filteredStudents = students.filter((student) => {
+    const matchesSearch =
+      student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.phone?.includes(searchTerm) ||
+      student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.class?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesClass = filterClass === "All" || student.class === filterClass;
+    const matchesStatus =
+      filterStatus === "All" || student.status === filterStatus;
+    return matchesSearch && matchesClass && matchesStatus;
+  });
+
+  // Get unique classes for filter
+  const uniqueClasses = [
+    "All",
+    ...new Set(students.map((s) => s.class).filter(Boolean)),
+  ];
+
+  // Get status badge color
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Active":
+        return "bg-green-100 text-green-700";
+      case "Pending":
+        return "bg-yellow-100 text-yellow-700";
+      case "Inactive":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
     }
   };
 
@@ -441,136 +708,19 @@ const Add_student = () => {
     },
   ];
 
-  // Handle input change
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  // Handle file change
-  const handleFileChange = (e) => {
-    if (e.target.files[0]) {
-      setFormData({ ...formData, photo: e.target.files[0] });
-    }
-  };
-
-  // Handle form submit
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (
-      !formData.name ||
-      !formData.fatherName ||
-      !formData.class ||
-      !formData.subject ||
-      !formData.phone
-    ) {
-      Swal.fire({
-        icon: "warning",
-        title: "Please fill all required fields",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
-
-    const newStudent = {
-      id: Date.now(),
-      ...formData,
-      admissionDate:
-        formData.admissionDate || new Date().toISOString().split("T")[0],
-    };
-
-    setStudents([newStudent, ...students]);
-    Swal.fire({
-      icon: "success",
-      title: "Student Added!",
-      text: `Student ${formData.name} has been added successfully.`,
-      timer: 2000,
-      showConfirmButton: false,
-    });
-
-    // Reset form
-    setFormData({
-      name: "",
-      fatherName: "",
-      motherName: "",
-      class: "",
-      subject: "",
-      roll: "",
-      phone: "",
-      email: "",
-      address: "",
-      dob: "",
-      gender: "Male",
-      bloodGroup: "A+",
-      nationality: "Bangladeshi",
-      religion: "Islam",
-      previousSchool: "",
-      guardianContact: "",
-      status: "Active",
-      paymentStatus: "Unpaid",
-      admissionDate: "",
-      photo: null,
-    });
-
-    setShowStudentList(true);
-  };
-
-  // Handle cancel
-  const handleCancel = () => {
-    setFormData({
-      name: "",
-      fatherName: "",
-      motherName: "",
-      class: "",
-      subject: "",
-      roll: "",
-      phone: "",
-      email: "",
-      address: "",
-      dob: "",
-      gender: "Male",
-      bloodGroup: "A+",
-      nationality: "Bangladeshi",
-      religion: "Islam",
-      previousSchool: "",
-      guardianContact: "",
-      status: "Active",
-      paymentStatus: "Unpaid",
-      admissionDate: "",
-      photo: null,
-    });
-    setShowStudentList(true);
-  };
-
-  // Filter students
-  const filteredStudents = students.filter((student) => {
-    const matchesSearch =
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.fatherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.class.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesClass = filterClass === "All" || student.class === filterClass;
-    const matchesStatus =
-      filterStatus === "All" || student.status === filterStatus;
-    return matchesSearch && matchesClass && matchesStatus;
-  });
-
-  // Get unique classes for filter
-  const uniqueClasses = ["All", ...new Set(students.map((s) => s.class))];
-
-  // Get status badge color
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Active":
-        return "bg-green-100 text-green-700";
-      case "Pending":
-        return "bg-yellow-100 text-yellow-700";
-      case "Inactive":
-        return "bg-red-100 text-red-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
+  // Loading state
+  if (loading) {
+    return (
+      <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="text-sm text-gray-500 mt-3">Loading students...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -721,7 +871,7 @@ const Add_student = () => {
                 <FaUserPlus className="text-blue-600" /> Add Student
               </h1>
               <p className="text-xs text-gray-500">
-                Add new student to the system
+                {students.length} students registered in the system
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -762,7 +912,7 @@ const Add_student = () => {
           </div>
 
           {showStudentList ? (
-            // Student List View
+            // ✅ Student List View - শুধু API ডেটা দেখাবে
             <div className="space-y-3 overflow-hidden h-[calc(100vh-240px)]">
               {/* Filters */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2">
@@ -771,7 +921,7 @@ const Add_student = () => {
                     <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
                     <input
                       type="text"
-                      placeholder="Search students..."
+                      placeholder="Search by name, phone, email..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -799,24 +949,33 @@ const Add_student = () => {
                       <option value="Pending">Pending</option>
                       <option value="Inactive">Inactive</option>
                     </select>
+                    <button
+                      onClick={() => setRefreshKey((prev) => prev + 1)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"
+                    >
+                      🔄 Refresh
+                    </button>
                   </div>
                 </div>
               </div>
 
-              {/* Students Table */}
+              {/* Students Table - শুধু API ডেটা */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
                       <tr>
                         <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Name
+                          #
                         </th>
                         <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Father
+                          Name & Contact
                         </th>
                         <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Class
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Username
                         </th>
                         <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Roll
@@ -831,52 +990,70 @@ const Add_student = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                       {filteredStudents.length > 0 ? (
-                        filteredStudents.map((student) => (
+                        filteredStudents.map((student, index) => (
                           <tr
-                            key={student.id}
+                            key={student._id || student.id}
                             className="hover:bg-gray-50 transition-colors"
                           >
+                            <td className="px-3 py-2 text-xs text-gray-500">
+                              {index + 1}
+                            </td>
                             <td className="px-3 py-2">
                               <div>
                                 <p className="text-xs font-medium text-gray-800">
                                   {student.name}
                                 </p>
                                 <p className="text-[10px] text-gray-500">
-                                  {student.email}
+                                  📱 {student.phone}
                                 </p>
+                                {student.email && (
+                                  <p className="text-[10px] text-gray-400">
+                                    ✉️ {student.email}
+                                  </p>
+                                )}
                               </div>
                             </td>
                             <td className="px-3 py-2 text-xs text-gray-600">
-                              {student.fatherName}
+                              {student.class || "N/A"}
+                            </td>
+                            <td className="px-3 py-2 text-xs font-mono">
+                              {student.username ? (
+                                <span className="text-blue-600 font-semibold">
+                                  {student.username}
+                                </span>
+                              ) : (
+                                <span className="text-gray-400 text-[10px]">
+                                  Not assigned
+                                </span>
+                              )}
                             </td>
                             <td className="px-3 py-2 text-xs text-gray-600">
-                              {student.class}
-                            </td>
-                            <td className="px-3 py-2 text-xs text-gray-600">
-                              {student.roll}
+                              {student.roll || (
+                                <span className="text-gray-400 text-[10px]">
+                                  N/A
+                                </span>
+                              )}
                             </td>
                             <td className="px-3 py-2">
                               <span
                                 className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(student.status)}`}
                               >
-                                {student.status}
+                                {student.status || "Pending"}
                               </span>
                             </td>
                             <td className="px-3 py-2">
                               <div className="flex items-center gap-1">
                                 <button
+                                  onClick={() => handleView(student)}
                                   className="text-blue-600 hover:text-blue-800 p-0.5"
                                   title="View"
                                 >
                                   <FaEye size={12} />
                                 </button>
                                 <button
-                                  className="text-green-600 hover:text-green-800 p-0.5"
-                                  title="Edit"
-                                >
-                                  <FaEdit size={12} />
-                                </button>
-                                <button
+                                  onClick={() =>
+                                    handleDelete(student._id, student.name)
+                                  }
                                   className="text-red-600 hover:text-red-800 p-0.5"
                                   title="Delete"
                                 >
@@ -889,10 +1066,10 @@ const Add_student = () => {
                       ) : (
                         <tr>
                           <td
-                            colSpan="6"
+                            colSpan="7"
                             className="px-4 py-8 text-center text-gray-500 text-sm"
                           >
-                            No students found
+                            {error || "No students found"}
                           </td>
                         </tr>
                       )}
@@ -1233,7 +1410,7 @@ const Add_student = () => {
                     type="submit"
                     className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
                   >
-                    <FaSave size={14} /> Add Student
+                    <FaSave size={14} /> Register Student
                   </button>
                   <button
                     type="button"

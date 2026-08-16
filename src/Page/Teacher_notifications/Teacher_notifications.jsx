@@ -42,8 +42,6 @@ import {
 import { FiMenu, FiX } from "react-icons/fi";
 import Swal from "sweetalert2";
 import { useAuth } from "../../Provider/AuthProvider";
-import Navbar from "../../Components/Navbar/Navbar";
-import Footer from "../../Components/Navbar/Footer/Footer";
 
 const Teacher_notifications = () => {
   const { user, logOut } = useAuth();
@@ -436,8 +434,6 @@ const Teacher_notifications = () => {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-      <Navbar />
-
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
@@ -749,9 +745,6 @@ const Teacher_notifications = () => {
           )}
         </main>
       </div>
-
-      <Footer />
-
       {/* Add Notification Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">

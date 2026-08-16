@@ -22,7 +22,8 @@ const Member = () => {
       name: "Dr. Muhammad Abdullah",
       designation: "Senior Islamic Scholar",
       role: "Advisor",
-      image: "",
+      image:
+        "https://i.ibb.co.com/ds77c7pp/images-q-tbn-ANd9-Gc-RCVV-m-BDc1u-Pd86qfosfzpa9hn-ODv-Z20q7-L5y-Xwbk-BV-QGwt-Fq-CDj-Jck-JC-s-10.jpg",
       bio: "Expert in Islamic jurisprudence and Quranic studies with over 20 years of experience.",
       joinDate: "January 2020",
       courses: 15,
@@ -35,7 +36,8 @@ const Member = () => {
       name: "Prof. Ayesha Rahman",
       designation: "Professor of Islamic Studies",
       role: "Academic Director",
-      image: "",
+      image:
+        "https://i.ibb.co.com/nsJRPdXK/images-q-tbn-ANd9-Gc-Sf-VF7-FIzqtkq-SYX-Lx-BWh-Bgk-J8-ZFrh-Ilt-L4-Bmh8v-Beg-s-10.jpg",
       bio: "Specializes in Islamic history and contemporary Muslim issues.",
       joinDate: "March 2019",
       courses: 12,
@@ -48,7 +50,8 @@ const Member = () => {
       name: "Ustadh Ahmed Hassan",
       designation: "Senior Teacher",
       role: "Lead Educator",
-      image: "",
+      image:
+        "https://i.ibb.co.com/GQRWh4DW/images-q-tbn-ANd9-Gc-Tw-Ke-AUYuda1bjp-PUU-NYup6-M-P-jlxhnq-Z0-Wb-X6hzw-Rj-HCp-Ys-O6-nc-UY-s-10.jpg",
       bio: "Passionate about teaching Arabic language and Quranic recitation.",
       joinDate: "June 2021",
       courses: 20,
@@ -61,7 +64,8 @@ const Member = () => {
       name: "Dr. Fatima Noor",
       designation: "Child Psychology Expert",
       role: "Advisor",
-      image: "",
+      image:
+        "https://i.ibb.co.com/WNsqLLQ3/images-q-tbn-ANd9-Gc-QPrj-B86scf-HN0n-Vb1-N5-A9sd3z0y-RT4-OIm-V-d-QDIanuf-A-s-10.jpg",
       bio: "Specializes in Islamic child psychology and family counseling.",
       joinDate: "August 2020",
       courses: 8,
@@ -74,7 +78,8 @@ const Member = () => {
       name: "Shaykh Ibrahim Ali",
       designation: "Hadith Scholar",
       role: "Senior Advisor",
-      image: "",
+      image:
+        "https://i.ibb.co.com/KjvMfnBD/images-q-tbn-ANd9-Gc-Qml-K-yr-SR8-Nptoi-I1-Ocq-Qi-D02-JYpbyri-Pi-Qjt-R8-Pbc-A-s-10.jpg",
       bio: "Expert in Hadith sciences and Islamic law.",
       joinDate: "January 2018",
       courses: 10,
@@ -87,7 +92,8 @@ const Member = () => {
       name: "Ustadha Mariam Khan",
       designation: "Quran Teacher",
       role: "Educator",
-      image: "",
+      image:
+        "https://i.ibb.co.com/GQRWh4DW/images-q-tbn-ANd9-Gc-Tw-Ke-AUYuda1bjp-PUU-NYup6-M-P-jlxhnq-Z0-Wb-X6hzw-Rj-HCp-Ys-O6-nc-UY-s-10.jpg",
       bio: "Specializes in Quranic recitation and memorization techniques.",
       joinDate: "September 2021",
       courses: 14,
@@ -100,7 +106,8 @@ const Member = () => {
       name: "Dr. Yusuf Malik",
       designation: "Islamic Finance Expert",
       role: "Advisor",
-      image: "",
+      image:
+        "https://i.ibb.co.com/WNsqLLQ3/images-q-tbn-ANd9-Gc-QPrj-B86scf-HN0n-Vb1-N5-A9sd3z0y-RT4-OIm-V-d-QDIanuf-A-s-10.jpg",
       bio: "Expert in Islamic banking and finance.",
       joinDate: "February 2020",
       courses: 6,
@@ -113,7 +120,8 @@ const Member = () => {
       name: "Prof. Zainab Ahmed",
       designation: "Comparative Religion Scholar",
       role: "Academic Director",
-      image: "",
+      image:
+        "https://i.ibb.co.com/KjvMfnBD/images-q-tbn-ANd9-Gc-Qml-K-yr-SR8-Nptoi-I1-Ocq-Qi-D02-JYpbyri-Pi-Qjt-R8-Pbc-A-s-10.jpg",
       bio: "Specializes in comparative religion and interfaith dialogue.",
       joinDate: "April 2019",
       courses: 9,

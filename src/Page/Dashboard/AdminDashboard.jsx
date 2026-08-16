@@ -88,6 +88,44 @@ const AdminDashboard = () => {
   });
 
   // Students Data
+  const [students, setStudents] = useState([
+    {
+      id: 1,
+      name: "Ahmed Hasan",
+      class: "Class 8",
+      roll: "01",
+      status: "Active",
+      admissionDate: "2026-01-15",
+      parentContact: "+880 1712 345678",
+    },
+    {
+      id: 2,
+      name: "Fatima Begum",
+      class: "Class 9",
+      roll: "02",
+      status: "Active",
+      admissionDate: "2026-02-01",
+      parentContact: "+880 1723 456789",
+    },
+    {
+      id: 3,
+      name: "Mohammad Ali",
+      class: "Class 10",
+      roll: "05",
+      status: "Pending",
+      admissionDate: "2026-07-20",
+      parentContact: "+880 1734 567890",
+    },
+    {
+      id: 4,
+      name: "Aisha Rahman",
+      class: "Class 7",
+      roll: "06",
+      status: "Active",
+      admissionDate: "2026-03-01",
+      parentContact: "+880 1745 678901",
+    },
+  ]);
 
   // Teachers Data
   const [teachers, setTeachers] = useState([
@@ -850,255 +888,111 @@ const DashboardContent = ({ stats, notifications }) => {
   );
 };
 
-// ==========================================
-// 2. STUDENT MANAGEMENT CONTENT - FIXED
-// ==========================================
-// ==========================================
-// 2. STUDENT MANAGEMENT CONTENT - DEBUG
-// ==========================================
+// AdminDashboard.jsx - StudentManagementContent Component
+
 const StudentManagementContent = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showApproveModal, setShowApproveModal] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
-  const [showStudentDetails, setShowStudentDetails] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [debugInfo, setDebugInfo] = useState("");
 
-  // Load students from API
+  // Load students - কোন টোকেন লাগবে না
   useEffect(() => {
     fetchStudents();
   }, [refreshKey]);
 
+  // AdminDashboard.jsx - fetchStudents
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
+      setError(null);
 
       console.log("🔄 Fetching students from API...");
-      console.log("🔑 Token:", token ? "✅ Present" : "❌ Missing");
 
-      if (!token) {
-        setDebugInfo("❌ No token found! Please login again.");
-        setLoading(false);
+      const response = await fetch("http://localhost:5000/api/students/all", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      console.log("📥 Response Status:", response.status);
+      console.log("📥 Response Status Text:", response.statusText);
+
+      if (response.status === 404) {
+        setError(
+          "API endpoint not found! Please check if server is running on port 5000",
+        );
         return;
       }
 
-      const response = await fetch(
-        "http://localhost:5000/api/admin/students/all",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      console.log("📥 Response Status:", response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const data = await response.json();
       console.log("📥 Response Data:", data);
 
       if (data.success) {
-        console.log("✅ Students loaded:", data.students.length);
-        setStudents(data.students);
-        setDebugInfo(`✅ Found ${data.students.length} students`);
-
-        if (data.students.length === 0) {
-          setDebugInfo(
-            "⚠️ No students found in database. Please register a student first.",
-          );
+        const studentList = data.students || [];
+        setStudents(studentList);
+        if (studentList.length === 0) {
+          setError("No students found. Please add a student.");
         }
       } else {
-        console.error("❌ Failed to fetch students:", data.message);
-        setStudents([]);
-        setDebugInfo(`❌ Error: ${data.message}`);
-        Swal.fire({
-          icon: "error",
-          title: "Error!",
-          text: data.message || "Could not fetch students",
-          confirmButtonColor: "#004d4d",
-        });
+        setError(data.message || "Failed to fetch students");
       }
     } catch (error) {
       console.error("❌ Error fetching students:", error);
-      setStudents([]);
-      setDebugInfo(`❌ Connection Error: ${error.message}`);
-      Swal.fire({
-        icon: "error",
-        title: "Connection Error!",
-        text: "Could not connect to server. Make sure backend is running.",
-        confirmButtonColor: "#004d4d",
-      });
+      setError(`Error: ${error.message}. Please check if server is running.`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Approve Student
-  const handleApproveStudent = async () => {
+  // Add test student
+  const addTestStudent = async () => {
     try {
-      if (
-        !selectedStudent.username ||
-        !selectedStudent.password ||
-        !selectedStudent.roll
-      ) {
-        Swal.fire({
-          icon: "warning",
-          title: "Information Missing!",
-          text: "Please provide username, password and roll number.",
-          confirmButtonColor: "#004d4d",
-        });
-        return;
-      }
-
-      if (selectedStudent.password.length < 6) {
-        Swal.fire({
-          icon: "warning",
-          title: "Weak Password!",
-          text: "Password must be at least 6 characters long.",
-          confirmButtonColor: "#004d4d",
-        });
-        return;
-      }
-
-      const token = localStorage.getItem("token");
-
+      setLoading(true);
       const response = await fetch(
-        `http://localhost:5000/api/admin/students/approve/${selectedStudent._id}`,
+        "http://localhost:5000/api/students/add-test",
         {
-          method: "PUT",
+          method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            username: selectedStudent.username,
-            password: selectedStudent.password,
-            roll: selectedStudent.roll,
-          }),
         },
       );
 
       const data = await response.json();
 
       if (data.success) {
-        // ✅ Update student in the list
-        const updatedStudents = students.map((s) =>
-          s._id === selectedStudent._id
-            ? {
-                ...s,
-                status: "Active",
-                username: selectedStudent.username,
-                roll: selectedStudent.roll,
-              }
-            : s,
-        );
-        setStudents(updatedStudents);
-        setShowApproveModal(false);
-        setSelectedStudent(null);
-
-        Swal.fire({
+        await Swal.fire({
           icon: "success",
-          title: "✅ Student Approved!",
-          html: `
-            <div style="text-align: left;">
-              <p><strong>Student:</strong> ${selectedStudent.name}</p>
-              <p><strong>Class:</strong> ${selectedStudent.class}</p>
-              <p><strong>Roll:</strong> ${selectedStudent.roll}</p>
-              <hr style="margin: 10px 0;">
-              <p style="font-size: 14px;"><strong>🔑 Login Credentials:</strong></p>
-              <div style="background: #f0f0f0; padding: 10px; border-radius: 5px; margin: 5px 0;">
-                <p style="font-size: 13px; margin: 2px 0;">
-                  <strong>Username:</strong> ${selectedStudent.username}
-                </p>
-                <p style="font-size: 13px; margin: 2px 0;">
-                  <strong>Password:</strong> ${selectedStudent.password}
-                </p>
-              </div>
-              <p style="font-size: 12px; color: #666; margin-top: 5px;">
-                📱 Phone: ${selectedStudent.phone}
-              </p>
-            </div>
-          `,
-          confirmButtonColor: "#004d4d",
+          title: "✅ Test Student Added!",
+          text: "A test student has been added successfully.",
+          timer: 2000,
+          showConfirmButton: false,
         });
+        setRefreshKey((prev) => prev + 1);
       } else {
         Swal.fire({
           icon: "error",
           title: "Failed!",
-          text: data.message || "Could not approve student.",
-          confirmButtonColor: "#004d4d",
+          text: data.message || "Could not add test student.",
         });
       }
     } catch (error) {
-      console.error("❌ Error approving student:", error);
+      console.error("❌ Error:", error);
       Swal.fire({
         icon: "error",
-        title: "Failed!",
-        text: "Could not approve student. Please try again.",
-        confirmButtonColor: "#004d4d",
+        title: "Error!",
+        text: "Could not connect to server.",
       });
-    }
-  };
-
-  // Delete Student
-  const handleDeleteStudent = async (id, name) => {
-    const result = await Swal.fire({
-      title: `Delete ${name}?`,
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const token = localStorage.getItem("token");
-
-        const response = await fetch(
-          `http://localhost:5000/api/admin/students/delete/${id}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        const data = await response.json();
-
-        if (data.success) {
-          setStudents(students.filter((s) => s._id !== id));
-          Swal.fire({
-            icon: "success",
-            title: "Deleted!",
-            text: "Student has been deleted.",
-            timer: 1500,
-            showConfirmButton: false,
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Failed!",
-            text: data.message || "Could not delete student.",
-            confirmButtonColor: "#004d4d",
-          });
-        }
-      } catch (error) {
-        console.error("❌ Error deleting student:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Failed!",
-          text: "Could not delete student.",
-          confirmButtonColor: "#004d4d",
-        });
-      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1137,27 +1031,62 @@ const StudentManagementContent = () => {
     );
   }
 
+  // Show error with Add Test Student button
+  if (error && students.length === 0) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 max-w-md text-center">
+          <FaUsers className="text-6xl text-yellow-400 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-yellow-700 mb-2">
+            No Students Found
+          </h3>
+          <p className="text-sm text-yellow-600 mb-4">{error}</p>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={addTestStudent}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
+            >
+              <FaPlusCircle size={16} /> Add Test Student
+            </button>
+            <button
+              onClick={() => setRefreshKey((prev) => prev + 1)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all"
+            >
+              🔄 Refresh
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-4">
+            💡 Click "Add Test Student" to insert a sample student into the
+            database
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col space-y-3 overflow-hidden">
+      {/* Header */}
       <div className="flex justify-between items-center flex-shrink-0 flex-wrap gap-2">
         <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
           <FaUsers className="text-blue-600" /> Student Management
           <span className="text-xs font-normal text-gray-500">
             (Total: {students.length})
           </span>
-        </h2>
-        <div className="flex items-center gap-2 flex-wrap">
-          {debugInfo && (
-            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-              {debugInfo}
-            </span>
-          )}
           {pendingCount > 0 && (
             <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-lg text-xs font-bold animate-pulse flex items-center gap-1">
               <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
               {pendingCount} Pending
             </span>
           )}
+        </h2>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={addTestStudent}
+            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"
+          >
+            <FaPlusCircle size={12} /> Add Test
+          </button>
           <input
             type="text"
             placeholder="Search..."
@@ -1184,395 +1113,100 @@ const StudentManagementContent = () => {
         </div>
       </div>
 
+      {/* Table */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
         <div className="overflow-x-auto h-full">
-          {filteredStudents.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center">
-                <FaUsers className="text-6xl text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 text-sm">No students found</p>
-                <p className="text-gray-400 text-xs mt-1">
-                  {filter === "all"
-                    ? "No students registered yet"
-                    : `No ${filter} students`}
-                </p>
-                {filter === "all" && (
-                  <div className="mt-3">
-                    <p className="text-xs text-blue-500">
-                      📌 Students need to register from the student registration
-                      page
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+              <tr>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                  Name & Contact
+                </th>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                  Class
+                </th>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                  Username
+                </th>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                  Roll
+                </th>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                  Status
+                </th>
+                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {filteredStudents.map((student) => (
+                <tr
+                  key={student._id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
+                  <td className="px-3 py-2">
+                    <p className="text-xs font-medium text-gray-800">
+                      {student.name}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      💡 After registration, refresh this page to see them
+                    <p className="text-[10px] text-gray-500">
+                      📱 {student.phone}
                     </p>
-                    <button
-                      onClick={() => setRefreshKey((prev) => prev + 1)}
-                      className="mt-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-all"
-                    >
-                      🔄 Refresh Now
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-                <tr>
-                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                    Name & Contact
-                  </th>
-                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                    Class
-                  </th>
-                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                    Username
-                  </th>
-                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                    Roll
-                  </th>
-                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                    Status
-                  </th>
-                  <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredStudents.map((student) => (
-                  <tr
-                    key={student._id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-3 py-2">
-                      <p className="text-xs font-medium text-gray-800">
-                        {student.name || "N/A"}
-                      </p>
-                      <p className="text-[10px] text-gray-500">
-                        📱 {student.phone || "N/A"}
-                      </p>
-                      {student.email && (
-                        <p className="text-[10px] text-gray-400">
-                          ✉️ {student.email}
-                        </p>
-                      )}
-                      <p className="text-[10px] text-gray-400">
-                        🆔 {student._id?.slice(-6) || "N/A"}
-                      </p>
-                    </td>
-                    <td className="px-3 py-2 text-xs text-gray-600">
-                      {student.class || "N/A"}
-                      {student.guardianName && (
-                        <p className="text-[10px] text-gray-400">
-                          👤 {student.guardianName}
-                        </p>
-                      )}
-                      <p className="text-[10px] text-gray-400">
-                        📅{" "}
-                        {student.createdAt
-                          ? new Date(student.createdAt).toLocaleDateString()
-                          : "N/A"}
-                      </p>
-                    </td>
-                    <td className="px-3 py-2 text-xs font-mono">
-                      {student.username ? (
-                        <span className="text-blue-600 font-semibold">
-                          {student.username}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 text-[10px]">
-                          Not assigned
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 text-xs text-gray-600">
-                      {student.roll || (
-                        <span className="text-gray-400 text-[10px]">N/A</span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2">
-                      <span
-                        className={`text-[8px] px-1.5 py-0.5 rounded-full ${
-                          student.status === "Active"
-                            ? "bg-green-100 text-green-700"
-                            : student.status === "Pending"
-                              ? "bg-yellow-100 text-yellow-700 animate-pulse"
-                              : "bg-red-100 text-red-700"
-                        }`}
-                      >
-                        {student.status || "Pending"}
+                  </td>
+                  <td className="px-3 py-2 text-xs text-gray-600">
+                    {student.class}
+                  </td>
+                  <td className="px-3 py-2 text-xs font-mono">
+                    {student.username ? (
+                      <span className="text-blue-600 font-semibold">
+                        {student.username}
                       </span>
-                      {student.approvedAt && (
-                        <p className="text-[8px] text-gray-400 mt-0.5">
-                          ✅ {new Date(student.approvedAt).toLocaleDateString()}
-                        </p>
-                      )}
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex items-center gap-1 flex-wrap">
-                        {student.status === "Pending" && (
-                          <button
-                            onClick={() => {
-                              const suggestedUsername =
-                                student.name?.toLowerCase().replace(/\s/g, "") +
-                                Math.floor(Math.random() * 100);
-                              setSelectedStudent({
-                                ...student,
-                                username: suggestedUsername,
-                                password: "student123S@",
-                                roll: "",
-                              });
-                              setShowApproveModal(true);
-                            }}
-                            className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-[10px] font-semibold flex items-center gap-1 transition-all"
-                          >
-                            <FaCheckCircle size={12} /> Approve
-                          </button>
-                        )}
-                        {student.status === "Active" && (
-                          <button
-                            onClick={() => setShowStudentDetails(student)}
-                            className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-semibold flex items-center gap-1 transition-all"
-                          >
-                            <FaEye size={12} /> View
-                          </button>
-                        )}
-                        <button
-                          onClick={() =>
-                            handleDeleteStudent(student._id, student.name)
-                          }
-                          className="text-red-600 hover:text-red-800 p-1 transition-all"
-                          title="Delete"
-                        >
-                          <FaTrash size={12} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+                    ) : (
+                      <span className="text-gray-400 text-[10px]">
+                        Not assigned
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2 text-xs text-gray-600">
+                    {student.roll || (
+                      <span className="text-gray-400 text-[10px]">N/A</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    <span
+                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${
+                        student.status === "Active"
+                          ? "bg-green-100 text-green-700"
+                          : student.status === "Pending"
+                            ? "bg-yellow-100 text-yellow-700 animate-pulse"
+                            : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {student.status || "Pending"}
+                    </span>
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center gap-1">
+                      <button
+                        className="text-blue-600 hover:text-blue-800 p-0.5"
+                        title="View"
+                      >
+                        <FaEye size={12} />
+                      </button>
+                      <button
+                        className="text-red-600 hover:text-red-800 p-0.5"
+                        title="Delete"
+                      >
+                        <FaTrash size={12} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
-
-      {/* Approve Student Modal */}
-      {showApproveModal && selectedStudent && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold text-gray-800 mb-2 flex items-center gap-2">
-              <FaCheckCircle className="text-green-600" /> Approve Student
-            </h3>
-
-            <div className="bg-gray-50 p-3 rounded-lg mb-4">
-              <p className="text-sm text-gray-700">
-                <strong>Name:</strong> {selectedStudent.name}
-              </p>
-              <p className="text-sm text-gray-700">
-                <strong>Phone:</strong> {selectedStudent.phone}
-              </p>
-              <p className="text-sm text-gray-700">
-                <strong>Class:</strong> {selectedStudent.class}
-              </p>
-              {selectedStudent.guardianName && (
-                <p className="text-sm text-gray-700">
-                  <strong>Guardian:</strong> {selectedStudent.guardianName}
-                </p>
-              )}
-              <p className="text-sm text-gray-500 mt-1">
-                📅 Registered:{" "}
-                {selectedStudent.createdAt
-                  ? new Date(selectedStudent.createdAt).toLocaleDateString()
-                  : "N/A"}
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Roll Number *
-                </label>
-                <input
-                  type="text"
-                  value={selectedStudent.roll}
-                  onChange={(e) =>
-                    setSelectedStudent({
-                      ...selectedStudent,
-                      roll: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="e.g., 01"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Username *
-                </label>
-                <input
-                  type="text"
-                  value={selectedStudent.username}
-                  onChange={(e) =>
-                    setSelectedStudent({
-                      ...selectedStudent,
-                      username: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Enter username"
-                />
-                <p className="text-[10px] text-gray-400 mt-1">
-                  Student will use this to login
-                </p>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">
-                  Password * (min 6 chars)
-                </label>
-                <input
-                  type="text"
-                  value={selectedStudent.password}
-                  onChange={(e) =>
-                    setSelectedStudent({
-                      ...selectedStudent,
-                      password: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Enter password"
-                />
-                <p className="text-[10px] text-gray-400 mt-1">
-                  ⚠️ Default: student123S@ (you can change it)
-                </p>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 mt-4">
-              <button
-                onClick={() => {
-                  setShowApproveModal(false);
-                  setSelectedStudent(null);
-                }}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleApproveStudent}
-                className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2"
-              >
-                <FaCheckCircle size={14} /> Approve & Activate
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Student Details Modal */}
-      {showStudentDetails && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <FaUserGraduate className="text-blue-600" /> Student Details
-              </h3>
-              <button
-                onClick={() => setShowStudentDetails(null)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <div className="bg-blue-50 p-3 rounded-lg">
-                <p className="text-sm font-semibold text-gray-800">
-                  {showStudentDetails.name}
-                </p>
-                <p className="text-xs text-gray-600">
-                  📱 {showStudentDetails.phone}
-                </p>
-                {showStudentDetails.email && (
-                  <p className="text-xs text-gray-600">
-                    ✉️ {showStudentDetails.email}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div className="bg-gray-50 p-2 rounded-lg">
-                  <p className="text-[10px] text-gray-500">Class</p>
-                  <p className="text-sm font-medium">
-                    {showStudentDetails.class || "N/A"}
-                  </p>
-                </div>
-                <div className="bg-gray-50 p-2 rounded-lg">
-                  <p className="text-[10px] text-gray-500">Roll</p>
-                  <p className="text-sm font-medium">
-                    {showStudentDetails.roll || "N/A"}
-                  </p>
-                </div>
-                <div className="bg-gray-50 p-2 rounded-lg">
-                  <p className="text-[10px] text-gray-500">Username</p>
-                  <p className="text-sm font-mono text-blue-600">
-                    {showStudentDetails.username || "Not set"}
-                  </p>
-                </div>
-                <div className="bg-gray-50 p-2 rounded-lg">
-                  <p className="text-[10px] text-gray-500">Status</p>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full ${
-                      showStudentDetails.status === "Active"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {showStudentDetails.status || "Pending"}
-                  </span>
-                </div>
-              </div>
-
-              {showStudentDetails.guardianName && (
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  <p className="text-[10px] text-gray-500">Guardian</p>
-                  <p className="text-sm">{showStudentDetails.guardianName}</p>
-                  {showStudentDetails.guardianPhone && (
-                    <p className="text-xs text-gray-600">
-                      📱 {showStudentDetails.guardianPhone}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-[10px] text-gray-500">Address</p>
-                <p className="text-sm">
-                  {showStudentDetails.address || "Not provided"}
-                </p>
-              </div>
-
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-[10px] text-gray-500">Registration Date</p>
-                <p className="text-sm">
-                  {showStudentDetails.createdAt
-                    ? new Date(showStudentDetails.createdAt).toLocaleString()
-                    : "N/A"}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 flex justify-end">
-              <button
-                onClick={() => setShowStudentDetails(null)}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
