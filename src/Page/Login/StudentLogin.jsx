@@ -11,24 +11,35 @@ const StudentLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // StudentLogin.jsx - Username এর পরিবর্তে Email দিয়ে Login
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await API.post("/auth/student/login", {
-        username,
-        password,
+      // ✅ Email এবং Password দিয়ে Login
+      const response = await fetch("http://localhost:5000/api/students/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: username, // এখানে username field এ email নিচ্ছি
+          password,
+        }),
       });
 
-      if (response.data.success) {
-        const { user, token } = response.data;
+      const data = await response.json();
+
+      if (data.success) {
+        const { user } = data;
 
         localStorage.setItem("isStudentLoggedIn", "true");
-        localStorage.setItem("studentUsername", username);
+        localStorage.setItem("studentUsername", user.email);
         localStorage.setItem("studentInfo", JSON.stringify(user));
         localStorage.setItem("studentEmail", user.email || "");
-        localStorage.setItem("token", token);
+        localStorage.setItem("studentToken", data.token || "student_token");
 
         await Swal.fire({
           icon: "success",
@@ -39,19 +50,20 @@ const StudentLogin = () => {
         });
 
         navigate("/student-dashboard");
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: data.message || "ভুল ইমেইল বা পাসওয়ার্ড!",
+          confirmButtonColor: "#004d4d",
+        });
       }
     } catch (error) {
       console.error("Login error:", error);
-
-      let errorMessage = "ভুল ইউজারনেম বা পাসওয়ার্ড!";
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      }
-
-      await Swal.fire({
+      Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text: errorMessage,
+        text: "সার্ভারে সংযোগ করা যায়নি!",
         confirmButtonColor: "#004d4d",
       });
     } finally {

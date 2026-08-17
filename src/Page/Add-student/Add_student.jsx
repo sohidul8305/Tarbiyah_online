@@ -104,16 +104,15 @@ const Add_student = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ সম্পূর্ণ ফর্ম ডেটা - সব ফিল্ড সহ
+  // Form Data
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     password: "",
     confirmPassword: "",
-    class: "",
+    course: "",
     subject: "",
-    roll: "",
     fatherName: "",
     motherName: "",
     guardianName: "",
@@ -133,7 +132,7 @@ const Add_student = () => {
   });
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterClass, setFilterClass] = useState("All");
+  const [filterCourse, setFilterCourse] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
   const [showStudentList, setShowStudentList] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -154,21 +153,6 @@ const Add_student = () => {
     "অ্যাডভান্সড তাজউইদ",
   ];
 
-  // Class List
-  const classList = [
-    "Class 1",
-    "Class 2",
-    "Class 3",
-    "Class 4",
-    "Class 5",
-    "Class 6",
-    "Class 7",
-    "Class 8",
-    "Class 9",
-    "Class 10",
-  ];
-
-  // Subject List
   const subjectList = [
     "Tajweed",
     "Tafsir",
@@ -180,10 +164,7 @@ const Add_student = () => {
     "Quran Memorization",
   ];
 
-  // Blood Group List
   const bloodGroupList = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-
-  // Religion List
   const religionList = [
     "Islam",
     "Hinduism",
@@ -191,14 +172,8 @@ const Add_student = () => {
     "Buddhism",
     "Other",
   ];
-
-  // Gender List
   const genderList = ["Male", "Female", "Other"];
-
-  // Status List
   const statusList = ["Active", "Pending", "Inactive"];
-
-  // Payment Status List
   const paymentStatusList = ["Paid", "Partial", "Unpaid"];
 
   // Load admin info
@@ -257,6 +232,8 @@ const Add_student = () => {
       if (data.success) {
         const studentList = data.students || [];
         console.log(`✅ Found ${studentList.length} students from API`);
+
+        // ✅ এখানে students সেট করছি
         setStudents(studentList);
 
         if (studentList.length === 0) {
@@ -275,11 +252,10 @@ const Add_student = () => {
     }
   };
 
-  // ✅ সম্পূর্ণ ডেটা সহ Register Student
+  // Register Student
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate passwords
     if (formData.password !== formData.confirmPassword) {
       Swal.fire({
         icon: "error",
@@ -289,7 +265,6 @@ const Add_student = () => {
       return;
     }
 
-    // Validate password length
     if (formData.password.length > 0 && formData.password.length < 6) {
       Swal.fire({
         icon: "error",
@@ -299,7 +274,6 @@ const Add_student = () => {
       return;
     }
 
-    // Validate phone number
     if (formData.phone.length < 11) {
       Swal.fire({
         icon: "error",
@@ -309,12 +283,11 @@ const Add_student = () => {
       return;
     }
 
-    // Required fields validation
-    if (!formData.name || !formData.phone || !formData.class) {
+    if (!formData.name || !formData.phone || !formData.course) {
       Swal.fire({
         icon: "warning",
         title: "Required Fields Missing!",
-        text: "Name, Phone and Class are required.",
+        text: "Name, Phone and Course are required.",
         timer: 2000,
         showConfirmButton: false,
       });
@@ -326,27 +299,13 @@ const Add_student = () => {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
-        class: formData.class,
-        subject: formData.subject,
+        course: formData.course,
         fatherName: formData.fatherName,
         motherName: formData.motherName,
-        guardianName: formData.guardianName,
-        guardianPhone: formData.guardianPhone,
-        presentAddress: formData.presentAddress,
-        permanentAddress: formData.permanentAddress,
-        dobOrNid: formData.dobOrNid,
-        gender: formData.gender,
-        bloodGroup: formData.bloodGroup,
-        nationality: formData.nationality,
-        religion: formData.religion,
-        previousSchool: formData.previousSchool,
-        status: formData.status,
         paymentStatus: formData.paymentStatus,
         admissionDate: formData.admissionDate,
-        roll: formData.roll,
       });
 
-      // ✅ Full data sent to API
       const response = await fetch(
         "http://localhost:5000/api/students/register/student",
         {
@@ -359,16 +318,13 @@ const Add_student = () => {
             email: formData.email || "",
             phone: formData.phone,
             password: formData.password || "default123",
-            course: formData.class,
+            course: formData.course,
             presentAddress: formData.presentAddress || "",
             permanentAddress: formData.permanentAddress || "",
             dobOrNid: formData.dobOrNid || "",
             guardianName: formData.guardianName || formData.fatherName || "",
             guardianPhone: formData.guardianPhone || formData.phone,
-            // Extra fields
-            class: formData.class,
             subject: formData.subject,
-            roll: formData.roll,
             fatherName: formData.fatherName,
             motherName: formData.motherName,
             gender: formData.gender,
@@ -393,7 +349,7 @@ const Add_student = () => {
           html: `
             <div style="text-align: left;">
               <p><strong>নাম:</strong> ${formData.name}</p>
-              <p><strong>ক্লাস:</strong> ${formData.class}</p>
+              <p><strong>কোর্স:</strong> ${formData.course}</p>
               <p><strong>ফোন:</strong> ${formData.phone}</p>
               <p><strong>ইমেইল:</strong> ${formData.email || "N/A"}</p>
               <hr style="margin: 10px 0;">
@@ -406,16 +362,14 @@ const Add_student = () => {
           showConfirmButton: true,
         });
 
-        // Reset form
         setFormData({
           name: "",
           email: "",
           phone: "",
           password: "",
           confirmPassword: "",
-          class: "",
+          course: "",
           subject: "",
-          roll: "",
           fatherName: "",
           motherName: "",
           guardianName: "",
@@ -434,7 +388,6 @@ const Add_student = () => {
           photo: null,
         });
 
-        // Refresh student list
         setRefreshKey((prev) => prev + 1);
         setShowStudentList(true);
       } else {
@@ -508,9 +461,8 @@ const Add_student = () => {
       phone: "",
       password: "",
       confirmPassword: "",
-      class: "",
+      course: "",
       subject: "",
-      roll: "",
       fatherName: "",
       motherName: "",
       guardianName: "",
@@ -583,37 +535,50 @@ const Add_student = () => {
     }
   };
 
+  // ✅ View Details - সব তথ্য সহ
   const handleView = (student) => {
     Swal.fire({
       title: `📋 Student Details: ${student.name}`,
       html: `
-        <div style="text-align: left; font-size: 13px; max-height: 400px; overflow-y: auto;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-            <p><strong>নাম:</strong> ${student.name || "N/A"}</p>
-            <p><strong>ফোন:</strong> ${student.phone || "N/A"}</p>
-            <p><strong>ইমেইল:</strong> ${student.email || "N/A"}</p>
-            <p><strong>ক্লাস:</strong> ${student.class || "N/A"}</p>
-            <p><strong>রোল:</strong> ${student.roll || "N/A"}</p>
-            <p><strong>ইউজারনেম:</strong> ${student.username || "Not assigned"}</p>
-            <p><strong>স্ট্যাটাস:</strong> ${student.status || "Pending"}</p>
-            <p><strong>পিতার নাম:</strong> ${student.fatherName || student.guardianName || "N/A"}</p>
-            <p><strong>মাতার নাম:</strong> ${student.motherName || "N/A"}</p>
-            <p><strong>অভিভাবক:</strong> ${student.guardianName || "N/A"}</p>
-            <p><strong>অভিভাবক ফোন:</strong> ${student.guardianPhone || "N/A"}</p>
-            <p><strong>বর্তমান ঠিকানা:</strong> ${student.presentAddress || student.address || "N/A"}</p>
-            <p><strong>স্থায়ী ঠিকানা:</strong> ${student.permanentAddress || "N/A"}</p>
-            <p><strong>পরিচয়পত্র:</strong> ${student.dobOrNid || "N/A"}</p>
-            <p><strong>জেন্ডার:</strong> ${student.gender || "N/A"}</p>
-            <p><strong>ব্লাড গ্রুপ:</strong> ${student.bloodGroup || "N/A"}</p>
-            <p><strong>ধর্ম:</strong> ${student.religion || "N/A"}</p>
-          </div>
-          <hr style="margin: 10px 0;">
-          <p style="font-size: 11px; color: #666;">রেজিস্ট্রেশন: ${student.createdAt ? new Date(student.createdAt).toLocaleString() : "N/A"}</p>
+      <div style="text-align: left; font-size: 13px; max-height: 450px; overflow-y: auto;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+          <p><strong>নাম:</strong> ${student.name || "N/A"}</p>
+          <p><strong>ফোন:</strong> ${student.phone || "N/A"}</p>
+          <p><strong>ইমেইল:</strong> ${student.email || "N/A"}</p>
+          <p><strong>কোর্স:</strong> ${student.course || student.class || "N/A"}</p>
+          <p><strong>ইউজারনেম:</strong> ${student.username || "Not assigned"}</p>
+          <p><strong>স্ট্যাটাস:</strong> ${student.status || "Pending"}</p>
+          <p><strong>পিতার নাম:</strong> ${student.fatherName || student.guardianName || "N/A"}</p>
+          <p><strong>মাতার নাম:</strong> ${student.motherName || "N/A"}</p>
+          <p><strong>অভিভাবক:</strong> ${student.guardianName || "N/A"}</p>
+          <p><strong>অভিভাবক ফোন:</strong> ${student.guardianPhone || "N/A"}</p>
+          <p><strong>বর্তমান ঠিকানা:</strong> ${student.presentAddress || student.address || "N/A"}</p>
+          <p><strong>স্থায়ী ঠিকানা:</strong> ${student.permanentAddress || "N/A"}</p>
+          <p><strong>পরিচয়পত্র:</strong> ${student.dobOrNid || "N/A"}</p>
+          <p><strong>পেমেন্ট মেথড:</strong> ${
+            student.paymentMethod === "bkash"
+              ? "bKash"
+              : student.paymentMethod === "nagod"
+                ? "Nagad"
+                : student.paymentMethod === "rocket"
+                  ? "Rocket"
+                  : student.paymentMethod === "bank"
+                    ? "Bank Transfer"
+                    : student.paymentMethod === "ssl"
+                      ? "SSL Commerz"
+                      : student.paymentMethod || "N/A"
+          }</p>
+          <p><strong>ট্রানজেকশন আইডি:</strong> ${student.transactionId || "N/A"}</p>
+          <p><strong>পেমেন্ট স্ট্যাটাস:</strong> ${student.paymentStatus || (student.paidAmount ? "Paid" : "Unpaid")}</p>
+          <p><strong>ভর্তি তারিখ:</strong> ${student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : "N/A"}</p>
         </div>
-      `,
+        <hr style="margin: 10px 0;">
+        <p style="font-size: 11px; color: #666;">রেজিস্ট্রেশন: ${student.createdAt ? new Date(student.createdAt).toLocaleString() : "N/A"}</p>
+      </div>
+    `,
       confirmButtonColor: "#3b82f6",
       confirmButtonText: "Close",
-      width: 600,
+      width: 650,
     });
   };
 
@@ -623,16 +588,20 @@ const Add_student = () => {
       student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.phone?.includes(searchTerm) ||
       student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.class?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesClass = filterClass === "All" || student.class === filterClass;
+      (student.course || student.class)
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    const matchesCourse =
+      filterCourse === "All" ||
+      (student.course || student.class) === filterCourse;
     const matchesStatus =
       filterStatus === "All" || student.status === filterStatus;
-    return matchesSearch && matchesClass && matchesStatus;
+    return matchesSearch && matchesCourse && matchesStatus;
   });
 
-  const uniqueClasses = [
+  const uniqueCourses = [
     "All",
-    ...new Set(students.map((s) => s.class).filter(Boolean)),
+    ...new Set(students.map((s) => s.course || s.class).filter(Boolean)),
   ];
 
   const getStatusColor = (status) => {
@@ -1069,7 +1038,7 @@ const Add_student = () => {
           </div>
 
           {showStudentList ? (
-            // Student List View
+            // Student List View - সব ডেটা সহ
             <div className="space-y-3 overflow-hidden h-[calc(100vh-240px)]">
               {/* Filters */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2">
@@ -1086,11 +1055,11 @@ const Add_student = () => {
                   </div>
                   <div className="flex items-center gap-1">
                     <select
-                      value={filterClass}
-                      onChange={(e) => setFilterClass(e.target.value)}
+                      value={filterCourse}
+                      onChange={(e) => setFilterCourse(e.target.value)}
                       className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
-                      {uniqueClasses.map((cls) => (
+                      {uniqueCourses.map((cls) => (
                         <option key={cls} value={cls}>
                           {cls}
                         </option>
@@ -1116,7 +1085,7 @@ const Add_student = () => {
                 </div>
               </div>
 
-              {/* Students Table */}
+              {/* Students Table - সব কলাম সহ */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -1129,13 +1098,19 @@ const Add_student = () => {
                           Name & Contact
                         </th>
                         <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Class
+                          Course
                         </th>
                         <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Username
+                          Payment Method
                         </th>
                         <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Roll
+                          Transaction ID
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Payment Status
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Admission Date
                         </th>
                         <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Status
@@ -1171,25 +1146,43 @@ const Add_student = () => {
                               </div>
                             </td>
                             <td className="px-3 py-2 text-xs text-gray-600">
-                              {student.class || "N/A"}
-                            </td>
-                            <td className="px-3 py-2 text-xs font-mono">
-                              {student.username ? (
-                                <span className="text-blue-600 font-semibold">
-                                  {student.username}
-                                </span>
-                              ) : (
-                                <span className="text-gray-400 text-[10px]">
-                                  Not assigned
-                                </span>
-                              )}
+                              {student.course || student.class || "N/A"}
                             </td>
                             <td className="px-3 py-2 text-xs text-gray-600">
-                              {student.roll || (
-                                <span className="text-gray-400 text-[10px]">
-                                  N/A
-                                </span>
-                              )}
+                              {student.paymentMethod === "bkash"
+                                ? "bKash"
+                                : student.paymentMethod === "nagod"
+                                  ? "Nagad"
+                                  : student.paymentMethod === "rocket"
+                                    ? "Rocket"
+                                    : student.paymentMethod === "bank"
+                                      ? "Bank Transfer"
+                                      : student.paymentMethod === "ssl"
+                                        ? "SSL Commerz"
+                                        : student.paymentMethod || "N/A"}
+                            </td>
+                            <td className="px-3 py-2 text-xs text-gray-600">
+                              {student.transactionId || "N/A"}
+                            </td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={`text-[8px] px-1.5 py-0.5 rounded-full ${
+                                  student.paymentStatus === "Paid"
+                                    ? "bg-green-100 text-green-700"
+                                    : student.paymentStatus === "Partial"
+                                      ? "bg-yellow-100 text-yellow-700"
+                                      : "bg-red-100 text-red-700"
+                                }`}
+                              >
+                                {student.paymentStatus || "Unpaid"}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-xs text-gray-600">
+                              {student.admissionDate
+                                ? new Date(
+                                    student.admissionDate,
+                                  ).toLocaleDateString()
+                                : "N/A"}
                             </td>
                             <td className="px-3 py-2">
                               <span
@@ -1223,7 +1216,7 @@ const Add_student = () => {
                       ) : (
                         <tr>
                           <td
-                            colSpan="7"
+                            colSpan="9"
                             className="px-4 py-8 text-center text-gray-500 text-sm"
                           >
                             {error || "No students found"}
@@ -1236,7 +1229,7 @@ const Add_student = () => {
               </div>
             </div>
           ) : (
-            // ✅ সম্পূর্ণ Add Student Form - সব ফিল্ড সহ
+            // Add Student Form
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 overflow-y-auto h-[calc(100vh-240px)]">
               <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <FaUserPlus className="text-blue-600" /> New Student
@@ -1409,17 +1402,17 @@ const Add_student = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Class *
+                        Course *
                       </label>
                       <select
-                        name="class"
+                        name="course"
                         required
-                        value={formData.class}
+                        value={formData.course}
                         onChange={handleInputChange}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="">Select Class</option>
-                        {classList.map((cls) => (
+                        <option value="">Select Course</option>
+                        {coursesList.map((cls) => (
                           <option key={cls} value={cls}>
                             {cls}
                           </option>
@@ -1443,19 +1436,6 @@ const Add_student = () => {
                           </option>
                         ))}
                       </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Roll Number
-                      </label>
-                      <input
-                        type="text"
-                        name="roll"
-                        value={formData.roll}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter roll number"
-                      />
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">

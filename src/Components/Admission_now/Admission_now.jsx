@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
+import Swal from "sweetalert2";
 
 const Admission_now = () => {
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     // Personal Information
     name: "",
@@ -24,12 +26,8 @@ const Admission_now = () => {
 
     // Additional Information
     gender: "",
-    religion: "",
-    bloodGroup: "",
     occupation: "",
     maritalStatus: "",
-    educationalQualification: "",
-    instituteName: "",
 
     // Course Selection
     selectedDepartment: "",
@@ -48,67 +46,72 @@ const Admission_now = () => {
     bankAccount: "",
   });
 
-  // শুধুমাত্র আপনার বলা ডিপার্টমেন্ট ও কোর্সসমূহ
+  // Departments and Courses
   const departments = {
     "islamic-studies": {
-      name: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
+      name: "Diploma in Islamic Studies",
       courses: [
         {
           id: "is1",
-          name: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
+          name: "Diploma in Islamic Studies",
           price: 12000,
-          duration: "১ বছর",
+          duration: "1 Year",
         },
       ],
     },
     alemiyah: {
-      name: "তারবিয়াহ আলেমিয়াহ",
+      name: "Tarbiyah Alimiyah",
       courses: [
         {
           id: "al1",
-          name: "আলেমিয়াহ ফর কিডস",
+          name: "Alimiyah for Kids",
           price: 8000,
-          duration: "৬ মাস",
+          duration: "6 Months",
         },
         {
           id: "al2",
-          name: "আলেমিয়াহ প্রোগ্রাম",
+          name: "Alimiyah Program",
           price: 20000,
-          duration: "২ বছর",
+          duration: "2 Years",
         },
       ],
     },
     "quran-studies": {
-      name: "তারবিয়াহ কুরআন স্টাডিজ",
+      name: "Tarbiyah Quran Studies",
       courses: [
-        { id: "qs1", name: "কায়দা নুরানী", price: 3000, duration: "২ মাস" },
-        { id: "qs2", name: "নাজেরা", price: 4000, duration: "৩ মাস" },
-        { id: "qs3", name: "হিফজুল কুরআন", price: 25000, duration: "২ বছর" },
+        { id: "qs1", name: "Qaida Noorani", price: 3000, duration: "2 Months" },
+        { id: "qs2", name: "Nazera", price: 4000, duration: "3 Months" },
+        { id: "qs3", name: "Hifzul Quran", price: 25000, duration: "2 Years" },
         {
           id: "qs4",
-          name: "হিফজ রিভিশন (ওয়ান টু ওয়ান)",
+          name: "Hifz Revision (One to One)",
           price: 10000,
-          duration: "৬ মাস",
+          duration: "6 Months",
         },
       ],
     },
     "quran-elders": {
-      name: "কুরআন ফর এল্ডার্স",
+      name: "Quran for Elders",
       courses: [
-        { id: "qe1", name: "কায়দা নুরানীয়া", price: 3000, duration: "২ মাস" },
-        { id: "qe2", name: "কুরআন নাজেরা", price: 4000, duration: "৩ মাস" },
-        { id: "qe3", name: "হিফজুল কুরআন", price: 20000, duration: "২ বছর" },
+        {
+          id: "qe1",
+          name: "Qaida Nooraniya",
+          price: 3000,
+          duration: "2 Months",
+        },
+        { id: "qe2", name: "Quran Nazera", price: 4000, duration: "3 Months" },
+        { id: "qe3", name: "Hifzul Quran", price: 20000, duration: "2 Years" },
         {
           id: "qe4",
-          name: "বেসিক তাজউইদ (লেভেল-১)",
+          name: "Basic Tajweed (Level-1)",
           price: 3000,
-          duration: "২ মাস",
+          duration: "2 Months",
         },
         {
           id: "qe5",
-          name: "অ্যাডভান্সড তাজউইদ",
+          name: "Advanced Tajweed",
           price: 5000,
-          duration: "৩ মাস",
+          duration: "3 Months",
         },
       ],
     },
@@ -179,10 +182,182 @@ const Admission_now = () => {
     setStep(step - 1);
   };
 
-  const handleSubmit = (e) => {
+  const getCurrentCourses = () => {
+    return departments[formData.selectedDepartment]?.courses || [];
+  };
+
+  // Admission_now.jsx - handleSubmit ফাংশন
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
-    alert("আপনার আবেদন সফলভাবে জমা হয়েছে!");
+    setLoading(true);
+
+    try {
+      if (!formData.name || !formData.phoneNumber || !formData.email) {
+        Swal.fire({
+          icon: "warning",
+          title: "Information Incomplete!",
+          text: "Name, Phone Number and Email are required.",
+        });
+        setLoading(false);
+        return;
+      }
+
+      const selectedCourseNames = formData.selectedCourses
+        .map((courseId) => {
+          const course = getCurrentCourses().find((c) => c.id === courseId);
+          return course ? course.name : "";
+        })
+        .filter(Boolean);
+
+      // ✅ Payment Status নির্ধারণ
+      const paymentStatus =
+        formData.paidAmount && parseFloat(formData.paidAmount) > 0
+          ? "Paid"
+          : "Unpaid";
+
+      // ✅ সব ডেটা পাঠাচ্ছি - এই পেমেন্ট ডেটা গুরুত্বপূর্ণ
+      const payload = {
+        // Personal Information
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phoneNumber,
+        password: "student123S@",
+        course:
+          selectedCourseNames.join(", ") ||
+          formData.selectedDepartment ||
+          "Not Specified",
+
+        // Family Information
+        fatherName: formData.fatherName || "",
+        motherName: formData.motherName || "",
+        guardianName: formData.fatherName || "",
+        guardianPhone: formData.guardianPhone || formData.phoneNumber,
+
+        // Address
+        presentAddress: formData.presentAddress || "",
+        permanentAddress: formData.permanentAddress || "",
+
+        // Additional Information
+        dobOrNid: formData.nationalId || "",
+        gender: formData.gender || "",
+        occupation: formData.occupation || "",
+        maritalStatus: formData.maritalStatus || "",
+        age: formData.age || "",
+
+        // ✅ Payment Information - এই 3টি ফিল্ড গুরুত্বপূর্ণ
+        paymentMethod: formData.paymentMethod || "", // ✅ পেমেন্ট মেথড
+        paymentType: formData.paymentType || "",
+        transactionId: formData.transactionId || "", // ✅ ট্রানজেকশন আইডি
+        paidAmount: formData.paidAmount || "",
+        paymentRemarks: formData.paymentRemarks || "",
+        paymentStatus: paymentStatus, // ✅ পেমেন্ট স্ট্যাটাস
+
+        // Status
+        status: "Pending",
+        admissionDate: new Date().toISOString(), // ✅ ভর্তি তারিখ
+      };
+
+      // ✅ কনসোল লগ - দেখুন ডেটা পাঠাচ্ছে কিনা
+      console.log("📤 ====== SENDING PAYLOAD ======");
+      console.log("📤 Payment Method:", payload.paymentMethod);
+      console.log("📤 Transaction ID:", payload.transactionId);
+      console.log("📤 Payment Status:", payload.paymentStatus);
+      console.log("📤 Admission Date:", payload.admissionDate);
+      console.log("📤 ===========================");
+
+      const response = await fetch(
+        "http://localhost:5000/api/students/register/student",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      const data = await response.json();
+      console.log("📥 Response:", data);
+
+      if (data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "🎉 Admission Completed!",
+          html: `
+          <div style="text-align: left;">
+            <p><strong>Name:</strong> ${formData.name}</p>
+            <p><strong>Phone:</strong> ${formData.phoneNumber}</p>
+            <p><strong>Email:</strong> ${formData.email}</p>
+            <p><strong>Course:</strong> ${selectedCourseNames.join(", ") || "N/A"}</p>
+            <p><strong>Payment Method:</strong> ${formData.paymentMethod || "N/A"}</p>
+            <p><strong>Transaction ID:</strong> ${formData.transactionId || "N/A"}</p>
+            <p><strong>Payment Status:</strong> ${paymentStatus}</p>
+            <hr style="margin: 10px 0;">
+            <p style="color: #004d4d; font-weight: bold;">
+              ✅ Your application has been submitted!<br/>
+              You can login after admin approval.
+            </p>
+            <p style="font-size: 12px; color: #666; margin-top: 5px;">
+              Username: <strong>${formData.email}</strong><br/>
+              Password: <strong>student123S@</strong>
+            </p>
+          </div>
+        `,
+          confirmButtonColor: "#004d4d",
+          confirmButtonText: "OK",
+        });
+
+        // Reset form
+        setFormData({
+          name: "",
+          nationalId: "",
+          dateOfBirth: "",
+          age: "",
+          phoneNumber: "",
+          email: "",
+          fatherName: "",
+          motherName: "",
+          guardianPhone: "",
+          presentAddress: "",
+          permanentAddress: "",
+          gender: "",
+          occupation: "",
+          maritalStatus: "",
+          selectedDepartment: "",
+          selectedCourses: [],
+          paymentMethod: "",
+          paymentType: "",
+          transactionId: "",
+          paymentRemarks: "",
+          paidAmount: "",
+          bkashNumber: "",
+          nagodNumber: "",
+          rocketNumber: "",
+          merchantNumber: "",
+          bankAccount: "",
+        });
+
+        setStep(1);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Admission Failed!",
+          text: data.message || "Please try again.",
+          confirmButtonColor: "#004d4d",
+        });
+      }
+    } catch (error) {
+      console.error("❌ Admission Error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Server Connection Error!",
+        text: "Please check if backend server is running.",
+        confirmButtonColor: "#004d4d",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const calculateTotal = () => {
@@ -196,11 +371,6 @@ const Admission_now = () => {
     return total;
   };
 
-  const getCurrentCourses = () => {
-    return departments[formData.selectedDepartment]?.courses || [];
-  };
-
-  // পেমেন্ট মেথড অনুযায়ী মার্চেন্ট নম্বর দেখানো
   const getMerchantNumber = () => {
     if (formData.paymentMethod === "bkash") {
       return "01841412525";
@@ -211,24 +381,24 @@ const Admission_now = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 ">
+    <div className="min-h-screen bg-gray-50 py-8">
       <Navbar></Navbar>
       <div
-        className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-6 border-t-4 mb-20"
+        className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-6 border-t-4 mb-20 mt-10"
         style={{ borderColor: "#00ADD2" }}
       >
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold" style={{ color: "#00ADD2" }}>
-            তারবিয়াহ অনলাইন মাদ্রাসা
+            Tarbiyah Online Madrasha
           </h1>
-          <p className="text-gray-600 mt-2">ইসলামিক শিক্ষার বিশ্বস্ত ঠিকানা</p>
+          <p className="text-gray-600 mt-2">Trusted Islamic Education</p>
         </div>
 
         <h2
           className="text-2xl font-bold text-center mb-6"
           style={{ color: "#00ADD2" }}
         >
-          ভর্তি ফর্ম
+          Admission Form
         </h2>
 
         {/* Progress Steps */}
@@ -239,9 +409,9 @@ const Admission_now = () => {
             <div
               className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${step >= 1 ? "bg-[#00ADD2] text-white" : "bg-gray-300"}`}
             >
-              ১
+              1
             </div>
-            <span className="text-sm">ব্যক্তিগত তথ্য</span>
+            <span className="text-sm">Personal Info</span>
           </div>
           <div
             className={`flex-1 text-center ${step >= 2 ? "text-[#00ADD2]" : "text-gray-400"}`}
@@ -249,9 +419,9 @@ const Admission_now = () => {
             <div
               className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${step >= 2 ? "bg-[#00ADD2] text-white" : "bg-gray-300"}`}
             >
-              ২
+              2
             </div>
-            <span className="text-sm">পরিবার ও ঠিকানা</span>
+            <span className="text-sm">Family & Address</span>
           </div>
           <div
             className={`flex-1 text-center ${step >= 3 ? "text-[#00ADD2]" : "text-gray-400"}`}
@@ -259,9 +429,9 @@ const Admission_now = () => {
             <div
               className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${step >= 3 ? "bg-[#00ADD2] text-white" : "bg-gray-300"}`}
             >
-              ৩
+              3
             </div>
-            <span className="text-sm">কোর্স নির্বাচন</span>
+            <span className="text-sm">Course Selection</span>
           </div>
           <div
             className={`flex-1 text-center ${step >= 4 ? "text-[#00ADD2]" : "text-gray-400"}`}
@@ -269,9 +439,9 @@ const Admission_now = () => {
             <div
               className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${step >= 4 ? "bg-[#00ADD2] text-white" : "bg-gray-300"}`}
             >
-              ৪
+              4
             </div>
-            <span className="text-sm">পেমেন্ট</span>
+            <span className="text-sm">Payment</span>
           </div>
         </div>
 
@@ -283,13 +453,13 @@ const Admission_now = () => {
                 className="text-xl font-semibold mb-4"
                 style={{ color: "#00ADD2" }}
               >
-                ব্যক্তিগত তথ্য
+                Personal Information
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    পূর্ণ নাম *
+                    Full Name *
                   </label>
                   <input
                     type="text"
@@ -303,7 +473,7 @@ const Admission_now = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    জাতীয় পরিচয় পত্র নম্বর *
+                    National ID / Birth Reg No. *
                   </label>
                   <input
                     type="text"
@@ -317,7 +487,7 @@ const Admission_now = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    জন্ম তারিখ *
+                    Date of Birth *
                   </label>
                   <input
                     type="date"
@@ -331,7 +501,7 @@ const Admission_now = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    বয়স
+                    Age
                   </label>
                   <input
                     type="text"
@@ -344,7 +514,7 @@ const Admission_now = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    মোবাইল নম্বর *
+                    Phone Number *
                   </label>
                   <input
                     type="tel"
@@ -358,7 +528,7 @@ const Admission_now = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    ইমেইল *
+                    Email *
                   </label>
                   <input
                     type="email"
@@ -372,7 +542,7 @@ const Admission_now = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    লিঙ্গ *
+                    Gender *
                   </label>
                   <select
                     name="gender"
@@ -381,84 +551,16 @@ const Admission_now = () => {
                     required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   >
-                    <option value="">লিঙ্গ নির্বাচন করুন</option>
-                    <option value="male">পুরুষ</option>
-                    <option value="female">মহিলা</option>
-                    <option value="other">অন্যান্য</option>
+                    <option value="">Select Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    শিক্ষাগত যোগ্যতা
-                  </label>
-                  <select
-                    name="educationalQualification"
-                    value={formData.educationalQualification}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
-                  >
-                    <option value="">শিক্ষাগত যোগ্যতা নির্বাচন করুন</option>
-                    <option value="ssc">এসএসসি/সমমান</option>
-                    <option value="hsc">এইচএসসি/সমমান</option>
-                    <option value="graduate">স্নাতক/সমমান</option>
-                    <option value="postgraduate">স্নাতকোত্তর/সমমান</option>
-                    <option value="others">অন্যান্য</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    প্রতিষ্ঠানের নাম
-                  </label>
-                  <input
-                    type="text"
-                    name="instituteName"
-                    value={formData.instituteName}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    রক্তের গ্রুপ
-                  </label>
-                  <select
-                    name="bloodGroup"
-                    value={formData.bloodGroup}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
-                  >
-                    <option value="">রক্তের গ্রুপ নির্বাচন করুন</option>
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    ধর্ম
-                  </label>
-                  <input
-                    type="text"
-                    name="religion"
-                    value={formData.religion}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
-                    placeholder="ইসলাম"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    বৈবাহিক অবস্থা
+                    Marital Status
                   </label>
                   <select
                     name="maritalStatus"
@@ -466,25 +568,12 @@ const Admission_now = () => {
                     onChange={handleInputChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   >
-                    <option value="">নির্বাচন করুন</option>
-                    <option value="single">অবিবাহিত</option>
-                    <option value="married">বিবাহিত</option>
-                    <option value="divorced">তালাকপ্রাপ্ত</option>
-                    <option value="widowed">বিধবা/বিধুর</option>
+                    <option value="">Select Status</option>
+                    <option value="single">Single</option>
+                    <option value="married">Married</option>
+                    <option value="divorced">Divorced</option>
+                    <option value="widowed">Widowed</option>
                   </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    পেশা
-                  </label>
-                  <input
-                    type="text"
-                    name="occupation"
-                    value={formData.occupation}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
-                  />
                 </div>
               </div>
 
@@ -495,7 +584,7 @@ const Admission_now = () => {
                   className="text-white px-6 py-2 rounded-md hover:opacity-90 transition"
                   style={{ backgroundColor: "#00ADD2" }}
                 >
-                  পরবর্তী →
+                  Next →
                 </button>
               </div>
             </div>
@@ -508,13 +597,13 @@ const Admission_now = () => {
                 className="text-xl font-semibold mb-4"
                 style={{ color: "#00ADD2" }}
               >
-                পরিবার ও ঠিকানার তথ্য
+                Family & Address Information
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    পিতার নাম *
+                    Father's Name *
                   </label>
                   <input
                     type="text"
@@ -528,21 +617,7 @@ const Admission_now = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    মাতার নাম *
-                  </label>
-                  <input
-                    type="text"
-                    name="motherName"
-                    value={formData.motherName}
-                    onChange={handleInputChange}
-                    required
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    গার্ডিয়ানের মোবাইল নম্বর *
+                    Guardian's Phone Number *
                   </label>
                   <input
                     type="tel"
@@ -556,7 +631,7 @@ const Admission_now = () => {
 
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700">
-                    বর্তমান ঠিকানা *
+                    Present Address *
                   </label>
                   <textarea
                     name="presentAddress"
@@ -570,7 +645,7 @@ const Admission_now = () => {
 
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700">
-                    স্থায়ী ঠিকানা *
+                    Permanent Address *
                   </label>
                   <textarea
                     name="permanentAddress"
@@ -589,7 +664,7 @@ const Admission_now = () => {
                   onClick={handlePrevious}
                   className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition"
                 >
-                  ← পূর্ববর্তী
+                  ← Previous
                 </button>
                 <button
                   type="button"
@@ -597,7 +672,7 @@ const Admission_now = () => {
                   className="text-white px-6 py-2 rounded-md hover:opacity-90 transition"
                   style={{ backgroundColor: "#00ADD2" }}
                 >
-                  পরবর্তী →
+                  Next →
                 </button>
               </div>
             </div>
@@ -610,13 +685,12 @@ const Admission_now = () => {
                 className="text-xl font-semibold mb-4"
                 style={{ color: "#00ADD2" }}
               >
-                ডিপার্টমেন্ট ও কোর্স নির্বাচন
+                Department & Course Selection
               </h2>
 
-              {/* Department Selection */}
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ডিপার্টমেন্ট নির্বাচন করুন *
+                  Select Department *
                 </label>
                 <select
                   name="selectedDepartment"
@@ -625,24 +699,23 @@ const Admission_now = () => {
                   required
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                 >
-                  <option value="">ডিপার্টমেন্ট নির্বাচন করুন</option>
+                  <option value="">Select Department</option>
                   <option value="islamic-studies">
-                    ডিপ্লোমা ইন ইসলামিক স্টাডিজ
+                    Diploma in Islamic Studies
                   </option>
-                  <option value="alemiyah">তারবিয়াহ আলেমিয়াহ</option>
-                  <option value="quran-studies">তারবিয়াহ কুরআন স্টাডিজ</option>
-                  <option value="quran-elders">কুরআন ফর এল্ডার্স</option>
+                  <option value="alemiyah">Tarbiyah Alimiyah</option>
+                  <option value="quran-studies">Tarbiyah Quran Studies</option>
+                  <option value="quran-elders">Quran for Elders</option>
                 </select>
               </div>
 
-              {/* Course Selection */}
               {formData.selectedDepartment && (
                 <div>
                   <h3
                     className="font-semibold mb-3"
                     style={{ color: "#00ADD2" }}
                   >
-                    {departments[formData.selectedDepartment]?.name} - কোর্সসমূহ
+                    {departments[formData.selectedDepartment]?.name} - Courses
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {getCurrentCourses().map((course) => (
@@ -668,7 +741,7 @@ const Admission_now = () => {
                             </h4>
                             <div className="flex justify-between mt-1">
                               <span className="text-xs text-gray-500">
-                                মেয়াদ: {course.duration}
+                                Duration: {course.duration}
                               </span>
                               <span
                                 className="text-sm font-medium"
@@ -694,7 +767,7 @@ const Admission_now = () => {
                     className="font-semibold text-lg"
                     style={{ color: "#00ADD2" }}
                   >
-                    নির্বাচিত কোর্সসমূহ:
+                    Selected Courses:
                   </h3>
                   <ul className="list-disc list-inside space-y-1">
                     {formData.selectedCourses.map((courseId) => {
@@ -723,7 +796,7 @@ const Admission_now = () => {
                       className="font-bold text-lg"
                       style={{ color: "#00ADD2" }}
                     >
-                      মোট মূল্য: ৳{calculateTotal().toLocaleString()}
+                      Total Amount: ৳{calculateTotal().toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -735,7 +808,7 @@ const Admission_now = () => {
                   onClick={handlePrevious}
                   className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition"
                 >
-                  ← পূর্ববর্তী
+                  ← Previous
                 </button>
                 <button
                   type="button"
@@ -743,7 +816,7 @@ const Admission_now = () => {
                   className="text-white px-6 py-2 rounded-md hover:opacity-90 transition"
                   style={{ backgroundColor: "#00ADD2" }}
                 >
-                  পরবর্তী →
+                  Next →
                 </button>
               </div>
             </div>
@@ -756,7 +829,7 @@ const Admission_now = () => {
                 className="text-xl font-semibold mb-4"
                 style={{ color: "#00ADD2" }}
               >
-                পেমেন্ট তথ্য
+                Payment Information
               </h2>
 
               {/* Payment Instructions */}
@@ -765,36 +838,35 @@ const Admission_now = () => {
                 style={{ backgroundColor: "#fff8e1", borderColor: "#ff9800" }}
               >
                 <h4 className="font-bold text-orange-600 mb-2">
-                  ⚠️ পেমেন্ট করার আগে নির্দেশনা পড়ুন:
+                  ⚠️ Payment Instructions:
                 </h4>
                 <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
                   <li>
-                    বিকাশ ও নগদে{" "}
-                    <span className="font-bold text-red-600">"সেন্ড মানি"</span>{" "}
-                    করলে হবে না। শুধুমাত্র{" "}
+                    For bKash & Nagad, use{" "}
                     <span className="font-bold text-green-600">
-                      "মার্চেন্ট পে"
+                      "Merchant Pay"
                     </span>{" "}
-                    অপশনে পেমেন্ট করতে হবে।
+                    option only.
                   </li>
                   <li>
-                    মার্চেন্ট নম্বর:{" "}
+                    Merchant Number:{" "}
                     <span className="font-bold" style={{ color: "#00ADD2" }}>
-                      বিকাশ: 01841412525
+                      bKash: 01841412525
                     </span>{" "}
-                    এবং{" "}
+                    and{" "}
                     <span className="font-bold" style={{ color: "#00ADD2" }}>
-                      নগদ: 01841512525
+                      Nagad: 01841512525
                     </span>
                   </li>
-                  <li>ব্যাংক ট্রান্সফারের মাধ্যমে পেমেন্ট করতে পারবেন।</li>
+                  <li>You can also pay via Bank Transfer.</li>
                 </ul>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* ✅ Payment Method */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    পেমেন্ট মেথড *
+                    Payment Method *
                   </label>
                   <select
                     name="paymentMethod"
@@ -803,18 +875,19 @@ const Admission_now = () => {
                     required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   >
-                    <option value="">পেমেন্ট মেথড নির্বাচন করুন</option>
-                    <option value="bkash">বিকাশ (মার্চেন্ট পে)</option>
-                    <option value="nagod">নগদ (মার্চেন্ট পে)</option>
-                    <option value="rocket">রকেট</option>
-                    <option value="bank">ব্যাংক ট্রান্সফার</option>
-                    <option value="ssl">এসএসএল কমার্জ (অনলাইন)</option>
+                    <option value="">Select Payment Method</option>
+                    <option value="bkash">bKash (Merchant Pay)</option>
+                    <option value="nagod">Nagad (Merchant Pay)</option>
+                    <option value="rocket">Rocket</option>
+                    <option value="bank">Bank Transfer</option>
+                    <option value="ssl">SSL Commerz (Online)</option>
                   </select>
                 </div>
 
+                {/* Payment Type */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    পেমেন্ট টাইপ *
+                    Payment Type *
                   </label>
                   <select
                     name="paymentType"
@@ -823,13 +896,13 @@ const Admission_now = () => {
                     required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   >
-                    <option value="">পেমেন্ট টাইপ নির্বাচন করুন</option>
-                    <option value="online">অনলাইন পেমেন্ট</option>
-                    <option value="offline">অফলাইন পেমেন্ট</option>
+                    <option value="">Select Payment Type</option>
+                    <option value="online">Online Payment</option>
+                    <option value="offline">Offline Payment</option>
                   </select>
                 </div>
 
-                {/* মার্চেন্ট নম্বর দেখানো */}
+                {/* Merchant Number Display */}
                 {(formData.paymentMethod === "bkash" ||
                   formData.paymentMethod === "nagod") && (
                   <div className="col-span-2">
@@ -842,8 +915,8 @@ const Admission_now = () => {
                     >
                       <p className="text-sm font-medium">
                         📌{" "}
-                        {formData.paymentMethod === "bkash" ? "বিকাশ" : "নগদ"}{" "}
-                        মার্চেন্ট নম্বর:
+                        {formData.paymentMethod === "bkash" ? "bKash" : "Nagad"}{" "}
+                        Merchant Number:
                         <span
                           className="font-bold ml-2"
                           style={{ color: "#00ADD2" }}
@@ -854,14 +927,14 @@ const Admission_now = () => {
                         </span>
                       </p>
                       <p className="text-xs text-red-600 mt-1">
-                        ⚠️ শুধুমাত্র "মার্চেন্ট পে" অপশনে পেমেন্ট করুন। "সেন্ড
-                        মানি" করলে হবে না।
+                        ⚠️ Use "Merchant Pay" option only. "Send Money" will not
+                        work.
                       </p>
                     </div>
                   </div>
                 )}
 
-                {/* ব্যাংক তথ্য */}
+                {/* Bank Information */}
                 {formData.paymentMethod === "bank" && (
                   <div className="col-span-2">
                     <div
@@ -872,40 +945,40 @@ const Admission_now = () => {
                       }}
                     >
                       <h4 className="font-bold" style={{ color: "#00ADD2" }}>
-                        🏦 ব্যাংক তথ্য:
+                        🏦 Bank Information:
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-sm">
                         <div>
                           <p>
-                            <span className="font-semibold">একাউন্ট নাম:</span>{" "}
+                            <span className="font-semibold">Account Name:</span>{" "}
                             Tarbiyah Academy
                           </p>
                           <p>
                             <span className="font-semibold">
-                              একাউন্ট নম্বর:
+                              Account Number:
                             </span>{" "}
                             401211100007923
                           </p>
                           <p>
-                            <span className="font-semibold">ব্যাংক:</span>{" "}
+                            <span className="font-semibold">Bank:</span>{" "}
                             Shahjalal Islami Bank Limited
                           </p>
                         </div>
                         <div>
                           <p>
-                            <span className="font-semibold">শাখা:</span>{" "}
+                            <span className="font-semibold">Branch:</span>{" "}
                             Satmasjid Road Branch
                           </p>
                           <p>
-                            <span className="font-semibold">ব্রাঞ্চ কোড:</span>{" "}
+                            <span className="font-semibold">Branch Code:</span>{" "}
                             4012
                           </p>
                           <p>
-                            <span className="font-semibold">SWIFT কোড:</span>{" "}
+                            <span className="font-semibold">SWIFT Code:</span>{" "}
                             SJBLBDDHSMR
                           </p>
                           <p>
-                            <span className="font-semibold">রাউটিং নম্বর:</span>{" "}
+                            <span className="font-semibold">Routing No:</span>{" "}
                             190264035
                           </p>
                         </div>
@@ -914,47 +987,47 @@ const Admission_now = () => {
                   </div>
                 )}
 
+                {/* Mobile Number (bKash/Nagad/Rocket) */}
                 {(formData.paymentMethod === "bkash" ||
                   formData.paymentMethod === "nagod" ||
                   formData.paymentMethod === "rocket") && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        {formData.paymentMethod === "bkash"
-                          ? "বিকাশ"
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      {formData.paymentMethod === "bkash"
+                        ? "bKash"
+                        : formData.paymentMethod === "nagod"
+                          ? "Nagad"
+                          : "Rocket"}{" "}
+                      Number (Yours) *
+                    </label>
+                    <input
+                      type="text"
+                      name={
+                        formData.paymentMethod === "bkash"
+                          ? "bkashNumber"
                           : formData.paymentMethod === "nagod"
-                            ? "নগদ"
-                            : "রকেট"}{" "}
-                        নম্বর (আপনার) *
-                      </label>
-                      <input
-                        type="text"
-                        name={
-                          formData.paymentMethod === "bkash"
-                            ? "bkashNumber"
-                            : formData.paymentMethod === "nagod"
-                              ? "nagodNumber"
-                              : "rocketNumber"
-                        }
-                        value={
-                          formData.paymentMethod === "bkash"
-                            ? formData.bkashNumber
-                            : formData.paymentMethod === "nagod"
-                              ? formData.nagodNumber
-                              : formData.rocketNumber
-                        }
-                        onChange={handleInputChange}
-                        required
-                        placeholder="01xxxxxxxxx"
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
-                      />
-                    </div>
-                  </>
+                            ? "nagodNumber"
+                            : "rocketNumber"
+                      }
+                      value={
+                        formData.paymentMethod === "bkash"
+                          ? formData.bkashNumber
+                          : formData.paymentMethod === "nagod"
+                            ? formData.nagodNumber
+                            : formData.rocketNumber
+                      }
+                      onChange={handleInputChange}
+                      required
+                      placeholder="01xxxxxxxxx"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
+                    />
+                  </div>
                 )}
 
+                {/* ✅ Amount Paid */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    প্রদানকৃত টাকা (৳) *
+                    Amount Paid (৳) *
                   </label>
                   <input
                     type="number"
@@ -964,21 +1037,22 @@ const Admission_now = () => {
                     required
                     placeholder={
                       calculateTotal() > 0
-                        ? `মোট: ৳${calculateTotal()}`
-                        : "টাকা লিখুন"
+                        ? `Total: ৳${calculateTotal()}`
+                        : "Enter amount"
                     }
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                   {calculateTotal() > 0 && (
                     <p className="text-xs text-gray-500 mt-1">
-                      মোট দিতে হবে: ৳{calculateTotal().toLocaleString()}
+                      Total to pay: ৳{calculateTotal().toLocaleString()}
                     </p>
                   )}
                 </div>
 
+                {/* ✅ Transaction ID */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    ট্রানজেকশন আইডি *
+                    Transaction ID *
                   </label>
                   <input
                     type="text"
@@ -986,14 +1060,15 @@ const Admission_now = () => {
                     value={formData.transactionId}
                     onChange={handleInputChange}
                     required
-                    placeholder="ট্রানজেকশন আইডি লিখুন"
+                    placeholder="Enter transaction ID"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
 
+                {/* Payment Remarks */}
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700">
-                    পেমেন্ট রিমার্কস
+                    Payment Remarks
                   </label>
                   <textarea
                     name="paymentRemarks"
@@ -1001,30 +1076,30 @@ const Admission_now = () => {
                     onChange={handleInputChange}
                     rows="2"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
-                    placeholder="অতিরিক্ত পেমেন্ট তথ্য (যদি থাকে)..."
+                    placeholder="Additional payment information (if any)..."
                   />
                 </div>
               </div>
 
-              {/* SSL Commerz Integration */}
+              {/* SSL Commerz */}
               {formData.paymentMethod === "ssl" && (
                 <div
                   className="p-4 rounded-lg border"
                   style={{ backgroundColor: "#e6f7f9", borderColor: "#00ADD2" }}
                 >
                   <h3 className="font-semibold" style={{ color: "#00ADD2" }}>
-                    এসএসএল কমার্জ অনলাইন পেমেন্ট
+                    SSL Commerz Online Payment
                   </h3>
                   <p className="text-sm text-gray-600">
-                    আপনাকে নিরাপদ পেমেন্টের জন্য এসএসএল কমার্জ পেমেন্ট গেটওয়েতে
-                    পুনঃনির্দেশিত করা হবে।
+                    You will be redirected to SSL Commerz payment gateway for
+                    secure payment.
                   </p>
                   <button
                     type="button"
                     className="mt-2 text-white px-4 py-2 rounded hover:opacity-90"
                     style={{ backgroundColor: "#00ADD2" }}
                   >
-                    এসএসএল কমার্জ দিয়ে পেমেন্ট করুন
+                    Pay with SSL Commerz
                   </button>
                 </div>
               )}
@@ -1035,16 +1110,16 @@ const Admission_now = () => {
                 style={{ backgroundColor: "#f0f9fa", borderColor: "#00ADD2" }}
               >
                 <h4 className="font-semibold" style={{ color: "#00ADD2" }}>
-                  পেমেন্ট সামারি
+                  Payment Summary
                 </h4>
                 <div className="flex justify-between mt-2">
-                  <span>মোট কোর্স ফি:</span>
+                  <span>Total Course Fee:</span>
                   <span className="font-bold" style={{ color: "#00ADD2" }}>
                     ৳{calculateTotal().toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>নির্বাচিত ডিপার্টমেন্ট:</span>
+                  <span>Selected Department:</span>
                   <span className="font-semibold">
                     {formData.selectedDepartment
                       ? departments[formData.selectedDepartment]?.name
@@ -1052,24 +1127,24 @@ const Admission_now = () => {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>পেমেন্ট মেথড:</span>
+                  <span>Payment Method:</span>
                   <span className="font-semibold">
                     {formData.paymentMethod === "bkash"
-                      ? "বিকাশ"
+                      ? "bKash"
                       : formData.paymentMethod === "nagod"
-                        ? "নগদ"
+                        ? "Nagad"
                         : formData.paymentMethod === "rocket"
-                          ? "রকেট"
+                          ? "Rocket"
                           : formData.paymentMethod === "bank"
-                            ? "ব্যাংক ট্রান্সফার"
+                            ? "Bank Transfer"
                             : formData.paymentMethod === "ssl"
-                              ? "এসএসএল কমার্জ"
+                              ? "SSL Commerz"
                               : "-"}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>পেমেন্ট স্ট্যাটাস:</span>
-                  <span className="text-green-600 font-semibold">পেন্ডিং</span>
+                  <span>Payment Status:</span>
+                  <span className="text-green-600 font-semibold">Pending</span>
                 </div>
               </div>
 
@@ -1079,14 +1154,15 @@ const Admission_now = () => {
                   onClick={handlePrevious}
                   className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition"
                 >
-                  ← পূর্ববর্তী
+                  ← Previous
                 </button>
                 <button
                   type="submit"
-                  className="text-white px-8 py-2 rounded-md hover:opacity-90 transition"
+                  disabled={loading}
+                  className="text-white px-8 py-2 rounded-md hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ backgroundColor: "#00ADD2" }}
                 >
-                  ভর্তি সম্পন্ন করুন
+                  {loading ? "Processing..." : "Submit Admission"}
                 </button>
               </div>
             </div>

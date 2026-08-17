@@ -87,6 +87,44 @@ const AdminDashboard = () => {
     notifications: 8,
   });
 
+  // AdminDashboard.jsx - StudentManagementContent এ View Details আপডেট করুন
+
+  // AdminDashboard.jsx - StudentManagementContent এ handleView
+
+  const handleView = (student) => {
+    Swal.fire({
+      title: `📋 Student Details: ${student.name}`,
+      html: `
+      <div style="text-align: left; font-size: 13px; max-height: 450px; overflow-y: auto;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+          <p><strong>নাম:</strong> ${student.name || "N/A"}</p>
+          <p><strong>ফোন:</strong> ${student.phone || "N/A"}</p>
+          <p><strong>ইমেইল:</strong> ${student.email || "N/A"}</p>
+          <p><strong>কোর্স:</strong> ${student.course || student.class || "N/A"}</p>
+          <p><strong>ইউজারনেম:</strong> ${student.username || "Not assigned"}</p>
+          <p><strong>স্ট্যাটাস:</strong> ${student.status || "Pending"}</p>
+          <p><strong>পিতার নাম:</strong> ${student.fatherName || student.guardianName || "N/A"}</p>
+          <p><strong>মাতার নাম:</strong> ${student.motherName || "N/A"}</p>
+          <p><strong>অভিভাবক:</strong> ${student.guardianName || "N/A"}</p>
+          <p><strong>অভিভাবক ফোন:</strong> ${student.guardianPhone || "N/A"}</p>
+          <p><strong>বর্তমান ঠিকানা:</strong> ${student.presentAddress || student.address || "N/A"}</p>
+          <p><strong>স্থায়ী ঠিকানা:</strong> ${student.permanentAddress || "N/A"}</p>
+          <p><strong>পরিচয়পত্র:</strong> ${student.dobOrNid || "N/A"}</p>
+          <p><strong>পেমেন্ট স্ট্যাটাস:</strong> ${student.paymentStatus || (student.paidAmount ? "Paid" : "Unpaid")}</p>
+          <p><strong>পেমেন্ট মেথড:</strong> ${student.paymentMethod || "N/A"}</p>
+          <p><strong>ট্রানজেকশন আইডি:</strong> ${student.transactionId || "N/A"}</p>
+          <p><strong>ভর্তি তারিখ:</strong> ${student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : "N/A"}</p>
+        </div>
+        <hr style="margin: 10px 0;">
+        <p style="font-size: 11px; color: #666;">রেজিস্ট্রেশন: ${student.createdAt ? new Date(student.createdAt).toLocaleString() : "N/A"}</p>
+      </div>
+    `,
+      confirmButtonColor: "#3b82f6",
+      confirmButtonText: "Close",
+      width: 650,
+    });
+  };
+
   // Students Data
   const [students, setStudents] = useState([
     {
