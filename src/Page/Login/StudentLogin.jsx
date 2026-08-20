@@ -11,11 +11,15 @@ const StudentLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // StudentLogin.jsx - handleSubmit ফাংশন
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      console.log("📤 Login Request:", { username, password });
+
       const response = await fetch("http://localhost:5000/api/students/login", {
         method: "POST",
         headers: {
@@ -27,7 +31,21 @@ const StudentLogin = () => {
         }),
       });
 
-      const data = await response.json();
+      console.log("📥 Response Status:", response.status);
+
+      // ✅ Response Text দেখুন
+      const responseText = await response.text();
+      console.log("📥 Response Text:", responseText);
+
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (e) {
+        console.error("❌ Failed to parse JSON:", e);
+        throw new Error(
+          "Server returned invalid response. Please check if backend is running.",
+        );
+      }
 
       if (data.success) {
         const { user } = data;
@@ -56,11 +74,11 @@ const StudentLogin = () => {
         });
       }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("❌ Login error:", error);
       Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text: "সার্ভারে সংযোগ করা যায়নি!",
+        text: error.message || "সার্ভারে সংযোগ করা যায়নি!",
         confirmButtonColor: "#004d4d",
       });
     } finally {

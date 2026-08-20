@@ -36,7 +36,8 @@ const StudentDashboard = () => {
     roll: "",
     admissionDate: "",
   });
-  // StudentDashboard.jsx - useEffect আপডেট করুন
+
+  // StudentDashboard.jsx - useEffect
 
   useEffect(() => {
     // Check if student is logged in
@@ -45,6 +46,7 @@ const StudentDashboard = () => {
       navigate("/student-login");
       return;
     }
+
     const info = localStorage.getItem("studentInfo");
     if (info) {
       const parsedInfo = JSON.parse(info);

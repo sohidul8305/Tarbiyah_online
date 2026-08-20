@@ -202,10 +202,6 @@ const Add_student = () => {
     fetchStudentsFromAPI();
   }, [refreshKey]);
 
-  // Add_student.jsx - fetchStudentsFromAPI ফাংশন
-
-  // Add_student.jsx - fetchStudentsFromAPI
-
   const fetchStudentsFromAPI = async () => {
     try {
       setLoading(true);
@@ -222,7 +218,6 @@ const Add_student = () => {
 
       console.log("📥 Response Status:", response.status);
 
-      // ✅ Check if response is JSON
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         const text = await response.text();
@@ -259,11 +254,8 @@ const Add_student = () => {
       setLoading(false);
     }
   };
+
   // ✅ Approve Student Function
-  // Add_student.jsx - handleApproveStudent ফাংশন
-
-  // Add_student.jsx - handleApproveStudent
-
   const handleApproveStudent = async () => {
     try {
       if (!selectedStudent) {
@@ -313,7 +305,6 @@ const Add_student = () => {
 
       console.log("📥 Response Status:", response.status);
 
-      // ✅ Check if response is JSON
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
         const text = await response.text();
@@ -348,17 +339,17 @@ const Add_student = () => {
           icon: "success",
           title: "✅ Student Approved!",
           html: `
-          <div style="text-align: left;">
-            <p><strong>Student:</strong> ${selectedStudent.name}</p>
-            <p><strong>Course:</strong> ${selectedStudent.course || "N/A"}</p>
-            <hr style="margin: 10px 0;">
-            <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
-              <p style="font-weight: bold; color: #004d4d;">🔑 Login Credentials:</p>
-              <p><strong>Username:</strong> ${selectedStudent.username}</p>
-              <p><strong>Password:</strong> ${selectedStudent.password}</p>
+            <div style="text-align: left;">
+              <p><strong>Student:</strong> ${selectedStudent.name}</p>
+              <p><strong>Course:</strong> ${selectedStudent.course || "N/A"}</p>
+              <hr style="margin: 10px 0;">
+              <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
+                <p style="font-weight: bold; color: #004d4d;">🔑 Login Credentials:</p>
+                <p><strong>Username:</strong> ${selectedStudent.username}</p>
+                <p><strong>Password:</strong> ${selectedStudent.password}</p>
+              </div>
             </div>
-          </div>
-        `,
+          `,
           confirmButtonColor: "#004d4d",
           confirmButtonText: "OK",
         });
@@ -378,6 +369,7 @@ const Add_student = () => {
       });
     }
   };
+
   // Register Student
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -661,51 +653,125 @@ const Add_student = () => {
     }
   };
 
-  // ✅ View Details
-  const handleView = (student) => {
-    Swal.fire({
-      title: `📋 Student Details: ${student.name}`,
-      html: `
-      <div style="text-align: left; font-size: 13px; max-height: 450px; overflow-y: auto;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-          <p><strong>নাম:</strong> ${student.name || "N/A"}</p>
-          <p><strong>ফোন:</strong> ${student.phone || "N/A"}</p>
-          <p><strong>ইমেইল:</strong> ${student.email || "N/A"}</p>
-          <p><strong>কোর্স:</strong> ${student.course || student.class || "N/A"}</p>
-          <p><strong>ইউজারনেম:</strong> ${student.username || "Not assigned"}</p>
-          <p><strong>স্ট্যাটাস:</strong> ${student.status || "Pending"}</p>
-          <p><strong>পিতার নাম:</strong> ${student.fatherName || student.guardianName || "N/A"}</p>
-          <p><strong>মাতার নাম:</strong> ${student.motherName || "N/A"}</p>
-          <p><strong>অভিভাবক:</strong> ${student.guardianName || "N/A"}</p>
-          <p><strong>অভিভাবক ফোন:</strong> ${student.guardianPhone || "N/A"}</p>
-          <p><strong>বর্তমান ঠিকানা:</strong> ${student.presentAddress || student.address || "N/A"}</p>
-          <p><strong>স্থায়ী ঠিকানা:</strong> ${student.permanentAddress || "N/A"}</p>
-          <p><strong>পরিচয়পত্র:</strong> ${student.dobOrNid || "N/A"}</p>
-          <p><strong>পেমেন্ট মেথড:</strong> ${
-            student.paymentMethod === "bkash"
-              ? "bKash"
-              : student.paymentMethod === "nagod"
-                ? "Nagad"
-                : student.paymentMethod === "rocket"
-                  ? "Rocket"
-                  : student.paymentMethod === "bank"
-                    ? "Bank Transfer"
-                    : student.paymentMethod === "ssl"
-                      ? "SSL Commerz"
-                      : student.paymentMethod || "N/A"
-          }</p>
-          <p><strong>ট্রানজেকশন আইডি:</strong> ${student.transactionId || "N/A"}</p>
-          <p><strong>পেমেন্ট স্ট্যাটাস:</strong> ${student.paymentStatus || (student.paidAmount ? "Paid" : "Unpaid")}</p>
-          <p><strong>ভর্তি তারিখ:</strong> ${student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : "N/A"}</p>
-        </div>
-        <hr style="margin: 10px 0;">
-        <p style="font-size: 11px; color: #666;">রেজিস্ট্রেশন: ${student.createdAt ? new Date(student.createdAt).toLocaleString() : "N/A"}</p>
-      </div>
-    `,
-      confirmButtonColor: "#3b82f6",
-      confirmButtonText: "Close",
-      width: 650,
-    });
+  // ✅ View Details - একটাই handleView ফাংশন থাকবে
+  const handleView = async (student) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/students/details/${student._id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      let fullStudent = student;
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          fullStudent = data.student;
+        }
+      }
+
+      console.log("📥 Student Data:", fullStudent);
+
+      Swal.fire({
+        title: `📋 Student Details: ${fullStudent.name}`,
+        html: `
+          <div style="text-align: left; font-size: 13px; max-height: 450px; overflow-y: auto;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+              <p><strong>নাম:</strong> ${fullStudent.name || "N/A"}</p>
+              <p><strong>ফোন:</strong> ${fullStudent.phone || "N/A"}</p>
+              <p><strong>ইমেইল:</strong> ${fullStudent.email || "N/A"}</p>
+              <p><strong>কোর্স:</strong> ${fullStudent.course || fullStudent.class || "N/A"}</p>
+              
+              <p><strong>ইউজারনেম:</strong> ${fullStudent.username ? `<span style="color: #004d4d; font-weight: bold;">${fullStudent.username}</span>` : '<span style="color: red;">Not assigned</span>'}</p>
+              <p><strong>পাসওয়ার্ড:</strong> ${fullStudent.password ? `<span style="color: #004d4d; font-weight: bold;">${fullStudent.password}</span>` : '<span style="color: red;">Not set</span>'}</p>
+              
+              <p><strong>স্ট্যাটাস:</strong> ${fullStudent.status || "Pending"}</p>
+              <p><strong>পিতার নাম:</strong> ${fullStudent.fatherName || fullStudent.guardianName || "N/A"}</p>
+              <p><strong>মাতার নাম:</strong> ${fullStudent.motherName || "N/A"}</p>
+              <p><strong>অভিভাবক:</strong> ${fullStudent.guardianName || "N/A"}</p>
+              <p><strong>অভিভাবক ফোন:</strong> ${fullStudent.guardianPhone || "N/A"}</p>
+              <p><strong>বর্তমান ঠিকানা:</strong> ${fullStudent.presentAddress || fullStudent.address || "N/A"}</p>
+              <p><strong>স্থায়ী ঠিকানা:</strong> ${fullStudent.permanentAddress || "N/A"}</p>
+              <p><strong>পরিচয়পত্র:</strong> ${fullStudent.dobOrNid || "N/A"}</p>
+              <p><strong>পেমেন্ট মেথড:</strong> ${
+                fullStudent.paymentMethod === "bkash"
+                  ? "bKash"
+                  : fullStudent.paymentMethod === "nagod"
+                    ? "Nagad"
+                    : fullStudent.paymentMethod === "rocket"
+                      ? "Rocket"
+                      : fullStudent.paymentMethod === "bank"
+                        ? "Bank Transfer"
+                        : fullStudent.paymentMethod === "ssl"
+                          ? "SSL Commerz"
+                          : fullStudent.paymentMethod || "N/A"
+              }</p>
+              <p><strong>ট্রানজেকশন আইডি:</strong> ${fullStudent.transactionId || "N/A"}</p>
+              <p><strong>পেমেন্ট স্ট্যাটাস:</strong> ${fullStudent.paymentStatus || (fullStudent.paidAmount ? "Paid" : "Unpaid")}</p>
+              <p><strong>ভর্তি তারিখ:</strong> ${fullStudent.admissionDate ? new Date(fullStudent.admissionDate).toLocaleDateString() : "N/A"}</p>
+            </div>
+            <hr style="margin: 10px 0;">
+            
+            ${
+              fullStudent.username && fullStudent.password
+                ? `
+              <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac; margin-bottom: 10px;">
+                <p style="font-weight: bold; color: #004d4d; margin-bottom: 5px;">🔑 Login Credentials:</p>
+                <p><strong>Username:</strong> <span style="color: #004d4d;">${fullStudent.username}</span></p>
+                <p><strong>Password:</strong> <span style="color: #004d4d;">${fullStudent.password}</span></p>
+              </div>
+            `
+                : ""
+            }
+            
+            <p style="font-size: 11px; color: #666;">রেজিস্ট্রেশন: ${fullStudent.createdAt ? new Date(fullStudent.createdAt).toLocaleString() : "N/A"}</p>
+          </div>
+        `,
+        confirmButtonColor: "#3b82f6",
+        confirmButtonText: "Close",
+        width: 650,
+      });
+    } catch (error) {
+      console.error("❌ Error fetching student details:", error);
+      // Fallback: আগের ডেটা দিয়ে দেখান
+      Swal.fire({
+        title: `📋 Student Details: ${student.name}`,
+        html: `
+          <div style="text-align: left; font-size: 13px; max-height: 450px; overflow-y: auto;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+              <p><strong>নাম:</strong> ${student.name || "N/A"}</p>
+              <p><strong>ফোন:</strong> ${student.phone || "N/A"}</p>
+              <p><strong>ইমেইল:</strong> ${student.email || "N/A"}</p>
+              <p><strong>কোর্স:</strong> ${student.course || student.class || "N/A"}</p>
+              <p><strong>ইউজারনেম:</strong> ${student.username ? `<span style="color: #004d4d; font-weight: bold;">${student.username}</span>` : '<span style="color: red;">Not assigned</span>'}</p>
+              <p><strong>পাসওয়ার্ড:</strong> ${student.password ? `<span style="color: #004d4d; font-weight: bold;">${student.password}</span>` : '<span style="color: red;">Not set</span>'}</p>
+              <p><strong>স্ট্যাটাস:</strong> ${student.status || "Pending"}</p>
+              <p><strong>পিতার নাম:</strong> ${student.fatherName || student.guardianName || "N/A"}</p>
+              <p><strong>মাতার নাম:</strong> ${student.motherName || "N/A"}</p>
+              <p><strong>অভিভাবক:</strong> ${student.guardianName || "N/A"}</p>
+              <p><strong>অভিভাবক ফোন:</strong> ${student.guardianPhone || "N/A"}</p>
+              <p><strong>বর্তমান ঠিকানা:</strong> ${student.presentAddress || student.address || "N/A"}</p>
+              <p><strong>স্থায়ী ঠিকানা:</strong> ${student.permanentAddress || "N/A"}</p>
+              <p><strong>পরিচয়পত্র:</strong> ${student.dobOrNid || "N/A"}</p>
+              <p><strong>পেমেন্ট মেথড:</strong> ${student.paymentMethod || "N/A"}</p>
+              <p><strong>ট্রানজেকশন আইডি:</strong> ${student.transactionId || "N/A"}</p>
+              <p><strong>পেমেন্ট স্ট্যাটাস:</strong> ${student.paymentStatus || "Unpaid"}</p>
+              <p><strong>ভর্তি তারিখ:</strong> ${student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : "N/A"}</p>
+            </div>
+            <hr style="margin: 10px 0;">
+            <p style="font-size: 11px; color: #666;">রেজিস্ট্রেশন: ${student.createdAt ? new Date(student.createdAt).toLocaleString() : "N/A"}</p>
+          </div>
+        `,
+        confirmButtonColor: "#3b82f6",
+        confirmButtonText: "Close",
+        width: 650,
+      });
+    }
   };
 
   // Filter students
@@ -1328,22 +1394,14 @@ const Add_student = () => {
                                   <FaEye size={12} />
                                 </button>
 
-                                {/* ✅ Approve Button - শুধু Pending Student এর জন্য */}
+                                {/* Approve Button - শুধু Pending Student এর জন্য */}
                                 {student.status === "Pending" && (
-                                  // Add_student.jsx - Approve বাটনে ক্লিক করলে
-
                                   <button
                                     onClick={() => {
                                       setSelectedStudent({
                                         ...student,
-                                        username:
-                                          student.email ||
-                                          student.name
-                                            ?.toLowerCase()
-                                            .replace(/\s/g, "") ||
-                                          "",
+                                        username: "",
                                         password: "student123S@",
-                                        // roll: "", // ✅ Roll বাদ
                                       });
                                       setShowApproveModal(true);
                                     }}
@@ -1806,8 +1864,8 @@ const Add_student = () => {
           )}
         </main>
       </div>
-      // Add_student.jsx - Approve Modal (Roll বাদ)
-      {/* ✅ Approve Modal - শুধু Username এবং Password */}
+
+      {/* Approve Modal */}
       {showApproveModal && selectedStudent && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
@@ -1855,7 +1913,7 @@ const Add_student = () => {
               </p>
             </div>
 
-            {/* ✅ শুধু Username এবং Password - Roll বাদ */}
+            {/* Username এবং Password */}
             <div className="space-y-3 border-t pt-3">
               <h4 className="text-sm font-bold text-gray-700">
                 🔑 Set Login Credentials
@@ -1878,7 +1936,7 @@ const Add_student = () => {
                   placeholder="Enter username"
                 />
                 <p className="text-xs text-gray-400 mt-1">
-                  💡 This will be used for student login
+                  💡 Enter a unique username for student login
                 </p>
               </div>
 
