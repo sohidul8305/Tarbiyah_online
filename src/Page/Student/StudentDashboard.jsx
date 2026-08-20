@@ -28,7 +28,7 @@ const StudentDashboard = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("dashboard");
-  const [loading, setLoading] = useState(true); // ✅ এখানে setLoading ডিফাইন করুন
+  const [loading, setLoading] = useState(true);
   const [studentInfo, setStudentInfo] = useState({
     name: "",
     email: "",
@@ -38,11 +38,14 @@ const StudentDashboard = () => {
     username: "",
     status: "",
     admissionDate: "",
+    course: "",
+    paymentStatus: "",
+    paymentMethod: "",
+    transactionId: "",
+    paidAmount: "",
   });
 
-  // StudentDashboard.jsx - useEffect
   useEffect(() => {
-    // Check if student is logged in
     const isLoggedIn = localStorage.getItem("isStudentLoggedIn");
     if (!isLoggedIn) {
       navigate("/student-login");
@@ -61,6 +64,11 @@ const StudentDashboard = () => {
         username: parsedInfo.username || "",
         status: parsedInfo.status || "Active",
         admissionDate: parsedInfo.admissionDate || parsedInfo.createdAt || "",
+        course: parsedInfo.course || parsedInfo.class || "",
+        paymentStatus: parsedInfo.paymentStatus || "Unpaid",
+        paymentMethod: parsedInfo.paymentMethod || "",
+        transactionId: parsedInfo.transactionId || "",
+        paidAmount: parsedInfo.paidAmount || "",
       });
     }
     setLoading(false);
@@ -95,7 +103,6 @@ const StudentDashboard = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // সাইডবার মেনু আইটেম
   const menuItems = [
     {
       id: "dashboard",
@@ -139,7 +146,7 @@ const StudentDashboard = () => {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#004d4d] mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00ADD2] mx-auto"></div>
           <p className="text-sm text-gray-500 mt-3">Loading dashboard...</p>
         </div>
       </div>
@@ -150,7 +157,6 @@ const StudentDashboard = () => {
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Navbar />
 
-      {/* Mobile Header with Sidebar Toggle */}
       <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center">
         <h1 className="text-sm font-bold text-gray-800">Student Dashboard</h1>
         <button
@@ -162,7 +168,6 @@ const StudentDashboard = () => {
       </div>
 
       <div className="flex flex-grow relative">
-        {/* ================= SIDEBAR ================= */}
         <aside
           className={`
             fixed md:relative z-50
@@ -174,8 +179,7 @@ const StudentDashboard = () => {
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
-          {/* Sidebar Header */}
-          <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
+          <div className="p-4 bg-gradient-to-r from-[#00ADD2] to-[#00c4e6] text-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                 <span className="text-xl font-bold">
@@ -191,7 +195,6 @@ const StudentDashboard = () => {
             </div>
           </div>
 
-          {/* Navigation Menu */}
           <nav className="p-3 space-y-1">
             {menuItems.map((item) => (
               <Link
@@ -207,8 +210,8 @@ const StudentDashboard = () => {
                     w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all
                     ${
                       activeMenu === item.id
-                        ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                        : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        ? "bg-[#e6f7f9] text-[#00ADD2] font-bold shadow-sm"
+                        : "text-gray-700 hover:bg-gray-50 hover:text-[#00ADD2]"
                     }
                   `}
                 >
@@ -218,7 +221,6 @@ const StudentDashboard = () => {
               </Link>
             ))}
 
-            {/* Logout Button */}
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -228,13 +230,11 @@ const StudentDashboard = () => {
             </button>
           </nav>
 
-          {/* Footer */}
           <div className="absolute bottom-0 left-0 right-0 p-4 text-xs text-gray-400 border-t border-gray-100">
             <p>© 2026 Pipilika Soft</p>
           </div>
         </aside>
 
-        {/* ================= OVERLAY (Mobile) ================= */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -242,9 +242,7 @@ const StudentDashboard = () => {
           />
         )}
 
-        {/* ================= MAIN CONTENT ================= */}
         <main className="flex-grow p-4 md:p-6 overflow-x-auto w-full">
-          {/* Top Bar */}
           <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
               <h1 className="text-lg font-bold text-gray-800">
@@ -267,7 +265,6 @@ const StudentDashboard = () => {
             </div>
           </div>
 
-          {/* ================= DASHBOARD CONTENT ================= */}
           <Outlet />
 
           {activeMenu === "dashboard" && (
@@ -282,49 +279,46 @@ const StudentDashboard = () => {
 };
 
 // ==========================================
-// ড্যাশবোর্ড কন্টেন্ট (সব ট্যাবের কন্টেন্ট)
+// ড্যাশবোর্ড কন্টেন্ট
 // ==========================================
 
-// 1. Dashboard Home Content (Updated based on provided Image)
 const DashboardContent = ({ studentInfo }) => {
   const [paymentTab, setPaymentTab] = useState("summary");
 
-  // ডেমো কোর্স লিস্ট
-  const courses = [
-    { id: 1, code: "AQD-101", title: "Aqeedah", section: "[Brother-A-B16]" },
-    {
-      id: 2,
-      code: "ATI-101",
-      title: "Adabu Talibil Il'm",
-      section: "[Brother-A-B16]",
-    },
-    {
-      id: 3,
-      code: "DNS-101",
-      title: "Da'wah & Sunnah",
-      section: "[Brother-A-B16]",
-    },
-    { id: 4, code: "FQH-101", title: "Fiqh-I", section: "[Brother-A-B16]" },
-    { id: 5, code: "TAJ-101", title: "Tajweed-I", section: "[Brother-A-B16]" },
-  ];
+  // Student এর নিজের কোর্স
+  const courses = studentInfo.course
+    ? [
+        {
+          id: 1,
+          code: "CRS-101",
+          title: studentInfo.course,
+          section: "[Student]",
+        },
+      ]
+    : [{ id: 1, code: "N/A", title: "No course registered yet", section: "" }];
+
+  // Payment Calculation
+  const paidAmount = parseFloat(studentInfo.paidAmount) || 0;
+  const totalBill = paidAmount > 0 ? paidAmount : 2280;
+  const totalPaid = studentInfo.paymentStatus === "Paid" ? totalBill : 0;
+  const totalDue = studentInfo.paymentStatus === "Paid" ? 0 : totalBill;
 
   return (
     <div className="space-y-4">
-      {/* Purple Welcome Banner */}
-      <div className="bg-[#8e24aa] text-white p-3 rounded-sm shadow-sm text-sm flex items-center">
+      {/* Welcome Banner - কালার পরিবর্তন */}
+      <div className="bg-[#00ADD2] text-white p-3 rounded-sm shadow-sm text-sm flex items-center">
         <p>
           Assalamu alaikum wa rahmatullahi wa barakatuh. Ahlan wa Sahlan WA
           Masa'al Khair!{" "}
           <strong>
-            {studentInfo.name} [{studentInfo.roll}]
+            {studentInfo.name} [{studentInfo.roll || "N/A"}]
           </strong>
         </p>
       </div>
 
-      {/* Important Links Section */}
-      <div className="border border-blue-200 bg-white rounded-sm shadow-sm">
-        {/* Header */}
-        <div className="bg-[#3498db] text-white px-3 py-2 flex justify-between items-center rounded-t-sm">
+      {/* Important Links Section - কালার পরিবর্তন */}
+      <div className="border border-[#00ADD2] bg-white rounded-sm shadow-sm">
+        <div className="bg-[#00ADD2] text-white px-3 py-2 flex justify-between items-center rounded-t-sm">
           <div className="flex items-center gap-2 text-sm font-medium">
             <FaInfoCircle /> Important Links
           </div>
@@ -338,7 +332,6 @@ const DashboardContent = ({ studentInfo }) => {
           </div>
         </div>
 
-        {/* Content Body */}
         <div className="p-4 bg-[#f8f9fa]">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Card 1: Check Due & Payments */}
@@ -405,19 +398,19 @@ const DashboardContent = ({ studentInfo }) => {
               </Link>
             </div>
 
-            {/* Orange Warning Text */}
+            {/* ✅ Orange Warning Text - রাখবেন */}
             <div className="col-span-1 md:col-span-1 bg-[#f39c12] text-white text-xs p-2 rounded-sm leading-relaxed mt-2">
               আপনার পোর্টাল এবং ক্যাম্পাসের পাসওয়ার্ড যদি একই থাকে সে ক্ষেত্রে
               আপনি সরাসরি ক্যাম্পাসে লগইন হয়ে যেতে পারবেন, অন্যথায় আপনাকে
               ক্যাম্পাসে পাসওয়ার্ড দিয়ে লগইন করতে হবে।
             </div>
 
-            {/* Campus Login Card */}
-            <div className="col-span-1 md:col-span-1 bg-[#00a65a] text-white rounded-sm relative flex flex-col justify-between h-[100px] mt-2 hover:brightness-105 transition-all">
+            {/* ✅ Campus Login Card - রাখবেন, শুধু কালার পরিবর্তন */}
+            <div className="col-span-1 md:col-span-1 bg-[#00ADD2] text-white rounded-sm relative flex flex-col justify-between h-[100px] mt-2 hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg mb-1">Campus</h3>
                 <Link to="/campus-login">
-                  <button className="bg-[#008d4c] hover:bg-[#00733e] text-white text-xs px-3 py-1 rounded shadow-sm transition-colors border border-transparent">
+                  <button className="bg-[#008c9e] hover:bg-[#006b7a] text-white text-xs px-3 py-1 rounded shadow-sm transition-colors border border-transparent">
                     Login to Campus
                   </button>
                 </Link>
@@ -434,11 +427,11 @@ const DashboardContent = ({ studentInfo }) => {
         </div>
       </div>
 
-      {/* Registered Courses Section */}
-      <div className="border border-blue-200 bg-white rounded-sm shadow-sm mb-6">
-        <div className="flex items-center gap-2 p-2 border-b border-blue-200 text-sm bg-[#f4f6f9] font-medium text-gray-700">
-          <FaFileAlt className="text-gray-500" /> Registered Courses of
-          <select className="border border-gray-300 rounded px-2 py-0.5 text-xs bg-white focus:outline-none">
+      {/* Registered Courses Section - Student এর নিজের কোর্স */}
+      <div className="border border-[#00ADD2] bg-white rounded-sm shadow-sm mb-6">
+        <div className="flex items-center gap-2 p-2 border-b border-[#00ADD2] text-sm bg-[#f4f6f9] font-medium text-gray-700">
+          <FaFileAlt className="text-[#00ADD2]" /> Registered Courses of
+          <select className="border border-[#00ADD2] rounded px-2 py-0.5 text-xs bg-white focus:outline-none">
             <option>Fall 2026 (Jul-Dec)</option>
           </select>
         </div>
@@ -462,10 +455,10 @@ const DashboardContent = ({ studentInfo }) => {
                     {index + 1}
                   </td>
                   <td className="px-4 py-3">
-                    <p className="font-medium text-[#3498db]">
+                    <p className="font-medium text-[#00ADD2]">
                       {course.code}: {course.title} {course.section}
                     </p>
-                    <div className="text-[11px] text-[#3498db] flex gap-2 mt-1">
+                    <div className="text-[11px] text-[#00ADD2] flex gap-2 mt-1">
                       <span className="cursor-pointer hover:underline">
                         [Attendances]
                       </span>
@@ -487,17 +480,33 @@ const DashboardContent = ({ studentInfo }) => {
         </div>
       </div>
 
-      {/* Payment Section (Unchanged) */}
-      <PaymentSection paymentTab={paymentTab} setPaymentTab={setPaymentTab} />
+      {/* Payment Section */}
+      <PaymentSection
+        paymentTab={paymentTab}
+        setPaymentTab={setPaymentTab}
+        studentInfo={studentInfo}
+        totalBill={totalBill}
+        totalPaid={totalPaid}
+        totalDue={totalDue}
+      />
     </div>
   );
 };
 
-// 2. Payment Section Component
-const PaymentSection = ({ paymentTab, setPaymentTab }) => {
+// ==========================================
+// Payment Section Components
+// ==========================================
+
+const PaymentSection = ({
+  paymentTab,
+  setPaymentTab,
+  studentInfo,
+  totalBill,
+  totalPaid,
+  totalDue,
+}) => {
   return (
     <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-      {/* Tabs */}
       <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-3 mb-4 text-sm">
         {[
           { id: "summary", label: "Payment Summary" },
@@ -510,7 +519,7 @@ const PaymentSection = ({ paymentTab, setPaymentTab }) => {
             onClick={() => setPaymentTab(tab.id)}
             className={`px-4 py-1.5 rounded border transition-all ${
               paymentTab === tab.id
-                ? "bg-gray-100 font-bold border-gray-400 text-gray-800"
+                ? "bg-gray-100 font-bold border-[#00ADD2] text-[#00ADD2]"
                 : "bg-white text-gray-600 hover:bg-gray-50 border-gray-200"
             }`}
           >
@@ -519,11 +528,10 @@ const PaymentSection = ({ paymentTab, setPaymentTab }) => {
         ))}
       </div>
 
-      {/* Filter Bar */}
       <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-200 mb-6 gap-3">
         <div className="flex items-center gap-2 text-sm text-gray-700 w-full sm:w-auto">
           <span>📋 Payment Summary for</span>
-          <select className="border border-gray-300 rounded px-3 py-1 bg-white text-sm focus:outline-none">
+          <select className="border border-gray-300 rounded px-3 py-1 bg-white text-sm focus:outline-none focus:ring-[#00ADD2]">
             <option>Fall 2026 (Jul-Dec)</option>
             <option>Spring 2026 (Jan-Jun)</option>
           </select>
@@ -532,134 +540,202 @@ const PaymentSection = ({ paymentTab, setPaymentTab }) => {
           onClick={() =>
             Swal.fire("Refreshed", "Data updated successfully", "success")
           }
-          className="bg-[#5bc0de] hover:bg-[#31b0d5] text-white text-xs px-3 py-1.5 rounded font-bold flex items-center gap-1 shadow-sm"
+          className="bg-[#00ADD2] hover:bg-[#008c9e] text-white text-xs px-3 py-1.5 rounded font-bold flex items-center gap-1 shadow-sm"
         >
           <span>🔄</span> Refresh
         </button>
       </div>
 
-      {/* Tab Content */}
-      {paymentTab === "summary" && <PaymentSummary />}
-      {paymentTab === "all-bill" && <AllBill />}
-      {paymentTab === "history" && <PaymentHistory />}
-      {paymentTab === "online-history" && <OnlinePaymentHistory />}
+      {paymentTab === "summary" && (
+        <PaymentSummary
+          totalBill={totalBill}
+          totalPaid={totalPaid}
+          totalDue={totalDue}
+          studentInfo={studentInfo}
+        />
+      )}
+      {paymentTab === "all-bill" && <AllBill studentInfo={studentInfo} />}
+      {paymentTab === "history" && <PaymentHistory studentInfo={studentInfo} />}
+      {paymentTab === "online-history" && (
+        <OnlinePaymentHistory studentInfo={studentInfo} />
+      )}
     </div>
   );
 };
 
-// 3. Payment Summary Component
-const PaymentSummary = () => (
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    {/* Left Box */}
-    <div className="border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm">
-      <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 font-bold text-sm text-gray-800 flex items-center gap-2">
-        <span>📊</span> Payment Summary for Fall 2026 (Jul-Dec)
+// Payment Summary Component
+const PaymentSummary = ({ totalBill, totalPaid, totalDue, studentInfo }) => {
+  const bill =
+    typeof totalBill === "number" ? totalBill : parseFloat(totalBill) || 0;
+  const paid =
+    typeof totalPaid === "number" ? totalPaid : parseFloat(totalPaid) || 0;
+  const due =
+    typeof totalDue === "number" ? totalDue : parseFloat(totalDue) || 0;
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm">
+        <div className="bg-[#00ADD2] text-white px-4 py-2 border-b border-gray-300 font-bold text-sm flex items-center gap-2">
+          <span>📊</span> Payment Summary for Fall 2026 (Jul-Dec)
+        </div>
+        <div className="p-4 space-y-3 text-sm text-gray-700">
+          <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
+            <span>Previous Advance:</span>
+            <span className="font-semibold">0.00</span>
+          </div>
+          <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
+            <span>This Semester Bill:</span>
+            <span className="font-semibold">{bill.toFixed(2)}</span>
+          </div>
+          <div className="border-t border-black my-1"></div>
+          <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
+            <span>This Semester Paid:</span>
+            <span className="font-semibold">{paid.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between py-1 text-base font-bold text-gray-900">
+            <span>This Semester Due:</span>
+            <span className="text-red-600">{due.toFixed(2)}</span>
+          </div>
+          <div className="text-xs text-gray-400 mt-2 border-t pt-2">
+            <p>Payment Method: {studentInfo.paymentMethod || "N/A"}</p>
+            <p>Transaction ID: {studentInfo.transactionId || "N/A"}</p>
+            <p>
+              Status:{" "}
+              <span
+                className={
+                  studentInfo.paymentStatus === "Paid"
+                    ? "text-green-600 font-bold"
+                    : "text-red-600 font-bold"
+                }
+              >
+                {studentInfo.paymentStatus || "Unpaid"}
+              </span>
+            </p>
+          </div>
+        </div>
       </div>
-      <div className="p-4 space-y-3 text-sm text-gray-700">
-        <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-          <span>Previous Advance:</span>
-          <span className="font-semibold">0.00</span>
+
+      <div className="border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm">
+        <div className="bg-[#00ADD2] text-white px-4 py-2 border-b border-gray-300 font-bold text-sm flex items-center gap-2">
+          <span>📈</span> Overall Summary
         </div>
-        <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-          <span>This Semester Bill:</span>
-          <span className="font-semibold">2,280.00</span>
-        </div>
-        <div className="border-t border-black my-1"></div>
-        <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-          <span>This Semester Paid:</span>
-          <span className="font-semibold">0.00</span>
-        </div>
-        <div className="flex justify-between py-1 text-base font-bold text-gray-900">
-          <span>This Semester Due:</span>
-          <span className="text-red-600">2,280.00</span>
+        <div className="p-4 space-y-3 text-sm text-gray-700">
+          <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
+            <span>Total Bill (Debit):</span>
+            <span className="font-semibold">{bill.toFixed(2)}</span>
+          </div>
+          <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
+            <span>Total Paid (Credit):</span>
+            <span className="font-semibold">{paid.toFixed(2)}</span>
+          </div>
+          <div className="border-t border-black my-1"></div>
+          <div className="flex justify-between items-center py-2 bg-gray-50 px-2 rounded">
+            <span className="font-bold text-gray-900">Overall Due:</span>
+            <span className="bg-red-600 text-white font-bold px-3 py-1 rounded text-sm shadow">
+              {due.toFixed(2)}
+            </span>
+          </div>
         </div>
       </div>
     </div>
+  );
+};
 
-    {/* Right Box */}
-    <div className="border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm">
-      <div className="bg-gray-100 px-4 py-2 border-b border-gray-300 font-bold text-sm text-gray-800 flex items-center gap-2">
-        <span>📈</span> Overall Summary
-      </div>
-      <div className="p-4 space-y-3 text-sm text-gray-700">
-        <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-          <span>Total Bill (Debit):</span>
-          <span className="font-semibold">2,280.00</span>
-        </div>
-        <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-          <span>Total Paid (Credit):</span>
-          <span className="font-semibold">0.00</span>
-        </div>
-        <div className="border-t border-black my-1"></div>
-        <div className="flex justify-between items-center py-2 bg-gray-50 px-2 rounded">
-          <span className="font-bold text-gray-900">Overall Due:</span>
-          <span className="bg-red-600 text-white font-bold px-3 py-1 rounded text-sm shadow">
-            2,280.00
+// All Bill Component
+const AllBill = ({ studentInfo }) => {
+  const paidAmount = parseFloat(studentInfo.paidAmount) || 2280;
+
+  return (
+    <div className="p-4 text-sm text-gray-600 bg-gray-50 rounded-lg border">
+      <p className="font-bold text-gray-800 mb-4">All Semester Bills:</p>
+      <div className="space-y-2">
+        <div className="flex justify-between items-center p-2 bg-white rounded border">
+          <span>Fall 2026 Semester Bill</span>
+          <span className="font-bold text-red-600">
+            {paidAmount.toFixed(2)} BDT
+          </span>
+          <span
+            className={`text-xs px-2 py-1 rounded ${studentInfo.paymentStatus === "Paid" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+          >
+            {studentInfo.paymentStatus || "Due"}
           </span>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
-// 4. All Bill Component
-const AllBill = () => (
-  <div className="p-4 text-sm text-gray-600 bg-gray-50 rounded-lg border">
-    <p className="font-bold text-gray-800 mb-4">All Semester Bills:</p>
-    <div className="space-y-2">
-      <div className="flex justify-between items-center p-2 bg-white rounded border">
-        <span>Fall 2026 Semester Bill</span>
-        <span className="font-bold text-red-600">2,280.00 BDT</span>
-        <span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded">
-          Due
-        </span>
-      </div>
-      <div className="flex justify-between items-center p-2 bg-white rounded border">
-        <span>Spring 2026 Semester Bill</span>
-        <span className="font-bold text-green-600">2,280.00 BDT</span>
-        <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">
-          Paid
-        </span>
+// Payment History Component
+const PaymentHistory = ({ studentInfo }) => {
+  const paidAmount = parseFloat(studentInfo.paidAmount) || 0;
+
+  return (
+    <div className="p-4 text-sm text-gray-600 bg-gray-50 rounded-lg border">
+      <p className="font-bold text-gray-800 mb-2">Payment History (Credit):</p>
+      {studentInfo.paymentStatus === "Paid" && paidAmount > 0 ? (
+        <div className="space-y-2">
+          <div className="flex justify-between items-center p-2 bg-white rounded border">
+            <span>Fall 2026 - Semester Fee</span>
+            <span className="font-bold text-green-600">
+              {paidAmount.toFixed(2)} BDT
+            </span>
+            <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">
+              Paid
+            </span>
+          </div>
+          <div className="text-xs text-gray-400 mt-2">
+            <p>📌 Transaction: {studentInfo.transactionId || "N/A"}</p>
+            <p>📌 Method: {studentInfo.paymentMethod || "N/A"}</p>
+          </div>
+        </div>
+      ) : (
+        <p className="text-gray-500">No payment records found yet.</p>
+      )}
+      <div className="mt-4 text-xs text-gray-400">
+        <p>
+          📌 Total Paid:{" "}
+          {studentInfo.paymentStatus === "Paid"
+            ? paidAmount.toFixed(2)
+            : "0.00"}{" "}
+          BDT
+        </p>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
-// 5. Payment History Component
-const PaymentHistory = () => (
-  <div className="p-4 text-sm text-gray-600 bg-gray-50 rounded-lg border">
-    <p className="font-bold text-gray-800 mb-2">Payment History (Credit):</p>
-    <p className="text-gray-500">No payment records found yet.</p>
-    <div className="mt-4 text-xs text-gray-400">
-      <p>📌 Total Paid: 0.00 BDT</p>
+// Online Payment History Component
+const OnlinePaymentHistory = ({ studentInfo }) => {
+  const paidAmount = parseFloat(studentInfo.paidAmount) || 2280;
+  const isPaid = studentInfo.paymentStatus === "Paid";
+
+  return (
+    <div className="p-4 text-sm bg-teal-50 rounded-lg border border-teal-100 text-center space-y-4">
+      <p className="font-bold text-teal-900 text-base">
+        Make Online Payment via bKash / SSLCommerz
+      </p>
+      <p className="text-gray-600 text-sm">
+        আপনার বকেয়া{" "}
+        <span className="font-bold text-red-600">
+          {isPaid ? "০.০০" : paidAmount.toFixed(2)} টাকা
+        </span>{" "}
+        অনলাইনে পরিশোধ করতে নিচের বাটনে ক্লিক করুন।
+      </p>
+      <button
+        onClick={() =>
+          Swal.fire({
+            title: "Payment Gateway",
+            text: "Connecting to bKash Gateway...",
+            icon: "info",
+            confirmButtonColor: "#00ADD2",
+          })
+        }
+        className="bg-[#00ADD2] hover:bg-[#008c9e] text-white px-8 py-3 rounded-lg font-bold text-sm shadow-lg transition-all"
+      >
+        Pay {isPaid ? "0.00" : paidAmount.toFixed(2)} BDT Now
+      </button>
     </div>
-  </div>
-);
+  );
+};
 
-// 6. Online Payment History Component
-const OnlinePaymentHistory = () => (
-  <div className="p-4 text-sm bg-teal-50 rounded-lg border border-teal-100 text-center space-y-4">
-    <p className="font-bold text-teal-900 text-base">
-      Make Online Payment via bKash / SSLCommerz
-    </p>
-    <p className="text-gray-600 text-sm">
-      আপনার বকেয়া <span className="font-bold text-red-600">২,২৮০.০০ টাকা</span>{" "}
-      অনলাইনে পরিশোধ করতে নিচের বাটনে ক্লিক করুন।
-    </p>
-    <button
-      onClick={() =>
-        Swal.fire({
-          title: "Payment Gateway",
-          text: "Connecting to bKash Gateway...",
-          icon: "info",
-          confirmButtonColor: "#004d4d",
-        })
-      }
-      className="bg-[#004d4d] hover:bg-teal-900 text-white px-8 py-3 rounded-lg font-bold text-sm shadow-lg transition-all"
-    >
-      Pay 2,280.00 BDT Now
-    </button>
-  </div>
-);
-j;
 export default StudentDashboard;
