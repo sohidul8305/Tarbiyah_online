@@ -87,10 +87,6 @@ const AdminDashboard = () => {
     notifications: 8,
   });
 
-  // AdminDashboard.jsx - StudentManagementContent এ View Details আপডেট করুন
-
-  // AdminDashboard.jsx - StudentManagementContent এ handleView
-
   const handleView = (student) => {
     Swal.fire({
       title: `📋 Student Details: ${student.name}`,
@@ -936,18 +932,18 @@ const StudentManagementContent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Load students - কোন টোকেন লাগবে না
+  // ✅ Approve Modal State
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+
   useEffect(() => {
     fetchStudents();
   }, [refreshKey]);
 
-  // AdminDashboard.jsx - fetchStudents
   const fetchStudents = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      console.log("🔄 Fetching students from API...");
 
       const response = await fetch("http://localhost:5000/api/students/all", {
         method: "GET",
@@ -955,9 +951,6 @@ const StudentManagementContent = () => {
           "Content-Type": "application/json",
         },
       });
-
-      console.log("📥 Response Status:", response.status);
-      console.log("📥 Response Status Text:", response.statusText);
 
       if (response.status === 404) {
         setError(
@@ -971,7 +964,6 @@ const StudentManagementContent = () => {
       }
 
       const data = await response.json();
-      console.log("📥 Response Data:", data);
 
       if (data.success) {
         const studentList = data.students || [];
@@ -990,47 +982,140 @@ const StudentManagementContent = () => {
     }
   };
 
-  // Add test student
-  const addTestStudent = async () => {
+  // ✅ Approve Student Function
+  const handleApproveStudent = async () => {
     try {
-      setLoading(true);
+      if (
+        !selectedStudent.username ||
+        !selectedStudent.password ||
+        !selectedStudent.roll
+      ) {
+        Swal.fire({
+          icon: "warning",
+          title: "Information Missing!",
+          text: "Please provide username, password and roll number.",
+        });
+        return;
+      }
+
       const response = await fetch(
-        "http://localhost:5000/api/students/add-test",
+        `http://localhost:5000/api/students/approve/${selectedStudent._id}`,
         {
-          method: "POST",
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({
+            username: selectedStudent.username,
+            password: selectedStudent.password,
+            roll: selectedStudent.roll,
+          }),
         },
       );
 
       const data = await response.json();
 
       if (data.success) {
-        await Swal.fire({
+        const updatedStudents = students.map((s) =>
+          s._id === selectedStudent._id
+            ? {
+                ...s,
+                status: "Active",
+                username: selectedStudent.username,
+                roll: selectedStudent.roll,
+              }
+            : s,
+        );
+        setStudents(updatedStudents);
+        setShowApproveModal(false);
+        setSelectedStudent(null);
+
+        Swal.fire({
           icon: "success",
-          title: "✅ Test Student Added!",
-          text: "A test student has been added successfully.",
-          timer: 2000,
-          showConfirmButton: false,
+          title: "✅ Student Approved!",
+          html: `
+            <div style="text-align: left;">
+              <p><strong>Student:</strong> ${selectedStudent.name}</p>
+              <p><strong>Class:</strong> ${selectedStudent.class}</p>
+              <p><strong>Roll:</strong> ${selectedStudent.roll}</p>
+              <hr style="margin: 10px 0;">
+              <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
+                <p style="font-weight: bold; color: #004d4d; margin-bottom: 5px;">🔑 Login Credentials:</p>
+                <p><strong>Username:</strong> <span style="color: #004d4d;">${selectedStudent.username}</span></p>
+                <p><strong>Password:</strong> <span style="color: #004d4d;">${selectedStudent.password}</span></p>
+              </div>
+            </div>
+          `,
+          confirmButtonColor: "#004d4d",
+          confirmButtonText: "OK",
         });
-        setRefreshKey((prev) => prev + 1);
       } else {
         Swal.fire({
           icon: "error",
           title: "Failed!",
-          text: data.message || "Could not add test student.",
+          text: data.message || "Could not approve student.",
         });
       }
     } catch (error) {
-      console.error("❌ Error:", error);
+      console.error("❌ Error approving student:", error);
       Swal.fire({
         icon: "error",
-        title: "Error!",
-        text: "Could not connect to server.",
+        title: "Failed!",
+        text: "Could not approve student. Please try again.",
       });
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  // ✅ Delete Student
+  const handleDelete = async (id, name) => {
+    const result = await Swal.fire({
+      title: `Delete ${name}?`,
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/students/delete/${id}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          setStudents(students.filter((s) => s._id !== id));
+          Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: "Student has been deleted.",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Failed!",
+            text: data.message || "Could not delete student.",
+          });
+        }
+      } catch (error) {
+        console.error("❌ Error deleting student:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: "Could not delete student.",
+        });
+      }
     }
   };
 
@@ -1069,39 +1154,6 @@ const StudentManagementContent = () => {
     );
   }
 
-  // Show error with Add Test Student button
-  if (error && students.length === 0) {
-    return (
-      <div className="h-full flex flex-col items-center justify-center">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 max-w-md text-center">
-          <FaUsers className="text-6xl text-yellow-400 mx-auto mb-4" />
-          <h3 className="text-lg font-bold text-yellow-700 mb-2">
-            No Students Found
-          </h3>
-          <p className="text-sm text-yellow-600 mb-4">{error}</p>
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={addTestStudent}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2"
-            >
-              <FaPlusCircle size={16} /> Add Test Student
-            </button>
-            <button
-              onClick={() => setRefreshKey((prev) => prev + 1)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-all"
-            >
-              🔄 Refresh
-            </button>
-          </div>
-          <p className="text-xs text-gray-500 mt-4">
-            💡 Click "Add Test Student" to insert a sample student into the
-            database
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="h-full flex flex-col space-y-3 overflow-hidden">
       {/* Header */}
@@ -1119,12 +1171,6 @@ const StudentManagementContent = () => {
           )}
         </h2>
         <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={addTestStudent}
-            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"
-          >
-            <FaPlusCircle size={12} /> Add Test
-          </button>
           <input
             type="text"
             placeholder="Search..."
@@ -1150,7 +1196,6 @@ const StudentManagementContent = () => {
           </button>
         </div>
       </div>
-
       {/* Table */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
         <div className="overflow-x-auto h-full">
@@ -1190,6 +1235,11 @@ const StudentManagementContent = () => {
                     <p className="text-[10px] text-gray-500">
                       📱 {student.phone}
                     </p>
+                    {student.email && (
+                      <p className="text-[10px] text-gray-400">
+                        ✉️ {student.email}
+                      </p>
+                    )}
                   </td>
                   <td className="px-3 py-2 text-xs text-gray-600">
                     {student.class}
@@ -1225,17 +1275,28 @@ const StudentManagementContent = () => {
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-1">
+                      {/* ✅ View Button */}
                       <button
-                        className="text-blue-600 hover:text-blue-800 p-0.5"
-                        title="View"
+                        onClick={() => {
+                          setSelectedStudent({
+                            ...student,
+                            username: "",
+                            password: "",
+                            roll: student.roll || "",
+                          });
+                          setShowApproveModal(true);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 p-1 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="View / Approve"
                       >
-                        <FaEye size={12} />
+                        <FaEye size={16} />
                       </button>
                       <button
-                        className="text-red-600 hover:text-red-800 p-0.5"
+                        onClick={() => handleDelete(student._id, student.name)}
+                        className="text-red-600 hover:text-red-800 p-1 hover:bg-red-50 rounded-lg transition-colors"
                         title="Delete"
                       >
-                        <FaTrash size={12} />
+                        <FaTrash size={16} />
                       </button>
                     </div>
                   </td>
@@ -1245,6 +1306,160 @@ const StudentManagementContent = () => {
           </table>
         </div>
       </div>
+      // AdminDashboard.jsx - StudentManagementContent এর Modal অংশ
+      {/* ✅ Approve Modal - এখানে আপনি নিজে Username এবং Password দিতে পারবেন */}
+      {showApproveModal && selectedStudent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center mb-4 border-b pb-3">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <FaCheckCircle className="text-green-600" /> Student Details
+              </h3>
+              <button
+                onClick={() => {
+                  setShowApproveModal(false);
+                  setSelectedStudent(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Student Information Display */}
+            <div className="bg-gray-50 p-4 rounded-lg mb-4 space-y-1">
+              <p>
+                <strong>Name:</strong> {selectedStudent.name}
+              </p>
+              <p>
+                <strong>Email:</strong> {selectedStudent.email || "N/A"}
+              </p>
+              <p>
+                <strong>Phone:</strong> {selectedStudent.phone || "N/A"}
+              </p>
+              <p>
+                <strong>Class:</strong> {selectedStudent.class || "N/A"}
+              </p>
+              <p>
+                <strong>Guardian:</strong>{" "}
+                {selectedStudent.guardianName ||
+                  selectedStudent.fatherName ||
+                  "N/A"}
+              </p>
+              <p>
+                <strong>Address:</strong>{" "}
+                {selectedStudent.presentAddress ||
+                  selectedStudent.address ||
+                  "N/A"}
+              </p>
+              <p>
+                <strong>NID:</strong> {selectedStudent.dobOrNid || "N/A"}
+              </p>
+              <p>
+                <strong>Status:</strong>{" "}
+                <span className="text-yellow-600 font-semibold">
+                  {selectedStudent.status || "Pending"}
+                </span>
+              </p>
+              <p>
+                <strong>Registration:</strong>{" "}
+                {selectedStudent.createdAt
+                  ? new Date(selectedStudent.createdAt).toLocaleString()
+                  : "N/A"}
+              </p>
+            </div>
+
+            {/* ✅ এখানে আপনি নিজে Username এবং Password দিতে পারবেন */}
+            <div className="space-y-3 border-t pt-3">
+              <h4 className="text-sm font-bold text-gray-700">
+                🔑 Set Login Credentials
+              </h4>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Roll Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={selectedStudent.roll}
+                  onChange={(e) =>
+                    setSelectedStudent({
+                      ...selectedStudent,
+                      roll: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="e.g., 01"
+                />
+              </div>
+
+              {/* ✅ Username Input - আপনি এখানে Username দিবেন */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Username <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={selectedStudent.username}
+                  onChange={(e) =>
+                    setSelectedStudent({
+                      ...selectedStudent,
+                      username: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Enter username"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  💡 This will be used for student login
+                </p>
+              </div>
+
+              {/* ✅ Password Input - আপনি এখানে Password দিবেন */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={selectedStudent.password}
+                  onChange={(e) =>
+                    setSelectedStudent({
+                      ...selectedStudent,
+                      password: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Enter password"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  💡 Default password: <strong>student123S@</strong>
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 mt-4 pt-3 border-t">
+              <button
+                onClick={() => {
+                  setShowApproveModal(false);
+                  setSelectedStudent(null);
+                }}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg font-medium"
+              >
+                Close
+              </button>
+              <button
+                onClick={handleApproveStudent}
+                className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2 font-medium"
+              >
+                <FaCheckCircle size={14} /> Approve & Activate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

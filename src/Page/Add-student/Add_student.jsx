@@ -104,6 +104,10 @@ const Add_student = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ✅ Approve Modal State
+  const [showApproveModal, setShowApproveModal] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+
   // Form Data
   const [formData, setFormData] = useState({
     name: "",
@@ -198,6 +202,10 @@ const Add_student = () => {
     fetchStudentsFromAPI();
   }, [refreshKey]);
 
+  // Add_student.jsx - fetchStudentsFromAPI ফাংশন
+
+  // Add_student.jsx - fetchStudentsFromAPI
+
   const fetchStudentsFromAPI = async () => {
     try {
       setLoading(true);
@@ -214,16 +222,18 @@ const Add_student = () => {
 
       console.log("📥 Response Status:", response.status);
 
-      if (response.status === 404) {
-        setError(
-          "API endpoint not found! Please check if server is running on port 5000",
-        );
-        setStudents([]);
-        return;
-      }
+      // ✅ Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("❌ Response is not JSON:", text.substring(0, 200));
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        if (text.includes("<!DOCTYPE")) {
+          throw new Error(
+            "Backend server is not running! Please start the server.",
+          );
+        }
+        throw new Error("Server returned invalid response.");
       }
 
       const data = await response.json();
@@ -232,8 +242,6 @@ const Add_student = () => {
       if (data.success) {
         const studentList = data.students || [];
         console.log(`✅ Found ${studentList.length} students from API`);
-
-        // ✅ এখানে students সেট করছি
         setStudents(studentList);
 
         if (studentList.length === 0) {
@@ -251,7 +259,125 @@ const Add_student = () => {
       setLoading(false);
     }
   };
+  // ✅ Approve Student Function
+  // Add_student.jsx - handleApproveStudent ফাংশন
 
+  // Add_student.jsx - handleApproveStudent
+
+  const handleApproveStudent = async () => {
+    try {
+      if (!selectedStudent) {
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "No student selected.",
+        });
+        return;
+      }
+
+      if (!selectedStudent.username || !selectedStudent.password) {
+        Swal.fire({
+          icon: "warning",
+          title: "Information Missing!",
+          text: "Please provide username and password.",
+        });
+        return;
+      }
+
+      Swal.fire({
+        title: "Processing...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      console.log("📤 Sending Approve Request:");
+      console.log("📤 ID:", selectedStudent._id);
+      console.log("📤 Username:", selectedStudent.username);
+      console.log("📤 Password:", selectedStudent.password);
+
+      const response = await fetch(
+        `http://localhost:5000/api/students/approve/${selectedStudent._id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: selectedStudent.username,
+            password: selectedStudent.password,
+          }),
+        },
+      );
+
+      console.log("📥 Response Status:", response.status);
+
+      // ✅ Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("❌ Response is not JSON:", text.substring(0, 200));
+
+        if (text.includes("<!DOCTYPE")) {
+          throw new Error(
+            "Backend server is not running! Please start the server.",
+          );
+        }
+        throw new Error("Server returned invalid response.");
+      }
+
+      const data = await response.json();
+      console.log("📥 Response Data:", data);
+
+      if (data.success) {
+        const updatedStudents = students.map((s) =>
+          s._id === selectedStudent._id
+            ? {
+                ...s,
+                status: "Active",
+                username: selectedStudent.username,
+              }
+            : s,
+        );
+        setStudents(updatedStudents);
+        setShowApproveModal(false);
+        setSelectedStudent(null);
+
+        Swal.fire({
+          icon: "success",
+          title: "✅ Student Approved!",
+          html: `
+          <div style="text-align: left;">
+            <p><strong>Student:</strong> ${selectedStudent.name}</p>
+            <p><strong>Course:</strong> ${selectedStudent.course || "N/A"}</p>
+            <hr style="margin: 10px 0;">
+            <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
+              <p style="font-weight: bold; color: #004d4d;">🔑 Login Credentials:</p>
+              <p><strong>Username:</strong> ${selectedStudent.username}</p>
+              <p><strong>Password:</strong> ${selectedStudent.password}</p>
+            </div>
+          </div>
+        `,
+          confirmButtonColor: "#004d4d",
+          confirmButtonText: "OK",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Could not approve student.",
+        });
+      }
+    } catch (error) {
+      console.error("❌ Error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error!",
+        text: error.message || "Could not approve student. Please try again.",
+      });
+    }
+  };
   // Register Student
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -535,7 +661,7 @@ const Add_student = () => {
     }
   };
 
-  // ✅ View Details - সব তথ্য সহ
+  // ✅ View Details
   const handleView = (student) => {
     Swal.fire({
       title: `📋 Student Details: ${student.name}`,
@@ -1038,7 +1164,7 @@ const Add_student = () => {
           </div>
 
           {showStudentList ? (
-            // Student List View - সব ডেটা সহ
+            // Student List View
             <div className="space-y-3 overflow-hidden h-[calc(100vh-240px)]">
               {/* Filters */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2">
@@ -1085,7 +1211,7 @@ const Add_student = () => {
                 </div>
               </div>
 
-              {/* Students Table - সব কলাম সহ */}
+              {/* Students Table */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -1193,6 +1319,7 @@ const Add_student = () => {
                             </td>
                             <td className="px-3 py-2">
                               <div className="flex items-center gap-1">
+                                {/* View Button */}
                                 <button
                                   onClick={() => handleView(student)}
                                   className="text-blue-600 hover:text-blue-800 p-0.5"
@@ -1200,6 +1327,34 @@ const Add_student = () => {
                                 >
                                   <FaEye size={12} />
                                 </button>
+
+                                {/* ✅ Approve Button - শুধু Pending Student এর জন্য */}
+                                {student.status === "Pending" && (
+                                  // Add_student.jsx - Approve বাটনে ক্লিক করলে
+
+                                  <button
+                                    onClick={() => {
+                                      setSelectedStudent({
+                                        ...student,
+                                        username:
+                                          student.email ||
+                                          student.name
+                                            ?.toLowerCase()
+                                            .replace(/\s/g, "") ||
+                                          "",
+                                        password: "student123S@",
+                                        // roll: "", // ✅ Roll বাদ
+                                      });
+                                      setShowApproveModal(true);
+                                    }}
+                                    className="text-green-600 hover:text-green-800 p-0.5"
+                                    title="Approve"
+                                  >
+                                    <FaCheckCircle size={12} />
+                                  </button>
+                                )}
+
+                                {/* Delete Button */}
                                 <button
                                   onClick={() =>
                                     handleDelete(student._id, student.name)
@@ -1651,6 +1806,125 @@ const Add_student = () => {
           )}
         </main>
       </div>
+      // Add_student.jsx - Approve Modal (Roll বাদ)
+      {/* ✅ Approve Modal - শুধু Username এবং Password */}
+      {showApproveModal && selectedStudent && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center mb-4 border-b pb-3">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <FaCheckCircle className="text-green-600" /> Approve Student
+              </h3>
+              <button
+                onClick={() => {
+                  setShowApproveModal(false);
+                  setSelectedStudent(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Student Information */}
+            <div className="bg-gray-50 p-4 rounded-lg mb-4 space-y-1">
+              <p>
+                <strong>Name:</strong> {selectedStudent.name}
+              </p>
+              <p>
+                <strong>Email:</strong> {selectedStudent.email || "N/A"}
+              </p>
+              <p>
+                <strong>Phone:</strong> {selectedStudent.phone || "N/A"}
+              </p>
+              <p>
+                <strong>Course:</strong> {selectedStudent.course || "N/A"}
+              </p>
+              <p>
+                <strong>Guardian:</strong>{" "}
+                {selectedStudent.guardianName ||
+                  selectedStudent.fatherName ||
+                  "N/A"}
+              </p>
+              <p>
+                <strong>Status:</strong>{" "}
+                <span className="text-yellow-600 font-semibold">
+                  {selectedStudent.status || "Pending"}
+                </span>
+              </p>
+            </div>
+
+            {/* ✅ শুধু Username এবং Password - Roll বাদ */}
+            <div className="space-y-3 border-t pt-3">
+              <h4 className="text-sm font-bold text-gray-700">
+                🔑 Set Login Credentials
+              </h4>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Username <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={selectedStudent.username}
+                  onChange={(e) =>
+                    setSelectedStudent({
+                      ...selectedStudent,
+                      username: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Enter username"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  💡 This will be used for student login
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={selectedStudent.password}
+                  onChange={(e) =>
+                    setSelectedStudent({
+                      ...selectedStudent,
+                      password: e.target.value,
+                    })
+                  }
+                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Enter password"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  💡 Default password: <strong>student123S@</strong>
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2 mt-4 pt-3 border-t">
+              <button
+                onClick={() => {
+                  setShowApproveModal(false);
+                  setSelectedStudent(null);
+                }}
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleApproveStudent}
+                className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2 font-medium"
+              >
+                <FaCheckCircle size={14} /> Approve & Activate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

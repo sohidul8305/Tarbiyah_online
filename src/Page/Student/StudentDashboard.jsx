@@ -36,24 +36,31 @@ const StudentDashboard = () => {
     roll: "",
     admissionDate: "",
   });
+  // StudentDashboard.jsx - useEffect আপডেট করুন
 
-  // লোড স্টুডেন্ট ইনফো
   useEffect(() => {
-    const savedStudent = localStorage.getItem("studentInfo");
-    if (savedStudent) {
-      setStudentInfo(JSON.parse(savedStudent));
-    } else {
-      // ডেমো ডাটা
+    // Check if student is logged in
+    const isLoggedIn = localStorage.getItem("isStudentLoggedIn");
+    if (!isLoggedIn) {
+      navigate("/student-login");
+      return;
+    }
+    const info = localStorage.getItem("studentInfo");
+    if (info) {
+      const parsedInfo = JSON.parse(info);
       setStudentInfo({
-        name: user?.displayName || "Sohidul Islam",
-        email: user?.email || "student@tarabiyah.com",
-        phone: "01700000000",
-        class: "Class 8",
-        roll: "2024-001",
-        admissionDate: "January 2024",
+        name: parsedInfo.name || "",
+        email: parsedInfo.email || "",
+        phone: parsedInfo.phone || "",
+        class: parsedInfo.class || parsedInfo.course || "",
+        roll: parsedInfo.roll || "",
+        username: parsedInfo.username || "",
+        status: parsedInfo.status || "Active",
+        admissionDate: parsedInfo.admissionDate || parsedInfo.createdAt || "",
       });
     }
-  }, [user]);
+    setLoading(false);
+  }, [navigate]);
 
   const handleLogout = async () => {
     try {

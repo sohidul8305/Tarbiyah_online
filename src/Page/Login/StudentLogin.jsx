@@ -1,9 +1,9 @@
+// StudentLogin.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Navbar/Footer/Footer";
-import API from "../../services/api";
 
 const StudentLogin = () => {
   const [username, setUsername] = useState("");
@@ -11,22 +11,19 @@ const StudentLogin = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // StudentLogin.jsx - Username এর পরিবর্তে Email দিয়ে Login
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // ✅ Email এবং Password দিয়ে Login
       const response = await fetch("http://localhost:5000/api/students/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: username, // এখানে username field এ email নিচ্ছি
-          password,
+          username: username,
+          password: password,
         }),
       });
 
@@ -36,7 +33,7 @@ const StudentLogin = () => {
         const { user } = data;
 
         localStorage.setItem("isStudentLoggedIn", "true");
-        localStorage.setItem("studentUsername", user.email);
+        localStorage.setItem("studentUsername", user.username);
         localStorage.setItem("studentInfo", JSON.stringify(user));
         localStorage.setItem("studentEmail", user.email || "");
         localStorage.setItem("studentToken", data.token || "student_token");
@@ -54,7 +51,7 @@ const StudentLogin = () => {
         Swal.fire({
           icon: "error",
           title: "Login Failed",
-          text: data.message || "ভুল ইমেইল বা পাসওয়ার্ড!",
+          text: data.message || "ভুল ইউজারনেম বা পাসওয়ার্ড!",
           confirmButtonColor: "#004d4d",
         });
       }
@@ -127,10 +124,10 @@ const StudentLogin = () => {
             <p className="text-sm text-gray-600">
               Don't have an account?{" "}
               <button
-                onClick={() => navigate("/student-registration")}
+                onClick={() => navigate("/admission")}
                 className="text-[#004d4d] font-bold hover:underline"
               >
-                Register Now
+                Admission Now
               </button>
             </p>
           </div>
