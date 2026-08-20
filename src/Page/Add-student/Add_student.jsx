@@ -692,7 +692,6 @@ const Add_student = () => {
               
               <p><strong>স্ট্যাটাস:</strong> ${fullStudent.status || "Pending"}</p>
               <p><strong>পিতার নাম:</strong> ${fullStudent.fatherName || fullStudent.guardianName || "N/A"}</p>
-              <p><strong>মাতার নাম:</strong> ${fullStudent.motherName || "N/A"}</p>
               <p><strong>অভিভাবক:</strong> ${fullStudent.guardianName || "N/A"}</p>
               <p><strong>অভিভাবক ফোন:</strong> ${fullStudent.guardianPhone || "N/A"}</p>
               <p><strong>বর্তমান ঠিকানা:</strong> ${fullStudent.presentAddress || fullStudent.address || "N/A"}</p>
