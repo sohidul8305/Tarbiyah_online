@@ -48,6 +48,7 @@ const Admin_profile = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("profile");
+  const [activeSubMenu, setActiveSubMenu] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [adminInfo, setAdminInfo] = useState({
     name: "",
@@ -64,7 +65,6 @@ const Admin_profile = () => {
       twitter: "",
       linkedin: "",
       instagram: "",
-      github: "",
     },
   });
 
@@ -85,7 +85,7 @@ const Admin_profile = () => {
         designation: "Administrator",
         department: "Administration",
         joinDate: "January 2024",
-        bio: "Experienced administrator with a passion for education and Islamic studies. Dedicated to providing quality education and fostering a positive learning environment.",
+        bio: "Experienced administrator with a passion for education and Islamic studies.",
         address: "40/1, Safe Garden, Mohammadpur - 1207, Dhaka",
         website: "https://tarabiyahonline.com",
         socialLinks: {
@@ -99,6 +99,14 @@ const Admin_profile = () => {
       setEditData(defaultAdmin);
     }
   }, [user]);
+
+  const toggleSubMenu = (menu) => {
+    if (activeSubMenu === menu) {
+      setActiveSubMenu(null);
+    } else {
+      setActiveSubMenu(menu);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -128,11 +136,7 @@ const Admin_profile = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const toggleSubMenu = (menu) => {
-    // Not needed for profile page
-  };
-
-  // Sidebar Menu Items
+  // ✅ Sidebar Menu Items - সম্পূর্ণ
   const menuItems = [
     {
       id: "profile",
@@ -146,11 +150,31 @@ const Admin_profile = () => {
       icon: <MdDashboard className="text-xl" />,
       label: "Dashboard",
       subItems: [
-        { id: "department", label: "Department" },
-        { id: "today-class", label: "Today's Class" },
-        { id: "payment-overview", label: "Payment Overview" },
-        { id: "new-admission", label: "New Admission" },
-        { id: "notification", label: "Notification" },
+        {
+          id: "department",
+          path: "/admin-dashboard/department",
+          label: "Department",
+        },
+        {
+          id: "today-class",
+          path: "/admin-dashboard/today-class",
+          label: "Today's Class",
+        },
+        {
+          id: "payment-overview",
+          path: "/admin-dashboard/payment-overview",
+          label: "Payment Overview",
+        },
+        {
+          id: "new-admission",
+          path: "/admin-dashboard/new-admission",
+          label: "New Admission",
+        },
+        {
+          id: "notification",
+          path: "/admin-dashboard/notification",
+          label: "Notification",
+        },
       ],
     },
     {
@@ -159,10 +183,26 @@ const Admin_profile = () => {
       icon: <FaUsers className="text-xl" />,
       label: "Student Management",
       subItems: [
-        { id: "student-add", label: "Student Add" },
-        { id: "batch-manual", label: "Batch Maintain" },
-        { id: "student-profile", label: "Student Profile" },
-        { id: "admission-permission", label: "Admission Permission" },
+        {
+          id: "student-add",
+          path: "/admin-students/add",
+          label: "Student Add",
+        },
+        {
+          id: "batch-manual",
+          path: "/admin-students/batch",
+          label: "Batch Maintain",
+        },
+        {
+          id: "student-profile",
+          path: "/admin-students/profile",
+          label: "Student Profile",
+        },
+        {
+          id: "admission-permission",
+          path: "/admin-students/admission",
+          label: "Admission Permission",
+        },
       ],
     },
     {
@@ -171,10 +211,26 @@ const Admin_profile = () => {
       icon: <FaChalkboardTeacher className="text-xl" />,
       label: "Teacher Management",
       subItems: [
-        { id: "teacher-assign", label: "Teacher Assign" },
-        { id: "class-schedule", label: "Class Schedule" },
-        { id: "teacher-attendance", label: "Teacher Attendance" },
-        { id: "teacher-overview", label: "Teacher Overview" },
+        {
+          id: "teacher-assign",
+          path: "/admin-teachers/assign",
+          label: "Teacher Assign",
+        },
+        {
+          id: "class-schedule",
+          path: "/admin-teachers/schedule",
+          label: "Class Schedule",
+        },
+        {
+          id: "teacher-attendance",
+          path: "/admin-teachers/attendance",
+          label: "Teacher Attendance",
+        },
+        {
+          id: "teacher-overview",
+          path: "/admin-teachers/overview",
+          label: "Teacher Overview",
+        },
       ],
     },
     {
@@ -183,10 +239,26 @@ const Admin_profile = () => {
       icon: <FaLayerGroup className="text-xl" />,
       label: "Batch & Course",
       subItems: [
-        { id: "batch-make", label: "Batch Make" },
-        { id: "course-make", label: "Course Make" },
-        { id: "syllabus", label: "Syllabus" },
-        { id: "clear-routine", label: "Clear Routine" },
+        {
+          id: "batch-make",
+          path: "/admin-batch-course/batch-make",
+          label: "Batch Make",
+        },
+        {
+          id: "course-make",
+          path: "/admin-batch-course/course-make",
+          label: "Course Make",
+        },
+        {
+          id: "syllabus",
+          path: "/admin-batch-course/syllabus",
+          label: "Syllabus",
+        },
+        {
+          id: "clear-routine",
+          path: "/admin-batch-course/clear-routine",
+          label: "Clear Routine",
+        },
       ],
     },
     {
@@ -201,11 +273,18 @@ const Admin_profile = () => {
       icon: <FaMoneyBillWave className="text-xl" />,
       label: "Finance",
       subItems: [
-        { id: "admin-on-fee", label: "Admin on Fee" },
-        { id: "monthly-fee", label: "Monthly Fee" },
-        { id: "invoice", label: "Invoice" },
-        { id: "report", label: "Report" },
-        { id: "exam", label: "Exam" },
+        {
+          id: "admin-on-fee",
+          path: "/admin-finance/admin-fee",
+          label: "Admin on Fee",
+        },
+        {
+          id: "monthly-fee",
+          path: "/admin-finance/monthly-fee",
+          label: "Monthly Fee",
+        },
+        { id: "invoice", path: "/admin-finance/invoice", label: "Invoice" },
+        { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
     {
@@ -214,9 +293,17 @@ const Admin_profile = () => {
       icon: <FaCalendarCheck className="text-xl" />,
       label: "Exam",
       subItems: [
-        { id: "exam-make", label: "Exam Make" },
-        { id: "result-publish", label: "Result Publish" },
-        { id: "certificate-permission", label: "Certificate Permission" },
+        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
+        {
+          id: "result-publish",
+          path: "/admin-exam/result",
+          label: "Result Publish",
+        },
+        {
+          id: "certificate-permission",
+          path: "/admin-exam/certificate",
+          label: "Certificate Permission",
+        },
       ],
     },
     {
@@ -225,9 +312,17 @@ const Admin_profile = () => {
       icon: <FaChartLine className="text-xl" />,
       label: "Report & Analytics",
       subItems: [
-        { id: "admission-report", label: "Admission Report" },
-        { id: "attendance-report", label: "Attendance Report" },
-        { id: "income", label: "Income" },
+        {
+          id: "admission-report",
+          path: "/admin-reports/admission",
+          label: "Admission Report",
+        },
+        {
+          id: "attendance-report",
+          path: "/admin-reports/attendance",
+          label: "Attendance Report",
+        },
+        { id: "income", path: "/admin-reports/income", label: "Income" },
       ],
     },
     {
@@ -235,7 +330,13 @@ const Admin_profile = () => {
       path: "/admin-crm",
       icon: <FaDatabase className="text-xl" />,
       label: "CRM Management",
-      subItems: [{ id: "data-entry", label: "Data Entry" }],
+      subItems: [
+        {
+          id: "data-entry",
+          path: "/admin-crm/data-entry",
+          label: "Data Entry",
+        },
+      ],
     },
     {
       id: "salary",
@@ -243,8 +344,12 @@ const Admin_profile = () => {
       icon: <FaMoneyBillWave className="text-xl" />,
       label: "Salary",
       subItems: [
-        { id: "total-salary", label: "Total Salary" },
-        { id: "due-salary", label: "Due Salary" },
+        {
+          id: "total-salary",
+          path: "/admin-salary/total",
+          label: "Total Salary",
+        },
+        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
       ],
     },
   ];
@@ -299,7 +404,7 @@ const Admin_profile = () => {
           </button>
         </div>
 
-        {/* Sidebar - No Scroll */}
+        {/* Sidebar */}
         <aside
           className={`
             fixed md:relative z-50
@@ -330,7 +435,7 @@ const Admin_profile = () => {
             </div>
           </div>
 
-          {/* Navigation Menu - No Scroll */}
+          {/* ✅ Navigation Menu - ঠিক করা */}
           <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
@@ -356,24 +461,25 @@ const Admin_profile = () => {
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${activeMenu === item.id ? "rotate-180" : ""}`}
+                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
                       >
                         <FaArrowRight size={12} />
                       </span>
                     </button>
-                    {activeMenu === item.id && (
+                    {activeSubMenu === item.id && (
                       <div className="ml-6 space-y-1 mt-1">
                         {item.subItems.map((sub) => (
-                          <button
+                          <Link
                             key={sub.id}
+                            to={sub.path}
                             onClick={() => {
                               setActiveMenu(item.id);
                               setIsSidebarOpen(false);
                             }}
-                            className="w-full text-left px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-gray-50 hover:text-[#004d4d] transition-all"
+                            className="block w-full text-left px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-gray-50 hover:text-[#004d4d] transition-all"
                           >
                             {sub.label}
-                          </button>
+                          </Link>
                         ))}
                       </div>
                     )}
@@ -427,7 +533,7 @@ const Admin_profile = () => {
           />
         )}
 
-        {/* Main Content - Full Screen */}
+        {/* Main Content */}
         <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">

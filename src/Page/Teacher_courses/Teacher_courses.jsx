@@ -24,17 +24,23 @@ import {
   FaSignOutAlt,
   FaPen,
   FaHome,
+  FaSpinner,
 } from "react-icons/fa";
 import { MdDashboard, MdAssignment, MdGrade, MdQuiz } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 import Swal from "sweetalert2";
 import { useAuth } from "../../Provider/AuthProvider";
 
+const API_URL = "http://localhost:5000/api";
+
 const TeacherCourses = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("courses");
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
   const [teacherInfo, setTeacherInfo] = useState({
     name: "",
     email: "",
@@ -46,118 +52,17 @@ const TeacherCourses = () => {
     classes: [],
   });
 
-  const [courses, setCourses] = useState([
-    {
-      id: 1,
-      name: "Tajweed - Beginner Level",
-      code: "TAJ-101",
-      department: "Islamic Studies",
-      class: "Class 8",
-      students: 30,
-      sessions: 24,
-      duration: "3 months",
-      status: "Active",
-      startDate: "2026-01-15",
-      endDate: "2026-04-15",
-      schedule: "Mon, Wed 09:00 AM",
-      description: "Learn the basic rules of Tajweed for Quran recitation",
-      image: null,
-      teacher: "Ustadh Ahmad",
-      progress: 75,
-      materials: 12,
-      assignments: 5,
-      quizzes: 3,
-      videos: 8,
-    },
-    {
-      id: 2,
-      name: "Tafsir - Quranic Studies",
-      code: "TAF-201",
-      department: "Islamic Studies",
-      class: "Class 9",
-      students: 25,
-      sessions: 20,
-      duration: "4 months",
-      status: "Active",
-      startDate: "2026-02-01",
-      endDate: "2026-06-01",
-      schedule: "Tue, Thu 11:00 AM",
-      description: "Detailed interpretation and explanation of the Quran",
-      image: null,
-      teacher: "Ustadh Ahmad",
-      progress: 60,
-      materials: 15,
-      assignments: 4,
-      quizzes: 2,
-      videos: 6,
-    },
-    {
-      id: 3,
-      name: "Hadith - Sahih Bukhari",
-      code: "HAD-301",
-      department: "Islamic Studies",
-      class: "Class 10",
-      students: 28,
-      sessions: 30,
-      duration: "6 months",
-      status: "Active",
-      startDate: "2026-01-10",
-      endDate: "2026-07-10",
-      schedule: "Sat, Sun 10:00 AM",
-      description: "Study of authentic Hadith from Sahih Bukhari",
-      image: null,
-      teacher: "Ustadh Ahmad",
-      progress: 40,
-      materials: 20,
-      assignments: 6,
-      quizzes: 4,
-      videos: 10,
-    },
-    {
-      id: 4,
-      name: "Fiqh - Islamic Jurisprudence",
-      code: "FIQ-101",
-      department: "Islamic Studies",
-      class: "Class 7",
-      students: 20,
-      sessions: 18,
-      duration: "3 months",
-      status: "Draft",
-      startDate: "2026-03-01",
-      endDate: "2026-06-01",
-      schedule: "Mon, Wed 02:00 PM",
-      description: "Understanding Islamic rulings and jurisprudence",
-      image: null,
-      teacher: "Ustadh Ahmad",
-      progress: 10,
-      materials: 8,
-      assignments: 2,
-      quizzes: 1,
-      videos: 3,
-    },
-    {
-      id: 5,
-      name: "Aqeedah - Islamic Beliefs",
-      code: "AQD-101",
-      department: "Islamic Studies",
-      class: "Class 6",
-      students: 22,
-      sessions: 16,
-      duration: "2 months",
-      status: "Active",
-      startDate: "2026-02-15",
-      endDate: "2026-04-15",
-      schedule: "Tue, Thu 09:00 AM",
-      description: "Study of Islamic creed and fundamental beliefs",
-      image: null,
-      teacher: "Ustadh Ahmad",
-      progress: 55,
-      materials: 10,
-      assignments: 3,
-      quizzes: 2,
-      videos: 5,
-    },
-  ]);
+  const [courses, setCourses] = useState([]);
+  const [stats, setStats] = useState({
+    totalCourses: 0,
+    activeCourses: 0,
+    draftCourses: 0,
+    completedCourses: 0,
+    archivedCourses: 0,
+    totalStudents: 0,
+    totalSessions: 0,
+    avgProgress: 0,
+  });
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
@@ -180,6 +85,38 @@ const TeacherCourses = () => {
     description: "",
     teacher: "",
   });
+
+  // API Helper Functions
+  const getToken = () => localStorage.getItem("teacherToken");
+  const getTeacherId = () => localStorage.getItem("teacherId");
+
+  const apiRequest = async (endpoint, method = "GET", data = null) => {
+    const token = getToken();
+    const options = {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    };
+
+    if (data) {
+      options.body = JSON.stringify(data);
+    }
+
+    try {
+      const response = await fetch(`${API_URL}${endpoint}`, options);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Something went wrong");
+      }
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  };
 
   // Load teacher info
   useEffect(() => {
@@ -205,12 +142,60 @@ const TeacherCourses = () => {
     }
   }, [user]);
 
+  // Load courses from API
+  useEffect(() => {
+    const loadCourses = async () => {
+      try {
+        setLoading(true);
+        const teacherId = getTeacherId() || "me";
+        const result = await apiRequest(`/courses/teacher/${teacherId}`);
+
+        if (result.success && result.courses) {
+          setCourses(result.courses);
+        }
+      } catch (error) {
+        console.error("Error loading courses:", error);
+        // If API fails, use local data
+        const localCourses = localStorage.getItem("teacherCourses");
+        if (localCourses) {
+          setCourses(JSON.parse(localCourses));
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCourses();
+  }, []);
+
+  // Load stats from API
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const teacherId = getTeacherId() || "me";
+        const result = await apiRequest(`/courses/stats/${teacherId}`);
+
+        if (result.success && result.stats) {
+          setStats(result.stats);
+        }
+      } catch (error) {
+        console.error("Error loading stats:", error);
+      }
+    };
+
+    if (courses.length > 0) {
+      loadStats();
+    }
+  }, [courses]);
+
   const handleLogout = async () => {
     try {
       await logOut();
       localStorage.removeItem("isTeacherLoggedIn");
       localStorage.removeItem("teacherInfo");
       localStorage.removeItem("teacherEmail");
+      localStorage.removeItem("teacherToken");
+      localStorage.removeItem("teacherId");
 
       await Swal.fire({
         icon: "success",
@@ -324,21 +309,28 @@ const TeacherCourses = () => {
   // Handle search
   const filteredCourses = courses.filter((course) => {
     const matchesSearch =
-      course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      course.department.toLowerCase().includes(searchTerm.toLowerCase());
+      course.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      course.department?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       filterStatus === "All" || course.status === filterStatus;
-    const matchesClass = filterClass === "All" || course.class === filterClass;
+    const matchesClass =
+      filterClass === "All" || course.className === filterClass;
     return matchesSearch && matchesStatus && matchesClass;
   });
 
   // Get unique classes for filter
-  const uniqueClasses = ["All", ...new Set(courses.map((c) => c.class))];
+  const uniqueClasses = [
+    "All",
+    ...new Set(courses.map((c) => c.className).filter(Boolean)),
+  ];
 
   // Handle add course
-  const handleAddCourse = (e) => {
+  // Teacher_courses.jsx - handleAddCourse function replace করুন
+
+  const handleAddCourse = async (e) => {
     e.preventDefault();
+
     if (
       !formData.name ||
       !formData.code ||
@@ -347,41 +339,84 @@ const TeacherCourses = () => {
     ) {
       Swal.fire({
         icon: "warning",
-        title: "Please fill all required fields",
+        title: "দয়া করে সব আবশ্যক ফিল্ড পূরণ করুন",
         timer: 1500,
         showConfirmButton: false,
       });
       return;
     }
 
-    const newCourse = {
-      id: Date.now(),
-      ...formData,
-      students: 0,
-      sessions: 0,
-      progress: 0,
-      materials: 0,
-      assignments: 0,
-      quizzes: 0,
-      videos: 0,
-      image: null,
-    };
+    try {
+      setSubmitting(true);
 
-    setCourses([...courses, newCourse]);
-    setShowAddModal(false);
-    resetForm();
-    Swal.fire({
-      icon: "success",
-      title: "Course Created!",
-      text: "New course has been added successfully.",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+      const courseData = {
+        title: formData.name,
+        code: formData.code,
+        description: formData.description || "",
+        department: formData.department || "Islamic Studies",
+        className: formData.class,
+        teacher: formData.teacher || teacherInfo.name || "Ustadh Ahmad",
+        duration: formData.duration || "",
+        status: formData.status || "Draft",
+        startDate: formData.startDate,
+        endDate: formData.endDate || "",
+        schedule: formData.schedule || "",
+      };
+
+      console.log("📤 Sending course data:", courseData);
+
+      const response = await fetch("http://localhost:5000/api/courses/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(courseData),
+      });
+
+      const result = await response.json();
+      console.log("📥 Response:", result);
+
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to create course");
+      }
+
+      if (result.success) {
+        // Add new course to list
+        setCourses([result.course, ...courses]);
+        setShowAddModal(false);
+        resetForm();
+
+        // Save to localStorage as backup
+        localStorage.setItem(
+          "teacherCourses",
+          JSON.stringify([result.course, ...courses]),
+        );
+
+        Swal.fire({
+          icon: "success",
+          title: "কোর্স তৈরি হয়েছে!",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        throw new Error(result.message || "Failed to create course");
+      }
+    } catch (error) {
+      console.error("❌ Error creating course:", error);
+      Swal.fire({
+        icon: "error",
+        title: "কোর্স তৈরি করতে ব্যর্থ হয়েছে",
+        text: error.message || "Please try again",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Handle edit course
-  const handleEditCourse = (e) => {
+  const handleEditCourse = async (e) => {
     e.preventDefault();
+
     if (
       !formData.name ||
       !formData.code ||
@@ -390,42 +425,106 @@ const TeacherCourses = () => {
     ) {
       Swal.fire({
         icon: "warning",
-        title: "Please fill all required fields",
+        title: "দয়া করে সব আবশ্যক ফিল্ড পূরণ করুন",
         timer: 1500,
         showConfirmButton: false,
       });
       return;
     }
 
-    setCourses(
-      courses.map((c) =>
-        c.id === selectedCourse.id ? { ...c, ...formData } : c,
-      ),
-    );
-    setShowEditModal(false);
-    resetForm();
-    Swal.fire({
-      icon: "success",
-      title: "Course Updated!",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    try {
+      setSubmitting(true);
+
+      const courseData = {
+        title: formData.name,
+        code: formData.code,
+        description: formData.description,
+        category: formData.department || "Islamic Studies",
+        department: formData.department,
+        className: formData.class,
+        teacher: formData.teacher || teacherInfo.name,
+        duration: formData.duration,
+        status: formData.status,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        schedule: formData.schedule,
+      };
+
+      const result = await apiRequest(
+        `/courses/update/${selectedCourse._id}`,
+        "PUT",
+        courseData,
+      );
+
+      if (result.success) {
+        const updatedCourses = courses.map((c) =>
+          c._id === selectedCourse._id ? result.course : c,
+        );
+        setCourses(updatedCourses);
+        setShowEditModal(false);
+        resetForm();
+
+        // Save to localStorage as backup
+        localStorage.setItem("teacherCourses", JSON.stringify(updatedCourses));
+
+        Swal.fire({
+          icon: "success",
+          title: "কোর্স আপডেট হয়েছে!",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      console.error("Error updating course:", error);
+      Swal.fire({
+        icon: "error",
+        title: "কোর্স আপডেট করতে ব্যর্থ হয়েছে",
+        text: error.message,
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   // Handle delete course
   const handleDeleteCourse = (id) => {
     Swal.fire({
-      title: "Delete Course?",
-      text: "This action cannot be undone! All associated content will be removed.",
+      title: "কোর্স ডিলিট করবেন?",
+      text: "এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না! সব কন্টেন্ট মুছে যাবে।",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
+      confirmButtonText: "হ্যাঁ, ডিলিট করুন!",
+      cancelButtonText: "বাতিল করুন",
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setCourses(courses.filter((c) => c.id !== id));
-        Swal.fire("Deleted!", "Course has been deleted.", "success");
+        try {
+          await apiRequest(`/courses/delete/${id}`, "DELETE");
+          const updatedCourses = courses.filter((c) => c._id !== id);
+          setCourses(updatedCourses);
+
+          // Save to localStorage as backup
+          localStorage.setItem(
+            "teacherCourses",
+            JSON.stringify(updatedCourses),
+          );
+
+          Swal.fire({
+            icon: "success",
+            title: "ডিলিট হয়েছে!",
+            text: "কোর্স সফলভাবে ডিলিট করা হয়েছে।",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+        } catch (error) {
+          console.error("Error deleting course:", error);
+          Swal.fire({
+            icon: "error",
+            title: "ডিলিট করতে ব্যর্থ হয়েছে",
+            text: error.message,
+          });
+        }
       }
     });
   };
@@ -434,17 +533,17 @@ const TeacherCourses = () => {
   const openEditModal = (course) => {
     setSelectedCourse(course);
     setFormData({
-      name: course.name,
-      code: course.code,
-      department: course.department,
-      class: course.class,
-      duration: course.duration,
-      status: course.status,
-      startDate: course.startDate,
-      endDate: course.endDate,
-      schedule: course.schedule,
-      description: course.description,
-      teacher: course.teacher,
+      name: course.title || "",
+      code: course.code || "",
+      department: course.department || "",
+      class: course.className || "",
+      duration: course.duration || "",
+      status: course.status || "Draft",
+      startDate: course.startDate || "",
+      endDate: course.endDate || "",
+      schedule: course.schedule || "",
+      description: course.description || "",
+      teacher: course.teacher || "",
     });
     setShowEditModal(true);
   };
@@ -496,6 +595,18 @@ const TeacherCourses = () => {
     return "bg-red-500";
   };
 
+  // Loading Spinner
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <FaSpinner className="text-6xl text-teal-600 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">লোড হচ্ছে...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Mobile Header */}
@@ -510,7 +621,7 @@ const TeacherCourses = () => {
       </div>
 
       <div className="flex flex-grow relative">
-        {/* ================= SIDEBAR ================= */}
+        {/* SIDEBAR */}
         <aside
           className={`
             fixed md:relative z-50
@@ -583,7 +694,7 @@ const TeacherCourses = () => {
           </div>
         </aside>
 
-        {/* ================= OVERLAY (Mobile) ================= */}
+        {/* OVERLAY (Mobile) */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -591,14 +702,14 @@ const TeacherCourses = () => {
           />
         )}
 
-        {/* ================= MAIN CONTENT ================= */}
+        {/* MAIN CONTENT */}
         <main className="flex-grow p-4 md:p-6 overflow-x-auto w-full min-h-screen">
           {/* Top Bar */}
           <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
               <h1 className="text-lg font-bold text-gray-800">My Courses</h1>
               <p className="text-sm text-gray-500">
-                Manage and organize your courses
+                Manage and organize your courses ({courses.length} courses)
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -642,7 +753,7 @@ const TeacherCourses = () => {
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   />
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   <select
                     value={filterStatus}
                     onChange={(e) => setFilterStatus(e.target.value)}
@@ -692,36 +803,48 @@ const TeacherCourses = () => {
             </div>
 
             {/* Course Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 text-center">
                 <p className="text-2xl font-bold text-teal-600">
-                  {courses.length}
+                  {stats.totalCourses}
                 </p>
-                <p className="text-xs text-gray-500">Total Courses</p>
+                <p className="text-xs text-gray-500">Total</p>
               </div>
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 text-center">
                 <p className="text-2xl font-bold text-green-600">
-                  {courses.filter((c) => c.status === "Active").length}
+                  {stats.activeCourses}
                 </p>
                 <p className="text-xs text-gray-500">Active</p>
               </div>
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 text-center">
                 <p className="text-2xl font-bold text-yellow-600">
-                  {courses.filter((c) => c.status === "Draft").length}
+                  {stats.draftCourses}
                 </p>
                 <p className="text-xs text-gray-500">Draft</p>
               </div>
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 text-center">
                 <p className="text-2xl font-bold text-blue-600">
-                  {courses.reduce((sum, c) => sum + c.students, 0)}
+                  {stats.completedCourses}
                 </p>
-                <p className="text-xs text-gray-500">Total Students</p>
+                <p className="text-xs text-gray-500">Completed</p>
               </div>
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 text-center">
                 <p className="text-2xl font-bold text-purple-600">
-                  {courses.reduce((sum, c) => sum + c.sessions, 0)}
+                  {stats.totalStudents}
                 </p>
-                <p className="text-xs text-gray-500">Total Sessions</p>
+                <p className="text-xs text-gray-500">Students</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 text-center">
+                <p className="text-2xl font-bold text-orange-600">
+                  {stats.totalSessions}
+                </p>
+                <p className="text-xs text-gray-500">Sessions</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 text-center">
+                <p className="text-2xl font-bold text-pink-600">
+                  {stats.avgProgress}%
+                </p>
+                <p className="text-xs text-gray-500">Avg Progress</p>
               </div>
             </div>
 
@@ -730,7 +853,7 @@ const TeacherCourses = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredCourses.map((course) => (
                   <div
-                    key={course.id}
+                    key={course._id || course.id}
                     className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden"
                   >
                     {/* Course Image Placeholder */}
@@ -744,8 +867,8 @@ const TeacherCourses = () => {
                     <div className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-gray-800 text-sm mb-1">
-                            {course.name}
+                          <h3 className="font-semibold text-gray-800 text-sm mb-1 line-clamp-1">
+                            {course.title}
                           </h3>
                           <p className="text-xs text-gray-500">
                             {course.department}
@@ -761,15 +884,16 @@ const TeacherCourses = () => {
                       <div className="mt-3 space-y-1 text-sm">
                         <p className="text-gray-600 flex items-center gap-2">
                           <FaChalkboardTeacher className="text-gray-400" />{" "}
-                          {course.class}
+                          {course.className}
                         </p>
                         <p className="text-gray-600 flex items-center gap-2">
                           <FaUsers className="text-gray-400" />{" "}
-                          {course.students} Students
+                          {course.students || 0} Students
                         </p>
                         <p className="text-gray-600 flex items-center gap-2">
                           <FaCalendarAlt className="text-gray-400" />{" "}
-                          {course.startDate} - {course.endDate}
+                          {course.startDate}{" "}
+                          {course.endDate ? `- ${course.endDate}` : ""}
                         </p>
                       </div>
 
@@ -777,12 +901,12 @@ const TeacherCourses = () => {
                       <div className="mt-3">
                         <div className="flex justify-between text-xs text-gray-500 mb-1">
                           <span>Progress</span>
-                          <span>{course.progress}%</span>
+                          <span>{course.progress || 0}%</span>
                         </div>
                         <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full ${getProgressColor(course.progress)}`}
-                            style={{ width: `${course.progress}%` }}
+                            className={`h-full rounded-full ${getProgressColor(course.progress || 0)}`}
+                            style={{ width: `${course.progress || 0}%` }}
                           ></div>
                         </div>
                       </div>
@@ -791,18 +915,19 @@ const TeacherCourses = () => {
                       <div className="mt-3 flex items-center gap-3 text-xs text-gray-500 border-t border-gray-100 pt-3">
                         <span className="flex items-center gap-1">
                           <FaVideo className="text-purple-500" />{" "}
-                          {course.videos}
+                          {course.videos || 0}
                         </span>
                         <span className="flex items-center gap-1">
                           <MdAssignment className="text-blue-500" />{" "}
-                          {course.assignments}
+                          {course.assignments || 0}
                         </span>
                         <span className="flex items-center gap-1">
-                          <MdQuiz className="text-green-500" /> {course.quizzes}
+                          <MdQuiz className="text-green-500" />{" "}
+                          {course.quizzes || 0}
                         </span>
                         <span className="flex items-center gap-1">
                           <FaFileAlt className="text-orange-500" />{" "}
-                          {course.materials}
+                          {course.materials || 0}
                         </span>
                       </div>
 
@@ -821,7 +946,7 @@ const TeacherCourses = () => {
                           <FaEdit />
                         </button>
                         <button
-                          onClick={() => handleDeleteCourse(course.id)}
+                          onClick={() => handleDeleteCourse(course._id)}
                           className="text-red-600 hover:text-red-800 p-1.5 rounded hover:bg-red-50 transition-all"
                         >
                           <FaTrash />
@@ -860,13 +985,13 @@ const TeacherCourses = () => {
                     <tbody className="divide-y divide-gray-100">
                       {filteredCourses.map((course) => (
                         <tr
-                          key={course.id}
+                          key={course._id || course.id}
                           className="hover:bg-gray-50 transition-colors"
                         >
                           <td className="px-4 py-3">
                             <div>
                               <p className="font-semibold text-sm text-gray-800">
-                                {course.name}
+                                {course.title}
                               </p>
                               <p className="text-xs text-gray-500">
                                 {course.code} • {course.department}
@@ -874,21 +999,21 @@ const TeacherCourses = () => {
                             </div>
                           </td>
                           <td className="px-4 py-3 text-sm text-gray-600">
-                            {course.class}
+                            {course.className}
                           </td>
                           <td className="px-4 py-3 text-sm text-gray-600">
-                            {course.students}
+                            {course.students || 0}
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-2">
                               <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                                 <div
-                                  className={`h-full rounded-full ${getProgressColor(course.progress)}`}
-                                  style={{ width: `${course.progress}%` }}
+                                  className={`h-full rounded-full ${getProgressColor(course.progress || 0)}`}
+                                  style={{ width: `${course.progress || 0}%` }}
                                 ></div>
                               </div>
                               <span className="text-xs font-medium">
-                                {course.progress}%
+                                {course.progress || 0}%
                               </span>
                             </div>
                           </td>
@@ -914,7 +1039,7 @@ const TeacherCourses = () => {
                                 <FaEdit />
                               </button>
                               <button
-                                onClick={() => handleDeleteCourse(course.id)}
+                                onClick={() => handleDeleteCourse(course._id)}
                                 className="text-red-600 hover:text-red-800 p-1"
                               >
                                 <FaTrash />
@@ -939,6 +1064,15 @@ const TeacherCourses = () => {
                 <p className="text-gray-500">
                   Try adjusting your search or filter criteria
                 </p>
+                <button
+                  onClick={() => {
+                    resetForm();
+                    setShowAddModal(true);
+                  }}
+                  className="mt-4 bg-teal-600 hover:bg-teal-700 text-white px-6 py-2 rounded-lg font-semibold inline-flex items-center gap-2 transition-all"
+                >
+                  <FaPlusCircle /> Create Your First Course
+                </button>
               </div>
             )}
           </div>
@@ -1005,15 +1139,22 @@ const TeacherCourses = () => {
                     }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   >
-                    <option value="Islamic Studies">Islamic Studies</option>
-                    <option value="Arabic Language">Arabic Language</option>
-                    <option value="Quran Studies">Quran Studies</option>
-                    <option value="Hadith Studies">Hadith Studies</option>
+                    <option value="Diploma In Islamic Studies">
+                      {" "}
+                      Diploma In Islamic Studies
+                    </option>
+                    <option value="Tarbiyah Allimiyah">
+                      Tarbiyah Allimiyah
+                    </option>
+                    <option value="Tarbiyah Quran Studies">
+                      Tarbiyah Quran Studies
+                    </option>
+                    <option value="Quran for Elder">Quran for Elder</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
+                    Course *
                   </label>
                   <select
                     required
@@ -1024,11 +1165,18 @@ const TeacherCourses = () => {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                   >
                     <option value="">Select Class</option>
-                    <option value="Class 6">Class 6</option>
-                    <option value="Class 7">Class 7</option>
-                    <option value="Class 8">Class 8</option>
-                    <option value="Class 9">Class 9</option>
-                    <option value="Class 10">Class 10</option>
+                    <option value="Diploma">Diploma In Islamic Studies</option>
+                    <option value="Allimiyah_kids">Allimiyah for kids</option>
+                    <option value="Allimiyah_program">Allimiyah program</option>
+                    <option value="Quida_nurani">Quida nurani</option>
+                    <option value="Hifzul_quran">Hifzul Quran</option>
+                    <option value="Hifz_revision">Hifz revision</option>
+                    <option value="One_to_one">One to One </option>
+                    <option value="Quida_nuraniyah">Quida nuraniyah</option>
+                    <option value="Quran_najera">Quran_najera</option>
+                    <option value="Hifzul_quran">Hifzul quran</option>
+                    <option value="Basic_tazwid">Basic tazwid</option>
+                    <option value="Advance_tazwid">Advance tazwid</option>
                   </select>
                 </div>
               </div>
@@ -1125,9 +1273,11 @@ const TeacherCourses = () => {
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  disabled={submitting}
+                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Create Course
+                  {submitting ? <FaSpinner className="animate-spin" /> : null}
+                  {submitting ? "Creating..." : "Create Course"}
                 </button>
                 <button
                   type="button"
@@ -1322,9 +1472,11 @@ const TeacherCourses = () => {
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  disabled={submitting}
+                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Update Course
+                  {submitting ? <FaSpinner className="animate-spin" /> : null}
+                  {submitting ? "Updating..." : "Update Course"}
                 </button>
                 <button
                   type="button"
@@ -1360,7 +1512,7 @@ const TeacherCourses = () => {
                 <div className="md:col-span-2 space-y-4">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-800">
-                      {selectedCourse.name}
+                      {selectedCourse.title}
                     </h2>
                     <p className="text-sm text-gray-500">
                       {selectedCourse.code} • {selectedCourse.department}
@@ -1369,7 +1521,9 @@ const TeacherCourses = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <p className="text-xs text-gray-500">Class</p>
-                      <p className="font-semibold">{selectedCourse.class}</p>
+                      <p className="font-semibold">
+                        {selectedCourse.className}
+                      </p>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500">Status</p>
@@ -1390,12 +1544,17 @@ const TeacherCourses = () => {
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Schedule</p>
-                    <p className="font-semibold">{selectedCourse.schedule}</p>
+                    <p className="font-semibold">
+                      {selectedCourse.schedule || "Not set"}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Date Range</p>
                     <p className="font-semibold">
-                      {selectedCourse.startDate} - {selectedCourse.endDate}
+                      {selectedCourse.startDate}{" "}
+                      {selectedCourse.endDate
+                        ? `- ${selectedCourse.endDate}`
+                        : ""}
                     </p>
                   </div>
                   <div>
@@ -1416,37 +1575,37 @@ const TeacherCourses = () => {
                       <div className="flex justify-between">
                         <span className="text-gray-500">Students</span>
                         <span className="font-semibold">
-                          {selectedCourse.students}
+                          {selectedCourse.students || 0}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Sessions</span>
                         <span className="font-semibold">
-                          {selectedCourse.sessions}
+                          {selectedCourse.sessions || 0}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Videos</span>
                         <span className="font-semibold">
-                          {selectedCourse.videos}
+                          {selectedCourse.videos || 0}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Assignments</span>
                         <span className="font-semibold">
-                          {selectedCourse.assignments}
+                          {selectedCourse.assignments || 0}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Quizzes</span>
                         <span className="font-semibold">
-                          {selectedCourse.quizzes}
+                          {selectedCourse.quizzes || 0}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Materials</span>
                         <span className="font-semibold">
-                          {selectedCourse.materials}
+                          {selectedCourse.materials || 0}
                         </span>
                       </div>
                     </div>
@@ -1458,12 +1617,12 @@ const TeacherCourses = () => {
                     <div className="flex items-center gap-3">
                       <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full ${getProgressColor(selectedCourse.progress)}`}
-                          style={{ width: `${selectedCourse.progress}%` }}
+                          className={`h-full rounded-full ${getProgressColor(selectedCourse.progress || 0)}`}
+                          style={{ width: `${selectedCourse.progress || 0}%` }}
                         ></div>
                       </div>
                       <span className="font-bold text-lg">
-                        {selectedCourse.progress}%
+                        {selectedCourse.progress || 0}%
                       </span>
                     </div>
                   </div>

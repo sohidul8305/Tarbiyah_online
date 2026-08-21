@@ -30,6 +30,8 @@ import {
   FaSignOutAlt,
   FaPlay,
   FaPen,
+  FaSpinner,
+  FaBars,
 } from "react-icons/fa";
 import {
   MdDashboard,
@@ -38,108 +40,241 @@ import {
   MdQuiz,
   MdVerified,
 } from "react-icons/md";
-import { FiMenu, FiX } from "react-icons/fi";
 import Swal from "sweetalert2";
 import { useAuth } from "../../Provider/AuthProvider";
+import axios from "axios";
+
+// ✅ FIX: Use direct URL or check for environment variable safely
+// For Create React App (CRA) - This will work in development
+const API_URL =
+  typeof process !== "undefined" && process.env?.REACT_APP_API_URL
+    ? process.env.REACT_APP_API_URL
+    : "http://localhost:5000";
+
+// OR if you're using Vite, use this instead:
+// const API_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000";
+
+// OR simply use direct URL (easiest fix):
+// const API_URL = "http://localhost:5000";
 
 const TeacherProfile = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("profile");
-  const [teacherInfo, setTeacherInfo] = useState({
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [teacher, setTeacher] = useState({
     name: "",
+    title: "",
     email: "",
     phone: "",
-    designation: "",
-    department: "",
+    bio: "",
     joinDate: "",
-    subjects: [],
-    classes: [],
-  });
-
-  const [isEditing, setIsEditing] = useState(false);
-  const [teacher, setTeacher] = useState({
-    name: "শায়খ ড. মাওলানা মুহাম্মদ আব্দুল্লাহ",
-    title: "প্রধান উস্তাদ ও বিভাগীয় প্রধান - তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
-    email: "abdullah@tarbiyahonline.com",
-    phone: "+৮৮০ ১৭০০ ১২৩৪৫৬",
-    bio: "আল-আজহার বিশ্ববিদ্যালয় থেকে হাদিস ও শরিয়াহর ওপর উচ্চতর ডিগ্রি অর্জন করেছেন। দীর্ঘ ১৫ বছরেরও বেশি সময় ধরে কওমি মাদরাসা এবং অনলাইন প্ল্যাটফর্মে ইসলামিক স্টাডিজ ও আরবি ভাষা শিক্ষাদানে নিয়োজিত আছেন।",
-    joinDate: "জানুয়ারি ২০২০",
-    totalStudents: "১৫০+",
-    totalCourses: "৮টি",
-    rating: "৪.৯",
-    education: [
-      {
-        degree: "পিএইচডি (Hadith & Islamic Studies)",
-        institution: "আল-আজহার বিশ্ববিদ্যালয়, মিসর",
-        year: "২০১৮",
-      },
-      {
-        degree: "মাস্টার্স (Tafseer & Quranic Sciences)",
-        institution: "ইসলামী বিশ্ববিদ্যালয়, কুষ্টিয়া",
-        year: "২০১২",
-      },
-      {
-        degree: "দাওরায়ে হাদিস (তাকমীল)",
-        institution: "জামিয়া আরামিয়া দারুল উলুম",
-        year: "২০০৯",
-      },
-    ],
-    expertise: [
-      "হাদিস শাস্ত্র",
-      "উসূলে ফিকহ",
-      "আরবি ব্যাকরণ (নাহু-সরফ)",
-      "তাফসিরুল কুরআন",
-    ],
-    courses: [
-      {
-        title: "তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
-        students: "৪৫ জন",
-        duration: "৪ বছর",
-        icon: "📚",
-      },
-      {
-        title: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
-        students: "৬০ জন",
-        duration: "১ বছর",
-        icon: "🎓",
-      },
-      {
-        title: "কুরআন ফর এল্ডারস",
-        students: "২৫ জন",
-        duration: "৬ মাস",
-        icon: "📖",
-      },
-    ],
-    achievements: [
-      "বেস্ট অনলাইন শিক্ষক পুরস্কার ২০২৩",
-      "হাদিস গবেষণায় স্বর্ণপদক - ২০১৮",
-      "শিক্ষাক্ষেত্রে অবদানের জন্য সম্মাননা - ২০২১",
-    ],
+    totalStudents: "",
+    totalCourses: "",
+    rating: "",
+    education: [],
+    expertise: [],
+    courses: [],
+    achievements: [],
+    photo: "",
   });
 
   const [editData, setEditData] = useState({ ...teacher });
 
-  // Load teacher info
+  // Load teacher profile from API
   useEffect(() => {
-    const savedTeacher = localStorage.getItem("teacherInfo");
-    if (savedTeacher) {
-      const teacher = JSON.parse(savedTeacher);
-      setTeacherInfo(teacher);
-    } else {
-      setTeacherInfo({
-        name: user?.displayName || "Ustadh Ahmad",
-        email: user?.email || "teacher@tarabiyah.com",
-        phone: "01700000000",
-        designation: "Senior Teacher",
-        department: "Islamic Studies",
-        joinDate: "January 2024",
-        subjects: ["Tajweed", "Tafsir", "Hadith"],
-        classes: ["Class 8", "Class 9", "Class 10"],
-      });
+    if (user?.email) {
+      fetchTeacherProfile(user.email);
     }
   }, [user]);
+
+  const fetchTeacherProfile = async (email) => {
+    try {
+      setIsLoading(true);
+      const response = await axios.get(
+        `${API_URL}/api/teacher/profile/${email}`,
+      );
+
+      if (response.data.success) {
+        const teacherData = response.data.teacher;
+        setTeacher(teacherData);
+        setEditData(teacherData);
+      }
+    } catch (error) {
+      console.error("Error fetching teacher profile:", error);
+      // If API fails, use default data
+      const defaultData = {
+        name: user?.displayName || "শায়খ ড. মাওলানা মুহাম্মদ আব্দুল্লাহ",
+        title:
+          "প্রধান উস্তাদ ও বিভাগীয় প্রধান - তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
+        email: user?.email || "",
+        phone: "+৮৮০ ১৭০০ ১২৩৪৫৬",
+        bio: "আল-আজহার বিশ্ববিদ্যালয় থেকে হাদিস ও শরিয়াহর ওপর উচ্চতর ডিগ্রি অর্জন করেছেন। দীর্ঘ ১৫ বছরেরও বেশি সময় ধরে কওমি মাদরাসা এবং অনলাইন প্ল্যাটফর্মে ইসলামিক স্টাডিজ ও আরবি ভাষা শিক্ষাদানে নিয়োজিত আছেন।",
+        joinDate: "জানুয়ারি ২০২০",
+        totalStudents: "১৫০+",
+        totalCourses: "৮টি",
+        rating: "৪.৯",
+        education: [
+          {
+            degree: "পিএইচডি (Hadith & Islamic Studies)",
+            institution: "আল-আজহার বিশ্ববিদ্যালয়, মিসর",
+            year: "২০১৮",
+          },
+          {
+            degree: "মাস্টার্স (Tafseer & Quranic Sciences)",
+            institution: "ইসলামী বিশ্ববিদ্যালয়, কুষ্টিয়া",
+            year: "২০১২",
+          },
+          {
+            degree: "দাওরায়ে হাদিস (তাকমীল)",
+            institution: "জামিয়া আরামিয়া দারুল উলুম",
+            year: "২০০৯",
+          },
+        ],
+        expertise: [
+          "হাদিস শাস্ত্র",
+          "উসূলে ফিকহ",
+          "আরবি ব্যাকরণ (নাহু-সরফ)",
+          "তাফসিরুল কুরআন",
+        ],
+        courses: [
+          {
+            title: "তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
+            students: "৪৫ জন",
+            duration: "৪ বছর",
+            icon: "📚",
+          },
+          {
+            title: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
+            students: "৬০ জন",
+            duration: "১ বছর",
+            icon: "🎓",
+          },
+          {
+            title: "কুরআন ফর এল্ডারস",
+            students: "২৫ জন",
+            duration: "৬ মাস",
+            icon: "📖",
+          },
+        ],
+        achievements: [
+          "বেস্ট অনলাইন শিক্ষক পুরস্কার ২০২৩",
+          "হাদিস গবেষণায় স্বর্ণপদক - ২০১৮",
+          "শিক্ষাক্ষেত্রে অবদানের জন্য সম্মাননা - ২০২১",
+        ],
+      };
+      setTeacher(defaultData);
+      setEditData(defaultData);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setIsSaving(true);
+
+      // Show loading
+      Swal.fire({
+        title: "আপডেট হচ্ছে...",
+        text: "দয়া করে অপেক্ষা করুন",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const response = await axios.put(
+        `${API_URL}/api/teacher/profile/${user.email}`,
+        editData,
+      );
+
+      if (response.data.success) {
+        setTeacher(editData);
+        setIsEditing(false);
+
+        Swal.fire({
+          icon: "success",
+          title: "✅ প্রোফাইল আপডেট হয়েছে!",
+          text: "আপনার প্রোফাইল সফলভাবে আপডেট করা হয়েছে।",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      console.error("Error saving profile:", error);
+      Swal.fire({
+        icon: "error",
+        title: "আপডেট ব্যর্থ!",
+        text: error.response?.data?.message || "আবার চেষ্টা করুন।",
+        confirmButtonColor: "#004d4d",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleEditToggle = () => {
+    if (isEditing) {
+      handleSaveProfile();
+    } else {
+      setEditData({ ...teacher });
+      setIsEditing(true);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditData({ ...teacher });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditData({ ...editData, [name]: value });
+  };
+
+  const handleEducationChange = (index, field, value) => {
+    const newEducation = [...editData.education];
+    newEducation[index] = { ...newEducation[index], [field]: value };
+    setEditData({ ...editData, education: newEducation });
+  };
+
+  const addEducation = () => {
+    setEditData({
+      ...editData,
+      education: [
+        ...editData.education,
+        { degree: "", institution: "", year: "" },
+      ],
+    });
+  };
+
+  const removeEducation = (index) => {
+    const newEducation = editData.education.filter((_, i) => i !== index);
+    setEditData({ ...editData, education: newEducation });
+  };
+
+  const handleExpertiseChange = (index, value) => {
+    const newExpertise = [...editData.expertise];
+    newExpertise[index] = value;
+    setEditData({ ...editData, expertise: newExpertise });
+  };
+
+  const addExpertise = () => {
+    setEditData({
+      ...editData,
+      expertise: [...editData.expertise, ""],
+    });
+  };
+
+  const removeExpertise = (index) => {
+    const newExpertise = editData.expertise.filter((_, i) => i !== index);
+    setEditData({ ...editData, expertise: newExpertise });
+  };
 
   const handleLogout = async () => {
     try {
@@ -257,36 +392,11 @@ const TeacherProfile = () => {
     },
   ];
 
-  const handleEditToggle = () => {
-    if (isEditing) {
-      setTeacher(editData);
-      Swal.fire({
-        icon: "success",
-        title: "প্রোফাইল আপডেট হয়েছে!",
-        text: "আপনার প্রোফাইল সফলভাবে আপডেট করা হয়েছে।",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-    } else {
-      setEditData({ ...teacher });
-    }
-    setIsEditing(!isEditing);
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    setEditData({ ...teacher });
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditData({ ...editData, [name]: value });
-  };
-
   const renderStars = (rating) => {
     const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
+    const numRating = parseFloat(rating) || 0;
+    const fullStars = Math.floor(numRating);
+    const hasHalfStar = numRating % 1 >= 0.5;
 
     for (let i = 1; i <= 5; i++) {
       if (i <= fullStars) {
@@ -312,6 +422,17 @@ const TeacherProfile = () => {
     return stars;
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <FaSpinner className="text-4xl text-teal-600 animate-spin mx-auto" />
+          <p className="mt-4 text-gray-600">প্রোফাইল লোড হচ্ছে...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="flex flex-1 overflow-hidden relative">
@@ -322,7 +443,7 @@ const TeacherProfile = () => {
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
           >
-            {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+            {isSidebarOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
           </button>
         </div>
 
@@ -345,13 +466,13 @@ const TeacherProfile = () => {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
                 <span className="text-xl font-bold">
-                  {teacherInfo.name?.charAt(0) || "T"}
+                  {teacher.name?.charAt(0) || "T"}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm truncate">{teacherInfo.name}</p>
+                <p className="font-bold text-sm truncate">{teacher.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {teacherInfo.designation}
+                  {teacher.title?.split("-")[0] || "Teacher"}
                 </p>
               </div>
             </div>
@@ -422,7 +543,7 @@ const TeacherProfile = () => {
             </div>
             <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-gray-700 hidden sm:block">
-                {teacherInfo.name}
+                {teacher.name}
               </span>
               <button
                 onClick={handleLogout}
@@ -440,20 +561,33 @@ const TeacherProfile = () => {
               <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] h-32 md:h-40 relative">
                 <button
                   onClick={handleEditToggle}
+                  disabled={isSaving}
                   className={`absolute top-4 right-4 ${
                     isEditing
                       ? "bg-green-500 hover:bg-green-600"
                       : "bg-white/20 hover:bg-white/30"
-                  } text-white px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all backdrop-blur-sm`}
+                  } text-white px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all backdrop-blur-sm ${
+                    isSaving ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
-                  {isEditing ? <FaSave /> : <FaEdit />}
-                  {isEditing ? "সেভ করুন" : "এডিট প্রোফাইল"}
+                  {isSaving ? (
+                    <FaSpinner className="animate-spin" />
+                  ) : isEditing ? (
+                    <FaSave />
+                  ) : (
+                    <FaEdit />
+                  )}
+                  {isSaving
+                    ? "সেভ হচ্ছে..."
+                    : isEditing
+                      ? "সেভ করুন"
+                      : "এডিট প্রোফাইল"}
                 </button>
 
-                {isEditing && (
+                {isEditing && !isSaving && (
                   <button
                     onClick={handleCancelEdit}
-                    className="absolute top-4 right-32 bg-red-500/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all backdrop-blur-sm"
+                    className="absolute top-4 right-36 bg-red-500/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all backdrop-blur-sm"
                   >
                     <FaTimes /> বাতিল
                   </button>
@@ -463,10 +597,55 @@ const TeacherProfile = () => {
               <div className="px-6 md:px-8 pb-6 relative flex flex-col md:flex-row items-center md:items-end gap-6 -mt-16 md:-mt-12">
                 <div className="relative">
                   <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl bg-white p-1.5 shadow-lg border-4 border-white flex items-center justify-center text-6xl bg-teal-50">
-                    <span>👨‍🏫</span>
+                    {teacher.photo ? (
+                      <img
+                        src={teacher.photo}
+                        alt={teacher.name}
+                        className="w-full h-full rounded-xl object-cover"
+                      />
+                    ) : (
+                      <span>👨‍🏫</span>
+                    )}
                   </div>
                   {isEditing && (
-                    <button className="absolute bottom-0 right-0 bg-teal-600 text-white p-1.5 rounded-full border-2 border-white hover:bg-teal-700 transition-all">
+                    <button
+                      onClick={() => {
+                        // Photo upload functionality
+                        Swal.fire({
+                          title: "প্রোফাইল ছবি আপডেট",
+                          input: "url",
+                          inputLabel: "ছবির URL লিখুন",
+                          inputPlaceholder: "https://example.com/photo.jpg",
+                          showCancelButton: true,
+                          confirmButtonColor: "#004d4d",
+                          confirmButtonText: "আপডেট করুন",
+                          cancelButtonText: "বাতিল",
+                          preConfirm: async (url) => {
+                            if (!url) {
+                              Swal.showValidationMessage("URL প্রয়োজন!");
+                              return;
+                            }
+                            try {
+                              await axios.post(
+                                `${API_URL}/api/teacher/profile/${user.email}/photo`,
+                                { photoUrl: url },
+                              );
+                              setEditData({ ...editData, photo: url });
+                              setTeacher({ ...teacher, photo: url });
+                              Swal.fire({
+                                icon: "success",
+                                title: "ছবি আপডেট হয়েছে!",
+                                timer: 1500,
+                                showConfirmButton: false,
+                              });
+                            } catch (error) {
+                              Swal.showValidationMessage("ছবি আপডেট ব্যর্থ!");
+                            }
+                          },
+                        });
+                      }}
+                      className="absolute bottom-0 right-0 bg-teal-600 text-white p-1.5 rounded-full border-2 border-white hover:bg-teal-700 transition-all"
+                    >
                       <FaCamera className="text-xs" />
                     </button>
                   )}
@@ -477,7 +656,7 @@ const TeacherProfile = () => {
                     <input
                       type="text"
                       name="name"
-                      value={editData.name}
+                      value={editData.name || ""}
                       onChange={handleInputChange}
                       className="text-2xl md:text-3xl font-bold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1 w-full max-w-md"
                     />
@@ -494,7 +673,7 @@ const TeacherProfile = () => {
                     <input
                       type="text"
                       name="title"
-                      value={editData.title}
+                      value={editData.title || ""}
                       onChange={handleInputChange}
                       className="text-[#004d4d] font-medium text-sm md:text-base bg-gray-50 border border-gray-300 rounded-lg px-3 py-1 w-full max-w-md mt-1"
                     />
@@ -512,7 +691,7 @@ const TeacherProfile = () => {
                           <input
                             type="email"
                             name="email"
-                            value={editData.email}
+                            value={editData.email || ""}
                             onChange={handleInputChange}
                             className="bg-transparent border-none text-sm focus:outline-none w-40"
                           />
@@ -522,7 +701,7 @@ const TeacherProfile = () => {
                           <input
                             type="text"
                             name="phone"
-                            value={editData.phone}
+                            value={editData.phone || ""}
                             onChange={handleInputChange}
                             className="bg-transparent border-none text-sm focus:outline-none w-32"
                           />
@@ -603,7 +782,7 @@ const TeacherProfile = () => {
               ))}
             </div>
 
-            {/* Main Content - Two Columns */}
+            {/* Rest of the content remains the same... */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column */}
               <div className="lg:col-span-1 space-y-6">
@@ -614,7 +793,7 @@ const TeacherProfile = () => {
                   {isEditing ? (
                     <textarea
                       name="bio"
-                      value={editData.bio}
+                      value={editData.bio || ""}
                       onChange={handleInputChange}
                       rows="6"
                       className="w-full text-gray-600 text-sm leading-relaxed bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
@@ -632,31 +811,18 @@ const TeacherProfile = () => {
                   </h3>
                   {isEditing ? (
                     <div className="space-y-2">
-                      {editData.expertise.map((item, index) => (
+                      {editData.expertise?.map((item, index) => (
                         <div key={index} className="flex items-center gap-2">
                           <input
                             type="text"
                             value={item}
-                            onChange={(e) => {
-                              const newExpertise = [...editData.expertise];
-                              newExpertise[index] = e.target.value;
-                              setEditData({
-                                ...editData,
-                                expertise: newExpertise,
-                              });
-                            }}
+                            onChange={(e) =>
+                              handleExpertiseChange(index, e.target.value)
+                            }
                             className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                           />
                           <button
-                            onClick={() => {
-                              const newExpertise = editData.expertise.filter(
-                                (_, i) => i !== index,
-                              );
-                              setEditData({
-                                ...editData,
-                                expertise: newExpertise,
-                              });
-                            }}
+                            onClick={() => removeExpertise(index)}
                             className="text-red-500 hover:text-red-700"
                           >
                             <FaTimes />
@@ -664,12 +830,7 @@ const TeacherProfile = () => {
                         </div>
                       ))}
                       <button
-                        onClick={() => {
-                          setEditData({
-                            ...editData,
-                            expertise: [...editData.expertise, ""],
-                          });
-                        }}
+                        onClick={addExpertise}
                         className="text-teal-600 hover:text-teal-700 text-sm font-semibold"
                       >
                         + যোগ করুন
@@ -677,7 +838,7 @@ const TeacherProfile = () => {
                     </div>
                   ) : (
                     <div className="flex flex-wrap gap-2">
-                      {teacher.expertise.map((item, index) => (
+                      {teacher.expertise?.map((item, index) => (
                         <span
                           key={index}
                           className="bg-teal-50 text-[#004d4d] text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-teal-100"
@@ -695,7 +856,7 @@ const TeacherProfile = () => {
                     <span className="text-yellow-500">🏆</span> অর্জনসমূহ
                   </h3>
                   <div className="space-y-2">
-                    {teacher.achievements.map((achievement, index) => (
+                    {teacher.achievements?.map((achievement, index) => (
                       <div
                         key={index}
                         className="flex items-center gap-2 p-2 bg-yellow-50 rounded-lg border border-yellow-100"
@@ -752,29 +913,99 @@ const TeacherProfile = () => {
                     শিক্ষাগত যোগ্যতা
                   </h3>
                   <div className="space-y-4">
-                    {teacher.education.map((edu, index) => (
-                      <div
-                        key={index}
-                        className="flex items-start gap-4 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-100 hover:shadow-md transition-all"
-                      >
-                        <div className="p-3 bg-teal-100 text-teal-700 rounded-xl shadow-sm">
-                          <FaAward className="text-xl" />
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-bold text-gray-800 text-sm md:text-base">
-                            {edu.degree}
-                          </h4>
-                          <p className="text-gray-600 text-sm mt-0.5">
-                            {edu.institution}
-                          </p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className="inline-block text-xs font-semibold bg-teal-100 text-teal-800 px-2.5 py-0.5 rounded-full">
-                              📅 {edu.year}
-                            </span>
+                    {isEditing ? (
+                      <>
+                        {editData.education?.map((edu, index) => (
+                          <div
+                            key={index}
+                            className="p-4 rounded-xl bg-gray-50 border border-gray-200"
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <h4 className="font-bold text-gray-800 text-sm">
+                                শিক্ষা #{index + 1}
+                              </h4>
+                              <button
+                                onClick={() => removeEducation(index)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <FaTimes />
+                              </button>
+                            </div>
+                            <div className="space-y-2">
+                              <input
+                                type="text"
+                                placeholder="ডিগ্রী"
+                                value={edu.degree}
+                                onChange={(e) =>
+                                  handleEducationChange(
+                                    index,
+                                    "degree",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+                              />
+                              <input
+                                type="text"
+                                placeholder="প্রতিষ্ঠান"
+                                value={edu.institution}
+                                onChange={(e) =>
+                                  handleEducationChange(
+                                    index,
+                                    "institution",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+                              />
+                              <input
+                                type="text"
+                                placeholder="সাল"
+                                value={edu.year}
+                                onChange={(e) =>
+                                  handleEducationChange(
+                                    index,
+                                    "year",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                        <button
+                          onClick={addEducation}
+                          className="text-teal-600 hover:text-teal-700 text-sm font-semibold"
+                        >
+                          + নতুন শিক্ষা যোগ করুন
+                        </button>
+                      </>
+                    ) : (
+                      teacher.education?.map((edu, index) => (
+                        <div
+                          key={index}
+                          className="flex items-start gap-4 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-100 hover:shadow-md transition-all"
+                        >
+                          <div className="p-3 bg-teal-100 text-teal-700 rounded-xl shadow-sm">
+                            <FaAward className="text-xl" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-bold text-gray-800 text-sm md:text-base">
+                              {edu.degree}
+                            </h4>
+                            <p className="text-gray-600 text-sm mt-0.5">
+                              {edu.institution}
+                            </p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="inline-block text-xs font-semibold bg-teal-100 text-teal-800 px-2.5 py-0.5 rounded-full">
+                                📅 {edu.year}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </div>
 
@@ -784,7 +1015,7 @@ const TeacherProfile = () => {
                     পরিচালিত কোর্সসমূহ
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {teacher.courses.map((course, index) => (
+                    {teacher.courses?.map((course, index) => (
                       <div
                         key={index}
                         className="p-4 rounded-xl border border-gray-100 bg-gradient-to-br from-gray-50 to-white hover:shadow-md transition-all group"
@@ -818,29 +1049,55 @@ const TeacherProfile = () => {
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                      { label: "প্রোফাইল সম্পাদনা", icon: "✏️", color: "blue" },
+                      {
+                        label: "প্রোফাইল সম্পাদনা",
+                        icon: "✏️",
+                        color: "blue",
+                        action: handleEditToggle,
+                      },
                       {
                         label: "পাসওয়ার্ড পরিবর্তন",
                         icon: "🔒",
                         color: "red",
+                        action: () => {
+                          Swal.fire({
+                            icon: "info",
+                            title: "পাসওয়ার্ড পরিবর্তন",
+                            text: "এই ফিচারটি শীঘ্রই আসছে!",
+                            confirmButtonColor: "#004d4d",
+                          });
+                        },
                       },
-                      { label: "সেটিংস", icon: "⚙️", color: "gray" },
-                      { label: "সাপোর্ট", icon: "💬", color: "green" },
+                      {
+                        label: "সেটিংস",
+                        icon: "⚙️",
+                        color: "gray",
+                        action: () => {
+                          Swal.fire({
+                            icon: "info",
+                            title: "সেটিংস",
+                            text: "এই ফিচারটি শীঘ্রই আসছে!",
+                            confirmButtonColor: "#004d4d",
+                          });
+                        },
+                      },
+                      {
+                        label: "সাপোর্ট",
+                        icon: "💬",
+                        color: "green",
+                        action: () => {
+                          Swal.fire({
+                            icon: "info",
+                            title: "সাপোর্ট",
+                            text: "এই ফিচারটি শীঘ্রই আসছে!",
+                            confirmButtonColor: "#004d4d",
+                          });
+                        },
+                      },
                     ].map((item, index) => (
                       <button
                         key={index}
-                        onClick={() => {
-                          if (item.label === "প্রোফাইল সম্পাদনা") {
-                            handleEditToggle();
-                          } else {
-                            Swal.fire({
-                              icon: "info",
-                              title: item.label,
-                              text: "এই ফিচারটি শীঘ্রই আসছে!",
-                              confirmButtonColor: "#004d4d",
-                            });
-                          }
-                        }}
+                        onClick={item.action}
                         className={`bg-${item.color}-50 hover:bg-${item.color}-100 p-3 rounded-lg border border-${item.color}-100 text-center transition-all`}
                       >
                         <div className="text-2xl">{item.icon}</div>

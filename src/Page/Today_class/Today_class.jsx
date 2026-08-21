@@ -9,61 +9,32 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
   FaCalendarAlt,
   FaClock,
   FaBook,
-  FaFileAlt,
   FaChartLine,
-  FaUserGraduate,
-  FaUserPlus,
-  FaClipboardList,
-  FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
   FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
   FaClock as FaClockIcon,
   FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
   FaPlusCircle,
-  FaDownload,
-  FaPrint,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
   FaBuilding,
   FaUniversity,
   FaGraduationCap,
   FaGlobe,
-  FaVideo,
   FaLink,
+  FaSpinner,
+  FaSync,
+  FaBookOpen,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Today_class = () => {
@@ -72,6 +43,17 @@ const Today_class = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [activeSubMenu, setActiveSubMenu] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterDepartment, setFilterDepartment] = useState("All");
+  const [filterClass, setFilterClass] = useState("All");
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedClass, setSelectedClass] = useState(null);
+  const [editingClass, setEditingClass] = useState(null);
+
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -81,6 +63,7 @@ const Today_class = () => {
     joinDate: "",
   });
 
+  // Today's Classes Data - 6 classes as per your requirement
   const [todayClasses, setTodayClasses] = useState([
     {
       id: 1,
@@ -180,13 +163,32 @@ const Today_class = () => {
     },
   ]);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("All");
-  const [filterDepartment, setFilterDepartment] = useState("All");
-  const [filterClass, setFilterClass] = useState("All");
-  const [viewMode, setViewMode] = useState("grid");
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [selectedClass, setSelectedClass] = useState(null);
+  // New class form state
+  const [newClass, setNewClass] = useState({
+    name: "",
+    subject: "",
+    class: "",
+    teacher: "",
+    time: "",
+    days: [],
+    room: "",
+    students: 0,
+    status: "Upcoming",
+    link: "",
+    department: "",
+    attendance: 0,
+    totalStudents: 0,
+  });
+
+  // Available days
+  const availableDays = [
+    "Saturday",
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+  ];
 
   // Load admin info
   useEffect(() => {
@@ -239,6 +241,170 @@ const Today_class = () => {
     } else {
       setActiveSubMenu(menu);
     }
+  };
+
+  // Handle Add Class
+  const handleAddClass = () => {
+    if (
+      !newClass.name ||
+      !newClass.subject ||
+      !newClass.teacher ||
+      !newClass.time
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Information",
+        text: "Please fill in all required fields (Name, Subject, Teacher, Time)",
+      });
+      return;
+    }
+
+    const newId =
+      todayClasses.length > 0
+        ? Math.max(...todayClasses.map((c) => c.id)) + 1
+        : 1;
+    const classToAdd = {
+      ...newClass,
+      id: newId,
+      students: newClass.totalStudents || 0,
+      totalStudents: newClass.totalStudents || 0,
+      attendance: 0,
+      days: newClass.days || [],
+    };
+
+    setTodayClasses([...todayClasses, classToAdd]);
+    setShowAddModal(false);
+    setNewClass({
+      name: "",
+      subject: "",
+      class: "",
+      teacher: "",
+      time: "",
+      days: [],
+      room: "",
+      students: 0,
+      status: "Upcoming",
+      link: "",
+      department: "",
+      attendance: 0,
+      totalStudents: 0,
+    });
+
+    Swal.fire({
+      icon: "success",
+      title: "Class Added!",
+      text: "New class has been created successfully.",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  // Handle Edit Class
+  const handleEditClass = () => {
+    if (!editingClass) return;
+
+    setTodayClasses(
+      todayClasses.map((c) => (c.id === editingClass.id ? editingClass : c)),
+    );
+    setShowEditModal(false);
+    setEditingClass(null);
+
+    Swal.fire({
+      icon: "success",
+      title: "Class Updated!",
+      text: "Class has been updated successfully.",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  // Handle Delete Class
+  const handleDeleteClass = (id, name) => {
+    Swal.fire({
+      title: `Delete "${name}"?`,
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setTodayClasses(todayClasses.filter((c) => c.id !== id));
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: "Class has been deleted.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    });
+  };
+
+  // Handle Update Attendance
+  const handleUpdateAttendance = (id, newAttendance) => {
+    const cls = todayClasses.find((c) => c.id === id);
+    if (!cls) return;
+
+    if (newAttendance < 0 || newAttendance > cls.totalStudents) {
+      Swal.fire({
+        icon: "warning",
+        title: "Invalid Attendance",
+        text: `Attendance must be between 0 and ${cls.totalStudents}`,
+      });
+      return;
+    }
+
+    setTodayClasses(
+      todayClasses.map((c) =>
+        c.id === id ? { ...c, attendance: newAttendance } : c,
+      ),
+    );
+    setShowDetailsModal(false);
+    setSelectedClass(null);
+
+    Swal.fire({
+      icon: "success",
+      title: "Attendance Updated!",
+      text: "Attendance has been updated successfully.",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  // Handle Update Status
+  const handleUpdateStatus = (id, newStatus) => {
+    setTodayClasses(
+      todayClasses.map((c) => (c.id === id ? { ...c, status: newStatus } : c)),
+    );
+
+    Swal.fire({
+      icon: "success",
+      title: "Status Updated!",
+      text: `Class status changed to ${newStatus}`,
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  // Toggle day selection
+  const toggleDay = (day) => {
+    setNewClass((prev) => {
+      const days = prev.days.includes(day)
+        ? prev.days.filter((d) => d !== day)
+        : [...prev.days, day];
+      return { ...prev, days };
+    });
+  };
+
+  const toggleEditDay = (day) => {
+    setEditingClass((prev) => {
+      const days = prev.days.includes(day)
+        ? prev.days.filter((d) => d !== day)
+        : [...prev.days, day];
+      return { ...prev, days };
+    });
   };
 
   // Sidebar Menu Items
@@ -395,7 +561,7 @@ const Today_class = () => {
     {
       id: "exam",
       path: "/admin-exam",
-      icon: <FaCalendarCheck className="text-xl" />,
+      icon: <FaCalendarAlt className="text-xl" />,
       label: "Exam",
       subItems: [
         { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
@@ -459,13 +625,13 @@ const Today_class = () => {
     },
   ];
 
-  // Handle search and filter
+  // Filter classes
   const filteredClasses = todayClasses.filter((cls) => {
     const matchesSearch =
-      cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cls.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cls.teacher.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      cls.class.toLowerCase().includes(searchTerm.toLowerCase());
+      cls.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cls.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cls.teacher?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cls.class?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "All" || cls.status === filterStatus;
     const matchesDepartment =
       filterDepartment === "All" || cls.department === filterDepartment;
@@ -476,9 +642,12 @@ const Today_class = () => {
   // Get unique values for filters
   const uniqueDepartments = [
     "All",
-    ...new Set(todayClasses.map((c) => c.department)),
+    ...new Set(todayClasses.map((c) => c.department).filter(Boolean)),
   ];
-  const uniqueClasses = ["All", ...new Set(todayClasses.map((c) => c.class))];
+  const uniqueClasses = [
+    "All",
+    ...new Set(todayClasses.map((c) => c.class).filter(Boolean)),
+  ];
 
   // Get status badge color
   const getStatusColor = (status) => {
@@ -668,7 +837,7 @@ const Today_class = () => {
                 View and manage today's class schedule
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-semibold text-gray-700 hidden sm:block">
                 {adminInfo.name}
               </span>
@@ -709,8 +878,11 @@ const Today_class = () => {
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-orange-600">
-                {todayClasses.reduce((sum, c) => sum + c.attendance, 0)}/
-                {todayClasses.reduce((sum, c) => sum + c.totalStudents, 0)}
+                {todayClasses.reduce((sum, c) => sum + (c.attendance || 0), 0)}/
+                {todayClasses.reduce(
+                  (sum, c) => sum + (c.totalStudents || 0),
+                  0,
+                )}
               </p>
               <p className="text-[10px] text-gray-500">Total Attendance</p>
             </div>
@@ -735,7 +907,7 @@ const Today_class = () => {
                   onChange={(e) => setFilterStatus(e.target.value)}
                   className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 >
-                  <option value="All">Status</option>
+                  <option value="All">All Status</option>
                   <option value="Ongoing">Ongoing</option>
                   <option value="Upcoming">Upcoming</option>
                   <option value="Completed">Completed</option>
@@ -763,13 +935,35 @@ const Today_class = () => {
                     </option>
                   ))}
                 </select>
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setFilterStatus("All");
+                    setFilterDepartment("All");
+                    setFilterClass("All");
+                  }}
+                  className="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded-lg transition-all"
+                  title="Reset Filters"
+                >
+                  <FaSync size={10} />
+                </button>
               </div>
             </div>
           </div>
 
+          {/* Add Class Button */}
+          <div className="mb-3">
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all shadow-sm"
+            >
+              <FaPlusCircle size={14} /> Add New Class
+            </button>
+          </div>
+
           {/* Classes Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 overflow-hidden">
-            {filteredClasses.slice(0, 6).map((cls) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto h-[calc(100vh-420px)]">
+            {filteredClasses.map((cls) => (
               <div
                 key={cls.id}
                 className={`bg-white border ${
@@ -780,7 +974,7 @@ const Today_class = () => {
                       : cls.status === "Completed"
                         ? "border-blue-300"
                         : "border-gray-200"
-                } rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden`}
+                } rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col`}
               >
                 <div
                   className={`h-1 ${
@@ -793,40 +987,59 @@ const Today_class = () => {
                           : "bg-red-500"
                   }`}
                 ></div>
-                <div className="p-3">
+                <div className="p-3 flex-1 flex flex-col">
                   <div className="flex items-start justify-between">
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-800 text-xs mb-0.5 line-clamp-2">
                         {cls.name}
                       </h3>
                       <p className="text-[10px] text-gray-500">{cls.subject}</p>
                     </div>
                     <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(cls.status)}`}
+                      className={`text-[8px] px-1.5 py-0.5 rounded-full whitespace-nowrap ml-1 ${getStatusColor(cls.status)}`}
                     >
                       {cls.status}
                     </span>
                   </div>
 
-                  <div className="mt-1.5 space-y-0.5 text-[10px]">
-                    <p className="text-gray-600 flex items-center gap-1">
+                  <div className="mt-1.5 space-y-0.5 text-[10px] flex-1">
+                    <p className="text-gray-600 flex items-center gap-1 truncate">
                       <FaChalkboardTeacher
-                        className="text-gray-400"
+                        className="text-gray-400 flex-shrink-0"
                         size={10}
-                      />{" "}
-                      {cls.teacher}
+                      />
+                      <span className="truncate">{cls.teacher}</span>
                     </p>
                     <p className="text-gray-600 flex items-center gap-1">
-                      <FaClockIcon className="text-gray-400" size={10} />{" "}
-                      {cls.time}
+                      <FaClockIcon
+                        className="text-gray-400 flex-shrink-0"
+                        size={10}
+                      />
+                      <span className="truncate">{cls.time}</span>
                     </p>
                     <p className="text-gray-600 flex items-center gap-1">
-                      <FaUsers className="text-gray-400" size={10} />{" "}
-                      {cls.students} Students
+                      <FaUsers
+                        className="text-gray-400 flex-shrink-0"
+                        size={10}
+                      />
+                      <span>{cls.students || 0} Students</span>
                     </p>
                     <p className="text-gray-600 flex items-center gap-1">
-                      <FaBook className="text-gray-400" size={10} /> {cls.class}
+                      <FaBook
+                        className="text-gray-400 flex-shrink-0"
+                        size={10}
+                      />
+                      <span className="truncate">{cls.class}</span>
                     </p>
+                    {cls.days && cls.days.length > 0 && (
+                      <p className="text-gray-600 flex items-center gap-1">
+                        <FaCalendarAlt
+                          className="text-gray-400 flex-shrink-0"
+                          size={10}
+                        />
+                        <span className="truncate">{cls.days.join(", ")}</span>
+                      </p>
+                    )}
                   </div>
 
                   {/* Attendance Progress */}
@@ -834,29 +1047,34 @@ const Today_class = () => {
                     <div className="flex justify-between text-[8px] text-gray-500 mb-0.5">
                       <span>Attendance</span>
                       <span>
-                        {cls.attendance}/{cls.totalStudents}
+                        {cls.attendance || 0}/{cls.totalStudents || 0}
                       </span>
                     </div>
                     <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full ${
-                          (cls.attendance / cls.totalStudents) * 100 >= 80
+                          ((cls.attendance || 0) / (cls.totalStudents || 1)) *
+                            100 >=
+                          80
                             ? "bg-green-500"
-                            : (cls.attendance / cls.totalStudents) * 100 >= 50
+                            : ((cls.attendance || 0) /
+                                  (cls.totalStudents || 1)) *
+                                  100 >=
+                                50
                               ? "bg-yellow-500"
                               : "bg-red-500"
                         }`}
                         style={{
-                          width: `${(cls.attendance / cls.totalStudents) * 100}%`,
+                          width: `${((cls.attendance || 0) / (cls.totalStudents || 1)) * 100}%`,
                         }}
                       ></div>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100">
+                  <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100 flex-wrap">
                     <a
-                      href={cls.link}
+                      href={cls.link || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`${
@@ -865,22 +1083,33 @@ const Today_class = () => {
                           : cls.status === "Upcoming"
                             ? "bg-yellow-600 hover:bg-yellow-700"
                             : "bg-blue-600 hover:bg-blue-700"
-                      } text-white text-[8px] font-medium flex-1 text-center py-1 rounded transition-all flex items-center justify-center gap-0.5`}
+                      } text-white text-[8px] font-medium flex-1 text-center py-1 rounded transition-all flex items-center justify-center gap-0.5 min-w-[50px]`}
                     >
-                      <FaLink size={10} /> Join Class
+                      <FaLink size={8} /> Join
                     </a>
                     <button
                       onClick={() => openDetailsModal(cls)}
-                      className="text-blue-600 hover:text-blue-800 p-0.5 rounded hover:bg-blue-50 transition-all"
+                      className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
                       title="View Details"
                     >
                       <FaEye size={12} />
                     </button>
                     <button
-                      className="text-green-600 hover:text-green-800 p-0.5 rounded hover:bg-green-50 transition-all"
+                      onClick={() => {
+                        setEditingClass({ ...cls });
+                        setShowEditModal(true);
+                      }}
+                      className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
                       title="Edit"
                     >
                       <FaEdit size={12} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteClass(cls.id, cls.name)}
+                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                      title="Delete"
+                    >
+                      <FaTrash size={12} />
                     </button>
                   </div>
                 </div>
@@ -896,12 +1125,437 @@ const Today_class = () => {
                 No Classes Found
               </h3>
               <p className="text-xs text-gray-500">
-                Try adjusting your search or filter criteria
+                {searchTerm || filterStatus !== "All"
+                  ? "Try adjusting your search or filter criteria"
+                  : "Click 'Add New Class' to create one"}
               </p>
             </div>
           )}
         </main>
       </div>
+
+      {/* Add Class Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaPlusCircle className="text-purple-600" />
+                Add New Class
+              </h3>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Class Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={newClass.name}
+                    onChange={(e) =>
+                      setNewClass({ ...newClass, name: e.target.value })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="e.g., Tajweed - Beginner Level"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Subject *
+                  </label>
+                  <input
+                    type="text"
+                    value={newClass.subject}
+                    onChange={(e) =>
+                      setNewClass({ ...newClass, subject: e.target.value })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="e.g., Tajweed"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Class Level *
+                  </label>
+                  <input
+                    type="text"
+                    value={newClass.class}
+                    onChange={(e) =>
+                      setNewClass({ ...newClass, class: e.target.value })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="e.g., Class 8"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Teacher *
+                  </label>
+                  <input
+                    type="text"
+                    value={newClass.teacher}
+                    onChange={(e) =>
+                      setNewClass({ ...newClass, teacher: e.target.value })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="e.g., Ustadh Ahmad"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Time *
+                  </label>
+                  <input
+                    type="text"
+                    value={newClass.time}
+                    onChange={(e) =>
+                      setNewClass({ ...newClass, time: e.target.value })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="e.g., 09:00 AM - 10:00 AM"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Room
+                  </label>
+                  <input
+                    type="text"
+                    value={newClass.room}
+                    onChange={(e) =>
+                      setNewClass({ ...newClass, room: e.target.value })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="e.g., Room 101"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Department
+                  </label>
+                  <input
+                    type="text"
+                    value={newClass.department}
+                    onChange={(e) =>
+                      setNewClass({ ...newClass, department: e.target.value })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="e.g., Islamic Studies"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Total Students
+                  </label>
+                  <input
+                    type="number"
+                    value={newClass.totalStudents}
+                    onChange={(e) =>
+                      setNewClass({
+                        ...newClass,
+                        totalStudents: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Meeting Link
+                </label>
+                <input
+                  type="text"
+                  value={newClass.link}
+                  onChange={(e) =>
+                    setNewClass({ ...newClass, link: e.target.value })
+                  }
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  placeholder="https://meet.google.com/..."
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={newClass.status}
+                  onChange={(e) =>
+                    setNewClass({ ...newClass, status: e.target.value })
+                  }
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="Upcoming">Upcoming</option>
+                  <option value="Ongoing">Ongoing</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Days
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {availableDays.map((day) => (
+                    <button
+                      key={day}
+                      onClick={() => toggleDay(day)}
+                      className={`px-3 py-1 text-xs rounded-lg transition-all ${
+                        newClass.days.includes(day)
+                          ? "bg-purple-600 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      {day.slice(0, 3)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200 flex gap-3">
+              <button
+                onClick={handleAddClass}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-semibold text-sm transition-all"
+              >
+                Create Class
+              </button>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Class Modal */}
+      {showEditModal && editingClass && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaEdit className="text-green-600" />
+                Edit Class
+              </h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Class Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingClass.name}
+                    onChange={(e) =>
+                      setEditingClass({ ...editingClass, name: e.target.value })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Subject *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingClass.subject}
+                    onChange={(e) =>
+                      setEditingClass({
+                        ...editingClass,
+                        subject: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Class Level *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingClass.class}
+                    onChange={(e) =>
+                      setEditingClass({
+                        ...editingClass,
+                        class: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Teacher *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingClass.teacher}
+                    onChange={(e) =>
+                      setEditingClass({
+                        ...editingClass,
+                        teacher: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Time *
+                  </label>
+                  <input
+                    type="text"
+                    value={editingClass.time}
+                    onChange={(e) =>
+                      setEditingClass({ ...editingClass, time: e.target.value })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Room
+                  </label>
+                  <input
+                    type="text"
+                    value={editingClass.room}
+                    onChange={(e) =>
+                      setEditingClass({ ...editingClass, room: e.target.value })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Department
+                  </label>
+                  <input
+                    type="text"
+                    value={editingClass.department}
+                    onChange={(e) =>
+                      setEditingClass({
+                        ...editingClass,
+                        department: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    Total Students
+                  </label>
+                  <input
+                    type="number"
+                    value={editingClass.totalStudents}
+                    onChange={(e) =>
+                      setEditingClass({
+                        ...editingClass,
+                        totalStudents: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Meeting Link
+                </label>
+                <input
+                  type="text"
+                  value={editingClass.link}
+                  onChange={(e) =>
+                    setEditingClass({ ...editingClass, link: e.target.value })
+                  }
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={editingClass.status}
+                  onChange={(e) =>
+                    setEditingClass({ ...editingClass, status: e.target.value })
+                  }
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                >
+                  <option value="Upcoming">Upcoming</option>
+                  <option value="Ongoing">Ongoing</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Days
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {availableDays.map((day) => (
+                    <button
+                      key={day}
+                      onClick={() => toggleEditDay(day)}
+                      className={`px-3 py-1 text-xs rounded-lg transition-all ${
+                        editingClass.days?.includes(day)
+                          ? "bg-purple-600 text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      {day.slice(0, 3)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200 flex gap-3">
+              <button
+                onClick={handleEditClass}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-sm transition-all"
+              >
+                Update Class
+              </button>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Class Details Modal */}
       {showDetailsModal && selectedClass && (
@@ -931,12 +1585,30 @@ const Today_class = () => {
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Status</p>
-                    <span
-                      className={`text-sm px-2 py-1 rounded-full ${getStatusColor(selectedClass.status)}`}
-                    >
-                      {getStatusIcon(selectedClass.status)}{" "}
-                      {selectedClass.status}
-                    </span>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span
+                        className={`text-sm px-3 py-1 rounded-full ${getStatusColor(selectedClass.status)} flex items-center gap-1`}
+                      >
+                        {getStatusIcon(selectedClass.status)}{" "}
+                        {selectedClass.status}
+                      </span>
+                      <select
+                        value={selectedClass.status}
+                        onChange={(e) => {
+                          handleUpdateStatus(selectedClass.id, e.target.value);
+                          setSelectedClass({
+                            ...selectedClass,
+                            status: e.target.value,
+                          });
+                        }}
+                        className="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-purple-500"
+                      >
+                        <option value="Upcoming">Upcoming</option>
+                        <option value="Ongoing">Ongoing</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                      </select>
+                    </div>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Teacher</p>
@@ -954,6 +1626,21 @@ const Today_class = () => {
                     <p className="text-xs text-gray-500">Department</p>
                     <p className="font-semibold">{selectedClass.department}</p>
                   </div>
+                  {selectedClass.days && selectedClass.days.length > 0 && (
+                    <div>
+                      <p className="text-xs text-gray-500">Days</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {selectedClass.days.map((day) => (
+                          <span
+                            key={day}
+                            className="bg-purple-100 text-purple-700 px-2 py-0.5 rounded text-xs"
+                          >
+                            {day}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div>
                     <p className="text-xs text-gray-500">Meeting Link</p>
                     <a
@@ -976,20 +1663,20 @@ const Today_class = () => {
                       <div className="flex justify-between">
                         <span className="text-gray-500">Total Students</span>
                         <span className="font-semibold">
-                          {selectedClass.totalStudents}
+                          {selectedClass.totalStudents || 0}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Present</span>
                         <span className="font-semibold text-green-600">
-                          {selectedClass.attendance}
+                          {selectedClass.attendance || 0}
                         </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-500">Absent</span>
                         <span className="font-semibold text-red-600">
-                          {selectedClass.totalStudents -
-                            selectedClass.attendance}
+                          {(selectedClass.totalStudents || 0) -
+                            (selectedClass.attendance || 0)}
                         </span>
                       </div>
                     </div>
@@ -1003,27 +1690,27 @@ const Today_class = () => {
                       <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full ${
-                            (selectedClass.attendance /
-                              selectedClass.totalStudents) *
+                            ((selectedClass.attendance || 0) /
+                              (selectedClass.totalStudents || 1)) *
                               100 >=
                             80
                               ? "bg-green-500"
-                              : (selectedClass.attendance /
-                                    selectedClass.totalStudents) *
+                              : ((selectedClass.attendance || 0) /
+                                    (selectedClass.totalStudents || 1)) *
                                     100 >=
                                   50
                                 ? "bg-yellow-500"
                                 : "bg-red-500"
                           }`}
                           style={{
-                            width: `${(selectedClass.attendance / selectedClass.totalStudents) * 100}%`,
+                            width: `${((selectedClass.attendance || 0) / (selectedClass.totalStudents || 1)) * 100}%`,
                           }}
                         ></div>
                       </div>
                       <span className="font-bold text-lg">
                         {Math.round(
-                          (selectedClass.attendance /
-                            selectedClass.totalStudents) *
+                          ((selectedClass.attendance || 0) /
+                            (selectedClass.totalStudents || 1)) *
                             100,
                         )}
                         %
@@ -1031,7 +1718,44 @@ const Today_class = () => {
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  {/* Update Attendance */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-800 mb-2">
+                      Update Attendance
+                    </h4>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        value={selectedClass.attendance || 0}
+                        onChange={(e) => {
+                          setSelectedClass({
+                            ...selectedClass,
+                            attendance: parseInt(e.target.value) || 0,
+                          });
+                        }}
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="Enter attendance count"
+                        min="0"
+                        max={selectedClass.totalStudents}
+                      />
+                      <button
+                        onClick={() => {
+                          handleUpdateAttendance(
+                            selectedClass.id,
+                            selectedClass.attendance,
+                          );
+                        }}
+                        className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                      >
+                        Update
+                      </button>
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-1">
+                      Max: {selectedClass.totalStudents || 0} students
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2 flex-wrap">
                     <a
                       href={selectedClass.link}
                       target="_blank"
@@ -1046,8 +1770,15 @@ const Today_class = () => {
                     >
                       <FaLink className="inline mr-2" /> Join Class
                     </a>
-                    <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all">
-                      <FaEdit />
+                    <button
+                      onClick={() => {
+                        setShowDetailsModal(false);
+                        setEditingClass({ ...selectedClass });
+                        setShowEditModal(true);
+                      }}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                    >
+                      <FaEdit className="inline mr-1" /> Edit
                     </button>
                   </div>
                 </div>
