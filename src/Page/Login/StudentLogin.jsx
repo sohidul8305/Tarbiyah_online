@@ -15,6 +15,8 @@ const StudentLogin = () => {
 
   // StudentLogin.jsx - handleSubmit ফাংশন
 
+  // StudentLogin.jsx - handleSubmit ফাংশন
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -28,26 +30,12 @@ const StudentLogin = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: username,
-          password: password,
+          username: username.trim(),
+          password: password.trim(),
         }),
       });
 
       console.log("📥 Response Status:", response.status);
-
-      // ✅ Check if response is JSON
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text();
-        console.error("❌ Response is not JSON:", text.substring(0, 200));
-
-        if (text.includes("<!DOCTYPE")) {
-          throw new Error(
-            "Backend server is not running! Please start the server.",
-          );
-        }
-        throw new Error("Server returned invalid response.");
-      }
 
       const data = await response.json();
       console.log("📥 Response Data:", data);

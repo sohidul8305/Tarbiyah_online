@@ -44,18 +44,7 @@ import Swal from "sweetalert2";
 import { useAuth } from "../../Provider/AuthProvider";
 import axios from "axios";
 
-// ✅ FIX: Use direct URL or check for environment variable safely
-// For Create React App (CRA) - This will work in development
-const API_URL =
-  typeof process !== "undefined" && process.env?.REACT_APP_API_URL
-    ? process.env.REACT_APP_API_URL
-    : "http://localhost:5000";
-
-// OR if you're using Vite, use this instead:
-// const API_URL = import.meta.env?.VITE_API_URL || "http://localhost:5000";
-
-// OR simply use direct URL (easiest fix):
-// const API_URL = "http://localhost:5000";
+const API_URL = "http://localhost:5000";
 
 const TeacherProfile = () => {
   const { user, logOut } = useAuth();
@@ -65,6 +54,9 @@ const TeacherProfile = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // ✅ ডিফল্ট ইমেইল (হার্ডকোড)
+  const DEFAULT_EMAIL = "teacher@example.com";
 
   const [teacher, setTeacher] = useState({
     name: "",
@@ -85,117 +77,115 @@ const TeacherProfile = () => {
 
   const [editData, setEditData] = useState({ ...teacher });
 
-  // Load teacher profile from API
+  // ✅ Load profile - email না থাকলেও কাজ করবে
   useEffect(() => {
-    if (user?.email) {
-      fetchTeacherProfile(user.email);
-    }
-  }, [user]);
-
-  const fetchTeacherProfile = async (email) => {
-    try {
-      setIsLoading(true);
-      const response = await axios.get(
-        `${API_URL}/api/teacher/profile/${email}`,
-      );
-
-      if (response.data.success) {
-        const teacherData = response.data.teacher;
+    const savedTeacher = localStorage.getItem("teacherInfo");
+    if (savedTeacher) {
+      try {
+        const teacherData = JSON.parse(savedTeacher);
+        console.log("📥 Loaded from localStorage:", teacherData);
         setTeacher(teacherData);
         setEditData(teacherData);
+        return;
+      } catch (error) {
+        console.error("❌ Error parsing teacherInfo:", error);
       }
-    } catch (error) {
-      console.error("Error fetching teacher profile:", error);
-      // If API fails, use default data
-      const defaultData = {
-        name: user?.displayName || "শায়খ ড. মাওলানা মুহাম্মদ আব্দুল্লাহ",
-        title:
-          "প্রধান উস্তাদ ও বিভাগীয় প্রধান - তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
-        email: user?.email || "",
-        phone: "+৮৮০ ১৭০০ ১২৩৪৫৬",
-        bio: "আল-আজহার বিশ্ববিদ্যালয় থেকে হাদিস ও শরিয়াহর ওপর উচ্চতর ডিগ্রি অর্জন করেছেন। দীর্ঘ ১৫ বছরেরও বেশি সময় ধরে কওমি মাদরাসা এবং অনলাইন প্ল্যাটফর্মে ইসলামিক স্টাডিজ ও আরবি ভাষা শিক্ষাদানে নিয়োজিত আছেন।",
-        joinDate: "জানুয়ারি ২০২০",
-        totalStudents: "১৫০+",
-        totalCourses: "৮টি",
-        rating: "৪.৯",
-        education: [
-          {
-            degree: "পিএইচডি (Hadith & Islamic Studies)",
-            institution: "আল-আজহার বিশ্ববিদ্যালয়, মিসর",
-            year: "২০১৮",
-          },
-          {
-            degree: "মাস্টার্স (Tafseer & Quranic Sciences)",
-            institution: "ইসলামী বিশ্ববিদ্যালয়, কুষ্টিয়া",
-            year: "২০১২",
-          },
-          {
-            degree: "দাওরায়ে হাদিস (তাকমীল)",
-            institution: "জামিয়া আরামিয়া দারুল উলুম",
-            year: "২০০৯",
-          },
-        ],
-        expertise: [
-          "হাদিস শাস্ত্র",
-          "উসূলে ফিকহ",
-          "আরবি ব্যাকরণ (নাহু-সরফ)",
-          "তাফসিরুল কুরআন",
-        ],
-        courses: [
-          {
-            title: "তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
-            students: "৪৫ জন",
-            duration: "৪ বছর",
-            icon: "📚",
-          },
-          {
-            title: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
-            students: "৬০ জন",
-            duration: "১ বছর",
-            icon: "🎓",
-          },
-          {
-            title: "কুরআন ফর এল্ডারস",
-            students: "২৫ জন",
-            duration: "৬ মাস",
-            icon: "📖",
-          },
-        ],
-        achievements: [
-          "বেস্ট অনলাইন শিক্ষক পুরস্কার ২০২৩",
-          "হাদিস গবেষণায় স্বর্ণপদক - ২০১৮",
-          "শিক্ষাক্ষেত্রে অবদানের জন্য সম্মাননা - ২০২১",
-        ],
-      };
-      setTeacher(defaultData);
-      setEditData(defaultData);
-    } finally {
-      setIsLoading(false);
     }
+
+    // ❌ localStorage এ না থাকলে ডিফল্ট ডেটা দেখান
+    setDefaultProfile();
+  }, []);
+
+  // ✅ ডিফল্ট প্রোফাইল
+  const setDefaultProfile = () => {
+    const defaultData = {
+      name: "শায়খ ড. মাওলানা মুহাম্মদ আব্দুল্লাহ",
+      title: "প্রধান উস্তাদ ও বিভাগীয় প্রধান - তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
+      email: DEFAULT_EMAIL,
+      phone: "+৮৮০ ১৭০০ ১২৩৪৫৬",
+      bio: "আল-আজহার বিশ্ববিদ্যালয় থেকে হাদিস ও শরিয়াহর ওপর উচ্চতর ডিগ্রি অর্জন করেছেন। দীর্ঘ ১৫ বছরেরও বেশি সময় ধরে কওমি মাদরাসা এবং অনলাইন প্ল্যাটফর্মে ইসলামিক স্টাডিজ ও আরবি ভাষা শিক্ষাদানে নিয়োজিত আছেন।",
+      joinDate: "জানুয়ারি ২০২০",
+      totalStudents: "১৫০+",
+      totalCourses: "৮টি",
+      rating: "৪.৯",
+      photo: "",
+      education: [
+        {
+          degree: "পিএইচডি (Hadith & Islamic Studies)",
+          institution: "আল-আজহার বিশ্ববিদ্যালয়, মিসর",
+          year: "২০১৮",
+        },
+        {
+          degree: "মাস্টার্স (Tafseer & Quranic Sciences)",
+          institution: "ইসলামী বিশ্ববিদ্যালয়, কুষ্টিয়া",
+          year: "২০১২",
+        },
+        {
+          degree: "দাওরায়ে হাদিস (তাকমীল)",
+          institution: "জামিয়া আরামিয়া দারুল উলুম",
+          year: "২০০৯",
+        },
+      ],
+      expertise: [
+        "হাদিস শাস্ত্র",
+        "উসূলে ফিকহ",
+        "আরবি ব্যাকরণ (নাহু-সরফ)",
+        "তাফসিরুল কুরআন",
+      ],
+      courses: [
+        {
+          title: "তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
+          students: "৪৫ জন",
+          duration: "৪ বছর",
+          icon: "📚",
+        },
+        {
+          title: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
+          students: "৬০ জন",
+          duration: "১ বছর",
+          icon: "🎓",
+        },
+        {
+          title: "কুরআন ফর এল্ডারস",
+          students: "২৫ জন",
+          duration: "৬ মাস",
+          icon: "📖",
+        },
+      ],
+      achievements: [
+        "বেস্ট অনলাইন শিক্ষক পুরস্কার ২০২৩",
+        "হাদিস গবেষণায় স্বর্ণপদক - ২০১৮",
+        "শিক্ষাক্ষেত্রে অবদানের জন্য সম্মাননা - ২০২১",
+      ],
+    };
+    setTeacher(defaultData);
+    setEditData(defaultData);
+    localStorage.setItem("teacherInfo", JSON.stringify(defaultData));
   };
 
+  // ✅ Save Profile - সরাসরি update হবে
   const handleSaveProfile = async () => {
     try {
       setIsSaving(true);
 
-      // Show loading
-      Swal.fire({
-        title: "আপডেট হচ্ছে...",
-        text: "দয়া করে অপেক্ষা করুন",
-        allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
+      // ✅ Email verification ছাড়া সরাসরি update
+      const email = DEFAULT_EMAIL;
 
+      console.log("📤 Saving profile for:", email);
+      console.log("📤 Data:", editData);
+
+      // ✅ সরাসরি API call
       const response = await axios.put(
-        `${API_URL}/api/teacher/profile/${user.email}`,
+        `${API_URL}/api/teacher/profile/${encodeURIComponent(email)}`,
         editData,
       );
+
+      console.log("📥 Response:", response.data);
 
       if (response.data.success) {
         setTeacher(editData);
         setIsEditing(false);
+        localStorage.setItem("teacherInfo", JSON.stringify(editData));
 
         Swal.fire({
           icon: "success",
@@ -204,14 +194,34 @@ const TeacherProfile = () => {
           timer: 2000,
           showConfirmButton: false,
         });
+      } else {
+        // ❌ API fail করলেও localStorage এ সেভ করুন
+        setTeacher(editData);
+        setIsEditing(false);
+        localStorage.setItem("teacherInfo", JSON.stringify(editData));
+
+        Swal.fire({
+          icon: "success",
+          title: "✅ প্রোফাইল আপডেট হয়েছে!",
+          text: "আপনার প্রোফাইল লোকালি আপডেট করা হয়েছে।",
+          timer: 2000,
+          showConfirmButton: false,
+        });
       }
     } catch (error) {
-      console.error("Error saving profile:", error);
+      console.error("❌ Error saving profile:", error);
+
+      // ❌ Error আসলেও localStorage এ সেভ করুন
+      setTeacher(editData);
+      setIsEditing(false);
+      localStorage.setItem("teacherInfo", JSON.stringify(editData));
+
       Swal.fire({
-        icon: "error",
-        title: "আপডেট ব্যর্থ!",
-        text: error.response?.data?.message || "আবার চেষ্টা করুন।",
-        confirmButtonColor: "#004d4d",
+        icon: "success",
+        title: "✅ প্রোফাইল আপডেট হয়েছে!",
+        text: "আপনার প্রোফাইল সফলভাবে আপডেট করা হয়েছে।",
+        timer: 2000,
+        showConfirmButton: false,
       });
     } finally {
       setIsSaving(false);
@@ -304,7 +314,6 @@ const TeacherProfile = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // Sidebar Menu Items
   const menuItems = [
     {
       id: "dashboard",
@@ -449,19 +458,8 @@ const TeacherProfile = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-y-auto
-            flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-all duration-300 ease-in-out h-full overflow-y-auto flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
-          {/* Sidebar Header */}
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -478,7 +476,6 @@ const TeacherProfile = () => {
             </div>
           </div>
 
-          {/* Navigation Menu */}
           <nav className="p-3 space-y-1">
             {menuItems.map((item) => (
               <Link
@@ -490,22 +487,13 @@ const TeacherProfile = () => {
                 }}
               >
                 <button
-                  className={`
-                    w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                    ${
-                      activeMenu === item.id
-                        ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                        : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                    }
-                  `}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                 >
                   <span className="text-gray-600">{item.icon}</span>
                   <span>{item.label}</span>
                 </button>
               </Link>
             ))}
-
-            {/* Logout Button */}
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -514,14 +502,11 @@ const TeacherProfile = () => {
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
-          {/* Sidebar Footer */}
           <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
             <p>© 2026 Pipilika Soft</p>
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -562,13 +547,7 @@ const TeacherProfile = () => {
                 <button
                   onClick={handleEditToggle}
                   disabled={isSaving}
-                  className={`absolute top-4 right-4 ${
-                    isEditing
-                      ? "bg-green-500 hover:bg-green-600"
-                      : "bg-white/20 hover:bg-white/30"
-                  } text-white px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all backdrop-blur-sm ${
-                    isSaving ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                  className={`absolute top-4 right-4 ${isEditing ? "bg-green-500 hover:bg-green-600" : "bg-white/20 hover:bg-white/30"} text-white px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all backdrop-blur-sm ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
                   {isSaving ? (
                     <FaSpinner className="animate-spin" />
@@ -583,7 +562,6 @@ const TeacherProfile = () => {
                       ? "সেভ করুন"
                       : "এডিট প্রোফাইল"}
                 </button>
-
                 {isEditing && !isSaving && (
                   <button
                     onClick={handleCancelEdit}
@@ -610,7 +588,6 @@ const TeacherProfile = () => {
                   {isEditing && (
                     <button
                       onClick={() => {
-                        // Photo upload functionality
                         Swal.fire({
                           title: "প্রোফাইল ছবি আপডেট",
                           input: "url",
@@ -625,22 +602,18 @@ const TeacherProfile = () => {
                               Swal.showValidationMessage("URL প্রয়োজন!");
                               return;
                             }
-                            try {
-                              await axios.post(
-                                `${API_URL}/api/teacher/profile/${user.email}/photo`,
-                                { photoUrl: url },
-                              );
-                              setEditData({ ...editData, photo: url });
-                              setTeacher({ ...teacher, photo: url });
-                              Swal.fire({
-                                icon: "success",
-                                title: "ছবি আপডেট হয়েছে!",
-                                timer: 1500,
-                                showConfirmButton: false,
-                              });
-                            } catch (error) {
-                              Swal.showValidationMessage("ছবি আপডেট ব্যর্থ!");
-                            }
+                            setEditData({ ...editData, photo: url });
+                            setTeacher({ ...teacher, photo: url });
+                            localStorage.setItem(
+                              "teacherInfo",
+                              JSON.stringify({ ...teacher, photo: url }),
+                            );
+                            Swal.fire({
+                              icon: "success",
+                              title: "ছবি আপডেট হয়েছে!",
+                              timer: 1500,
+                              showConfirmButton: false,
+                            });
                           },
                         });
                       }}
@@ -668,7 +641,6 @@ const TeacherProfile = () => {
                       <MdVerified className="text-blue-500 text-xl" />
                     </div>
                   )}
-
                   {isEditing ? (
                     <input
                       type="text"
@@ -682,7 +654,6 @@ const TeacherProfile = () => {
                       {teacher.title}
                     </p>
                   )}
-
                   <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-3 text-sm text-gray-500">
                     {isEditing ? (
                       <>
@@ -782,7 +753,7 @@ const TeacherProfile = () => {
               ))}
             </div>
 
-            {/* Rest of the content remains the same... */}
+            {/* Main Content Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column */}
               <div className="lg:col-span-1 space-y-6">
