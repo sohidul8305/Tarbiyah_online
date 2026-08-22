@@ -91,8 +91,10 @@ const Navbar = () => {
 
   useEffect(() => {
     localStorage.setItem("language", language);
-    document.documentElement.dir = language === "bn" ? "rtl" : "ltr";
     document.documentElement.lang = language;
+
+    // পুরো ওয়েবসাইটের অন্যান্য কম্পোনেন্টগুলোকে ভাষা পরিবর্তনের সিগন্যাল পাঠানোর জন্য
+    window.dispatchEvent(new Event("languageChange"));
   }, [language]);
 
   const t = translations[language];

@@ -1,4 +1,5 @@
 import React from "react";
+import { useLanguage } from "../../../context/useLanguage"; // আপনার সঠিক পাথ অনুযায়ী এটি ঠিক করে নিবেন
 
 const CourseCard = ({ title, instructor, image }) => (
   <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300 flex flex-col">
@@ -13,58 +14,96 @@ const CourseCard = ({ title, instructor, image }) => (
 );
 
 const CourseSection = () => {
-  // প্রতিটি লাইভ কোর্সের জন্য আলাদা নাম এবং ইমেজ লিংক
+  const { t } = useLanguage();
+
+  // প্রতিটি লাইভ কোর্সের জন্য বাংলা এবং ইংরেজি নাম
   const liveCourses = [
     {
-      title: "Diploma In Islamic Studies",
+      title: t({
+        en: "Diploma In Islamic Studies",
+        bn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
+      }),
       image: "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png",
     },
     {
-      title: "Online Hifz Course",
+      title: t({
+        en: "Online Hifz Course",
+        bn: "অনলাইন হিফজ কোর্স",
+      }),
       image: "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png",
     },
     {
-      title: "Qaida Nuraniyah Course",
+      title: t({
+        en: "Qaida Nuraniyah Course",
+        bn: "কায়েদা নূরানিয়াহ কোর্স",
+      }),
       image: "https://i.ibb.co.com/7tWnV1pB/banner.jpg",
     },
     {
-      title: "Tarbiyah Alimiyah Program",
+      title: t({
+        en: "Tarbiyah Alimiyah Program",
+        bn: "তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
+      }),
       image: "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png",
     },
     {
-      title: "Alimiyah For Kids",
+      title: t({
+        en: "Alimiyah For Kids",
+        bn: "আলেমিয়াহ ফর কিডস",
+      }),
       image: "https://i.ibb.co.com/7tWnV1pB/banner.jpg",
     },
     {
-      title: "Hifz For Elders",
+      title: t({
+        en: "Hifz For Elders",
+        bn: "হিফজ ফর এল্ডার্স",
+      }),
       image: "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png",
     },
     {
-      title: "Online Pre Hifz",
+      title: t({
+        en: "Online Pre Hifz",
+        bn: "অনলাইন প্রি-হিফজ",
+      }),
       image: "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png",
     },
     {
-      title: "Najera For Elders",
+      title: t({
+        en: "Najera For Elders",
+        bn: "নাজেরা ফর এল্ডার্স",
+      }),
       image: "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png",
     },
     {
-      title: "Tarbiyah Najera Course",
+      title: t({
+        en: "Tarbiyah Najera Course",
+        bn: "তারবিয়াহ নাজেরা কোর্স",
+      }),
       image: "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png",
     },
     {
-      title: "Qaida Nuraniyah For Elders",
+      title: t({
+        en: "Qaida Nuraniyah For Elders",
+        bn: "কায়েদা নূরানিয়াহ ফর এল্ডার্স",
+      }),
       image: "https://i.ibb.co.com/7tWnV1pB/banner.jpg",
     },
   ];
 
-  // প্রতিটি রেকর্ড করা কোর্সের জন্য আলাদা নাম এবং ইমেজ লিংক
+  // প্রতিটি রেকর্ড করা কোর্সের জন্য বাংলা এবং ইংরেজি নাম
   const recordedCourses = [
     {
-      title: "Imam Nabawr 40 Hadiths",
+      title: t({
+        en: "Imam Nabawr 40 Hadiths",
+        bn: "ইমাম নববীর ৪০ হাদিস",
+      }),
       image: "https://i.ibb.co.com/7tWnV1pB/banner.jpg",
     },
     {
-      title: "Surah Mulk Hifz Course",
+      title: t({
+        en: "Surah Mulk Hifz Course",
+        bn: "সূরা মূলক হিফজ কোর্স",
+      }),
       image: "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png",
     },
   ];
@@ -73,7 +112,9 @@ const CourseSection = () => {
     <section className="py-16 px-4 bg-gray-50">
       {/* Live Courses */}
       <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">
-        OUR <span className="text-orange-500">LIVE</span> COURSE
+        {t({ en: "OUR", bn: "আমাদের" })}{" "}
+        <span className="text-orange-500">{t({ en: "LIVE", bn: "লাইভ" })}</span>{" "}
+        {t({ en: "COURSE", bn: "কোর্সসমূহ" })}
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto mb-16">
         {liveCourses.map((course, index) => (
@@ -88,7 +129,11 @@ const CourseSection = () => {
 
       {/* Recorded Courses */}
       <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">
-        OUR <span className="text-orange-500">RECORDED</span> COURSE
+        {t({ en: "OUR", bn: "আমাদের" })}{" "}
+        <span className="text-orange-500">
+          {t({ en: "RECORDED", bn: "রেকর্ডেড" })}
+        </span>{" "}
+        {t({ en: "COURSE", bn: "কোর্সসমূহ" })}
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
         {recordedCourses.map((course, index) => (

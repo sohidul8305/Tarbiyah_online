@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
+import { useLanguage } from "../../../context/useLanguage"; // আপনার সঠিক পাথ অনুযায়ী এটি ঠিক করে নিবেন
 
 const StatsSection = () => {
+  const { t } = useLanguage();
+
   const [stats, setStats] = useState([
     { number: "Loading...", label: "Students" },
     { number: "Loading...", label: "More Than 30 Countries" },
@@ -25,7 +28,7 @@ const StatsSection = () => {
       })
       .catch((err) => {
         console.error("Error fetching stats:", err);
-        // এরর হলে ফলব্যাক বা ডিফল্ট ডেটা সেট করে দেওয়া
+        // এরর হলে ফলব্যাক বা ডিফল্ট ডেটা সেট করে দেওয়া
         setStats([
           { number: "15,000+", label: "Students" },
           { number: "30+", label: "More Than 30 Countries" },
@@ -35,6 +38,22 @@ const StatsSection = () => {
         setLoading(false);
       });
   }, []);
+
+  // লেবেলগুলোর বাংলা এবং ইংরেজি রূপান্তর ম্যাপিং
+  const getTranslatedLabel = (label) => {
+    switch (label) {
+      case "Students":
+        return t({ en: "Students", bn: "শিক্ষার্থী" });
+      case "More Than 30 Countries":
+        return t({ en: "More Than 30 Countries", bn: "৩০টিরও বেশি দেশ" });
+      case "Course Completed":
+        return t({ en: "Course Completed", bn: "সম্পন্ন কোর্স" });
+      case "Four Years Experience":
+        return t({ en: "Four Years Experience", bn: "৪ বছরের অভিজ্ঞতা" });
+      default:
+        return t({ en: label, bn: label });
+    }
+  };
 
   return (
     <div className="bg-white py-10 px-4 mb-20">
@@ -49,7 +68,9 @@ const StatsSection = () => {
               <h2 className="text-3xl md:text-4xl font-bold text-[#00acc1]">
                 {stat.number}
               </h2>
-              <p className="text-gray-600 font-medium mt-2">{stat.label}</p>
+              <p className="text-gray-600 font-medium mt-2">
+                {getTranslatedLabel(stat.label)}
+              </p>
             </div>
           ))}
         </div>
