@@ -917,7 +917,6 @@ const AlimiyahKidsDetails = () => {
 
             {/* Right Sidebar - 1 Column */}
             <div className="space-y-4 -mt-[305px]">
-              {/* Video Thumbnail */}
               <a
                 href="https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB"
                 target="_blank"
