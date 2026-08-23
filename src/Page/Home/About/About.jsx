@@ -1,14 +1,24 @@
 import React from "react";
+import { useLanguage } from "../../../context/useLanguage"; // আপনার সঠিক পাথ অনুযায়ী এটি ঠিক করে নিবেন
 
 const About = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="about-wrapper">
       {/* ─── HERO BANNER ─── */}
       <div className="hero">
         <div className="hero-overlay">
-          <h1 className="hero-title">About Us</h1>
+          <h1 className="hero-title">
+            {t({ en: "About Us", bn: "আমাদের সম্পর্কে" })}
+          </h1>
           <div className="hero-underline"></div>
-          <p className="hero-sub">Nurturing faith, knowledge, and character</p>
+          <p className="hero-sub">
+            {t({
+              en: "Nurturing faith, knowledge, and character",
+              bn: "ঈমান, জ্ঞান এবং চরিত্র গঠন",
+            })}
+          </p>
         </div>
       </div>
 
@@ -24,20 +34,23 @@ const About = () => {
               <div className="photo-border"></div>
             </div>
             <div className="chairman-content">
-              <h2 className="section-label">Chairman's Message</h2>
-              <h3 className="chairman-tagline">Always More Than Expected</h3>
+              <h2 className="section-label">
+                {t({ en: "Chairman's Message", bn: "চেয়ারম্যানের বাণী" })}
+              </h2>
+              <h3 className="chairman-tagline">
+                {t({
+                  en: "Always More Than Expected",
+                  bn: "সর্বদা প্রত্যাশার চেয়ে বেশি",
+                })}
+              </h3>
               <p className="chairman-name">
-                <strong>Ahmadullah</strong>
+                <strong>{t({ en: "Ahmadullah", bn: "আহমদ উল্লাহ" })}</strong>
               </p>
               <p className="chairman-message">
-                The journey of our dream company Tarbiyah Online is going to
-                start with the infinite grace of Almighty Allah. We have been
-                planning for a long time an institution where our children will
-                develop into religious scholars with personality and knowledge.
-                By receiving higher education in the Arab world in addition to
-                domestic education, they will devote themselves to the work of
-                propagating Dean Islam efficiently at home and abroad, Insha
-                Allah.
+                {t({
+                  en: "The journey of our dream company Tarbiyah Online is going to start with the infinite grace of Almighty Allah. We have been planning for a long time an institution where our children will develop into religious scholars with personality and knowledge. By receiving higher education in the Arab world in addition to domestic education, they will devote themselves to the work of propagating Dean Islam efficiently at home and abroad, Insha Allah.",
+                  bn: "মহান আল্লাহর অশেষ মেহেরবানীতে আমাদের স্বপ্নের প্রতিষ্ঠান 'তারবিয়াহ অনলাইন'-এর যাত্রা শুরু হতে যাচ্ছে। আমরা দীর্ঘদিন ধরে এমন একটি প্রতিষ্ঠানের পরিকল্পনা করে আসছি যেখানে আমাদের সন্তানেরা ব্যক্তিত্ব ও জ্ঞানে সমৃদ্ধ দ্বীনী আলেম হিসেবে গড়ে উঠবে। দেশের শিক্ষার পাশাপাশি আরব বিশ্বের উচ্চশিক্ষা লাভ করে তারা দেশ-বিদেশে দ্বীন ইসলামের প্রচারে নিজেদের নিয়োজিত করবে ইনশাআল্লাহ।",
+                })}
               </p>
             </div>
           </div>
@@ -51,38 +64,42 @@ const About = () => {
             {/* Values Card */}
             <div className="pillar-card">
               <div className="pillar-icon">⭐</div>
-              <h3 className="pillar-title">Values</h3>
+              <h3 className="pillar-title">
+                {t({ en: "Values", bn: "মূল্যবোধ" })}
+              </h3>
               <p className="pillar-text">
-                The dream of Tarbiyah Online Madrasa is to provide Muslims
-                worldwide with the true teachings of the Quran and Sunnah,
-                shaping them into Allah‑fearing, ethical, and ideal individuals,
-                so they can play a significant role in society based on the
-                light of Islam.
+                {t({
+                  en: "The dream of Tarbiyah Online Madrasa is to provide Muslims worldwide with the true teachings of the Quran and Sunnah, shaping them into Allah‑fearing, ethical, and ideal individuals, so they can play a significant role in society based on the light of Islam.",
+                  bn: "তারবিয়াহ অনলাইন মাদ্রাসার স্বপ্ন হলো বিশ্বজুড়ে মুসলমানদের কাছে কুরআন ও সুন্নাহর সঠিক শিক্ষা পৌঁছে দেওয়া, তাদের আল্লাহভীতি, নৈতিক এবং আদর্শ ব্যক্তিতে রূপান্তর করা, যাতে তারা ইসলামের আলোর ভিত্তিতে সমাজে গুরুত্বপূর্ণ ভূমিকা পালন করতে পারে।",
+                })}
               </p>
             </div>
 
             {/* Vision Card */}
             <div className="pillar-card vision">
               <div className="pillar-icon">👁️</div>
-              <h3 className="pillar-title">Vision</h3>
+              <h3 className="pillar-title">
+                {t({ en: "Vision", bn: "ভিশন" })}
+              </h3>
               <p className="pillar-text">
-                The vision of Tarbiyah Online Madrasa is to provide Muslims
-                worldwide with the true teachings of the Quran and Sunnah,
-                shaping them into Allah‑fearing, ethical, and ideal individuals,
-                so they can play a significant role in society based on the
-                light of Islam.
+                {t({
+                  en: "The vision of Tarbiyah Online Madrasa is to provide Muslims worldwide with the true teachings of the Quran and Sunnah, shaping them into Allah‑fearing, ethical, and ideal individuals, so they can play a significant role in society based on the light of Islam.",
+                  bn: "তারবিয়াহ অনলাইন মাদ্রাসার ভিশন হলো বিশ্বজুড়ে মুসলমানদের কাছে কুরআন ও সুন্নাহর সঠিক শিক্ষা পৌঁছে দেওয়া, তাদের আল্লাহভীতি, নৈতিক এবং আদর্শ ব্যক্তিতে রূপান্তর করা, যাতে তারা ইসলামের আলোর ভিত্তিতে সমাজে গুরুত্বপূর্ণ ভূমিকা পালন করতে পারে।",
+                })}
               </p>
             </div>
 
             {/* Objective Card */}
             <div className="pillar-card objective">
               <div className="pillar-icon">🎯</div>
-              <h3 className="pillar-title">Objective</h3>
+              <h3 className="pillar-title">
+                {t({ en: "Objective", bn: "উদ্দেশ্য" })}
+              </h3>
               <p className="pillar-text">
-                To provide Muslims worldwide with the true teachings of the
-                Quran and Sunnah, shaping them into Allah‑fearing, ethical, and
-                ideal individuals, so they can play a significant role in
-                society based on the light of Islam.
+                {t({
+                  en: "To provide Muslims worldwide with the true teachings of the Quran and Sunnah, shaping them into Allah‑fearing, ethical, and ideal individuals, so they can play a significant role in society based on the light of Islam.",
+                  bn: "বিশ্বজুড়ে মুসলমানদের কাছে কুরআন ও সুন্নাহর সঠিক শিক্ষা পৌঁছে দেওয়া, তাদের আল্লাহভীতি, নৈতিক এবং আদর্শ ব্যক্তিতে রূপান্তর করা, যাতে তারা ইসলামের আলোর ভিত্তিতে সমাজে গুরুত্বপূর্ণ ভূমিকা পালন করতে পারে।",
+                })}
               </p>
             </div>
           </div>

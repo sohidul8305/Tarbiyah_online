@@ -158,6 +158,7 @@ import Course_quran_elders_advanced_tajweed_enroll from "../Components/Course_qu
 import Admission_now from "../Components/Admission_now/Admission_now";
 import Dashboard from "../Page/Dashboard/Dashboard";
 import NotFoundPage from "../Page/NotFoundPage/NotFoundPage";
+import Donate from "../Components/Donate/Donate";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -239,6 +240,7 @@ export const router = createBrowserRouter([
       { path: "/admin-salary/total", element: <Total_salary /> },
       { path: "/admin-salary/due", element: <Due_salary /> },
       { path: "/admin-absence", element: <Student_absence /> },
+      { path: "/donate", element: <Donate /> },
 
       {
         path: "/admin-batch-course/course-make",
@@ -509,7 +511,6 @@ export const router = createBrowserRouter([
     element: (
       <PrivateRoute role="admin">
         {" "}
-        {/* ✅ এখানে role="admin" যোগ করুন */}
         <AdminDashboard />
       </PrivateRoute>
     ),

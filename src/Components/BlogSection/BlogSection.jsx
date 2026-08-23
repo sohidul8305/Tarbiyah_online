@@ -1,5 +1,5 @@
 import React from "react";
-import { useLanguage } from "../../context/useLanguage"; // আপনার সঠিক পাথ অনুযায়ী এটি ঠিক করে নিবেন
+import { useLanguage } from "../../context/useLanguage";
 
 const BlogCard = ({
   category,
