@@ -31,8 +31,8 @@ const VideoSection = () => {
         </h4>
         <h2 className="text-4xl font-extrabold text-[#004d4d] mb-6">
           {t({
-            en: "TARBIYAHH",
-            bn: "তারবিয়াহ",
+            en: "TARBIYAH ONLINE",
+            bn: "তারবিয়াহ অনলাইন",
           })}
         </h2>
         <p className="text-gray-600 leading-relaxed text-lg">
