@@ -20,7 +20,6 @@ const VideoSection = () => {
           </div>
         </div>
       </div>
-      <p>Hello Sohidul </p>
 
       {/* Right Side: Text Content */}
       <div className="w-full md:w-1/2">
@@ -32,8 +31,8 @@ const VideoSection = () => {
         </h4>
         <h2 className="text-4xl font-extrabold text-[#004d4d] mb-6">
           {t({
-            en: "TARBIYAH ONLINE",
-            bn: "তারবিয়াহ অনলাইন",
+            en: "TARBIYAH",
+            bn: "তারবিয়াহ",
           })}
         </h2>
         <p className="text-gray-600 leading-relaxed text-lg">
