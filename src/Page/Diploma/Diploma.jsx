@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import diplomabanner from "../../image/diplomabanner.png";
+// import diplomabanner from "../../image/diplomabanner.png";
 import diplomacover from "../../image/diplomacover.png";
 import { Link } from "react-router";
 import {
@@ -36,7 +36,7 @@ const Diploma = () => {
   // শুধুমাত্র title ও subtitle সহ ডিপ্লোমা কোর্স ডাটা
   const diplomaCourse = {
     id: 1,
-    image: diplomabanner,
+    // image: diplomabanner,
     title: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
     subtitle: "২ বছরের পূর্ণাঙ্গ ইসলামিক স্টাডিজ প্রোগ্রাম",
   };
