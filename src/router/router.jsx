@@ -100,7 +100,7 @@ import Adminstudent_profile from "../Page/Student-profile/Adminstudent_profile";
 import Student_admission from "../Page/Student-admission/Student_admission";
 import Teacher_assign from "../Page/Teacher-assign/Teacher_assign";
 import Class_shedule from "../Page/Teacher-shedule/Teacher_shedule";
-import Teacher_attence from "../Page/Teacher-Attence/Teacher_attence";
+import Teacher_attence from "../Page/Teacher-attence/Teacher_attence";
 import Teacher_overview from "../Page/Teacher-overview/Teacher_overview";
 import Batch_make from "../Page/Batch_make/Batch_make";
 import Syllabus from "../Page/Syllabus/Syllabus";
