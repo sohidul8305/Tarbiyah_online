@@ -20,6 +20,7 @@ const VideoSection = () => {
           </div>
         </div>
       </div>
+      <p>Hello Sohidul </p>
 
       {/* Right Side: Text Content */}
       <div className="w-full md:w-1/2">
