@@ -1,6 +1,6 @@
 import React from "react";
 import { Play } from "lucide-react";
-import { useLanguage } from "../../../context/useLanguage"; // আপনার সঠিক পাথ অনুযায়ী এটি ঠিক করে নিবেন
+import { useLanguage } from "../../../context/useLanguage"; // আপনার সঠিক পাথ অনুযায়ী এটি ঠিক করে নিবেন
 
 const VideoSection = () => {
   const { t } = useLanguage();
@@ -46,8 +46,8 @@ const VideoSection = () => {
         </h2>
         <p className="text-gray-600 leading-relaxed text-lg">
           {t({
-            en: "Tarbiyah Online has been working tirelessly to inculcate impeccable Islamic character, humane values, patriotism, and age-appropriate academic skills in its students from the primary level through a holistic approach. In order to achieve this goal, lessons are given in the light of the curriculum made by combining Quranic education, worldly education, and religious education.",
-            bn: "তারবিয়াহ অনলাইন প্রাথমিক স্তর থেকেই শিক্ষার্থীদের মধ্যে নিখুঁত ইসলামিক চরিত্র, মানবিক মূল্যবোধ, দেশপ্রেম এবং বয়সোপযোগী একাডেমিক দক্ষতা অর্জনে অক্লান্ত পরিশ্রম করে আসছে। এই লক্ষ্য অর্জনের জন্য কুরআনিক শিক্ষা, পার্থিব শিক্ষা এবং ধর্মীয় শিক্ষার সমন্বয়ে তৈরি করা পাঠ্যক্রমের আলোকে পাঠদান করা হয়।",
+            en: "Tarbiyah Online Madrasah is a structured online Islamic education platform dedicated to making authentic Islamic learning accessible to Muslims worldwide. Guided by qualified scholars and experienced educators, we offer learning pathways for learners of all ages—from Quran education for children and adults to systematic Islamic Studies programs. Our programs are thoughtfully designed to provide age-appropriate, research-informed, and structured learning, helping learners build Authentic Knowledge, Tarbiyah, and lasting Transformation.",
+            bn: "তারবিয়াহ অনলাইন মাদ্রাসা একটি সুবিন্যস্ত অনলাইন ইসলামিক শিক্ষা প্ল্যাটফর্ম, যা বিশ্বজুড়ে মুসলমানদের জন্য সহীহ ইসলামিক শিক্ষা সহজলভ্য করতে নিবেদিত। যোগ্য আলেম ও অভিজ্ঞ শিক্ষকমণ্ডলীর তত্ত্বাবধানে আমরা সকল বয়সের শিক্ষার্থীর জন্য পাঠদানের ব্যবস্থা করে থাকি—শিশুর কুরআন শিক্ষা থেকে শুরু করে বয়স্কদের জন্য সিস্টেমেটিক ইসলামিক স্টাডিজ প্রোগ্রাম। আমাদের প্রোগ্রামগুলো এমনভাবে সাজানো হয়েছে যা বয়সোপযোগী, গবেষণাভিত্তিক ও সুশৃঙ্খল শিক্ষা নিশ্চিত করে, যা শিক্ষার্থীদের মধ্যে সহীহ ইলম, তারবিয়াহ এবং দীর্ঘস্থায়ী রূপান্তর গঠনে সহায়তা করে।",
           })}
         </p>
       </div>

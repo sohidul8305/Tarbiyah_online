@@ -1,5 +1,5 @@
 import React from "react";
-import { useLanguage } from "../../../context/useLanguage"; // আপনার সঠিক পাথ অনুযায়ী এটি ঠিক করে নিবেন
+import { useLanguage } from "../../../context/useLanguage"; // আপনার সঠিক পাথ অনুযায়ী এটি ঠিক করে নিবেন
 
 const About = () => {
   const { t } = useLanguage();
@@ -15,8 +15,14 @@ const About = () => {
           <div className="hero-underline"></div>
           <p className="hero-sub">
             {t({
-              en: "Nurturing faith, knowledge, and character",
-              bn: "ঈমান, জ্ঞান এবং চরিত্র গঠন",
+              en: "Tarbiyah Online Madrasah",
+              bn: "তারবিয়াহ অনলাইন মাদ্রাসা",
+            })}
+          </p>
+          <p className="hero-tagline-sub">
+            {t({
+              en: "Authentic Knowledge. Tarbiyah. Transformation.",
+              bn: "সহীহ ইলম। তারবিয়াহ। আত্মশুদ্ধি ও রূপান্তর।",
             })}
           </p>
         </div>
@@ -28,7 +34,7 @@ const About = () => {
           <div className="chairman-grid">
             <div className="chairman-photo">
               <img
-                src="https://i.ibb.co.com/w5hF3js/images-q-tbn-ANd9-Gc-Q46lu-UI2-Xv-YN4u-OOKnapk-RDQYn3-WTQPPWEr1q-A3lj-Cj-B3-Uwn-OKv8ka-IOKb1-Tyi9m-Ughpl5.webp"
+                src="https://i.ibb.co.com/GQRWh4DW/images-q-tbn-ANd9-Gc-Tw-Ke-AUYuda1bjp-PUU-NYup6-M-P-jlxhnq-Z0-Wb-X6hzw-Rj-HCp-Ys-O6-nc-UY-s-10.jpg"
                 alt="Ahmadullah - Chairman"
               />
               <div className="photo-border"></div>
@@ -39,17 +45,14 @@ const About = () => {
               </h2>
               <h3 className="chairman-tagline">
                 {t({
-                  en: "Always More Than Expected",
-                  bn: "সর্বদা প্রত্যাশার চেয়ে বেশি",
+                  en: "Assalamu Alaikum wa Rahmatullahi wa Barakatuh",
+                  bn: "আসসালামু আলাইকুম ওয়া রাহমাতুল্লাহি ওয়া বারাকাতুহ",
                 })}
               </h3>
-              <p className="chairman-name">
-                <strong>{t({ en: "Ahmadullah", bn: "আহমদ উল্লাহ" })}</strong>
-              </p>
               <p className="chairman-message">
                 {t({
-                  en: "The journey of our dream company Tarbiyah Online is going to start with the infinite grace of Almighty Allah. We have been planning for a long time an institution where our children will develop into religious scholars with personality and knowledge. By receiving higher education in the Arab world in addition to domestic education, they will devote themselves to the work of propagating Dean Islam efficiently at home and abroad, Insha Allah.",
-                  bn: "মহান আল্লাহর অশেষ মেহেরবানীতে আমাদের স্বপ্নের প্রতিষ্ঠান 'তারবিয়াহ অনলাইন'-এর যাত্রা শুরু হতে যাচ্ছে। আমরা দীর্ঘদিন ধরে এমন একটি প্রতিষ্ঠানের পরিকল্পনা করে আসছি যেখানে আমাদের সন্তানেরা ব্যক্তিত্ব ও জ্ঞানে সমৃদ্ধ দ্বীনী আলেম হিসেবে গড়ে উঠবে। দেশের শিক্ষার পাশাপাশি আরব বিশ্বের উচ্চশিক্ষা লাভ করে তারা দেশ-বিদেশে দ্বীন ইসলামের প্রচারে নিজেদের নিয়োজিত করবে ইনশাআল্লাহ।",
+                  en: "Alhamdulillah, Tarbiyah Online Madrasah was founded with a vision to make authentic, structured and accessible Islamic education available to learners around the world. We believe true education goes beyond knowledge it nurtures faith, character and action, transforming knowledge into a meaningful way of life. May Allah accept this humble effort and make Tarbiyah a source of beneficial knowledge and lasting transformation.",
+                  bn: "আলহামদুলিল্লাহ, বিশ্বজুড়ে শিক্ষার্থীদের জন্য সহীহ, সুবিন্যস্ত ও সহজলভ্য ইসলামী শিক্ষা পৌঁছে দেওয়ার লক্ষ্যে 'তারবিয়াহ অনলাইন মাদ্রাসা' প্রতিষ্ঠিত হয়েছে। আমরা বিশ্বাস করি, প্রকৃত শিক্ষা কেবল জ্ঞানার্জনের মধ্যে সীমাবদ্ধ নয়; বরং এটি ঈমান, চরিত্র ও আমলকে পরিশুদ্ধ করে এবং জ্ঞানকে জীবনের একটি অর্থবহ উপায়ে রূপান্তরিত করে। মহান আল্লাহ আমাদের এই ক্ষুদ্র প্রচেষ্টা কবুল করুন এবং তারবিয়াহকে উপকারী ইলম ও স্থায়ী রূপান্তরের মাধ্যম বানিয়ে দিন।",
                 })}
               </p>
             </div>
@@ -61,20 +64,6 @@ const About = () => {
       <section className="pillars-section">
         <div className="container">
           <div className="pillars-grid">
-            {/* Values Card */}
-            <div className="pillar-card">
-              <div className="pillar-icon">⭐</div>
-              <h3 className="pillar-title">
-                {t({ en: "Values", bn: "মূল্যবোধ" })}
-              </h3>
-              <p className="pillar-text">
-                {t({
-                  en: "The dream of Tarbiyah Online Madrasa is to provide Muslims worldwide with the true teachings of the Quran and Sunnah, shaping them into Allah‑fearing, ethical, and ideal individuals, so they can play a significant role in society based on the light of Islam.",
-                  bn: "তারবিয়াহ অনলাইন মাদ্রাসার স্বপ্ন হলো বিশ্বজুড়ে মুসলমানদের কাছে কুরআন ও সুন্নাহর সঠিক শিক্ষা পৌঁছে দেওয়া, তাদের আল্লাহভীতি, নৈতিক এবং আদর্শ ব্যক্তিতে রূপান্তর করা, যাতে তারা ইসলামের আলোর ভিত্তিতে সমাজে গুরুত্বপূর্ণ ভূমিকা পালন করতে পারে।",
-                })}
-              </p>
-            </div>
-
             {/* Vision Card */}
             <div className="pillar-card vision">
               <div className="pillar-icon">👁️</div>
@@ -83,22 +72,36 @@ const About = () => {
               </h3>
               <p className="pillar-text">
                 {t({
-                  en: "The vision of Tarbiyah Online Madrasa is to provide Muslims worldwide with the true teachings of the Quran and Sunnah, shaping them into Allah‑fearing, ethical, and ideal individuals, so they can play a significant role in society based on the light of Islam.",
-                  bn: "তারবিয়াহ অনলাইন মাদ্রাসার ভিশন হলো বিশ্বজুড়ে মুসলমানদের কাছে কুরআন ও সুন্নাহর সঠিক শিক্ষা পৌঁছে দেওয়া, তাদের আল্লাহভীতি, নৈতিক এবং আদর্শ ব্যক্তিতে রূপান্তর করা, যাতে তারা ইসলামের আলোর ভিত্তিতে সমাজে গুরুত্বপূর্ণ ভূমিকা পালন করতে পারে।",
+                  en: "To build a globally connected generation rooted in authentic Islamic knowledge, faith, noble character, and purposeful living—empowering individuals to become positive contributors to their families, communities, and society.",
+                  bn: "সহীহ ইসলামী জ্ঞান, ঈমান, উন্নত চরিত্র এবং উদ্দেশ্যমূলক জীবনের ভিত্তির ওপর প্রতিষ্ঠিত একটি বিশ্বব্যাপী সংযুক্ত প্রজন্ম গড়ে তোলা—যা প্রতিটি মানুষকে তাদের পরিবার, সম্প্রদায় ও সমাজের জন্য ইতিবাচক অবদান রাখতে সক্ষম করে তুলবে।",
                 })}
               </p>
             </div>
 
-            {/* Objective Card */}
+            {/* Mission Card */}
             <div className="pillar-card objective">
               <div className="pillar-icon">🎯</div>
               <h3 className="pillar-title">
-                {t({ en: "Objective", bn: "উদ্দেশ্য" })}
+                {t({ en: "Mission", bn: "মিশন" })}
               </h3>
               <p className="pillar-text">
                 {t({
-                  en: "To provide Muslims worldwide with the true teachings of the Quran and Sunnah, shaping them into Allah‑fearing, ethical, and ideal individuals, so they can play a significant role in society based on the light of Islam.",
-                  bn: "বিশ্বজুড়ে মুসলমানদের কাছে কুরআন ও সুন্নাহর সঠিক শিক্ষা পৌঁছে দেওয়া, তাদের আল্লাহভীতি, নৈতিক এবং আদর্শ ব্যক্তিতে রূপান্তর করা, যাতে তারা ইসলামের আলোর ভিত্তিতে সমাজে গুরুত্বপূর্ণ ভূমিকা পালন করতে পারে।",
+                  en: "To provide authentic, structured, and accessible Islamic education for learners of all ages through qualified educators, research-based curricula, personalized learning, and technology-enabled education—making meaningful Islamic learning accessible anytime, anywhere.",
+                  bn: "যোগ্য শিক্ষকমণ্ডলী, গবেষণাভিত্তিক সিলেবাস, পার্সোনালাইজড লার্নিং এবং প্রযুক্তিনির্ভর শিক্ষার মাধ্যমে সকল বয়সের শিক্ষার্থীর জন্য সহীহ, সুশৃঙ্খল ও সহজলভ্য ইসলামী শিক্ষা প্রদান করা—যাতে যেকোনো সময়, যেকোনো স্থান থেকে অর্থপূর্ণ ইসলামী শিক্ষা গ্রহণ করা সম্ভব হয়।",
+                })}
+              </p>
+            </div>
+
+            {/* Values Card */}
+            <div className="pillar-card">
+              <div className="pillar-icon">⭐</div>
+              <h3 className="pillar-title">
+                {t({ en: "Values", bn: "মূল্যবোধ" })}
+              </h3>
+              <p className="pillar-text">
+                {t({
+                  en: "We uphold Authenticity, Excellence, Integrity, Compassion, Continuous Learning, and Transformation. We believe that true education goes beyond acquiring knowledge—it should nurture faith, develop character, inspire action, and create lasting positive change.",
+                  bn: "আমরা সত্যনিষ্ঠা, উৎকর্ষ, সততা, সহমর্মিতা, নিরবচ্ছিন্ন শিক্ষা এবং আত্মিক রূপান্তরকে ধারণ করি। আমরা বিশ্বাস করি প্রকৃত শিক্ষা কেবল জ্ঞান অর্জন নয়—এটি ঈমানকে পোক্ত করে, চরিত্র গঠন করে, আমলের তাড়না তৈরি করে এবং দীর্ঘস্থায়ী ইতিবাচক পরিবর্তন আনে।",
                 })}
               </p>
             </div>
@@ -164,11 +167,19 @@ const About = () => {
         }
 
         .hero-sub {
-          font-size: 1.2rem;
+          font-size: 1.3rem;
+          color: #ffffff;
+          font-weight: 600;
+          margin: 0 0 6px 0;
+          letter-spacing: 1px;
+        }
+
+        .hero-tagline-sub {
+          font-size: 1.1rem;
           color: #e6f0e9;
           font-weight: 400;
           margin: 0;
-          letter-spacing: 2px;
+          letter-spacing: 1.5px;
         }
 
         /* ── Chairman Section ── */
@@ -223,22 +234,10 @@ const About = () => {
         }
 
         .chairman-tagline {
-          font-size: 1.8rem;
+          font-size: 1.5rem;
           font-weight: 600;
           color: #1e3a2f;
-          margin: 0 0 10px 0;
-          font-style: italic;
-        }
-
-        .chairman-name {
-          font-size: 1.2rem;
-          color: #2a7d4f;
-          margin: 0 0 12px 0;
-        }
-
-        .chairman-name strong {
-          color: #1e4d34;
-          font-weight: 700;
+          margin: 0 0 14px 0;
         }
 
         .chairman-message {
@@ -249,7 +248,7 @@ const About = () => {
           text-align: justify;
         }
 
-        /* ── Pillars Section (Visible Text Cards with Hover Animation) ── */
+        /* ── Pillars Section ── */
         .pillars-section {
           padding: 70px 0 80px;
           background: #f7f9f8;
@@ -278,27 +277,23 @@ const About = () => {
           align-items: center;
         }
 
-        /* ── HOVER EFFECTS (Text & Card Change) ── */
         .pillar-card:hover {
           transform: translateY(-10px);
           box-shadow: 0 20px 50px rgba(30, 58, 47, 0.15);
           background: #ffffff;
-          border-top-color: #c8a96e; /* Gold border on hover */
+          border-top-color: #c8a96e;
         }
 
-        /* Title changes color on hover */
         .pillar-card:hover .pillar-title {
-          color: #b8860b; /* Golden text */
+          color: #b8860b;
           transition: color 0.3s ease;
         }
 
-        /* Text changes slightly (darker & better contrast) on hover */
         .pillar-card:hover .pillar-text {
           color: #1a2c24;
           transition: color 0.3s ease;
         }
 
-        /* Icon scales up a bit on hover */
         .pillar-card:hover .pillar-icon {
           transform: scale(1.1);
           transition: transform 0.3s ease;
@@ -308,7 +303,7 @@ const About = () => {
           border-top-color: #1e6b8a;
         }
         .pillar-card.vision:hover {
-          border-top-color: #f5d98f; /* Gold-ish on hover */
+          border-top-color: #f5d98f;
         }
 
         .pillar-card.objective {
@@ -384,13 +379,16 @@ const About = () => {
             font-size: 2rem;
           }
           .hero-sub {
-            font-size: 1rem;
+            font-size: 1.1rem;
+          }
+          .hero-tagline-sub {
+            font-size: 0.95rem;
           }
           .chairman-section {
             padding: 40px 0 30px;
           }
           .chairman-tagline {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
           }
           .chairman-message {
             font-size: 0.95rem;

@@ -1,14 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { useLanguage } from "../../../context/useLanguage"; // আপনার সঠিক পাথ অনুযায়ী এটি ঠিক করে নিবেন
+import { useLanguage } from "../../../context/useLanguage"; // আপনার সঠিক পাথ অনুযায়ী এটি ঠিক করে নিবেন
 
 const StatsSection = () => {
   const { t } = useLanguage();
 
   const [stats, setStats] = useState([
-    { number: "Loading...", label: "Students" },
-    { number: "Loading...", label: "More Than 30 Countries" },
-    { number: "Loading...", label: "Course Completed" },
-    { number: "Loading...", label: "Four Years Experience" },
+    { number: t({ en: "Loading...", bn: "লোড হচ্ছে..." }), label: "Students" },
+    {
+      number: t({ en: "Loading...", bn: "লোড হচ্ছে..." }),
+      label: "More Than 50 Countries",
+    },
+    {
+      number: t({ en: "Loading...", bn: "লোড হচ্ছে..." }),
+      label: "Course Completed",
+    },
+    {
+      number: t({ en: "Loading...", bn: "লোড হচ্ছে..." }),
+      label: "Six Years Experience",
+    },
   ]);
   const [loading, setLoading] = useState(true);
 
@@ -18,10 +27,10 @@ const StatsSection = () => {
       .then((data) => {
         // ব্যাকএন্ড থেকে আসা ডেটাকে অ্যারে ফরম্যাটে রূপান্তর করা
         const formattedStats = [
-          { number: data.students || "15,000+", label: "Students" },
-          { number: data.countries || "30+", label: "More Than 30 Countries" },
-          { number: data.courses || "25+", label: "Course Completed" },
-          { number: data.experience || "4+", label: "Four Years Experience" },
+          { number: data.students || "20000+", label: "Students" },
+          { number: data.countries || "50+", label: "More Than 50 Countries" },
+          { number: data.courses || "30+", label: "Course Completed" },
+          { number: data.experience || "6+", label: "Six Years Experience" },
         ];
         setStats(formattedStats);
         setLoading(false);
@@ -30,10 +39,10 @@ const StatsSection = () => {
         console.error("Error fetching stats:", err);
         // এরর হলে ফলব্যাক বা ডিফল্ট ডেটা সেট করে দেওয়া
         setStats([
-          { number: "15,000+", label: "Students" },
-          { number: "30+", label: "More Than 30 Countries" },
-          { number: "25+", label: "Course Completed" },
-          { number: "4+", label: "Four Years Experience" },
+          { number: "20000+", label: "Students" },
+          { number: "50+", label: "More Than 50 Countries" },
+          { number: "30+", label: "Course Completed" },
+          { number: "6+", label: "Six Years Experience" },
         ]);
         setLoading(false);
       });
@@ -44,12 +53,12 @@ const StatsSection = () => {
     switch (label) {
       case "Students":
         return t({ en: "Students", bn: "শিক্ষার্থী" });
-      case "More Than 30 Countries":
-        return t({ en: "More Than 30 Countries", bn: "৩০টিরও বেশি দেশ" });
+      case "More Than 50 Countries":
+        return t({ en: "More Than 50 Countries", bn: "৫০টিরও বেশি দেশ" });
       case "Course Completed":
         return t({ en: "Course Completed", bn: "সম্পন্ন কোর্স" });
-      case "Four Years Experience":
-        return t({ en: "Four Years Experience", bn: "৪ বছরের অভিজ্ঞতা" });
+      case "Six Years Experience":
+        return t({ en: "Six Years Experience", bn: "৬ বছরের অভিজ্ঞতা" });
       default:
         return t({ en: label, bn: label });
     }

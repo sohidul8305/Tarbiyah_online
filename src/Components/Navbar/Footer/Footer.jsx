@@ -109,13 +109,6 @@ const Footer = () => {
           </div>
 
           {/* Payment Methods */}
-          <div className="bg-white p-2 rounded-lg shadow-md max-w-sm w-full">
-            <img
-              src="https://i.ibb.co.com/84Z9Xv5/payment-gateways.png"
-              alt="Payment Methods"
-              className="w-full object-contain h-10"
-            />
-          </div>
         </div>
 
         {/* Column 3: Get Touch With Us */}
