@@ -15,99 +15,101 @@ const Footer = () => {
   const { t } = useLanguage();
 
   return (
-    <footer className="bg-[#00313A] text-white pt-16 pb-8 px-6 md:px-12 font-sans">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+    <footer className="bg-[#00313A] text-white pt-12 sm:pt-16 pb-8 px-4 sm:px-6 md:px-12 font-sans overflow-x-hidden">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12 mb-12">
         {/* Column 1: Logo & About */}
-        <div>
+        <div className="w-full">
           <div className="flex items-center gap-3 mb-6">
             <img
               src={Tarbiyahlogo}
               alt="Tarbiyah Online"
-              className="h-16 object-contain"
+              className="h-14 sm:h-16 object-contain"
             />
           </div>
           <p className="text-sm leading-relaxed text-gray-200">
             {t({
-              en: '"At Tarbiyah Online, we believe that education should be accessible to everyone, regardless of their background or circumstances. Therefore, we offer a range of online courses designed to help you learn new skills whenever it suits you."',
-              bn: '"তারবিয়াহ অনলাইনে আমরা বিশ্বাস করি যে শিক্ষা প্রত্যেকের কাছে অ্যাক্সেসযোগ্য হওয়া উচিত, তাদের পটভূমি বা পরিস্থিতি নির্বিশেষে। তাই আমরা অনলাইন কোর্সের একটি পরিসর অফার করি যা আপনাকে নতুন দক্ষতা শিখতে সাহায্য করার জন্য ডিজাইন করা হয়েছে, যে কোনো সময়ে আপনার জন্য উপযুক্ত।"',
+              en: '"Access Authentic Islamic Education from Renowned Scholars Worldwide. Learn, Grow, and Transform wherever you are, whenever you are ready."',
+              bn: '"বিশ্বজুড়ে প্রখ্যাত আলেমদের কাছ থেকে খাঁটি ইসলামী শিক্ষা গ্রহণ করুন। আপনি যেখানেই থাকুন না কেন, যখনই প্রস্তুত থাকবেন, শিখুন, বিকশিত হোন এবং নিজেকে রূপান্তরিত করুন।"',
             })}
           </p>
         </div>
 
         {/* Column 2: Useful Links & Payment Methods */}
-        <div>
+        <div className="w-full">
           <h3 className="font-bold text-lg mb-6 uppercase tracking-wider border-b border-teal-700/50 pb-2 inline-block">
             {t({ en: "USEFUL LINKS", bn: "প্রয়োজনীয় লিংক" })}
           </h3>
-          <div className="grid grid-cols-2 gap-y-3 gap-x-6 text-sm mb-8 text-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm mb-8 text-gray-200">
             <a
-              href="https://tarbiyahonline.com/terms-and-conditions"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-teal-300 transition-colors"
+              href="/terms"
+              className="hover:text-teal-300 transition-colors truncate"
             >
               {t({ en: "Terms & Conditions", bn: "শর্তাবলী ও শর্তসমূহ" })}
             </a>
             <a
-              href="https://tarbiyahonline.com/admission"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-teal-300 transition-colors"
+              href="/admission-now"
+              className="hover:text-teal-300 transition-colors truncate"
             >
               {t({ en: "Online Application", bn: "অনলাইন আবেদন" })}
             </a>
             <a
-              href="https://tarbiyahonline.com/privacy-policy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-teal-300 transition-colors"
+              href="/about"
+              className="hover:text-teal-300 transition-colors truncate"
             >
-              {t({ en: "Privacy Policy", bn: "গোপনীয়তা নীতি" })}
+              {t({ en: "About Us", bn: "আমাদের সম্পর্কে" })}
             </a>
             <a
-              href="https://tarbiyahonline.com/my-account"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-teal-300 transition-colors"
+              href="/course"
+              className="hover:text-teal-300 transition-colors truncate"
             >
-              {t({ en: "My Account", bn: "আমার একাউন্ট" })}
+              {t({ en: "All Courses", bn: "সকল কোর্সসমূহ" })}
             </a>
             <a
-              href="https://tarbiyahonline.com/refund-policy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-teal-300 transition-colors"
+              href="/consultancy"
+              className="hover:text-teal-300 transition-colors truncate"
             >
-              {t({ en: "Refund Policy", bn: "রিফান্ড নীতি" })}
+              {t({ en: "Consultancy", bn: "কনসালটেন্সি" })}
             </a>
             <a
-              href="https://tarbiyahonline.com/cart"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-teal-300 transition-colors"
+              href="/blog"
+              className="hover:text-teal-300 transition-colors truncate"
             >
-              {t({ en: "Cart Page", bn: "কার্টপেজ" })}
+              {t({ en: "Blog", bn: "ব্লগ" })}
             </a>
             <a
-              href="https://tarbiyahonline.com/career"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-teal-300 transition-colors"
+              href="/events"
+              className="hover:text-teal-300 transition-colors truncate"
             >
-              {t({ en: "Career", bn: "ক্যারিয়ার" })}
+              {t({ en: "Events", bn: "ইভেন্টস" })}
             </a>
             <a
-              href="https://tarbiyahonline.com/contact"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-teal-300 transition-colors"
+              href="/gallery"
+              className="hover:text-teal-300 transition-colors truncate"
             >
-              {t({ en: "Contact", bn: "কনটাক্ট" })}
+              {t({ en: "Gallery", bn: "গ্যালারি" })}
+            </a>
+            <a
+              href="/support"
+              className="hover:text-teal-300 transition-colors truncate"
+            >
+              {t({ en: "Support", bn: "সাপোর্ট" })}
+            </a>
+            <a
+              href="/donate"
+              className="hover:text-teal-300 transition-colors truncate"
+            >
+              {t({ en: "Donate", bn: "ডোনেট" })}
+            </a>
+            <a
+              href="/course/diploma/details"
+              className="hover:text-teal-300 transition-colors truncate sm:col-span-2"
+            >
+              {t({ en: "Diploma Details", bn: "ডিপ্লোমা বিস্তারিত" })}
             </a>
           </div>
 
           {/* Payment Methods */}
-          <div className="bg-white p-2 rounded-lg shadow-md max-w-sm">
+          <div className="bg-white p-2 rounded-lg shadow-md max-w-sm w-full">
             <img
               src="https://i.ibb.co.com/84Z9Xv5/payment-gateways.png"
               alt="Payment Methods"
@@ -117,7 +119,7 @@ const Footer = () => {
         </div>
 
         {/* Column 3: Get Touch With Us */}
-        <div>
+        <div className="w-full">
           <h3 className="font-bold text-lg mb-6 uppercase tracking-wider border-b border-teal-700/50 pb-2 inline-block">
             {t({ en: "GET IN TOUCH WITH US", bn: "আমাদের সাথে যোগাযোগ করুন" })}
           </h3>
@@ -141,41 +143,45 @@ const Footer = () => {
             </p>
             <p className="flex items-center gap-3">
               <FaEnvelope className="text-teal-300 flex-shrink-0 text-base" />
-              <span>info@tarbiyahonline.com</span>
+              <span className="break-all">hello.tarbiyah@gmail.com</span>
             </p>
           </div>
 
-          {/* Social Icons */}
-          <div className="flex gap-3 mt-6">
+          {/* Social Icons with Colorful Hover Effects */}
+          <div className="flex flex-wrap gap-3 mt-6">
             <a
-              href="https://facebook.com/tarbiyahonline"
+              href="https://www.facebook.com/share/19cMVX749c/"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 bg-white text-[#00313A] rounded-full flex items-center justify-center font-bold shadow-md hover:bg-teal-100 transition-colors"
+              aria-label="Facebook"
+              className="w-10 h-10 bg-white text-[#00313A] rounded-full flex items-center justify-center font-bold shadow-md hover:bg-[#1877F2] hover:text-white transition-all duration-300"
             >
               <FaFacebookF />
             </a>
             <a
-              href="https://youtube.com/@tarbiyahonline"
+              href="https://youtube.com/@tarbiyahonlinemadrasa?si=pb18-SWBf6lzeuME"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 bg-white text-[#00313A] rounded-full flex items-center justify-center font-bold shadow-md hover:bg-teal-100 transition-colors"
+              aria-label="YouTube"
+              className="w-10 h-10 bg-white text-[#00313A] rounded-full flex items-center justify-center font-bold shadow-md hover:bg-[#FF0000] hover:text-white transition-all duration-300"
             >
               <FaYoutube />
             </a>
             <a
-              href="https://linkedin.com/company/tarbiyahonline"
+              href="https://www.linkedin.com/company/tarbiyah-online-madrasah/"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 bg-white text-[#00313A] rounded-full flex items-center justify-center font-bold shadow-md hover:bg-teal-100 transition-colors"
+              aria-label="LinkedIn"
+              className="w-10 h-10 bg-white text-[#00313A] rounded-full flex items-center justify-center font-bold shadow-md hover:bg-[#0A66C2] hover:text-white transition-all duration-300"
             >
               <FaLinkedinIn />
             </a>
             <a
-              href="https://instagram.com/tarbiyahonline"
+              href="https://www.instagram.com/tarbiyahonline?igsh=cmxrMnBpNHpyOHlr"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-10 h-10 bg-white text-[#00313A] rounded-full flex items-center justify-center font-bold shadow-md hover:bg-teal-100 transition-colors"
+              aria-label="Instagram"
+              className="w-10 h-10 bg-white text-[#00313A] rounded-full flex items-center justify-center font-bold shadow-md hover:bg-[#E4405F] hover:text-white transition-all duration-300"
             >
               <FaInstagram />
             </a>
