@@ -155,10 +155,14 @@ import Enroll_tajweed_english_version from "../Components/Enroll_tajweed_english
 import Campus_login from "../Page/Campus_login/Campus_login";
 import Course_quran_elders_advanced_tajweed from "../Components/Course_quran_elders_advanced_tajweed/Course_quran_elders_advanced_tajweed";
 import Course_quran_elders_advanced_tajweed_enroll from "../Components/Course_quran_elders_advanced_tajweed_enroll/Course_quran_elders_advanced_tajweed_enroll";
+
 import Admission_now from "../Components/Admission_now/Admission_now";
 import Dashboard from "../Page/Dashboard/Dashboard";
 import NotFoundPage from "../Page/NotFoundPage/NotFoundPage";
 import Donate from "../Components/Donate/Donate";
+import Child_development_details from "../Components/Child_development_details/Child_development_details";
+import Farewell_hajj_details from "../Components/Farewell_hajj_details/Farewell_hajj_details";
+import Age_barriers_details from "../Components/Age_barriers_details/Age_barriers_details";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -443,6 +447,18 @@ export const router = createBrowserRouter([
     element: (
       <Course_quran_elders_advanced_tajweed_enroll></Course_quran_elders_advanced_tajweed_enroll>
     ),
+  },
+  {
+    path: "/blog/importance-of-environment-in-child-development",
+    element: <Child_development_details></Child_development_details>,
+  },
+  {
+    path: "/blog/conquest-of-mecca-and-farewell-hajj",
+    element: <Farewell_hajj_details></Farewell_hajj_details>,
+  },
+  {
+    path: "/blog/accomplished-thinkers-transcend-age-barriers",
+    element: <Age_barriers_details></Age_barriers_details>,
   },
 
   // ==========================================

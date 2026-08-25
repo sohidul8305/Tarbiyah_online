@@ -1,7 +1,9 @@
 import React from "react";
+import { Link } from "react-router-dom"; // Change to "next/link" if using Next.js
 import { useLanguage } from "../../context/useLanguage";
 
 const BlogCard = ({
+  slug,
   category,
   title,
   author,
@@ -28,9 +30,13 @@ const BlogCard = ({
       <p className="text-sm text-gray-600 mb-4 leading-relaxed line-clamp-3">
         {desc}
       </p>
-      <a href="#" className="text-teal-600 font-bold text-sm hover:underline">
+      {/* Dynamic route based on slug */}
+      <Link
+        to={`/blog/${slug}`}
+        className="text-teal-600 font-bold text-sm hover:underline inline-block"
+      >
         {readMoreText}
-      </a>
+      </Link>
     </div>
   </div>
 );
@@ -40,6 +46,7 @@ const BlogSection = () => {
 
   const posts = [
     {
+      slug: "importance-of-environment-in-child-development",
       category: t({ en: "Learning Islam", bn: "ইসলাম শিক্ষা" }),
       title: t({
         en: "The Importance Of Environment In Child Development",
@@ -55,6 +62,7 @@ const BlogSection = () => {
       }),
     },
     {
+      slug: "conquest-of-mecca-and-farewell-hajj",
       category: t({ en: "Islamic History", bn: "ইসলামিক ইতিহাস" }),
       title: t({
         en: "The Conquest Of Mecca And The Lessons Of The Farewell Hajj",
@@ -70,10 +78,11 @@ const BlogSection = () => {
       }),
     },
     {
+      slug: "accomplished-thinkers-transcend-age-barriers",
       category: t({ en: "Learning Islam", bn: "ইসলাম শিক্ষা" }),
       title: t({
         en: "Accomplished Thinkers Transcend Age Barriers In Attaining Knowledge",
-        bn: "জ্ঞান অর্জনে বয়স কোনো বাধা নয়",
+        bn: "জ্ঞান অর্জনে বয়স কোনো বাধা নয়",
       }),
       author: "tarbiyahedu",
       date: "08/17/2024",
@@ -81,7 +90,7 @@ const BlogSection = () => {
       comments: t({ en: "0 comment", bn: "০ মন্তব্য" }),
       desc: t({
         en: "Achieving knowledge at a mature age. Peace be upon the Companions who accepted Islam. Not all were small; Rather, many of them were older. Age is never a barrier...",
-        bn: "প্রৌঢ় বা পরিপক্ব বয়সে জ্ঞান অর্জন করা। সাহাবিগণের যুগে অনেকেই বয়সের পরে ইসলাম গ্রহণ করেছিলেন। জ্ঞান অর্জনের ক্ষেত্রে বয়স কখনোই বাধা হতে পারে না...",
+        bn: "প্রৌঢ় বা পরিপক্ব বয়সে জ্ঞান অর্জন করা। সাহাবিগণের যুগে অনেকেই বয়সের পরে ইসলাম গ্রহণ করেছিলেন। জ্ঞান অর্জনের ক্ষেত্রে বয়স কখনোই বাধা হতে পারে না...",
       }),
     },
   ];
@@ -97,7 +106,7 @@ const BlogSection = () => {
             <BlogCard
               key={index}
               {...post}
-              readMoreText={t({ en: "Read More", bn: "আরও পড়ুন" })}
+              readMoreText={t({ en: "Read More", bn: "আরও পড়ুন" })}
               byText={t({ en: "By", bn: "লিখেছেন" })}
               dateText={t({ en: "Date", bn: "তারিখ" })}
             />
