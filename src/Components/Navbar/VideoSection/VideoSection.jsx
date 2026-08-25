@@ -9,16 +9,25 @@ const VideoSection = () => {
     <section className="py-16 px-6 max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12">
       {/* Left Side: Video Thumbnail with Play Button */}
       <div className="w-full md:w-1/2 relative group cursor-pointer">
-        <img
-          src="https://i.ibb.co.com/v6kR8y3T/Screenshot-2026-08-02-124734.png"
-          alt="Video Thumbnail"
-          className="w-full rounded-lg shadow-lg"
-        />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="bg-teal-600/80 p-6 rounded-full group-hover:scale-110 transition-transform duration-300">
-            <Play size={48} fill="white" className="text-white" />
+        <a
+          href="https://www.youtube.com/watch?v=Kc4wxdA4g70"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block cursor-pointer relative overflow-hidden rounded-lg"
+        >
+          <img
+            src="https://i.ibb.co.com/v6kR8y3T/Screenshot-2026-08-02-124734.png"
+            alt="YouTube Video"
+            className="w-full rounded-lg shadow-lg group-hover:scale-105 transition-transform duration-500"
+          />
+
+          {/* Play Icon Overlay (Interactive on Hover) */}
+          <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover:bg-black/30 transition-colors">
+            <div className="bg-teal-600 p-4 md:p-6 rounded-full shadow-lg group-hover:scale-110 transition-transform duration-300">
+              <Play size={36} fill="white" className="text-white ml-1" />
+            </div>
           </div>
-        </div>
+        </a>
       </div>
 
       {/* Right Side: Text Content */}
