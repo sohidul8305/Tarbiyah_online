@@ -102,8 +102,8 @@ const OurVideo = () => {
       <Helmet>
         <title>
           {t({
-            en: "Our Videos & Gallery | Tarbiyah Education",
-            bn: "আমাদের ভিডিও ও গ্যালারি | তারবিয়াহ এডুকেশন",
+            // en: "Our Videos & Gallery | Tarbiyah Education",
+            // bn: "আমাদের ভিডিও ও গ্যালারি | তারবিয়াহ এডুকেশন",
           })}
         </title>
         <meta
