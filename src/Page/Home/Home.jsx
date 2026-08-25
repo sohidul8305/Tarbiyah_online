@@ -12,6 +12,7 @@ import SeminarSection from "../../Components/SeminarSection/SeminarSection";
 import BlogSection from "../../Components/BlogSection/BlogSection";
 import Testimonials from "../../Components/Testimonials/Testimonials";
 import FAQSection from "../../Components/FAQSection/FAQSection";
+import Our_video from "../../Components/Our_video/Our_video";
 
 const Home = () => {
   // কনটেক্সট থেকে language এবং t ফাংশনটি নিয়ে নিলাম
@@ -30,6 +31,7 @@ const Home = () => {
       <FivePillars />
       <SeminarSection />
       <BlogSection />
+      <Our_video></Our_video>
     </div>
   );
 };
