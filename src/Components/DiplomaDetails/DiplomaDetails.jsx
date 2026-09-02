@@ -14,7 +14,7 @@ import UbadullahImg from "../../image/Ubaydullah.png";
 import JakariyamasudImg from "../../image/jakariyah.png";
 import Mohammadhidoy from "../../image/Hridoy-Ustaz-01.png";
 import AbdullahMamunImg from "../../image/Abdullahmanun.jpg";
-import AbunomanImg from "../../image/abunoman.jpg";
+// import AbunomanImg from "../../image/abunoman.jpg";
 // Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
 import "swiper/css";
 import "swiper/css/pagination";
@@ -120,7 +120,7 @@ const DiplomaDetails = () => {
       name: "Ustad Abu Noman",
       title: "Coordinator",
       subtitle: "Department of Quranic Studies, Tarbiyah Education Network",
-      image: AbunomanImg,
+      // image: AbunomanImg,
     },
   ];
 
