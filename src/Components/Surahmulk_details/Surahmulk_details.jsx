@@ -4,7 +4,7 @@ const Surahmulk_details = () => {
   return (
     <div>
       <p>surah mulk details page </p>
-      <p>mulk</p>
+      <p>Updatrgjrr</p>
     </div>
   );
 };
