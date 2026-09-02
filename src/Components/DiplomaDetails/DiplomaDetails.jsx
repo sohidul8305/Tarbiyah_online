@@ -18,7 +18,7 @@ import AbunomanImg from "../../image/Abunoman.jpg";
 import Abdullahkafi from "../../image/Abdullah Kafi.png";
 import ImamhossainImg from "../../image/Emam Hussain.png";
 import Avatorboys from "../../image/Avatorboys.png";
-
+import Certificate from "../../image/certificate.png";
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -275,57 +275,59 @@ const DiplomaDetails = () => {
   const testimonials = [
     {
       id: 1,
-      name: "আব্দুল্লাহ আল মামুন",
-      designation: "শিক্ষার্থী, ঢাকা",
+      name: "MST SONEA KHATUN",
+      designation: "STUDENT ID: TDIS25B1128, BATCH: 11",
       quote:
-        "আলহামদুলিল্লাহ, এই কোর্সটি আমার ঈমানি দৃঢ়তা ও ইসলামি জ্ঞান বৃদ্ধিতে অসাধারণ ভূমিকা রেখেছে। শিক্ষকদের আন্তরিকতা সত্যিই প্রশংসনীয়।",
-      image:
-        "https://i.ibb.co.com/gZv5KDDx/images-q-tbn-ANd9-Gc-Tge-GIm6kq-Fp3x-NYHpqsl89ua-z2-JOR-Gy-XIYu-Gy-THG3-Q-s-10.jpg",
-    },
-    {
-      id: 2,
-      name: "বিবি আয়শা ",
-      designation: "প্রবাসী, যুক্তরাজ্য",
-      quote:
-        "ব্যস্ত জীবনের মাঝেও আমি এই কোর্সটি সম্পন্ন করতে পেরেছি। লাইভ ক্লাস ও রেকর্ডেড ভিডিওগুলোর কারণে সময়ানুবর্তিতা বজায় রাখা সম্ভব হয়েছে।",
+        "আমার সবগুলোই ভালো লেগেছে। কারণ, দ্বীন পালনের ক্ষেত্রে প্রত্যেকটাই সমান জরুরি। নির্দিষ্ট কোন একটাকে বাদ দিলে বা কম পছন্দের মনে করলে, কোর্সটি যেন অসম্পূর্ণ থেকে যাবে।",
       image:
         "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
-      id: 3,
-      name: "মোঃ হাসান মিয়া",
-      designation: "ব্যবসায়ী, চট্টগ্রাম",
+      id: 2,
+      name: "MEHEDI HASAN",
+      designation: "STUDENT ID: TDIS24B8008, BATCH: 08",
       quote:
-        "দ্বীনি জ্ঞান অর্জনের পাশাপাশি দৈনন্দিন জীবনে ইসলামি আদব-আখলাক চর্চায় এই কোর্স আমাকে অনেক সাহায্য করেছে।",
+        "চলমান সেমিস্টারে আমার সবচেয়ে ভালো লেগেছে সিরাহ কোর্সটি। এই কোর্সে মহানবী হযরত মুহাম্মদ (সা.) এর জীবন ও চরিত্র সম্পর্কে গভীরভাবে জানতে পেরেছি। তাঁর ধৈর্য, ন্যায়বিচার, দাওয়াতি পদ্ধতি ও নৈতিকতা আমার জীবনে অনুপ্রেরণা জুগিয়েছে। এ কারণে সিরাহ কোর্সটি আমার কাছে সবচেয়ে প্রিয়।",
       image:
         "https://i.ibb.co.com/gZv5KDDx/images-q-tbn-ANd9-Gc-Tge-GIm6kq-Fp3x-NYHpqsl89ua-z2-JOR-Gy-XIYu-Gy-THG3-Q-s-10.jpg",
     },
     {
-      id: 4,
-      name: "ফাতেমা ",
-      designation: "শিক্ষার্থী, সিলেট",
+      id: 3,
+      name: "TAHMINA TARIN",
+      designation: "STUDENT ID: TDIS23B6056, BATCH: 5&6",
       quote:
-        "শায়খ প্রফেসর মোখতার আহমাদের তত্ত্বাবধানে পড়ার সুযোগ পাওয়া আমার জন্য একটি বড় প্রাপ্তি। কারিকুলাম অত্যন্ত সুসংগঠিত।",
+        "লাস্ট সেমিস্টার এ আমার সবচেয়ে ভালো লেগেছে কমপারেটিভ রিলিজিওন। উস্তাদ ডঃ আবু বকর যাকারিয়া এতো সুন্দর করে ভেঙ্গে ভেঙ্গে দ্বীন, ধর্ম, রিলিজিওন এর পার্থক্য এবং বিভিন্ন ধর্মগুলো এতো নিখুঁত ভাবে উপস্থাপন করেছেন যে আমাদের মন এবং মস্তিষ্কে তা গভীরভাবে গেথে গিয়েছে। আলহামদুলিল্লাহ। আমি শ্রদ্ধেয় উস্তাদগণের দীর্ঘায়ু কামনা করছি। পাশাপাশি তারবিয়া একাডেমি কে ধন্যবাদ জানাবো আমাদের জন্য এতো সুন্দর, ওয়েল অর্গানাইজড একটা কোর্স করার সুযোগ করে দেওয়ার জন্য। জাযাকুমুল্লাহ খাইরান।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
+    },
+    {
+      id: 4,
+      name: "Asma Akter Roma",
+      designation:
+        "স্টুডেন্ট: ৫ম সেমিস্টার, ডিপার্টমেন্ট: ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
+      quote:
+        "আলহামদুলিল্লাহ আমাদের সকল উস্তায খুবই বিনয়ের সাথে ক্লাস বুঝিয়ে দিয়ে থাকেন, বিশেষ করে উস্তায ডঃ যুবায়েরের ইহসান তার ক্লাসে পড়া বুঝিয়ে দেন এবং পড়াগুলো ক্লাসেই আদায় করে নেন। মাঝে মাঝে গুগল ফর্মে HW দিয়ে থাকেন। উস্তাযের পড়ানোর এই নিয়ম নীতি আমার কাছে খুবই ভালো লাগে।",
       image:
         "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 5,
-      name: "মোঃ নাজমুল হক",
-      designation: "চাকরিজীবী, রাজশাহী",
+      name: "Umme Musa",
+      designation:
+        "Former Assistant Professor, Dept. of CSE, BUBT (স্টুডেন্ট: ১ম সেমিস্টার, ডিপ্লোমা ইন ইসলামিক স্টাডিজ)",
       quote:
-        "সপ্তাহে মাত্র ৩ দিন ক্লাস থাকায় চাকরির সাথে তাল মিলিয়ে পড়াশোনা করতে পারছি। একাডেমিক সাপোর্ট দল সবসময় পাশে আছে।",
+        "হাদিস- ক্লাসের রেকর্ড অনেক গোছানো, নোট আছে। সিরাহ কোর্সের মতই সমসাময়িক বিষয়ে হাদিসগুলোর প্রয়োগ বুঝতে পেরেছি। এই কোর্সের বড় একটা ভালো দিক- প্রতিটা লেসনের শেষে Sample Question আছে। এতে করে পরীক্ষা ভীতি দূর হয়েছে। আলহামদুলিল্লাহ।",
       image:
-        "https://i.ibb.co.com/gZv5KDDx/images-q-tbn-ANd9-Gc-Tge-GIm6kq-Fp3x-NYHpqsl89ua-z2-JOR-Gy-XIYu-Gy-THG3-Q-s-10.jpg",
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 6,
-      name: "মোঃ ইব্রাহিম খলিল",
-      designation: "শিক্ষার্থী, খুলনা",
+      name: "জান্নাতি মহল মিলোরা",
+      designation: "শিক্ষার্থী: ডিপ্লোমা ইন ইসলামিক স্টাডিজ, ২য় সেমিস্টার",
       quote:
-        "ইজাজাহ ও সার্টিফিকেট পাওয়ার সুযোগ এই ডিপ্লোমাকে আরও মূল্যবান করেছে। ইনশাআল্লাহ, উচ্চশিক্ষার পথ সুগম হবে।",
+        "আলহামদুলিল্লাহ প্রত্যেক ওস্তাদের ক্লাস অত্যন্ত আনন্দের সাথে করছি। আমার কাছে প্রত্যেক ওস্তাদকেই ভীষণ ভালো লাগে এবং আমি মহান আল্লাহ তায়ালার কাছে শুকরিয়া জ্ঞাপন করছি যে আল্লাহ তায়ালা আমাকে এই কোর্স করার তৌফিক দান করেছেন।",
       image:
-        "https://i.ibb.co.com/gZv5KDDx/images-q-tbn-ANd9-Gc-Tge-GIm6kq-Fp3x-NYHpqsl89ua-z2-JOR-Gy-XIYu-Gy-THG3-Q-s-10.jpg",
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
   ];
 
@@ -334,38 +336,38 @@ const DiplomaDetails = () => {
     {
       id: 1,
       title: "ভিডিও ১",
-      thumbnail: "https://img.youtube.com/vi/fSj6hz-j7Ok/hqdefault.jpg",
-      url: "https://youtu.be/fSj6hz-j7Ok?si=QBGUyETeILDQ5lK1",
+      thumbnail: "https://img.youtube.com/vi/OFXVzYi_lLo/hqdefault.jpg",
+      url: "https://youtu.be/OFXVzYi_lLo?si=v8LJgLRS1s6ypf3f",
     },
     {
       id: 2,
       title: "ভিডিও ২",
-      thumbnail: "https://img.youtube.com/vi/fSj6hz-j7Ok/hqdefault.jpg",
-      url: "https://youtu.be/fSj6hz-j7Ok?si=QBGUyETeILDQ5lK1",
+      thumbnail: "https://img.youtube.com/vi/4cTt9SmRK_8/hqdefault.jpg",
+      url: "https://youtu.be/4cTt9SmRK_8?si=gRlG1LmO8waoSBvO",
     },
     {
       id: 3,
       title: "ভিডিও ৩",
-      thumbnail: "https://img.youtube.com/vi/fSj6hz-j7Ok/hqdefault.jpg",
-      url: "https://youtu.be/fSj6hz-j7Ok?si=QBGUyETeILDQ5lK1",
+      thumbnail: "https://img.youtube.com/vi/RiUeYS8DWAA/hqdefault.jpg",
+      url: "https://youtu.be/RiUeYS8DWAA?si=iIA_9r6RTpasEym7",
     },
     {
       id: 4,
       title: "ভিডিও ৪",
-      thumbnail: "https://img.youtube.com/vi/fSj6hz-j7Ok/hqdefault.jpg",
-      url: "https://youtu.be/fSj6hz-j7Ok?si=QBGUyETeILDQ5lK1",
+      thumbnail: "https://img.youtube.com/vi/KR59dFBOpbg/hqdefault.jpg",
+      url: "https://youtu.be/KR59dFBOpbg?si=y9NSXGXuPvF6k8jn",
     },
     {
       id: 5,
       title: "ভিডিও ৫",
-      thumbnail: "https://img.youtube.com/vi/fSj6hz-j7Ok/hqdefault.jpg",
-      url: "https://youtu.be/fSj6hz-j7Ok?si=QBGUyETeILDQ5lK1",
+      thumbnail: "https://img.youtube.com/vi/dorXizH7iR0/hqdefault.jpg",
+      url: "https://youtu.be/dorXizH7iR0?si=3TZq3s6rA_j2uJI4",
     },
     {
       id: 6,
       title: "ভিডিও ৬",
-      thumbnail: "https://img.youtube.com/vi/fSj6hz-j7Ok/hqdefault.jpg",
-      url: "https://youtu.be/fSj6hz-j7Ok?si=QBGUyETeILDQ5lK1",
+      thumbnail: "https://img.youtube.com/vi/_IU75TfdGTM/hqdefault.jpg",
+      url: "https://youtu.be/_IU75TfdGTM?si=5DtS6m13OhmHOxOU",
     },
   ];
 
@@ -539,7 +541,7 @@ const DiplomaDetails = () => {
                   </p>
                 </div>
                 <div className="w-48 h-32 bg-gray-100 rounded-xl border border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs text-center p-2">
-                  Selected template preview
+                  <img src={Certificate} />
                 </div>
               </div>
 
@@ -1407,7 +1409,6 @@ const DiplomaDetails = () => {
                   ))}
                 </Swiper>
               </div>
-
               {/* 3. ভিডিও গ্যালারি */}
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
