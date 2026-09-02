@@ -3,8 +3,9 @@ import { Link } from "react-router";
 import KidsImg from "../../image/kids.jpg";
 import NuraniyaCourseImg from "../../image/nuranicourse.jpg";
 import NuraniyaBannerIMG from "../../image/nuranibanner.jpg";
-// import NazeraBannerImg from "../../image/najerabanner.png";
+import NazerakidsImg from "../../image/Thumb.jpg";
 import HifjulBannerImg from "../../image/hifjulbanner.png";
+import courseImg from "../../image/hifzthumbal.jpg";
 import {
   FaCheckCircle,
   FaClock,
@@ -48,13 +49,13 @@ const Kids = () => {
       id: "nazera",
       title: "নাজেরা",
       subtitle: "সহি তাজউইথ ও সুন্দরভাবে কুরআন তিলাওয়াত শেখা।",
-      // image: NazeraBannerImg,
+      image: NazerakidsImg,
     },
     {
       id: "hifz",
       title: "হিফজুল কুরআন",
       subtitle: "ধাপে ধাপে সম্পূর্ণ কুরআন মুখস্থ করার প্রোগ্রাম।",
-      image: HifjulBannerImg,
+      image: courseImg,
     },
     {
       id: "hifz-revision",

@@ -135,10 +135,12 @@ const Admission_now = () => {
         });
       }
     } else if (name === "selectedDepartment") {
+      // ডিপার্টমেন্ট চেঞ্জ হলে প্রথম কোর্সটি ডিফল্ট সিলেক্টেড করব
+      const firstCourse = departments[value]?.courses[0];
       setFormData({
         ...formData,
         selectedDepartment: value,
-        selectedCourses: [],
+        selectedCourses: firstCourse ? [firstCourse.id] : [],
       });
     } else {
       setFormData({
@@ -186,8 +188,6 @@ const Admission_now = () => {
     return departments[formData.selectedDepartment]?.courses || [];
   };
 
-  // Admission_now.jsx - handleSubmit ফাংশন
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -210,13 +210,11 @@ const Admission_now = () => {
         })
         .filter(Boolean);
 
-      // ✅ Payment Status নির্ধারণ
       const paymentStatus =
         formData.paidAmount && parseFloat(formData.paidAmount) > 0
           ? "Paid"
           : "Unpaid";
 
-      // ✅ সব ডেটা পাঠাচ্ছি - এই পেমেন্ট ডেটা গুরুত্বপূর্ণ
       const payload = {
         // Personal Information
         name: formData.name,
@@ -245,20 +243,19 @@ const Admission_now = () => {
         maritalStatus: formData.maritalStatus || "",
         age: formData.age || "",
 
-        // ✅ Payment Information - এই 3টি ফিল্ড গুরুত্বপূর্ণ
-        paymentMethod: formData.paymentMethod || "", // ✅ পেমেন্ট মেথড
+        // Payment Information
+        paymentMethod: formData.paymentMethod || "",
         paymentType: formData.paymentType || "",
-        transactionId: formData.transactionId || "", // ✅ ট্রানজেকশন আইডি
+        transactionId: formData.transactionId || "",
         paidAmount: formData.paidAmount || "",
         paymentRemarks: formData.paymentRemarks || "",
-        paymentStatus: paymentStatus, // ✅ পেমেন্ট স্ট্যাটাস
+        paymentStatus: paymentStatus,
 
         // Status
         status: "Pending",
-        admissionDate: new Date().toISOString(), // ✅ ভর্তি তারিখ
+        admissionDate: new Date().toISOString(),
       };
 
-      // ✅ কনসোল লগ - দেখুন ডেটা পাঠাচ্ছে কিনা
       console.log("📤 ====== SENDING PAYLOAD ======");
       console.log("📤 Payment Method:", payload.paymentMethod);
       console.log("📤 Transaction ID:", payload.transactionId);
@@ -401,7 +398,7 @@ const Admission_now = () => {
           Admission Form
         </h2>
 
-        {/* Progress Steps */}
+        {/* Progress Steps - এখন Course Selection প্রথমে */}
         <div className="flex justify-between mb-8">
           <div
             className={`flex-1 text-center ${step >= 1 ? "text-[#00ADD2]" : "text-gray-400"}`}
@@ -411,7 +408,7 @@ const Admission_now = () => {
             >
               1
             </div>
-            <span className="text-sm">Personal Info</span>
+            <span className="text-sm">Course Selection</span>
           </div>
           <div
             className={`flex-1 text-center ${step >= 2 ? "text-[#00ADD2]" : "text-gray-400"}`}
@@ -421,7 +418,7 @@ const Admission_now = () => {
             >
               2
             </div>
-            <span className="text-sm">Family & Address</span>
+            <span className="text-sm">Personal Info</span>
           </div>
           <div
             className={`flex-1 text-center ${step >= 3 ? "text-[#00ADD2]" : "text-gray-400"}`}
@@ -431,7 +428,7 @@ const Admission_now = () => {
             >
               3
             </div>
-            <span className="text-sm">Course Selection</span>
+            <span className="text-sm">Family & Address</span>
           </div>
           <div
             className={`flex-1 text-center ${step >= 4 ? "text-[#00ADD2]" : "text-gray-400"}`}
@@ -446,8 +443,145 @@ const Admission_now = () => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Step 1: Personal Information */}
+          {/* Step 1: Course Selection - এখন প্রথমে */}
           {step === 1 && (
+            <div className="space-y-4">
+              <h2
+                className="text-xl font-semibold mb-4"
+                style={{ color: "#00ADD2" }}
+              >
+                Department & Course Selection
+              </h2>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Department *
+                </label>
+                <select
+                  name="selectedDepartment"
+                  value={formData.selectedDepartment}
+                  onChange={handleInputChange}
+                  required
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
+                >
+                  <option value="">Select Department</option>
+                  <option value="islamic-studies">
+                    Diploma in Islamic Studies
+                  </option>
+                  <option value="alemiyah">Tarbiyah Alimiyah</option>
+                  <option value="quran-studies">Tarbiyah Quran Studies</option>
+                  <option value="quran-elders">Quran for Elders</option>
+                </select>
+              </div>
+
+              {formData.selectedDepartment && (
+                <div>
+                  <h3
+                    className="font-semibold mb-3"
+                    style={{ color: "#00ADD2" }}
+                  >
+                    {departments[formData.selectedDepartment]?.name} - Courses
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {getCurrentCourses().map((course) => (
+                      <div
+                        key={course.id}
+                        className="border rounded-lg p-4 hover:shadow-md transition"
+                        style={{ borderColor: "#00ADD2" }}
+                      >
+                        <label className="flex items-start space-x-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            value={course.id}
+                            checked={formData.selectedCourses.includes(
+                              course.id,
+                            )}
+                            onChange={handleInputChange}
+                            className="mt-1 h-4 w-4 focus:ring-[#00ADD2] border-gray-300 rounded"
+                            style={{ color: "#00ADD2" }}
+                          />
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-gray-800">
+                              {course.name}
+                            </h4>
+                            <div className="flex justify-between mt-1">
+                              <span className="text-xs text-gray-500">
+                                Duration: {course.duration}
+                              </span>
+                              <span
+                                className="text-sm font-medium"
+                                style={{ color: "#00ADD2" }}
+                              >
+                                ৳{course.price.toLocaleString()}
+                              </span>
+                            </div>
+                          </div>
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {formData.selectedCourses.length > 0 && (
+                <div
+                  className="p-4 rounded-lg mt-4"
+                  style={{ backgroundColor: "#e6f7f9" }}
+                >
+                  <h3
+                    className="font-semibold text-lg"
+                    style={{ color: "#00ADD2" }}
+                  >
+                    Selected Courses:
+                  </h3>
+                  <ul className="list-disc list-inside space-y-1">
+                    {formData.selectedCourses.map((courseId) => {
+                      const course = getCurrentCourses().find(
+                        (c) => c.id === courseId,
+                      );
+                      return course ? (
+                        <li key={courseId}>
+                          <span className="font-medium">{course.name}</span>
+                          <span className="text-sm text-gray-600">
+                            {" "}
+                            - {course.duration}
+                          </span>
+                          <span
+                            className="text-sm font-medium ml-2"
+                            style={{ color: "#00ADD2" }}
+                          >
+                            ৳{course.price.toLocaleString()}
+                          </span>
+                        </li>
+                      ) : null;
+                    })}
+                  </ul>
+                  <div className="mt-3 pt-2 border-t border-gray-300">
+                    <p
+                      className="font-bold text-lg"
+                      style={{ color: "#00ADD2" }}
+                    >
+                      Total Amount: ৳{calculateTotal().toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end mt-6">
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="text-white px-6 py-2 rounded-md hover:opacity-90 transition"
+                  style={{ backgroundColor: "#00ADD2" }}
+                >
+                  Next →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2: Personal Information */}
+          {step === 2 && (
             <div className="space-y-4">
               <h2
                 className="text-xl font-semibold mb-4"
@@ -577,7 +711,14 @@ const Admission_now = () => {
                 </div>
               </div>
 
-              <div className="flex justify-end mt-6">
+              <div className="flex justify-between mt-6">
+                <button
+                  type="button"
+                  onClick={handlePrevious}
+                  className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition"
+                >
+                  ← Previous
+                </button>
                 <button
                   type="button"
                   onClick={handleNext}
@@ -590,8 +731,8 @@ const Admission_now = () => {
             </div>
           )}
 
-          {/* Step 2: Family & Address Information */}
-          {step === 2 && (
+          {/* Step 3: Family & Address Information */}
+          {step === 3 && (
             <div className="space-y-4">
               <h2
                 className="text-xl font-semibold mb-4"
@@ -617,6 +758,20 @@ const Admission_now = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
+                    Mother's Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="motherName"
+                    value={formData.motherName}
+                    onChange={handleInputChange}
+                    required
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
                     Guardian's Phone Number *
                   </label>
                   <input
@@ -625,6 +780,19 @@ const Admission_now = () => {
                     value={formData.guardianPhone}
                     onChange={handleInputChange}
                     required
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Occupation
+                  </label>
+                  <input
+                    type="text"
+                    name="occupation"
+                    value={formData.occupation}
+                    onChange={handleInputChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
@@ -657,150 +825,6 @@ const Admission_now = () => {
                   />
                 </div>
               </div>
-
-              <div className="flex justify-between mt-6">
-                <button
-                  type="button"
-                  onClick={handlePrevious}
-                  className="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition"
-                >
-                  ← Previous
-                </button>
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="text-white px-6 py-2 rounded-md hover:opacity-90 transition"
-                  style={{ backgroundColor: "#00ADD2" }}
-                >
-                  Next →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Course Selection */}
-          {step === 3 && (
-            <div className="space-y-4">
-              <h2
-                className="text-xl font-semibold mb-4"
-                style={{ color: "#00ADD2" }}
-              >
-                Department & Course Selection
-              </h2>
-
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Department *
-                </label>
-                <select
-                  name="selectedDepartment"
-                  value={formData.selectedDepartment}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
-                >
-                  <option value="">Select Department</option>
-                  <option value="islamic-studies">
-                    Diploma in Islamic Studies
-                  </option>
-                  <option value="alemiyah">Tarbiyah Alimiyah</option>
-                  <option value="quran-studies">Tarbiyah Quran Studies</option>
-                  <option value="quran-elders">Quran for Elders</option>
-                </select>
-              </div>
-
-              {formData.selectedDepartment && (
-                <div>
-                  <h3
-                    className="font-semibold mb-3"
-                    style={{ color: "#00ADD2" }}
-                  >
-                    {departments[formData.selectedDepartment]?.name} - Courses
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {getCurrentCourses().map((course) => (
-                      <div
-                        key={course.id}
-                        className="border rounded-lg p-4 hover:shadow-md transition"
-                        style={{ borderColor: "#00ADD2" }}
-                      >
-                        <label className="flex items-start space-x-3 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            value={course.id}
-                            checked={formData.selectedCourses.includes(
-                              course.id,
-                            )}
-                            onChange={handleInputChange}
-                            className="mt-1 h-4 w-4 focus:ring-[#00ADD2] border-gray-300 rounded"
-                            style={{ color: "#00ADD2" }}
-                          />
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-800">
-                              {course.name}
-                            </h4>
-                            <div className="flex justify-between mt-1">
-                              <span className="text-xs text-gray-500">
-                                Duration: {course.duration}
-                              </span>
-                              <span
-                                className="text-sm font-medium"
-                                style={{ color: "#00ADD2" }}
-                              >
-                                ৳{course.price.toLocaleString()}
-                              </span>
-                            </div>
-                          </div>
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {formData.selectedCourses.length > 0 && (
-                <div
-                  className="p-4 rounded-lg mt-4"
-                  style={{ backgroundColor: "#e6f7f9" }}
-                >
-                  <h3
-                    className="font-semibold text-lg"
-                    style={{ color: "#00ADD2" }}
-                  >
-                    Selected Courses:
-                  </h3>
-                  <ul className="list-disc list-inside space-y-1">
-                    {formData.selectedCourses.map((courseId) => {
-                      const course = getCurrentCourses().find(
-                        (c) => c.id === courseId,
-                      );
-                      return course ? (
-                        <li key={courseId}>
-                          <span className="font-medium">{course.name}</span>
-                          <span className="text-sm text-gray-600">
-                            {" "}
-                            - {course.duration}
-                          </span>
-                          <span
-                            className="text-sm font-medium ml-2"
-                            style={{ color: "#00ADD2" }}
-                          >
-                            ৳{course.price.toLocaleString()}
-                          </span>
-                        </li>
-                      ) : null;
-                    })}
-                  </ul>
-                  <div className="mt-3 pt-2 border-t border-gray-300">
-                    <p
-                      className="font-bold text-lg"
-                      style={{ color: "#00ADD2" }}
-                    >
-                      Total Amount: ৳{calculateTotal().toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              )}
 
               <div className="flex justify-between mt-6">
                 <button
@@ -863,7 +887,7 @@ const Admission_now = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* ✅ Payment Method */}
+                {/* Payment Method */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Payment Method *
@@ -1024,7 +1048,7 @@ const Admission_now = () => {
                   </div>
                 )}
 
-                {/* ✅ Amount Paid */}
+                {/* Amount Paid */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Amount Paid (৳) *
@@ -1049,7 +1073,7 @@ const Admission_now = () => {
                   )}
                 </div>
 
-                {/* ✅ Transaction ID */}
+                {/* Transaction ID */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Transaction ID *

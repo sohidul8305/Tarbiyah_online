@@ -5,6 +5,7 @@ import AlemyahCourse from "../../image/alemiyahkidsthumball.png";
 // Swiper এবং প্রয়োজনীয় মডিউল ইমপোর্ট করুন
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
+import girlavator from "../../image/arartor.png";
 
 // Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
 import "swiper/css";
@@ -66,7 +67,7 @@ const AlimiyahKidsDetails = () => {
   const instructors = [
     {
       id: 1,
-      name: "মাওলানা আব্দুর রহমান",
+      name: "Jubaiur Hossain",
       title: "কিডস প্রোগ্রাম কো-অর্ডিনেটর",
       subtitle: "বিশেষজ্ঞ: বাল্য শিক্ষা ও তাজবিদ",
       image: "https://i.pravatar.cc/150?img=11",
@@ -74,15 +75,15 @@ const AlimiyahKidsDetails = () => {
     },
     {
       id: 2,
-      name: "শায়েখা ফাতেমা বিনতে আহমদ",
+      name: "Atiqullah shohid",
       title: "প্রধান শিক্ষিকা",
       subtitle: "বিশেষজ্ঞ: শিশু মনোবিজ্ঞান ও ইসলামি শিক্ষা",
-      image: "https://i.pravatar.cc/150?img=12",
+      image: girlavator,
       expertise: "শিশু মনোবিজ্ঞান",
     },
     {
       id: 3,
-      name: "হাফেজ মাওলানা ইউনুস আলী",
+      name: "Al Amin",
       title: "কুরআন শিক্ষক",
       subtitle: "বিশেষজ্ঞ: নূরানী পদ্ধতি ও তাজবিদ",
       image: "https://i.pravatar.cc/150?img=13",
@@ -90,7 +91,31 @@ const AlimiyahKidsDetails = () => {
     },
     {
       id: 4,
-      name: "মাওলানা সাদিকুর রহমান",
+      name: "Abdullah Al-Mamun",
+      title: "আরবি ভাষা শিক্ষক",
+      subtitle: "বিশেষজ্ঞ: আরবি ভাষা ও সাহিত্য",
+      image: "https://i.pravatar.cc/150?img=14",
+      expertise: "আরবি ভাষা",
+    },
+    {
+      id: 4,
+      name: "Hossain hodoy",
+      title: "আরবি ভাষা শিক্ষক",
+      subtitle: "বিশেষজ্ঞ: আরবি ভাষা ও সাহিত্য",
+      image: "https://i.pravatar.cc/150?img=14",
+      expertise: "আরবি ভাষা",
+    },
+    {
+      id: 4,
+      name: "Marxan Ahmed",
+      title: "আরবি ভাষা শিক্ষক",
+      subtitle: "বিশেষজ্ঞ: আরবি ভাষা ও সাহিত্য",
+      image: "https://i.pravatar.cc/150?img=14",
+      expertise: "আরবি ভাষা",
+    },
+    {
+      id: 4,
+      name: "Imam Hossain",
       title: "আরবি ভাষা শিক্ষক",
       subtitle: "বিশেষজ্ঞ: আরবি ভাষা ও সাহিত্য",
       image: "https://i.pravatar.cc/150?img=14",
@@ -451,7 +476,7 @@ const AlimiyahKidsDetails = () => {
                     এখনই এনরোল করুন এবং আপনার শেখার যাত্রা শুরু করুন।
                   </p>
                 </div>
-                <Link to="/Course-apply-from">
+                <Link to="/admission-now">
                   <button className="bg-[#002b2b] hover:bg-teal-900 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all">
                     Start Now
                   </button>

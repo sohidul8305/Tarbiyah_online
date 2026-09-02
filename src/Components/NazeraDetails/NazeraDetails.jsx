@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import KidsImg from "../../image/kids.jpg";
-// import NazeracourseImg from "../../image/najeracourse.png";
-// import NazeraBannerImg from "../../image/najerathumball.jpg";
+import NazeracourseImg from "../../image/Thumb.jpg";
+import NazerakidsBannerImg from "../../image/banner.jpg";
 // Swiper এবং প্রয়োজনীয় মডিউল ইমপোর্ট করুন
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
@@ -47,21 +47,21 @@ const NazeraDetails = () => {
 
   const courseDetails = {
     title: "তারবিয়াহ নাজেরা কোর্স",
-    description: `আবু হুরাইরা রাদি. থেকে বর্ণিত : রাসূলুল্লাহ সল্লাল্লাহু আলাইহি ওয়াসাল্লাম বলেছেন, যে ব্যক্তি কুরআন সুন্দর উচ্চরণে পড়ে না সে আমার উম্মতের অন্তর্ভূক্ত নয় - সহীহ বুখারী-৭৫২৭। তাইতো আমাদের সকলের উচিত বিশুদ্ধভাবে কুরআন তিলাওয়াত শিক্ষা করা এবং সন্তানদেরকে বিশুদ্ধভাবে কুরআন তিলাওয়াত শেখার সুব্যবস্থা করে দেওয়া। বিশুদ্ধভাবে কুরআন তিলাওয়াত শেখার সুব্যবস্থা হিসেবে আমরা অফার করছি “নাজেরা ফর জুনিওরস” কোর্সটি। যার মাধ্যমে একজন শিক্ষার্থী ঘরে বসেই সল্প সময়ে বিশুদ্ধভাবে কুরআন তিলাওয়াত শিখতে পারবে ইনশাল্লাহ। এখানে আপনি তাজবীদের নিয়ম-কানুন সহ সঠিক আচার-আচরণে অল্প সময়ের মধ্যে আপনার তেলাওয়াত শুদ্ধ করতে পারেন। এই প্রোগ্রামটি সম্পূর্ণ অনলাইন এবং খণ্ডকালীন। তরবিয়াহ অনলাইন নাজিরা প্রোগ্রামটি শিশু, তরুণ প্রজন্ম এবং প্রাপ্তবয়স্কদের (যারা সঠিকভাবে কুরআন তেলাওয়াত করতে পারে না) এবং যারা মুখস্থ করার স্বপ্ন দেখে তাদের জন্য ডিজাইন করা হয়েছে। এই প্রোগ্রামে আমরা আপনাকে সূরা ইয়াসিন, সূরা আর রহমান, সূরা মুলকের মতো গুরুত্বপূর্ণ সূরা সহ ৩০ তম জুজ এবং ২৯ তম জুজ নাজিরা বা পূর্ণ কুরআন নাজেরা শেখাব। এ ছাড়া তাজবিদদের মৌলিক নিয়ম ও ১৫টি ছোট সূরা মুখস্থ করা হবে ।`,
+    description: `আবু হুরাইরা রাদি. থেকে বর্ণিত : রাসূলুল্লাহ সল্লাল্লাহু আলাইহি ওয়াসাল্লাম বলেছেন, যে ব্যক্তি কুরআন সুন্দর উচ্চরণে পড়ে না সে আমার উম্মতের অন্তর্ভূক্ত নয় - সহীহ বুখারী-৭৫২৭। তাইতো আমাদের সকলের উচিত বিশুদ্ধভাবে কুরআন তিলাওয়াত শিক্ষা করা এবং সন্তানদেরকে বিশুদ্ধভাবে কুরআন তিলাওয়াত শেখার সুব্যবস্থা করে দেওয়া। বিশুদ্ধভাবে কুরআন তিলাওয়াত শেখার সুব্যবস্থা হিসেবে আমরা অফার করছি “নাজেরা ফর জুনিওরস” কোর্সটি। যার মাধ্যমে একজন শিক্ষার্থী ঘরে বসেই সল্প সময়ে বিশুদ্ধভাবে কুরআন তিলাওয়াত শিখতে পারবে ইনশাল্লাহ। এখানে আপনি তাজবীদের নিয়ম-কানুন সহ সঠিক আচার-আচরণে অল্প সময়ের মধ্যে আপনার তেলাওয়াত শুদ্ধ করতে পারেন। এই প্রোগ্রামটি সম্পূর্ণ অনলাইন এবং খণ্ডকালীন। তরবিয়াহ অনলাইন নাজিরা প্রোগ্রামটি শিশু, তরুণ প্রজন্ম এবং প্রাপ্তবয়স্কদের (যারা সঠিকভাবে কুরআন তেলাওয়াত করতে পারে না) এবং যারা মুখস্থ করার স্বপ্ন দেখে তাদের জন্য ডিজাইন করা হয়েছে। এই প্রোগ্রামে আমরা আপনাকে সূরা ইয়াসিন, সূরা আর রহমান, সূরা মুলকের মতো গুরুত্বপূর্ণ সূরা সহ ৩০ তম জুজ এবং ২৯ তম জুজ নাজিরা বা পূর্ণ কুরআন নাজেরা শেখাব। এ ছাড়া তাজবিদদের মৌলিক নিয়ম ও ১৫টি ছোট সূরা মুখস্থ করা হবে ।`,
     objectives: [
-      "সঠিক পদ্ধিতিতে তিলাওয়াত শিক্ষা",
+      "সঠিক পদ্ধিতিতে তিলাওয়াত শিক্ষা",
       "২৯ তম জুয এবং ৩০ তম জুয সম্পূর্ণ নাজেরা",
       "গুরুত্বপূর্ণ সূরা সমূহ নাজেরা",
       "বেসিক তাজউইদ লেভেল-২",
-      "হুসনে সওতের নিয়মিত অনুশীলন",
+      "হুসনে সওতের নিয়মিত অনুশীলন",
       "শেষ ১৫টি ছোট সূরা হিফয",
-      "নিয়মিত মাশক্ব ও কুরআনিক দুআ শিক্ষা",
+      "নিয়মিত মাশক্ব ও কুরআনিক দুআ শিক্ষা",
     ],
   };
 
   const semestersData = [
     {
-      title: "কায়েদাহ নূরানিয়্যাহর পর্যালোচনা",
+      title: "কায়েদাহ নূরানিয়্যাহর পর্যালোচনা",
       content: "বিস্তারিত আলোচনা ও মৌলিক ধারণা...",
     },
     {
@@ -69,15 +69,15 @@ const NazeraDetails = () => {
       content: "সহজ ও সাবলীলভাবে গঠন প্রণালী...",
     },
     {
-      title: "তাজউইদের মূলনীতি শিক্ষা ও প্রয়োগ",
+      title: "তাজউইদের মূলনীতি শিক্ষা ও প্রয়োগ",
       content: "নিয়মকানুন ও প্রায়োগিক অনুশীলন...",
     },
     {
-      title: "কুরআন তিলাওয়াত (প্রাথমিক স্তর) ছোট সূরা-সমূহ",
+      title: "কুরআন তিলাওয়াত (প্রাথমিক স্তর) ছোট সূরা-সমূহ",
       content: "ছোট সূরাগুলোর তিলাওয়াত ও অনুশীলন...",
     },
     {
-      title: "কুরআন তিলাওয়াত (উন্নত স্তর): বড় সূরা ও আয়াতসমূহ",
+      title: "কুরআন তিলাওয়াত (উন্নত স্তর): বড় সূরা ও আয়াতসমূহ",
       content: "বড় সূরার তিলাওয়াত ও অর্থসহ পাঠ...",
     },
     {
@@ -86,7 +86,6 @@ const NazeraDetails = () => {
     },
   ];
 
-  // Why Tarbiyah Quran Studies features with icons
   const whyFeatures = [
     {
       icon: <FaUserTie className="text-xl" />,
@@ -98,7 +97,7 @@ const NazeraDetails = () => {
     },
     {
       icon: <FaCheckCircle className="text-xl" />,
-      text: "মাসিক মূল্যায়ন",
+      text: "মাসিক মূল্যায়ন",
     },
     {
       icon: <FaGlobe className="text-xl" />,
@@ -106,7 +105,7 @@ const NazeraDetails = () => {
     },
     {
       icon: <FaHeadset className="text-xl" />,
-      text: "ওয়ান-টু-ওয়ান সাপোর্ট",
+      text: "ওয়ান-টু-ওয়ান সাপোর্ট",
     },
     {
       icon: <FaCertificate className="text-xl" />,
@@ -114,7 +113,6 @@ const NazeraDetails = () => {
     },
   ];
 
-  // Testimonials data
   const testimonials = [
     {
       id: 1,
@@ -166,7 +164,6 @@ const NazeraDetails = () => {
     },
   ];
 
-  // Video Gallery Data
   const videoGallery = [
     {
       id: 1,
@@ -206,7 +203,6 @@ const NazeraDetails = () => {
     },
   ];
 
-  // FAQ Data - Tarbiyah Quran for Kids
   const faqs = [
     {
       question: "ইউরোপ, আমেরিকা বা মধ্যপ্রাচ্য থেকে কি এই কোর্সটি করা যাবে?",
@@ -216,39 +212,41 @@ const NazeraDetails = () => {
     {
       question: "আপনাদের ওস্তাদরা বাচ্চাদের সঙ্গে কেমন আচরণ করেন?",
       answer:
-        "আমাদের শিক্ষকরা শিশুদের বয়স ও মানসিকতা অনুযায়ী ধৈর্য, আন্তরিকতা ও উৎসাহের সঙ্গে পাঠদান করেন, যাতে তারা আনন্দের সঙ্গে শিখতে পারে।",
+        "আমাদের শিক্ষকরা শিশুদের বয়স ও মানসিকতা অনুযায়ী ধৈর্য, আন্তরিকতা ও উৎসাহের সঙ্গে পাঠদান করেন, যাতে তারা আনন্দের সঙ্গে শিখতে পারে।",
     },
     {
       question: "আপনাদের হিফজ ডিপার্টমেন্টের সাফল্য সম্পর্কে বলুন।",
       answer:
-        "আমাদের হিফজ ডিপার্টমেন্টে দেশ-বিদেশের অসংখ্য শিক্ষার্থী সফলভাবে নাজেরা, হিফজ ও হিফজ রিভিশন সম্পন্ন করেছে এবং নিয়মিত কুরআনের সঙ্গে সংযুক্ত রয়েছে।",
+        "আমাদের হিফজ ডিপার্টমেন্টে দেশ-বিদেশের অসংখ্য শিক্ষার্থী সফলভাবে নাজেরা, হিফজ ও হিফজ রিভিশন সম্পন্ন করেছে এবং নিয়মিত কুরআনের সঙ্গে সংযুক্ত রয়েছে।",
     },
     {
-      question: "কত বছর বয়স থেকে বাচ্চারা শুরু করতে পারে?",
+      question: "কত বছর বয়স থেকে বাচ্চারা শুরু করতে পারে?",
       answer:
-        "সাধারণত ৪-৫ বছর বয়স থেকে শিশুদের কুরআন শিক্ষা শুরু করা যায়। তবে শিশুর প্রস্তুতি অনুযায়ী উপযুক্ত কোর্স নির্বাচন করা হয়।",
+        "সাধারণত ৪-৫ বছর বয়স থেকে শিশুদের কুরআন শিক্ষা শুরু করা যায়। তবে শিশুর প্রস্তুতি অনুযায়ী উপযুক্ত কোর্স নির্বাচন করা হয়।",
     },
     {
       question: "অভিভাবকরা কেন তারবিয়াহকে বেছে নেবেন?",
       answer:
-        "কারণ আমরা শুধু কুরআন শেখাই না; বরং শিশুর তিলাওয়াত, আদব-আখলাক, নিয়মিত অনুশীলন এবং শেখার অগ্রগতির ওপর সমান গুরুত্ব দিই।",
+        "কারণ আমরা শুধু কুরআন শেখাই না; বরং শিশুর তিলাওয়াত, আদব-আখলাক, নিয়মিত অনুশীলন এবং শেখার অগ্রগতির ওপর সমান গুরুত্ব দিই।",
     },
     {
-      question: "স্কুল কলেজের পড়াশোনার পাশাপাশি কি হিফজ করা সম্ভব?",
+      question: "স্কুল কলেজের পড়াশোনার পাশাপাশি কি হিফজ করা সম্ভব?",
       answer:
-        "হ্যাঁ। আমাদের ক্লাস রুটিন এমনভাবে পরিকল্পিত, যাতে শিক্ষার্থীরা জেনারেল শিক্ষার পাশাপাশি হিফজ চালিয়ে যেতে পারে।",
+        "হ্যাঁ। আমাদের ক্লাস রুটিন এমনভাবে পরিকল্পিত, যাতে শিক্ষার্থীরা জেনারেল শিক্ষার পাশাপাশি হিফজ চালিয়ে যেতে পারে।",
     },
     {
       question: "বাচ্চাদের হিফজ করানো কেন গুরুত্বপূর্ণ?",
       answer:
-        "শৈশব হলো মুখস্থ করার সর্বোত্তম সময়। এই সময়ে কুরআন হিফজ করলে তা দীর্ঘমেয়াদে সংরক্ষণ সহজ হয় এবং শিশুর নৈতিক, আত্মিক ও বুদ্ধিবৃত্তিক বিকাশেও ইতিবাচক ভূমিকা রাখে।",
+        "শৈশব হলো মুখস্থ করার সর্বোত্তম সময়। এই সময়ে কুরআন হিফজ করলে তা দীর্ঘমেয়াদে সংরক্ষণ সহজ হয় এবং শিশুর নৈতিক, আত্মিক ও বুদ্ধিবৃত্তিক বিকাশেও ইতিবাচক ভূমিকা রাখে।",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex flex-col justify-between">
+      {/* Navbar Added */}
       <Navbar />
-      <div className="py-8 px-4 sm:px-6 lg:px-8">
+
+      <div className="py-8 px-4 sm:px-6 lg:px-8 flex-grow">
         <div className="max-w-7xl mx-auto">
           {/* Back Button */}
           <Link
@@ -259,12 +257,14 @@ const NazeraDetails = () => {
             <span className="font-medium">কোর্স পেজে ফিরে যান</span>
           </Link>
 
-          {/* Hero Section Banner */}
-          <img
-            // src={NazeraBannerImg}
-            alt="Nazera Banner"
-            className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
-          />
+          {/* Hero Section Banner with Responsive & Fixed Sizing */}
+          <div className="w-full max-w-3xl ml-8 mr-72">
+            <img
+              src={NazerakidsBannerImg}
+              alt="Nazera Banner"
+              className="w-full h-48 sm:h-64 md:h-72 object-cover rounded-2xl border border-gray-100 shadow-sm"
+            />
+          </div>
 
           {/* Course Info Section - Below Banner */}
           <div className="ml-8 mr-72">
@@ -457,8 +457,8 @@ const NazeraDetails = () => {
                   {[
                     "দেশ ও প্রবাসে যারা কুরআনের শিক্ষা ও হিফজ করতে আগ্রহী",
                     "জেনারেল শিক্ষার পাশাপাশি যারা কুরআন শিক্ষার প্রতি আগ্রহ লালন করেন",
-                    "৬-১৪ বছরের সকল শিক্ষার্থীর জন্য এই কোর্সটি বিশেষভাবে ডিজাইন করা হয়েছে",
-                    "যারা নিজেদের সন্তানকে প্র্যাক্টিসিং মুসলিম হিসেবে গড়ে তুলতে চান",
+                    "৬-১৪ বছরের সকল শিক্ষার্থীর জন্য এই কোর্সটি বিশেষভাবে ডিজাইন করা হয়েছে",
+                    "যারা নিজেদের সন্তানকে প্র্যাক্টিসিং মুসলিম হিসেবে গড়ে তুলতে চান",
                   ].map((feature, index) => (
                     <div
                       key={index}
@@ -514,9 +514,7 @@ const NazeraDetails = () => {
                 </div>
               </div>
 
-              {/* ========== LAST 3 SECTIONS ========== */}
-
-              {/* 1. কেন তারবিয়াহ কুরআন স্টাডিজ ? */}
+              {/* কেন তারবিয়াহ কুরআন স্টাডিজ ? */}
               <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-12 border border-gray-100">
                 <div className="text-center mb-10">
                   <h2 className="text-2xl md:text-4xl font-bold mb-3 text-[#00ADD2]">
@@ -542,7 +540,7 @@ const NazeraDetails = () => {
                 </div>
               </div>
 
-              {/* 2. শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা */}
+              {/* শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা */}
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
@@ -602,18 +600,13 @@ const NazeraDetails = () => {
                         <p className="text-gray-500 text-xs">
                           {item.designation}
                         </p>
-                        <div className="mt-3 flex justify-center gap-1">
-                          <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-                          <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-                          <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-                        </div>
                       </div>
                     </SwiperSlide>
                   ))}
                 </Swiper>
               </div>
 
-              {/* 3. ভিডিও গ্যালারি */}
+              {/* ভিডিও গ্যালারি */}
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
@@ -652,7 +645,7 @@ const NazeraDetails = () => {
                 </div>
               </div>
 
-              {/* 4. FAQ */}
+              {/* FAQ */}
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
@@ -689,8 +682,8 @@ const NazeraDetails = () => {
             </div>
 
             {/* Right Sidebar - 1 Column */}
-            <div className="space-y-4 -mt-[305px]">
-              {/* Video Thumbnail */}
+            <div className="space-y-4 lg:-mt-[305px]">
+              {/* Video Thumbnail with Adjusted Size */}
               <a
                 href="https://youtu.be/NI8VoGYDtYs?si=Z_FxwYJJuUgzeliU"
                 target="_blank"
@@ -698,9 +691,9 @@ const NazeraDetails = () => {
                 className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer"
               >
                 <img
-                  src=""
+                  src={NazeracourseImg}
                   alt="Course Video"
-                  className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-colors group-hover:bg-black/40">
                   <div className="w-12 h-12 bg-[#008080] rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
@@ -720,7 +713,7 @@ const NazeraDetails = () => {
                   Apply This Course
                 </h1>
 
-                <div className="w-full  text-white font-bold py-3 rounded-xl shadow-md transition-all mb-4">
+                <div className="w-full text-white font-bold py-3 rounded-xl shadow-md transition-all mb-4">
                   <Link to="/course/kids/nazera/enroll" className="w-full">
                     <button className="w-full bg-[#006666] text-white font-bold py-3 text-xs rounded-md hover:opacity-90 transition cursor-pointer">
                       Enroll Now
@@ -732,6 +725,8 @@ const NazeraDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* Footer Added */}
       <Footer />
     </div>
   );

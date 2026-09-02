@@ -1,318 +1,138 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  Search,
-  Filter,
-  Users,
-  Star,
-  Award,
-  BookOpen,
-  Calendar,
-  ChevronRight,
-} from "lucide-react";
+import React from "react";
+import { useLanguage } from "../../context/useLanguage";
+import ShakilImg from "../../image/Shakil.png";
+import BariImg from "../../image/bari.png";
+import SohanImg from "../../image/Sohan.jpeg";
+import SohelImg from "../../image/sohel.png";
+import Mahfujur from "../../image/mahfuz.png";
+import Murad from "../../image/muradshek.png";
+import Sowrab from "../../image/surav.png";
+import Shohidul from "../../image/developer.jpeg";
+import Kawsar from "../../image/kawser.png";
+import Ashik from "../../image/ashik.png";
+import yasin from "../../image/yasin.png";
+const Members = () => {
+  const { t } = useLanguage();
 
-const Member = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState("all");
-
-  // Member Data
-  const members = [
+  const membersList = [
     {
-      id: 1,
-      name: "Dr. Muhammad Abdullah",
-      designation: "Senior Islamic Scholar",
-      role: "Advisor",
-      image:
-        "https://i.ibb.co.com/ds77c7pp/images-q-tbn-ANd9-Gc-RCVV-m-BDc1u-Pd86qfosfzpa9hn-ODv-Z20q7-L5y-Xwbk-BV-QGwt-Fq-CDj-Jck-JC-s-10.jpg",
-      bio: "Expert in Islamic jurisprudence and Quranic studies with over 20 years of experience.",
-      joinDate: "January 2020",
-      courses: 15,
-      students: 1200,
-      rating: 4.9,
-      specialty: "Quran & Tafsir",
+      name: { en: "Shakil Ahmmed", bn: "শাকিল আহমেদ" },
+      designation: { en: "Incharge", bn: "ইনচার্জ" },
+      department: { en: "Management", bn: "ম্যানেজমেন্ট" },
+      image: ShakilImg,
     },
     {
-      id: 2,
-      name: "Prof. Ayesha Rahman",
-      designation: "Professor of Islamic Studies",
-      role: "Academic Director",
-      image:
-        "https://i.ibb.co.com/nsJRPdXK/images-q-tbn-ANd9-Gc-Sf-VF7-FIzqtkq-SYX-Lx-BWh-Bgk-J8-ZFrh-Ilt-L4-Bmh8v-Beg-s-10.jpg",
-      bio: "Specializes in Islamic history and contemporary Muslim issues.",
-      joinDate: "March 2019",
-      courses: 12,
-      students: 950,
-      rating: 4.8,
-      specialty: "Islamic History",
+      name: { en: "Abdul Bari", bn: "আব্দুল বারি" },
+      designation: { en: "Senior Admin", bn: "সিনিয়র অ্যাডমিন" },
+      department: {
+        en: "Diploma In Islamic Studies",
+        bn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
+      },
+      image: BariImg,
     },
     {
-      id: 3,
-      name: "Ustadh Ahmed Hassan",
-      designation: "Senior Teacher",
-      role: "Lead Educator",
-      image:
-        "https://i.ibb.co.com/GQRWh4DW/images-q-tbn-ANd9-Gc-Tw-Ke-AUYuda1bjp-PUU-NYup6-M-P-jlxhnq-Z0-Wb-X6hzw-Rj-HCp-Ys-O6-nc-UY-s-10.jpg",
-      bio: "Passionate about teaching Arabic language and Quranic recitation.",
-      joinDate: "June 2021",
-      courses: 20,
-      students: 1500,
-      rating: 4.9,
-      specialty: "Arabic Language",
+      name: { en: "Sohanur Islam", bn: "সোহানুর ইসলাম" },
+      designation: { en: "Junior Admin", bn: "জুনিয়র অ্যাডমিন" },
+      department: { en: "Quran Studies", bn: "কুরআন স্টাডিজ" },
+      image: SohanImg,
     },
     {
-      id: 4,
-      name: "Dr. Fatima Noor",
-      designation: "Child Psychology Expert",
-      role: "Advisor",
-      image:
-        "https://i.ibb.co.com/WNsqLLQ3/images-q-tbn-ANd9-Gc-QPrj-B86scf-HN0n-Vb1-N5-A9sd3z0y-RT4-OIm-V-d-QDIanuf-A-s-10.jpg",
-      bio: "Specializes in Islamic child psychology and family counseling.",
-      joinDate: "August 2020",
-      courses: 8,
-      students: 600,
-      rating: 4.7,
-      specialty: "Child Psychology",
+      name: { en: "MD Sohel Rana", bn: "মো. সোহেল রানা" },
+      designation: { en: "Junior Admin", bn: "জুনিয়র অ্যাডমিন" },
+      department: { en: "Allimiyah", bn: "আলিমিয়াহ" },
+      image: SohelImg,
     },
     {
-      id: 5,
-      name: "Shaykh Ibrahim Ali",
-      designation: "Hadith Scholar",
-      role: "Senior Advisor",
-      image:
-        "https://i.ibb.co.com/KjvMfnBD/images-q-tbn-ANd9-Gc-Qml-K-yr-SR8-Nptoi-I1-Ocq-Qi-D02-JYpbyri-Pi-Qjt-R8-Pbc-A-s-10.jpg",
-      bio: "Expert in Hadith sciences and Islamic law.",
-      joinDate: "January 2018",
-      courses: 10,
-      students: 800,
-      rating: 4.9,
-      specialty: "Hadith Studies",
+      name: { en: "Mahfujur Rahman", bn: "মাহফুজুর রহমান" },
+      designation: { en: "Junior Admin", bn: "জুনিয়র অ্যাডমিন" },
+      department: { en: "Quran For Elders", bn: "কুরআন ফর এল্ডার্স" },
+      image: Mahfujur,
     },
     {
-      id: 6,
-      name: "Ustadha Mariam Khan",
-      designation: "Quran Teacher",
-      role: "Educator",
-      image:
-        "https://i.ibb.co.com/GQRWh4DW/images-q-tbn-ANd9-Gc-Tw-Ke-AUYuda1bjp-PUU-NYup6-M-P-jlxhnq-Z0-Wb-X6hzw-Rj-HCp-Ys-O6-nc-UY-s-10.jpg",
-      bio: "Specializes in Quranic recitation and memorization techniques.",
-      joinDate: "September 2021",
-      courses: 14,
-      students: 1100,
-      rating: 4.8,
-      specialty: "Quran Memorization",
+      name: { en: "Murad Sheikh", bn: "মুরাদ শেখ" },
+      designation: { en: "Media Head", bn: "মিডিয়া হেড" },
+      department: { en: "Media", bn: "মিডিয়া" },
+      image: Murad,
     },
     {
-      id: 7,
-      name: "Dr. Yusuf Malik",
-      designation: "Islamic Finance Expert",
-      role: "Advisor",
-      image:
-        "https://i.ibb.co.com/WNsqLLQ3/images-q-tbn-ANd9-Gc-QPrj-B86scf-HN0n-Vb1-N5-A9sd3z0y-RT4-OIm-V-d-QDIanuf-A-s-10.jpg",
-      bio: "Expert in Islamic banking and finance.",
-      joinDate: "February 2020",
-      courses: 6,
-      students: 450,
-      rating: 4.6,
-      specialty: "Islamic Finance",
+      name: { en: "Sowrab Ahmad", bn: "সৌরভ আহমেদ" },
+      designation: { en: "Senior Editor", bn: "সিনিয়র এডিটর" },
+      department: { en: "Media", bn: "মিডিয়া" },
+      image: Sowrab,
     },
     {
-      id: 8,
-      name: "Prof. Zainab Ahmed",
-      designation: "Comparative Religion Scholar",
-      role: "Academic Director",
-      image:
-        "https://i.ibb.co.com/KjvMfnBD/images-q-tbn-ANd9-Gc-Qml-K-yr-SR8-Nptoi-I1-Ocq-Qi-D02-JYpbyri-Pi-Qjt-R8-Pbc-A-s-10.jpg",
-      bio: "Specializes in comparative religion and interfaith dialogue.",
-      joinDate: "April 2019",
-      courses: 9,
-      students: 700,
-      rating: 4.7,
-      specialty: "Comparative Religion",
+      name: { en: "Ashikur Rahman", bn: "আশিকুর রহমান" },
+      designation: { en: "Junior Editor", bn: "জুনিয়র এডিটর" },
+      department: { en: "Media", bn: "মিডিয়া" },
+      image: Ashik,
+    },
+    {
+      name: { en: "Shohidul Islam", bn: "শহিদুল ইসলাম" },
+      designation: { en: "Junior Web Developer", bn: "জুনিয়র ওয়েব ডেভেলপার" },
+      department: { en: "Web Development", bn: "ওয়েব ডেভেলপমেন্ট" },
+      image: Shohidul,
+    },
+    {
+      name: { en: "Yasin Ahmad Omar ", bn: "ইয়াসিন আহমদ ওমর" },
+      designation: { en: "Junior Editor", bn: "জুনিয়র এডিটর" },
+      department: { en: "Junior Editor", bn: "জুনিয়র এডিটর" },
+      image: yasin,
+    },
+    {
+      name: { en: "Kawsar Ahmad", bn: "কাওসার আহমেদ" },
+      designation: { en: "Office Assistant", bn: "অফিস অ্যাসিস্ট্যান্ট" },
+      department: { en: "Office", bn: "অফিস" },
+      image: Kawsar,
     },
   ];
 
-  // Filter members based on search and filter type
-  const filteredMembers = members.filter((member) => {
-    const matchesSearch =
-      member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.designation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.specialty.toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchesFilter =
-      filterType === "all" ||
-      member.role.toLowerCase() === filterType.toLowerCase();
-
-    return matchesSearch && matchesFilter;
-  });
-
-  // Get unique roles for filter
-  const roles = ["all", ...new Set(members.map((m) => m.role.toLowerCase()))];
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Users className="w-10 h-10 text-[#004d4d]" />
-            <h1 className="text-4xl font-bold text-gray-900">
-              Our Team Members
-            </h1>
-          </div>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Meet our dedicated team of Islamic scholars, educators, and advisors
-            who are committed to providing quality Islamic education.
-          </p>
-        </div>
+    <div className="bg-white py-12 px-4 md:px-20 lg:px-40">
+      <div className="mb-8 text-center">
+        <h2 className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">
+          {t({ en: "OUR TEAM MEMBERS", bn: "আমাদের টিম মেম্বারবৃন্দ" })}
+        </h2>
+        <p className="text-gray-600 text-sm sm:text-base">
+          {t({
+            en: "Our dedicated management and administrative team",
+            bn: "আমাদের নিবেদিত প্রাণ ব্যবস্থাপনা ও প্রশাসনিক টিম",
+          })}
+        </p>
+      </div>
 
-        {/* Search and Filter */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search by name, designation or specialty..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d] focus:border-transparent"
-              />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {membersList.map((member, index) => (
+          <div
+            key={index}
+            className="border p-5 rounded-xl shadow-sm hover:shadow-md transition-shadow flex flex-col items-center text-center bg-white"
+          >
+            <div className="w-28 h-28 bg-gray-100 rounded-xl overflow-hidden mb-4 flex items-center justify-center border border-gray-100">
+              {member.image ? (
+                <img
+                  src={member.image}
+                  alt={t(member.name)}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-gray-400 text-xs font-medium">
+                  No Image
+                </span>
+              )}
             </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-5 w-5 text-gray-400" />
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d] focus:border-transparent bg-white"
-              >
-                <option value="all">All Members</option>
-                <option value="advisor">Advisors</option>
-                <option value="educator">Educators</option>
-                <option value="academic director">Academic Directors</option>
-                <option value="senior advisor">Senior Advisors</option>
-                <option value="lead educator">Lead Educators</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-lg shadow-md p-4 text-center">
-            <div className="text-2xl font-bold text-[#004d4d]">
-              {members.length}
-            </div>
-            <div className="text-sm text-gray-600">Total Members</div>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-4 text-center">
-            <div className="text-2xl font-bold text-[#004d4d]">
-              {members.reduce((acc, m) => acc + m.courses, 0)}
-            </div>
-            <div className="text-sm text-gray-600">Total Courses</div>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-4 text-center">
-            <div className="text-2xl font-bold text-[#004d4d]">
-              {members.reduce((acc, m) => acc + m.students, 0)}
-            </div>
-            <div className="text-sm text-gray-600">Total Students</div>
-          </div>
-          <div className="bg-white rounded-lg shadow-md p-4 text-center">
-            <div className="text-2xl font-bold text-[#004d4d]">
-              {(
-                members.reduce((acc, m) => acc + m.rating, 0) / members.length
-              ).toFixed(1)}
-            </div>
-            <div className="text-sm text-gray-600">Average Rating</div>
-          </div>
-        </div>
-
-        {/* Members Grid */}
-        {filteredMembers.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-lg shadow-md">
-            <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-600">
-              No members found
-            </h3>
-            <p className="text-gray-400 mt-2">
-              Try adjusting your search or filter
+            <h4 className="font-bold text-gray-900 text-lg">
+              {t(member.name)}
+            </h4>
+            <p className="text-xs text-blue-600 font-semibold mt-1">
+              {t(member.designation)}
+            </p>
+            <p className="text-xs text-gray-500 mt-1 font-medium">
+              {t(member.department)}
             </p>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredMembers.map((member) => (
-              <div
-                key={member.id}
-                className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
-              >
-                {/* Image */}
-                <div className="relative h-48 overflow-hidden bg-[#004d4d]">
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-2 right-2 bg-[#004d4d] text-white px-2 py-1 rounded-full text-xs">
-                    {member.role}
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {member.name}
-                  </h3>
-                  <p className="text-sm text-[#004d4d] font-medium">
-                    {member.designation}
-                  </p>
-
-                  <div className="mt-2 flex items-center gap-1">
-                    <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                    <span className="text-sm font-medium">{member.rating}</span>
-                    <span className="text-xs text-gray-400 ml-1">
-                      ({member.students} students)
-                    </span>
-                  </div>
-
-                  <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                    {member.bio}
-                  </p>
-
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded-full">
-                      <BookOpen className="w-3 h-3" />
-                      {member.courses} courses
-                    </span>
-                    <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-xs px-2 py-1 rounded-full">
-                      <Calendar className="w-3 h-3" />
-                      {member.joinDate}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 pt-3 border-t border-gray-100">
-                    <span className="text-xs text-gray-500">Specialty: </span>
-                    <span className="text-xs font-medium text-[#004d4d]">
-                      {member.specialty}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* View All Button */}
-        <div className="mt-12 text-center">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-[#004d4d] hover:text-[#003d3d] font-medium"
-          >
-            Back to Home
-            <ChevronRight className="w-4 h-4" />
-          </Link>
-        </div>
+        ))}
       </div>
     </div>
   );
 };
 
-export default Member;
+export default Members;

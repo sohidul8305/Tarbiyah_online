@@ -12,6 +12,17 @@ import {
   Users,
 } from "lucide-react";
 
+import {
+  FaFacebook,
+  FaInstagram,
+  FaTwitter,
+  FaLinkedin,
+  FaTiktok,
+  FaYoutube,
+  FaTelegramPlane,
+  FaWhatsapp,
+} from "react-icons/fa";
+
 const OurVideo = () => {
   const { t, language } = useLanguage();
 
@@ -28,72 +39,72 @@ const OurVideo = () => {
     "KR59dFBOpbg", // আপডেট করা নতুন ভিডিও আইডি
   ];
 
-  // Social Media Links Data
+  // Social Media Links Data with Proper Brand Icons
   const socialLinks = [
     {
       name: { en: "Facebook Page", bn: "ফেসবুক পেজ" },
       url: "https://www.facebook.com/share/19cMVX749c/",
-      icon: <Users className="text-blue-600 shrink-0" size={24} />,
+      icon: <FaFacebook className="text-blue-600 shrink-0" size={24} />,
       bg: "hover:bg-blue-50 border-blue-100",
     },
     {
       name: { en: "YouTube Channel", bn: "ইউটিউব চ্যানেল" },
       url: "https://youtube.com/@tarbiyahonlinemadrasa?si=pb18-SWBf6lzeuME",
-      icon: <Video className="text-red-600 shrink-0" size={24} />,
+      icon: <FaYoutube className="text-red-600 shrink-0" size={24} />,
       bg: "hover:bg-red-50 border-red-100",
     },
     {
       name: { en: "Instagram", bn: "ইনস্টাগ্রাম" },
       url: "https://www.instagram.com/tarbiyahonline?igsh=cmxrMnBpNHpyOHlr",
-      icon: <Share2 className="text-pink-600 shrink-0" size={24} />,
+      icon: <FaInstagram className="text-pink-600 shrink-0" size={24} />,
       bg: "hover:bg-pink-50 border-pink-100",
     },
     {
       name: { en: "Telegram Channel", bn: "টেলিগ্রাম চ্যানেল" },
       url: "https://t.me/tarbiyahofficial",
-      icon: <Send className="text-sky-500 shrink-0" size={24} />,
+      icon: <FaTelegramPlane className="text-sky-500 shrink-0" size={24} />,
       bg: "hover:bg-sky-50 border-sky-100",
     },
     {
       name: { en: "WhatsApp Channel", bn: "হোয়াটসঅ্যাপ চ্যানেল" },
       url: "https://whatsapp.com/channel/0029VbAxCUiHbFVB1B0Sfn1P",
-      icon: <MessageCircle className="text-green-600 shrink-0" size={24} />,
+      icon: <FaWhatsapp className="text-green-600 shrink-0" size={24} />,
       bg: "hover:bg-green-50 border-green-100",
     },
     {
       name: { en: "WhatsApp Group", bn: "হোয়াটসঅ্যাপ কমিউনিকেশন গ্রুপ" },
       url: "https://chat.whatsapp.com/Lrn2WN1nKyrBrI6B6OjWSm?s=cl&p=a&mlu=4",
-      icon: <MessageCircle className="text-emerald-600 shrink-0" size={24} />,
+      icon: <FaWhatsapp className="text-emerald-600 shrink-0" size={24} />,
       bg: "hover:bg-emerald-50 border-emerald-100",
     },
     {
       name: { en: "TikTok Channel", bn: "টিকটক চ্যানেল" },
       url: "https://www.tiktok.com/@tarbiyah.online.m?_r=1&_t=ZS-992L9JTAU33",
-      icon: <Video className="text-gray-900 shrink-0" size={24} />,
+      icon: <FaTiktok className="text-gray-900 shrink-0" size={24} />,
       bg: "hover:bg-gray-100 border-gray-200",
     },
     {
       name: { en: "Twitter (X) Channel", bn: "টুইটার (X) চ্যানেল" },
       url: "https://x.com/tarbiyaX",
-      icon: <Share2 className="text-black shrink-0" size={24} />,
+      icon: <FaTwitter className="text-black shrink-0" size={24} />,
       bg: "hover:bg-gray-100 border-gray-200",
     },
     {
       name: { en: "LinkedIn Company", bn: "লিংকড-ইন পেজ" },
       url: "https://www.linkedin.com/company/tarbiyah-online-madrasah/",
-      icon: <Users className="text-blue-700 shrink-0" size={24} />,
+      icon: <FaLinkedin className="text-blue-700 shrink-0" size={24} />,
       bg: "hover:bg-blue-50 border-blue-100",
     },
     {
       name: { en: "Hikmah Platform", bn: "হিকমাহ প্ল্যাটফর্ম" },
-      url: "http://hikmah.net?referrer=tarbiyahonline26",
+      url: "https://i.ibb.co.com/0jH7kmtm/Hikma-logo.png",
       icon: <Globe className="text-amber-600 shrink-0" size={24} />,
       bg: "hover:bg-amber-50 border-amber-100",
     },
     {
       name: { en: "Facebook Group", bn: "ফেসবুক গ্রুপ" },
       url: "https://www.youtube.com/watch?v=KR59dFBOpbg",
-      icon: <Users className="text-blue-500 shrink-0" size={24} />,
+      icon: <FaFacebook className="text-blue-500 shrink-0" size={24} />,
       bg: "hover:bg-blue-50 border-blue-100",
     },
   ];

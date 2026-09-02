@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import {
   FaBuilding,
   FaLaptopCode,
@@ -26,10 +27,6 @@ const Campus = () => {
     () => localStorage.getItem("language") || "en",
   );
 
-  // ট্যাব স্টেট: "home", "dashboard", "myCourse"
-  const [activeTab, setActiveTab] = useState("home");
-
-  // MyCourse থেকে কোনো কোর্সে Continue ক্লিক করলে তার বিস্তারিত দেখানোর জন্য স্টেট
   const [selectedCourse, setSelectedCourse] = useState(null);
 
   useEffect(() => {
@@ -40,6 +37,7 @@ const Campus = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  // ============= কনটেন্ট =============
   const content = {
     en: {
       title: "Discover Our Campus",
@@ -57,14 +55,6 @@ const Campus = () => {
       f2: "Dedicated Student Support",
       f3: "Rich Islamic Library & Resources",
       f4: "Experienced Faculty Members",
-      homeTab: "01 Home",
-      dashboardTab: "02 Dashboard",
-      myCourseTab: "03 MyCourse",
-      noticeBoardTitle: "Notice Board",
-      academicCalendarTitle: "Academic Calendar",
-      courseOverviewTitle: "Course Overview",
-      myCoursesTitle: "Enrolled Courses",
-      viewDetails: "View Details",
       backToCourses: "Back to My Courses",
       outcomeTitle: "Course Outcome",
       materialsTitle: "Materials",
@@ -76,12 +66,13 @@ const Campus = () => {
       videoRecording: "Video Recording",
       pdfNotes: "PDF Notes & Resources",
       quizzes: "Quizzes",
+      loginCampus: "Login Campus",
     },
     bn: {
-      title: "আমাদের ক্যাম্পাস",
+      title: "আমাদের ক্যাম্পাস আবিষ্কার করুন",
       subtitle:
-        "তারবিয়াহর অনলাইন ও অফলাইন লার্নিং এনভায়রনমেন্টে আপনাকে স্বাগতম",
-      offlineTitle: "অফলাইন ক্যাম্পাস ও অফিস",
+        "তারবিয়াহ অনলাইন ও অফলাইন লার্নিং এনভায়রনমেন্টে আপনাকে স্বাগতম",
+      offlineTitle: "শারীরিক ক্যাম্পাস ও অফিস",
       offlineDesc:
         "আমাদের শারীরিক ক্যাম্পাস শিক্ষার্থীদের ইসলামি ও আধুনিক শিক্ষায় উৎকর্ষ সাধনের জন্য একটি শান্ত ও উপযোগী পরিবেশ প্রদান করে। আসুন এবং শিক্ষার নতুন অভিজ্ঞতা নিন।",
       addressTitle: "ক্যাম্পাসের ঠিকানা:",
@@ -94,14 +85,6 @@ const Campus = () => {
       f2: "ডেডিকেটেড স্টুডেন্ট সাপোর্ট",
       f3: "সমৃদ্ধ ইসলামি লাইব্রেরি ও রিসোর্স",
       f4: "অভিজ্ঞ শিক্ষক মণ্ডলী",
-      homeTab: "০১ হোম",
-      dashboardTab: "০২ ড্যাশবোর্ড",
-      myCourseTab: "০৩ আমার কোর্স",
-      noticeBoardTitle: "নোটিশ বোর্ড",
-      academicCalendarTitle: "একাডেমিক ক্যালেন্ডার",
-      courseOverviewTitle: "কোর্স ওভারভিউ",
-      myCoursesTitle: "এনরোলকৃত কোর্সসমূহ",
-      viewDetails: "বিস্তারিত দেখুন",
       backToCourses: "আমার কোর্সসমূহে ফিরে যান",
       outcomeTitle: "কোর্স আউটকাম",
       materialsTitle: "ম্যাটেরিয়ালস (Materials)",
@@ -113,12 +96,12 @@ const Campus = () => {
       videoRecording: "ভিডিও রেকর্ডিং",
       pdfNotes: "পিডিএফ নোটস",
       quizzes: "কুইজসমূহ",
+      loginCampus: "ক্যাম্পাস লগইন",
     },
   };
 
   const t = content[language];
 
-  // এনরোলকৃত কোর্সসমূহ (আউটকাম ও কন্টেন্ট সহ)
   const enrolledCourses = [
     {
       id: 1,
@@ -158,24 +141,6 @@ const Campus = () => {
     },
   ];
 
-  // নোটিশ বোর্ডের ডেটা
-  const notices = [
-    {
-      id: 1,
-      date: "August 10, 2026",
-      titleEn: "Final Exam Routine Published for Diploma Students.",
-      titleBn: "ডিপ্লোমা শিক্ষার্থীদের ফাইনাল পরীক্ষার রুটিন প্রকাশিত হয়েছে।",
-    },
-    {
-      id: 2,
-      date: "August 05, 2026",
-      titleEn:
-        "Online Classes will remain closed on Friday due to maintenance.",
-      titleBn:
-        "রক্ষণাবেক্ষণের কাজের জন্য আগামী শুক্রবার অনলাইন ক্লাস বন্ধ থাকবে।",
-    },
-  ];
-
   const facilities = [
     {
       id: "f1",
@@ -188,50 +153,6 @@ const Campus = () => {
 
   return (
     <div className="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen py-12 px-6 md:px-16 font-sans overflow-hidden">
-      {/* টপ ট্যাব ন্যাভবার */}
-      {!selectedCourse && (
-        <div className="flex justify-center mb-12">
-          <div className="bg-white p-2 rounded-2xl shadow-md border border-gray-200 flex flex-wrap gap-2 md:gap-4">
-            <button
-              onClick={() => setActiveTab("home")}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all duration-300 ${
-                activeTab === "home"
-                  ? "bg-[#004d4d] text-white shadow-lg scale-105"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              <FaHome /> {t.homeTab}
-            </button>
-
-            <button
-              onClick={() => setActiveTab("dashboard")}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all duration-300 ${
-                activeTab === "dashboard"
-                  ? "bg-[#004d4d] text-white shadow-lg scale-105"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              <FaTachometerAlt /> {t.dashboardTab}
-            </button>
-
-            <button
-              onClick={() => {
-                setActiveTab("myCourse");
-                setSelectedCourse(null);
-              }}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all duration-300 ${
-                activeTab === "myCourse"
-                  ? "bg-[#004d4d] text-white shadow-lg scale-105"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              <FaGraduationCap /> {t.myCourseTab}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* ট্যাবের কন্টেন্ট অথবা সিলেক্টেড কোর্সের ডিটেইলস ভিউ */}
       <AnimatePresence mode="wait">
         {/* ================= COURSE DETAIL VIEW ================= */}
         {selectedCourse ? (
@@ -243,7 +164,6 @@ const Campus = () => {
             transition={{ duration: 0.5 }}
             className="max-w-6xl mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-gray-100"
           >
-            {/* ব্যাক বাটন */}
             <button
               onClick={() => setSelectedCourse(null)}
               className="flex items-center gap-2 text-[#004d4d] font-bold mb-6 hover:underline"
@@ -251,7 +171,6 @@ const Campus = () => {
               <FaArrowLeft /> {t.backToCourses}
             </button>
 
-            {/* কোর্সের ব্যানার এবং নাম */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10 items-center">
               <div className="lg:col-span-1 h-60 rounded-2xl overflow-hidden shadow-md">
                 <img
@@ -279,7 +198,6 @@ const Campus = () => {
               </div>
             </div>
 
-            {/* Course Outcome সেকশন */}
             <div className="mb-10 bg-teal-50/60 p-6 rounded-2xl border border-teal-100">
               <h2 className="text-2xl font-bold text-gray-900 mb-3">
                 {t.outcomeTitle}
@@ -291,9 +209,7 @@ const Campus = () => {
               </p>
             </div>
 
-            {/* Grades, Materials & Module সেকশন (সবগুলো আলাদা করা হয়েছে) */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* 1. Grade সেকশন (Grad Class Test, Mid term exam, Final exam) */}
               <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <FaAward className="text-[#004d4d]" /> {t.gradeTitle}
@@ -326,7 +242,6 @@ const Campus = () => {
                 </ul>
               </div>
 
-              {/* 2. Materials সেকশন */}
               <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <FaClipboardList className="text-[#004d4d]" />{" "}
@@ -360,7 +275,6 @@ const Campus = () => {
                 </ul>
               </div>
 
-              {/* 3. Module সেকশন (Video recording, PDF, Quize etc) */}
               <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <FaBookOpen className="text-[#004d4d]" /> {t.modulesTitle}
@@ -390,91 +304,69 @@ const Campus = () => {
           </motion.div>
         ) : (
           <>
-            {/* ================= 01 HOME TAB ================= */}
-            {activeTab === "home" && (
-              <motion.div
-                key="home"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className="text-center max-w-3xl mx-auto mb-16">
-                  <span className="bg-teal-100 text-[#004d4d] px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide uppercase mb-4 inline-block shadow-sm">
-                    Tarbiyah Education
-                  </span>
-                  <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
-                    {t.title}
-                  </h1>
-                  <p className="text-gray-600 text-lg md:text-xl leading-relaxed">
-                    {t.subtitle}
-                  </p>
-                </div>
+            {/* ================= HOME SECTION ================= */}
+            <motion.div
+              key="home"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+            >
+              {/* হেডার */}
+              <div className="text-center max-w-3xl mx-auto mb-16">
+                <span className="bg-teal-100 text-[#004d4d] px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide uppercase mb-4 inline-block shadow-sm">
+                  TARBIYAH EDUCATION
+                </span>
+                <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+                  {t.title}
+                </h1>
+                <p className="text-gray-600 text-lg md:text-xl leading-relaxed">
+                  {t.subtitle}
+                </p>
+              </div>
 
-                {/* নোটিশ বোর্ড */}
-                <div className="max-w-4xl mx-auto mb-16 bg-white p-8 rounded-3xl shadow-lg border border-gray-100">
-                  <div className="flex items-center gap-3 mb-6 border-b pb-4">
-                    <FaBell className="text-2xl text-[#004d4d]" />
-                    <h3 className="text-2xl font-bold text-gray-900">
-                      {t.noticeBoardTitle}
-                    </h3>
-                  </div>
-                  <div className="space-y-4">
-                    {notices.map((notice) => (
-                      <div
-                        key={notice.id}
-                        className="p-4 bg-teal-50/50 border-l-4 border-[#004d4d] rounded-r-xl"
-                      >
-                        <span className="text-xs font-bold text-[#004d4d] bg-teal-100 px-2.5 py-1 rounded-full">
-                          {notice.date}
-                        </span>
-                        <p className="text-gray-800 font-medium mt-2">
-                          {language === "en" ? notice.titleEn : notice.titleBn}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* ক্যাম্পাস কার্ড */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-20">
-                  <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden relative group border border-gray-100">
-                    <div className="h-2 bg-[#004d4d] w-full"></div>
-                    <div className="p-8">
-                      <div className="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                        <FaBuilding className="text-2xl text-[#004d4d]" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#004d4d] transition-colors">
-                        {t.offlineTitle}
-                      </h2>
-                      <p className="text-gray-600 mb-8 leading-relaxed">
-                        {t.offlineDesc}
-                      </p>
-                      <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 flex items-start gap-4">
-                        <FaMapMarkerAlt className="text-[#004d4d] mt-1 text-xl flex-shrink-0" />
-                        <div>
-                          <h4 className="font-bold text-gray-900 mb-1">
-                            {t.addressTitle}
-                          </h4>
-                          <p className="text-gray-600 text-sm">{t.address}</p>
-                        </div>
+              {/* ================= CAMPUS CARDS ================= */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-20">
+                {/* Physical Campus Card */}
+                <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden relative group border border-gray-100">
+                  <div className="h-2 bg-[#004d4d] w-full"></div>
+                  <div className="p-8">
+                    <div className="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <FaBuilding className="text-2xl text-[#004d4d]" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#004d4d] transition-colors">
+                      {t.offlineTitle}
+                    </h2>
+                    <p className="text-gray-600 mb-8 leading-relaxed">
+                      {t.offlineDesc}
+                    </p>
+                    <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 flex items-start gap-4">
+                      <FaMapMarkerAlt className="text-[#004d4d] mt-1 text-xl flex-shrink-0" />
+                      <div>
+                        <h4 className="font-bold text-gray-900 mb-1">
+                          {t.addressTitle}
+                        </h4>
+                        <p className="text-gray-600 text-sm">{t.address}</p>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden relative group border border-gray-100">
-                    <div className="h-2 bg-yellow-500 w-full"></div>
-                    <div className="p-8">
-                      <div className="w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                        <FaLaptopCode className="text-2xl text-yellow-600" />
-                      </div>
-                      <h2 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-yellow-600 transition-colors">
-                        {t.onlineTitle}
-                      </h2>
-                      <p className="text-gray-600 mb-8 leading-relaxed">
-                        {t.onlineDesc}
-                      </p>
-                      <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 flex items-start gap-4">
+                {/* Virtual Campus Card with Login Button */}
+                <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden relative group border border-gray-100">
+                  <div className="h-2 bg-yellow-500 w-full"></div>
+                  <div className="p-8">
+                    <div className="w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <FaLaptopCode className="text-2xl text-yellow-600" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-yellow-600 transition-colors">
+                      {t.onlineTitle}
+                    </h2>
+                    <p className="text-gray-600 mb-8 leading-relaxed">
+                      {t.onlineDesc}
+                    </p>
+                    <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 flex flex-col gap-4">
+                      <div className="flex items-start gap-4">
                         <div className="w-3 h-3 rounded-full bg-green-500 mt-1.5 flex-shrink-0 animate-pulse"></div>
                         <div>
                           <h4 className="font-bold text-gray-900 mb-1">
@@ -489,204 +381,47 @@ const Campus = () => {
                           </p>
                         </div>
                       </div>
+
+                      {/* Login Campus Button */}
+                      <Link to="/campus-login">
+                        <button className="w-full bg-[#004d4d] hover:bg-teal-800 text-white font-semibold py-2.5 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                          <FaLaptopCode className="text-lg" />
+                          {t.loginCampus}
+                        </button>
+                      </Link>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* সুবিধাসমূহ */}
-                <div className="max-w-6xl mx-auto bg-white p-10 md:p-14 rounded-3xl shadow-xl border border-gray-100">
-                  <div className="text-center mb-12">
-                    <h3 className="text-3xl font-bold text-gray-900 mb-3">
-                      {t.facilitiesTitle}
-                    </h3>
-                    <div className="w-20 h-1.5 bg-[#004d4d] mx-auto rounded-full"></div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {facilities.map((facility) => (
-                      <div
-                        key={facility.id}
-                        className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl border border-gray-100 hover:border-teal-100 hover:shadow-lg transition-all duration-300 group"
-                      >
-                        <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-5 group-hover:bg-[#004d4d] transition-colors duration-300">
-                          <div className="group-hover:text-white transition-colors duration-300">
-                            {facility.icon}
-                          </div>
-                        </div>
-                        <p className="font-bold text-gray-800 text-lg leading-snug group-hover:text-[#004d4d] transition-colors">
-                          {t[facility.id]}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* ================= 02 DASHBOARD TAB ================= */}
-            {activeTab === "dashboard" && (
-              <motion.div
-                key="dashboard"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="max-w-6xl mx-auto space-y-12"
-              >
-                <div className="bg-white p-8 md:p-10 rounded-3xl shadow-lg border border-gray-100">
-                  <div className="flex items-center gap-3 mb-6 border-b pb-4">
-                    <FaCalendarAlt className="text-3xl text-[#004d4d]" />
-                    <h2 className="text-3xl font-bold text-gray-900">
-                      {t.academicCalendarTitle}
-                    </h2>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="p-6 bg-teal-50 rounded-2xl border border-teal-100">
-                      <span className="text-xs font-bold text-[#004d4d] uppercase">
-                        Semester Start
-                      </span>
-                      <h4 className="text-xl font-bold text-gray-900 mt-1">
-                        September 1, 2026
-                      </h4>
-                      <p className="text-gray-600 text-sm mt-2">
-                        New batch orientation and classes begin.
-                      </p>
-                    </div>
-                    <div className="p-6 bg-yellow-50 rounded-2xl border border-yellow-100">
-                      <span className="text-xs font-bold text-yellow-700 uppercase">
-                        Mid-Term Exams
-                      </span>
-                      <h4 className="text-xl font-bold text-gray-900 mt-1">
-                        November 15, 2026
-                      </h4>
-                      <p className="text-gray-600 text-sm mt-2">
-                        Online portal assessment test.
-                      </p>
-                    </div>
-                    <div className="p-6 bg-gray-50 rounded-2xl border border-gray-200">
-                      <span className="text-xs font-bold text-gray-700 uppercase">
-                        Vacation
-                      </span>
-                      <h4 className="text-xl font-bold text-gray-900 mt-1">
-                        December 20, 2026
-                      </h4>
-                      <p className="text-gray-600 text-sm mt-2">
-                        Winter break and semester break.
-                      </p>
-                    </div>
-                  </div>
+              {/* ================= FACILITIES ================= */}
+              <div className="max-w-6xl mx-auto bg-white p-10 md:p-14 rounded-3xl shadow-xl border border-gray-100">
+                <div className="text-center mb-12">
+                  <h3 className="text-3xl font-bold text-gray-900 mb-3">
+                    {t.facilitiesTitle}
+                  </h3>
+                  <div className="w-20 h-1.5 bg-[#004d4d] mx-auto rounded-full"></div>
                 </div>
 
-                <div className="bg-white p-8 md:p-10 rounded-3xl shadow-lg border border-gray-100">
-                  <div className="flex items-center gap-3 mb-8 border-b pb-4">
-                    <FaGraduationCap className="text-3xl text-[#004d4d]" />
-                    <h2 className="text-3xl font-bold text-gray-900">
-                      {t.courseOverviewTitle}
-                    </h2>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {enrolledCourses.map((course) => (
-                      <div
-                        key={course.id}
-                        className="bg-gray-50 rounded-2xl overflow-hidden shadow-sm border border-gray-200 flex flex-col"
-                      >
-                        <div className="h-48 overflow-hidden relative">
-                          <img
-                            src={course.image}
-                            alt={course.titleEn}
-                            className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                          />
-                          <span className="absolute top-3 right-3 bg-[#004d4d] text-white text-xs font-bold px-3 py-1 rounded-full">
-                            {course.progress} Completed
-                          </span>
-                        </div>
-                        <div className="p-6 flex flex-col flex-grow">
-                          <h3 className="font-bold text-xl text-gray-900 mb-2">
-                            {language === "en"
-                              ? course.titleEn
-                              : course.titleBn}
-                          </h3>
-                          <p className="text-gray-600 text-sm mb-4">
-                            Instructor: {course.instructor}
-                          </p>
-                          <div className="mt-auto">
-                            <button
-                              onClick={() => setSelectedCourse(course)}
-                              className="w-full bg-[#004d4d] text-white py-2.5 rounded-xl font-semibold hover:bg-teal-900 transition-colors"
-                            >
-                              {t.viewDetails}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            {/* ================= 03 MY COURSE TAB ================= */}
-            {activeTab === "myCourse" && (
-              <motion.div
-                key="myCourse"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.5 }}
-                className="max-w-6xl mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-lg border border-gray-100"
-              >
-                <div className="flex items-center gap-3 mb-8 border-b pb-4">
-                  <FaGraduationCap className="text-3xl text-[#004d4d]" />
-                  <h2 className="text-3xl font-bold text-gray-900">
-                    {t.myCoursesTitle}
-                  </h2>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {enrolledCourses.map((course) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                  {facilities.map((facility) => (
                     <div
-                      key={course.id}
-                      className="bg-gray-50 rounded-2xl overflow-hidden shadow-sm border border-gray-200 flex flex-col"
+                      key={facility.id}
+                      className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl border border-gray-100 hover:border-teal-100 hover:shadow-lg transition-all duration-300 group"
                     >
-                      <div className="h-52 overflow-hidden relative">
-                        <img
-                          src={course.image}
-                          alt={course.titleEn}
-                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                        />
-                        <div className="absolute inset-0 bg-black/20"></div>
-                      </div>
-                      <div className="p-6 flex flex-col flex-grow">
-                        <h3 className="font-bold text-xl text-gray-900 mb-2">
-                          {language === "en" ? course.titleEn : course.titleBn}
-                        </h3>
-                        <p className="text-gray-600 text-sm mb-2">
-                          Instructor: {course.instructor}
-                        </p>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 my-4">
-                          <div
-                            className="bg-[#004d4d] h-2.5 rounded-full"
-                            style={{ width: course.progress }}
-                          ></div>
-                        </div>
-                        <div className="mt-auto flex justify-between items-center">
-                          <span className="text-sm font-bold text-gray-700">
-                            Progress: {course.progress}
-                          </span>
-                          <button
-                            onClick={() => setSelectedCourse(course)}
-                            className="bg-[#004d4d] text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-teal-900 transition-colors"
-                          >
-                            Continue
-                          </button>
+                      <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-5 group-hover:bg-[#004d4d] transition-colors duration-300">
+                        <div className="group-hover:text-white transition-colors duration-300">
+                          {facility.icon}
                         </div>
                       </div>
+                      <p className="font-bold text-gray-800 text-lg leading-snug group-hover:text-[#004d4d] transition-colors">
+                        {t[facility.id]}
+                      </p>
                     </div>
                   ))}
                 </div>
-              </motion.div>
-            )}
+              </div>
+            </motion.div>
           </>
         )}
       </AnimatePresence>

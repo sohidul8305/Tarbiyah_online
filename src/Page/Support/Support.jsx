@@ -15,7 +15,7 @@ const Support = () => {
 
   const content = {
     en: {
-      title: "Customer & Student Support",
+      title: "Customer & User Support",
       subtitle:
         "We are here to help you. Reach out to us through any of the channels below or send us a message.",
       helpCenter: "Help & Support Center",

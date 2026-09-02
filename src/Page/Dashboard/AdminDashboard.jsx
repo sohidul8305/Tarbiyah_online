@@ -59,6 +59,7 @@ import {
   MdVerified,
 } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+import Admin_notification from "../Admin-notification/Admin_notification";
 
 const AdminDashboard = () => {
   const { user, logOut } = useAuth();
@@ -92,7 +93,7 @@ const AdminDashboard = () => {
       title: `📋 Student Details: ${student.name}`,
       html: `
       <div style="text-align: left; font-size: 13px; max-height: 450px; overflow-y: auto;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">admin
           <p><strong>নাম:</strong> ${student.name || "N/A"}</p>
           <p><strong>ফোন:</strong> ${student.phone || "N/A"}</p>
           <p><strong>ইমেইল:</strong> ${student.email || "N/A"}</p>
@@ -274,6 +275,11 @@ const AdminDashboard = () => {
       path: "/admin-profile",
       icon: <FaUser className="text-xl" />,
       label: "Profile",
+    },
+    {
+      id: "notification",
+      icon: <FaBell className="text-xl" />,
+      label: "Notification",
     },
     {
       id: "dashboard",
@@ -490,6 +496,8 @@ const AdminDashboard = () => {
     switch (activeMenu) {
       case "dashboard":
         return <DashboardContent stats={stats} notifications={notifications} />;
+      case "notification":
+        return <Admin_notification />; // notification কেস আলাদা
       case "student-management":
         return <StudentManagementContent students={students} />;
       case "teacher-management":

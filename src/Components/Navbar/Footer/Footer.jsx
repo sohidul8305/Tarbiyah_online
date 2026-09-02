@@ -128,10 +128,19 @@ const Footer = () => {
             </p>
             <p className="flex items-start gap-3">
               <FaPhoneAlt className="text-teal-300 mt-1 flex-shrink-0 text-base" />
-              <span>
-                (+88) 01841515454 <br />
-                (+88) 01841513434 <br />
-                (+88) 01841516565
+              <span className="block space-y-2 text-white-700">
+                <p>
+                  <strong>01841516565</strong> (Diploma In Islamic Studies)
+                </p>
+                <p>
+                  <strong>01841514545</strong> (Tarbiyah Alimiyah Program)
+                </p>
+                <p>
+                  <strong>01841513434</strong> (Tarbiyah Quran Studies)
+                </p>
+                <p>
+                  <strong>01841511515</strong> (Quran For Elders)
+                </p>
               </span>
             </p>
             <p className="flex items-center gap-3">

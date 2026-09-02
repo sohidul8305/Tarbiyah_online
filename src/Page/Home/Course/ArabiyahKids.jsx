@@ -7,7 +7,8 @@ const ArabiyahKids = () => {
   const details = {
     en: {
       title: "Arabiyah Studies for Kids",
-      subtitle: "Making Arabic fun, engaging, and interactive for the younger generation.",
+      subtitle:
+        "Making Arabic fun, engaging, and interactive for the younger generation.",
       duration: "6 Months",
       level: "Kids (Ages 6 - 12)",
       features: [
@@ -17,11 +18,13 @@ const ArabiyahKids = () => {
         "Short Surah Recitation (Tajweed)",
         "Daily Islamic Manners (Adab)",
       ],
-      description: "Arabiyah Studies for Kids is designed using modern language teaching methods tailored to children's cognitive styles. Through stories, interactive exercises, and fun activities, kids will learn to speak, read, and write basic Arabic naturally.",
+      description:
+        "Arabiyah Studies for Kids is designed using modern language teaching methods tailored to children's cognitive styles. Through stories, interactive exercises, and fun activities, kids will learn to speak, read, and write basic Arabic naturally.",
     },
     bn: {
       title: "আরাবিয়াহ স্টাডিজ ফর কিডস",
-      subtitle: "নতুন প্রজন্মের জন্য আরবি শিক্ষাকে আনন্দদায়ক, আকর্ষণীয় ও ইন্টারঅ্যাক্টিভ করে তোলা।",
+      subtitle:
+        "নতুন প্রজন্মের জন্য আরবি শিক্ষাকে আনন্দদায়ক, আকর্ষণীয় ও ইন্টারঅ্যাক্টিভ করে তোলা।",
       duration: "৬ মাস",
       level: "শিশু-কিশোর (বয়স ৬ - ১২)",
       features: [
@@ -31,7 +34,8 @@ const ArabiyahKids = () => {
         "ছোট সূরা মুখস্থ ও তাজবীদ",
         "দৈনন্দিন ইসলামী আদব ও আখলাক",
       ],
-      description: "আরাবিয়াহ স্টাডিজ ফর কিডস কোর্সটি বাচ্চাদের মানসিক বিকাশের সাথে সামঞ্জস্য রেখে আধুনিক ও বিনোদনমূলক পদ্ধতিতে সাজানো হয়েছে। বিভিন্ন গল্প, কুইজ ও মজার মজার কার্যাবলীর মাধ্যমে শিশুরা সহজেই আরবি পড়তে, লিখতে ও বলতে শিখবে।",
+      description:
+        "আরাবিয়াহ স্টাডিজ ফর কিডস কোর্সটি বাচ্চাদের মানসিক বিকাশের সাথে সামঞ্জস্য রেখে আধুনিক ও বিনোদনমূলক পদ্ধতিতে সাজানো হয়েছে। বিভিন্ন গল্প, কুইজ ও মজার মজার কার্যাবলীর মাধ্যমে শিশুরা সহজেই আরবি পড়তে, লিখতে ও বলতে শিখবে।",
     },
   };
 
@@ -53,24 +57,41 @@ const ArabiyahKids = () => {
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6 bg-gray-50 p-6 rounded-2xl mb-8">
             <div>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t("duration")}</p>
-              <p className="text-base font-semibold text-gray-800">{active.duration}</p>
+              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">
+                {t("duration")}
+              </p>
+              <p className="text-base font-semibold text-gray-800">
+                {active.duration}
+              </p>
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t("level")}</p>
-              <p className="text-base font-semibold text-gray-800">{active.level}</p>
+              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">
+                {t("level")}
+              </p>
+              <p className="text-base font-semibold text-gray-800">
+                {active.level}
+              </p>
             </div>
             <div>
-              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">{t("instructor")}</p>
-              <p className="text-base font-semibold text-gray-800">Tarbiyah Online</p>
+              <p className="text-xs text-gray-400 font-bold uppercase tracking-wider">
+                {t("instructor")}
+              </p>
+              <p className="text-base font-semibold text-gray-800">
+                Tarbiyah Online
+              </p>
             </div>
           </div>
 
           <div className="mb-8">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">{t("curriculum")}</h3>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">
+              {t("curriculum")}
+            </h3>
             <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {active.features.map((item, index) => (
-                <li key={index} className="flex items-center gap-3 text-gray-600 bg-gray-50/50 p-3 rounded-lg border border-gray-100">
+                <li
+                  key={index}
+                  className="flex items-center gap-3 text-gray-600 bg-gray-50/50 p-3 rounded-lg border border-gray-100"
+                >
                   <span className="text-teal-600">✓</span>
                   <span>{item}</span>
                 </li>

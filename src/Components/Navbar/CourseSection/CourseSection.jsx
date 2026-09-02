@@ -1,5 +1,5 @@
 import React from "react";
-import { useLanguage } from "../../../context/useLanguage"; // আপনার সঠিক পাথ অনুযায়ী এটি ঠিক করে নিবেন
+import { useLanguage } from "../../../context/useLanguage";
 
 const CourseCard = ({ title, instructor, image }) => (
   <div className="bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-shadow duration-300 flex flex-col">

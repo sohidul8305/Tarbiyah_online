@@ -163,6 +163,9 @@ import Donate from "../Components/Donate/Donate";
 import Child_development_details from "../Components/Child_development_details/Child_development_details";
 import Farewell_hajj_details from "../Components/Farewell_hajj_details/Farewell_hajj_details";
 import Age_barriers_details from "../Components/Age_barriers_details/Age_barriers_details";
+import Student_support from "../Components/Student_support/Student_support";
+import Imam_nabawi_details from "../Components/Imam_nabawi_details/Imam_nabawi_details";
+import Surahmulk_details from "../Components/Surahmulk_details/Surahmulk_details";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -460,6 +463,14 @@ export const router = createBrowserRouter([
     path: "/blog/accomplished-thinkers-transcend-age-barriers",
     element: <Age_barriers_details></Age_barriers_details>,
   },
+  {
+    path: "/course/recorded/imam-nabawi-40-hadiths",
+    element: <Imam_nabawi_details></Imam_nabawi_details>,
+  },
+  {
+    path: "/course/recorded/surah-mulk-hifz",
+    element: <Surahmulk_details></Surahmulk_details>,
+  },
 
   // ==========================================
   // ২. অথ পেজ (লগইন, রেজিস্টার)
@@ -486,12 +497,20 @@ export const router = createBrowserRouter([
     element: <TeacherLogin />,
   },
   {
-    path: "/teacher-login",
-    element: <TeacherLogin />,
-  },
-  {
     path: "/campus-login",
     element: <Campus_login />,
+  },
+  {
+    path: "/student_support",
+    element: <Student_support />,
+  },
+  {
+    path: "/student_support",
+    element: <Student_support />,
+  },
+  {
+    path: "/admin-notification",
+    element: <Admin_notification />,
   },
 
   // ==========================================

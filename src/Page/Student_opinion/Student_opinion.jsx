@@ -1,101 +1,71 @@
 import React from "react";
 import { useLanguage } from "../../context/useLanguage";
+import { ExternalLink } from "lucide-react";
 
 const Student_opinion = () => {
-  const { t } = useLanguage();
-
-  const opinions = [
-    {
-      name: {
-        en: "Abdullah Al Mahmud",
-        bn: "আব্দুল্লাহ আল মাহমুদ",
-      },
-      title: {
-        en: "Diploma in Islamic Studies",
-        bn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
-      },
-      comment: {
-        en: "The courses of Tarbiyah Online are extremely standard and timely. Alhamdulillah, I have learned a lot from here.",
-        bn: "তারবিয়াহ অনলাইনের কোর্সগুলো অত্যন্ত মানসম্মত এবং সময়োপযোগী। আলহামদুলিল্লাহ, আমি এখান থেকে অনেক কিছু শিখেছি।",
-      },
-    },
-    {
-      name: {
-        en: "Fatima Akter",
-        bn: "ফাতিমা আক্তার",
-      },
-      title: {
-        en: "Arabic Studies for Kids",
-        bn: "আরবি স্টাডিজ ফর কিডস",
-      },
-      comment: {
-        en: "My child is learning Arabic here, and I am extremely satisfied seeing their learning interest and progress rate.",
-        bn: "আমার সন্তান এখানে আরবি শিখছে, তার শেখার আগ্রহ এবং উন্নতির হার দেখে আমি অত্যন্ত সন্তুষ্ট।",
-      },
-    },
-    {
-      name: {
-        en: "Md. Nazmul Hossain",
-        bn: "মো. নাজমুল হোসেন",
-      },
-      title: {
-        en: "Quranic Arabic & Tajweed Course",
-        bn: "কুরআনিক আরবি ও তাজবীদ কোর্স",
-      },
-      comment: {
-        en: "Learning Quran with correct Tajweed was my long-time wish, and Tarbiyah Online made it so easy for me.",
-        bn: "সঠিক তাজবীদসহ কুরআন শেখা আমার দীর্ঘদিনের ইচ্ছা ছিল, এবং তারবিয়াহ অনলাইন আমার জন্য বিষয়টি খুব সহজ করে দিয়েছে।",
-      },
-    },
-    {
-      name: {
-        en: "Ayesha Siddika",
-        bn: "আয়েশা সিদ্দিকা",
-      },
-      title: {
-        en: "Allimiyah Islamic Course",
-        bn: "আলিম ও বিশেষ ইসলামিক কোর্স",
-      },
-      comment: {
-        en: "The teachers are extremely knowledgeable and cooperative. The online class environment is very disciplined.",
-        bn: "শিক্ষকবৃন্দ অত্যন্ত জ্ঞানী ও সহযোগিতাপূর্ণ। অনলাইন ক্লাসের পরিবেশ অত্যন্ত শৃঙ্খলিত।",
-      },
-    },
-    {
-      name: {
-        en: "Tanvir Ahmed",
-        bn: "তানভীর আহমেদ",
-      },
-      title: {
-        en: "Quran for elder",
-        bn: "এল্ডারলি কুরআন",
-      },
-      comment: {
-        en: "A wonderful platform to study authentic Islamic knowledge right from home. Highly recommended!",
-        bn: "ঘর বসেই সহীহ ইসলামিক জ্ঞান অর্জনের জন্য একটি চমৎকার প্ল্যাটফর্ম। অত্যন্ত সুপারিশকৃত!",
-      },
-    },
-  ];
+  const { language, t } = useLanguage();
 
   return (
-    <div className="max-w-6xl mx-auto py-12 px-6">
-      <h2 className="text-3xl font-bold text-[#004d4d] text-center mb-10">
-        {t({ en: "Students' Opinions", bn: "শিক্ষার্থীদের মতামত" })}
-      </h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {opinions.map((item, index) => (
-          <div
-            key={index}
-            className="bg-white p-6 rounded-lg shadow-lg border-t-4 border-[#004d4d]"
-          >
-            <p className="text-gray-600 mb-4 italic">"{t(item.comment)}"</p>
-            <div className="border-t pt-4">
-              <h4 className="font-bold text-[#004d4d]">{t(item.name)}</h4>
-              <p className="text-sm text-gray-500">{t(item.title)}</p>
-            </div>
+    <div className="bg-gray-50 min-h-screen py-16">
+      <div className="max-w-4xl mx-auto px-4">
+        {/* --- Header & Description Section --- */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-[#004d4d] mb-6">
+            {t({
+              en: "What Our Students & Parents Say",
+              bn: "আমাদের ছাত্র-ছাত্রী ও অভিভাবকদের মতামত",
+            })}
+          </h2>
+          <div className="text-gray-600 text-base md:text-lg max-w-3xl mx-auto leading-relaxed space-y-4">
+            {language === "bn" ? (
+              <>
+                <p>
+                  তারবিয়াহ অনলাইন মাদরাসায়, আমাদের সবচেয়ে বড় প্রেরণা হলো
+                  আমাদের শিক্ষার্থী এবং তাদের অভিভাবকদের আস্থা ও সন্তোষ।
+                </p>
+                <p>
+                  এখানে আমরা তারবিয়াহতে তাদের শেখার যাত্রা, একাডেমিক অভিজ্ঞতা
+                  এবং সামগ্রিক বৃদ্ধি সম্পর্কে আমাদের শিক্ষার্থী ও অভিভাবকদের
+                  প্রকৃত অভিজ্ঞতা এবং প্রতিক্রিয়া শেয়ার করছি।
+                </p>
+                <p>
+                  তারবিয়াহ অনলাইন মাদরাসায় তাদের অভিজ্ঞতা সম্পর্কে আমাদের
+                  ছাত্র-ছাত্রী ও অভিভাবকরা যা বলেন তা পড়ে দেখুন।
+                </p>
+              </>
+            ) : (
+              <>
+                <p>
+                  At Tarbiyah Online Madrasah, our greatest motivation is the
+                  trust and satisfaction of our students and their parents.
+                </p>
+                <p>
+                  Here, we share genuine experiences and feedback from our
+                  students and parents about their learning journey, academic
+                  experience, and overall growth at Tarbiyah.
+                </p>
+                <p>
+                  Read what our students and parents have to say about their
+                  experience with Tarbiyah Online Madrasah.
+                </p>
+              </>
+            )}
           </div>
-        ))}
+          <div className="w-24 h-1 bg-teal-600 mx-auto mt-6 rounded-full"></div>
+        </div>
+
+        {/* --- Read All Reviews Button --- */}
+        <div className="text-center mt-8">
+          <a
+            href="https://www.facebook.com/share/p/14ksfgsxzxE/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-[#004d4d] hover:bg-teal-700 text-white font-semibold px-8 py-3.5 rounded-xl shadow-md transition-all duration-300 transform hover:-translate-y-0.5"
+          >
+            <span>{t({ en: "Read All Reviews", bn: "সকল রিভিউ পড়ুন" })}</span>
+            <ExternalLink size={18} />
+          </a>
+        </div>
       </div>
     </div>
   );

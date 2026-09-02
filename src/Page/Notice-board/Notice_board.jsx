@@ -25,35 +25,20 @@ const Notice_board = () => {
       notices: [
         {
           id: 1,
-          title: "Admission Open for Diploma in Islamic Studies (2026-27)",
+          title:
+            "Admission Open for Diploma in Islamic Studies (2026) Batch(15)",
           category: "Admission",
-          date: "July 20, 2026",
+          date: "September 01, 2026",
           description:
             "Applications are now open for the new academic session. Interested students can apply online through the student portal or join now button.",
         },
         {
           id: 2,
-          title: "Mid-Term Examination Schedule Announced",
-          category: "Exam",
-          date: "July 15, 2026",
+          title: " Admission Open for Allimiyah Program (2026) Bactch(15) ",
+          category: "Admission",
+          date: "September 01, 2026",
           description:
-            "The upcoming mid-term exams for all departments will commence from next month. Detailed routine is available in the class routine section.",
-        },
-        {
-          id: 3,
-          title: "Important Notice Regarding Online Class Attendance",
-          category: "General",
-          date: "July 10, 2026",
-          description:
-            "All students are requested to maintain at least 80% attendance in live classes to be eligible for final examinations and certificates.",
-        },
-        {
-          id: 4,
-          title: "Special Workshop on Quranic Arabic for Beginners",
-          category: "General",
-          date: "July 05, 2026",
-          description:
-            "A free special workshop will be held this coming Friday. All enrolled students are encouraged to join via the virtual campus link.",
+            "Applications are now open for the new academic session. Interested students can apply online through the student portal or join now button.",
         },
       ],
     },

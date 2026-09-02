@@ -5,6 +5,16 @@ import CourseImg from "../../image/diplomathumball.png";
 // Swiper এবং প্রয়োজনীয় মডিউল ইমপোর্ট করুন
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
+import ProfessorImg from "../../image/profile.jpg";
+import abubakkerImg from "../../image/DRABMjakariya.png";
+import JubairEhsanImg from "../../image/Zubair.jpeg";
+import MonjurImg from "../../image/Monjur.png";
+import motiulImg from "../../image/Motiul Islam .jpeg";
+import UbadullahImg from "../../image/Ubaydullah.png";
+import JakariyamasudImg from "../../image/jakariyah.png";
+import Mohammadhidoy from "../../image/Hridoy-Ustaz-01.png";
+import AbdullahMamunImg from "../../image/Abdullah AL Mamun.jpeg";
+import AbunomanImg from "../../image/Abu Numan .JPG";
 
 // Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
 import "swiper/css";
@@ -47,35 +57,35 @@ const DiplomaDetails = () => {
       id: 1,
       name: "Professor Mokhter Ahmad",
       title: "Chairman, Tarbiyah Academy",
-      image: "https://i.pravatar.cc/150?img=1",
+      image: ProfessorImg,
     },
     {
       id: 2,
       name: "Dr. Abu Bakr Muhammad Zakaria",
       title: "Prof. Islamic University, Kushtia",
       subtitle: "Comparative Theology and Aqeedah",
-      image: "https://i.pravatar.cc/150?img=2",
+      image: abubakkerImg,
     },
     {
       id: 3,
       name: "Dr. Zubair Ehsanul Haque",
       title: "Department Head, Dhaka University",
       subtitle: "Subject: Arabic Language",
-      image: "https://i.pravatar.cc/150?img=3",
+      image: JubairEhsanImg,
     },
     {
       id: 4,
       name: "Dr. Mir Manzoor Mahmud",
       title: "Prof. Manarat Int. University",
       subtitle: "Subject: Seerah and History of Islam",
-      image: "https://i.pravatar.cc/150?img=4",
+      image: MonjurImg,
     },
     {
       id: 5,
       name: "Dr. Matiul Islam",
       title: "Bangladesh Islamic University",
       subtitle: "Subject: Hadith Studies",
-      image: "https://i.pravatar.cc/150?img=5",
+      image: motiulImg,
     },
     {
       id: 6,
@@ -83,35 +93,35 @@ const DiplomaDetails = () => {
       title: "Bangladesh Islamic University",
       subtitle:
         "School of Arts and Humanities, Manarat International University",
-      image: "https://i.pravatar.cc/150?img=6",
+      image: UbadullahImg,
     },
     {
       id: 7,
       name: "Ustad Zakaria Masud",
       title: "Writer, Islamic writer and thinker",
       subtitle: "Subject: Seerah",
-      image: "https://i.pravatar.cc/150?img=7",
+      image: JakariyamasudImg,
     },
     {
       id: 8,
       name: "Ustad Hossain Mohammad Hridoy",
       title: "Coordinator",
       subtitle: "Department of Islamic Studies, Tarbiyah Education Network",
-      image: "https://i.pravatar.cc/150?img=8",
+      image: Mohammadhidoy,
     },
     {
       id: 9,
       name: "Ustad Abdullah Al Mamun",
       title: "Faculty",
       subtitle: "Tarbiyah Education Network",
-      image: "https://i.pravatar.cc/150?img=9",
+      image: AbdullahMamunImg,
     },
     {
       id: 10,
       name: "Ustad Abu Noman",
       title: "Coordinator",
       subtitle: "Department of Quranic Studies, Tarbiyah Education Network",
-      image: "https://i.pravatar.cc/150?img=10",
+      image: AbunomanImg,
     },
   ];
 
@@ -513,7 +523,7 @@ const DiplomaDetails = () => {
                     Enroll now and start your structured learning journey.
                   </p>
                 </div>
-                <Link to="/Course-apply-from">
+                <Link to="/admission-now">
                   <button className="bg-[#002b2b] hover:bg-teal-900 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all">
                     Start Now
                   </button>

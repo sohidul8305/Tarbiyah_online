@@ -1,172 +1,228 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { useState } from "react";
+import diplomabanner from "../../image/diplomabanner.png"; // আপনার ফোল্ডার স্ট্রাকচার অনুযায়ী ঠিক করুন
+import diplomacover from "../../image/diplomacover.png"; // আপনার ফোল্ডার স্ট্রাকচার অনুযায়ী ঠিক করুন
+import { Link } from "react-router";
+import { useLanguage } from "../context/useLanguage";
+// ... বাকি কোড
+import {
+  FaCheckCircle,
+  FaClock,
+  FaLaptop,
+  FaAward,
+  FaBookOpen,
+  FaUsers,
+  FaStar,
+  FaArrowRight,
+  FaGraduationCap,
+  FaVideo,
+  FaFileAlt,
+  FaUserGraduate,
+  FaCalendarAlt,
+  FaClock as FaTime,
+  FaCertificate,
+  FaGlobe,
+  FaMobileAlt,
+  FaHeadset,
+  FaShieldAlt,
+  FaPlay,
+  FaUserTie,
+  FaComments,
+  FaBook,
+  FaQuran,
+  FaMosque,
+} from "react-icons/fa";
 
-const LanguageContext = createContext();
+const Diploma = () => {
+  const [activeTab, setActiveTab] = useState("overview");
 
-export const useLanguage = () => useContext(LanguageContext);
+  // ভাষা কন্টেক্সট নিরাপদ ব্যবহার
+  const languageContext = useLanguage();
+  const language = languageContext ? languageContext.language : "en";
 
-export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState(() => {
-    return localStorage.getItem("language") || "bn"; // Default to bn (Bangla) as per user preference
-  });
-
-  useEffect(() => {
-    localStorage.setItem("language", language);
-    document.documentElement.dir = "ltr";
-    document.documentElement.lang = language;
-  }, [language]);
-
-  const toggleLanguage = () => {
-    setLanguage((prev) => (prev === "en" ? "bn" : "en"));
-  };
-
-  const translations = {
-    en: {
-      // Navbar & Topbar
-      address: "40/1, Safa Garden, Mohammadpur - 1207",
-      email: "info@tarbiyahonline.com",
-      phone1: "+880 1841-514545",
-      phone2: "+880 1841-516565",
-      login: "Log In",
-      home: "Home",
-      about: "About Us",
-      courses: "Courses",
-      consultancy: "Consultancy",
-      blog: "Blog",
-      sponsorship: "Sponsorship",
-      portalLogin: "Portal Login",
-      joinNow: "Join Now",
-      support: "Support",
-      donation: "Donation",
-
-      // About Dropdown
-      management: "Management",
-      faculty: "Faculty",
-      ourMember: "Our Member",
-      studentOpinion: "Student Opinion",
-      termsConditions: "Terms & Conditions",
-
-      // Course Dropdown
-      liveCourse: "Live Course",
-      recordedCourse: "Recorded Course",
-      diplomaIslamicStudies: "Diploma in Islamic Studies",
-      tarbiyahAlemiyah: "Tarbiyah Alemiyah Program",
-      arabiyahKids: "Arabiyah Studies for Kids",
-      quranElders: "Quran for Elders",
-
-      // Portal Login Dropdown
-      teacherLogin: "Teacher Login",
-      adminLogin: "Admin Login",
-      studentLogin: "Student Login",
-
-      // Blog Dropdown
-      events: "Events",
-      gallery: "Gallery",
-
-      // Footer
-      footerDesc: "At Tarbiyah Online, we believe that education should be accessible to everyone, regardless of their background or circumstances. That's Why we offer a range of online courses designed to help you learn new skills at any time that suits you.",
-      usefulLinks: "Useful Links",
-      applyOnline: "Apply Online",
-      privacyPolicy: "Privacy Policy",
-      myAccount: "My Account",
-      refundPolicy: "Refund Policy",
-      cart: "Cart",
-      career: "Careers",
-      contact: "Contact Us",
-      getTouch: "Get In Touch",
-      addressLabel: "40/1 Safa Garden Satmasjid Housing, Mohammadpur, Dhaka-1207",
-
-      // Course names & general text
-      courseTitle: "Our Courses",
-      liveHeader: "OUR LIVE COURSES",
-      recordedHeader: "OUR RECORDED COURSES",
-      instructor: "tarbiyahedu",
-      curriculum: "Course Curriculum",
-      duration: "Duration",
-      level: "Level",
-      enrollNow: "Enroll Now",
-      studentReviews: "Student Opinions",
-      whatStudentsSay: "What Our Students Say About Tarbiyah Online",
-      termsTitle: "Terms & Conditions",
-      termsSubtitle: "Please read our terms and conditions carefully before enrolling in our courses.",
-    },
-    bn: {
-      // Navbar & Topbar
-      address: "৪০/১, সাফা গার্ডেন, মোহাম্মদপুর - ১২০৭",
-      email: "info@tarbiyahonline.com",
-      phone1: "+৮৮০ ১৮৪১-৫১৪৫৪৫",
-      phone2: "+৮৮০ ১৮৪১-৫১৬৫৬৫",
-      login: "লগইন",
-      home: "হোম",
-      about: "আমাদের সম্পর্কে",
-      courses: "কোর্সসমূহ",
-      consultancy: "পরামর্শ",
-      blog: "ব্লগ",
-      sponsorship: "স্পনসরশিপ",
-      portalLogin: "পোর্টাল লগইন",
-      joinNow: "যুক্ত হোন",
-      support: "সাপোর্ট",
-      donation: "ডোনেশন",
-
-      // About Dropdown
-      management: "ব্যবস্থাপনা",
-      faculty: "শিক্ষকবৃন্দ",
-      ourMember: "আমাদের সদস্য",
-      studentOpinion: "শিক্ষার্থীদের মতামত",
-      termsConditions: "শর্তাবলী",
-
-      // Course Dropdown
-      liveCourse: "লাইভ কোর্স",
-      recordedCourse: "রেকর্ডেড কোর্স",
-      diplomaIslamicStudies: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
-      tarbiyahAlemiyah: "তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
-      arabiyahKids: "আরাবিয়াহ স্টাডিজ ফর কিডস",
-      quranElders: "কুরআন ফর এল্ডার্স",
-
-      // Portal Login Dropdown
-      teacherLogin: "শিক্ষক লগইন",
-      adminLogin: "অ্যাডমিন লগইন",
-      studentLogin: "শিক্ষার্থী লগইন",
-
-      // Blog Dropdown
-      events: "ইভেন্টসমূহ",
-      gallery: "গ্যালারি",
-
-      // Footer
-      footerDesc: "তারবিয়াহ অনলাইনে আমরা বিশ্বাস করি যে শিক্ষা সবার কাছে পৌঁছানো উচিত, তাদের ব্যাকগ্রাউন্ড বা পরিস্থিতি যাই হোক না কেন। এই কারণেই আমরা বিভিন্ন ধরণের অনলাইন কোর্স অফার করি যা আপনাকে যেকোনো উপযুক্ত সময়ে নতুন দক্ষতা শিখতে সাহায্য করার জন্য ডিজাইন করা হয়েছে।",
-      usefulLinks: "প্রয়োজনীয় লিংক",
-      applyOnline: "অনলাইন আবেদন",
-      privacyPolicy: "গোপনীয়তা নীতি",
-      myAccount: "আমার অ্যাকাউন্ট",
-      refundPolicy: "রিফান্ড পলিসি",
-      cart: "কার্ট",
-      career: "ক্যারিয়ার",
-      contact: "যোগাযোগ করুন",
-      getTouch: "আমাদের সাথে যোগাযোগ",
-      addressLabel: "৪০/১ সাফা গার্ডেন, সাত মসজিদ হাউজিং, মোহাম্মদপুর, ঢাকা-১২০৭",
-
-      // Course names & general text
-      courseTitle: "আমাদের কোর্সসমূহ",
-      liveHeader: "আমাদের লাইভ কোর্সসমূহ",
-      recordedHeader: "আমাদের রেকর্ডেড কোর্সসমূহ",
-      instructor: "তারবিয়াহ এডু",
-      curriculum: "কোর্সের পাঠ্যসূচি",
-      duration: "সময়সীমা",
-      level: "স্তর",
-      enrollNow: "এখনই যুক্ত হোন",
-      studentReviews: "শিক্ষার্থীদের মতামত",
-      whatStudentsSay: "তারবিয়াহ অনলাইন সম্পর্কে আমাদের শিক্ষার্থীদের অভিজ্ঞতা ও মতামত",
-      termsTitle: "শর্তাবলী ও নিয়মাবলী",
-      termsSubtitle: "আমাদের কোর্সগুলোতে ভর্তি হওয়ার আগে দয়া করে শর্তাবলী এবং নিয়মাবলী মনোযোগ দিয়ে পড়ুন।",
-    }
-  };
-
-  const t = (key) => {
-    return translations[language][key] || key;
+  // শুধুমাত্র title ও subtitle সহ ডিপ্লোমা কোর্স ডাটা (ভাষা অনুযায়ী পরিবর্তনশীল)
+  const diplomaCourse = {
+    id: 1,
+    image: diplomabanner,
+    title:
+      language === "bn"
+        ? "ডিপ্লোমা ইন ইসলামিক স্টাডিজ"
+        : "Diploma in Islamic Studies",
+    subtitle:
+      language === "bn"
+        ? "২ বছরের পূর্ণাঙ্গ ইসলামিক স্টাডিজ প্রোগ্রাম"
+        : "2-Year Comprehensive Islamic Studies Program",
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, toggleLanguage, t }}>
-      {children}
-    </LanguageContext.Provider>
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* Hero Section */}
+        <div className="relative bg-gradient-to-br from-[#002b2b] via-[#003d3d] to-[#004d4d] text-white rounded-3xl shadow-2xl overflow-hidden">
+          <div className="absolute inset-0 opacity-15 pointer-events-none">
+            <div className="absolute top-0 left-0 w-64 h-64 bg-yellow-400 rounded-full blur-3xl animate-pulse"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-teal-400 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          </div>
+
+          <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+            <span className="bg-yellow-500 text-black px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-bounce text-center">
+              {language === "bn" ? (
+                <>
+                  ভর্তি চলছে <br /> সীমিত আসন
+                </>
+              ) : (
+                <>
+                  Admission <br /> Ongoing
+                </>
+              )}
+            </span>
+          </div>
+
+          <div className="relative z-10 flex flex-col lg:flex-row items-center p-6 lg:p-12 gap-8">
+            <div className="w-full lg:w-1/2">
+              <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl p-3 border border-white/10 shadow-2xl">
+                <img
+                  src={diplomacover}
+                  alt="Islamic Studies Banner"
+                  className="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-xl shadow-xl"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-yellow-500 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform cursor-pointer">
+                    <FaPlay className="text-black text-2xl sm:text-3xl ml-1" />
+                  </div>
+                </div>
+                <div className="absolute -bottom-4 left-4 bg-white/90 backdrop-blur-sm text-black px-4 py-2 rounded-xl shadow-lg flex items-center gap-2">
+                  <FaUsers className="text-yellow-500" />
+                  <span className="font-bold">1,200+</span>
+                  <span className="text-sm">
+                    {language === "bn" ? "ছাত্র" : "Students"}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full lg:w-1/2 space-y-6">
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2"></div>
+                <h1 className="text-2xl sm:text-3xl md:text-5xl font-bold leading-tight">
+                  {language === "bn" ? "ডিপ্লোমা ইন" : "Diploma in"} <br />
+                  <span className="text-yellow-400 relative inline-block">
+                    {language === "bn" ? "ইসলামিক স্টাডিজ" : "Islamic Studies"}
+                    <svg
+                      className="absolute -bottom-2 left-0 w-full h-2"
+                      viewBox="0 0 200 10"
+                    >
+                      <path
+                        d="M0 5 Q50 10 100 5 T200 5"
+                        stroke="#FBBF24"
+                        strokeWidth="3"
+                        fill="none"
+                      />
+                    </svg>
+                  </span>
+                </h1>
+              </div>
+
+              <p className="text-sm sm:text-base md:text-lg text-gray-200 leading-relaxed">
+                {language === "bn"
+                  ? "আকিদা, ফিকহ, তাফসির, হাদিস, সিরাহসহ ইসলামি জ্ঞানের বিভিন্ন শাখায় সুসংগঠিত উচ্চতর শিক্ষা।"
+                  : "Structured higher education in various branches of Islamic knowledge including Aqeedah, Fiqh, Tafseer, Hadith, and Seerah."}
+              </p>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
+                <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
+                  <FaStar className="text-yellow-400 text-xl sm:text-2xl mx-auto mb-1" />
+                  <p className="text-xs text-gray-300">
+                    {language === "bn" ? "রেটিং" : "Rating"}
+                  </p>
+                  <p className="text-sm font-bold">
+                    {language === "bn" ? "৪.৯ (৫)" : "4.9 (5)"}
+                  </p>
+                </div>
+                <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
+                  <FaLaptop className="text-yellow-400 text-xl sm:text-2xl mx-auto mb-1" />
+                  <p className="text-xs text-gray-300">
+                    {language === "bn" ? "ক্লাস" : "Classes"}
+                  </p>
+                  <p className="text-sm font-bold">
+                    {language === "bn" ? "লাইভ" : "Live"}
+                  </p>
+                </div>
+                <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
+                  <FaAward className="text-yellow-400 text-xl sm:text-2xl mx-auto mb-1" />
+                  <p className="text-xs text-gray-300">
+                    {language === "bn" ? "সার্টিফিকেট" : "Certificate"}
+                  </p>
+                  <p className="text-sm font-bold">
+                    {language === "bn" ? "ভেরিফাইড" : "Verified"}
+                  </p>
+                </div>
+                <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
+                  <FaUsers className="text-yellow-400 text-xl sm:text-2xl mx-auto mb-1" />
+                  <p className="text-xs text-gray-300">
+                    {language === "bn" ? "ছাত্র" : "Students"}
+                  </p>
+                  <p className="text-sm font-bold">
+                    {language === "bn" ? "১২০০+" : "1200+"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Featured Course Section */}
+        <div className="mt-16">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#002b2b] mb-3">
+              {language === "bn" ? "আমাদের কোর্স সমূহ" : "Our Courses"}
+            </h2>
+            <p className="text-sm sm:text-base text-gray-600">
+              {language === "bn"
+                ? "দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম"
+                : "Reliable online platform for acquiring Islamic knowledge"}
+            </p>
+          </div>
+
+          {/* Single Course Card Display */}
+          <div className="max-w-md mx-auto">
+            <div className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col">
+              {/* Top Image Banner with Overlays */}
+              <div className="relative h-48 w-full">
+                <img
+                  src={diplomaCourse.image}
+                  alt={diplomaCourse.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+              </div>
+
+              {/* Card Body - Title, Subtitle and Details Button */}
+              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#002b2b]">
+                    {diplomaCourse.title}
+                  </h3>
+                  <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
+                    {diplomaCourse.subtitle}
+                  </p>
+                </div>
+
+                {/* Button Footer */}
+                <div className="border-t border-gray-100 pt-3 flex items-center justify-end">
+                  <Link to="/course/diploma/details">
+                    <button className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-5 py-2 rounded-full transition-all duration-300 text-sm flex items-center gap-2 shadow-md">
+                      <span>{language === "bn" ? "বিস্তারিত" : "Details"}</span>
+                      <FaArrowRight className="text-xs" />
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
+
+export default Diploma;

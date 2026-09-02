@@ -34,7 +34,7 @@ const About = () => {
           <div className="chairman-grid">
             <div className="chairman-photo">
               <img
-                src="https://i.ibb.co.com/GQRWh4DW/images-q-tbn-ANd9-Gc-Tw-Ke-AUYuda1bjp-PUU-NYup6-M-P-jlxhnq-Z0-Wb-X6hzw-Rj-HCp-Ys-O6-nc-UY-s-10.jpg"
+                src="https://i.ibb.co.com/LDh0Hqs1/profile.jpg"
                 alt="Ahmadullah - Chairman"
               />
               <div className="photo-border"></div>

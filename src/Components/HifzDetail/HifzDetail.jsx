@@ -3,6 +3,8 @@ import { Link } from "react-router";
 // Swiper এবং প্রয়োজনীয় মডিউল ইমপোর্ট করুন
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
+import HifzBannerImg from "../../image/banner (2).jpg";
+import HIfzThumbalImg from "../../image/hifzthumbal.jpg";
 
 // Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
 import "swiper/css";
@@ -39,7 +41,6 @@ const OneToOneDetails = () => {
   };
 
   const courseDetails = {
-    title: "অনলাইন হিফজ কোর্স",
     description: `
       আল্লাহ তায়ালা বলেন, আমিই যিকর (কুরআন) নাযিল করেছি এবং আমিই উহার সংরক্ষণ। 
       হিফজ- অধ্যায়: এটি সর্বসাকুল্যে precious বরকত পূর্ণ সমৃদ্ধ বিষয় তথা ক্ষেত্র। তাই 
@@ -49,10 +50,10 @@ const OneToOneDetails = () => {
       শিক্ষার্থী খুব সহজেই কুরআনুল কারীম হিফজ সমাপ্ত করতে পারার ইনশাআল্লাহ।
     `,
     objectives: [
-      "হিফজের বিষয়াবলী ও অনুশীলনী",
+      "হিফজের বিষয়াবলী ও অনুশীলনী",
       "ব্যবহারিক তাজবিদ ও সার্টিফাইড ইন্সট্রাক্টর",
       "সাপ্তাহিক সেশন ও মাসিক মূল্যায়ন",
-      "নিয়মিত প্রগ্রেস ও মৌখিক টিপস",
+      "নিয়মিত প্রগ্রেস ও মৌখিক টিপস",
     ],
     interCourses: [
       "পূর্ণ কুরআন হিফজ",
@@ -60,7 +61,7 @@ const OneToOneDetails = () => {
       "অ্যারাবিক সুয় হিফজ",
     ],
     targetAudience: [
-      "যাঁরা শুদ্ধ মাত্রায় কুরআনকে পড়তে পারে এমন শিক্ষার্থীদের জন্য।",
+      "যাঁরা শুদ্ধ মাত্রায় কুরআনকে পড়তে পারে এমন শিক্ষার্থীদের জন্য।",
       "যে কোনো বয়সের যে কেউ হাজী বা হাফেজ হতে পারে।",
       "বসে না থেকে ঘরে বসে কুরআন হিফজ করতে আগ্রহী।",
       "কর্মব্যস্ত জীবনের পাশাপাশি ঘরে কুরআন হিফজ প্রতি আগ্রহীদের জন্য।",
@@ -70,7 +71,7 @@ const OneToOneDetails = () => {
       "ক্লাসের সময়কাল: ১২০ মিনিট প্রতি ক্লাস",
       "সার্টিফিকেট ও ইনরাইট প্রদান",
       "পরীক্ষা: সিলেক্টিভ এবং ট্রায়াল",
-      "সাপ্তাহিক ক্লাসের দিন: ৪ দিন [নিয়মিত ব্যাচের জন্য]",
+      "সাপ্তাহিক ক্লাসের দিন: ৪ দিন [নিয়মিত ব্যাচের জন্য]",
       "সাপ্তাহিক ক্লাসের দিন: ২ দিন [ভিপিসী ব্যাচের জন্য]",
     ],
     feeStructure: ["ভর্তি ফি ২০০০ টাকা", "মাসিক ফি ২০০০ টাকা"],
@@ -88,7 +89,7 @@ const OneToOneDetails = () => {
     },
     {
       icon: <FaCheckCircle className="text-xl" />,
-      text: "মাসিক মূল্যায়ন",
+      text: "মাসিক মূল্যায়ন",
     },
     {
       icon: <FaGlobe className="text-xl" />,
@@ -96,7 +97,7 @@ const OneToOneDetails = () => {
     },
     {
       icon: <FaHeadset className="text-xl" />,
-      text: "ওয়ান-টু-ওয়ান সাপোর্ট",
+      text: "ওয়ান-টু-ওয়ান সাপোর্ট",
     },
     {
       icon: <FaCertificate className="text-xl" />,
@@ -206,32 +207,32 @@ const OneToOneDetails = () => {
     {
       question: "আপনাদের ওস্তাদরা বাচ্চাদের সঙ্গে কেমন আচরণ করেন?",
       answer:
-        "আমাদের শিক্ষকরা শিশুদের বয়স ও মানসিকতা অনুযায়ী ধৈর্য, আন্তরিকতা ও উৎসাহের সঙ্গে পাঠদান করেন, যাতে তারা আনন্দের সঙ্গে শিখতে পারে।",
+        "আমাদের শিক্ষকরা শিশুদের বয়স ও মানসিকতা অনুযায়ী ধৈর্য, আন্তরিকতা ও উৎসাহের সঙ্গে পাঠদান করেন, যাতে তারা আনন্দের সঙ্গে শিখতে পারে।",
     },
     {
       question: "আপনাদের হিফজ ডিপার্টমেন্টের সাফল্য সম্পর্কে বলুন।",
       answer:
-        "আমাদের হিফজ ডিপার্টমেন্টে দেশ-বিদেশের অসংখ্য শিক্ষার্থী সফলভাবে নাজেরা, হিফজ ও হিফজ রিভিশন সম্পন্ন করেছে এবং নিয়মিত কুরআনের সঙ্গে সংযুক্ত রয়েছে।",
+        "আমাদের হিফজ ডিপার্টমেন্টে দেশ-বিদেশের অসংখ্য শিক্ষার্থী সফলভাবে নাজেরা, হিফজ ও হিফজ রিভিশন সম্পন্ন করেছে এবং নিয়মিত কুরআনের সঙ্গে সংযুক্ত রয়েছে।",
     },
     {
-      question: "কত বছর বয়স থেকে বাচ্চারা শুরু করতে পারে?",
+      question: "কত বছর বয়স থেকে বাচ্চারা শুরু করতে পারে?",
       answer:
-        "সাধারণত ৪-৫ বছর বয়স থেকে শিশুদের কুরআন শিক্ষা শুরু করা যায়। তবে শিশুর প্রস্তুতি অনুযায়ী উপযুক্ত কোর্স নির্বাচন করা হয়।",
+        "সাধারণত ৪-৫ বছর বয়স থেকে শিশুদের কুরআন শিক্ষা শুরু করা যায়। তবে শিশুর প্রস্তুতি অনুযায়ী উপযুক্ত কোর্স নির্বাচন করা হয়।",
     },
     {
       question: "অভিভাবকরা কেন তারবিয়াহকে বেছে নেবেন?",
       answer:
-        "কারণ আমরা শুধু কুরআন শেখাই না; বরং শিশুর তিলাওয়াত, আদব-আখলাক, নিয়মিত অনুশীলন এবং শেখার অগ্রগতির ওপর সমান গুরুত্ব দিই।",
+        "কারণ আমরা শুধু কুরআন শেখাই না; বরং শিশুর তিলাওয়াত, আদব-আখলাক, নিয়মিত অনুশীলন এবং শেখার অগ্রগতির ওপর সমান গুরুত্ব দিই।",
     },
     {
-      question: "স্কুল কলেজের পড়াশোনার পাশাপাশি কি হিফজ করা সম্ভব?",
+      question: "স্কুল কলেজের পড়াশোনার পাশাপাশি কি হিফজ করা সম্ভব?",
       answer:
-        "হ্যাঁ। আমাদের ক্লাস রুটিন এমনভাবে পরিকল্পিত, যাতে শিক্ষার্থীরা জেনারেল শিক্ষার পাশাপাশি হিফজ চালিয়ে যেতে পারে।",
+        "হ্যাঁ। আমাদের ক্লাস রুটিন এমনভাবে পরিকল্পিত, যাতে শিক্ষার্থীরা জেনারেল শিক্ষার পাশাপাশি হিফজ চালিয়ে যেতে পারে।",
     },
     {
       question: "বাচ্চাদের হিফজ করানো কেন গুরুত্বপূর্ণ?",
       answer:
-        "শৈশব হলো মুখস্থ করার সর্বোত্তম সময়। এই সময়ে কুরআন হিফজ করলে তা দীর্ঘমেয়াদে সংরক্ষণ সহজ হয় এবং শিশুর নৈতিক, আত্মিক ও বুদ্ধিবৃত্তিক বিকাশেও ইতিবাচক ভূমিকা রাখে।",
+        "শৈশব হলো মুখস্থ করার সর্বোত্তম সময়। এই সময়ে কুরআন হিফজ করলে তা দীর্ঘমেয়াদে সংরক্ষণ সহজ হয় এবং শিশুর নৈতিক, আত্মিক ও বুদ্ধিবৃত্তিক বিকাশেও ইতিবাচক ভূমিকা রাখে।",
     },
   ];
 
@@ -250,22 +251,17 @@ const OneToOneDetails = () => {
           </Link>
 
           {/* Hero Section Banner */}
-          <div className="w-full max-w-3xl h-24 sm:h-32 md:h-40 rounded-2xl border border-gray-100 ml-8 mr-72 relative overflow-hidden bg-gradient-to-r from-amber-700 via-yellow-700 to-amber-900 p-6 text-white flex items-center justify-between shadow-md">
-            <div className="absolute inset-0 opacity-20 pointer-events-none flex justify-between items-center px-4">
-              <img
-                src={KidsImg}
-                alt="decoration"
-                className="w-24 h-24 object-cover rounded-full hidden sm:block"
-              />
-              <img
-                src={KidsImg}
-                alt="decoration"
-                className="w-24 h-24 object-cover rounded-full hidden sm:block"
-              />
+          <div className="w-full max-w-3xl h-36 sm:h-44 md:h-52 rounded-2xl border border-gray-100 ml-8 mr-72 relative overflow-hidden shadow-md">
+            <img
+              src={HifzBannerImg}
+              alt="Hifz Banner"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-between px-6 sm:px-10">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white relative z-10">
+                {courseDetails.title}
+              </h1>
             </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold relative z-10">
-              {courseDetails.title}
-            </h1>
           </div>
 
           {/* Course Info Section - Below Banner */}
@@ -644,8 +640,8 @@ const OneToOneDetails = () => {
               {/* Instructor / Course Preview Image Card */}
               <div className="block relative group overflow-hidden rounded-2xl shadow-md border border-gray-100 bg-white p-2">
                 <img
-                  src="https://i.pravatar.cc/300?img=11"
-                  alt="Instructor Preview"
+                  src={HIfzThumbalImg}
+                  alt="Course Preview Thumbnail"
                   className="w-full h-44 object-cover rounded-xl"
                 />
               </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import alemiyahbanner from "../../image/alemiyahkidsbanner.png";
-import alemiaImg from "../../image/alemiyah.jpg";
+import alemiaImg from "../../image/Coursecover.png";
 import { Link } from "react-router";
 import {
   FaCheckCircle,

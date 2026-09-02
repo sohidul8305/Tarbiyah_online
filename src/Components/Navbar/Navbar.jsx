@@ -11,7 +11,7 @@ const Navbar = () => {
   const translations = {
     en: {
       address: "40/1, safa garden, satmasjid housing, mohammadpur, Dhaka-1207",
-      email: "info@tarbiyahonline.com",
+      email: "hello.tarbiyah@gmail.com",
       phone1: "+880 1841-514545",
       phone2: "+880 1841-516565",
       login: "Log In",
@@ -259,7 +259,10 @@ const Navbar = () => {
               >
                 {t.admission}
               </Link>
-              <Link to="/support" className="block px-4 py-2 hover:bg-gray-100">
+              <Link
+                to="/student_support"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
                 {t.support}
               </Link>
             </div>
