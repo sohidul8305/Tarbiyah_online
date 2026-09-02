@@ -13,7 +13,7 @@ import motiulImg from "../../image/Motiul Islam .jpeg";
 import UbadullahImg from "../../image/Ubaydullah.png";
 import JakariyamasudImg from "../../image/jakariyah.png";
 import Mohammadhidoy from "../../image/Hridoy-Ustaz-01.png";
-import AbdullahMamunImg from "../../image/Abdullah AL Mamun.jpeg";
+import AbdullahMamunImg from "../../image/Abdullahmanun.jpg";
 import AbunomanImg from "../../image/abunoman.jpg";
 // Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
 import "swiper/css";
