@@ -14,8 +14,11 @@ import UbadullahImg from "../../image/Ubaydullah.png";
 import JakariyamasudImg from "../../image/jakariyah.png";
 import Mohammadhidoy from "../../image/Hridoy-Ustaz-01.png";
 import AbdullahMamunImg from "../../image/Abdullahmanun.jpg";
-// import AbunomanImg from "../../image/abunoman.jpg";
-// Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
+import AbunomanImg from "../../image/Abunoman.jpg";
+import Abdullahkafi from "../../image/Abdullah Kafi.png";
+import ImamhossainImg from "../../image/Emam Hussain.png";
+import Avatorboys from "../../image/Avatorboys.png";
+
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -55,7 +58,7 @@ const DiplomaDetails = () => {
     {
       id: 1,
       name: "Professor Mokhter Ahmad",
-      title: "Chairman, Tarbiyah Academy",
+      title: "Chairman, Tarbiyah Education Network",
       image: ProfessorImg,
     },
     {
@@ -120,7 +123,35 @@ const DiplomaDetails = () => {
       name: "Ustad Abu Noman",
       title: "Coordinator",
       subtitle: "Department of Quranic Studies, Tarbiyah Education Network",
-      // image: AbunomanImg,
+      image: AbunomanImg,
+    },
+    {
+      id: 11,
+      name: "Dr Abdullah Al kafi",
+      title: "Senior Faculty",
+      subtitle: "Diploma In Islamic Studies",
+      image: Abdullahkafi,
+    },
+    {
+      id: 12,
+      name: "Emam Hussain",
+      title: "Junior Faculty",
+      subtitle: "Diploma In Islamic Studies",
+      image: ImamhossainImg,
+    },
+    {
+      id: 13,
+      name: "Sarder Al Mahmud",
+      title: "Faculty",
+      subtitle: "Diploma In Islamic Studies",
+      image: Avatorboys,
+    },
+    {
+      id: 14,
+      name: "Sayed Al Amin",
+      title: "Junior Faculty",
+      subtitle: "Diploma In Islamic Studies",
+      image: Avatorboys,
     },
   ];
 
@@ -1462,7 +1493,7 @@ const DiplomaDetails = () => {
             <div className="space-y-4 -mt-[305px]">
               {/* YouTube Video Thumbnail */}
               <a
-                href="https://youtu.be/fSj6hz-j7Ok?si=QBGUyETeILDQ5lK1"
+                href="https://youtu.be/66DgxQACWd4?si=J6UgGDOVUQ4pU6nf"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer"
@@ -1505,7 +1536,7 @@ const DiplomaDetails = () => {
               {/* Instructors List - No Scroll */}
               <div className="bg-white rounded-3xl">
                 <h3 className="text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
-                  ফ্যাকাল্টি
+                  Faculty
                 </h3>
                 <div className="space-y-4">
                   {instructors.map((instructor) => (
