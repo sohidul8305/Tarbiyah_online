@@ -13,7 +13,7 @@ import Jubair from "../../image/Zubair.jpeg";
 import Ubauddin from "../../image/Ubaydullah.png";
 import Motiul from "../../image/Motiul Islam .jpeg";
 import JakariyahmasudImg from "../../image/jakariyah.png";
-import Aldullahalmamun from "../../image/Abdullah AL Mamun.jpeg";
+import Aldullahalmamun from "../../image/Abdullahmanun.jpg";
 import abdullahkafi from "../../image/Abdullah Kafi.png";
 import AlminImg from "../../image/Alamin.png";
 import TorikImg from "../../image/Torikul Islam.jpg";
