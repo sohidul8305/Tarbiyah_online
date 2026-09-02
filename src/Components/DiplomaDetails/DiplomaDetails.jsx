@@ -14,8 +14,7 @@ import UbadullahImg from "../../image/Ubaydullah.png";
 import JakariyamasudImg from "../../image/jakariyah.png";
 import Mohammadhidoy from "../../image/Hridoy-Ustaz-01.png";
 import AbdullahMamunImg from "../../image/Abdullah AL Mamun.jpeg";
-import AbunomanImg from "../../image/Abu Numan .JPG";
-
+import AbunomanImg from "../../image/abunoman.jpg";
 // Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
 import "swiper/css";
 import "swiper/css/pagination";
