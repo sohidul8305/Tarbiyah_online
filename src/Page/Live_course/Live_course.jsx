@@ -3,13 +3,12 @@ import { Link } from "react-router";
 import { FaGraduationCap } from "react-icons/fa";
 import { useLanguage } from "../../context/useLanguage";
 
-// ইমেজগুলো ইম্পোর্ট করা হলো
 import diplomacover from "../../image/diplomacover.png";
-import Tarbiyahcourse from "../../image/Tarbiyaprogram.jpg";
-import NuraniyahcourseImg from "../../image/nuranicourse.jpg";
-import hifzImg from "../../image/adalthifzbanner.jpg";
+import Tarbiyahcourse from "../../image/Coursecover.png";
 import AlemiyahKids from "../../image/Alemiyahkids.png";
 import Najeraelders from "../../image/Thumb.jpg";
+import hifzquranImg from "../../image/banner (2).jpg";
+import NuraniyahcourseImg from "../../image/Quranforeldersbanner.jpg";
 
 const Live_course = () => {
   // ভাষা কন্টেক্সট নিরাপদ ব্যবহার
@@ -20,7 +19,7 @@ const Live_course = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
 
-  // রাউটার ফাইলের পাথ অনুযায়ী আপডেট করা কোর্স লিস্ট
+  // মোট ৬টি কোর্স লিস্ট সঠিক ইমেজসহ
   const courses = [
     {
       id: 1,
@@ -28,14 +27,14 @@ const Live_course = () => {
         language === "bn"
           ? "ডিপ্লোমা ইন ইসলামিক স্টাডিজ"
           : "Diploma in Islamic Studies",
-      slug: "/course/diploma/details", // রাউটার পাথ অনুযায়ী সঠিক করা হয়েছে
+      slug: "/course/diploma/details",
       category: "Live Course",
       image: diplomacover,
       instructor: t("instructor"),
     },
     {
       id: 2,
-      title: language === "bn" ? "আলিমিয়াহ ফর কিডস" : "Alemiyah for Kids",
+      title: language === "bn" ? "আলিমিয়াহ ফর কিডস" : "Allimiyah for Kids",
       slug: "/course/alemiah/alimiyah-kids",
       category: "Recorded Course",
       image: AlemiyahKids,
@@ -43,7 +42,7 @@ const Live_course = () => {
     },
     {
       id: 3,
-      title: language === "bn" ? "আলিমিয়াহ প্রোগ্রাম" : "Alemiyah Program",
+      title: language === "bn" ? "আলিমিয়াহ প্রোগ্রাম" : "Allimiyah Program",
       slug: "/course/alemiah/alimiyah-program",
       category: "Live Course",
       image: Tarbiyahcourse,
@@ -51,14 +50,6 @@ const Live_course = () => {
     },
     {
       id: 4,
-      title: language === "bn" ? "কায়দা নুরানী" : "Qaida Nurani",
-      slug: "/course/kids/quida-nurani",
-      category: "Live Course",
-      image: NuraniyahcourseImg,
-      instructor: t("instructor"),
-    },
-    {
-      id: 5,
       title: language === "bn" ? "নাজেরা" : "Najera",
       slug: "/course/quran/elders-nazera",
       category: "Live Course",
@@ -66,37 +57,17 @@ const Live_course = () => {
       instructor: t("instructor"),
     },
     {
-      id: 6,
+      id: 5,
       title: language === "bn" ? "হিফজুল কুরআন" : "Hifzul Quran",
       slug: "/course/quran/elders-hifz",
       category: "Live Course",
-      image: hifzImg,
+      image: hifzquranImg,
       instructor: t("instructor"),
     },
     {
-      id: 7,
-      title: language === "bn" ? "হিফজ রিভিশন" : "Hifz Revision",
-      slug: "/course/kids/hifz-revision",
-      category: "Live Course",
-      image: hifzImg,
-      instructor: t("instructor"),
-    },
-    {
-      id: 8,
+      id: 6,
       title: language === "bn" ? "কায়দায়ে নূরানিয়্যাহ" : "Qaiday Nuraniyyah",
       slug: "/course/quran/elders-quida",
-      category: "Live Course",
-      image: NuraniyahcourseImg,
-      instructor: t("instructor"),
-    },
-
-    {
-      id: 10,
-      title:
-        language === "bn"
-          ? "বেসিক তাজউইদ (লেভেল–১)"
-          : "Basic Tajweed (Level-1)",
-      slug: "/course/quran/elders-tajweed",
       category: "Live Course",
       image: NuraniyahcourseImg,
       instructor: t("instructor"),
@@ -126,7 +97,7 @@ const Live_course = () => {
         </h1>
         <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
           {language === "bn"
-            ? "সকল বয়স এবং স্তরের জন্য ডিজাইন করা আমাদের লাইভ কোর্সসমূহ অন্বেষণ করুন"
+            ? "সকল বয়স এবং স্তরের জন্য ডিজাইন করা আমাদের লাইভ কোর্সসমূহ অন্বেষণ করুন"
             : "Explore our comprehensive live courses designed for all ages and levels"}
         </p>
       </div>
@@ -160,30 +131,30 @@ const Live_course = () => {
       </div>
 
       {/* কোর্স গ্রিড (রেসপন্সিভ) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredCourses.map((course) => (
           <Link
             key={course.id}
             to={course.slug}
-            className="block bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+            className="block bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
           >
             {/* কোর্সের ছবি */}
-            <div className="h-48 w-full overflow-hidden bg-gray-200">
+            <div className="w-full h-48 bg-gray-100 overflow-hidden relative">
               <img
                 src={course.image}
                 alt={course.title}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover object-center"
               />
             </div>
 
             {/* কার্ডের বিবরণ */}
-            <div className="p-4">
+            <div className="p-4 flex flex-col flex-grow justify-between">
               <h3 className="font-bold text-gray-800 text-base mb-2 line-clamp-1">
                 {course.title}
               </h3>
-              <div className="flex items-center text-teal-700 text-sm gap-1">
-                <FaGraduationCap className="text-teal-700 text-base" />
-                <span>{course.instructor}</span>
+              <div className="flex items-center text-teal-700 text-sm gap-1 mt-auto">
+                <FaGraduationCap className="text-teal-700 text-base flex-shrink-0" />
+                <span className="truncate">{course.instructor}</span>
               </div>
             </div>
           </Link>
@@ -195,7 +166,7 @@ const Live_course = () => {
         <div className="text-center py-12">
           <p className="text-gray-500 text-lg">
             {language === "bn"
-              ? "আপনার অনুসন্ধانের সাথে মিল কোনো কোর্স পাওয়া যায়নি।"
+              ? "আপনার অনুসন্ধানের সাথে মিল কোনো কোর্স পাওয়া যায়নি।"
               : "No courses found matching your search."}
           </p>
         </div>
