@@ -115,7 +115,7 @@ const Faculty = () => {
       name: { en: "Marjan Ahmad", bn: "মারজান আহমেদ" },
       designation: { en: "Senior Teacher", bn: "সিনিয়র শিক্ষক" },
       department: { en: "Allimiyah", bn: "আলিমিয়াহ" },
-      image: Avatorboys,
+      image: Avator,
     },
     {
       name: { en: "Atiqullah Sahid", bn: "আতিকুল্লাহ সাহিদ" },
