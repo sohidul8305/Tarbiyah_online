@@ -85,9 +85,7 @@ const Diploma = () => {
                   className="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-xl shadow-xl"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-yellow-500 rounded-full flex items-center justify-center shadow-2xl hover:scale-110 transition-transform cursor-pointer">
-                    <FaPlay className="text-black text-2xl sm:text-3xl ml-1" />
-                  </div>
+                  <div className=""></div>
                 </div>
                 <div className="absolute -bottom-4 left-4 bg-white/90 backdrop-blur-sm text-black px-4 py-2 rounded-xl shadow-lg flex items-center gap-2">
                   <FaUsers className="text-yellow-500" />

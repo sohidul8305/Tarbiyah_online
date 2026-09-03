@@ -64,8 +64,8 @@ const Alemiah = () => {
         bn: "আলিমিয়াহ ফর কিডস",
       }),
       subtitle: t({
-        en: "An enjoyable start to learning Islamic knowledge for children aged 6–11",
-        bn: "৬–১১ বছর বয়সী শিশুদের জন্য ইলম শেখার আনন্দময় সূচনা",
+        en: "Reliable online platform for acquiring Islamic knowledge",
+        bn: "দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম",
       }),
       image: alemiyahbanner,
     },

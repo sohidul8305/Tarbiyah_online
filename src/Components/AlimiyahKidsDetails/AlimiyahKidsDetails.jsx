@@ -9,6 +9,7 @@ import girlavator from "../../image/arartor.png";
 import MamunImg from "../../image/Abdullahmanun.jpg";
 import MahmudImg from "../../image/Hridoy-Ustaz-01.png";
 import MarjanaImg from "../../image/arartor.png";
+import Certificate from "../../image/allimiyahcertificate.png";
 
 // Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
 import "swiper/css";
@@ -56,7 +57,37 @@ import ImamhussainImg from "../../image/Emam Hussain.png";
 import AtiqullahImg from "../../image/atikullah.png";
 import JubaerImg from "../../image/jubair.png";
 import AlaminImg from "../../image/Alamin.png";
+
+// --- Language Hook (self-contained) ---
+import { useState as useStateHook, useEffect } from "react";
+
+export const useLanguage = () => {
+  const [language, setLanguage] = useStateHook(
+    () => localStorage.getItem("language") || "en",
+  );
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setLanguage(localStorage.getItem("language") || "en");
+    };
+
+    window.addEventListener("languageChange", handleStorageChange);
+    return () => {
+      window.removeEventListener("languageChange", handleStorageChange);
+    };
+  }, []);
+
+  const t = (translations) => {
+    return translations[language] || translations["en"];
+  };
+
+  return { language, t };
+};
+// -----------------------------------------------
+
 const AlimiyahKidsDetails = () => {
+  const { t } = useLanguage();
+
   const [openSemester, setOpenSemester] = useState(null);
   const [activeTab, setActiveTab] = useState("info");
   const [openFaq, setOpenFaq] = useState(null);
@@ -69,164 +100,243 @@ const AlimiyahKidsDetails = () => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
-  // Alimiyah Kids এর ইনস্ট্রাক্টর
+  // Alimiyah Kids এর ইনস্ট্রাক্টর (ট্রান্সলেটেড)
   const instructors = [
     {
       id: 1,
       name: "Abdullah Al Mamun",
-      title: "Co Ordinator",
-      subtitle: "Tarbiyah Education Network",
+      title: t({ en: "Co Ordinator", bn: "সমন্বয়ক" }),
+      subtitle: t({
+        en: "Tarbiyah Education Network",
+        bn: "তারবিয়াহ এডুকেশন নেটওয়ার্ক",
+      }),
       image: MamunImg,
     },
     {
       id: 2,
-      name: "Hussain Mohammad Hidoy ",
-      title: "Coordinator",
-      subtitle: "Department of Islamic Studies, Tarbiyah Education Network",
+      name: "Hussain Mohammad Hidoy",
+      title: t({ en: "Coordinator", bn: "সমন্বয়ক" }),
+      subtitle: t({
+        en: "Department of Islamic Studies, Tarbiyah Education Network",
+        bn: "ইসলামিক স্টাডিজ বিভাগ, তারবিয়াহ এডুকেশন নেটওয়ার্ক",
+      }),
       image: MahmudImg,
     },
     {
       id: 3,
-      name: "Emam hussain ",
-      title: "Junior Faculty",
-      subtitle: "Diploma In Islamic Studies",
+      name: "Emam hussain",
+      title: t({ en: "Junior Faculty", bn: "জুনিয়র অনুষদ সদস্য" }),
+      subtitle: t({
+        en: "Diploma In Islamic Studies",
+        bn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
+      }),
       image: ImamhussainImg,
     },
     {
       id: 4,
-      name: "Marjan Ahmad ",
-      title: "Senior Teacher",
-      subtitle: "Tarbiyah Education Network",
+      name: "Marjan Ahmad",
+      title: t({ en: "Senior Teacher", bn: "সিনিয়র শিক্ষক" }),
+      subtitle: t({
+        en: "Tarbiyah Education Network",
+        bn: "তারবিয়াহ এডুকেশন নেটওয়ার্ক",
+      }),
       image: MarjanaImg,
     },
     {
-      id: 4,
+      id: 5,
       name: "Atiqullah Sahid",
-      title: "Junior Teacher",
-      subtitle: "Allimiyah",
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Allimiyah", bn: "আলিমিয়াহ" }),
       image: AtiqullahImg,
     },
     {
-      id: 4,
-      name: "Jubair Hussain ",
-      title: "Junior Teacher",
-      subtitle: "Allimiyah",
+      id: 6,
+      name: "Jubair Hussain",
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Allimiyah", bn: "আলিমিয়াহ" }),
       image: JubaerImg,
     },
     {
-      id: 4,
+      id: 7,
       name: "Al Amin",
-      title: "Junior Teacher",
-      subtitle: "Allimiyah",
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Allimiyah", bn: "আলিমিয়াহ" }),
       image: AlaminImg,
     },
   ];
 
-  // Alimiyah Kids এর মূল ডাটা
+  // Alimiyah Kids এর মূল ডাটা (ট্রান্সলেটেড)
   const courseDetails = {
-    title: "Alimiyah for Kids",
-    subtitle: "বাচ্চাদের জন্য ইসলামিক শিক্ষা",
-    description: `
-     Alimiyah Basic Islam Course is basically designed for Muslim children and teenagers. Which will help the student to acquire basic knowledge of Islam as well as to implement it. This course will play a great role in knowing the Islamic solutions and procedures in all the necessary areas based on the 10 basic subjects. This course will develop positive mindset in children.
-    `,
+    title: t({ en: "Alimiyah for Kids", bn: "আলিমিয়াহ ফর কিডস" }),
+    subtitle: t({
+      en: "Islamic education for children",
+      bn: "বাচ্চাদের জন্য ইসলামিক শিক্ষা",
+    }),
+    description: t({
+      en: "Alimiyah Basic Islam Course is basically designed for Muslim children and teenagers. Which will help the student to acquire basic knowledge of Islam as well as to implement it. This course will play a great role in knowing the Islamic solutions and procedures in all the necessary areas based on the 10 basic subjects. This course will develop positive mindset in children.",
+      bn: "আলিমিয়াহ বেসিক ইসলাম কোর্সটি মূলত মুসলিম শিশু ও কিশোরদের জন্য ডিজাইন করা হয়েছে। যা শিক্ষার্থীকে ইসলামের মৌলিক জ্ঞান অর্জনের পাশাপাশি তা বাস্তবায়নে সাহায্য করবে। এই কোর্সটি ১০টি মৌলিক বিষয়ের ভিত্তিতে প্রয়োজনীয় সকল ক্ষেত্রে ইসলামি সমাধান ও পদ্ধতি জানতে গুরুত্বপূর্ণ ভূমিকা পালন করবে। এই কোর্সটি শিশুদের মধ্যে ইতিবাচক মানসিকতা গড়ে তুলবে।",
+    }),
     objectives: [
-      "বিশুদ্ধ আকিদাহ সম্পর্কিত জ্ঞানলাভ",
-      "ব্যাসিক মাসাআলা-মাসায়েল",
-      "ছোটদের উপযোগী দ্বীনের মৌলিক জ্ঞানার্জন",
-      "ছোটদের আরবি ভাষায় শিক্ষার আসর",
-      "সম্পূর্ণ অনলাইন ভিত্তিক কোর্স",
-      "লাইভ ক্লাস, মাশক্ব, লেকচার শীট ও রেকর্ডেড ক্লাস",
-      "​সম্পূর্ণ কায়দা অনুশীলন",
-      " ​ছোটদের আরবি ভাষা শিক্ষার আসর",
-      " ছোটদের হাদিস ও সুন্নাহ চর্চা",
-      "​ছোটদের দোয়া ও ইবাদত চর্চা",
-      "​ছোটদের আখলাক ও আদব",
+      t({
+        en: "Knowledge of pure Aqeedah",
+        bn: "বিশুদ্ধ আকিদাহ সম্পর্কিত জ্ঞানলাভ",
+      }),
+      t({ en: "Basic Masaa'il (issues)", bn: "ব্যাসিক মাসাআলা-মাসায়েল" }),
+      t({
+        en: "Basic Islamic knowledge suitable for children",
+        bn: "ছোটদের উপযোগী দ্বীনের মৌলিক জ্ঞানার্জন",
+      }),
+      t({
+        en: "Arabic language learning sessions for children",
+        bn: "ছোটদের আরবি ভাষায় শিক্ষার আসর",
+      }),
+      t({ en: "Fully online course", bn: "সম্পূর্ণ অনলাইন ভিত্তিক কোর্স" }),
+      t({
+        en: "Live classes, homework, lecture sheets & recorded classes",
+        bn: "লাইভ ক্লাস, মাশক্ব, লেকচার শীট ও রেকর্ডেড ক্লাস",
+      }),
+      t({ en: "Complete Qa'idah practice", bn: "সম্পূর্ণ কায়দা অনুশীলন" }),
+      t({
+        en: "Arabic language learning sessions for children",
+        bn: "ছোটদের আরবি ভাষা শিক্ষার আসর",
+      }),
+      t({
+        en: "Hadith & Sunnah practice for children",
+        bn: "ছোটদের হাদিস ও সুন্নাহ চর্চা",
+      }),
+      t({
+        en: "Du'a and Ibadah practice for children",
+        bn: "ছোটদের দোয়া ও ইবাদত চর্চা",
+      }),
+      t({ en: "Akhlaq and Adab for children", bn: "ছোটদের আখলাক ও আদব" }),
     ],
     benefits: [
-      "প্রবাসে বসবাসের ফলে যারা দ্বীনী শিক্ষার্জনের সুবিধা হতে বঞ্চিত",
-      "ইংলিশ মিডিয়ামের শিক্ষার্থীদের জন্য রয়েছে প্রফেশনাল ইংলিশ ভার্সন",
-      "জেনারেল শিক্ষার পাশাপাশি যারা দ্বীনি শিক্ষার আগ্রহ লালন করেন",
-      "৬-১২ বছরের সকল শিক্ষার্থীর জন্য এই কোর্সটি বিশেষভাবে ডিজাইন করা হয়েছে",
-      "যারা নিজেদের সন্তানকে প্র্যাক্টিসিং মুসলিম হিসেবে গড়ে তুলতে চান",
+      t({
+        en: "Those living abroad who are deprived of Islamic education",
+        bn: "প্রবাসে বসবাসের ফলে যারা দ্বীনী শিক্ষার্জনের সুবিধা হতে বঞ্চিত",
+      }),
+      t({
+        en: "Professional English version for English medium students",
+        bn: "ইংলিশ মিডিয়ামের শিক্ষার্থীদের জন্য রয়েছে প্রফেশনাল ইংলিশ ভার্সন",
+      }),
+      t({
+        en: "Those who are interested in Islamic education alongside general education",
+        bn: "জেনারেল শিক্ষার পাশাপাশি যারা দ্বীনি শিক্ষার আগ্রহ লালন করেন",
+      }),
+      t({
+        en: "This course is specially designed for students aged 6-12",
+        bn: "৬-১২ বছরের সকল শিক্ষার্থীর জন্য এই কোর্সটি বিশেষভাবে ডিজাইন করা হয়েছে",
+      }),
+      t({
+        en: "Those who want to raise their children as practicing Muslims",
+        bn: "যারা নিজেদের সন্তানকে প্র্যাক্টিসিং মুসলিম হিসেবে গড়ে তুলতে চান",
+      }),
     ],
     schedule: {
-      duration: "২ বছর",
-      classes: "সপ্তাহে ৩ দিন",
-      time: "সকাল ১০:০০ - ১১:৩০",
-      totalClasses: "২৪০টি ক্লাস",
+      duration: t({ en: "2 Years", bn: "২ বছর" }),
+      classes: t({ en: "3 days a week", bn: "সপ্তাহে ৩ দিন" }),
+      time: t({ en: "10:00 AM - 11:30 AM", bn: "সকাল ১০:০০ - ১১:৩০" }),
+      totalClasses: t({ en: "240 classes", bn: "২৪০টি ক্লাস" }),
     },
     price: {
-      original: "৮,০০০ টাকা",
-      discount: "৫,৫০০ টাকা",
-      save: "৩১%",
+      original: t({ en: "8,000 TK", bn: "৮,০০০ টাকা" }),
+      discount: t({ en: "5,500 TK", bn: "৫,৫০০ টাকা" }),
+      save: t({ en: "31%", bn: "৩১%" }),
     },
   };
 
-  // Materials Included
+  // Materials Included (ট্রান্সলেটেড)
   const materialsData = [
     {
-      text: "সপ্তাহে ২ দিন ৩টি ক্লাস",
+      text: t({
+        en: "3 classes per week (2 days)",
+        bn: "সপ্তাহে ২ দিন ৩টি ক্লাস",
+      }),
       icon: <FaClock className="text-[#00ADD2]" />,
     },
     {
-      text: "প্রতিটি ক্লাস ৪০ মিনিট",
+      text: t({ en: "Each class 40 minutes", bn: "প্রতিটি ক্লাস ৪০ মিনিট" }),
       icon: <FaClock className="text-[#00ADD2]" />,
     },
     {
-      text: "প্রতিটি ক্লাসের লাইভ ক্লাস রেকর্ড",
+      text: t({
+        en: "Live class recording for each class",
+        bn: "প্রতিটি ক্লাসের লাইভ ক্লাস রেকর্ড",
+      }),
       icon: <FaVideo className="text-[#00ADD2]" />,
     },
     {
-      text: "প্রতিটি ক্লাসের রেকর্ডেড ভিডিও",
+      text: t({
+        en: "Recorded video for each class",
+        bn: "প্রতিটি ক্লাসের রেকর্ডেড ভিডিও",
+      }),
       icon: <FaRegDownload className="text-[#00ADD2]" />,
     },
     {
-      text: "কুইজ ও মিডটার্ম পরীক্ষা",
+      text: t({
+        en: "Quizzes and Midterm exams",
+        bn: "কুইজ ও মিডটার্ম পরীক্ষা",
+      }),
       icon: <FaQuestionCircle className="text-[#00ADD2]" />,
     },
     {
-      text: "সেমিস্টার ফাইনাল পরীক্ষা",
+      text: t({ en: "Semester final exams", bn: "সেমিস্টার ফাইনাল পরীক্ষা" }),
       icon: <FaRegClipboard className="text-[#00ADD2]" />,
     },
     {
-      text: "কোর্স ডিউরেশন এর নোট",
+      text: t({ en: "Course duration notes", bn: "কোর্স ডিউরেশন এর নোট" }),
       icon: <FaFileAlt className="text-[#00ADD2]" />,
     },
     {
-      text: "সার্টিফিকেট ও ইজাযাহ প্রদান",
+      text: t({
+        en: "Certificate and Ijazah",
+        bn: "সার্টিফিকেট ও ইজাযাহ প্রদান",
+      }),
       icon: <FaCertificate className="text-[#00ADD2]" />,
     },
   ];
 
-  // Why Tarbiyah Diploma features
+  // Why Tarbiyah features (ট্রান্সলেটেড)
   const whyFeatures = [
     {
       icon: <FaCheckCircle />,
-      text: "বিশুদ্ধ আকিদাভিত্তিক পাঠক্রম",
+      text: t({
+        en: "Authentic Aqeedah-based curriculum",
+        bn: "বিশুদ্ধ আকিদাভিত্তিক পাঠক্রম",
+      }),
     },
     {
       icon: <FaUserTie />,
-      text: "দেশবরেণ্য ইসলামি স্কলার",
+      text: t({
+        en: "Renowned Islamic scholars",
+        bn: "দেশবরেণ্য ইসলামি স্কলার",
+      }),
     },
     {
       icon: <FaVideo />,
-      text: "লাইভ ও রেকর্ডেড ক্লাস",
+      text: t({ en: "Live and recorded classes", bn: "লাইভ ও রেকর্ডেড ক্লাস" }),
     },
     {
       icon: <FaHeadset />,
-      text: "নিয়মিত একাডেমিক সাপোর্ট",
+      text: t({
+        en: "Regular academic support",
+        bn: "নিয়মিত একাডেমিক সাপোর্ট",
+      }),
     },
     {
       icon: <FaCertificate />,
-      text: "ইজাযাহ ও সার্টিফিকেট",
+      text: t({ en: "Ijazah and Certificate", bn: "ইজাযাহ ও সার্টিফিকেট" }),
     },
     {
       icon: <FaGlobe />,
-      text: "বিশ্বের যেকোনো দেশ থেকে অংশগ্রহণ",
+      text: t({
+        en: "Participate from anywhere in the world",
+        bn: "বিশ্বের যেকোনো দেশ থেকে অংশগ্রহণ",
+      }),
     },
   ];
 
-  // Testimonials data
+  // Testimonials (এগুলো বাংলায় থাকবে, ট্রান্সলেট করা হয়নি – যেমনটি আছে)
   const testimonials = [
     {
       id: 1,
@@ -283,79 +393,118 @@ const AlimiyahKidsDetails = () => {
         "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
   ];
-  // Video Gallery Data
+
+  // Video Gallery (ট্রান্সলেটেড)
   const videoGallery = [
     {
       id: 1,
-      title: "ভিডিও ১",
+      title: t({ en: "Video 1", bn: "ভিডিও ১" }),
       thumbnail: "https://img.youtube.com/vi/I1ibIcH35k4/hqdefault.jpg",
       url: "https://youtu.be/I1ibIcH35k4?si=l6ig1yuVRai-OtXj",
     },
     {
       id: 2,
-      title: "ভিডিও ২",
+      title: t({ en: "Video 2", bn: "ভিডিও ২" }),
       thumbnail: "https://img.youtube.com/vi/D5Ov8e2aDh0/hqdefault.jpg",
       url: "https://youtu.be/D5Ov8e2aDh0?si=LG7MHGRQBIw4pSxA",
     },
     {
       id: 3,
-      title: "ভিডিও ৩",
+      title: t({ en: "Video 3", bn: "ভিডিও ৩" }),
       thumbnail: "https://img.youtube.com/vi/VvWiI0H_1aM/hqdefault.jpg",
       url: "https://youtu.be/VvWiI0H_1aM?si=4KyGDgdCGqgj-dvG",
     },
     {
       id: 4,
-      title: "ভিডিও ৪",
+      title: t({ en: "Video 4", bn: "ভিডিও ৪" }),
       thumbnail: "https://img.youtube.com/vi/BfQfFoEYpl4/hqdefault.jpg",
       url: "https://youtu.be/BfQfFoEYpl4?si=dSmxcRERYRmTDSD7",
     },
     {
       id: 5,
-      title: "ভিডিও ৫",
+      title: t({ en: "Video 5", bn: "ভিডিও ৫" }),
       thumbnail: "https://img.youtube.com/vi/e3PX_VdD_jI/hqdefault.jpg",
       url: "https://youtu.be/e3PX_VdD_jI?si=qeCYrxke3um9G1yg",
     },
     {
       id: 6,
-      title: "ভিডিও ৬",
+      title: t({ en: "Video 6", bn: "ভিডিও ৬" }),
       thumbnail: "https://img.youtube.com/vi/EbcUT8uqW8g/hqdefault.jpg",
       url: "https://youtu.be/EbcUT8uqW8g?si=yFGWV7Q6FicA-Dyz",
     },
   ];
-  // FAQ Data
+
+  // FAQ (ট্রান্সলেটেড)
   const faqs = [
     {
-      question: "এই প্রোগ্রামের উদ্দেশ্য কী?",
-      answer:
-        "জেনারেল শিক্ষার পাশাপাশি শিশু-কিশোরদের সহিহ আকীদা, কুরআন-সুন্নাহভিত্তিক জ্ঞান ও উত্তম চরিত্রে গড়ে তোলা।",
+      question: t({
+        en: "What is the purpose of this program?",
+        bn: "এই প্রোগ্রামের উদ্দেশ্য কী?",
+      }),
+      answer: t({
+        en: "To build children and teenagers with sound Aqeedah, Qur'an-Sunnah based knowledge, and excellent character alongside general education.",
+        bn: "জেনারেল শিক্ষার পাশাপাশি শিশু-কিশোরদের সহিহ আকীদা, কুরআন-সুন্নাহভিত্তিক জ্ঞান ও উত্তম চরিত্রে গড়ে তোলা।",
+      }),
     },
     {
-      question: "কত বছরের শিক্ষার্থীরা এই প্রোগ্রামে ভর্তি হতে পারবে?",
-      answer: "৬–১২ বছর বয়সী শিক্ষার্থীরা এই প্রোগ্রামে ভর্তি হতে পারবে।",
+      question: t({
+        en: "What age group can enroll in this program?",
+        bn: "কত বছরের শিক্ষার্থীরা এই প্রোগ্রামে ভর্তি হতে পারবে?",
+      }),
+      answer: t({
+        en: "Students aged 6–12 can enroll.",
+        bn: "৬–১২ বছর বয়সী শিক্ষার্থীরা এই প্রোগ্রামে ভর্তি হতে পারবে।",
+      }),
     },
     {
-      question: "এই প্রোগ্রামে কোন কোন বিষয় পড়ানো হবে?",
-      answer:
-        "আকীদাহ, কুরআন, হাদিস, ফিকহ, সীরাহ, আরবি ভাষা, আদব-আখলাক এবং প্রয়োজনীয় ইসলামি বিষয়সমূহ।",
+      question: t({
+        en: "What subjects will be taught in this program?",
+        bn: "এই প্রোগ্রামে কোন কোন বিষয় পড়ানো হবে?",
+      }),
+      answer: t({
+        en: "Aqeedah, Qur'an, Hadith, Fiqh, Seerah, Arabic language, Adab-Akhlaq, and essential Islamic topics.",
+        bn: "আকীদাহ, কুরআন, হাদিস, ফিকহ, সীরাহ, আরবি ভাষা, আদব-আখলাক এবং প্রয়োজনীয় ইসলামি বিষয়সমূহ।",
+      }),
     },
     {
-      question: "অভিভাবকরা কেন তারবিয়াহকে বেছে নেবেন?",
-      answer:
-        "কারণ এখানে আধুনিক অনলাইন শিক্ষাপদ্ধতির মাধ্যমে কিডস ফেন্ডলি কারিকুলাম, অভিজ্ঞ শিক্ষক, নিয়মিত মূল্যায়ন এবং অভিভাবকবান্ধব সাপোর্ট নিশ্চিত করা হয়।",
+      question: t({
+        en: "Why should parents choose Tarbiyah?",
+        bn: "অভিভাবকরা কেন তারবিয়াহকে বেছে নেবেন?",
+      }),
+      answer: t({
+        en: "Because here we ensure a kid-friendly curriculum, experienced teachers, regular assessments, and parent-friendly support through modern online education methods.",
+        bn: "কারণ এখানে আধুনিক অনলাইন শিক্ষাপদ্ধতির মাধ্যমে কিডস ফেন্ডলি কারিকুলাম, অভিজ্ঞ শিক্ষক, নিয়মিত মূল্যায়ন এবং অভিভাবকবান্ধব সাপোর্ট নিশ্চিত করা হয়।",
+      }),
     },
     {
-      question: "এটি কত বছরের প্রোগ্রাম?",
-      answer: "এটি একটি ৬ মাস মেয়াদি আলিমিয়্যাহ ফর কিডস প্রোগ্রাম।",
+      question: t({
+        en: "What is the duration of this program?",
+        bn: "এটি কত বছরের প্রোগ্রাম?",
+      }),
+      answer: t({
+        en: "It is a 6-month Alimiyah for Kids program.",
+        bn: "এটি একটি ৬ মাস মেয়াদি আলিমিয়্যাহ ফর কিডস প্রোগ্রাম।",
+      }),
     },
     {
-      question: "কোর্স শেষে শিক্ষার্থীদের আউটকাম কী হবে?",
-      answer:
-        "শিক্ষার্থীরা ইসলাম সম্পর্কে মৌলিক ও মধ্যম স্তরের জ্ঞান অর্জন করবে, সহিহ আকীদা ও ইবাদতের ভিত্তি দৃঢ় হবে এবং ভবিষ্যতের উচ্চতর ইসলামি শিক্ষার জন্য প্রস্তুত হবে।",
+      question: t({
+        en: "What will be the outcome for students after completing the course?",
+        bn: "কোর্স শেষে শিক্ষার্থীদের আউটকাম কী হবে?",
+      }),
+      answer: t({
+        en: "Students will gain basic to intermediate knowledge of Islam, strengthen their Aqeedah and Ibadah foundations, and be prepared for higher Islamic studies.",
+        bn: "শিক্ষার্থীরা ইসলাম সম্পর্কে মৌলিক ও মধ্যম স্তরের জ্ঞান অর্জন করবে, সহিহ আকীদা ও ইবাদতের ভিত্তি দৃঢ় হবে এবং ভবিষ্যতের উচ্চতর ইসলামি শিক্ষার জন্য প্রস্তুত হবে।",
+      }),
     },
     {
-      question: "কোর্স শেষে সার্টিফিকেট দেওয়া হবে কি?",
-      answer:
-        "হ্যাঁ। সফলভাবে কোর্স সম্পন্নকারীদের Tarbiyah Online Madrasah-এর পক্ষ থেকে সার্টিফিকেট প্রদান করা হবে।",
+      question: t({
+        en: "Will a certificate be given after the course?",
+        bn: "কোর্স শেষে সার্টিফিকেট দেওয়া হবে কি?",
+      }),
+      answer: t({
+        en: "Yes. Successful graduates will be awarded a certificate from Tarbiyah Online Madrasah.",
+        bn: "হ্যাঁ। সফলভাবে কোর্স সম্পন্নকারীদের Tarbiyah Online Madrasah-এর পক্ষ থেকে সার্টিফিকেট প্রদান করা হবে।",
+      }),
     },
   ];
 
@@ -370,13 +519,21 @@ const AlimiyahKidsDetails = () => {
             className="inline-flex items-center gap-2 text-[#002b2b] hover:text-yellow-600 mb-6 transition-colors group"
           >
             <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">আলিমিয়াহ পেজে ফিরে যান</span>
+            <span className="font-medium">
+              {t({
+                en: "Back to Alimiyah Page",
+                bn: "আলিমিয়াহ পেজে ফিরে যান",
+              })}
+            </span>
           </Link>
 
           {/* Banner Image */}
           <img
             src={AlemiyahBanner}
-            alt="Alimiyah Kids Banner"
+            alt={t({
+              en: "Alimiyah Kids Banner",
+              bn: "আলিমিয়াহ কিডস ব্যানার",
+            })}
             className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
           />
 
@@ -386,11 +543,15 @@ const AlimiyahKidsDetails = () => {
             <div className="flex items-center gap-4 py-3">
               <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
                 <FaShare className="text-lg" />
-                <span className="font-medium">Share</span>
+                <span className="font-medium">
+                  {t({ en: "Share", bn: "শেয়ার" })}
+                </span>
               </button>
               <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
                 <FaBookmark className="text-lg" />
-                <span className="font-medium">Wishlist</span>
+                <span className="font-medium">
+                  {t({ en: "Wishlist", bn: "উইশলিস্ট" })}
+                </span>
               </button>
             </div>
 
@@ -410,7 +571,7 @@ const AlimiyahKidsDetails = () => {
                 }`}
               >
                 <FaInfoCircle />
-                <span>Course Info</span>
+                <span>{t({ en: "Course Info", bn: "কোর্স তথ্য" })}</span>
               </button>
               <button
                 onClick={() => setActiveTab("reviews")}
@@ -421,7 +582,7 @@ const AlimiyahKidsDetails = () => {
                 }`}
               >
                 <FaCommentDots />
-                <span>Reviews</span>
+                <span>{t({ en: "Reviews", bn: "রিভিউ" })}</span>
               </button>
             </div>
 
@@ -429,7 +590,10 @@ const AlimiyahKidsDetails = () => {
             {activeTab === "reviews" && (
               <div className="mt-4 p-4 bg-gray-50 rounded-xl">
                 <p className="text-gray-500 text-center">
-                  এখনো কোনো রিভিউ নেই। প্রথম রিভিউ দিন!
+                  {t({
+                    en: "No reviews yet. Be the first to review!",
+                    bn: "এখনো কোনো রিভিউ নেই। প্রথম রিভিউ দিন!",
+                  })}
                 </p>
               </div>
             )}
@@ -444,7 +608,7 @@ const AlimiyahKidsDetails = () => {
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
                   <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    ABOUT COURSE
+                    {t({ en: "ABOUT COURSE", bn: "কোর্স সম্পর্কে" })}
                   </h2>
                 </div>
                 <p className="text-gray-700 leading-relaxed text-lg">
@@ -457,7 +621,7 @@ const AlimiyahKidsDetails = () => {
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
                   <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    WHAT YOU WILL GAIN
+                    {t({ en: "WHAT YOU WILL GAIN", bn: "আপনি কী পাবেন" })}
                   </h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -474,7 +638,7 @@ const AlimiyahKidsDetails = () => {
               </div>
 
               {/* EARN A CERTIFICATE */}
-              {/* <div className="bg-white rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+              <div className="bg-white rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
                 <div>
                   <h3 className="text-xl font-bold text-[#00ADD2] mb-2">
                     {t({
@@ -495,21 +659,27 @@ const AlimiyahKidsDetails = () => {
                     alt={t({ en: "Certificate", bn: "সার্টিফিকেট" })}
                   />
                 </div>
-              </div> */}
+              </div>
 
               {/* 3. Ready To Apply Button */}
               <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-3xl p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                   <h3 className="text-xl font-bold text-[#002b2b]">
-                    Ready To Apply Your Course
+                    {t({
+                      en: "Ready To Apply Your Course",
+                      bn: "আপনার কোর্সে আবেদন করতে প্রস্তুত",
+                    })}
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    এখনই এনরোল করুন এবং আপনার শেখার যাত্রা শুরু করুন।
+                    {t({
+                      en: "Enroll now and start your structured learning journey.",
+                      bn: "এখনই এনরোল করুন এবং আপনার শেখার যাত্রা শুরু করুন।",
+                    })}
                   </p>
                 </div>
                 <Link to="/admission-now">
                   <button className="bg-[#002b2b] hover:bg-teal-900 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all">
-                    Start Now
+                    {t({ en: "Start Now", bn: "এখনই শুরু করুন" })}
                   </button>
                 </Link>
               </div>
@@ -517,7 +687,7 @@ const AlimiyahKidsDetails = () => {
               {/* 4. TARGET AUDIENCE */}
               <div>
                 <h2 className="text-lg font-bold text-[#00ADD2] mb-4">
-                  TARGET AUDIENCE
+                  {t({ en: "TARGET AUDIENCE", bn: "লক্ষ্য দর্শক" })}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {courseDetails.benefits.map((benefit, index) => (
@@ -535,7 +705,7 @@ const AlimiyahKidsDetails = () => {
               {/* 5. MATERIALS INCLUDED */}
               <div>
                 <h2 className="text-lg font-bold text-[#00ADD2] mb-4">
-                  MATERIALS INCLUDED
+                  {t({ en: "MATERIALS INCLUDED", bn: "অন্তর্ভুক্ত উপকরণ" })}
                 </h2>
                 <div className="grid grid-cols-2 gap-y-4 gap-x-4">
                   {materialsData.map((item, index) => (
@@ -552,7 +722,7 @@ const AlimiyahKidsDetails = () => {
               {/* 6. COURSE CURRICULUM */}
               <div>
                 <h2 className="text-lg font-bold text-[#00ADD2] mb-4">
-                  COURSE CURRICULUM
+                  {t({ en: "COURSE CURRICULUM", bn: "কোর্স পাঠ্যসূচি" })}
                 </h2>
                 <div className="border border-gray-300 rounded-sm">
                   {/* Curriculum Item 1: কুরআন */}
@@ -569,34 +739,58 @@ const AlimiyahKidsDetails = () => {
                         )}
                       </span>
                       <span className="text-[#002b2b] font-semibold">
-                        কুরআন
+                        {t({ en: "Qur'an", bn: "কুরআন" })}
                       </span>
                     </div>
                     {openSemester === 1 && (
                       <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
                         <p className="font-semibold text-[#002b2b]">
-                          আরবি বর্ণমালা পরিচিতি
+                          {t({
+                            en: "Introduction to Arabic Alphabets",
+                            bn: "আরবি বর্ণমালা পরিচিতি",
+                          })}
                         </p>
                         <p className="font-semibold text-[#002b2b]">
-                          আরবি বর্ণমালার বিশুদ্ধ উচ্চারণ
+                          {t({
+                            en: "Correct Pronunciation of Arabic Letters",
+                            bn: "আরবি বর্ণমালার বিশুদ্ধ উচ্চারণ",
+                          })}
                         </p>
                         <p className="font-semibold text-[#002b2b]">
-                          এরাবিক ডায়াক্রিটিক্স (হারাকাত ও তানবিন)
+                          {t({
+                            en: "Arabic Diacritics (Harakat & Tanween)",
+                            bn: "এরাবিক ডায়াক্রিটিক্স (হারাকাত ও তানবিন)",
+                          })}
                         </p>
                         <p className="font-semibold text-[#002b2b]">
-                          বানান করে আরবি পাঠ
+                          {t({
+                            en: "Reading Arabic with Spelling",
+                            bn: "বানান করে আরবি পাঠ",
+                          })}
                         </p>
                         <p className="font-semibold text-[#002b2b]">
-                          বানান ছাড়া আরবি পাঠ
+                          {t({
+                            en: "Reading Arabic without Spelling",
+                            bn: "বানান ছাড়া আরবি পাঠ",
+                          })}
                         </p>
                         <p className="font-semibold text-[#002b2b]">
-                          মাখরাজ ও সিফাতের মৌলিক প্রায়োগিক জ্ঞান
+                          {t({
+                            en: "Basic Practical Knowledge of Makharij & Sifaat",
+                            bn: "মাখরাজ ও সিফাতের মৌলিক প্রায়োগিক জ্ঞান",
+                          })}
                         </p>
                         <p className="font-semibold text-[#002b2b]">
-                          তাজবিদের সমন্বয়ে বিশুদ্ধ কুরআন তিলাওয়াত
+                          {t({
+                            en: "Reciting Qur'an with Tajweed",
+                            bn: "তাজবিদের সমন্বয়ে বিশুদ্ধ কুরআন তিলাওয়াত",
+                          })}
                         </p>
                         <p className="font-semibold text-[#002b2b]">
-                          সালাতে পঠিত সূরাগুলো মুখস্থকরণ
+                          {t({
+                            en: "Memorizing Surahs recited in Salah",
+                            bn: "সালাতে পঠিত সূরাগুলো মুখস্থকরণ",
+                          })}
                         </p>
                       </div>
                     )}
@@ -616,7 +810,7 @@ const AlimiyahKidsDetails = () => {
                         )}
                       </span>
                       <span className="text-[#002b2b] font-semibold">
-                        হিফজুল হাদিস
+                        {t({ en: "Hifdhul Hadith", bn: "হিফজুল হাদিস" })}
                       </span>
                     </div>
                     {openSemester === 2 && (
@@ -627,13 +821,14 @@ const AlimiyahKidsDetails = () => {
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 text-[#00ADD2] underline hover:text-[#002b2b] transition-colors mb-2"
                         >
-                          <FaExternalLinkAlt className="text-xs" /> ভিডিও লিংক
-                          দেখুন
+                          <FaExternalLinkAlt className="text-xs" />{" "}
+                          {t({ en: "Watch Video", bn: "ভিডিও লিংক দেখুন" })}
                         </a>
                         <p>
-                          ৫০ টি জীবনঘনিষ্ঠ হাদিস মুখস্থকরণ <br />
-                          অর্থসহ সহীহ হাদিসের মৌলিক শিক্ষা <br />
-                          আকিদা-আখলাক ও আত্মিক বিশুদ্ধতায় হাদিসের প্রভাব
+                          {t({
+                            en: "Memorization of 50 life-related Hadiths with meanings, basic teachings of authentic Hadith, and impact of Hadith on Aqeedah-Akhlaq and spiritual purification.",
+                            bn: "৫০ টি জীবনঘনিষ্ঠ হাদিস মুখস্থকরণ, অর্থসহ সহীহ হাদিসের মৌলিক শিক্ষা, আকিদা-আখলাক ও আত্মিক বিশুদ্ধতায় হাদিসের প্রভাব",
+                          })}
                         </p>
                       </div>
                     )}
@@ -653,20 +848,19 @@ const AlimiyahKidsDetails = () => {
                         )}
                       </span>
                       <span className="text-[#002b2b] font-semibold">
-                        বিশুদ্ধ আকিদাহ ও আদাব
+                        {t({
+                          en: "Pure Aqeedah & Adab",
+                          bn: "বিশুদ্ধ আকিদাহ ও আদাব",
+                        })}
                       </span>
                     </div>
                     {openSemester === 3 && (
                       <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
                         <p className="text-[#002b2b]">
-                          সহীহ আকিদাহর পরিচয় <br />
-                          সহীহ আকিদাহ পাঠের গুরুত্ব <br />
-                          আল্লাহ ও তার কিতাব সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ{" "}
-                          <br />
-                          মালাইকা ও রাসুলদের সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ{" "}
-                          <br />
-                          আখিরাত ও তাকদীর ও তার কিতাব সম্পর্কে সঠিক ও
-                          ত্রুটিমুক্ত আকিদাহ
+                          {t({
+                            en: "Introduction to correct Aqeedah, importance of studying correct Aqeedah, correct and flawless Aqeedah about Allah and His Book, correct and flawless Aqeedah about Angels and Messengers, correct and flawless Aqeedah about the Hereafter and Destiny.",
+                            bn: "সহীহ আকিদাহর পরিচয়, সহীহ আকিদাহ পাঠের গুরুত্ব, আল্লাহ ও তার কিতাব সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ, মালাইকা ও রাসুলদের সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ, আখিরাত ও তাকদীর ও তার কিতাব সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ",
+                          })}
                         </p>
                       </div>
                     )}
@@ -686,7 +880,7 @@ const AlimiyahKidsDetails = () => {
                         )}
                       </span>
                       <span className="text-[#002b2b] font-semibold">
-                        দু'আ এন্ড ইবাদাহ
+                        {t({ en: "Du'a & Ibadah", bn: "দু'আ এন্ড ইবাদাহ" })}
                       </span>
                     </div>
                     {openSemester === 4 && (
@@ -697,18 +891,14 @@ const AlimiyahKidsDetails = () => {
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 text-[#00ADD2] underline hover:text-[#002b2b] transition-colors mb-2"
                         >
-                          <FaExternalLinkAlt className="text-xs" /> ভিডিও লিংক
-                          দেখুন
+                          <FaExternalLinkAlt className="text-xs" />{" "}
+                          {t({ en: "Watch Video", bn: "ভিডিও লিংক দেখুন" })}
                         </a>
                         <p>
-                          ঘুমাতে যাওয়া ও ঘুম থেকে ওঠার নিয়ম ও দুয়া <br />
-                          ওয়াশরুমে যাওয়া ও বের হবার নিয়ম ও দুয়া <br />
-                          মসজিদে প্রবেশ ও বের হবার নিয়ম ও দুয়া <br />
-                          পবিত্রতা ও পরিচ্ছন্নতার মৌলিক জ্ঞান <br />
-                          ইসলামে পরিপাটি থাকার গুরুত্ব <br />
-                          অযু-গোসলের ইসলামিক নিয়ম <br />
-                          আজান-ইকামাতের শিক্ষালাত <br />
-                          প্র্যাক্টিক্যাল সালাতের সামগ্রিক ধারণা
+                          {t({
+                            en: "Rules and Du'as for sleeping and waking up, entering and leaving the toilet, entering and leaving the mosque, basic knowledge of purity and cleanliness, importance of being tidy in Islam, Islamic rules of Wudu and Ghusl, lessons on Adhan and Iqamah, practical understanding of Salah.",
+                            bn: "ঘুমাতে যাওয়া ও ঘুম থেকে ওঠার নিয়ম ও দুয়া, ওয়াশরুমে যাওয়া ও বের হবার নিয়ম ও দুয়া, মসজিদে প্রবেশ ও বের হবার নিয়ম ও দুয়া, পবিত্রতা ও পরিচ্ছন্নতার মৌলিক জ্ঞান, ইসলামে পরিপাটি থাকার গুরুত্ব, অযু-গোসলের ইসলামিক নিয়ম, আজান-ইকামাতের শিক্ষা, প্র্যাক্টিক্যাল সালাতের সামগ্রিক ধারণা",
+                          })}
                         </p>
                       </div>
                     )}
@@ -728,23 +918,31 @@ const AlimiyahKidsDetails = () => {
                         )}
                       </span>
                       <span className="text-[#002b2b] font-semibold">
-                        বেসিক এরাবিক (স্পোকেন ও রাইডিং এরাবিক)
+                        {t({
+                          en: "Basic Arabic (Spoken & Reading)",
+                          bn: "বেসিক এরাবিক (স্পোকেন ও রাইডিং এরাবিক)",
+                        })}
                       </span>
                     </div>
                     {openSemester === 5 && (
                       <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
                         <p className="font-semibold text-[#002b2b]">
-                          ১. স্পোকেন এরাবিক
+                          {t({
+                            en: "1. Spoken Arabic",
+                            bn: "১. স্পোকেন এরাবিক",
+                          })}
                         </p>
                         <p className="font-semibold text-[#002b2b]">
-                          ২. রাইডিং এরাবিক:
+                          {t({
+                            en: "2. Reading Arabic:",
+                            bn: "২. রাইডিং এরাবিক:",
+                          })}
                         </p>
                         <p className="pl-4">
-                          - আরবি শব্দমালা মুখস্থকরণ <br />
-                          - আরবিতে সংখ্যা ও রঙের নাম <br />
-                          - আরবি দিন ও মাসের নাম <br />
-                          - নিজের পরিচয় প্রদান ও প্রাথমিক কথোপকথন <br />-
-                          দৈনন্দিন জীবনের বহুল ব্যবহৃত আরবি কথোপকথন
+                          {t({
+                            en: "- Memorizing Arabic vocabulary\n- Names of numbers and colors in Arabic\n- Names of Arabic days and months\n- Introducing oneself and basic conversation\n- Frequently used Arabic conversation in daily life",
+                            bn: "- আরবি শব্দমালা মুখস্থকরণ\n- আরবিতে সংখ্যা ও রঙের নাম\n- আরবি দিন ও মাসের নাম\n- নিজের পরিচয় প্রদান ও প্রাথমিক কথোপকথন\n- দৈনন্দিন জীবনের বহুল ব্যবহৃত আরবি কথোপকথন",
+                          })}
                         </p>
                       </div>
                     )}
@@ -764,18 +962,16 @@ const AlimiyahKidsDetails = () => {
                         )}
                       </span>
                       <span className="text-[#002b2b] font-semibold">
-                        ইসলামিক ম্যানার্স
+                        {t({ en: "Islamic Manners", bn: "ইসলামিক ম্যানার্স" })}
                       </span>
                     </div>
                     {openSemester === 6 && (
                       <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
                         <p className="text-[#002b2b]">
-                          অভিবাদন ও সালাম <br />
-                          কথা বলার আদব <br />
-                          খাওয়ার আদব <br />
-                          পিতা-মাতা ও মুরব্বিদের সম্মান <br />
-                          নারিষ্ণতা ও পবিত্রতা (নম্রতা ও পরিচ্ছন্নতা) <br />
-                          দুর্বিনীত ও দান (সহযোগিতা ও দানশীলতা)
+                          {t({
+                            en: "Greeting and Salam, etiquette of speaking, etiquette of eating, respect for parents and elders, humility and purity (politeness and cleanliness), cooperation and charity.",
+                            bn: "অভিবাদন ও সালাম, কথা বলার আদব, খাওয়ার আদব, পিতা-মাতা ও মুরব্বিদের সম্মান, নারিষ্ণতা ও পবিত্রতা (নম্রতা ও পরিচ্ছন্নতা), দুর্বিনীত ও দান (সহযোগিতা ও দানশীলতা)",
+                          })}
                         </p>
                       </div>
                     )}
@@ -786,19 +982,22 @@ const AlimiyahKidsDetails = () => {
               {/* 7. FEE STRUCTURE */}
               <div>
                 <h2 className="text-lg font-bold text-[#00ADD2] mb-4">
-                  FEE STRUCTURE
+                  {t({ en: "FEE STRUCTURE", bn: "ফি কাঠামো" })}
                 </h2>
                 <div className="grid grid-cols-2 gap-10 text-sm">
                   {/* Left Column - Bangla Medium */}
                   <div>
                     <p className="text-[#002b2b] font-medium mb-3">
-                      বাংলা মিডিয়াম:
+                      {t({ en: "Bangla Medium:", bn: "বাংলা মিডিয়াম:" })}
                     </p>
                     <div className="flex items-start gap-3 mb-2">
                       <FaCheckCircle className="text-[#00ADD2] mt-1" />
                       <div>
                         <span className="block text-[#002b2b] font-medium">
-                          ভর্তি ফি ২০০০ টাকা
+                          {t({
+                            en: "Admission Fee 2000 TK",
+                            bn: "ভর্তি ফি ২০০০ টাকা",
+                          })}
                         </span>
                       </div>
                     </div>
@@ -806,7 +1005,10 @@ const AlimiyahKidsDetails = () => {
                       <FaCheckCircle className="text-[#00ADD2] mt-1" />
                       <div>
                         <span className="block text-[#002b2b] font-medium">
-                          মাসিক ফি ২০০০ টাকা (৬ মাস)
+                          {t({
+                            en: "Monthly Fee 2000 TK (6 months)",
+                            bn: "মাসিক ফি ২০০০ টাকা (৬ মাস)",
+                          })}
                         </span>
                       </div>
                     </div>
@@ -815,13 +1017,16 @@ const AlimiyahKidsDetails = () => {
                   {/* Right Column - English Medium */}
                   <div>
                     <p className="text-[#002b2b] font-medium mb-3">
-                      ইংরেজি মিডিয়াম:
+                      {t({ en: "English Medium:", bn: "ইংরেজি মিডিয়াম:" })}
                     </p>
                     <div className="flex items-start gap-3 mb-2">
                       <FaCheckCircle className="text-[#00ADD2] mt-1" />
                       <div>
                         <span className="block text-[#002b2b] font-medium">
-                          ভর্তি ফি ৩০০০ টাকা
+                          {t({
+                            en: "Admission Fee 3000 TK",
+                            bn: "ভর্তি ফি ৩০০০ টাকা",
+                          })}
                         </span>
                       </div>
                     </div>
@@ -829,7 +1034,10 @@ const AlimiyahKidsDetails = () => {
                       <FaCheckCircle className="text-[#00ADD2] mt-1" />
                       <div>
                         <span className="block text-[#002b2b] font-medium">
-                          মাসিক ফি ৩০০০ টাকা (৬ মাস)
+                          {t({
+                            en: "Monthly Fee 3000 TK (6 months)",
+                            bn: "মাসিক ফি ৩০০০ টাকা (৬ মাস)",
+                          })}
                         </span>
                       </div>
                     </div>
@@ -837,8 +1045,10 @@ const AlimiyahKidsDetails = () => {
                 </div>
                 <div className="mt-4 text-sm text-gray-500">
                   <p>
-                    * সেমিস্টার ফি মাসিক ইনস্টলমেন্ট এর মাধ্যমে প্রদান করার
-                    সুযোগ আছে।
+                    {t({
+                      en: "* Semester fee can be paid through monthly installments.",
+                      bn: "* সেমিস্টার ফি মাসিক ইনস্টলমেন্ট এর মাধ্যমে প্রদান করার সুযোগ আছে।",
+                    })}
                   </p>
                 </div>
               </div>
@@ -848,19 +1058,47 @@ const AlimiyahKidsDetails = () => {
               <div className="bg-gradient-to-br from-[#fff] via-[#fff] to-[#fff] text-black rounded-3xl shadow-2xl p-6 md:p-12">
                 <div className="text-center mb-10">
                   <h2 className="text-2xl md:text-4xl font-bold mb-3 text-[#00ADD2]">
-                    কেন তারবিয়াহ আলিমিয়াহ ফর কিডস ?
+                    {t({
+                      en: "Why Tarbiyah Alimiyah for Kids?",
+                      bn: "কেন তারবিয়াহ আলিমিয়াহ ফর কিডস ?",
+                    })}
                   </h2>
                   <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
                   {[
-                    { text: "কিডস ফেন্ডলি ওস্তাদ" },
-                    { text: "লাইভ ও রেকর্ডেড ক্লাস" },
-                    { text: "ওয়ান-টু-ওয়ান একাডেমিক সাপোর্ট" },
-                    { text: "উওম চরিত্র গঠনের পরিবেশ" },
-                    { text: "কিডস ফেন্ডলি কারিকুলাম" },
-                    { text: "সার্টিফিকেট" },
+                    {
+                      text: t({
+                        en: "Kid-friendly Teachers",
+                        bn: "কিডস ফেন্ডলি ওস্তাদ",
+                      }),
+                    },
+                    {
+                      text: t({
+                        en: "Live & Recorded Classes",
+                        bn: "লাইভ ও রেকর্ডেড ক্লাস",
+                      }),
+                    },
+                    {
+                      text: t({
+                        en: "One-to-One Academic Support",
+                        bn: "ওয়ান-টু-ওয়ান একাডেমিক সাপোর্ট",
+                      }),
+                    },
+                    {
+                      text: t({
+                        en: "Environment for Character Building",
+                        bn: "উওম চরিত্র গঠনের পরিবেশ",
+                      }),
+                    },
+                    {
+                      text: t({
+                        en: "Kid-friendly Curriculum",
+                        bn: "কিডস ফেন্ডলি কারিকুলাম",
+                      }),
+                    },
+                    { text: t({ en: "Certificate", bn: "সার্টিফিকেট" }) },
                   ].map((feature, index) => (
                     <div
                       key={index}
@@ -876,12 +1114,16 @@ const AlimiyahKidsDetails = () => {
                   ))}
                 </div>
               </div>
-              {/* 2. শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা */}
+
+              {/* 2. শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা (বাংলায় থাকবে) */}
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
                   <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা
+                    {t({
+                      en: "Student & Parent Experiences",
+                      bn: "শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা",
+                    })}
                   </h2>
                 </div>
 
@@ -900,12 +1142,8 @@ const AlimiyahKidsDetails = () => {
                     dynamicBullets: true,
                   }}
                   breakpoints={{
-                    640: {
-                      slidesPerView: 2,
-                    },
-                    1024: {
-                      slidesPerView: 3,
-                    },
+                    640: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 },
                   }}
                   className="testimonial-swiper"
                 >
@@ -952,7 +1190,7 @@ const AlimiyahKidsDetails = () => {
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
                   <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    ভিডিও গ্যালারি
+                    {t({ en: "Video Gallery", bn: "ভিডিও গ্যালারি" })}
                   </h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -990,7 +1228,9 @@ const AlimiyahKidsDetails = () => {
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">FAQ</h2>
+                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                    {t({ en: "FAQ", bn: "প্রায়শই জিজ্ঞাসিত প্রশ্ন" })}
+                  </h2>
                 </div>
                 <div className="space-y-4">
                   {faqs.map((faq, index) => (
@@ -1032,7 +1272,7 @@ const AlimiyahKidsDetails = () => {
               >
                 <img
                   src={AlemyahCourse}
-                  alt="Course Video"
+                  alt={t({ en: "Course Video", bn: "কোর্স ভিডিও" })}
                   className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-colors group-hover:bg-black/40">
@@ -1050,27 +1290,22 @@ const AlimiyahKidsDetails = () => {
               {/* Enrollment & Info Card */}
               <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-[#007a91]">
                 <h1 className="text-2xl font-bold text-[#007a91] mb-5">
-                  ENROLL NOW
+                  {t({ en: "ENROLL NOW", bn: "এখনই নিবন্ধন করুন" })}
                 </h1>
 
                 {/* Split Button with Links */}
                 <div className="flex items-center justify-center mb-6 relative">
-                  {/* Left Half - Link */}
                   <Link to="/enroll/bangla-version" className="w-1/2">
                     <button className="w-full bg-[#007a91] text-white font-bold py-3 rounded-l-md hover:opacity-90 transition">
-                      Bangla Version
+                      {t({ en: "Bangla Version", bn: "বাংলা ভার্সন" })}
                     </button>
                   </Link>
-
-                  {/* Middle Or Circle */}
                   <div className="absolute w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#002b2b] font-medium shadow-md z-10 text-[10px]">
-                    Or
+                    {t({ en: "Or", bn: "অথবা" })}
                   </div>
-
-                  {/* Right Half - Link */}
                   <Link to="/enroll/english-version" className="w-1/2">
                     <button className="w-full bg-[#003d3d] text-white font-bold py-3 rounded-r-md hover:opacity-90 transition">
-                      English Version
+                      {t({ en: "English Version", bn: "ইংরেজি ভার্সন" })}
                     </button>
                   </Link>
                 </div>
@@ -1084,7 +1319,8 @@ const AlimiyahKidsDetails = () => {
                     className="w-full"
                   >
                     <button className="w-full bg-[#003d3d] hover:bg-[#002b2b] text-white font-semibold py-3 rounded-xl shadow flex items-center justify-center gap-2 transition-all">
-                      <FaDownload /> Prospectus
+                      <FaDownload />{" "}
+                      {t({ en: "Prospectus", bn: "প্রসপেক্টাস" })}
                     </button>
                   </a>
                 </div>
@@ -1092,15 +1328,23 @@ const AlimiyahKidsDetails = () => {
                 {/* Info Details */}
                 <div className="space-y-3 text-left px-1 text-[#002b2b]">
                   <div className="flex items-center gap-2 text-[15px]">
-                    <span className="font-medium">Course Level:</span>
-                    <span className="font-bold">Basic</span>
+                    <span className="font-medium">
+                      {t({ en: "Course Level:", bn: "কোর্স লেভেল:" })}
+                    </span>
+                    <span className="font-bold">
+                      {t({ en: "Basic", bn: "বেসিক" })}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-[15px]">
-                    <span className="font-medium">Enrolled:</span>
+                    <span className="font-medium">
+                      {t({ en: "Enrolled:", bn: "এনরোল্ড:" })}
+                    </span>
                     <span className="font-bold">525</span>
                   </div>
                   <div className="flex items-center gap-2 text-[15px]">
-                    <span className="font-medium">Last Updated:</span>
+                    <span className="font-medium">
+                      {t({ en: "Last Updated:", bn: "শেষ আপডেট:" })}
+                    </span>
                     <span className="font-bold">03/09/2026</span>
                   </div>
                 </div>
@@ -1109,7 +1353,7 @@ const AlimiyahKidsDetails = () => {
               {/* Instructors List */}
               <div className="bg-white rounded-3xl">
                 <h3 className="text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
-                  Faculty
+                  {t({ en: "Faculty", bn: "অনুষদ" })}
                 </h3>
                 <div className="space-y-4">
                   {instructors.map((instructor) => (
