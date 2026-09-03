@@ -2,12 +2,12 @@ import React from "react";
 import { useLanguage } from "../../context/useLanguage";
 import ShakilImg from "../../image/Shakil.png";
 import BariImg from "../../image/bari.png";
-import SohanImg from "../../image/Sohan.jpeg";
+import SohanImg from "../../image/sohan.png";
 import SohelImg from "../../image/sohel.png";
 import Mahfujur from "../../image/mahfuz.png";
 import Murad from "../../image/muradshek.png";
 import Sowrab from "../../image/surav.png";
-import Shohidul from "../../image/developer.jpeg";
+import Shohidul from "../../image/sohid.png";
 import Kawsar from "../../image/kawser.png";
 import Ashik from "../../image/ashik.png";
 import yasin from "../../image/yasin.png";
@@ -31,7 +31,7 @@ const Members = () => {
       image: BariImg,
     },
     {
-      name: { en: "Sohanur Islam", bn: "সোহানুর ইসলাম" },
+      name: { en: "Sohanur Rahman", bn: "সোহানুর রাহমান " },
       designation: { en: "Junior Admin", bn: "জুনিয়র অ্যাডমিন" },
       department: { en: "Quran Studies", bn: "কুরআন স্টাডিজ" },
       image: SohanImg,

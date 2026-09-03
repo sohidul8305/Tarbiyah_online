@@ -6,6 +6,9 @@ import AlemyahCourse from "../../image/alemiyahkidsthumball.png";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import girlavator from "../../image/arartor.png";
+import MamunImg from "../../image/Abdullahmanun.jpg";
+import MahmudImg from "../../image/Hridoy-Ustaz-01.png";
+import MarjanaImg from "../../image/arartor.png";
 
 // Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
 import "swiper/css";
@@ -49,7 +52,10 @@ import {
 } from "react-icons/fa";
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
-
+import ImamhussainImg from "../../image/Emam Hussain.png";
+import AtiqullahImg from "../../image/atikullah.png";
+import JubaerImg from "../../image/jubair.png";
+import AlaminImg from "../../image/Alamin.png";
 const AlimiyahKidsDetails = () => {
   const [openSemester, setOpenSemester] = useState(null);
   const [activeTab, setActiveTab] = useState("info");
@@ -67,59 +73,52 @@ const AlimiyahKidsDetails = () => {
   const instructors = [
     {
       id: 1,
-      name: "Jubaiur Hossain",
-      title: "কিডস প্রোগ্রাম কো-অর্ডিনেটর",
-      subtitle: "বিশেষজ্ঞ: বাল্য শিক্ষা ও তাজবিদ",
-      image: "https://i.pravatar.cc/150?img=11",
-      expertise: "বাল্য শিক্ষা",
+      name: "Abdullah Al Mamun",
+      title: "Co Ordinator",
+      subtitle: "Tarbiyah Education Network",
+      image: MamunImg,
     },
     {
       id: 2,
-      name: "Atiqullah shohid",
-      title: "প্রধান শিক্ষিকা",
-      subtitle: "বিশেষজ্ঞ: শিশু মনোবিজ্ঞান ও ইসলামি শিক্ষা",
-      image: girlavator,
-      expertise: "শিশু মনোবিজ্ঞান",
+      name: "Hussain Mohammad Hidoy ",
+      title: "Coordinator",
+      subtitle: "Department of Islamic Studies, Tarbiyah Education Network",
+      image: MahmudImg,
     },
     {
       id: 3,
+      name: "Emam hussain ",
+      title: "Junior Faculty",
+      subtitle: "Diploma In Islamic Studies",
+      image: ImamhussainImg,
+    },
+    {
+      id: 4,
+      name: "Marjan Ahmad ",
+      title: "Senior Teacher",
+      subtitle: "Tarbiyah Education Network",
+      image: MarjanaImg,
+    },
+    {
+      id: 4,
+      name: "Atiqullah Sahid",
+      title: "Junior Teacher",
+      subtitle: "Allimiyah",
+      image: AtiqullahImg,
+    },
+    {
+      id: 4,
+      name: "Jubair Hussain ",
+      title: "Junior Teacher",
+      subtitle: "Allimiyah",
+      image: JubaerImg,
+    },
+    {
+      id: 4,
       name: "Al Amin",
-      title: "কুরআন শিক্ষক",
-      subtitle: "বিশেষজ্ঞ: নূরানী পদ্ধতি ও তাজবিদ",
-      image: "https://i.pravatar.cc/150?img=13",
-      expertise: "কুরআন শিক্ষা",
-    },
-    {
-      id: 4,
-      name: "Abdullah Al-Mamun",
-      title: "আরবি ভাষা শিক্ষক",
-      subtitle: "বিশেষজ্ঞ: আরবি ভাষা ও সাহিত্য",
-      image: "https://i.pravatar.cc/150?img=14",
-      expertise: "আরবি ভাষা",
-    },
-    {
-      id: 4,
-      name: "Hossain hodoy",
-      title: "আরবি ভাষা শিক্ষক",
-      subtitle: "বিশেষজ্ঞ: আরবি ভাষা ও সাহিত্য",
-      image: "https://i.pravatar.cc/150?img=14",
-      expertise: "আরবি ভাষা",
-    },
-    {
-      id: 4,
-      name: "Marxan Ahmed",
-      title: "আরবি ভাষা শিক্ষক",
-      subtitle: "বিশেষজ্ঞ: আরবি ভাষা ও সাহিত্য",
-      image: "https://i.pravatar.cc/150?img=14",
-      expertise: "আরবি ভাষা",
-    },
-    {
-      id: 4,
-      name: "Imam Hossain",
-      title: "আরবি ভাষা শিক্ষক",
-      subtitle: "বিশেষজ্ঞ: আরবি ভাষা ও সাহিত্য",
-      image: "https://i.pravatar.cc/150?img=14",
-      expertise: "আরবি ভাষা",
+      title: "Junior Teacher",
+      subtitle: "Allimiyah",
+      image: AlaminImg,
     },
   ];
 
@@ -131,19 +130,23 @@ const AlimiyahKidsDetails = () => {
      Alimiyah Basic Islam Course is basically designed for Muslim children and teenagers. Which will help the student to acquire basic knowledge of Islam as well as to implement it. This course will play a great role in knowing the Islamic solutions and procedures in all the necessary areas based on the 10 basic subjects. This course will develop positive mindset in children.
     `,
     objectives: [
-      "ছোটদের সিরাহ",
       "বিশুদ্ধ আকিদাহ সম্পর্কিত জ্ঞানলাভ",
       "ব্যাসিক মাসাআলা-মাসায়েল",
       "ছোটদের উপযোগী দ্বীনের মৌলিক জ্ঞানার্জন",
       "ছোটদের আরবি ভাষায় শিক্ষার আসর",
       "সম্পূর্ণ অনলাইন ভিত্তিক কোর্স",
       "লাইভ ক্লাস, মাশক্ব, লেকচার শীট ও রেকর্ডেড ক্লাস",
+      "​সম্পূর্ণ কায়দা অনুশীলন",
+      " ​ছোটদের আরবি ভাষা শিক্ষার আসর",
+      " ছোটদের হাদিস ও সুন্নাহ চর্চা",
+      "​ছোটদের দোয়া ও ইবাদত চর্চা",
+      "​ছোটদের আখলাক ও আদব",
     ],
     benefits: [
       "প্রবাসে বসবাসের ফলে যারা দ্বীনী শিক্ষার্জনের সুবিধা হতে বঞ্চিত",
       "ইংলিশ মিডিয়ামের শিক্ষার্থীদের জন্য রয়েছে প্রফেশনাল ইংলিশ ভার্সন",
       "জেনারেল শিক্ষার পাশাপাশি যারা দ্বীনি শিক্ষার আগ্রহ লালন করেন",
-      "৮-১২ বছরের সকল শিক্ষার্থীর জন্য এই কোর্সটি বিশেষভাবে ডিজাইন করা হয়েছে",
+      "৬-১২ বছরের সকল শিক্ষার্থীর জন্য এই কোর্সটি বিশেষভাবে ডিজাইন করা হয়েছে",
       "যারা নিজেদের সন্তানকে প্র্যাক্টিসিং মুসলিম হিসেবে গড়ে তুলতে চান",
     ],
     schedule: {
@@ -162,7 +165,7 @@ const AlimiyahKidsDetails = () => {
   // Materials Included
   const materialsData = [
     {
-      text: "সপ্তাহে ২ দিন ৪টি ক্লাস",
+      text: "সপ্তাহে ২ দিন ৩টি ক্লাস",
       icon: <FaClock className="text-[#00ADD2]" />,
     },
     {
@@ -227,94 +230,98 @@ const AlimiyahKidsDetails = () => {
   const testimonials = [
     {
       id: 1,
-      name: "আব্দুল্লাহ আল মামুন",
-      designation: "শিক্ষার্থী, ঢাকা",
+      name: "Sabikun Nahar",
+      designation: "STUDENT ID: TDIS25B1128, BATCH: 11",
       quote:
-        "আলহামদুলিল্লাহ, এই কোর্সটি আমার ঈমানি দৃঢ়তা ও ইসলামি জ্ঞান বৃদ্ধিতে অসাধারণ ভূমিকা রেখেছে। শিক্ষকদের আন্তরিকতা সত্যিই প্রশংসনীয়।",
-      image: "https://i.pravatar.cc/150?img=11",
+        "আলহামদুলিল্লাহ জীবনে অনেক ক্লাস করেছি কিন্তু কুরআন শিক্ষার জন্য আমার মনে হয় আজকের ক্লাস টা বেস্ট। যারা জেন হন নি প্লিজ তাড়াতাড়ি জেন হন। অনেক গুরুত্বপূর্ণ আলোচনা হচ্ছে আলহামদুলিল্লাহ।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 2,
-      name: "মোঃ সাইফুল ইসলাম",
-      designation: "প্রবাসী, যুক্তরাজ্য",
+      name: "আহলিয়া হাসান",
+      designation: "STUDENT ID: TDIS24B8008, BATCH: 08",
       quote:
-        "ব্যস্ত জীবনের মাঝেও আমি এই কোর্সটি সম্পন্ন করতে পেরেছি। লাইভ ক্লাস ও রেকর্ডেড ভিডিওগুলোর কারণে সময়ানুবর্তিতা বজায় রাখা সম্ভব হয়েছে।",
-      image: "https://i.pravatar.cc/150?img=12",
+        "শায়খ প্রফেসর মোখতার স্যারের ভিডিওর মাধ্যমে। তারপর আমার মেয়েকে কুরআন ফর কিডস এ দিয়েছি। এখন আমার ছয় বছরের পাখিটা সহি শুদ্ধ করে কুরআন পড়তে পারে আলহামদুলিল্লাহ।। এবং সারাদিন একবার এই আয়াত একবার ওই আয়াত আনমনেই বলতে থাকে আলহামদুলিল্লাহ আলহামদুলিল্লাহ। এমনকি ওর সামনে কেউ তেলাওয়াত করতে গেলে তার ভুলও ধরে। আলহামদুলিল্লাহ অনেক অনেক দোয়া এবং ভালোবাসা এই প্রতিষ্ঠানের জন্য।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 3,
-      name: "মোঃ হাসান মিয়া",
-      designation: "ব্যবসায়ী, চট্টগ্রাম",
+      name: "Mehedi Hasan",
+      designation: "STUDENT ID: TDIS23B6056, BATCH: 5&6",
       quote:
-        "দ্বীনি জ্ঞান অর্জনের পাশাপাশি দৈনন্দিন জীবনে ইসলামি আদব-আখলাক চর্চায় এই কোর্স আমাকে অনেক সাহায্য করেছে।",
-      image: "https://i.pravatar.cc/150?img=13",
+        "আসসালামু আলাইকুম। আমার বাচ্চার ৯ বছর আলিমিয়ান ফর কিডস বেসিক কোর্সটি সম্পন্ন করেছে। তাই আমি চাচ্ছি দ্বিতীয় কোর্সে একটু তাড়াতাড়ি ভর্তি করতে। আমাকে এ ব্যাপারে সাহায্য করবেন দয়া করে। ছয় মাসের কোর্সের মাধ্যমে এতটা উপকৃত হব আমি কখনো ভাবি নি আস্থা ছিল আপনাদের প্রতিষ্ঠানের উপর। আমরা ছাচ্ছি পরবর্তী কোর্সগুলো যদি ওদের কথা চিন্তা করে আপনারা কোনো কোর্সের উদ্যোগ নেন তাহলে আমরা উপকৃত হব।",
+      image:
+        "https://i.ibb.co.com/gZv5KDDx/images-q-tbn-ANd9-Gc-Tge-GIm6kq-Fp3x-NYHpqsl89ua-z2-JOR-Gy-XIYu-Gy-THG3-Q-s-10.jpg",
     },
     {
       id: 4,
-      name: "আমিনুল ইসলাম",
-      designation: "শিক্ষার্থী, সিলেট",
+      name: "MST SONEA KHATUN",
+      designation: "STUDENT ID: TDIS25B1128, BATCH: 11",
       quote:
-        "শায়খ প্রফেসর মোখতার আহমাদের তত্ত্বাবধানে পড়ার সুযোগ পাওয়া আমার জন্য একটি বড় প্রাপ্তি। কারিকুলাম অত্যন্ত সুসংগঠিত।",
-      image: "https://i.pravatar.cc/150?img=14",
+        "আমার সবগুলোই ভালো লেগেছে। কারণ, দ্বীন পালনের ক্ষেত্রে প্রত্যেকটাই সমান জরুরি। নির্দিষ্ট কোন একটাকে বাদ দিলে বা কম পছন্দের মনে করলে, কোর্সটি যেন অসম্পূর্ণ থেকে যাবে।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 5,
-      name: "মোঃ নাজমুল হক",
-      designation: "চাকরিজীবী, রাজশাহী",
+      name: "MEHEDI HASAN",
+      designation: "STUDENT ID: TDIS24B8008, BATCH: 08",
       quote:
-        "সপ্তাহে মাত্র ৩ দিন ক্লাস থাকায় চাকরির সাথে তাল মিলিয়ে পড়াশোনা করতে পারছি। একাডেমিক সাপোর্ট দল সবসময় পাশে আছে।",
-      image: "https://i.pravatar.cc/150?img=15",
+        "চলমান সেমিস্টারে আমার সবচেয়ে ভালো লেগেছে সিরাহ কোর্সটি। এই কোর্সে মহানবী হযরত মুহাম্মদ (সা.) এর জীবন ও চরিত্র সম্পর্কে গভীরভাবে জানতে পেরেছি। তাঁর ধৈর্য, ন্যায়বিচার, দাওয়াতি পদ্ধতি ও নৈতিকতা আমার জীবনে অনুপ্রেরণা জুগিয়েছে। এ কারণে সিরাহ কোর্সটি আমার কাছে সবচেয়ে প্রিয়।",
+      image:
+        "https://i.ibb.co.com/gZv5KDDx/images-q-tbn-ANd9-Gc-Tge-GIm6kq-Fp3x-NYHpqsl89ua-z2-JOR-Gy-XIYu-Gy-THG3-Q-s-10.jpg",
     },
     {
       id: 6,
-      name: "মোঃ ইব্রাহিম খলিল",
-      designation: "শিক্ষার্থী, খুলনা",
+      name: "TAHMINA TARIN",
+      designation: "STUDENT ID: TDIS23B6056, BATCH: 5&6",
       quote:
-        "ইজাজাহ ও সার্টিফিকেট পাওয়ার সুযোগ এই ডিপ্লোমাকে আরও মূল্যবান করেছে। ইনশাআল্লাহ, উচ্চশিক্ষার পথ সুগম হবে।",
-      image: "https://i.pravatar.cc/150?img=16",
+        "লাস্ট সেমিস্টার এ আমার সবচেয়ে ভালো লেগেছে কমপারেটিভ রিলিজিওন। উস্তাদ ডঃ আবু বকর যাকারিয়া এতো সুন্দর করে ভেঙ্গে ভেঙ্গে দ্বীন, ধর্ম, রিলিজিওন এর পার্থক্য এবং বিভিন্ন ধর্মগুলো এতো নিখুঁত ভাবে উপস্থাপন করেছেন যে আমাদের মন এবং মস্তিষ্কে তা গভীরভাবে গেথে গিয়েছে। আলহামদুলিল্লাহ। আমি শ্রদ্ধেয় উস্তাদগণের দীর্ঘায়ু কামনা করছি। পাশাপাশি তারবিয়া একাডেমি কে ধন্যবাদ জানাবো আমাদের জন্য এতো সুন্দর, ওয়েল অর্গানাইজড একটা কোর্স করার সুযোগ করে দেওয়ার জন্য। জাযাকুমুল্লাহ খাইরান।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
   ];
-
   // Video Gallery Data
   const videoGallery = [
     {
       id: 1,
       title: "ভিডিও ১",
-      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
-      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+      thumbnail: "https://img.youtube.com/vi/I1ibIcH35k4/hqdefault.jpg",
+      url: "https://youtu.be/I1ibIcH35k4?si=l6ig1yuVRai-OtXj",
     },
     {
       id: 2,
       title: "ভিডিও ২",
-      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
-      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+      thumbnail: "https://img.youtube.com/vi/D5Ov8e2aDh0/hqdefault.jpg",
+      url: "https://youtu.be/D5Ov8e2aDh0?si=LG7MHGRQBIw4pSxA",
     },
     {
       id: 3,
       title: "ভিডিও ৩",
-      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
-      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+      thumbnail: "https://img.youtube.com/vi/VvWiI0H_1aM/hqdefault.jpg",
+      url: "https://youtu.be/VvWiI0H_1aM?si=4KyGDgdCGqgj-dvG",
     },
     {
       id: 4,
       title: "ভিডিও ৪",
-      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
-      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+      thumbnail: "https://img.youtube.com/vi/BfQfFoEYpl4/hqdefault.jpg",
+      url: "https://youtu.be/BfQfFoEYpl4?si=dSmxcRERYRmTDSD7",
     },
     {
       id: 5,
       title: "ভিডিও ৫",
-      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
-      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+      thumbnail: "https://img.youtube.com/vi/e3PX_VdD_jI/hqdefault.jpg",
+      url: "https://youtu.be/e3PX_VdD_jI?si=qeCYrxke3um9G1yg",
     },
     {
       id: 6,
       title: "ভিডিও ৬",
-      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
-      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+      thumbnail: "https://img.youtube.com/vi/EbcUT8uqW8g/hqdefault.jpg",
+      url: "https://youtu.be/EbcUT8uqW8g?si=yFGWV7Q6FicA-Dyz",
     },
   ];
-
   // FAQ Data
   const faqs = [
     {
@@ -466,6 +473,30 @@ const AlimiyahKidsDetails = () => {
                 </div>
               </div>
 
+              {/* EARN A CERTIFICATE */}
+              {/* <div className="bg-white rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+                <div>
+                  <h3 className="text-xl font-bold text-[#00ADD2] mb-2">
+                    {t({
+                      en: "EARN A CERTIFICATE",
+                      bn: "সার্টিফিকেট অর্জন করুন",
+                    })}
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    {t({
+                      en: "Add this certificate to your resume to demonstrate your skills & increase your chances of getting noticed.",
+                      bn: "আপনার দক্ষতা প্রদর্শন ও নজরে আসার সম্ভাবনা বাড়াতে এই সার্টিফিকেট আপনার জীবনবৃত্তান্তে যুক্ত করুন।",
+                    })}
+                  </p>
+                </div>
+                <div className="w-48 h-32 bg-gray-100 rounded-xl border border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs text-center p-2">
+                  <img
+                    src={Certificate}
+                    alt={t({ en: "Certificate", bn: "সার্টিফিকেট" })}
+                  />
+                </div>
+              </div> */}
+
               {/* 3. Ready To Apply Button */}
               <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-3xl p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
@@ -524,7 +555,7 @@ const AlimiyahKidsDetails = () => {
                   COURSE CURRICULUM
                 </h2>
                 <div className="border border-gray-300 rounded-sm">
-                  {/* Curriculum Item 1 */}
+                  {/* Curriculum Item 1: কুরআন */}
                   <div className="border-b border-gray-300">
                     <div
                       onClick={() => toggleSemester(1)}
@@ -550,16 +581,28 @@ const AlimiyahKidsDetails = () => {
                           আরবি বর্ণমালার বিশুদ্ধ উচ্চারণ
                         </p>
                         <p className="font-semibold text-[#002b2b]">
-                          তাজবিদের সাধারণ বিষয় ও বিশুদ্ধ তিলাওয়াত
+                          এরাবিক ডায়াক্রিটিক্স (হারাকাত ও তানবিন)
                         </p>
                         <p className="font-semibold text-[#002b2b]">
-                          সালাতে পড়া সূরাগুলো মুখস্থ করা
+                          বানান করে আরবি পাঠ
+                        </p>
+                        <p className="font-semibold text-[#002b2b]">
+                          বানান ছাড়া আরবি পাঠ
+                        </p>
+                        <p className="font-semibold text-[#002b2b]">
+                          মাখরাজ ও সিফাতের মৌলিক প্রায়োগিক জ্ঞান
+                        </p>
+                        <p className="font-semibold text-[#002b2b]">
+                          তাজবিদের সমন্বয়ে বিশুদ্ধ কুরআন তিলাওয়াত
+                        </p>
+                        <p className="font-semibold text-[#002b2b]">
+                          সালাতে পঠিত সূরাগুলো মুখস্থকরণ
                         </p>
                       </div>
                     )}
                   </div>
 
-                  {/* Curriculum Item 2 */}
+                  {/* Curriculum Item 2: হিফজুল হাদিস */}
                   <div className="border-b border-gray-300">
                     <div
                       onClick={() => toggleSemester(2)}
@@ -588,15 +631,15 @@ const AlimiyahKidsDetails = () => {
                           দেখুন
                         </a>
                         <p>
-                          ২০ টি জীবনঘনিষ্ট হাদিস মুখস্তকরণ
-                          <br /> অর্থসহ সহীহ হাদিসের মৌলিক শিক্ষা <br />
-                          আকিদা-আখলাক ও আত্মিক বিশুদ্ধতায় হাদিসের প্রভাব
+                          ৫০ টি জীবনঘনিষ্ঠ হাদিস মুখস্থকরণ <br />
+                          অর্থসহ সহীহ হাদিসের মৌলিক শিক্ষা <br />
+                          আকিদা-আখলাক ও আত্মিক বিশুদ্ধতায় হাদিসের প্রভাব
                         </p>
                       </div>
                     )}
                   </div>
 
-                  {/* Curriculum Item 3 */}
+                  {/* Curriculum Item 3: বিশুদ্ধ আকিদাহ ও আদাব */}
                   <div className="border-b border-gray-300">
                     <div
                       onClick={() => toggleSemester(3)}
@@ -610,22 +653,26 @@ const AlimiyahKidsDetails = () => {
                         )}
                       </span>
                       <span className="text-[#002b2b] font-semibold">
-                        ছোটদের আকিদাহ
+                        বিশুদ্ধ আকিদাহ ও আদাব
                       </span>
                     </div>
                     {openSemester === 3 && (
                       <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
                         <p className="text-[#002b2b]">
-                          আল্লাহ ও মালাইকা সম্পর্কে মৌলিক আকিদাহ <br /> রাসুল ও
-                          কিতাব সম্পর্কে সঠিক আকিদাহ <br /> মালাইকা ও রাসুলদের
-                          সম্পর্কে সঠিক আকিদাহ <br /> আখিরাত ও তাকদীর ও তার
-                          কিতাব সম্পর্কে সঠিক আকিদাহ
+                          সহীহ আকিদাহর পরিচয় <br />
+                          সহীহ আকিদাহ পাঠের গুরুত্ব <br />
+                          আল্লাহ ও তার কিতাব সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ{" "}
+                          <br />
+                          মালাইকা ও রাসুলদের সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ{" "}
+                          <br />
+                          আখিরাত ও তাকদীর ও তার কিতাব সম্পর্কে সঠিক ও
+                          ত্রুটিমুক্ত আকিদাহ
                         </p>
                       </div>
                     )}
                   </div>
 
-                  {/* Curriculum Item 4 */}
+                  {/* Curriculum Item 4: দু'আ এন্ড ইবাদাহ */}
                   <div className="border-b border-gray-300">
                     <div
                       onClick={() => toggleSemester(4)}
@@ -639,7 +686,7 @@ const AlimiyahKidsDetails = () => {
                         )}
                       </span>
                       <span className="text-[#002b2b] font-semibold">
-                        ইসলামিক ছালাত ও ইবাদতের দুয়া
+                        দু'আ এন্ড ইবাদাহ
                       </span>
                     </div>
                     {openSemester === 4 && (
@@ -654,20 +701,21 @@ const AlimiyahKidsDetails = () => {
                           দেখুন
                         </a>
                         <p>
-                          সুন্নাহভিত্তিক জীবন যাপনের মৌলিক ধারণা
-                          <br /> প্রতি কাজে সুন্নাহ মেনে চলা
-                          <br /> ঘুমোতে যাওয়া ও ঘুম থেকে ওঠার নিয়ম ও দুয়া
-                          <br /> ওয়াশরুমে যাওয়া ও বের হবার নিয়ম ও দুয়া <br />
-                          মসজিদে প্রবেশ ও বের হবার নিয়ম ও দুয়া
-                          <br /> কথা বলার আদব ও শিষ্টাচার
-                          <br /> অন্যের ঘরে প্রবেশের আদব, ইত্যাদি
+                          ঘুমাতে যাওয়া ও ঘুম থেকে ওঠার নিয়ম ও দুয়া <br />
+                          ওয়াশরুমে যাওয়া ও বের হবার নিয়ম ও দুয়া <br />
+                          মসজিদে প্রবেশ ও বের হবার নিয়ম ও দুয়া <br />
+                          পবিত্রতা ও পরিচ্ছন্নতার মৌলিক জ্ঞান <br />
+                          ইসলামে পরিপাটি থাকার গুরুত্ব <br />
+                          অযু-গোসলের ইসলামিক নিয়ম <br />
+                          আজান-ইকামাতের শিক্ষালাত <br />
+                          প্র্যাক্টিক্যাল সালাতের সামগ্রিক ধারণা
                         </p>
                       </div>
                     )}
                   </div>
 
-                  {/* Curriculum Item 5 */}
-                  <div>
+                  {/* Curriculum Item 5: বেসিক এরাবিক */}
+                  <div className="border-b border-gray-300">
                     <div
                       onClick={() => toggleSemester(5)}
                       className="flex items-center gap-3 px-4 py-3 bg-white cursor-pointer hover:bg-gray-50 transition"
@@ -680,20 +728,54 @@ const AlimiyahKidsDetails = () => {
                         )}
                       </span>
                       <span className="text-[#002b2b] font-semibold">
-                        সিরাহ
+                        বেসিক এরাবিক (স্পোকেন ও রাইডিং এরাবিক)
                       </span>
                     </div>
                     {openSemester === 5 && (
                       <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
+                        <p className="font-semibold text-[#002b2b]">
+                          ১. স্পোকেন এরাবিক
+                        </p>
+                        <p className="font-semibold text-[#002b2b]">
+                          ২. রাইডিং এরাবিক:
+                        </p>
+                        <p className="pl-4">
+                          - আরবি শব্দমালা মুখস্থকরণ <br />
+                          - আরবিতে সংখ্যা ও রঙের নাম <br />
+                          - আরবি দিন ও মাসের নাম <br />
+                          - নিজের পরিচয় প্রদান ও প্রাথমিক কথোপকথন <br />-
+                          দৈনন্দিন জীবনের বহুল ব্যবহৃত আরবি কথোপকথন
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Curriculum Item 6: ইসলামিক ম্যানার্স */}
+                  <div>
+                    <div
+                      onClick={() => toggleSemester(6)}
+                      className="flex items-center gap-3 px-4 py-3 bg-white cursor-pointer hover:bg-gray-50 transition"
+                    >
+                      <span className="text-[#00ADD2] text-sm">
+                        {openSemester === 6 ? (
+                          <FaChevronUp />
+                        ) : (
+                          <FaChevronDown />
+                        )}
+                      </span>
+                      <span className="text-[#002b2b] font-semibold">
+                        ইসলামিক ম্যানার্স
+                      </span>
+                    </div>
+                    {openSemester === 6 && (
+                      <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
                         <p className="text-[#002b2b]">
-                          রাসুলের বংশ পরিচিতি <br />
-                          আরব ও আরবজাতীর জীবন দর্শন <br />
-                          রাসুলের জন্মকালীন আশ্চর্য ঘটনাপ্রবাহ
-                          <br /> রাসুলের বাল্যকাল ও শৈশব
-                          <br /> রাসুলের তারুণ্য ও বিবাহ
-                          <br />
-                          নবুওয়াতপ্রাপ্তি ও দাওয়াত
-                          <br /> সংগ্রামী কর্মজীবন ও পরলোকগমন
+                          অভিবাদন ও সালাম <br />
+                          কথা বলার আদব <br />
+                          খাওয়ার আদব <br />
+                          পিতা-মাতা ও মুরব্বিদের সম্মান <br />
+                          নারিষ্ণতা ও পবিত্রতা (নম্রতা ও পরিচ্ছন্নতা) <br />
+                          দুর্বিনীত ও দান (সহযোগিতা ও দানশীলতা)
                         </p>
                       </div>
                     )}
@@ -943,7 +1025,7 @@ const AlimiyahKidsDetails = () => {
             {/* Right Sidebar - 1 Column */}
             <div className="space-y-4 -mt-[305px]">
               <a
-                href="https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB"
+                href="https://www.youtube.com/watch?v=r0JH4X805mE&feature=youtu.be"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer"
@@ -993,19 +1075,33 @@ const AlimiyahKidsDetails = () => {
                   </Link>
                 </div>
 
+                {/* Separate Download Button for Prospectus */}
+                <div className="flex items-center justify-center mb-6">
+                  <a
+                    href="https://drive.google.com/file/d/1UfiIPqcdwYa8rxuDO-0RC07PYbTy5ynj/view?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full"
+                  >
+                    <button className="w-full bg-[#003d3d] hover:bg-[#002b2b] text-white font-semibold py-3 rounded-xl shadow flex items-center justify-center gap-2 transition-all">
+                      <FaDownload /> Prospectus
+                    </button>
+                  </a>
+                </div>
+
                 {/* Info Details */}
                 <div className="space-y-3 text-left px-1 text-[#002b2b]">
                   <div className="flex items-center gap-2 text-[15px]">
                     <span className="font-medium">Course Level:</span>
-                    <span className="font-bold">Intermediate</span>
+                    <span className="font-bold">Basic</span>
                   </div>
                   <div className="flex items-center gap-2 text-[15px]">
                     <span className="font-medium">Enrolled:</span>
-                    <span className="font-bold">325</span>
+                    <span className="font-bold">525</span>
                   </div>
                   <div className="flex items-center gap-2 text-[15px]">
                     <span className="font-medium">Last Updated:</span>
-                    <span className="font-bold">12/24/2024</span>
+                    <span className="font-bold">03/09/2026</span>
                   </div>
                 </div>
               </div>
@@ -1013,7 +1109,7 @@ const AlimiyahKidsDetails = () => {
               {/* Instructors List */}
               <div className="bg-white rounded-3xl">
                 <h3 className="text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
-                  ফ্যাকাল্টি
+                  Faculty
                 </h3>
                 <div className="space-y-4">
                   {instructors.map((instructor) => (

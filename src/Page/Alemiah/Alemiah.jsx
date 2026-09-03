@@ -25,19 +25,60 @@ import {
   FaShieldAlt,
 } from "react-icons/fa";
 
+// --- Language Hook (copied from DiplomaDetails for consistency) ---
+import { useState as useStateHook, useEffect } from "react";
+
+export const useLanguage = () => {
+  const [language, setLanguage] = useStateHook(
+    () => localStorage.getItem("language") || "en",
+  );
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setLanguage(localStorage.getItem("language") || "en");
+    };
+
+    window.addEventListener("languageChange", handleStorageChange);
+    return () => {
+      window.removeEventListener("languageChange", handleStorageChange);
+    };
+  }, []);
+
+  const t = (translations) => {
+    return translations[language] || translations["en"];
+  };
+
+  return { language, t };
+};
+// ---------------------------------------------------------
+
 const Alemiah = () => {
-  // শুধুমাত্র title ও subtitle সহ কোর্স ডাটা
+  const { t } = useLanguage();
+
+  // Courses data with translated titles and subtitles
   const courses = [
     {
       id: "alimiyah-kids",
-      title: "আলিমিয়াহ ফর কিডস",
-      subtitle: "৬–১১ বছর বয়সী শিশুদের জন্য ইলম শেখার  আনন্দময় সূচনা",
+      title: t({
+        en: "Alimiyah for Kids",
+        bn: "আলিমিয়াহ ফর কিডস",
+      }),
+      subtitle: t({
+        en: "An enjoyable start to learning Islamic knowledge for children aged 6–11",
+        bn: "৬–১১ বছর বয়সী শিশুদের জন্য ইলম শেখার আনন্দময় সূচনা",
+      }),
       image: alemiyahbanner,
     },
     {
       id: "alimiyah-program",
-      title: "আলিমিয়াহ প্রোগ্রাম",
-      subtitle: "১২–১৮ বছর বয়সী শিক্ষার্থীদের জন্য আলিম হওয়ার পথচলা।",
+      title: t({
+        en: "Alimiyah Program",
+        bn: "আলিমিয়াহ প্রোগ্রাম",
+      }),
+      subtitle: t({
+        en: "The path to becoming an Alim for students aged 12–18.",
+        bn: "১২–১৮ বছর বয়সী শিক্ষার্থীদের জন্য আলিম হওয়ার পথচলা।",
+      }),
       image: "https://i.ibb.co.com/7xnC6p7d/banner-2.jpg",
     },
   ];
@@ -60,7 +101,10 @@ const Alemiah = () => {
               <div className="relative bg-white/5 backdrop-blur-sm rounded-2xl p-3 border border-white/10 shadow-2xl">
                 <img
                   src={alemiaImg}
-                  alt="Alemiah Program Banner"
+                  alt={t({
+                    en: "Alemiah Program Banner",
+                    bn: "আলেমিয়াহ প্রোগ্রাম ব্যানার",
+                  })}
                   className="w-full h-80 lg:h-96 object-cover rounded-xl shadow-xl"
                 />
               </div>
@@ -70,12 +114,22 @@ const Alemiah = () => {
             <div className="w-full lg:w-1/2 space-y-6">
               <div className="space-y-3">
                 <span className="inline-block bg-yellow-500/20 text-yellow-300 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-yellow-500/30 ml-100">
-                  ভর্তি চলছে<br></br> সীমিত আসন
+                  {t({
+                    en: "Admissions Open • Limited Seats",
+                    bn: "ভর্তি চলছে • সীমিত আসন",
+                  })}
                 </span>
                 <h1 className="text-3xl md:text-5xl font-bold leading-tight">
-                  আলেমিয়াহ <br />
+                  {t({
+                    en: "Alimiyah",
+                    bn: "আলেমিয়াহ",
+                  })}{" "}
+                  <br />
                   <span className="text-yellow-400 relative">
-                    প্রোগ্রাম
+                    {t({
+                      en: "Program",
+                      bn: "প্রোগ্রাম",
+                    })}
                     <svg
                       className="absolute -bottom-2 left-0 w-full h-2"
                       viewBox="0 0 200 10"
@@ -92,30 +146,47 @@ const Alemiah = () => {
               </div>
 
               <p className="text-base md:text-lg text-gray-200 leading-relaxed">
-                স্কুল-কলেজের পড়াশোনার পাশাপাশি কুরআন, হাদিস, আকিদা, ফিকহ, আরবি
-                ভাষা, সিরাহ ও ইসলামি আদব শেখার একটি সুসংগঠিত অনলাইন প্রোগ্রাম
+                {t({
+                  en: "Alongside school/college studies, a structured online program to learn Qur'an, Hadith, Aqidah, Fiqh, Arabic language, Sirah, and Islamic manners.",
+                  bn: "স্কুল-কলেজের পড়াশোনার পাশাপাশি কুরআন, হাদিস, আকিদা, ফিকহ, আরবি ভাষা, সিরাহ ও ইসলামি আদব শেখার একটি সুসংগঠিত অনলাইন প্রোগ্রাম",
+                })}
               </p>
 
               {/* Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4">
                 <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
                   <FaStar className="text-yellow-400 text-2xl mx-auto mb-1" />
-                  <p className="text-xs text-gray-300">রেটিং</p>
+                  <p className="text-xs text-gray-300">
+                    {t({ en: "Rating", bn: "রেটিং" })}
+                  </p>
                   <p className="text-sm font-bold">৪.৯ (৫)</p>
                 </div>
                 <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
                   <FaGraduationCap className="text-yellow-400 text-2xl mx-auto mb-1" />
-                  <p className="text-xs text-gray-300">প্রোগ্রাম</p>
-                  <p className="text-sm font-bold">২টি</p>
+                  <p className="text-xs text-gray-300">
+                    {t({ en: "Programs", bn: "প্রোগ্রাম" })}
+                  </p>
+                  <p className="text-sm font-bold">
+                    {t({ en: "2", bn: "২টি" })}
+                  </p>
                 </div>
                 <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
                   <FaAward className="text-yellow-400 text-2xl mx-auto mb-1" />
-                  <p className="text-xs text-gray-300">সার্টিফিকেট</p>
-                  <p className="text-sm font-bold">আলেমিয়াহ সনদ</p>
+                  <p className="text-xs text-gray-300">
+                    {t({ en: "Certificate", bn: "সার্টিফিকেট" })}
+                  </p>
+                  <p className="text-sm font-bold">
+                    {t({
+                      en: "Alimiyah Sanad",
+                      bn: "আলেমিয়াহ সনদ",
+                    })}
+                  </p>
                 </div>
                 <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
                   <FaUsers className="text-yellow-400 text-2xl mx-auto mb-1" />
-                  <p className="text-xs text-gray-300">ছাত্র</p>
+                  <p className="text-xs text-gray-300">
+                    {t({ en: "Students", bn: "ছাত্র" })}
+                  </p>
                   <p className="text-sm font-bold">১৩০০+</p>
                 </div>
               </div>
@@ -127,10 +198,22 @@ const Alemiah = () => {
         <div className="mt-16">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-[#002b2b] mb-3">
-              আমাদের <span className="text-yellow-500">প্রোগ্রামসমূহ</span>
+              {t({
+                en: "Our Programs",
+                bn: "আমাদের প্রোগ্রামসমূহ",
+              })}{" "}
+              <span className="text-yellow-500">
+                {t({
+                  en: "",
+                  bn: "",
+                })}
+              </span>
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
-              আপনার প্রয়োজন অনুযায়ী সঠিক প্রোগ্রামটি বেছে নিন
+              {t({
+                en: "Choose the right program according to your needs",
+                bn: "আপনার প্রয়োজন অনুযায়ী সঠিক প্রোগ্রামটি বেছে নিন",
+              })}
             </p>
           </div>
 
@@ -151,7 +234,8 @@ const Alemiah = () => {
 
                   <div className="absolute top-3 left-3 right-3 flex justify-between items-center text-white text-xs font-semibold">
                     <span className="flex items-center gap-1 drop-shadow bg-yellow-500 text-black px-2.5 py-1 rounded-full font-bold">
-                      {course.topBadge} <FaStar className="text-black inline" />
+                      {t({ en: "Top", bn: "শীর্ষ" })}{" "}
+                      <FaStar className="text-black inline" />
                     </span>
                   </div>
 
@@ -174,7 +258,7 @@ const Alemiah = () => {
                   <div className="border-t border-gray-100 pt-3 flex items-center justify-end">
                     <Link to={`/course/alemiah/${course.id}`}>
                       <button className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-5 py-2 rounded-full transition-all duration-300 text-sm flex items-center gap-2 shadow-md">
-                        <span>বিস্তারিত</span>
+                        <span>{t({ en: "Details", bn: "বিস্তারিত" })}</span>
                         <FaArrowRight className="text-xs" />
                       </button>
                     </Link>
