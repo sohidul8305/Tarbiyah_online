@@ -36,10 +36,10 @@ const OurVideo = () => {
     "M-2CAAfpxZQ",
     "HoICwgwGbn0",
     "66DgxQACWd4",
-    "KR59dFBOpbg", // আপডেট করা নতুন ভিডিও আইডি
+    "KR59dFBOpbg",
   ];
 
-  // Social Media Links Data with Proper Brand Icons
+  // Social Media Links Data with Proper Brand Icons and Correct URLs
   const socialLinks = [
     {
       name: { en: "Facebook Page", bn: "ফেসবুক পেজ" },
@@ -97,15 +97,30 @@ const OurVideo = () => {
     },
     {
       name: { en: "Hikmah Platform", bn: "হিকমাহ প্ল্যাটফর্ম" },
-      url: "https://i.ibb.co.com/0jH7kmtm/Hikma-logo.png",
-      icon: <Globe className="text-amber-600 shrink-0" size={24} />,
+      url: "http://hikmah.net?referrer=tarbiyahonline26",
+      icon: (
+        <img
+          src="https://hikmah.net/favicon.ico"
+          alt="Hikmah Logo"
+          className="w-6 h-6 object-contain shrink-0 rounded"
+        />
+      ),
       bg: "hover:bg-amber-50 border-amber-100",
     },
     {
       name: { en: "Facebook Group", bn: "ফেসবুক গ্রুপ" },
-      url: "https://www.youtube.com/watch?v=KR59dFBOpbg",
+      url: "https://facebook.com/groups/tarbiyahacademyofficial/",
       icon: <FaFacebook className="text-blue-500 shrink-0" size={24} />,
       bg: "hover:bg-blue-50 border-blue-100",
+    },
+    {
+      name: {
+        en: "Facebook Channel / Messenger",
+        bn: "ফেসবুক মেসেঞ্জার চ্যানেল",
+      },
+      url: "https://www.messenger.com/channel/tarbiyahonlinemadrasah",
+      icon: <FaFacebook className="text-indigo-500 shrink-0" size={24} />,
+      bg: "hover:bg-indigo-50 border-indigo-100",
     },
   ];
 
