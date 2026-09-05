@@ -2,6 +2,7 @@ import React from "react";
 import alemiyahbanner from "../../image/alemiyahkidsbanner.png";
 import alemiaImg from "../../image/Coursecover.png";
 import { Link } from "react-router";
+import AlimiyahBannerImg from "../../image/arbiyaprogrambabanner.jpg";
 import {
   FaCheckCircle,
   FaClock,
@@ -79,7 +80,7 @@ const Alemiah = () => {
         en: "Reliable online platform for acquiring Islamic knowledge",
         bn: "দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম",
       }),
-      image: "https://i.ibb.co.com/7xnC6p7d/banner-2.jpg",
+      image: AlimiyahBannerImg,
     },
   ];
 
@@ -105,7 +106,7 @@ const Alemiah = () => {
                     en: "Alemiah Program Banner",
                     bn: "আলেমিয়াহ প্রোগ্রাম ব্যানার",
                   })}
-                  className="w-full h-80 lg:h-96 object-cover rounded-xl shadow-xl"
+                  className="w-50px h-70px lg:h-90 rounded-xl shadow-xl"
                 />
               </div>
             </div>
@@ -148,7 +149,7 @@ const Alemiah = () => {
               <p className="text-base md:text-lg text-gray-200 leading-relaxed">
                 {t({
                   en: "Alongside school/college studies, a structured online program to learn Qur'an, Hadith, Aqidah, Fiqh, Arabic language, Sirah, and Islamic manners.",
-                  bn: "স্কুল-কলেজের পড়াশোনার পাশাপাশি কুরআন, হাদিস, আকিদা, ফিকহ, আরবি ভাষা, সিরাহ ও ইসলামি আদব শেখার একটি সুসংগঠিত অনলাইন প্রোগ্রাম",
+                  bn: "স্কুল-কলেজের পড়াশোনার পাশাপাশি কুরআন, হাদিস, আকিদা, ফিকহ, আরবি ভাষা, সিরাহ ও ইসলামি আদব শেখার একটি সুসংগঠিত অনলাইন প্রোগ্রাম",
                 })}
               </p>
 
