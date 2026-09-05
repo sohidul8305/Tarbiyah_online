@@ -76,8 +76,8 @@ const Alemiah = () => {
         bn: "আলিমিয়াহ প্রোগ্রাম",
       }),
       subtitle: t({
-        en: "The path to becoming an Alim for students aged 12–18.",
-        bn: "১২–১৮ বছর বয়সী শিক্ষার্থীদের জন্য আলিম হওয়ার পথচলা।",
+        en: "Reliable online platform for acquiring Islamic knowledge",
+        bn: "দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম",
       }),
       image: "https://i.ibb.co.com/7xnC6p7d/banner-2.jpg",
     },

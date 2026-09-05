@@ -5,6 +5,13 @@ import Tarbiyahcourse from "../../image/Tarbiyaprogram.jpg";
 // Swiper এবং প্রয়োজনীয় মডিউল ইমপোর্ট করুন
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
+import MamunImg from "../../image/Abdullahmanun.jpg";
+import MahmudImg from "../../image/Hridoy-Ustaz-01.png";
+import MarjanaImg from "../../image/arartor.png";
+import ImamhussainImg from "../../image/Emam Hussain.png";
+import AtiqullahImg from "../../image/atikullah.png";
+import JubaerImg from "../../image/jubair.png";
+import AlaminImg from "../../image/Alamin.png";
 
 // Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
 import "swiper/css";
@@ -55,51 +62,52 @@ const AlimiyahProgramDetails = () => {
   const instructors = [
     {
       id: 1,
-      name: "Professor Mokhter Ahmad",
-      title: "Chairman, Tarbiyah Academy",
-      image: "https://i.pravatar.cc/150?img=1",
+      name: "Abdullah Al Mamun",
+      title: "Co Ordinator",
+      subtitle: "Tarbiyah Education Network",
+      image: MamunImg,
     },
     {
       id: 2,
-      name: "Dr. Abu Bakr Muhammad Zakaria",
-      title: "Prof. Islamic University, Kushtia",
-      subtitle: "Comparative Theology and Aqeedah",
-      image: "https://i.pravatar.cc/150?img=2",
+      name: "Hussain Mohammad Hidoy",
+      title: "Coordinator",
+      subtitle: "Department of Islamic Studies, Tarbiyah Education Network",
+      image: MahmudImg,
     },
     {
       id: 3,
-      name: "Dr. Zubair Ehsanul Haque",
-      title: "Department Head, Dhaka University",
-      subtitle: "Subject: Arabic Language",
-      image: "https://i.pravatar.cc/150?img=3",
+      name: "Emam hussain",
+      title: "Junior Faculty",
+      subtitle: "Diploma In Islamic Studies",
+      image: ImamhussainImg,
     },
     {
       id: 4,
-      name: "Dr. Mir Manzoor Mahmud",
-      title: "Prof. Manarat Int. University",
-      subtitle: "Subject: Seerah and History of Islam",
-      image: "https://i.pravatar.cc/150?img=4",
+      name: "Marjan Ahmad",
+      title: "Senior Teacher",
+      subtitle: "Tarbiyah Education Network",
+      image: MarjanaImg,
     },
     {
       id: 5,
-      name: "Dr. Matiul Islam",
-      title: "Bangladesh Islamic University",
-      subtitle: "Subject: Hadith Studies",
-      image: "https://i.pravatar.cc/150?img=5",
+      name: "Atiqullah Sahid",
+      title: "Junior Teacher",
+      subtitle: "Allimiyah",
+      image: AtiqullahImg,
     },
     {
       id: 6,
-      name: "Ustad Hossain Mohammad Hridoy",
-      title: "Coordinator",
-      subtitle: "Department of Islamic Studies, Tarbiyah Education Network",
-      image: "https://i.pravatar.cc/150?img=8",
+      name: "Jubair Hussain",
+      title: "Junior Teacher",
+      subtitle: "Allimiyah",
+      image: JubaerImg,
     },
     {
       id: 7,
-      name: "Ustad Abdullah Al Mamun",
-      title: "Faculty",
-      subtitle: "Tarbiyah Education Network",
-      image: "https://i.pravatar.cc/150?img=9",
+      name: "Al Amin",
+      title: "Junior Teacher",
+      subtitle: "Allimiyah",
+      image: AlaminImg,
     },
   ];
 
@@ -1021,6 +1029,20 @@ const AlimiyahProgramDetails = () => {
                   </Link>
                 </div>
 
+                {/* Separate Download Button for Prospectus */}
+                <div className="flex items-center justify-center mb-6">
+                  <a
+                    href="https://drive.google.com/file/d/1UfiIPqcdwYa8rxuDO-0RC07PYbTy5ynj/view?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full"
+                  >
+                    <button className="w-full bg-[#003d3d] hover:bg-[#002b2b] text-white font-semibold py-3 rounded-xl shadow flex items-center justify-center gap-2 transition-all">
+                      <FaDownload /> {"Prospectus"}
+                    </button>
+                  </a>
+                </div>
+
                 {/* Info Details */}
                 <div className="space-y-3 text-left px-1 text-[#002b2b]">
                   <div className="flex items-center gap-2 text-[15px]">
@@ -1041,7 +1063,7 @@ const AlimiyahProgramDetails = () => {
               {/* Instructors List */}
               <div className="bg-white rounded-3xl">
                 <h3 className="text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
-                  ফ্যাকাল্টি
+                  Faculty
                 </h3>
                 <div className="space-y-4">
                   {instructors.map((instructor) => (
