@@ -824,12 +824,14 @@ const AlimiyahKidsDetails = () => {
                           <FaExternalLinkAlt className="text-xs" />{" "}
                           {t({ en: "Watch Video", bn: "ভিডিও লিংক দেখুন" })}
                         </a>
-                        <p>
-                          {t({
-                            en: "Memorization of 50 life-related Hadiths with meanings, basic teachings of authentic Hadith, and impact of Hadith on Aqeedah-Akhlaq and spiritual purification.",
-                            bn: "৫০ টি জীবনঘনিষ্ঠ হাদিস মুখস্থকরণ, অর্থসহ সহীহ হাদিসের মৌলিক শিক্ষা, আকিদা-আখলাক ও আত্মিক বিশুদ্ধতায় হাদিসের প্রভাব",
-                          })}
-                        </p>
+                        <p
+                          dangerouslySetInnerHTML={{
+                            __html: t({
+                              en: "Memorization of 50 life-related Hadiths with meanings, <br>basic teachings of authentic Hadith, <br>and impact of Hadith on Aqeedah-Akhlaq and spiritual purification.",
+                              bn: "৫০ টি জীবনঘনিষ্ঠ হাদিস মুখস্থকরণ, অর্থসহ সহীহ হাদিসের মৌলিক শিক্ষা, আকিদা-আখলাক ও আত্মিক বিশুদ্ধতায় হাদিসের প্রভাব",
+                            }),
+                          }}
+                        />
                       </div>
                     )}
                   </div>
@@ -856,12 +858,15 @@ const AlimiyahKidsDetails = () => {
                     </div>
                     {openSemester === 3 && (
                       <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
-                        <p className="text-[#002b2b]">
-                          {t({
-                            en: "Introduction to correct Aqeedah, importance of studying correct Aqeedah, correct and flawless Aqeedah about Allah and His Book, correct and flawless Aqeedah about Angels and Messengers, correct and flawless Aqeedah about the Hereafter and Destiny.",
-                            bn: "সহীহ আকিদাহর পরিচয়, সহীহ আকিদাহ পাঠের গুরুত্ব, আল্লাহ ও তার কিতাব সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ, মালাইকা ও রাসুলদের সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ, আখিরাত ও তাকদীর ও তার কিতাব সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ",
-                          })}
-                        </p>
+                        <p
+                          className="text-[#002b2b]"
+                          dangerouslySetInnerHTML={{
+                            __html: t({
+                              en: "Introduction to correct Aqeedah, importance of studying correct Aqeedah, <br>correct and flawless Aqeedah about Allah and His Book, <br>correct and flawless Aqeedah about Angels and Messengers, <br>correct and flawless Aqeedah about the Hereafter and Destiny.",
+                              bn: "সহীহ আকিদাহর পরিচয়, সহীহ আকিদাহ পাঠের গুরুত্ব, <br>আল্লাহ ও তার কিতাব সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ, <br>মালাইকা ও রাসুলদের সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ, <br>আখিরাত ও তাকদীর সম্পর্কে সঠিক ও ত্রুটিমুক্ত আকিদাহ",
+                            }),
+                          }}
+                        />
                       </div>
                     )}
                   </div>
@@ -894,12 +899,14 @@ const AlimiyahKidsDetails = () => {
                           <FaExternalLinkAlt className="text-xs" />{" "}
                           {t({ en: "Watch Video", bn: "ভিডিও লিংক দেখুন" })}
                         </a>
-                        <p>
-                          {t({
-                            en: "Rules and Du'as for sleeping and waking up, entering and leaving the toilet, entering and leaving the mosque, basic knowledge of purity and cleanliness, importance of being tidy in Islam, Islamic rules of Wudu and Ghusl, lessons on Adhan and Iqamah, practical understanding of Salah.",
-                            bn: "ঘুমাতে যাওয়া ও ঘুম থেকে ওঠার নিয়ম ও দুয়া, ওয়াশরুমে যাওয়া ও বের হবার নিয়ম ও দুয়া, মসজিদে প্রবেশ ও বের হবার নিয়ম ও দুয়া, পবিত্রতা ও পরিচ্ছন্নতার মৌলিক জ্ঞান, ইসলামে পরিপাটি থাকার গুরুত্ব, অযু-গোসলের ইসলামিক নিয়ম, আজান-ইকামাতের শিক্ষা, প্র্যাক্টিক্যাল সালাতের সামগ্রিক ধারণা",
-                          })}
-                        </p>
+                        <p
+                          dangerouslySetInnerHTML={{
+                            __html: t({
+                              en: "Rules and Du'as for sleeping and waking up, <br>entering and leaving the toilet, entering and leaving the mosque, <br>basic knowledge of purity and cleanliness, importance of being tidy in Islam, <br>Islamic rules of Wudu and Ghusl, lessons on Adhan and Iqamah, <br>practical understanding of Salah.",
+                              bn: "ঘুমাতে যাওয়া ও ঘুম থেকে ওঠার নিয়ম ও দুয়া, ওয়াশরুমে যাওয়া ও বের হবার নিয়ম ও দুয়া, মসজিদে প্রবেশ ও বের হবার নিয়ম ও দুয়া, <br>পবিত্রতা ও পরিচ্ছন্নতার মৌলিক জ্ঞান, ইসলামে পরিপাটি থাকার গুরুত্ব, <br>অযু-গোসলের ইসলামিক নিয়ম, আজান-ইকামাতের শিক্ষা, <br>প্র্যাক্টিক্যাল সালাতের সামগ্রিক ধারণা",
+                            }),
+                          }}
+                        />
                       </div>
                     )}
                   </div>
@@ -967,12 +974,15 @@ const AlimiyahKidsDetails = () => {
                     </div>
                     {openSemester === 6 && (
                       <div className="px-4 py-3 bg-white border-t border-gray-200 text-sm text-gray-700 space-y-2">
-                        <p className="text-[#002b2b]">
-                          {t({
-                            en: "Greeting and Salam, etiquette of speaking, etiquette of eating, respect for parents and elders, humility and purity (politeness and cleanliness), cooperation and charity.",
-                            bn: "অভিবাদন ও সালাম, কথা বলার আদব, খাওয়ার আদব, পিতা-মাতা ও মুরব্বিদের সম্মান, নারিষ্ণতা ও পবিত্রতা (নম্রতা ও পরিচ্ছন্নতা), দুর্বিনীত ও দান (সহযোগিতা ও দানশীলতা)",
-                          })}
-                        </p>
+                        <p
+                          className="text-[#002b2b]"
+                          dangerouslySetInnerHTML={{
+                            __html: t({
+                              en: "Greeting and Salam, etiquette of speaking, <br>etiquette of eating, respect for parents and elders, <br>humility and purity (politeness and cleanliness), <br>cooperation and charity.",
+                              bn: "অভিবাদন ও সালাম, কথা বলার আদব, খাওয়ার আদব, <br>পিতা-মাতা ও মুরব্বিদের সম্মান, নম্রতা ও পরিচ্ছন্নতা, <br>সহযোগিতা ও দানশীলতা",
+                            }),
+                          }}
+                        />
                       </div>
                     )}
                   </div>
