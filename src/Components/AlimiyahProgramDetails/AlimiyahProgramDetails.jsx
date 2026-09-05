@@ -862,7 +862,7 @@ const AlimiyahProgramDetails = () => {
                     })}
                   </p>
                 </div>
-                <Link to="/Course-apply-from">
+                <Link to="/admission-now">
                   <button className="bg-[#002b2b] hover:bg-teal-900 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all">
                     {t({ en: "Start Now", bn: "এখনই শুরু করুন" })}
                   </button>
