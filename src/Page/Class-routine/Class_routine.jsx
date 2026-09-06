@@ -101,6 +101,7 @@ const Class_routine = () => {
       time: { en: "05:00 PM - 06:00 PM", bn: "বিকাল ০৫:০০ - ০৬:০০" },
       teacher: { en: "Ustadha Maryam", bn: "ওস্তাদা মরিয়ম" },
       status: { en: "Live", bn: "লাইভ" },
+      isKids: true, // কিডস এর জন্য ফ্ল্যাগ যোগ করা হলো
     },
     {
       key: "quran",
@@ -200,10 +201,9 @@ const Class_routine = () => {
                           {t(item.status)}
                         </span>
 
-                        {/* যদি এটি Quran for Elders হয়, তবেই স্ট্যাটাসের পাশে View ও Download বাটন দেখাবে */}
+                        {/* যদি এটি Quran for Elders হয় */}
                         {item.isElders && (
                           <div className="files-btn flex items-center gap-1.5 ml-2">
-                            {/* ড্রাইভ ফাইল দেখার জন্য */}
                             <a
                               href="https://drive.google.com/file/d/10z7GLK8JU3mi6JN-PvUeWD1dZdaXsz5n/view?usp=sharing"
                               target="_blank"
@@ -212,9 +212,30 @@ const Class_routine = () => {
                             >
                               {t(content.viewBtn)}
                             </a>
-                            {/* সরাসরি ডাউনলোড লিংক */}
                             <a
                               href="https://drive.google.com/uc?export=download&id=10z7GLK8JU3mi6JN-PvUeWD1dZdaXsz5n"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="bg-[#004d4d] text-white px-2.5 py-1 rounded text-xs font-medium hover:bg-teal-900 transition-colors"
+                            >
+                              {t(content.downloadBtn)}
+                            </a>
+                          </div>
+                        )}
+
+                        {/* যদি এটি Tarbiyah Studies for Kids হয় */}
+                        {item.isKids && (
+                          <div className="files-btn flex items-center gap-1.5 ml-2">
+                            <a
+                              href="https://drive.google.com/file/d/17hj_OlfL20a6lMlISENA5gO6yifJz6lQ/view?usp=sharing"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="bg-teal-700 text-white px-2.5 py-1 rounded text-xs font-medium hover:bg-teal-800 transition-colors"
+                            >
+                              {t(content.viewBtn)}
+                            </a>
+                            <a
+                              href="https://drive.google.com/uc?export=download&id=17hj_OlfL20a6lMlISENA5gO6yifJz6lQ"
                               target="_blank"
                               rel="noopener noreferrer"
                               className="bg-[#004d4d] text-white px-2.5 py-1 rounded text-xs font-medium hover:bg-teal-900 transition-colors"
