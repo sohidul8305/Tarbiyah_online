@@ -35,8 +35,16 @@ import {
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 
-// Import certificate image (same as Alimiyah pages)
+// Import certificate image
 import AllimiyahCertificate from "../../image/allimiyahcertificate (2).png";
+
+// --- NEW INSTRUCTOR IMAGES ---
+import MujahidImg from "../../image/Mujahid.png";
+import SalmanImg from "../../image/salman.png";
+import AbunumanImg from "../../image/Abunoman.jpg";
+import MahmudulImg from "../../image/mahmudul.png";
+import Ahmedjaber from "../../image/Ahamed jabe.png";
+import Avator from "../../image/arartor.png";
 
 // --- Language Hook ---
 import { useState as useStateHook, useEffect } from "react";
@@ -80,36 +88,55 @@ const QuidaNuraniDetails = () => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
-  // Instructors (translated)
+  // --- REPLACED INSTRUCTORS (6 specific teachers) ---
   const instructors = [
     {
       id: 1,
-      name: t({
-        en: "Hafez Maulana Abdur Rahman",
-        bn: "হাফেজ মাওলানা আব্দুর রহমান",
-      }),
-      title: t({ en: "Lead Qur'an Teacher", bn: "প্রধান কুরআন শিক্ষক" }),
-      subtitle: t({
-        en: "Expert in Tajweed & Qira'at",
-        bn: "বিশেষজ্ঞ: তাজবিদ ও কিরাত",
-      }),
-      image: "https://i.pravatar.cc/150?img=11",
+      name: t({ en: "Mujahidul Islam", bn: "মুজাহিদুল ইসলাম" }),
+      title: t({ en: "Senior Teacher", bn: "সিনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: MujahidImg,
     },
     {
       id: 2,
-      name: t({ en: "Maulana Sadikur Rahman", bn: "মাওলানা সাদিকুর রহমান" }),
-      title: t({ en: "Qa'idah Teacher", bn: "কায়দা শিক্ষক" }),
-      subtitle: t({
-        en: "Expert in Makharij & Sifaat",
-        bn: "বিশেষজ্ঞ: মাখরাজ ও সিফাত",
-      }),
-      image: "https://i.pravatar.cc/150?img=14",
+      name: t({ en: "Salman Ahmad", bn: "সালমান আহমেদ" }),
+      title: t({ en: "Senior Teacher", bn: "সিনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: SalmanImg,
+    },
+    {
+      id: 3,
+      name: t({ en: "Abu Noman", bn: "আবু নোমান" }),
+      title: t({ en: "Senior Teacher", bn: "সিনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: AbunumanImg,
+    },
+    {
+      id: 4,
+      name: t({ en: "Mahmudur Rahman", bn: "মাহমুদুর রহমান" }),
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: MahmudulImg,
+    },
+    {
+      id: 5,
+      name: t({ en: "Ahmad Jaber", bn: "আহমেদ জাবের" }),
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: Ahmedjaber,
+    },
+    {
+      id: 6,
+      name: t({ en: "Suraiya Akhtar", bn: "সুরাইয়া আক্তার" }),
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: Avator,
     },
   ];
 
-  // Course Data (translated)
+  // Course Data (translated – unchanged)
   const courseDetails = {
-    title: t({ en: "QAIDA NURANIYAH COURSE", bn: "কায়দা নূরানিয়াহ কোর্স" }),
+    title: t({ en: "QUIDA NURANIYAH COURSE", bn: "কায়দা নূরানিয়াহ কোর্স" }),
     description: t({
       en: "Narrated by Abu Hurairah [RA]: The Messenger of Allah [SAW] said, 'Whoever does not recite the Qur'an with proper pronunciation is not considered part of my Ummah.' - Sahih Bukhari 7527. Therefore, it is essential for all of us to learn how to recite the Qur'an correctly and to ensure that our children are taught proper recitation from the very beginning. This course is designed to teach correct pronunciation, basic Tajweed rules, and the foundation of Qur'anic recitation using the Qa'idah Nuraniyah method.",
       bn: "আবু হুরাইরা (রা.) থেকে বর্ণিত: রাসূলুল্লাহ (সা.) বলেছেন, 'যে ব্যক্তি কুরআনকে সঠিক উচ্চারণে পাঠ করে না, সে আমার উম্মতের অন্তর্ভুক্ত নয়।' - সহিহ বুখারি ৭৫২৭। তাই আমাদের সকলের জন্য কুরআন সঠিকভাবে পাঠ করা এবং আমাদের সন্তানদের প্রথম থেকেই সঠিক তিলাওয়াত শেখানো অত্যন্ত জরুরি। এই কোর্সটি কায়দা নূরানিয়াহ পদ্ধতিতে সঠিক উচ্চারণ, তাজবিদের মৌলিক নিয়ম এবং কুরআন তিলাওয়াতের ভিত্তি শেখানোর জন্য ডিজাইন করা হয়েছে।",
@@ -139,7 +166,7 @@ const QuidaNuraniDetails = () => {
     ],
   };
 
-  // Curriculum Data (translated)
+  // Curriculum Data (translated – unchanged)
   const semestersData = [
     {
       title: t({
@@ -216,7 +243,7 @@ const QuidaNuraniDetails = () => {
     },
   ];
 
-  // Why Tarbiyah Quran Studies features (translated)
+  // Why Tarbiyah Quran Studies features (translated – unchanged)
   const whyFeatures = [
     {
       icon: <FaUserTie className="text-xl" />,
@@ -247,7 +274,7 @@ const QuidaNuraniDetails = () => {
     },
   ];
 
-  // Testimonials (from screenshots)
+  // Testimonials (unchanged)
   const testimonials = [
     {
       id: 1,
@@ -287,7 +314,7 @@ const QuidaNuraniDetails = () => {
     },
   ];
 
-  // --- NEW VIDEO GALLERY (6 specific YouTube videos) ---
+  // Video Gallery (unchanged)
   const videoGallery = [
     {
       id: 1,
@@ -327,7 +354,7 @@ const QuidaNuraniDetails = () => {
     },
   ];
 
-  // FAQ Data (translated)
+  // FAQ Data (translated – unchanged)
   const faqs = [
     {
       question: t({
@@ -401,7 +428,7 @@ const QuidaNuraniDetails = () => {
     },
   ];
 
-  // --- PROSPECTUS LINK (same as Alimiyah Program) ---
+  // Prospectus link (unchanged)
   const prospectusLink =
     "https://drive.google.com/file/d/1mv0ponZWJ0Jb2cXSsvITdneTwYMQfXkv/view?usp=sharing";
 
@@ -513,7 +540,7 @@ const QuidaNuraniDetails = () => {
                 </p>
               </div>
 
-              {/* 2. EARN A CERTIFICATE (NEW) */}
+              {/* 2. EARN A CERTIFICATE */}
               <div className="bg-white rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
                 <div>
                   <h3 className="text-xl font-bold text-[#00ADD2] mb-2">
@@ -525,7 +552,7 @@ const QuidaNuraniDetails = () => {
                   <p className="text-gray-600 text-sm">
                     {t({
                       en: "Add this certificate to your resume to demonstrate your skills & increase your chances of getting noticed.",
-                      bn: "আপনার দক্ষতা প্রদর্শন ও নজরে আসার সম্ভাবনা বাড়াতে এই সার্টিফিকেট আপনার জীবনবৃত্তান্তে যুক্ত করুন।",
+                      bn: "আপনার দক্ষতা প্রদর্শন ও নজরে আসার সম্ভাবনা বাড়াতে এই সার্টিফিকেট আপনার জীবনবৃত্তান্তে যুক্ত করুন。",
                     })}
                   </p>
                 </div>
@@ -569,7 +596,7 @@ const QuidaNuraniDetails = () => {
                   <p className="text-gray-600 text-sm">
                     {t({
                       en: "Enroll now and start your structured learning journey.",
-                      bn: "এখনই এনরোল করুন এবং আপনার শেখার যাত্রা শুরু করুন।",
+                      bn: "এখনই এনরোল করুন এবং আপনার শেখার যাত্রা শুরু করুন。",
                     })}
                   </p>
                 </div>
@@ -764,7 +791,7 @@ const QuidaNuraniDetails = () => {
                   <p>
                     {t({
                       en: "* Semester fee can be paid through monthly installments.",
-                      bn: "* সেমিস্টারে ফি মাসিক ইনস্টলমেন্ট এর মাধ্যমে প্রদান করা যাবে।",
+                      bn: "* সেমিস্টারে ফি মাসিক ইনস্টলমেন্ট এর মাধ্যমে প্রদান করা যাবে。",
                     })}
                   </p>
                 </div>
@@ -823,10 +850,7 @@ const QuidaNuraniDetails = () => {
                     disableOnInteraction: false,
                     reverseDirection: true,
                   }}
-                  pagination={{
-                    clickable: true,
-                    dynamicBullets: true,
-                  }}
+                  pagination={{ clickable: true, dynamicBullets: true }}
                   breakpoints={{
                     640: { slidesPerView: 2 },
                     1024: { slidesPerView: 3 },
@@ -871,7 +895,7 @@ const QuidaNuraniDetails = () => {
                 </Swiper>
               </div>
 
-              {/* 3. Video Gallery (UPDATED with 6 videos) */}
+              {/* 3. Video Gallery */}
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
@@ -987,11 +1011,9 @@ const QuidaNuraniDetails = () => {
                       {t({ en: "Bangla Version", bn: "বাংলা ভার্সন" })}
                     </button>
                   </Link>
-
                   <div className="absolute w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#002b2b] font-medium shadow-md z-10 text-[10px]">
                     {t({ en: "Or", bn: "অথবা" })}
                   </div>
-
                   <Link to="/enroll/quida/english-version" className="w-1/2">
                     <button className="w-full bg-[#003d3d] text-white font-bold py-3 text-xs rounded-r-md hover:opacity-90 transition">
                       {t({ en: "English Version", bn: "ইংরেজি ভার্সন" })}
@@ -1036,6 +1058,40 @@ const QuidaNuraniDetails = () => {
                     </span>
                     <span className="font-bold">09/05/2026</span>
                   </div>
+                </div>
+              </div>
+
+              {/* --- NEW INSTRUCTORS LIST (replaced with 6 teachers) --- */}
+              <div className="bg-white rounded-3xl">
+                <h3 className="text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
+                  {t({ en: "Faculty", bn: "অনুষদ" })}
+                </h3>
+                <div className="space-y-4">
+                  {instructors.map((instructor) => (
+                    <div
+                      key={instructor.id}
+                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-none"
+                    >
+                      <img
+                        src={instructor.image}
+                        alt={instructor.name}
+                        className="w-12 h-12 rounded-full object-cover border border-yellow-500 flex-shrink-0"
+                      />
+                      <div className="overflow-hidden">
+                        <h4 className="font-bold text-sm text-[#002b2b] truncate">
+                          {instructor.name}
+                        </h4>
+                        <p className="text-xs text-gray-600 truncate">
+                          {instructor.title}
+                        </p>
+                        {instructor.subtitle && (
+                          <p className="text-[11px] text-gray-500 truncate">
+                            {instructor.subtitle}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
