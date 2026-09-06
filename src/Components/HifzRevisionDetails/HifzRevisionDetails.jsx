@@ -32,6 +32,14 @@ import Navbar from "../Navbar/Navbar";
 // Import certificate image
 import AllimiyahCertificate from "../../image/allimiyahcertificate (2).png";
 
+// --- Import faculty images ---
+import MujahidImg from "../../image/Mujahid.png";
+import SalmanImg from "../../image/salman.png";
+import AbunumanImg from "../../image/Abunoman.jpg";
+import MahmudulImg from "../../image/mahmudul.png";
+import Ahmedjaber from "../../image/Ahamed jabe.png";
+import Avator from "../../image/arartor.png";
+
 // --- Language Hook ---
 import { useState as useStateHook, useEffect } from "react";
 
@@ -73,6 +81,52 @@ const HifzRevisionDetails = () => {
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
   };
+
+  // --- Faculty list (6 teachers) ---
+  const instructors = [
+    {
+      id: 1,
+      name: t({ en: "Mujahidul Islam", bn: "মুজাহিদুল ইসলাম" }),
+      title: t({ en: "Senior Teacher", bn: "সিনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: MujahidImg,
+    },
+    {
+      id: 2,
+      name: t({ en: "Salman Ahmad", bn: "সালমান আহমেদ" }),
+      title: t({ en: "Senior Teacher", bn: "সিনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: SalmanImg,
+    },
+    {
+      id: 3,
+      name: t({ en: "Abu Noman", bn: "আবু নোমান" }),
+      title: t({ en: "Senior Teacher", bn: "সিনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: AbunumanImg,
+    },
+    {
+      id: 4,
+      name: t({ en: "Mahmudur Rahman", bn: "মাহমুদুর রহমান" }),
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: MahmudulImg,
+    },
+    {
+      id: 5,
+      name: t({ en: "Ahmad Jaber", bn: "আহমেদ জাবের" }),
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: Ahmedjaber,
+    },
+    {
+      id: 6,
+      name: t({ en: "Suraiya Akhtar", bn: "সুরাইয়া আক্তার" }),
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: Avator,
+    },
+  ];
 
   // Course Details (fully translated – new Bangla content)
   const courseDetails = {
@@ -896,6 +950,40 @@ const HifzRevisionDetails = () => {
                     <FaDownload /> {t({ en: "Prospectus", bn: "প্রসপেক্টাস" })}
                   </button>
                 </a>
+              </div>
+            </div>
+
+            {/* Faculty List (6 teachers) - NEW */}
+            <div className="bg-white rounded-3xl">
+              <h3 className="text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
+                {t({ en: "Faculty", bn: "অনুষদ" })}
+              </h3>
+              <div className="space-y-4">
+                {instructors.map((instructor) => (
+                  <div
+                    key={instructor.id}
+                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-none"
+                  >
+                    <img
+                      src={instructor.image}
+                      alt={instructor.name}
+                      className="w-12 h-12 rounded-full object-cover border border-yellow-500 flex-shrink-0"
+                    />
+                    <div className="overflow-hidden">
+                      <h4 className="font-bold text-sm text-[#002b2b] truncate">
+                        {instructor.name}
+                      </h4>
+                      <p className="text-xs text-gray-600 truncate">
+                        {instructor.title}
+                      </p>
+                      {instructor.subtitle && (
+                        <p className="text-[11px] text-gray-500 truncate">
+                          {instructor.subtitle}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

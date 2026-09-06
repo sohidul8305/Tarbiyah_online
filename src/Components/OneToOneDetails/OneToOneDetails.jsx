@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { Link } from "react-router";
-// Swiper এবং প্রয়োজনীয় মডিউল ইমপোর্ট করুন
+// Swiper and required modules
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 
-// Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
+// Swiper CSS
 import "swiper/css";
 import "swiper/css/pagination";
 
 import {
   FaArrowLeft,
-  FaShare,
-  FaBookmark,
+  FaShareAlt,
+  FaRegHeart,
   FaInfoCircle,
   FaCommentDots,
   FaCheckCircle,
@@ -25,12 +25,55 @@ import {
   FaCertificate,
   FaChevronDown,
   FaChevronUp,
+  FaPlay,
+  FaDownload,
 } from "react-icons/fa";
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 import KidsImg from "../../image/kids.jpg";
 
+// Import certificate image (same as other pages)
+import AllimiyahCertificate from "../../image/allimiyahcertificate (2).png";
+
+// --- Import faculty images (same 6 teachers as HifzRevisionDetails) ---
+import MujahidImg from "../../image/Mujahid.png";
+import SalmanImg from "../../image/salman.png";
+import AbunumanImg from "../../image/Abunoman.jpg";
+import MahmudulImg from "../../image/mahmudul.png";
+import Ahmedjaber from "../../image/Ahamed jabe.png";
+import Avator from "../../image/arartor.png";
+
+// --- Language Hook ---
+import { useState as useStateHook, useEffect } from "react";
+
+export const useLanguage = () => {
+  const [language, setLanguage] = useStateHook(
+    () => localStorage.getItem("language") || "en",
+  );
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setLanguage(localStorage.getItem("language") || "en");
+    };
+
+    window.addEventListener("languageChange", handleStorageChange);
+    return () => {
+      window.removeEventListener("languageChange", handleStorageChange);
+    };
+  }, []);
+
+  const t = (translations) => {
+    return translations[language] || translations["en"];
+  };
+
+  return { language, t };
+};
+// -----------------------------------------------
+
 const OneToOneDetails = () => {
+  const { t } = useLanguage();
+
+  const [showMore, setShowMore] = useState(false);
   const [activeTab, setActiveTab] = useState("info");
   const [openFaq, setOpenFaq] = useState(null);
 
@@ -38,630 +81,1164 @@ const OneToOneDetails = () => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
+  // --- Faculty list (6 teachers – same as HifzRevisionDetails) ---
+  const instructors = [
+    {
+      id: 1,
+      name: t({ en: "Mujahidul Islam", bn: "মুজাহিদুল ইসলাম" }),
+      title: t({ en: "Senior Teacher", bn: "সিনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: MujahidImg,
+    },
+    {
+      id: 2,
+      name: t({ en: "Salman Ahmad", bn: "সালমান আহমেদ" }),
+      title: t({ en: "Senior Teacher", bn: "সিনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: SalmanImg,
+    },
+    {
+      id: 3,
+      name: t({ en: "Abu Noman", bn: "আবু নোমান" }),
+      title: t({ en: "Senior Teacher", bn: "সিনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: AbunumanImg,
+    },
+    {
+      id: 4,
+      name: t({ en: "Mahmudur Rahman", bn: "মাহমুদুর রহমান" }),
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: MahmudulImg,
+    },
+    {
+      id: 5,
+      name: t({ en: "Ahmad Jaber", bn: "আহমেদ জাবের" }),
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: Ahmedjaber,
+    },
+    {
+      id: 6,
+      name: t({ en: "Suraiya Akhtar", bn: "সুরাইয়া আক্তার" }),
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" }),
+      image: Avator,
+    },
+  ];
+
+  // --- Course Details (new text from file) ---
   const courseDetails = {
-    title: "অনলাইন হিফজ কোর্স",
-    description: `
-      আল্লাহ তায়ালা বলেন, আমিই যিকর (কুরআন) নাযিল করেছি এবং আমিই উহার সংরক্ষণ। 
-      হিফজ- অধ্যায়: এটি সর্বসাকুল্যে precious বরকত পূর্ণ সমৃদ্ধ বিষয় তথা ক্ষেত্র। তাই 
-      প্রত্যেক মুসলিম হিসেবে আল্লাহর কালামের সঠিক কুরআনুল কারীমকে মুখস্থ করার মাধ্যমে হেফাযত 
-      করা। কুরআনুল কারীম হিফযকরণের সওয়াব ও ফজিলত অনেক বেশি। তাই আমরা 
-      প্রস্তুত করেছি "অনলাইন কুরআন তরতিব হিফজ" এই প্রজেক্টটি। প্রজেক্টের মাধ্যমে একজন 
-      শিক্ষার্থী খুব সহজেই কুরআনুল কারীম হিফজ সমাপ্ত করতে পারার ইনশাআল্লাহ।
-    `,
+    title: t({
+      en: "One-to-One Quran Learning Program",
+      bn: "ওয়ান-টু-ওয়ান কুরআন লার্নিং প্রোগ্রাম",
+    }),
+    subtitle: t({
+      en: "Every student's learning pace, needs, and time are different.",
+      bn: "প্রতিটি শিক্ষার্থীর শেখার গতি, প্রয়োজন ও সময় এক নয়।",
+    }),
+    description: t({
+      en: "Every student's learning pace, needs, and time are different. Instead of teaching everyone with the same routine, the One-to-One Quran Learning Program offers a completely personalized learning opportunity for your child or family member. You can choose your preferred time, and the student will have one-to-one classes directly with a skilled teacher. Most importantly, the student can select any one or multiple Quranic and Islamic subjects according to their needs.",
+      bn: "প্রতিটি শিক্ষার্থীর শেখার গতি, প্রয়োজন ও সময় এক নয়। তাই সবার জন্য একই রুটিনে কুরআন শেখার পরিবর্তে ওয়ান-টু-ওয়ান কুরআন লার্নিং প্রোগ্রাম (One-to-One Quran Learning Program)-এ আপনার সন্তান বা পরিবারের সদস্যের জন্য থাকবে সম্পূর্ণ ব্যক্তিকেন্দ্রিক শেখার সুযোগ। আপনি আপনার পছন্দের সময় নির্বাচন করতে পারবেন, আর শিক্ষার্থী সরাসরি একজন দক্ষ শিক্ষকের কাছ থেকে ওয়ান-টু-ওয়ান ক্লাস করবে। সবচেয়ে গুরুত্বপূর্ণ বিষয় হলো শিক্ষার্থী তার প্রয়োজন অনুযায়ী যেকোনো একটি বা একাধিক কুরআনিক ও ইসলামিক বিষয় বেছে নিয়ে পড়তে পারবে।",
+    }),
+    shortDesc: t({
+      en: "Every student's learning pace, needs, and time are different. The One-to-One Quran Learning Program offers a completely personalized learning opportunity for your child or family member.",
+      bn: "প্রতিটি শিক্ষার্থীর শেখার গতি, প্রয়োজন ও সময় এক নয়। তাই সবার জন্য একই রুটিনে কুরআন শেখার পরিবর্তে ওয়ান-টু-ওয়ান কুরআন লার্নিং প্রোগ্রাম (One-to-One Quran Learning Program)-এ আপনার সন্তান বা পরিবারের সদস্যের জন্য থাকবে সম্পূর্ণ ব্যক্তিকেন্দ্রিক শেখার সুযোগ।",
+    }),
     objectives: [
-      "হিফজের বিষয়াবলী ও অনুশীলনী",
-      "ব্যবহারিক তাজবিদ ও সার্টিফাইড ইন্সট্রাক্টর",
-      "সাপ্তাহিক সেশন ও মাসিক মূল্যায়ন",
-      "নিয়মিত প্রগ্রেস ও মৌখিক টিপস",
+      t({
+        en: "Guardians can choose class time according to their convenience",
+        bn: "গার্ডিয়ান নিজের সুবিধা অনুযায়ী ক্লাসের সময় নির্বাচন করতে পারবেন",
+      }),
+      t({
+        en: "Full attention of the teacher on one student in each class",
+        bn: "প্রতিটি ক্লাসে শিক্ষকের সম্পূর্ণ মনোযোগ থাকবে মাত্র একজন শিক্ষার্থীর প্রতি",
+      }),
+      t({
+        en: "Teaching based on student's age, current skill level and learning pace",
+        bn: "শিক্ষার্থীর বয়স, বর্তমান দক্ষতা ও শেখার গতি অনুযায়ী পাঠদান করা হবে",
+      }),
+      t({
+        en: "Choose preferred subjects from various Quranic and Islamic topics",
+        bn: "আপনার প্রয়োজন অনুযায়ী বিভিন্ন কুরআনিক ও ইসলামিক বিষয় থেকে পছন্দের বিষয় নির্বাচন করতে পারবেন",
+      }),
+      t({
+        en: "Regular classes from home anywhere in Bangladesh or the world",
+        bn: "বাংলাদেশ কিংবা বিশ্বের যেকোনো প্রান্ত থেকে ঘরে বসেই নিয়মিত ক্লাস করার সুযোগ",
+      }),
+      t({
+        en: "Regular monitoring and assessment of student's learning progress",
+        bn: "শিক্ষার্থীর শেখার অগ্রগতি নিয়মিত পর্যবেক্ষণ ও মূল্যায়ন করা হবে",
+      }),
     ],
-    interCourses: [
-      "পূর্ণ কুরআন হিফজ",
-      "৩০ পাড়া সম্পূর্ণ হিফজ",
-      "অ্যারাবিক সুয় হিফজ",
+    whatCanLearn: {
+      title: t({
+        en: "What Can You Learn?",
+        bn: "কী শিখতে পারবেন?",
+      }),
+      subtitle: t({
+        en: "In the One-to-One Quran Learning Program, students can choose any suitable subject according to their needs.",
+        bn: "ওয়ান-টু-ওয়ান কুরআন লার্নিং প্রোগ্রামে শিক্ষার্থী তার প্রয়োজন অনুযায়ী যেকোনো উপযুক্ত বিষয় নির্বাচন করতে পারবে।",
+      }),
+      quranLearning: [
+        t({ en: "Qaida Nuraniyah", bn: "কায়েদা নূরানিয়া" }),
+        t({ en: "Qur'an Reading / Nazera", bn: "কুরআন তিলাওয়াত / নাজেরা" }),
+        t({ en: "Hifzul Quran", bn: "হিফজুল কুরআন" }),
+        t({ en: "Hifz Revision", bn: "হিফজ রিভিশন" }),
+        t({ en: "Tajweed", bn: "তাজবীদ" }),
+        t({ en: "Makharij & Pronunciation", bn: "মাখারিয ও উচ্চারণ" }),
+        t({
+          en: "Selected Surah Memorization",
+          bn: "নির্বাচিত সূরা মুখস্থকরণ",
+        }),
+      ],
+      islamicStudies: [
+        t({ en: "Basic Islamic Knowledge", bn: "মৌলিক ইসলামিক জ্ঞান" }),
+        t({ en: "Aqeedah", bn: "আকিদাহ" }),
+        t({ en: "Fiqh", bn: "ফিকহ" }),
+        t({ en: "Seerah", bn: "সীরাত" }),
+        t({ en: "Hadith", bn: "হাদিস" }),
+        t({ en: "Daily Du'as & Adhkar", bn: "দৈনন্দিন দোয়া ও আজকার" }),
+        t({ en: "Islamic Manners & Akhlaq", bn: "ইসলামিক শিষ্টাচার ও আখলাক" }),
+      ],
+      note: t({
+        en: "Subject availability may vary according to the student's age, level and teacher specialization.",
+        bn: "শিক্ষার্থীর বয়স, লেভেল এবং শিক্ষকের দক্ষতার ওপর ভিত্তি করে বিষয়ের প্রাপ্যতা পরিবর্তিত হতে পারে।",
+      }),
+    },
+    flexibleSchedule: t({
+      en: "Your child's school, studies, work, or family schedule – you can choose your preferred time accordingly. During admission, the guardian will inform the available time slot, and a suitable schedule will be determined for the teacher and student accordingly. No fixed batch. No waiting for a group. Your learning schedule, your choice.",
+      bn: "আপনার সন্তানের স্কুল, পড়াশোনা, কাজ কিংবা পারিবারিক ব্যস্ততার সঙ্গে সামঞ্জস্য রেখে আপনার পছন্দের সময় নির্বাচন করতে পারবেন। ভর্তির সময় গার্ডিয়ান সুবিধাজনক সময় বা 'available time slot' জানাবেন। সেই অনুযায়ী শিক্ষক ও শিক্ষার্থীর জন্য উপযুক্ত সময়সূচিন নির্ধারণ করা হবে। কোনো নির্দিষ্ট ব্যাচ নেই। গ্রুপে যুক্ত হওয়ার জন্য কোনো অপেক্ষা নেই। আপনার শেখার সময়সূচি, আপনার পছন্দ।",
+    }),
+    courseFeatures: [
+      t({
+        en: "Live One-to-One Online Class",
+        bn: "লাইভ ওয়ান-টু-ওয়ান অনলাইন ক্লাস",
+      }),
+      t({ en: "Flexible Class Timing", bn: "নমনীয় ক্লাস সময়সূচি" }),
+      t({
+        en: "Personalized Learning Plan",
+        bn: "ব্যক্তিগত পরিকল্পনা অনুযায়ী পাঠদান",
+      }),
+      t({ en: "Choice of Subject", bn: "পছন্দের বিষয় নির্বাচনের সুযোগ" }),
+      t({ en: "Dedicated Teacher", bn: "নিবেদিতপ্রাণ শিক্ষক" }),
+      t({ en: "Individual Attention", bn: "একক মনোযোগ" }),
+      t({ en: "Regular Practice & Revision", bn: "নিয়মিত অনুশীলন ও রিভিশন" }),
+      t({ en: "Progress Monitoring", bn: "অগ্রগতি পর্যবেক্ষণ" }),
+      t({ en: "Regular Assessment", bn: "নিয়মিত মূল্যায়ন" }),
+      t({ en: "Learning From Home", bn: "বাড়ি থেকেই শেখার সুযোগ" }),
+      t({
+        en: "Suitable for Kids, Teens & Adults",
+        bn: "শিশু, কিশোর ও প্রাপ্তবয়স্কদের জন্য উপযুক্ত",
+      }),
+      t({
+        en: "Certificate upon successful completion*",
+        bn: "সফলভাবে সম্পন্ন করার পর সার্টিফিকেট*",
+      }),
     ],
+    level: t({
+      en: "Beginner to Advanced",
+      bn: "শুরু থেকে অ্যাডভান্সড পর্যন্ত",
+    }),
+    duration: t({
+      en: "Based on student's learning plan",
+      bn: "নির্বাচিত লার্নিং প্ল্যান অনুযায়ী",
+    }),
+    weeklyClasses: t({ en: "3 days per week", bn: "সপ্তাহে ৩ দিন" }),
+    classSchedule: t({
+      en: "Student/Guardian's Preferred Time",
+      bn: "শিক্ষার্থী বা গার্ডিয়ানের পছন্দের সময়",
+    }),
+    classDuration: t({
+      en: "As per selected learning plan",
+      bn: "নির্বাচিত লার্নিং প্ল্যান অনুযায়ী",
+    }),
+    subject: t({
+      en: "Student's Choice",
+      bn: "শিক্ষার্থীর পছন্দমতো",
+    }),
+    medium: t({ en: "Bangla / English", bn: "বাংলা / ইংরেজি" }),
+    location: t({ en: "Online", bn: "অনলাইন" }),
+    assessment: t({
+      en: "Regular Progress Assessment",
+      bn: "নিয়মিত অগ্রগতি মূল্যায়ন",
+    }),
+    certificateInfo: t({
+      en: "Certificate upon successful completion*",
+      bn: "সফলভাবে সম্পন্ন করার পর সার্টিফিকেট*",
+    }),
     targetAudience: [
-      "যাঁরা শুদ্ধ মাত্রায় কুরআনকে পড়তে পারে এমন শিক্ষার্থীদের জন্য।",
-      "যে কোনো বয়সের যে কেউ হাজী বা হাফেজ হতে পারে।",
-      "বসে না থেকে ঘরে বসে কুরআন হিফজ করতে আগ্রহী।",
-      "কর্মব্যস্ত জীবনের পাশাপাশি ঘরে কুরআন হিফজ প্রতি আগ্রহীদের জন্য।",
+      t({
+        en: "Parents who want personal or one-to-one Quran education for their children",
+        bn: "যেসব অভিভাবক তাদের সন্তানের জন্য ব্যক্তিগত বা ওয়ান-টু-ওয়ান কুরআন শিক্ষা চান",
+      }),
+      t({
+        en: "Students who cannot follow a fixed batch schedule",
+        bn: "যেসব শিক্ষার্থী নির্দিষ্ট ব্যাচের সময় মেনে চলতে পারেন না",
+      }),
+      t({
+        en: "Busy professionals and adults who want to learn Quran at convenient times",
+        bn: "ব্যস্ত পেশাজীবী ও প্রাপ্তবয়স্ক ব্যক্তিরা যারা সুবিধাজনক সময়ে কুরআন শিখতে চান",
+      }),
+      t({
+        en: "Those who need extra attention and care to improve their recitation",
+        bn: "যাদের তিলাওয়াত উন্নত করার জন্য অতিরিক্ত মনোযোগ ও যত্নের প্রয়োজন",
+      }),
+      t({
+        en: "Those who want to learn Tajweed and correct pronunciation",
+        bn: "যারা তাজবীদ ও সঠিক উচ্চারণ শিখতে চান",
+      }),
+      t({
+        en: "Those who want to memorize or revise the Quran under teacher's supervision",
+        bn: "যারা শিক্ষকের তত্ত্বাবধানে কুরআন মুখস্থ বা রিভিশন করতে চান",
+      }),
+      t({
+        en: "Families residing in Bangladesh or abroad",
+        bn: "বাংলাদেশ বা বিদেশে বসবাসরত পরিবারসমূহ",
+      }),
+      t({
+        en: "Those looking for a flexible and personalized Islamic learning experience",
+        bn: "যারা একটি নমনীয় এবং ব্যক্তিগত ইসলামিক শিক্ষার অভিজ্ঞতা খুঁজছেন",
+      }),
     ],
-    materials: [
-      "প্রোডাক্ট হোপ্লেট || ক্লাস ভিডিও রেকর্ডিং",
-      "ক্লাসের সময়কাল: ১২০ মিনিট প্রতি ক্লাস",
-      "সার্টিফিকেট ও ইনরাইট প্রদান",
-      "পরীক্ষা: সিলেক্টিভ এবং ট্রায়াল",
-      "সাপ্তাহিক ক্লাসের দিন: ৪ দিন [নিয়মিত ব্যাচের জন্য]",
-      "সাপ্তাহিক ক্লাসের দিন: ২ দিন [ভিপিসী ব্যাচের জন্য]",
+    howItWorks: [
+      t({
+        en: "Apply – Submit your admission application with the student's basic information and learning requirements.",
+        bn: "ধাপ ০১ — আবেদন করুন – শিক্ষার্থীর মৌলিক তথ্য এবং শেখার প্রয়োজনীয়তা উল্লেখ করে ভর্তির আবেদন জমা দিন।",
+      }),
+      t({
+        en: "Choose Your Subject – Select the Quranic or Islamic subject you want to learn.",
+        bn: "ধাপ ০২ — আপনার বিষয় নির্বাচন করুন – আপনি যে কুরআনিক বা ইসলামিক বিষয়টি শিখতে চান তা নির্বাচন করুন।",
+      }),
+      t({
+        en: "Select Your Preferred Time – Tell us your preferred days and class time according to your convenience.",
+        bn: "ধাপ ০৩ — আপনার পছন্দের সময় বেছে নিন – আপনার সুবিধা অনুযায়ী পছন্দের দিন এবং ক্লাসের সময় আমাদের জানান।",
+      }),
+      t({
+        en: "Get Matched with a Teacher – We will assign a suitable teacher based on the student's subject, level and learning requirements.",
+        bn: "ধাপ ০৪ — শিক্ষকের সাথে ম্যাচিং – শিক্ষার্থীর বিষয়, লেভেল এবং শেখার প্রয়োজনীয়তার ওপর ভিত্তি করে আমরা উপযুক্ত শিক্ষক নির্ধারণ করে দেব।",
+      }),
+      t({
+        en: "Start Learning – Begin your personalized One-to-One learning journey from the comfort of your home.",
+        bn: "ধাপ ০৫ — শেখা শুরু করুন – আপনার ঘরের আরামদায়ক পরিবেশে আপনার ব্যক্তিগত ওয়ান-টু-ওয়ান শেখার যাত্রা শুরু করুন।",
+      }),
     ],
-    feeStructure: ["ভর্তি ফি ২০০০ টাকা", "মাসিক ফি ২০০০ টাকা"],
+    feeStructure: {
+      bd: {
+        title: t({ en: "One-to-One Program", bn: "ওয়ান-টু-ওয়ান প্রোগ্রাম" }),
+        admission: t({ en: "Admission Fee: ৳1,000", bn: "ভর্তি ফি: ৳১,০০০" }),
+        monthly: t({ en: "Monthly Fee: ৳5,000", bn: "মাসিক ফি: ৳৫,০০০" }),
+        note: t({
+          en: "Monthly fee includes 12 live one-to-one classes per month (3 days per week).",
+          bn: "মাসিক ফি-এর মধ্যে সপ্তাহে ৩ দিন হিসেবে প্রতি মাসে মোট ১২টি লাইভ ওয়ান-টু-ওয়ান ক্লাস অন্তর্ভুক্ত রয়েছে।",
+        }),
+      },
+      overseas: {
+        title: t({ en: "International Program", bn: "আন্তর্জাতিক প্রোগ্রাম" }),
+        admission: t({ en: "Admission Fee: ৳1,000", bn: "ভর্তি ফি: ৳১,০০০" }),
+        monthly: t({ en: "Monthly Fee: ৳5,000", bn: "মাসিক ফি: ৳৫,০০০" }),
+        note: t({
+          en: "Monthly fee includes 12 live one-to-one classes per month (3 days per week).",
+          bn: "মাসিক ফি-এর মধ্যে সপ্তাহে ৩ দিন হিসেবে প্রতি মাসে মোট ১২টি লাইভ ওয়ান-টু-ওয়ান ক্লাস অন্তর্ভুক্ত রয়েছে।",
+        }),
+      },
+    },
+    rating: "0 (0 Ratings)",
   };
 
   // Why Tarbiyah Quran Studies features with icons
   const whyFeatures = [
     {
       icon: <FaUserTie className="text-xl" />,
-      text: "কিডস ফেন্ডলি উস্তাদ",
+      text: t({ en: "Kid-friendly Teachers", bn: "কিডস ফেন্ডলি উস্তাদ" }),
     },
     {
       icon: <FaVideo className="text-xl" />,
-      text: "লাইভ ক্লাস",
+      text: t({ en: "Live Classes", bn: "লাইভ ক্লাস" }),
     },
     {
       icon: <FaCheckCircle className="text-xl" />,
-      text: "মাসিক মূল্যায়ন",
+      text: t({ en: "Monthly Assessments", bn: "মাসিক মূল্যায়ন" }),
     },
     {
       icon: <FaGlobe className="text-xl" />,
-      text: "ব্যক্তিগত অগ্রগতি পর্যবেক্ষণ",
+      text: t({
+        en: "Personal Progress Tracking",
+        bn: "ব্যক্তিগত অগ্রগতি পর্যবেক্ষণ",
+      }),
     },
     {
       icon: <FaHeadset className="text-xl" />,
-      text: "ওয়ান-টু-ওয়ান সাপোর্ট",
+      text: t({ en: "One-to-One Support", bn: "ওয়ান-টু-ওয়ান সাপোর্ট" }),
     },
     {
       icon: <FaCertificate className="text-xl" />,
-      text: "সার্টিফিকেট",
+      text: t({ en: "Certificate", bn: "সার্টিফিকেট" }),
     },
   ];
 
-  // Testimonials data
+  // --- TESTIMONIALS (copied from HifzRevisionDetails) ---
   const testimonials = [
     {
       id: 1,
-      name: "আব্দুল্লাহ আল মামুন",
-      designation: "শিক্ষার্থী, ঢাকা",
-      quote:
-        "আলহামদুলিল্লাহ, এই কোর্সটি আমার কুরআন শিক্ষার যাত্রাকে অনেক সহজ করে দিয়েছে। উস্তাদের নির্দেশনায় আমি খুব দ্রুত তাজবিদ শিখতে পেরেছি।",
-      image: "https://i.pravatar.cc/150?img=11",
+      name: "ZAREEN TASNIM SILVIA",
+      designation: "FATHER: DEWAN SAYEDUL HAQUE MANU",
+      quote: "আলহামদুলিল্লাহ উস্তাদ আন্তরিকতার সাথেই পড়াচ্ছেন।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 2,
-      name: "মোঃ সাইফুল ইসলাম",
-      designation: "প্রবাসী, যুক্তরাজ্য",
-      quote:
-        "ব্যস্ত জীবনের মাঝেও আমি এই কোর্সটি সম্পন্ন করতে পেরেছি। লাইভ ক্লাস ও রেকর্ডেড ভিডিওগুলোর কারণে সময়ানুবর্তিতা বজায় রাখা সম্ভব হয়েছে।",
-      image: "https://i.pravatar.cc/150?img=12",
+      name: "NAZDA CHOWDHURY",
+      designation: "FATHER: CM MARUF",
+      quote: "আলহামদুলিল্লাহ খুব সুন্দর মজলিস। কুরআন মজিদ পড়ানোর মান।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 3,
-      name: "মোঃ হাসান মিয়া",
-      designation: "ব্যবসায়ী, চট্টগ্রাম",
-      quote:
-        "কুরআন শিক্ষার পাশাপাশি আমার সন্তানেরাও এই কোর্স থেকে উপকৃত হয়েছে। উস্তাদের শিক্ষা পদ্ধতি সত্যিই অসাধারণ।",
-      image: "https://i.pravatar.cc/150?img=13",
+      name: "ARIZ BIN AZAD",
+      designation: "FATHER: ABUL KALAM AZAD MAZUMDAR",
+      quote: "আলহামদুলিল্লাহ উস্তাদ এবং শিক্ষাদান পদ্ধতি নিয়ে আমরা সন্তুষ্ট।",
+      image:
+        "https://i.ibb.co.com/gZv5KDDx/images-q-tbn-ANd9-Gc-Tge-GIm6kq-Fp3x-NYHpqsl89ua-z2-JOR-Gy-XIYu-Gy-THG3-Q-s-10.jpg",
     },
     {
       id: 4,
-      name: "আমিনুল ইসলাম",
-      designation: "শিক্ষার্থী, সিলেট",
+      name: "MARYUM BINTE HASAN",
+      designation: "FATHER: KAMRUL HASAN",
       quote:
-        "শায়খ প্রফেসর মোখতার আহমাদের তত্ত্বাবধানে পড়ার সুযোগ পাওয়া আমার জন্য একটি বড় প্রাপ্তি। কারিকুলাম অত্যন্ত সুসংগঠিত।",
-      image: "https://i.pravatar.cc/150?img=14",
+        "আলহামদুলিল্লাহ এটা আমার মেয়ের প্রথম শিক্ষা প্রতিষ্ঠান। উস্তাদ খুব সুন্দর করে ক্লাস নেন। আমার বাবু ক্লাস করতে খুব আনন্দ পায় আলহামদুলিল্লাহ। মারগিয়াম তো ক্লাসের এক ঘন্টা আগে থেকে অপেক্ষা করে। আলহামদুলিল্লাহ আমাদের সন্তানের খুশিই আমাদের সবচেয়ে বড় পাওয়া।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 5,
-      name: "মোঃ নাজমুল হক",
-      designation: "চাকরিজীবী, রাজশাহী",
+      name: "MARYAM BINT RAIHAN",
+      designation: "FATHER: RAIHAN UDDIN",
       quote:
-        "সপ্তাহে মাত্র ৩ দিন ক্লাস থাকায় চাকরির সাথে তাল মিলিয়ে পড়াশোনা করতে পারছি। একাডেমিক সাপোর্ট দল সবসময় পাশে আছে।",
-      image: "https://i.pravatar.cc/150?img=15",
+        "আলহামদুলিল্লাহ আমার সন্তানদের পড়া ভালোভাবে হচ্ছে। পড়ানোর পদ্ধতি আলহামদুলিল্লাহ ভালো।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 6,
-      name: "মোঃ ইব্রাহিম খলিল",
-      designation: "শিক্ষার্থী, খুলনা",
+      name: "RAIYAN IBN RAIYAN",
+      designation: "FATHER: MD RAYHAN KIBRIA RONEE",
       quote:
-        "ইজাজাহ ও সার্টিফিকেট পাওয়ার সুযোগ এই কোর্সকে আরও মূল্যবান করেছে। ইনশাআল্লাহ, উচ্চশিক্ষার পথ সুগম হবে।",
-      image: "https://i.pravatar.cc/150?img=16",
+        "মাশাল্লাহ আপনাদের এই অনলাইন প্রোগ্রামটি অনেক ভালো লেগেছে আমার। উস্তাদ মাশাল্লাহ অনেক ভালো এবং আন্তরিকভাবে পাঠদান করেন।",
+      image:
+        "https://i.ibb.co.com/gZv5KDDx/images-q-tbn-ANd9-Gc-Tge-GIm6kq-Fp3x-NYHpqsl89ua-z2-JOR-Gy-XIYu-Gy-THG3-Q-s-10.jpg",
     },
   ];
 
-  // Video Gallery Data
+  // --- VIDEO GALLERY (copied from HifzRevisionDetails) ---
   const videoGallery = [
     {
       id: 1,
-      title: "ভিডিও ১",
-      thumbnail: "https://img.youtube.com/vi/NI8VoGYDtYs/hqdefault.jpg",
-      url: "https://youtu.be/NI8VoGYDtYs?si=Z_FxwYJJuUgzeliU",
+      title: t({ en: "Video 1", bn: "ভিডিও ১" }),
+      thumbnail: "https://img.youtube.com/vi/dkXJOsVKqsQ/hqdefault.jpg",
+      url: "https://youtu.be/dkXJOsVKqsQ?si=FPdD6Pec957idJVG",
     },
     {
       id: 2,
-      title: "ভিডিও ২",
-      thumbnail: "https://img.youtube.com/vi/NI8VoGYDtYs/hqdefault.jpg",
-      url: "https://youtu.be/NI8VoGYDtYs?si=Z_FxwYJJuUgzeliU",
+      title: t({ en: "Video 2", bn: "ভিডিও ২" }),
+      thumbnail: "https://img.youtube.com/vi/fqafW3frdx8/hqdefault.jpg",
+      url: "https://youtu.be/fqafW3frdx8?si=s0T6R_T0X-J-eJfp",
     },
     {
       id: 3,
-      title: "ভিডিও ৩",
-      thumbnail: "https://img.youtube.com/vi/NI8VoGYDtYs/hqdefault.jpg",
-      url: "https://youtu.be/NI8VoGYDtYs?si=Z_FxwYJJuUgzeliU",
+      title: t({ en: "Video 3", bn: "ভিডিও ৩" }),
+      thumbnail: "https://img.youtube.com/vi/6rhnPlznFeQ/hqdefault.jpg",
+      url: "https://youtu.be/6rhnPlznFeQ?si=YM31PCCeBwGLH1es",
     },
     {
       id: 4,
-      title: "ভিডিও ৪",
-      thumbnail: "https://img.youtube.com/vi/NI8VoGYDtYs/hqdefault.jpg",
-      url: "https://youtu.be/NI8VoGYDtYs?si=Z_FxwYJJuUgzeliU",
+      title: t({ en: "Video 4", bn: "ভিডিও ৪" }),
+      thumbnail: "https://img.youtube.com/vi/JkXBVpTIf40/hqdefault.jpg",
+      url: "https://youtu.be/JkXBVpTIf40?si=Aj36hCF4Xe4394ro",
     },
     {
       id: 5,
-      title: "ভিডিও ৫",
-      thumbnail: "https://img.youtube.com/vi/NI8VoGYDtYs/hqdefault.jpg",
-      url: "https://youtu.be/NI8VoGYDtYs?si=Z_FxwYJJuUgzeliU",
+      title: t({ en: "Video 5", bn: "ভিডিও ৫" }),
+      thumbnail: "https://img.youtube.com/vi/nac8NN4iEew/hqdefault.jpg",
+      url: "https://youtu.be/nac8NN4iEew?si=BAVe1pSlh83aD07N",
     },
     {
       id: 6,
-      title: "ভিডিও ৬",
-      thumbnail: "https://img.youtube.com/vi/NI8VoGYDtYs/hqdefault.jpg",
-      url: "https://youtu.be/NI8VoGYDtYs?si=Z_FxwYJJuUgzeliU",
+      title: t({ en: "Video 6", bn: "ভিডিও ৬" }),
+      thumbnail: "https://img.youtube.com/vi/hl-JdFk5_Z4/hqdefault.jpg",
+      url: "https://youtu.be/hl-JdFk5_Z4?si=r0tKdVVx98t8Nbpl",
     },
   ];
 
-  // FAQ Data - Tarbiyah Quran for Kids
+  // FAQ Data (translated)
   const faqs = [
     {
-      question: "ইউরোপ, আমেরিকা বা মধ্যপ্রাচ্য থেকে কি এই কোর্সটি করা যাবে?",
-      answer:
-        "হ্যাঁ। বিশ্বের যেকোনো দেশ থেকে অনলাইনের মাধ্যমে এই প্রোগ্রামে অংশগ্রহণ করা যাবে।",
+      question: t({
+        en: "Can this course be taken from Europe, America, or the Middle East?",
+        bn: "ইউরোপ, আমেরিকা বা মধ্যপ্রাচ্য থেকে কি এই কোর্সটি করা যাবে?",
+      }),
+      answer: t({
+        en: "Yes. This program can be attended online from anywhere in the world.",
+        bn: "হ্যাঁ। বিশ্বের যেকোনো দেশ থেকে অনলাইনের মাধ্যমে এই প্রোগ্রামে অংশগ্রহণ করা যাবে।",
+      }),
     },
     {
-      question: "আপনাদের ওস্তাদরা বাচ্চাদের সঙ্গে কেমন আচরণ করেন?",
-      answer:
-        "আমাদের শিক্ষকরা শিশুদের বয়স ও মানসিকতা অনুযায়ী ধৈর্য, আন্তরিকতা ও উৎসাহের সঙ্গে পাঠদান করেন, যাতে তারা আনন্দের সঙ্গে শিখতে পারে।",
+      question: t({
+        en: "How do your teachers interact with children?",
+        bn: "আপনাদের ওস্তাদরা বাচ্চাদের সঙ্গে কেমন আচরণ করেন?",
+      }),
+      answer: t({
+        en: "Our teachers teach with patience, sincerity, and encouragement according to the age and mentality of the children, so that they can learn with joy.",
+        bn: "আমাদের শিক্ষকরা শিশুদের বয়স ও মানসিকতা অনুযায়ী ধৈর্য, আন্তরিকতা ও উৎসাহের সঙ্গে পাঠদান করেন, যাতে তারা আনন্দের সঙ্গে শিখতে পারে।",
+      }),
     },
     {
-      question: "আপনাদের হিফজ ডিপার্টমেন্টের সাফল্য সম্পর্কে বলুন।",
-      answer:
-        "আমাদের হিফজ ডিপার্টমেন্টে দেশ-বিদেশের অসংখ্য শিক্ষার্থী সফলভাবে নাজেরা, হিফজ ও হিফজ রিভিশন সম্পন্ন করেছে এবং নিয়মিত কুরআনের সঙ্গে সংযুক্ত রয়েছে।",
+      question: t({
+        en: "Tell us about the success of your Hifz Department.",
+        bn: "আপনাদের হিফজ ডিপার্টমেন্টের সাফল্য সম্পর্কে বলুন।",
+      }),
+      answer: t({
+        en: "Our Hifz Department has numerous students from home and abroad who have successfully completed Nazerah, Hifz, and Hifz revision and remain regularly connected to the Qur'an.",
+        bn: "আমাদের হিফজ ডিপার্টমেন্টে দেশ-বিদেশের অসংখ্য শিক্ষার্থী সফলভাবে নাজেরা, হিফজ ও হিফজ রিভিশন সম্পন্ন করেছে এবং নিয়মিত কুরআনের সঙ্গে সংযুক্ত রয়েছে।",
+      }),
     },
     {
-      question: "কত বছর বয়স থেকে বাচ্চারা শুরু করতে পারে?",
-      answer:
-        "সাধারণত ৪-৫ বছর বয়স থেকে শিশুদের কুরআন শিক্ষা শুরু করা যায়। তবে শিশুর প্রস্তুতি অনুযায়ী উপযুক্ত কোর্স নির্বাচন করা হয়।",
+      question: t({
+        en: "From what age can children start?",
+        bn: "কত বছর বয়স থেকে বাচ্চারা শুরু করতে পারে?",
+      }),
+      answer: t({
+        en: "Generally, children can start Qur'an education from age 4-5. However, the appropriate course is selected according to the child's readiness.",
+        bn: "সাধারণত ৪-৫ বছর বয়স থেকে শিশুদের কুরআন শিক্ষা শুরু করা যায়। তবে শিশুর প্রস্তুতি অনুযায়ী উপযুক্ত কোর্স নির্বাচন করা হয়।",
+      }),
     },
     {
-      question: "অভিভাবকরা কেন তারবিয়াহকে বেছে নেবেন?",
-      answer:
-        "কারণ আমরা শুধু কুরআন শেখাই না; বরং শিশুর তিলাওয়াত, আদব-আখলাক, নিয়মিত অনুশীলন এবং শেখার অগ্রগতির ওপর সমান গুরুত্ব দিই।",
+      question: t({
+        en: "Why should parents choose Tarbiyah?",
+        bn: "অভিভাবকরা কেন তারবিয়াহকে বেছে নেবেন?",
+      }),
+      answer: t({
+        en: "Because we not only teach the Qur'an but also emphasize the child's recitation, manners, regular practice, and progress tracking.",
+        bn: "কারণ আমরা শুধু কুরআন শেখাই না; বরং শিশুর তিলাওয়াত, আদব-আখলাক, নিয়মিত অনুশীলন এবং শেখার অগ্রগতির ওপর সমান গুরুত্ব দিই।",
+      }),
     },
     {
-      question: "স্কুল কলেজের পড়াশোনার পাশাপাশি কি হিফজ করা সম্ভব?",
-      answer:
-        "হ্যাঁ। আমাদের ক্লাস রুটিন এমনভাবে পরিকল্পিত, যাতে শিক্ষার্থীরা জেনারেল শিক্ষার পাশাপাশি হিফজ চালিয়ে যেতে পারে।",
+      question: t({
+        en: "Is it possible to do Hifz alongside school/college studies?",
+        bn: "স্কুল কলেজের পড়াশোনার পাশাপাশি কি হিফজ করা সম্ভব?",
+      }),
+      answer: t({
+        en: "Yes. Our class schedule is designed so that students can continue Hifz alongside their general education.",
+        bn: "হ্যাঁ। আমাদের ক্লাস রুটিন এমনভাবে পরিকল্পিত, যাতে শিক্ষার্থীরা জেনারেল শিক্ষার পাশাপাশি হিফজ চালিয়ে যেতে পারে।",
+      }),
     },
     {
-      question: "বাচ্চাদের হিফজ করানো কেন গুরুত্বপূর্ণ?",
-      answer:
-        "শৈশব হলো মুখস্থ করার সর্বোত্তম সময়। এই সময়ে কুরআন হিফজ করলে তা দীর্ঘমেয়াদে সংরক্ষণ সহজ হয় এবং শিশুর নৈতিক, আত্মিক ও বুদ্ধিবৃত্তিক বিকাশেও ইতিবাচক ভূমিকা রাখে।",
+      question: t({
+        en: "Why is it important to have children memorize the Qur'an?",
+        bn: "বাচ্চাদের হিফজ করানো কেন গুরুত্বপূর্ণ?",
+      }),
+      answer: t({
+        en: "Childhood is the best time for memorization. Memorizing the Qur'an at this time makes it easier to retain it long-term and plays a positive role in the child's moral, spiritual, and intellectual development.",
+        bn: "শৈশব হলো মুখস্থ করার সর্বোত্তম সময়। এই সময়ে কুরআন হিফজ করলে তা দীর্ঘমেয়াদে সংরক্ষণ সহজ হয় এবং শিশুর নৈতিক, আত্মিক ও বুদ্ধিবৃত্তিক বিকাশেও ইতিবাচক ভূমিকা রাখে।",
+      }),
     },
   ];
 
+  // --- PROSPECTUS LINK (same as HifzRevisionDetails) ---
+  const prospectusLink =
+    "https://drive.google.com/file/d/1mv0ponZWJ0Jb2cXSsvITdneTwYMQfXkv/view?usp=sharing";
+
+  const handleDownloadPDF = () => {
+    window.open(prospectusLink, "_blank");
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <div className="py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Back Button */}
-          <Link
-            to="/course/kids"
-            className="inline-flex items-center gap-2 text-[#002b2b] hover:text-yellow-600 mb-6 transition-colors group"
-          >
-            <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">কোর্স পেজে ফিরে যান</span>
-          </Link>
+      <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        {/* Back Link */}
+        <Link
+          to="/course/kids"
+          className="inline-flex items-center gap-2 text-cyan-700 hover:text-cyan-900 mb-4 transition-colors text-sm font-medium"
+        >
+          <FaArrowLeft />
+          <span>
+            {t({ en: "Back to Course Page", bn: "কোর্স পেজে ফিরে যান" })}
+          </span>
+        </Link>
 
-          {/* Hero Section Banner */}
-          <div className="w-full max-w-3xl h-24 sm:h-32 md:h-40 rounded-2xl border border-gray-100 ml-8 mr-72 relative overflow-hidden bg-gradient-to-r from-amber-700 via-yellow-700 to-amber-900 p-6 text-white flex items-center justify-between shadow-md">
-            <div className="absolute inset-0 opacity-20 pointer-events-none flex justify-between items-center px-4">
+        {/* Main Grid Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          {/* Left Details Section */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Top Banner Image - STATIC KidsImg */}
+            <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-md bg-cyan-900 relative">
               <img
                 src={KidsImg}
-                alt="decoration"
-                className="w-24 h-24 object-cover rounded-full hidden sm:block"
+                alt={courseDetails.title}
+                className="w-full h-full object-cover opacity-90"
               />
-              <img
-                src={KidsImg}
-                alt="decoration"
-                className="w-24 h-24 object-cover rounded-full hidden sm:block"
-              />
-            </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold relative z-10">
-              {courseDetails.title}
-            </h1>
-          </div>
-
-          {/* Course Info Section - Below Banner */}
-          <div className="ml-8 mr-72">
-            {/* Share & Wishlist */}
-            <div className="flex items-center justify-between py-3">
-              <div className="flex items-center gap-4">
-                <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors cursor-pointer">
-                  <FaShare className="text-lg" />
-                  <span className="font-medium">Share</span>
-                </button>
-                <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors cursor-pointer">
-                  <FaBookmark className="text-lg" />
-                  <span className="font-medium">Wishlist</span>
-                </button>
-              </div>
-              <div className="text-sm text-gray-500">⭐ 0 (0 Ratings)</div>
-            </div>
-
-            {/* Course Title */}
-            <h1 className="text-2xl font-bold text-[#007a91] mb-3 uppercase">
-              {courseDetails.title}
-            </h1>
-
-            {/* Tabs */}
-            <div className="flex items-center gap-6 border-b border-gray-200">
-              <button
-                onClick={() => setActiveTab("info")}
-                className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all cursor-pointer ${
-                  activeTab === "info"
-                    ? "border-[#002b2b] text-[#002b2b] font-semibold"
-                    : "border-transparent text-gray-500 hover:text-[#002b2b]"
-                }`}
-              >
-                <FaInfoCircle />
-                <span>Course Info</span>
-              </button>
-              <button
-                onClick={() => setActiveTab("reviews")}
-                className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all cursor-pointer ${
-                  activeTab === "reviews"
-                    ? "border-[#002b2b] text-[#002b2b] font-semibold"
-                    : "border-transparent text-gray-500 hover:text-[#002b2b]"
-                }`}
-              >
-                <FaCommentDots />
-                <span>Reviews</span>
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            {activeTab === "reviews" && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-xl">
-                <p className="text-gray-500 text-center">
-                  No reviews yet. Be the first to review!
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-6">
+                <h1 className="text-2xl md:text-3xl font-bold text-white">
+                  {courseDetails.title}
+                </h1>
+                <p className="text-white/80 text-sm mt-1">
+                  {courseDetails.subtitle}
                 </p>
               </div>
-            )}
-          </div>
+            </div>
 
-          {/* Main Content Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Content - 2 Columns */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* 1. ABOUT COURSE */}
-              <div className="p-8 mt-10">
-                <h2 className="text-xl font-bold text-[#00ADD2] mb-4 uppercase">
-                  About Course
-                </h2>
-                <p className="text-gray-700 leading-relaxed text-[15px] whitespace-pre-line">
-                  {courseDetails.description}
-                </p>
-                <button className="text-[#00ADD2] text-sm font-medium mt-3 hover:underline cursor-pointer">
-                  – কম প্রদর্শন করুন
-                </button>
-              </div>
-
-              {/* 2. WHAT YOU WILL GAIN */}
-              <div className="bg-white rounded-3xl p-8 space-y-4 shadow-sm">
-                <h2 className="text-xl font-bold text-[#00ADD2] mb-4 uppercase">
-                  What You Will Gain
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {courseDetails.objectives.map((objective, index) => (
-                    <div
-                      key={index}
-                      className="flex items-start gap-3 p-1 rounded-xl transition-colors"
-                    >
-                      <FaAngleDoubleRight className="text-[#00ADD2] text-base flex-shrink-0 mt-1" />
-                      <span className="text-gray-700 text-sm font-medium">
-                        {objective}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* EARN A CERTIFICATE */}
-              <div className="bg-white rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
-                <div>
-                  <h3 className="text-xl font-bold text-[#00ADD2] mb-2 uppercase">
-                    Earn A Certificate
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    Add this certificate to your resume to demonstrate your
-                    skills & increase your chances of getting noticed.
-                  </p>
-                </div>
-                <div className="w-48 h-32 bg-gray-100 rounded-xl border border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs text-center p-2 shrink-0">
-                  Selected template preview
-                </div>
-              </div>
-
-              {/* 3. Ready To Apply Your Course */}
-              <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-3xl p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-xl font-bold text-[#002b2b]">
-                    Ready To Apply Your Course
-                  </h3>
-                  <p className="text-gray-600 text-sm">
-                    Enroll now and start your structured learning journey.
-                  </p>
-                </div>
-                <Link to="/course/kids/one-to-one/enroll">
-                  <button className="bg-[#002b2b] hover:bg-teal-900 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all cursor-pointer">
-                    Start Now
+            {/* Share, Wishlist, Rating bar */}
+            <div className="flex flex-wrap items-start justify-between gap-4 bg-white p-4 rounded-xl shadow-sm border border-gray-100 text-sm">
+              <div className="flex flex-col items-start gap-1">
+                <div className="flex items-center gap-4 text-cyan-700">
+                  <button className="flex items-center gap-1.5 hover:underline font-medium">
+                    <FaShareAlt /> {t({ en: "Share", bn: "শেয়ার" })}
                   </button>
-                </Link>
+                  <button className="flex items-center gap-1.5 hover:underline font-medium">
+                    <FaRegHeart /> {t({ en: "Wishlist", bn: "উইশলিস্ট" })}
+                  </button>
+                </div>
+                {/* tagline removed – not present in new content */}
               </div>
+              <div className="flex items-center gap-1 text-amber-400">
+                <FaStar />
+                <FaStar />
+                <FaStar />
+                <FaStar />
+                <FaStar />
+                <span className="text-gray-600 text-xs ml-1">
+                  {courseDetails.rating}
+                </span>
+              </div>
+            </div>
 
-              {/* INTER COURSES */}
-              <div>
-                <h2 className="text-xl font-bold text-[#00ADD2] mb-4 uppercase">
-                  Inter Courses
-                </h2>
-                <div className="flex flex-wrap gap-4">
-                  {courseDetails.interCourses.map((item, index) => (
-                    <span
-                      key={index}
-                      className="bg-teal-100/60 text-[#007a91] px-4 py-2 rounded-md font-medium text-sm border border-teal-200"
-                    >
-                      {item}
+            {/* ABOUT COURSE */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-3 tracking-wide">
+                {t({ en: "ABOUT COURSE", bn: "কোর্স সম্পর্কে" })}
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                {showMore ? courseDetails.description : courseDetails.shortDesc}
+              </p>
+              <button
+                onClick={() => setShowMore(!showMore)}
+                className="text-cyan-600 text-sm font-semibold mt-3 hover:underline flex items-center gap-1"
+              >
+                {showMore
+                  ? t({ en: "- Show Less", bn: "- কম দেখান" })
+                  : t({ en: "+ Show More", bn: "+ আরও দেখুন" })}
+              </button>
+            </div>
+
+            {/* WHAT YOU WILL GAIN (replaced with "কেন ওয়ান-টু-ওয়ান প্রোগ্রাম বেছে নেবেন?") */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                {t({
+                  en: "WHY CHOOSE ONE-TO-ONE?",
+                  bn: "কেন ওয়ান-টু-ওয়ান প্রোগ্রাম বেছে নেবেন?",
+                })}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 text-sm text-gray-700">
+                {courseDetails.objectives.map((obj, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-cyan-600 font-bold leading-tight">
+                      »
                     </span>
-                  ))}
+                    <span className="leading-snug">{obj}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* EARN A CERTIFICATE */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-1">
+                <h2 className="text-cyan-700 font-bold text-lg mb-2 tracking-wide">
+                  {t({
+                    en: "EARN A CERTIFICATE",
+                    bn: "সার্টিফিকেট অর্জন করুন",
+                  })}
+                </h2>
+                <p className="text-gray-600 text-xs leading-relaxed">
+                  {t({
+                    en: "Add this certificate to your resume to demonstrate your skills & increase your chances of getting noticed.",
+                    bn: "আপনার দক্ষতা প্রদর্শন ও নজরে আসার সম্ভাবনা বাড়াতে এই সার্টিফিকেট আপনার জীবনবৃত্তান্তে যুক্ত করুন।",
+                  })}
+                </p>
+              </div>
+              <div className="w-48 bg-cyan-50 border border-cyan-200 rounded-lg p-3 shadow-inner text-center flex-shrink-0">
+                <img
+                  src={AllimiyahCertificate}
+                  alt={t({ en: "Certificate", bn: "সার্টিফিকেট" })}
+                  className="w-full h-28 object-contain"
+                />
+              </div>
+            </div>
+
+            {/* WHAT CAN YOU LEARN? (new section) */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                {courseDetails.whatCanLearn.title}
+              </h2>
+              <p className="text-gray-600 text-sm mb-4">
+                {courseDetails.whatCanLearn.subtitle}
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-bold text-cyan-800 text-sm mb-3">
+                    {t({ en: "Qur'an Learning", bn: "কুরআন শিক্ষা" })}
+                  </h3>
+                  <ul className="space-y-1.5">
+                    {courseDetails.whatCanLearn.quranLearning.map(
+                      (item, idx) => (
+                        <li
+                          key={idx}
+                          className="flex items-start gap-2 text-sm text-gray-700"
+                        >
+                          <span className="text-cyan-600 font-bold">-</span>
+                          <span>{item}</span>
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-bold text-cyan-800 text-sm mb-3">
+                    {t({ en: "Islamic Studies", bn: "ইসলামিক স্টাডিজ" })}
+                  </h3>
+                  <ul className="space-y-1.5">
+                    {courseDetails.whatCanLearn.islamicStudies.map(
+                      (item, idx) => (
+                        <li
+                          key={idx}
+                          className="flex items-start gap-2 text-sm text-gray-700"
+                        >
+                          <span className="text-cyan-600 font-bold">-</span>
+                          <span>{item}</span>
+                        </li>
+                      ),
+                    )}
+                  </ul>
                 </div>
               </div>
 
-              {/* 4. TARGET AUDIENCE */}
-              <div>
-                <h2 className="text-xl font-bold text-[#00ADD2] mb-4 uppercase">
-                  Target Audience
-                </h2>
-                <div className="space-y-2">
-                  {courseDetails.targetAudience.map((feature, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2 text-gray-700"
-                    >
-                      <span className="text-[#00ADD2] text-xs">●</span>
-                      <span className="text-sm">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <p className="text-xs text-gray-500 italic mt-4">
+                {courseDetails.whatCanLearn.note}
+              </p>
+            </div>
 
-              {/* 5. MATERIALS INCLUDED */}
-              <div>
-                <h2 className="text-xl font-bold text-[#00ADD2] mb-4 uppercase">
-                  Materials Included
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4 text-sm">
-                  {courseDetails.materials.map((item, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <span className="text-[#00ADD2] mt-1 font-bold">✔</span>
-                      <span className="text-[#002b2b]">{item}</span>
-                    </div>
-                  ))}
-                </div>
+            {/* FLEXIBLE CLASS SCHEDULE (new section) */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                {t({
+                  en: "Flexible Class Schedule: Your Time, Your Choice",
+                  bn: "নমনীয় ক্লাস রুটিন: আপনার সময়, আপনার পছন্দ",
+                })}
+              </h2>
+              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                {courseDetails.flexibleSchedule}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <span className="bg-cyan-50 text-cyan-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-cyan-200">
+                  {t({ en: "No fixed batch", bn: "কোনো নির্দিষ্ট ব্যাচ নেই" })}
+                </span>
+                <span className="bg-cyan-50 text-cyan-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-cyan-200">
+                  {t({
+                    en: "No waiting for a group",
+                    bn: "গ্রুপে যুক্ত হওয়ার জন্য কোনো অপেক্ষা নেই",
+                  })}
+                </span>
+                <span className="bg-cyan-50 text-cyan-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-cyan-200">
+                  {t({
+                    en: "Your learning schedule, your choice",
+                    bn: "আপনার শেখার সময়সূচি, আপনার পছন্দ",
+                  })}
+                </span>
               </div>
+            </div>
 
-              {/* 7. COURSE FEE / FEE STRUCTURE */}
-              <div>
-                <h2 className="text-xl font-bold text-[#00ADD2] mb-4 uppercase">
-                  Fee Structure
-                </h2>
-                <div className="grid grid-cols-2 gap-10 text-sm">
+            {/* COURSE FEATURES (replaces MATERIALS INCLUDED) */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                {t({ en: "COURSE FEATURES", bn: "কোর্সের বিশেষ সুবিধাসমূহ" })}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 text-sm text-gray-700">
+                {courseDetails.courseFeatures.map((item, index) => (
+                  <div key={index} className="flex items-start gap-2">
+                    <span className="text-cyan-600 font-bold">✔</span>
+                    <span className="leading-snug">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* COURSE DETAILS TABLE */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                {t({ en: "COURSE DETAILS", bn: "কোর্সের বিবরণ" })}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div className="flex items-start gap-2">
+                  <span className="text-cyan-600 font-bold">•</span>
                   <div>
-                    {courseDetails.feeStructure.map((fee, index) => (
-                      <div key={index} className="flex items-start gap-3 mb-2">
-                        <FaCheckCircle className="text-[#00ADD2] mt-1" />
-                        <span className="block text-[#002b2b] font-medium">
-                          {fee}
-                        </span>
-                      </div>
-                    ))}
+                    <span className="font-semibold text-gray-700">
+                      {t({ en: "Program:", bn: "প্রোগ্রাম:" })}
+                    </span>
+                    <span className="text-gray-600 ml-1">
+                      {t({
+                        en: "One-to-One Quran Learning",
+                        bn: "ওয়ান-টু-ওয়ান কুরআন লার্নিং",
+                      })}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-cyan-600 font-bold">•</span>
+                  <div>
+                    <span className="font-semibold text-gray-700">
+                      {t({ en: "Class Type:", bn: "ক্লাসের ধরণ:" })}
+                    </span>
+                    <span className="text-gray-600 ml-1">
+                      {t({ en: "Live One-to-One", bn: "লাইভ ওয়ান-টু-ওয়ান" })}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-cyan-600 font-bold">•</span>
+                  <div>
+                    <span className="font-semibold text-gray-700">
+                      {t({ en: "Weekly Classes:", bn: "সাপ্তাহিক ক্লাস:" })}
+                    </span>
+                    <span className="text-gray-600 ml-1">
+                      {courseDetails.weeklyClasses}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-cyan-600 font-bold">•</span>
+                  <div>
+                    <span className="font-semibold text-gray-700">
+                      {t({ en: "Class Schedule:", bn: "ক্লাসের সময়সূচি:" })}
+                    </span>
+                    <span className="text-gray-600 ml-1">
+                      {courseDetails.classSchedule}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-cyan-600 font-bold">•</span>
+                  <div>
+                    <span className="font-semibold text-gray-700">
+                      {t({ en: "Class Duration:", bn: "ক্লাসের সময়কাল:" })}
+                    </span>
+                    <span className="text-gray-600 ml-1">
+                      {courseDetails.classDuration}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-cyan-600 font-bold">•</span>
+                  <div>
+                    <span className="font-semibold text-gray-700">
+                      {t({ en: "Subject:", bn: "বিষয়:" })}
+                    </span>
+                    <span className="text-gray-600 ml-1">
+                      {courseDetails.subject}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-cyan-600 font-bold">•</span>
+                  <div>
+                    <span className="font-semibold text-gray-700">
+                      {t({ en: "Medium:", bn: "মাধ্যম:" })}
+                    </span>
+                    <span className="text-gray-600 ml-1">
+                      {courseDetails.medium}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-cyan-600 font-bold">•</span>
+                  <div>
+                    <span className="font-semibold text-gray-700">
+                      {t({ en: "Location:", bn: "লোকেশন:" })}
+                    </span>
+                    <span className="text-gray-600 ml-1">
+                      {courseDetails.location}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 sm:col-span-2">
+                  <span className="text-cyan-600 font-bold">•</span>
+                  <div>
+                    <span className="font-semibold text-gray-700">
+                      {t({ en: "Assessment:", bn: "মূল্যায়ন:" })}
+                    </span>
+                    <span className="text-gray-600 ml-1">
+                      {courseDetails.assessment}
+                    </span>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* ========== LAST 3 SECTIONS ========== */}
-
-              {/* 1. কেন তারবিয়াহ কুরআন স্টাডিজ ? */}
-              <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-12 border border-gray-100">
-                <div className="text-center mb-10">
-                  <h2 className="text-2xl md:text-4xl font-bold mb-3 text-[#00ADD2]">
-                    কেন তারবিয়াহ কুরআন স্টাডিজ ?
-                  </h2>
-                  <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-                  {whyFeatures.map((feature, index) => (
-                    <div
-                      key={index}
-                      className="bg-gray-50 border border-gray-200 p-5 rounded-2xl flex items-center gap-4 hover:bg-gray-100 transition-all shadow-md"
-                    >
-                      <div className="w-12 h-12 rounded-xl bg-yellow-500/20 text-yellow-600 flex items-center justify-center shrink-0 text-xl">
-                        {feature.icon}
-                      </div>
-                      <h3 className="text-base md:text-lg font-semibold text-black">
-                        {feature.text}
-                      </h3>
-                    </div>
-                  ))}
-                </div>
+            {/* TARGET AUDIENCE */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                {t({ en: "TARGET AUDIENCE", bn: "এই প্রোগ্রাম কাদের জন্য?" })}
+              </h2>
+              <div className="space-y-2.5 text-xs md:text-sm text-gray-700">
+                {courseDetails.targetAudience.map((target, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="text-cyan-600 font-bold leading-tight">
+                      •
+                    </span>
+                    <span className="leading-snug">{target}</span>
+                  </div>
+                ))}
               </div>
+            </div>
 
-              {/* 2. শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা
-                  </h2>
-                </div>
-
-                <Swiper
-                  modules={[Autoplay, Pagination]}
-                  spaceBetween={20}
-                  slidesPerView={1}
-                  loop={true}
-                  autoplay={{
-                    delay: 4000,
-                    disableOnInteraction: false,
-                    reverseDirection: true,
-                  }}
-                  pagination={{
-                    clickable: true,
-                    dynamicBullets: true,
-                  }}
-                  breakpoints={{
-                    640: {
-                      slidesPerView: 2,
-                    },
-                    1024: {
-                      slidesPerView: 3,
-                    },
-                  }}
-                  className="testimonial-swiper"
-                >
-                  {testimonials.map((item) => (
-                    <SwiperSlide key={item.id}>
-                      <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 text-center border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 h-full">
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#002b2b] to-[#004d4d] mx-auto mb-4 flex items-center justify-center text-white text-3xl shadow-md overflow-hidden">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex justify-center mb-3">
-                          {[...Array(5)].map((_, i) => (
-                            <FaStar
-                              key={i}
-                              className="text-yellow-400 text-sm"
-                            />
-                          ))}
-                        </div>
-                        <p className="text-gray-700 text-sm italic leading-relaxed">
-                          "{item.quote}"
-                        </p>
-                        <p className="text-[#002b2b] font-bold mt-3">
-                          {item.name}
-                        </p>
-                        <p className="text-gray-500 text-xs">
-                          {item.designation}
-                        </p>
-                        <div className="mt-3 flex justify-center gap-1">
-                          <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-                          <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-                          <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
-                        </div>
-                      </div>
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
+            {/* HOW IT WORKS (new section) */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                {t({ en: "HOW IT WORKS", bn: "যেভাবে শুরু করবেন" })}
+              </h2>
+              <div className="space-y-4">
+                {courseDetails.howItWorks.map((step, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 border-b border-gray-100 last:border-0 pb-3 last:pb-0"
+                  >
+                    <span className="bg-cyan-600 text-white font-bold text-xs w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0">
+                      {index + 1}
+                    </span>
+                    <span className="text-sm text-gray-700 leading-relaxed">
+                      {step}
+                    </span>
+                  </div>
+                ))}
               </div>
+            </div>
 
-              {/* 3. ভিডিও গ্যালারি */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    ভিডিও গ্যালারি
-                  </h2>
+            {/* FEE STRUCTURE */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+              <h2 className="text-cyan-700 font-bold text-lg mb-4 tracking-wide">
+                {t({ en: "COURSE FEE", bn: "কোর্স ফি" })}
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-cyan-50/50 p-4 rounded-xl border border-cyan-100">
+                  <h3 className="font-bold text-cyan-800 text-sm mb-3">
+                    {courseDetails.feeStructure.bd.title}
+                  </h3>
+                  <p className="text-xs text-gray-700 mb-1.5 flex items-center gap-1.5">
+                    <span className="text-cyan-600 font-bold">»</span>
+                    {courseDetails.feeStructure.bd.admission}
+                  </p>
+                  <p className="text-xs text-gray-700 mb-1.5 flex items-center gap-1.5">
+                    <span className="text-cyan-600 font-bold">»</span>
+                    {courseDetails.feeStructure.bd.monthly}
+                  </p>
+                  <p className="text-xs text-gray-500 italic mt-2">
+                    {courseDetails.feeStructure.bd.note}
+                  </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {videoGallery.map((video) => (
-                    <a
-                      key={video.id}
-                      href={video.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300"
-                    >
-                      <div className="relative h-48 bg-gray-200">
-                        <img
-                          src={video.thumbnail}
-                          alt={video.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors flex items-center justify-center">
-                          <div className="w-14 h-14 bg-[#008080] rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
-                            <FaPlayCircle className="text-3xl" />
-                          </div>
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                          <p className="text-white text-sm font-semibold">
-                            {video.title}
-                          </p>
-                        </div>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              </div>
-
-              {/* 4. FAQ */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">FAQ</h2>
-                </div>
-                <div className="space-y-4">
-                  {faqs.map((faq, index) => (
-                    <div
-                      key={index}
-                      className="border border-gray-200 rounded-xl overflow-hidden"
-                    >
-                      <button
-                        onClick={() => toggleFaq(index)}
-                        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 text-left transition-colors cursor-pointer"
-                      >
-                        <span className="font-bold text-[#002b2b]">
-                          {index + 1}. {faq.question}
-                        </span>
-                        {openFaq === index ? (
-                          <FaChevronUp className="text-gray-500" />
-                        ) : (
-                          <FaChevronDown className="text-gray-500" />
-                        )}
-                      </button>
-                      {openFaq === index && (
-                        <div className="p-4 bg-white border-t border-gray-200 text-gray-700">
-                          {faq.answer}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                <div className="bg-cyan-50/50 p-4 rounded-xl border border-cyan-100">
+                  <h3 className="font-bold text-cyan-800 text-sm mb-3">
+                    {courseDetails.feeStructure.overseas.title}
+                  </h3>
+                  <p className="text-xs text-gray-700 mb-1.5 flex items-center gap-1.5">
+                    <span className="text-cyan-600 font-bold">»</span>
+                    {courseDetails.feeStructure.overseas.admission}
+                  </p>
+                  <p className="text-xs text-gray-700 mb-1.5 flex items-center gap-1.5">
+                    <span className="text-cyan-600 font-bold">»</span>
+                    {courseDetails.feeStructure.overseas.monthly}
+                  </p>
+                  <p className="text-xs text-gray-500 italic mt-2">
+                    {courseDetails.feeStructure.overseas.note}
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* Right Sidebar - 1 Column */}
-            <div className="space-y-4 -mt-[305px]">
-              {/* Instructor / Course Preview Image Card */}
-              <div className="block relative group overflow-hidden rounded-2xl shadow-md border border-gray-100 bg-white p-2">
-                <img
-                  src="https://i.pravatar.cc/300?img=11"
-                  alt="Instructor Preview"
-                  className="w-full h-44 object-cover rounded-xl"
-                />
+            {/* Ready To Apply Banner */}
+            <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-5 flex items-center justify-between shadow-sm flex-wrap gap-3">
+              <span className="text-cyan-800 font-bold text-base md:text-lg">
+                {t({
+                  en: "Ready To Apply Your Course",
+                  bn: "আপনার কোর্সে আবেদন করতে প্রস্তুত",
+                })}
+              </span>
+              <Link to="admission-now">
+                <button className="bg-cyan-700 hover:bg-cyan-800 text-white font-bold px-6 py-2.5 rounded-lg text-sm shadow transition-all">
+                  {t({ en: "Start Now", bn: "এখনই শুরু করুন" })}
+                </button>
+              </Link>
+            </div>
+
+            {/* ========== LAST 4 SECTIONS ========== */}
+
+            {/* 1. Why Tarbiyah Quran Studies */}
+            <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-12 border border-gray-100">
+              <div className="text-center mb-10">
+                <h2 className="text-2xl md:text-4xl font-bold mb-3 text-[#00ADD2]">
+                  {t({
+                    en: "Why Tarbiyah Quran Studies?",
+                    bn: "কেন তারবিয়াহ কুরআন স্টাডিজ ?",
+                  })}
+                </h2>
+                <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
               </div>
 
-              {/* Pricing & Enrollment Card */}
-              <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-[#007a91]">
-                <h2 className="text-xl font-bold text-[#007a91] mb-5">
-                  Apply This Course
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                {whyFeatures.map((feature, index) => (
+                  <div
+                    key={index}
+                    className="bg-gray-50 border border-gray-200 p-5 rounded-2xl flex items-center gap-4 hover:bg-gray-100 transition-all shadow-md"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-yellow-500/20 text-yellow-600 flex items-center justify-center shrink-0 text-xl">
+                      {feature.icon}
+                    </div>
+                    <h3 className="text-base md:text-lg font-semibold text-black">
+                      {feature.text}
+                    </h3>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 2. Student & Parent Experiences (Testimonials - NOW from HifzRevisionDetails) */}
+            <div className="bg-white rounded-3xl p-8 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
+                <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  {t({
+                    en: "Student & Parent Experiences",
+                    bn: "শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা",
+                  })}
                 </h2>
-                <div className="flex items-center justify-center mb-2">
-                  <Link to="/course/kids/one-to-one/enroll" className="w-full">
-                    <button className="w-full bg-[#007a91] text-white font-bold py-3 text-xs rounded-md hover:opacity-90 transition cursor-pointer">
-                      Enroll Now
+              </div>
+
+              <Swiper
+                modules={[Autoplay, Pagination]}
+                spaceBetween={20}
+                slidesPerView={1}
+                loop={true}
+                autoplay={{
+                  delay: 4000,
+                  disableOnInteraction: false,
+                  reverseDirection: true,
+                }}
+                pagination={{
+                  clickable: true,
+                  dynamicBullets: true,
+                }}
+                breakpoints={{
+                  640: { slidesPerView: 2 },
+                  1024: { slidesPerView: 3 },
+                }}
+                className="testimonial-swiper"
+              >
+                {testimonials.map((item) => (
+                  <SwiperSlide key={item.id}>
+                    <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 text-center border border-gray-100 shadow-lg hover:shadow-xl transition-all duration-300 h-full">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#002b2b] to-[#004d4d] mx-auto mb-4 flex items-center justify-center text-white text-3xl shadow-md overflow-hidden">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="flex justify-center mb-3">
+                        {[...Array(5)].map((_, i) => (
+                          <FaStar key={i} className="text-yellow-400 text-sm" />
+                        ))}
+                      </div>
+                      <p className="text-gray-700 text-sm italic leading-relaxed">
+                        "{item.quote}"
+                      </p>
+                      <p className="text-[#002b2b] font-bold mt-3">
+                        {item.name}
+                      </p>
+                      <p className="text-gray-500 text-xs">
+                        {item.designation}
+                      </p>
+                      <div className="mt-3 flex justify-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
+                        <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
+                        <span className="w-2 h-2 rounded-full bg-yellow-400"></span>
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+
+            {/* 3. Video Gallery - NOW from HifzRevisionDetails */}
+            <div className="bg-white rounded-3xl p-8 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
+                <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  {t({ en: "Video Gallery", bn: "ভিডিও গ্যালারি" })}
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {videoGallery.map((video) => (
+                  <a
+                    key={video.id}
+                    href={video.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300"
+                  >
+                    <div className="relative h-48 bg-gray-200">
+                      <img
+                        src={video.thumbnail}
+                        alt={video.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                        <div className="w-14 h-14 bg-[#008080] rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
+                          <FaPlayCircle className="text-3xl" />
+                        </div>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                        <p className="text-white text-sm font-semibold">
+                          {video.title}
+                        </p>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+
+            {/* 4. FAQ */}
+            <div className="bg-white rounded-3xl p-8 shadow-sm">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
+                <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  {t({ en: "FAQ", bn: "প্রায়শই জিজ্ঞাসিত প্রশ্ন" })}
+                </h2>
+              </div>
+              <div className="space-y-4">
+                {faqs.map((faq, index) => (
+                  <div
+                    key={index}
+                    className="border border-gray-200 rounded-xl overflow-hidden"
+                  >
+                    <button
+                      onClick={() => toggleFaq(index)}
+                      className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 text-left transition-colors cursor-pointer"
+                    >
+                      <span className="font-bold text-[#002b2b]">
+                        {index + 1}. {faq.question}
+                      </span>
+                      {openFaq === index ? (
+                        <FaChevronUp className="text-gray-500" />
+                      ) : (
+                        <FaChevronDown className="text-gray-500" />
+                      )}
                     </button>
-                  </Link>
+                    {openFaq === index && (
+                      <div className="p-4 bg-white border-t border-gray-200 text-gray-700">
+                        {faq.answer}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Sidebar - Static (no sticky) */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl shadow-md p-4 border border-cyan-100">
+              {/* Thumbnail / Video Box with Play Button */}
+              <a
+                href="https://youtu.be/9nu6iI_-UXo?si=RuvFDmQELizu0fXe"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative rounded-lg overflow-hidden shadow mb-4 bg-black group cursor-pointer block h-40"
+              >
+                <img
+                  src={KidsImg}
+                  alt={t({ en: "Course Video", bn: "কোর্স ভিডিও" })}
+                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-cyan-700 text-white rounded-full flex items-center justify-center shadow-lg group-hover:bg-cyan-600 transition-colors">
+                    <FaPlay className="text-sm ml-0.5" />
+                  </div>
                 </div>
+              </a>
+
+              <div className="mb-4">
+                <span className="text-xs font-bold text-cyan-800 tracking-wider uppercase block mb-1">
+                  {t({ en: "Apply This Course", bn: "এই কোর্সে আবেদন করুন" })}
+                </span>
+              </div>
+
+              <Link to="/course/kids/one-to-one/enroll">
+                <button className="w-full bg-cyan-700 hover:bg-cyan-800 text-white font-bold py-3 px-4 rounded-lg shadow transition-all text-sm flex items-center justify-center gap-2">
+                  <span>
+                    {t({ en: "Enroll Now", bn: "এখনই নিবন্ধন করুন" })}
+                  </span>
+                </button>
+              </Link>
+
+              {/* Prospectus Download Button */}
+              <div className="mt-3">
+                <a
+                  href={prospectusLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full"
+                >
+                  <button className="w-full bg-[#003d3d] hover:bg-[#002b2b] text-white font-semibold py-2.5 rounded-lg shadow flex items-center justify-center gap-2 transition-all text-sm">
+                    <FaDownload /> {t({ en: "Prospectus", bn: "প্রসপেক্টাস" })}
+                  </button>
+                </a>
+              </div>
+            </div>
+
+            {/* Faculty List (6 teachers) - same as HifzRevisionDetails */}
+            <div className="bg-white rounded-3xl">
+              <h3 className="text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
+                {t({ en: "Faculty", bn: "অনুষদ" })}
+              </h3>
+              <div className="space-y-4">
+                {instructors.map((instructor) => (
+                  <div
+                    key={instructor.id}
+                    className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-none"
+                  >
+                    <img
+                      src={instructor.image}
+                      alt={instructor.name}
+                      className="w-12 h-12 rounded-full object-cover border border-yellow-500 flex-shrink-0"
+                    />
+                    <div className="overflow-hidden">
+                      <h4 className="font-bold text-sm text-[#002b2b] truncate">
+                        {instructor.name}
+                      </h4>
+                      <p className="text-xs text-gray-600 truncate">
+                        {instructor.title}
+                      </p>
+                      {instructor.subtitle && (
+                        <p className="text-[11px] text-gray-500 truncate">
+                          {instructor.subtitle}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
