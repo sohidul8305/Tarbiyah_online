@@ -34,7 +34,7 @@ const Footer = () => {
           </p>
         </div>
 
-        {/* Column 2: Useful Links & Payment Methods */}
+        {/* Column 2: Useful Links */}
         <div className="w-full">
           <h3 className="font-bold text-lg mb-6 uppercase tracking-wider border-b border-teal-700/50 pb-2 inline-block">
             {t({ en: "USEFUL LINKS", bn: "প্রয়োজনীয় লিংক" })}
@@ -83,12 +83,6 @@ const Footer = () => {
               {t({ en: "Events", bn: "ইভেন্টস" })}
             </a>
             <a
-              href="/gallery"
-              className="hover:text-teal-300 transition-colors truncate"
-            >
-              {t({ en: "Gallery", bn: "গ্যালারি" })}
-            </a>
-            <a
               href="/support"
               className="hover:text-teal-300 transition-colors truncate"
             >
@@ -107,8 +101,6 @@ const Footer = () => {
               {t({ en: "Diploma Details", bn: "ডিপ্লোমা বিস্তারিত" })}
             </a>
           </div>
-
-          {/* Payment Methods */}
         </div>
 
         {/* Column 3: Get Touch With Us */}
@@ -126,23 +118,39 @@ const Footer = () => {
                 })}
               </span>
             </p>
-            <p className="flex items-start gap-3">
+            <div className="flex items-start gap-3">
               <FaPhoneAlt className="text-teal-300 mt-1 flex-shrink-0 text-base" />
-              <span className="block space-y-2 text-white-700">
+              <div className="block space-y-2 text-gray-200">
                 <p>
-                  <strong>01841516565</strong> (Diploma In Islamic Studies)
+                  <strong>01841516565</strong> (
+                  {t({
+                    en: "Diploma In Islamic Studies",
+                    bn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
+                  })}
+                  )
                 </p>
                 <p>
-                  <strong>01841514545</strong> (Tarbiyah Alimiyah Program)
+                  <strong>01841514545</strong> (
+                  {t({
+                    en: "Tarbiyah Alimiyah Program",
+                    bn: "তারবিয়াহ আলিমিয়াহ প্রোগ্রাম",
+                  })}
+                  )
                 </p>
                 <p>
-                  <strong>01841513434</strong> (Tarbiyah Quran Studies)
+                  <strong>01841513434</strong> (
+                  {t({
+                    en: "Tarbiyah Quran Studies",
+                    bn: "তারবিয়াহ কুরআন স্টাডিজ",
+                  })}
+                  )
                 </p>
                 <p>
-                  <strong>01841511515</strong> (Quran For Elders)
+                  <strong>01841511515</strong> (
+                  {t({ en: "Quran For Elders", bn: "কুরআন ফর এল্ডার্স" })})
                 </p>
-              </span>
-            </p>
+              </div>
+            </div>
             <p className="flex items-center gap-3">
               <FaEnvelope className="text-teal-300 flex-shrink-0 text-base" />
               <span className="break-all">hello.tarbiyah@gmail.com</span>

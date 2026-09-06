@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router";
+import { useLanguage } from "../../context/useLanguage"; // আপনার প্রজেক্টের পাথ অনুযায়ী ঠিক করে নেবেন
 import KidsImg from "../../image/kids.jpg";
 import NuraniyaCourseImg from "../../image/nuranicourse.jpg";
 import NuraniyaBannerIMG from "../../image/nuranibanner.jpg";
@@ -37,36 +38,53 @@ import {
 } from "react-icons/fa";
 
 const Kids = () => {
-  // কোর্সের তথ্য
+  const { t } = useLanguage();
+
+  // কোর্সের তথ্য (বাংলা ও ইংরেজি উভয় ভাষার জন্য)
   const courses = [
     {
       id: "quida-nurani",
-      title: "কায়দা নুরানী",
-      subtitle: "শিশুদের কুরআন শিক্ষার প্রথম ধাপ।",
+      title: { en: "Qaida Nurani", bn: "কায়দা নুরানী" },
+      subtitle: {
+        en: "First step of Quran learning for kids.",
+        bn: "শিশুদের কুরআন শিক্ষার প্রথম ধাপ।",
+      },
       image: NuraniyaBannerIMG,
     },
     {
       id: "nazera",
-      title: "নাজেরা",
-      subtitle: "সহি তাজউইথ ও সুন্দরভাবে কুরআন তিলাওয়াত শেখা।",
+      title: { en: "Nazera Quran", bn: "নাজেরা" },
+      subtitle: {
+        en: "Learning proper Tajweed and beautiful recitation.",
+        bn: "সহি তাজউইথ ও সুন্দরভাবে কুরআন তিলাওয়াত শেখা।",
+      },
       image: NazerakidsImg,
     },
     {
       id: "hifz",
-      title: "হিফজুল কুরআন",
-      subtitle: "ধাপে ধাপে সম্পূর্ণ কুরআন মুখস্থ করার প্রোগ্রাম।",
+      title: { en: "Hifzul Quran", bn: "হিফজুল কুরআন" },
+      subtitle: {
+        en: "Step-by-step complete Quran memorization program.",
+        bn: "ধাপে ধাপে সম্পূর্ণ কুরআন মুখস্থ করার প্রোগ্রাম।",
+      },
       image: courseImg,
     },
     {
       id: "hifz-revision",
-      title: "হিফজ রিভিশন",
-      subtitle: "মুখস্থ কুরআনকে দৃঢ় ও নির্ভুল রাখার নিয়মিত অনুশীলন",
+      title: { en: "Hifz Revision", bn: "হিফজ রিভিশন" },
+      subtitle: {
+        en: "Regular practice to keep memorized Quran strong and accurate.",
+        bn: "মুখস্থ কুরআনকে দৃঢ় ও নির্ভুল রাখার নিয়মিত অনুশীলন",
+      },
       image: KidsImg,
     },
     {
       id: "one-to-one",
-      title: "ওয়ান টু ওয়ান",
-      subtitle: "ফ্লেক্সিবল সময়ে পার্সোনালাইজড কুরআন লার্নিং",
+      title: { en: "One to One", bn: "ওয়ান টু ওয়ান" },
+      subtitle: {
+        en: "Personalized Quran learning at flexible times.",
+        bn: "ফ্লেক্সিবল সময়ে পার্সোনালাইজড কুরআন লার্নিং",
+      },
       image: KidsImg,
     },
   ];
@@ -96,12 +114,15 @@ const Kids = () => {
             <div className="w-full lg:w-1/2 space-y-6 text-center lg:text-left">
               <div className="space-y-3 flex flex-col items-center lg:items-start">
                 <span className="inline-block bg-yellow-400/20 text-yellow-200 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-yellow-400/35">
-                  ভর্তি চলছে <br /> সীমিত আসন
+                  {t({
+                    en: "Admission Open • Limited Seats",
+                    bn: "ভর্তি চলছে • সীমিত আসন",
+                  })}
                 </span>
                 <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight">
-                  তারবিয়াহ <br />
+                  {t({ en: "Tarbiyah", bn: "তারবিয়াহ" })} <br />
                   <span className="text-yellow-300 relative inline-block mt-1">
-                    কুরআন স্টাডিজ
+                    {t({ en: "Quran Studies", bn: "কুরআন স্টাডিজ" })}
                     <svg
                       className="absolute -bottom-2 left-0 w-full h-2"
                       viewBox="0 0 200 10"
@@ -118,29 +139,43 @@ const Kids = () => {
               </div>
 
               <p className="text-sm sm:text-base md:text-lg text-gray-200 leading-relaxed max-w-xl mx-auto lg:mx-0">
-                শিশুদের জন্য আনন্দময়, সহায়ক ও কিডস ফেন্ডলি পরিবেশে বিশুদ্ধ
-                তিলাওয়াত, তাজউথদ, নাজেরা ও হিফজ শিক্ষার বিশ্বস্ত প্ল্যাটফর্ম।
+                {t({
+                  en: "A trusted platform for kids in a joyful, supportive and friendly environment to learn pure recitation, tajweed, nazera and hifz.",
+                  bn: "শিশুদের জন্য আনন্দময়, সহায়ক ও কিডস ফ্রেন্ডলি পরিবেশে বিশুদ্ধ তিলাওয়াত, তাজউইদ, নাজেরা ও হিফজ শিক্ষার বিশ্বস্ত প্ল্যাটফর্ম।",
+                })}
               </p>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-2">
                 <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
                   <FaBook className="text-yellow-300 text-2xl mx-auto mb-1" />
-                  <p className="text-xs text-gray-300">লাইভ</p>
-                  <p className="text-sm font-bold">ক্লাস</p>
+                  <p className="text-xs text-gray-300">
+                    {t({ en: "Live", bn: "লাইভ" })}
+                  </p>
+                  <p className="text-sm font-bold">
+                    {t({ en: "Classes", bn: "ক্লাস" })}
+                  </p>
                 </div>
                 <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
                   <FaUsers className="text-yellow-300 text-2xl mx-auto mb-1" />
-                  <p className="text-xs text-gray-300">ছাত্র</p>
+                  <p className="text-xs text-gray-300">
+                    {t({ en: "Students", bn: "ছাত্র" })}
+                  </p>
                   <p className="text-sm font-bold">৪,০০০+</p>
                 </div>
                 <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
                   <FaAward className="text-yellow-300 text-2xl mx-auto mb-1" />
-                  <p className="text-xs text-gray-300">সার্টিফিকেট</p>
-                  <p className="text-sm font-bold">ভেরিফাইড</p>
+                  <p className="text-xs text-gray-300">
+                    {t({ en: "Certificate", bn: "সার্টিফিকেট" })}
+                  </p>
+                  <p className="text-sm font-bold">
+                    {t({ en: "Verified", bn: "ভেরিফাইড" })}
+                  </p>
                 </div>
                 <div className="bg-white/5 px-4 py-3 rounded-xl backdrop-blur-sm border border-white/10 text-center hover:bg-white/10 transition-all">
                   <FaStar className="text-yellow-300 text-2xl mx-auto mb-1" />
-                  <p className="text-xs text-gray-300">রেটিং</p>
+                  <p className="text-xs text-gray-300">
+                    {t({ en: "Rating", bn: "রেটিং" })}
+                  </p>
                   <p className="text-sm font-bold">৪.৯/৫</p>
                 </div>
               </div>
@@ -152,10 +187,16 @@ const Kids = () => {
         <div className="mt-12 sm:mt-16">
           <div className="text-center mb-10">
             <h2 className="text-2xl sm:text-3xl font-bold text-teal-800 mb-3">
-              আমাদের <span className="text-yellow-500">কোর্সসমূহ</span>
+              {t({ en: "Our", bn: "আমাদের" })}{" "}
+              <span className="text-yellow-500">
+                {t({ en: "Courses", bn: "কোর্সসমূহ" })}
+              </span>
             </h2>
             <p className="text-sm sm:text-base text-gray-600 max-w-2xl mx-auto px-4">
-              দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম
+              {t({
+                en: "Reliable online platform for acquiring Deeni ilm",
+                bn: "দ্বীনি ইলম অর্জনের নির্ভরযোগ্য অনলাইন প্ল্যাটফর্ম",
+              })}
             </p>
           </div>
 
@@ -165,24 +206,24 @@ const Kids = () => {
                 key={index}
                 className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 group flex flex-col justify-between"
               >
-                {/* Course Image - Fixed with object-contain or matching background */}
-                <div className="relative h-48 sm:h-52 overflow-hidden bg-gray-900 flex items-center justify-center">
+                {/* Course Image - Fixed with object-cover and standard aspect ratio */}
+                <div className="relative h-48 sm:h-52 overflow-hidden bg-gray-100 flex items-center justify-center">
                   <img
                     src={course.image}
-                    alt={course.title}
-                    className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                    alt={course.title.en}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"></div>
                 </div>
 
                 {/* Course Content */}
                 <div className="p-5 flex flex-col flex-grow justify-between">
                   <div>
                     <h3 className="text-lg sm:text-xl font-bold text-teal-800 mb-2">
-                      {course.title}
+                      {t(course.title)}
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-600 font-medium leading-relaxed">
-                      {course.subtitle}
+                      {t(course.subtitle)}
                     </p>
                   </div>
 
@@ -190,7 +231,7 @@ const Kids = () => {
                   <div className="pt-3 mt-3 border-t border-gray-100 flex justify-end">
                     <Link to={`/course/kids/${course.id}`}>
                       <button className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold px-4 py-2 rounded-full hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-1 text-xs">
-                        <span>বিস্তারিত</span>
+                        <span>{t({ en: "Details", bn: "বিস্তারিত" })}</span>
                         <FaArrowRight className="text-[10px]" />
                       </button>
                     </Link>
