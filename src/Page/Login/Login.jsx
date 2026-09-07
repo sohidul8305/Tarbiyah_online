@@ -141,21 +141,7 @@ const Login = () => {
         <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl">
           {/* Header */}
           <div className="text-center">
-            <div className="mx-auto h-12 w-12 bg-[#004d4d] rounded-full flex items-center justify-center">
-              <svg
-                className="h-6 w-6 text-white"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
-                />
-              </svg>
-            </div>
+            <div></div>
             <h2 className="mt-4 text-3xl font-extrabold text-gray-900">
               Sign in to your account
             </h2>
