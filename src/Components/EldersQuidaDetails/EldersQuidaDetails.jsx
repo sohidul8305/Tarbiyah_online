@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-// Swiper এবং প্রয়োজনীয় মডিউল ইমপোর্ট করুন
+// Swiper and required modules
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 
-// Swiper-এর CSS ফাইলগুলো ইমপোর্ট করুন
+// Swiper CSS
 import "swiper/css";
 import "swiper/css/pagination";
 
@@ -45,7 +45,43 @@ import {
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 
+// Import certificate image (same as HifzDetail)
+import AllimiyahCertificate from "../../image/allimiyahcertificate (2).png";
+
+// --- Import faculty images (6 teachers) ---
+import JUbairImg from "../../image/jubayer.png";
+import SumaiyaImg from "../../image/arartor.png";
+
+// --- Language Hook ---
+import { useState as useStateHook, useEffect } from "react";
+
+export const useLanguage = () => {
+  const [language, setLanguage] = useStateHook(
+    () => localStorage.getItem("language") || "en",
+  );
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setLanguage(localStorage.getItem("language") || "en");
+    };
+
+    window.addEventListener("languageChange", handleStorageChange);
+    return () => {
+      window.removeEventListener("languageChange", handleStorageChange);
+    };
+  }, []);
+
+  const t = (translations) => {
+    return translations[language] || translations["en"];
+  };
+
+  return { language, t };
+};
+// -----------------------------------------------
+
 const EldersQuidaDetails = () => {
+  const { t } = useLanguage();
+
   const [openSemester, setOpenSemester] = useState(0);
   const [activeTab, setActiveTab] = useState("info");
   const [openFaq, setOpenFaq] = useState(null);
@@ -58,212 +94,423 @@ const EldersQuidaDetails = () => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
-  // Elders Quida এর ইনস্ট্রাক্টর
+  // --- Faculty list (6 teachers) ---
   const instructors = [
     {
       id: 1,
-      name: "হাফেজ মাওলানা আব্দুর রহমান",
-      title: "প্রধান কুরআন শিক্ষক",
-      subtitle: "বিশেষজ্ঞ: তাজবিদ ও কিরাত",
-      image: "https://i.pravatar.cc/150?img=11",
-      expertise: "তাজবিদ ও কিরাত",
+      name: t({ en: "Jubayer Ahmad", bn: "যুবায়ের আহমেদ" }),
+      title: t({ en: "Senior Teacher", bn: "সিনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran For Elders", bn: "কুরআন ফর এল্ডার্স" }),
+      image: JUbairImg,
     },
     {
       id: 2,
-      name: "মাওলানা সাদিকুর রহমান",
-      title: "কায়দা শিক্ষক",
-      subtitle: "বিশেষজ্ঞ: মাখরাজ ও সিফাত",
-      image: "https://i.pravatar.cc/150?img=14",
-      expertise: "মাখরাজ ও সিফাত",
+      name: t({ en: "Sumaiya Afrin Mim", bn: "সুরাইয়া আক্তার" }),
+      title: t({ en: "Junior Teacher", bn: "জুনিয়র শিক্ষক" }),
+      subtitle: t({ en: "Quran For Elders", bn: "কুরআন ফর এল্ডার্স" }),
+      image: SumaiyaImg,
     },
   ];
 
-  // Elders Quida এর Course Data
+  // --- Updated Course Details from About Course.txt ---
   const courseDetails = {
-    title: "কুরআন স্টাডিজ ফর এল্ডার্স",
-    description: `Narrated by Abu Hurairah [RA]: The Messenger of Allah [SAW] said, "Whoever does not recite the Qur'an with proper pronunciation is not considered part of my Ummah." - Sahih Bukhari 7527. Therefore, it is essential for all of us to learn how to recite the Qur'an correctly and to ensure that our elders can also learn the Quran with proper tajweed and pronunciation. This course is specially designed for elderly people who want to learn Quran from the basics.`,
+    title: t({
+      en: "Quran Studies for Elders",
+      bn: "কুরআন স্টাডিজ ফর এল্ডার্স",
+    }),
+    subtitle: t({
+      en: "Qa'idah Nuraniyah for Elders",
+      bn: "কায়দাহ নূরানিয়্যাহ ফর এল্ডার্স",
+    }),
+    description: t({
+      en: "There is no end to learning the Qur'an, and there is no age to start. Life's busyness, age, or not having had the opportunity to learn the Qur'an before should not be an obstacle to learning the Qur'an. Through the Qa'idah Nuraniyah for Elders course, specially designed for adults, you have the opportunity to learn to recite the Qur'an correctly, as well as gain knowledge of basic Tajweed, Makharij, and Sifaat. This is a 4-month certificate course with a total of 32 live classes, 2 classes per week, and regular practice and activities. Online classes are conducted via Zoom.",
+      bn: "কুরআন শেখার শেষ নেই, শুরু করার বয়সও নেই। জীবনের ব্যস্ততা, বয়স কিংবা পূর্বে কুরআন শেখার সুযোগ না থাকা কোনোটিই কুরআন শেখার পথে বাধা হওয়া উচিত নয়। প্রাপ্তবয়স্কদের জন্য বিশেষভাবে সাজানো কায়দাহ নূরানিয়্যাহ ফর এল্ডার্স কোর্সের মাধ্যমে শুদ্ধভাবে কুরআন তিলাওয়াত শেখার পাশাপাশি প্রয়োজনীয় মৌলিক তাজউইদ, মাখারিজ ও সিফাত সম্পর্কে জ্ঞান অর্জনের সুযোগ রয়েছে। এটি একটি ৪ মাসের সার্টিফিকেট কোর্স, যেখানে রয়েছে মোট ৩২টি লাইভ ক্লাস, সপ্তাহে ২ দিন ক্লাস এবং নিয়মিত প্র্যাকটিস ও অ্যাক্টিভিটি। অনলাইন ক্লাস পরিচালিত হবে Zoom-এর মাধ্যমে।",
+    }),
     objectives: [
-      "মসজিদে নববীর পদ্ধতিতে পাঠদান",
-      "ধাপে ধাপে বেসিক তাজউইদ শিক্ষা",
-      "শেষ ১০টি ছোট সূরা মাশক",
-      "বিশুদ্ধ উচ্চারণ শিক্ষায় মাশক্ব ও তাল্ক্বীন",
-      "মাতৃভাষার দোয়া ও আমলজাত শিক্ষা",
-      "হাদীস মুখস্থ শিক্ষা",
-      "বয়স্কদের জন্য বিশেষ পাঠদান পদ্ধতি",
+      t({
+        en: "Gain the ability to recite the Qur'an correctly",
+        bn: "কুরআন শুদ্ধভাবে তিলাওয়াত করার সক্ষমতা অর্জন করবেন",
+      }),
+      t({
+        en: "Strengthen the foundation of Qur'an reading through Qa'idah Nuraniyah",
+        bn: "কায়দাহ নূরানিয়্যাহর মাধ্যমে কুরআন পড়ার ভিত্তি মজবুত করবেন",
+      }),
+      t({
+        en: "Learn and apply basic Tajweed",
+        bn: "বেসিক তাজউইদ সম্পর্কে জানতে ও তা প্রয়োগ করতে শিখবেন",
+      }),
+      t({
+        en: "Learn about Makharij and Sifaat of Arabic letters",
+        bn: "আরবি হরফের মাখারিজ ও সিফাত সম্পর্কে জানতে পারবেন",
+      }),
+      t({
+        en: "Practice correct pronunciation of letters",
+        bn: "হরফের সঠিক উচ্চারণ অনুশীলন করতে পারবেন",
+      }),
+      t({
+        en: "Learn proper application of Makharij and Sifaat in recitation",
+        bn: "তিলাওয়াতে মাখারিজ ও সিফাতের যথাযথ প্রয়োগ শিখবেন",
+      }),
+      t({
+        en: "Strengthen learning through regular practice and Mashq",
+        bn: "নিয়মিত প্র্যাকটিস ও মাশকের মাধ্যমে শেখা বিষয়গুলো দৃঢ় করতে পারবেন",
+      }),
+      t({
+        en: "Assess your progress through Midterm and Final exams",
+        bn: "মিডটার্ম ও ফাইনাল পরীক্ষার মাধ্যমে নিজের অগ্রগতি যাচাই করতে পারবেন",
+      }),
+      t({
+        en: "Participate in direct Halaqah, seminars, and live Q&A sessions",
+        bn: "সরাসরি হালাকাহ, সেমিনার ও লাইভ প্রশ্নোত্তর সেশনে অংশগ্রহণের সুযোগ পাবেন",
+      }),
+    ],
+    // Extra line after objectives (concluding sentence)
+    extraObjectivesNote: t({
+      en: "The course includes 32 live sessions, 32 recorded videos, 4 practice classes, 4 Mashq sessions, and 2 exams.",
+      bn: "কোর্সে রয়েছে ৩২টি লাইভ সেশন, ৩২টি রেকর্ডেড ভিডিও, ৪টি প্র্যাকটিস ক্লাস, ৪টি মাশক সেশন এবং ২টি পরীক্ষা।",
+    }),
+    targetAudience: [
+      t({ en: "Men and women aged 18–60", bn: "১৮–৬০ বছর বয়সী নারী ও পুরুষ" }),
+      t({
+        en: "Those who cannot read the Qur'an or want to read it correctly",
+        bn: "যারা কুরআন পড়তে পারেন না বা শুদ্ধভাবে পড়তে চান",
+      }),
+      t({
+        en: "Those who want to start learning the Qur'an again after a long time",
+        bn: "যারা দীর্ঘদিন পর আবার কুরআন শেখা শুরু করতে চান",
+      }),
+      t({
+        en: "Those who want to correct their recitation mistakes",
+        bn: "যারা নিজের তিলাওয়াতের ভুলগুলো সংশোধন করতে চান",
+      }),
+      t({
+        en: "Those interested in learning Makharij, Sifaat, and basic Tajweed",
+        bn: "যারা মাখারিজ, সিফাত ও মৌলিক তাজউইদ শিখতে আগ্রহী",
+      }),
+      t({
+        en: "Those who have stayed behind from learning Qur'an due to age",
+        bn: "যারা বয়সের কারণে কুরআন শেখা থেকে পিছিয়ে ছিলেন",
+      }),
+      t({
+        en: "Those looking for a regular and structured method of learning the Qur'an",
+        bn: "যারা নিয়মিত ও কাঠামোবদ্ধ পদ্ধতিতে কুরআন শেখার সুযোগ খুঁজছেন",
+      }),
+    ],
+    targetAudienceNote: t({
+      en: "Separate batches for men and women.",
+      bn: "নারী ও পুরুষদের জন্য পৃথক ব্যাচের ব্যবস্থা রয়েছে।",
+    }),
+    feeStructure: {
+      monthly: t({ en: "Monthly Fee: ৳1,000", bn: "মাসিক ফি: ৳১,০০০" }),
+      admission: t({ en: "Admission Fee: ৳1,000", bn: "ভর্তি ফি: ৳১,০০০" }),
+      oneTime: {
+        title: t({ en: "One-Time Payment", bn: "এককালীন পেমেন্ট" }),
+        description: t({
+          en: "Pay the 4-month course fee + admission fee together and save ৳500",
+          bn: "৪ মাসের কোর্স ফি + ভর্তি ফি একসাথে প্রদান করলে নিয়মিত মূল্য: ৳৫,০০০, ছাড়: ৳৫০০, অফার মূল্য: ৳৪,৫০০ মাত্র",
+        }),
+        regular: "৳৫,০০০",
+        discount: "৳৫০০",
+        offer: "৳৪,৫০০",
+      },
+    },
+    materials: [
+      t({
+        en: "Qa'idah Nuraniyah Textbook (published and approved by Al-Furqan Center, Jeddah, Saudi Arabia)",
+        bn: "কায়দাহ নূরানিয়্যাহ টেক্সটবুক (আল-ফুরকান সেন্টার, জেদ্দা, সৌদি আরব কর্তৃক প্রকাশিত ও অনুমোদিত)",
+      }),
+      t({
+        en: "Practice and Mashq materials for each class",
+        bn: "ক্লাসের প্রয়োজনীয় প্র্যাকটিস ও মাশক",
+      }),
+      t({ en: "32 recorded class videos", bn: "৩২টি রেকর্ডেড ক্লাস ভিডিও" }),
+      t({
+        en: "Regular practice opportunities",
+        bn: "নিয়মিত প্র্যাকটিসের সুযোগ",
+      }),
+      t({
+        en: "All necessary learning materials related to the course",
+        bn: "ক্লাস-সম্পর্কিত প্রয়োজনীয় শিক্ষাসামগ্রী",
+      }),
+    ],
+    // Keep the original curriculum data (unchanged)
+    curriculum: [
+      {
+        title: t({
+          en: "Individual Letters (Alphabet)",
+          bn: "হুরুফুল হিজাইল মুফরাদাহ (বর্ণমালা শেখা)",
+        }),
+      },
+      {
+        title: t({
+          en: "Compound Letters (Joined Letters)",
+          bn: "হুরুফুল হিজাইল মুরাক্কাবাহ (যুক্তবর্ণ শেখা)",
+        }),
+      },
+      {
+        title: t({
+          en: "Disjointed Letters (Muqatta'at)",
+          bn: "হুরুফুল মুক্বাত্তাআ'ত",
+        }),
+      },
+      {
+        title: t({
+          en: "Introduction to Harakat (Fathah, Kasrah, Dhammah)",
+          bn: "হারাকাতের পরিচিতি (ফাতহা, কাসরা, দম্মাহ)",
+        }),
+      },
+      { title: t({ en: "Introduction to Tanween", bn: "তানউইনের পরিচিতি" }) },
+      {
+        title: t({
+          en: "Practice of Harakat & Tanween",
+          bn: "হারাকাত ও তানউইনের অনুশীলন",
+        }),
+      },
+      {
+        title: t({
+          en: "Small Alif, Small Ya, Small Waw",
+          bn: "আলিফ সাগীরা, ইয়া সাগীরা, ওয়াও সাগীরা",
+        }),
+      },
+      {
+        title: t({
+          en: "Madd & Leen Letters (Practice)",
+          bn: "হুরুফুল মাদ্দ ও লীন (অনুশীলন)",
+        }),
+      },
+      {
+        title: t({
+          en: "Introduction & Practice of Sukun",
+          bn: "সূকূনের পরিচিতি ও অনুশীলন",
+        }),
+      },
+      {
+        title: t({
+          en: "Introduction & Practice of Shaddah",
+          bn: "সাদ্দাহ পরিচিতি ও অনুশীলন",
+        }),
+      },
+      {
+        title: t({
+          en: "Madd with Sukun & Shaddah",
+          bn: "সূকূন ও সাদ্দাহর সাথে মাদ্দ",
+        }),
+      },
+      {
+        title: t({
+          en: "Practice of all Tajweed Rules",
+          bn: "সকল তাজউইদের অনুশীলন",
+        }),
+      },
+      {
+        title: t({
+          en: "Practice of short Surahs",
+          bn: "ছোট সূরাহ সমূহের প্রাকটিস",
+        }),
+      },
     ],
   };
 
-  // Curriculum Data for Elders
-  const semestersData = [
-    { title: "হুরুফুল হিজাইল মুফরাদাহ (বর্ণমালা শেখা)" },
-    { title: "হুরুফুল হিজাইল মুরাক্কাবাহ (যুক্তবর্ণ শেখা)" },
-    { title: "হুরুফুল মুক্বাত্তাআ'ত" },
-    { title: "হারাকাতের পরিচিতি (ফাতহা, কাসরা, দম্মাহ)" },
-    { title: "তানউইনের পরিচিতি" },
-    { title: "হারাকাত ও তানউইনের অনুশীলন" },
-    { title: "আলিফ সাগীরা, ইয়া সাগীরা, ওয়াও সাগীরা" },
-    { title: "হুরুফুল মাদ্দ ও লীন (অনুশীলন)" },
-    { title: "সূকূনের পরিচিতি ও অনুশীলন" },
-    { title: "সাদ্দাহ পরিচিতি ও অনুশীলন" },
-    { title: "সূকূন ও সাদ্দাহর সাথে মাদ্দ" },
-    { title: "সকল তাজউইদের অনুশীলন" },
-    { title: "ছোট সূরাহ সমূহের প্রাকটিস" },
-  ];
-
-  // Why Tarbiyah Quran for Elders features
+  // Why Tarbiyah Quran for Elders features (translated)
   const whyFeatures = [
     {
       icon: <FaUserTie className="text-xl" />,
-      text: "ইজাজাহপ্রাপ্ত অভিজ্ঞ উস্তাদ ও উস্তাযাহ",
+      text: t({
+        en: "Experienced Ijazah-certified Teachers",
+        bn: "ইজাজাহপ্রাপ্ত অভিজ্ঞ উস্তাদ ও উস্তাযাহ",
+      }),
     },
     {
       icon: <FaVideo className="text-xl" />,
-      text: "লাইভ + রেকর্ডেড ক্লাস",
+      text: t({ en: "Live + Recorded Classes", bn: "লাইভ + রেকর্ডেড ক্লাস" }),
     },
     {
       icon: <FaBook className="text-xl" />,
-      text: "এল্ডার্স ফেন্ডলি কারিকুলাম",
+      text: t({
+        en: "Elder-friendly Curriculum",
+        bn: "এল্ডার্স ফেন্ডলি কারিকুলাম",
+      }),
     },
     {
       icon: <FaHeadset className="text-xl" />,
-      text: "ওয়ান-টু-ওয়ান গাইডলাইন",
+      text: t({ en: "One-to-One Guidance", bn: "ওয়ান-টু-ওয়ান গাইডলাইন" }),
     },
     {
       icon: <FaCertificate className="text-xl" />,
-      text: "সার্টিফিকেট",
+      text: t({ en: "Certificate", bn: "সার্টিফিকেট" }),
     },
     {
       icon: <FaShieldAlt className="text-xl" />,
-      text: "নিরাপদ পরিবেশ",
+      text: t({ en: "Safe Environment", bn: "নিরাপদ পরিবেশ" }),
     },
   ];
 
-  // Testimonials data
+  // --- TESTIMONIALS (copied from HifzDetail) ---
   const testimonials = [
     {
       id: 1,
-      name: "আব্দুল্লাহ আল মামুন",
-      designation: "শিক্ষার্থী, ঢাকা",
-      quote:
-        "আলহামদুলিল্লাহ, এই কোর্সটি আমার কুরআন শিক্ষার যাত্রাকে অনেক সহজ করে দিয়েছে। উস্তাদের নির্দেশনায় আমি খুব দ্রুত তাজবিদ শিখতে পেরেছি।",
-      image: "https://i.pravatar.cc/150?img=11",
+      name: "ZAREEN TASNIM SILVIA",
+      designation: "FATHER: DEWAN SAYEDUL HAQUE MANU",
+      quote: "আলহামদুলিল্লাহ উস্তাদ আন্তরিকতার সাথেই পড়াচ্ছেন।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 2,
-      name: "মোঃ সাইফুল ইসলাম",
-      designation: "প্রবাসী, যুক্তরাজ্য",
-      quote:
-        "ব্যস্ত জীবনের মাঝেও আমি এই কোর্সটি সম্পন্ন করতে পেরেছি। লাইভ ক্লাস ও রেকর্ডেড ভিডিওগুলোর কারণে সময়ানুবর্তিতা বজায় রাখা সম্ভব হয়েছে।",
-      image: "https://i.pravatar.cc/150?img=12",
+      name: "NAZDA CHOWDHURY",
+      designation: "FATHER: CM MARUF",
+      quote: "আলহামদুলিল্লাহ খুব সুন্দর মজলিস। কুরআন মজিদ পড়ানোর মান।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 3,
-      name: "মোঃ হাসান মিয়া",
-      designation: "ব্যবসায়ী, চট্টগ্রাম",
-      quote:
-        "কুরআন শিক্ষার পাশাপাশি আমার প্রবীণ বাবাও এই কোর্স থেকে উপকৃত হয়েছেন। উস্তাদের শিক্ষা পদ্ধতি সত্যিই অসাধারণ।",
-      image: "https://i.pravatar.cc/150?img=13",
+      name: "ARIZ BIN AZAD",
+      designation: "FATHER: ABUL KALAM AZAD MAZUMDAR",
+      quote: "আলহামদুলিল্লাহ উস্তাদ এবং শিক্ষাদান পদ্ধতি নিয়ে আমরা সন্তুষ্ট।",
+      image:
+        "https://i.ibb.co.com/gZv5KDDx/images-q-tbn-ANd9-Gc-Tge-GIm6kq-Fp3x-NYHpqsl89ua-z2-JOR-Gy-XIYu-Gy-THG3-Q-s-10.jpg",
     },
     {
       id: 4,
-      name: "আমিনুল ইসলাম",
-      designation: "শিক্ষার্থী, সিলেট",
+      name: "MARYUM BINTE HASAN",
+      designation: "FATHER: KAMRUL HASAN",
       quote:
-        "শায়খ প্রফেসর মোখতার আহমাদের তত্ত্বাবধানে পড়ার সুযোগ পাওয়া আমার জন্য একটি বড় প্রাপ্তি। কারিকুলাম অত্যন্ত সুসংগঠিত।",
-      image: "https://i.pravatar.cc/150?img=14",
+        "আলহামদুলিল্লাহ এটা আমার মেয়ের প্রথম শিক্ষা প্রতিষ্ঠান। উস্তাদ খুব সুন্দর করে ক্লাস নেন। আমার বাবু ক্লাস করতে খুব আনন্দ পায় আলহামদুলিল্লাহ। মারগিয়াম তো ক্লাসের এক ঘন্টা আগে থেকে অপেক্ষা করে। আলহামদুলিল্লাহ আমাদের সন্তানের খুশিই আমাদের সবচেয়ে বড় পাওয়া।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 5,
-      name: "মোঃ নাজমুল হক",
-      designation: "চাকরিজীবী, রাজশাহী",
+      name: "MARYAM BINT RAIHAN",
+      designation: "FATHER: RAIHAN UDDIN",
       quote:
-        "সপ্তাহে মাত্র ৩ দিন ক্লাস থাকায় চাকরির সাথে তাল মিলিয়ে পড়াশোনা করতে পারছি। একাডেমিক সাপোর্ট দল সবসময় পাশে আছে।",
-      image: "https://i.pravatar.cc/150?img=15",
+        "আলহামদুলিল্লাহ আমার সন্তানদের পড়া ভালোভাবে হচ্ছে। পড়ানোর পদ্ধতি আলহামদুলিল্লাহ ভালো।",
+      image:
+        "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 6,
-      name: "মোঃ ইব্রাহিম খলিল",
-      designation: "শিক্ষার্থী, খুলনা",
+      name: "RAIYAN IBN RAIYAN",
+      designation: "FATHER: MD RAYHAN KIBRIA RONEE",
       quote:
-        "ইজাজাহ ও সার্টিফিকেট পাওয়ার সুযোগ এই কোর্সকে আরও মূল্যবান করেছে। ইনশাআল্লাহ, উচ্চশিক্ষার পথ সুগম হবে।",
-      image: "https://i.pravatar.cc/150?img=16",
+        "মাশাল্লাহ আপনাদের এই অনলাইন প্রোগ্রামটি অনেক ভালো লেগেছে আমার। উস্তাদ মাশাল্লাহ অনেক ভালো এবং আন্তরিকভাবে পাঠদান করেন।",
+      image:
+        "https://i.ibb.co.com/gZv5KDDx/images-q-tbn-ANd9-Gc-Tge-GIm6kq-Fp3x-NYHpqsl89ua-z2-JOR-Gy-XIYu-Gy-THG3-Q-s-10.jpg",
     },
   ];
 
-  // Video Gallery Data
+  // Video Gallery (keep as before, but translate titles)
   const videoGallery = [
     {
       id: 1,
-      title: "ভিডিও ১",
-      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
-      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+      title: t({ en: "Video 1", bn: "ভিডিও ১" }),
+      thumbnail: "https://img.youtube.com/vi/dkXJOsVKqsQ/hqdefault.jpg",
+      url: "https://youtu.be/dkXJOsVKqsQ?si=7qHlpzi3ZK5Yx6j1",
     },
     {
       id: 2,
-      title: "ভিডিও ২",
-      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
-      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+      title: t({ en: "Video 2", bn: "ভিডিও ২" }),
+      thumbnail: "https://img.youtube.com/vi/mNiiwJrCJu0/hqdefault.jpg",
+      url: "https://youtu.be/mNiiwJrCJu0?si=Vg8r2aQNjrma5zZk",
     },
     {
       id: 3,
-      title: "ভিডিও ৩",
-      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
-      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+      title: t({ en: "Video 3", bn: "ভিডিও ৩" }),
+      thumbnail: "https://img.youtube.com/vi/BAdMojqCMLo/hqdefault.jpg",
+      url: "https://youtu.be/BAdMojqCMLo?si=Keq_R93pFN0Eg6py",
     },
     {
       id: 4,
-      title: "ভিডিও ৪",
-      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
-      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+      title: t({ en: "Video 4", bn: "ভিডিও ৪" }),
+      thumbnail: "https://img.youtube.com/vi/mX466vxKa6E/hqdefault.jpg",
+      url: "https://youtu.be/mX466vxKa6E?si=RUmcdgriOMXwEYns",
     },
     {
       id: 5,
-      title: "ভিডিও ৫",
-      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
-      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+      title: t({ en: "Video 5", bn: "ভিডিও ৫" }),
+      thumbnail: "https://img.youtube.com/vi/BAdMojqCMLo/hqdefault.jpg",
+      url: "https://youtu.be/BAdMojqCMLo?si=KpW88asKgnPVutxP",
     },
     {
       id: 6,
-      title: "ভিডিও ৬",
-      thumbnail: "https://img.youtube.com/vi/7gLTq-1fJFk/hqdefault.jpg",
-      url: "https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB",
+      title: t({ en: "Video 6", bn: "ভিডিও ৬" }),
+      thumbnail: "https://img.youtube.com/vi/JkYmxApemvs/hqdefault.jpg",
+      url: "https://www.youtube.com/watch?v=JkYmxApemvs",
     },
   ];
 
-  // FAQ Data
+  // FAQ Data (translated)
   const faqs = [
     {
-      question: "আমার বয়স অনেক বেশি, আমি কি এই কোর্সটি করতে পারব?",
-      answer:
-        "অবশ্যই। কুরআন শেখার জন্য বয়স কোনো বাধা নয়। এই কোর্সটি বিশেষভাবে প্রাপ্তবয়স্কদের প্রয়োজন বিবেচনায় তৈরি করা হয়েছে।",
+      question: t({
+        en: "I am very old. Can I take this course?",
+        bn: "আমার বয়স অনেক বেশি, আমি কি এই কোর্সটি করতে পারব?",
+      }),
+      answer: t({
+        en: "Absolutely. Age is not a barrier to learning the Qur'an. This course is specially designed for adults.",
+        bn: "অবশ্যই। কুরআন শেখার জন্য বয়স কোনো বাধা নয়। এই কোর্সটি বিশেষভাবে প্রাপ্তবয়স্কদের প্রয়োজন বিবেচনায় তৈরি করা হয়েছে।",
+      }),
     },
     {
-      question: "এই কোর্সের মূল উদ্দেশ্য কী?",
-      answer:
-        "শুদ্ধ তাজউইদসহ কুরআন তিলাওয়াত শেখানো এবং নিয়মিত অনুশীলনের মাধ্যমে আত্মবিশ্বাসের সঙ্গে কুরআন পড়তে সক্ষম করে তোলা।",
+      question: t({
+        en: "What is the main objective of this course?",
+        bn: "এই কোর্সের মূল উদ্দেশ্য কী?",
+      }),
+      answer: t({
+        en: "To teach Qur'an recitation with proper Tajweed and enable you to recite the Qur'an with confidence through regular practice.",
+        bn: "শুদ্ধ তাজউইদসহ কুরআন তিলাওয়াত শেখানো এবং নিয়মিত অনুশীলনের মাধ্যমে আত্মবিশ্বাসের সঙ্গে কুরআন পড়তে সক্ষম করে তোলা।",
+      }),
     },
     {
-      question:
-        "অনেক জায়গায় ১ মাসে কুরআন শেখানো হয়, কিন্তু আপনাদের কোর্স ৪ মাসের কেন?",
-      answer:
-        "তাজউইদ ও শুদ্ধ তিলাওয়াত একটি দক্ষতা, যা সময়, অনুশীলন ও নিয়মিত মাশক ছাড়া অর্জন করা সম্ভব নয়। তাই আমরা স্থায়ী শেখাকে গুরুত্ব দিয়ে পর্যাপ্ত সময় নিয়ে পাঠদান করি।",
+      question: t({
+        en: "Many places teach the Qur'an in 1 month. Why is your course 4 months?",
+        bn: "অনেক জায়গায় ১ মাসে কুরআন শেখানো হয়, কিন্তু আপনাদের কোর্স ৪ মাসের কেন?",
+      }),
+      answer: t({
+        en: "Tajweed and correct recitation are skills that cannot be acquired without time, practice, and regular Mashq. Therefore, we prioritize long-term learning and give adequate time for teaching.",
+        bn: "তাজউইদ ও শুদ্ধ তিলাওয়াত একটি দক্ষতা, যা সময়, অনুশীলন ও নিয়মিত মাশক ছাড়া অর্জন করা সম্ভব নয়। তাই আমরা স্থায়ী শেখাকে গুরুত্ব দিয়ে পর্যাপ্ত সময় নিয়ে পাঠদান করি।",
+      }),
     },
     {
-      question: "কোর্স শেষে আমি কি ওস্তাদ/উস্তাযাহ হতে পারব?",
-      answer:
-        "এই কোর্সটি মূলত ব্যক্তিগতভাবে শুদ্ধ তিলাওয়াত শেখার জন্য। তবে উচ্চতর প্রশিক্ষণ ও নির্ধারিত যোগ্যতা অর্জনের মাধ্যমে ভবিষ্যতে শিক্ষকতা করার সুযোগ তৈরি হতে পারে।",
+      question: t({
+        en: "After completing this course, can I become a teacher?",
+        bn: "কোর্স শেষে আমি কি ওস্তাদ/উস্তাযাহ হতে পারব?",
+      }),
+      answer: t({
+        en: "This course is primarily for personal learning of correct recitation. However, with further training and required qualifications, you may have the opportunity to teach in the future.",
+        bn: "এই কোর্সটি মূলত ব্যক্তিগতভাবে শুদ্ধ তিলাওয়াত শেখার জন্য। তবে উচ্চতর প্রশিক্ষণ ও নির্ধারিত যোগ্যতা অর্জনের মাধ্যমে ভবিষ্যতে শিক্ষকতা করার সুযোগ তৈরি হতে পারে।",
+      }),
     },
     {
-      question: "আমি কেন আপনাদের প্রোগ্রামে ভর্তি হব?",
-      answer:
-        "ইজাজাহপ্রাপ্ত অভিজ্ঞ উস্তাদ ও উস্তাযাহ, এল্ডার্স ফেন্ডলি কারিকুলাম, লাইভ ও রেকর্ডেড ক্লাস, ওয়ান টু ওয়ান সাপোর্ট এবং ধাপে ধাপে শেখানোর পদ্ধতি আমাদের প্রোগ্রামকে আলাদা করেছে।",
+      question: t({
+        en: "Why should I enroll in your program?",
+        bn: "আমি কেন আপনাদের প্রোগ্রামে ভর্তি হব?",
+      }),
+      answer: t({
+        en: "Experienced Ijazah-certified teachers, elder-friendly curriculum, live and recorded classes, one-to-one support, and a step-by-step teaching method make our program unique.",
+        bn: "ইজাজাহপ্রাপ্ত অভিজ্ঞ উস্তাদ ও উস্তাযাহ, এল্ডার্স ফেন্ডলি কারিকুলাম, লাইভ ও রেকর্ডেড ক্লাস, ওয়ান টু ওয়ান সাপোর্ট এবং ধাপে ধাপে শেখানোর পদ্ধতি আমাদের প্রোগ্রামকে আলাদা করেছে।",
+      }),
     },
     {
-      question: "আপনাদের ওস্তাদ–উস্তাযাহদের যোগ্যতা কী?",
-      answer:
-        "আমাদের শিক্ষকবৃন্দ ইজাজাহপ্রাপ্ত, অভিজ্ঞ এবং কুরআন শিক্ষাদানে প্রশিক্ষিত। তাঁরা দীর্ঘদিন ধরে অনলাইন ও অফলাইন উভয় মাধ্যমে পাঠদান করছেন।",
+      question: t({
+        en: "What are the qualifications of your teachers?",
+        bn: "আপনাদের ওস্তাদ–উস্তাযাহদের যোগ্যতা কী?",
+      }),
+      answer: t({
+        en: "Our teachers are Ijazah-certified, experienced, and trained in Qur'an education. They have been teaching both online and offline for a long time.",
+        bn: "আমাদের শিক্ষকবৃন্দ ইজাজাহপ্রাপ্ত, অভিজ্ঞ এবং কুরআন শিক্ষাদানে প্রশিক্ষিত। তাঁরা দীর্ঘদিন ধরে অনলাইন ও অফলাইন উভয় মাধ্যমে পাঠদান করছেন।",
+      }),
     },
   ];
+
+  // --- PROSPECTUS LINK (same as other pages) ---
+  const prospectusLink =
+    "https://drive.google.com/file/d/1mv0ponZWJ0Jb2cXSsvITdneTwYMQfXkv/view?usp=sharing";
+
+  const handleDownloadPDF = () => {
+    window.open(prospectusLink, "_blank");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -276,28 +523,37 @@ const EldersQuidaDetails = () => {
             className="inline-flex items-center gap-2 text-[#002b2b] hover:text-yellow-600 mb-6 transition-colors group"
           >
             <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">কোর্স পেজে ফিরে যান</span>
+            <span className="font-medium">
+              {t({ en: "Back to Course Page", bn: "কোর্স পেজে ফিরে যান" })}
+            </span>
           </Link>
 
           {/* Hero Section Banner */}
           <img
             src={EldersbannerImg}
-            alt="Elders Quida Banner"
+            alt={t({
+              en: "Elders Quida Banner",
+              bn: "এল্ডার্স কায়দা ব্যানার",
+            })}
             className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
           />
 
           {/* Course Info Section - Below Banner */}
           <div className="ml-8 mr-72">
-            {/* Share & Wishlist & Ratings */}
+            {/* Share & Wishlist */}
             <div className="flex items-center justify-between py-3">
               <div className="flex items-center gap-4">
                 <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
                   <FaShare className="text-lg" />
-                  <span className="font-medium">Share</span>
+                  <span className="font-medium">
+                    {t({ en: "Share", bn: "শেয়ার" })}
+                  </span>
                 </button>
                 <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
                   <FaBookmark className="text-lg" />
-                  <span className="font-medium">Wishlist</span>
+                  <span className="font-medium">
+                    {t({ en: "Wishlist", bn: "উইশলিস্ট" })}
+                  </span>
                 </button>
               </div>
             </div>
@@ -318,7 +574,7 @@ const EldersQuidaDetails = () => {
                 }`}
               >
                 <FaInfoCircle />
-                <span>Course Info</span>
+                <span>{t({ en: "Course Info", bn: "কোর্স তথ্য" })}</span>
               </button>
               <button
                 onClick={() => setActiveTab("reviews")}
@@ -329,7 +585,7 @@ const EldersQuidaDetails = () => {
                 }`}
               >
                 <FaCommentDots />
-                <span>Reviews</span>
+                <span>{t({ en: "Reviews", bn: "রিভিউ" })}</span>
               </button>
             </div>
 
@@ -337,7 +593,10 @@ const EldersQuidaDetails = () => {
             {activeTab === "reviews" && (
               <div className="mt-4 p-4 bg-gray-50 rounded-xl">
                 <p className="text-gray-500 text-center">
-                  No reviews yet. Be the first to review!
+                  {t({
+                    en: "No reviews yet. Be the first to review!",
+                    bn: "এখনো কোনো রিভিউ নেই। প্রথম রিভিউ দিন!",
+                  })}
                 </p>
               </div>
             )}
@@ -350,8 +609,11 @@ const EldersQuidaDetails = () => {
               {/* 1. ABOUT COURSE */}
               <div className="p-8 mt-10">
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
-                  ABOUT COURSE
+                  {t({ en: "ABOUT COURSE", bn: "কোর্স সম্পর্কে" })}
                 </h2>
+                <h3 className="text-lg font-bold text-[#007a91] mb-2">
+                  {courseDetails.subtitle}
+                </h3>
                 <p className="text-gray-700 leading-relaxed text-[15px]">
                   {courseDetails.description}
                 </p>
@@ -360,7 +622,7 @@ const EldersQuidaDetails = () => {
               {/* 2. WHAT YOU WILL GAIN */}
               <div className="bg-white rounded-3xl p-8 space-y-4 shadow-sm">
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
-                  WHAT YOU WILL GAIN
+                  {t({ en: "WHAT YOU WILL GAIN", bn: "আপনি কী পাবেন" })}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {courseDetails.objectives.map((objective, index) => (
@@ -375,37 +637,67 @@ const EldersQuidaDetails = () => {
                     </div>
                   ))}
                 </div>
+                {/* Extra note after objectives */}
+                <p className="text-sm text-gray-600 mt-2 italic">
+                  {courseDetails.extraObjectivesNote}
+                </p>
               </div>
 
-              {/* 3. Ready To Apply Your Course */}
+              {/* 3. EARN A CERTIFICATE (from HifzDetail) */}
+              <div className="bg-white rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+                <div>
+                  <h3 className="text-xl font-bold text-[#00ADD2] mb-2">
+                    {t({
+                      en: "EARN A CERTIFICATE",
+                      bn: "সার্টিফিকেট অর্জন করুন",
+                    })}
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    {t({
+                      en: "Add this certificate to your resume to demonstrate your skills & increase your chances of getting noticed.",
+                      bn: "আপনার দক্ষতা প্রদর্শন ও নজরে আসার সম্ভাবনা বাড়াতে এই সার্টিফিকেট আপনার জীবনবৃত্তান্তে যুক্ত করুন।",
+                    })}
+                  </p>
+                </div>
+                <div className="w-48 h-32 bg-gray-100 rounded-xl border border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs text-center p-2 shrink-0">
+                  <img
+                    src={AllimiyahCertificate}
+                    alt={t({ en: "Certificate", bn: "সার্টিফিকেট" })}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              </div>
+
+              {/* 4. Ready To Apply Your Course */}
               <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-3xl p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                   <h3 className="text-xl font-bold text-[#002b2b]">
-                    Ready To Apply Your Course
+                    {t({
+                      en: "Ready To Apply Your Course",
+                      bn: "আপনার কোর্সে আবেদন করতে প্রস্তুত",
+                    })}
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    Enroll now and start your structured learning journey.
+                    {t({
+                      en: "Enroll now and start your structured learning journey.",
+                      bn: "এখনই এনরোল করুন এবং আপনার শেখার যাত্রা শুরু করুন।",
+                    })}
                   </p>
                 </div>
-                <Link to="/Course-apply-from">
+                <Link to="/admission-now">
                   <button className="bg-[#002b2b] hover:bg-teal-900 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all">
-                    Start Now
+                    {t({ en: "Start Now", bn: "এখনই শুরু করুন" })}
                   </button>
                 </Link>
               </div>
 
-              {/* 4. TARGET AUDIENCE */}
+              {/* 5. TARGET AUDIENCE (with extra note) */}
               <div>
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
-                  TARGET AUDIENCE
+                  {t({ en: "TARGET AUDIENCE", bn: "লক্ষ্য দর্শক" })}
                 </h2>
                 <div className="space-y-2">
-                  {[
-                    "দেশ ও প্রবাস থেকে কুরআনের সঠিক তিলাওয়াত শিখতে আগ্রহী প্রবীণ মুসলিম",
-                    "যারা নিজেদের সন্তান ও নাতি-নাতনিদের কুরআন শিক্ষা দিতে চান",
-                    "যারা বৃদ্ধ বয়সেও কুরআন শিক্ষার প্রতি আগ্রহ লালন করেন",
-                    "জেনারেল শিক্ষার পাশাপাশি যারা কুরআন শিক্ষার প্রতি আগ্রহ লালন করেন",
-                  ].map((feature, index) => (
+                  {courseDetails.targetAudience.map((feature, index) => (
                     <div
                       key={index}
                       className="flex items-center gap-2 text-gray-700"
@@ -415,23 +707,19 @@ const EldersQuidaDetails = () => {
                     </div>
                   ))}
                 </div>
+                {/* Extra note */}
+                <p className="text-sm text-cyan-700 mt-3 font-medium">
+                  {courseDetails.targetAudienceNote}
+                </p>
               </div>
 
-              {/* 5. MATERIALS INCLUDED */}
+              {/* 6. MATERIALS INCLUDED (UPDATED) */}
               <div>
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
-                  MATERIALS INCLUDED
+                  {t({ en: "MATERIALS INCLUDED", bn: "অন্তর্ভুক্ত উপকরণ" })}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4 text-sm">
-                  {[
-                    "কোর্সের মেয়াদঃ ৪ মাস (প্রতিটি সেশন)",
-                    "সাপ্তাহিক ক্লাসের দিন: 4 দিন (নিয়মিত ব্যাচের জন্য)",
-                    "ক্লাসের সময়কাল: 120 মিনিট (প্রতি ক্লাস)",
-                    "পরীক্ষা: মিডটার্ম এবং ফাইনাল",
-                    "সাপ্তাহিক ক্লাসের দিন: 4 দিন (নিয়মিত ব্যাচের জন্য)",
-                    "কোর্স শেষে সার্টিফিকেট প্রদান",
-                    "বয়স্কদের জন্য বিশেষ সাপোর্ট",
-                  ].map((item, index) => (
+                  {courseDetails.materials.map((item, index) => (
                     <div key={index} className="flex items-start gap-2">
                       <span className="text-[#00ADD2] mt-1 font-bold">✔</span>
                       <span className="text-[#002b2b]">{item}</span>
@@ -440,13 +728,13 @@ const EldersQuidaDetails = () => {
                 </div>
               </div>
 
-              {/* 6. COURSE CURRICULUM */}
+              {/* 7. COURSE CURRICULUM */}
               <div>
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
-                  COURSE CURRICULUM
+                  {t({ en: "COURSE CURRICULUM", bn: "কোর্স পাঠ্যসূচি" })}
                 </h2>
                 <div className="border border-gray-300 rounded-sm">
-                  {semestersData.map((sem, index) => (
+                  {courseDetails.curriculum.map((sem, index) => (
                     <div
                       key={index}
                       className="border-b border-gray-300 last:border-b-0 overflow-hidden"
@@ -468,7 +756,10 @@ const EldersQuidaDetails = () => {
                       </button>
                       {openSemester === index && (
                         <div className="p-4 bg-gray-50 border-t border-gray-200 text-xs text-gray-600">
-                          এই মডিউলের বিস্তারিত পাঠ পরিকল্পনা এখানে দেওয়া হবে।
+                          {t({
+                            en: "Detailed lesson plan for this module will be provided here.",
+                            bn: "এই মডিউলের বিস্তারিত পাঠ পরিকল্পনা এখানে দেওয়া হবে।",
+                          })}
                         </div>
                       )}
                     </div>
@@ -476,73 +767,57 @@ const EldersQuidaDetails = () => {
                 </div>
               </div>
 
-              {/* 7. COURSE FEE */}
+              {/* 8. COURSE FEE (UPDATED) */}
               <div>
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
-                  COURSE FEE
+                  {t({ en: "COURSE FEE", bn: "কোর্স ফি" })}
                 </h2>
-                <div className="grid grid-cols-2 gap-10 text-sm">
-                  {/* Left Column - Bangla */}
-                  <div>
-                    <p className="text-[#002b2b] font-medium mb-3">
-                      বাংলামিডিয়াম কোর্স
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-start gap-3">
+                    <FaCheckCircle className="text-[#00ADD2] mt-1" />
+                    <span className="block text-[#002b2b] font-medium">
+                      {courseDetails.feeStructure.monthly}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <FaCheckCircle className="text-[#00ADD2] mt-1" />
+                    <span className="block text-[#002b2b] font-medium">
+                      {courseDetails.feeStructure.admission}
+                    </span>
+                  </div>
+                  <div className="mt-4 p-4 bg-cyan-50 rounded-xl border border-cyan-200">
+                    <h3 className="font-bold text-cyan-800 text-sm mb-2">
+                      {courseDetails.feeStructure.oneTime.title}
+                    </h3>
+                    <p className="text-xs text-gray-700 leading-relaxed">
+                      {courseDetails.feeStructure.oneTime.description}
                     </p>
-                    <div className="flex items-start gap-3 mb-2">
-                      <FaCheckCircle className="text-[#00ADD2] mt-1" />
-                      <div>
-                        <span className="block text-[#002b2b] font-medium">
-                          ভর্তি ফি ১০০০ টাকা
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <FaCheckCircle className="text-[#00ADD2] mt-1" />
-                      <div>
-                        <span className="block text-[#002b2b] font-medium">
-                          মাসিক ফি ১০০০ টাকা
-                        </span>
-                      </div>
+                    <div className="mt-2 flex flex-wrap gap-3 text-xs">
+                      <span className="line-through text-gray-400">
+                        {courseDetails.feeStructure.oneTime.regular}
+                      </span>
+                      <span className="text-green-600 font-bold">
+                        {courseDetails.feeStructure.oneTime.offer}
+                      </span>
+                      <span className="text-yellow-600 font-semibold">
+                        {t({ en: "Save", bn: "ছাড়" })}{" "}
+                        {courseDetails.feeStructure.oneTime.discount}
+                      </span>
                     </div>
                   </div>
-
-                  {/* Right Column - English */}
-                  <div>
-                    <p className="text-[#002b2b] font-medium mb-3">
-                      ইন্ডিয়ান কোর্স
-                    </p>
-                    <div className="flex items-start gap-3 mb-2">
-                      <FaCheckCircle className="text-[#00ADD2] mt-1" />
-                      <div>
-                        <span className="block text-[#002b2b] font-medium">
-                          ভর্তি ফি ২০০০ টাকা
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <FaCheckCircle className="text-[#00ADD2] mt-1" />
-                      <div>
-                        <span className="block text-[#002b2b] font-medium">
-                          মাসিক ফি ২০০০ টাকা
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-4 text-xs text-gray-500">
-                  <p>
-                    * সেমিস্টারে ফি মাসিক ইনস্টলমেন্ট এর মাধ্যমে প্রদান করা
-                    যাবে।
-                  </p>
                 </div>
               </div>
 
-              {/* ========== LAST 3 SECTIONS (যেমন Course_quran_elders_nazeradetails page এ আছে) ========== */}
+              {/* ========== LAST 4 SECTIONS ========== */}
 
               {/* 1. কেন তারবিয়াহ কুরআন ফর এল্ডার্স */}
               <div className="bg-white rounded-3xl shadow-2xl p-6 md:p-12 border border-gray-100">
                 <div className="text-center mb-10">
                   <h2 className="text-2xl md:text-4xl font-bold mb-3 text-[#00ADD2]">
-                    কেন তারবিয়াহ কুরআন ফর এল্ডার্স ?
+                    {t({
+                      en: "Why Tarbiyah Quran for Elders?",
+                      bn: "কেন তারবিয়াহ কুরআন ফর এল্ডার্স ?",
+                    })}
                   </h2>
                   <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
                 </div>
@@ -564,12 +839,15 @@ const EldersQuidaDetails = () => {
                 </div>
               </div>
 
-              {/* 2. শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা */}
+              {/* 2. শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা (UPDATED with HifzDetail testimonials) */}
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
                   <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা
+                    {t({
+                      en: "Student & Parent Experiences",
+                      bn: "শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা",
+                    })}
                   </h2>
                 </div>
 
@@ -640,7 +918,7 @@ const EldersQuidaDetails = () => {
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
                   <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    ভিডিও গ্যালারি
+                    {t({ en: "Video Gallery", bn: "ভিডিও গ্যালারি" })}
                   </h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -678,7 +956,9 @@ const EldersQuidaDetails = () => {
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">FAQ</h2>
+                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                    {t({ en: "FAQ", bn: "প্রায়শই জিজ্ঞাসিত প্রশ্ন" })}
+                  </h2>
                 </div>
                 <div className="space-y-4">
                   {faqs.map((faq, index) => (
@@ -714,14 +994,14 @@ const EldersQuidaDetails = () => {
             <div className="space-y-4 -mt-[305px]">
               {/* Video Thumbnail */}
               <a
-                href="https://youtu.be/7gLTq-1fJFk?si=aZ2WOC1ZBRuAJimB"
+                href="https://www.youtube.com/watch?v=RaWG0fp1-yg"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer"
               >
                 <img
                   src={ElderscourseImg}
-                  alt="Course Video"
+                  alt={t({ en: "Course Video", bn: "কোর্স ভিডিও" })}
                   className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-colors group-hover:bg-black/40">
@@ -739,7 +1019,7 @@ const EldersQuidaDetails = () => {
               {/* Pricing & Enrollment Card */}
               <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-[#007a91]">
                 <h1 className="text-2xl font-bold text-[#007a91] mb-5">
-                  ENROLL NOW
+                  {t({ en: "ENROLL NOW", bn: "এখনই নিবন্ধন করুন" })}
                 </h1>
 
                 {/* Split Button with Links */}
@@ -749,38 +1029,93 @@ const EldersQuidaDetails = () => {
                     className="w-1/2"
                   >
                     <button className="w-full bg-[#007a91] text-white font-bold py-3 text-xs rounded-l-md hover:opacity-90 transition">
-                      Bangla Version
+                      {t({ en: "Bangla Version", bn: "বাংলা ভার্সন" })}
                     </button>
                   </Link>
-
                   <div className="absolute w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#002b2b] font-medium shadow-md z-10 text-[10px]">
-                    Or
+                    {t({ en: "Or", bn: "অথবা" })}
                   </div>
-
                   <Link
                     to="/enroll/quidaelders/english-version"
                     className="w-1/2"
                   >
                     <button className="w-full bg-[#003d3d] text-white font-bold py-3 text-xs rounded-r-md hover:opacity-90 transition">
-                      English Version
+                      {t({ en: "English Version", bn: "ইংরেজি ভার্সন" })}
                     </button>
                   </Link>
+                </div>
+
+                {/* Prospectus Download Button */}
+                <div className="flex items-center justify-center mb-6">
+                  <a
+                    href={prospectusLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full"
+                  >
+                    <button className="w-full bg-[#003d3d] hover:bg-[#002b2b] text-white font-semibold py-3 rounded-xl shadow flex items-center justify-center gap-2 transition-all">
+                      <FaDownload />{" "}
+                      {t({ en: "Prospectus", bn: "প্রসপেক্টাস" })}
+                    </button>
+                  </a>
                 </div>
 
                 {/* Info Details */}
                 <div className="space-y-3 text-left px-1 text-[#002b2b]">
                   <div className="flex items-center gap-2 text-[15px]">
-                    <span className="font-medium">Course Level:</span>
-                    <span className="font-bold">Beginner</span>
+                    <span className="font-medium">
+                      {t({ en: "Course Level:", bn: "কোর্স লেভেল:" })}
+                    </span>
+                    <span className="font-bold">
+                      {t({ en: "Beginner", bn: "শুরু" })}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-[15px]">
-                    <span className="font-medium">Enrolled:</span>
+                    <span className="font-medium">
+                      {t({ en: "Enrolled:", bn: "এনরোল্ড:" })}
+                    </span>
                     <span className="font-bold">180</span>
                   </div>
                   <div className="flex items-center gap-2 text-[15px]">
-                    <span className="font-medium">Last Updated:</span>
-                    <span className="font-bold">07/24/2025</span>
+                    <span className="font-medium">
+                      {t({ en: "Last Updated:", bn: "শেষ আপডেট:" })}
+                    </span>
+                    <span className="font-bold">09/07/2026</span>
                   </div>
+                </div>
+              </div>
+
+              {/* Faculty List (6 teachers) */}
+              <div className="bg-white rounded-3xl">
+                <h3 className="text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
+                  {t({ en: "Faculty", bn: "অনুষদ" })}
+                </h3>
+                <div className="space-y-4">
+                  {instructors.map((instructor) => (
+                    <div
+                      key={instructor.id}
+                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-none"
+                    >
+                      <img
+                        src={instructor.image}
+                        alt={instructor.name}
+                        className="w-12 h-12 rounded-full object-cover border border-yellow-500 flex-shrink-0"
+                      />
+                      <div className="overflow-hidden">
+                        <h4 className="font-bold text-sm text-[#002b2b] truncate">
+                          {instructor.name}
+                        </h4>
+                        <p className="text-xs text-gray-600 truncate">
+                          {instructor.title}
+                        </p>
+                        {instructor.subtitle && (
+                          <p className="text-[11px] text-gray-500 truncate">
+                            {instructor.subtitle}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
