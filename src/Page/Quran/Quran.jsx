@@ -36,7 +36,7 @@ import {
 } from "react-icons/fa";
 import QuraneldersImg from "../../image/quranforelders (2).jpg";
 
-// Language Hook (সংযুক্ত করা হয়েছে)
+// Language Hook
 export const useLanguage = () => {
   const [language, setLanguage] = useState(
     () => localStorage.getItem("language") || "bn",
@@ -69,7 +69,7 @@ export const useLanguage = () => {
 const Quran = () => {
   const { language, switchLanguage, t } = useLanguage();
 
-  // টেক্সট কনটেন্টগুলোর বাংলা ও ইংরেজি রূপ
+  // Text content (Bengali & English)
   const content = {
     badge: { bn: "ভর্তি চলছে সীমিত আসন", en: "Admissions Open Limited Seats" },
     titlePart1: { bn: "কুরআন ফর", en: "Quran for" },
@@ -101,7 +101,7 @@ const Quran = () => {
     },
   };
 
-  // কোর্সের তথ্য
+  // Courses (with custom link for "Bakarah Hifz")
   const courses = [
     {
       id: "elders-quida",
@@ -123,12 +123,13 @@ const Quran = () => {
     },
     {
       id: "elders-hifz",
-      title: { bn: "হিফজুল কুরআন", en: "Hifzul Quran" },
+      title: { bn: "বাকারা হিফজ ", en: "Bakarah Hifz" },
       subtitle: {
-        bn: "নিয়মিত মাশকের মাধ্যমে ধাপে ধাপে সম্পূর্ণ কুরআন মুখস্থ করার প্রোগ্রাম।",
-        en: "Step-by-step complete Quran memorization program through regular practice.",
+        bn: "নিয়মিত মাশকের মাধ্যমে ধাপে ধাপে সম্পূর্ণ বাকারা হিফজ প্রোগ্রাম।",
+        en: "Step-by-step complete Surah Al-Baqarah through regular practice.",
       },
       image: Adalthifzbanner,
+      link: "/course/Albakarah/details", // Custom route for Bakarah Hifz
     },
     {
       id: "elders-tajweed",
@@ -139,18 +140,9 @@ const Quran = () => {
       },
       image: adaltsbannerImg,
     },
-    {
-      id: "elders-advanced-tajweed",
-      title: { bn: "অ্যাডভান্সড তাজউইদ", en: "Advanced Tajweed" },
-      subtitle: {
-        bn: "তাজউইদের গভীর নিয়মে ধাপে ধাপে দক্ষতা অর্জন",
-        en: "Step-by-step skill development in deep Tajweed rules",
-      },
-      image: AdvancedtajweedImg,
-    },
   ];
 
-  // কেন আমাদের বেছে নেবেন এর ডাটা
+  // Why Choose Us
   const whyChooseUs = [
     {
       icon: <FaUserTie />,
@@ -290,44 +282,48 @@ const Quran = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {courses.map((course, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 group flex flex-col justify-between"
-              >
-                {/* Course Image */}
-                <div className="relative h-48 overflow-hidden bg-gray-100">
-                  <img
-                    src={course.image}
-                    alt={t(course.title)}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                </div>
-
-                {/* Course Content */}
-                <div className="p-5 flex flex-col flex-grow justify-between">
-                  <div>
-                    <h3 className="text-lg font-bold text-[#002b2b] mb-2">
-                      {t(course.title)}
-                    </h3>
-                    <p className="text-xs text-gray-600 font-medium leading-relaxed">
-                      {t(course.subtitle)}
-                    </p>
+            {courses.map((course, index) => {
+              // Determine the link: use custom link if provided, else fallback to default
+              const linkTo = course.link || `/course/quran/${course.id}`;
+              return (
+                <div
+                  key={index}
+                  className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 hover:shadow-2xl transition-all duration-300 group flex flex-col justify-between"
+                >
+                  {/* Course Image */}
+                  <div className="relative h-48 overflow-hidden bg-gray-100">
+                    <img
+                      src={course.image}
+                      alt={t(course.title)}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                   </div>
 
-                  {/* Button */}
-                  <div className="pt-3 mt-3 border-t border-gray-100 flex justify-end">
-                    <Link to={`/course/quran/${course.id}`}>
-                      <button className="bg-[#002b2b] text-white font-bold px-4 py-2 rounded-full hover:bg-[#003d3d] transition-all transform hover:scale-105 flex items-center gap-1 text-xs cursor-pointer">
-                        <span>{t(content.detailsBtn)}</span>
-                        <FaArrowRight className="text-[10px]" />
-                      </button>
-                    </Link>
+                  {/* Course Content */}
+                  <div className="p-5 flex flex-col flex-grow justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold text-[#002b2b] mb-2">
+                        {t(course.title)}
+                      </h3>
+                      <p className="text-xs text-gray-600 font-medium leading-relaxed">
+                        {t(course.subtitle)}
+                      </p>
+                    </div>
+
+                    {/* Button */}
+                    <div className="pt-3 mt-3 border-t border-gray-100 flex justify-end">
+                      <Link to={linkTo}>
+                        <button className="bg-[#002b2b] text-white font-bold px-4 py-2 rounded-full hover:bg-[#003d3d] transition-all transform hover:scale-105 flex items-center gap-1 text-xs cursor-pointer">
+                          <span>{t(content.detailsBtn)}</span>
+                          <FaArrowRight className="text-[10px]" />
+                        </button>
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

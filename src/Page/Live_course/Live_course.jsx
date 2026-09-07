@@ -58,8 +58,8 @@ const Live_course = () => {
     },
     {
       id: 5,
-      title: language === "bn" ? "হিফজুল কুরআন" : "Hifzul Quran",
-      slug: "/course/quran/elders-hifz",
+      title: language === "bn" ? "বাকারা হিফজ" : "Bakarah Hifz",
+      slug: "/course/Albakarah/details",
       category: "Live Course",
       image: hifzquranImg,
       instructor: t("instructor"),

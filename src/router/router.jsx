@@ -367,7 +367,7 @@ export const router = createBrowserRouter([
     element: <EldersQuidaDetails></EldersQuidaDetails>,
   },
   {
-    path: "/course/quran/elders-hifz",
+    path: "/course/Albakarah/details",
     element: <Course_quran_elders_hifz></Course_quran_elders_hifz>,
   },
   {
