@@ -34,7 +34,7 @@ import {
   FaSmile,
   FaUserPlus,
 } from "react-icons/fa";
-import QuraneldersImg from "../../image/quraneldars.jpg";
+import QuraneldersImg from "../../image/quranforelders (2).jpg";
 
 // Language Hook (সংযুক্ত করা হয়েছে)
 export const useLanguage = () => {
@@ -189,32 +189,6 @@ const Quran = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        {/* Language Toggle Bar */}
-        <div className="flex justify-end mb-6">
-          <div className="inline-flex bg-white p-1.5 rounded-full shadow-md border border-gray-200">
-            <button
-              onClick={() => switchLanguage("bn")}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                language === "bn"
-                  ? "bg-[#002b2b] text-white shadow"
-                  : "text-gray-600 hover:text-[#002b2b]"
-              }`}
-            >
-              বাংলা
-            </button>
-            <button
-              onClick={() => switchLanguage("en")}
-              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                language === "en"
-                  ? "bg-[#002b2b] text-white shadow"
-                  : "text-gray-600 hover:text-[#002b2b]"
-              }`}
-            >
-              English
-            </button>
-          </div>
-        </div>
-
         {/* Hero Section */}
         <div className="relative bg-gradient-to-br from-[#002b2b] via-[#003d3d] to-[#004d4d] text-white rounded-3xl shadow-2xl overflow-hidden">
           <div className="absolute inset-0 opacity-10 pointer-events-none">

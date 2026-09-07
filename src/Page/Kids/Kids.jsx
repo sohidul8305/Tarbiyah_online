@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router";
-import { useLanguage } from "../../context/useLanguage"; // আপনার প্রজেক্টের পাথ অনুযায়ী ঠিক করে নেবেন
-import KidsImg from "../../image/kids.jpg";
+import { useLanguage } from "../../context/useLanguage";
+import KidsImg from "../../image/quranstudis.jpg";
 import NuraniyaCourseImg from "../../image/nuranicourse.jpg";
 import NuraniyaBannerIMG from "../../image/nuranibanner.jpg";
 import NazerakidsImg from "../../image/Thumb.jpg";

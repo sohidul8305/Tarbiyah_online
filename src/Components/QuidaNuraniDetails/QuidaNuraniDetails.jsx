@@ -430,7 +430,7 @@ const QuidaNuraniDetails = () => {
 
   // Prospectus link (unchanged)
   const prospectusLink =
-    "https://drive.google.com/file/d/1mv0ponZWJ0Jb2cXSsvITdneTwYMQfXkv/view?usp=sharing";
+    "https://drive.google.com/file/d/1-l8KU-x35e3hj5OnUAJtGXeikndUZYsm/view?usp=sharing";
 
   const handleDownloadPDF = () => {
     window.open(prospectusLink, "_blank");
