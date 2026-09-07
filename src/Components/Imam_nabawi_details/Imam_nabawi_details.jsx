@@ -288,7 +288,7 @@ const ImamNabawiDetails = () => {
               en: "Imam Nabawi 40 Hadiths Banner",
               bn: "ইমাম নববীর ৪০ হাদিস ব্যানার",
             })}
-            className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
+            className="w-full max-w-3xl aspect-[3/1] sm:aspect-[4/1] object-cover object-[70%_40%] rounded-2xl border border-gray-100 shadow-lg ml-8 mr-auto mt-6"
           />
 
           {/* Course Info Section - Below Banner */}
