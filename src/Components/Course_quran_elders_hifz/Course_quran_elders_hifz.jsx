@@ -1365,7 +1365,7 @@ const Course_quran_elders_hifz = () => {
                     <span className="font-medium">
                       {t({ en: "Last Updated:", bn: "শেষ আপডেট:" })}
                     </span>
-                    <span className="font-bold">07/09/2026</span>
+                    <span className="font-bold">06/09/2026</span>
                   </div>
                 </div>
               </div>
