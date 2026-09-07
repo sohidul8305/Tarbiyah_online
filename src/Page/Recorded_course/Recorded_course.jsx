@@ -5,7 +5,7 @@ import { useLanguage } from "../../context/useLanguage";
 
 // রেকর্ডেড কোর্সের ইমেজগুলো ইম্পোর্ট করা হলো
 import chollisCoverImg from "../../image/40radiscover.jpg";
-import surahmulkCoverImg from "../../image/mulksurahcover.jpg";
+import surahmulkCoverImg from "../../image/surahmulk.png";
 
 const Our_record_course = () => {
   // ভাষা কন্টেক্সট নিরাপদ ব্যবহার

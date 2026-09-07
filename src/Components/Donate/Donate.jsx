@@ -5,7 +5,6 @@ const Donate = () => {
   const { language, t } = useLanguage();
   const [copied, setCopied] = useState("");
 
-  // ডোনট অ্যামাউন্ট সিলেকশনের জন্য স্টেট (ডিফল্ট ১০০০ টাকা বা যেকোনো সংখ্যা)
   const [amount, setAmount] = useState("1000");
   const [customAmount, setCustomAmount] = useState("");
   const [name, setName] = useState("");
@@ -30,46 +29,29 @@ const Donate = () => {
     setAmount(val);
   };
 
-  // ভাষা পরিবর্তনের টগল হ্যান্ডলার (যদি আপনার লোকালস্টোরেজ ও ইভেন্ট ডিসপ্যাচ ব্যবহার করতে চান)
-  const toggleLanguage = () => {
-    const newLang = language === "en" ? "bn" : "en";
-    localStorage.setItem("language", newLang);
-    window.dispatchEvent(new Event("languageChange"));
-  };
-
   return (
     <div className="bg-gray-50 min-h-screen py-8 px-4 md:px-10 lg:px-16">
-      {/* Top Language Toggle Bar */}
-      <div className="max-w-7xl mx-auto flex justify-end mb-6"></div>
-
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Video, Hadith & Description */}
+        {/* Left Column: Video & All Provided Texts */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Video Section */}
+          {/* Video Section (Compact Vertical Size) */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-4">
-            <div className="relative rounded-xl overflow-hidden shadow-md aspect-video bg-gray-900">
+            <div className="w-[220px] sm:w-[240px] h-[300px] sm:h-[330px] mx-auto relative rounded-xl overflow-hidden shadow-md bg-black">
               <iframe
-                className="w-full h-full"
+                className="w-full h-full absolute inset-0 object-cover"
                 src="https://www.youtube.com/embed/4-VSJrhtVpg"
                 title="Tarbiyah Online Madrasah Donation Video"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               ></iframe>
             </div>
-
-            {/* Hadith / Quote Box */}
-            <div className="mt-4 bg-emerald-50 border-l-4 border-emerald-600 p-4 rounded-r-xl text-gray-800 text-sm md:text-base italic">
-              {t({
-                en: "“When a person dies, his deeds come to an end except for three: ongoing charity, beneficial knowledge, or a righteous child who prays for him.” — Sahih Muslim",
-                bn: "“মানুষ যখন মারা যায়, তখন তার আমল বন্ধ হয়ে যায় তবে তিনটি উৎস ছাড়া: সদকায়ে জারিয়া (চলমান দান), এমন জ্ঞান যা দ্বারা উপকার সাধিত হয় এবং এমন নেক সন্তান যে তার জন্য দোয়া করে।” — সহিহ মুসলিম",
-              })}
-            </div>
           </div>
 
-          {/* Details & Features Section */}
+          {/* Main Description & Lists Card */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 space-y-6">
+            {/* Section 1 */}
             <div className="space-y-3">
-              <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900">
+              <h1 className="text-2xl md:text-3xl font-extrabold text-gray-950">
                 {t({
                   en: "Your Small Donation Can Help Many Students",
                   bn: "আপনার ছোট দান অনেক শিক্ষার্থীকে সাহায্য করতে পারে",
@@ -83,7 +65,7 @@ const Donate = () => {
               </p>
             </div>
 
-            {/* List of services/support */}
+            {/* Support List */}
             <div className="space-y-3 bg-gray-50 p-5 rounded-xl border border-gray-100">
               <h3 className="font-bold text-gray-800 text-sm md:text-base">
                 {t({
@@ -130,18 +112,149 @@ const Donate = () => {
               </ul>
             </div>
 
-            {/* Sadaqah Jariyah Section */}
-            <div className="space-y-3 pt-2">
+            <p className="text-gray-600 text-sm md:text-base leading-relaxed">
+              {t({
+                en: "What may seem small to us individually can become something powerful when hundreds of believers contribute together.",
+                bn: "আমাদের কাছে যা ব্যক্তিগতভাবে ছোট মনে হতে পারে, শত শত বিশ্বাসী একসাথে অবদান রাখলে তা একটি শক্তিশালী উদ্যোগে পরিণত হতে পারে।",
+              })}
+            </p>
+
+            {/* Section 2: Small Sacrifice Can Reach Thousands */}
+            <div className="space-y-3 pt-2 border-t border-gray-100">
+              <h3 className="text-lg font-bold text-emerald-900">
+                {t({
+                  en: "Your Small Sacrifice Can Reach Thousands",
+                  bn: "আপনার ছোট ত্যাগ হাজার হাজার মানুষের কাছে পৌঁছাতে পারে",
+                })}
+              </h3>
+              <p className="text-xs md:text-sm text-gray-600">
+                {t({
+                  en: "Perhaps your contribution may help:",
+                  bn: "সম্ভবত আপনার অবদান সাহায্য করতে পারে:",
+                })}
+              </p>
+              <ul className="space-y-2 text-xs md:text-sm text-gray-700">
+                {[
+                  {
+                    en: "A child learn to recite the Qur’an correctly",
+                    bn: "একজন শিশুকে সঠিকভাবে কুরআন তিলাওয়াত শিখতে",
+                  },
+                  {
+                    en: "A young Muslim overcome doubts and strengthen their faith",
+                    bn: "একজন তরুণ মুসলমানকে সংশয় কাটিয়ে ঈমানকে মজবুত করতে",
+                  },
+                  {
+                    en: "A student continue their journey of Islamic learning",
+                    bn: "একজন ছাত্রকে তার ইসলামিক শিক্ষার যাত্রা চালিয়ে যেতে",
+                  },
+                  {
+                    en: "A family reconnect with the Qur’an and Sunnah",
+                    bn: "কোনো পরিবারকে কুরআন ও সুন্নাহর সাথে পুনরায় সংযোগ স্থাপন করতে",
+                  },
+                  {
+                    en: "A future scholar continue seeking sacred knowledge",
+                    bn: "ভবিষ্যৎ আলেমকে পবিত্র জ্ঞান অন্বেষণ অব্যাহত রাখতে",
+                  },
+                ].map((item, index) => (
+                  <li key={index} className="flex items-start space-x-2">
+                    <span className="text-emerald-600 font-bold">▪</span>
+                    <span>{t(item)}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs md:text-sm text-gray-600 leading-relaxed pt-2">
+                {t({
+                  en: "You may never know how far the impact of your contribution will reach. One student may learn something today, teach it to someone tomorrow, and that knowledge may continue to benefit others for years—even generations—to come.",
+                  bn: "আপনার অবদানের প্রভাব কতদূর পৌঁছাবে তা আপনি হয়তো কখনো জানতে পারবেন না। একজন শিক্ষার্থী আজ কিছু শিখতে পারে, আগামীকাল অন্য কাউকে তা শেখাতে পারে এবং সেই জ্ঞান আগামী বছরগুলোতে—এমনকি প্রজন্ম ধরে—অন্যদের উপকারে আসতে পারে।",
+                })}
+              </p>
+            </div>
+
+            {/* Section 3: Sadaqah Jariyah & Hadith */}
+            <div className="space-y-3 pt-2 border-t border-gray-100">
               <h3 className="text-lg font-bold text-emerald-900">
                 {t({
                   en: "Turn Your Donation Into Sadaqah Jariyah",
                   bn: "আপনার দানকে সদকায়ে জারিয়ায় রূপান্তর করুন",
                 })}
               </h3>
+              <ul className="space-y-1.5 text-xs md:text-sm text-gray-600 list-disc list-inside">
+                <li>{t({ en: "One lesson taught.", bn: "একটি পাঠ দান।" })}</li>
+                <li>
+                  {t({
+                    en: "One Qur’anic verse learned.",
+                    bn: "একটি কুরআনের আয়াত শিক্ষা।",
+                  })}
+                </li>
+                <li>
+                  {t({ en: "One doubt removed.", bn: "একটি সংশয় দূর করা।" })}
+                </li>
+                <li>
+                  {t({
+                    en: "One heart brought closer to Allah.",
+                    bn: "একটি হৃদয় আল্লাহর কাছাকাছি আনা।",
+                  })}
+                </li>
+                <li>
+                  {t({
+                    en: "One family strengthened through Islamic knowledge.",
+                    bn: "ইসলামিক জ্ঞানের মাধ্যমে একটি পরিবারকে শক্তিশালী করা।",
+                  })}
+                </li>
+                <li>
+                  {t({
+                    en: "One student inspired to live by the Qur’an and Sunnah.",
+                    bn: "কুরআন ও সুন্নাহ অনুযায়ী জীবনযাপন করতে অনুপ্রাণিত একজন শিক্ষার্থী।",
+                  })}
+                </li>
+              </ul>
+
+              <p className="text-xs md:text-sm text-gray-600 pt-1">
+                {t({
+                  en: "Every one of these can become a source of ongoing reward for you, by the permission of Allah.",
+                  bn: "আল্লাহর ইজ্ঞতে এর প্রতিটি আপনার জন্য চলমান সওয়াবের মাধ্যম হতে পারে।",
+                })}
+              </p>
+
+              {/* Hadith Box */}
+              <div className="bg-emerald-50 border-l-4 border-emerald-600 p-4 rounded-r-xl text-gray-800 text-xs md:text-sm space-y-2 my-3">
+                <p className="font-semibold">
+                  {t({
+                    en: "The Prophet ﷺ said:",
+                    bn: "নবী করীম ﷺ ইরশাদ করেছেন:",
+                  })}
+                </p>
+                <p className="italic">
+                  {t({
+                    en: "“When a person dies, his deeds come to an end except for three: ongoing charity, beneficial knowledge, or a righteous child who prays for him.”",
+                    bn: "“মানুষ যখন মারা যায়, তখন তার আমল বন্ধ হয়ে যায় তবে তিনটি উৎস ছাড়া: সদকায়ে জারিয়া (চলমান দান), এমন জ্ঞান যা দ্বারা উপকার সাধিত হয় এবং এমন নেক সন্তান যে তার জন্য দোয়া করে।”",
+                  })}
+                </p>
+                <p className="text-right font-medium text-emerald-800">
+                  {t({ en: "— Sahih Muslim", bn: "— সহিহ মুসলিম" })}
+                </p>
+              </div>
+
               <p className="text-xs md:text-sm text-gray-600 leading-relaxed">
                 {t({
-                  en: "One lesson taught. One Qur’anic verse learned. One doubt removed. One heart brought closer to Allah. Every one of these can become a source of ongoing reward for you, by the permission of Allah.",
-                  bn: "একটি পাঠ দান। একটি কুরআনের আয়াত শিক্ষা। একটি সংশয় দূর করা। একটি হৃদয় আল্লাহর কাছাকাছি আনা। আল্লাহর ইজ্ঞতে এর প্রতিটি আপনার জন্য চলমান সওয়াবের মাধ্যম হতে পারে।",
+                  en: "Your donation can help support beneficial knowledge whose impact may continue long after you are gone.",
+                  bn: "আপনার দান এমন কল্যাণকর জ্ঞানকে সমর্থন করতে সাহায্য করতে পারে যার প্রভাব আপনার প্রয়াণের পরেও দীর্ঘকাল বজায় থাকতে পারে।",
+                })}
+              </p>
+            </div>
+
+            {/* Closing Note */}
+            <div className="bg-emerald-50/60 p-4 rounded-xl border border-emerald-100 text-center space-y-2 pt-3">
+              <h4 className="font-bold text-emerald-900 text-sm md:text-base">
+                {t({
+                  en: "Small Donation. Lasting Impact. Ongoing Reward.",
+                  bn: "ছোট দান। স্থায়ী প্রভাব। চলমান সওয়াব।",
+                })}
+              </h4>
+              <p className="text-xs text-emerald-800">
+                {t({
+                  en: "Jazakumullahu Khairan for supporting Islamic education and the spread of beneficial knowledge.",
+                  bn: "ইসলামিক শিক্ষা এবং উপকারী জ্ঞানের প্রসারে সহায়তা করার জন্য জাজাকুমুল্লাহু খায়রান।",
                 })}
               </p>
             </div>
@@ -154,13 +267,13 @@ const Donate = () => {
           <div className="bg-white rounded-2xl shadow-lg border border-emerald-100 p-6 space-y-6">
             <div className="bg-[#004d5a] text-white text-center py-3 rounded-xl font-bold shadow-sm">
               {t({
-                en: "Join Our Cause & Support",
-                bn: "যুক্ত হোন আমাদের সাথে",
+                en: "🤲 Support Tarbiyah Online Madrasah",
+                bn: "🤲 তারবিয়া অনলাইন মাদরাসাকে সহায়তা করুন",
               })}
               <p className="text-xs font-normal opacity-90 mt-0.5">
                 {t({
-                  en: "Your contribution keeps this noble effort alive.",
-                  bn: "উদারতা, উল্লাস ও সৎ দেশটির বিস্তার এই উদ্যোগে সামিল হোন।",
+                  en: "Give according to your ability. Every contribution matters.",
+                  bn: "আপনার সামর্থ্য অনুযায়ী দিন। প্রতিটি অবদানই মূল্যবান।",
                 })}
               </p>
             </div>
@@ -300,15 +413,14 @@ const Donate = () => {
               className="w-full bg-[#004d5a] hover:bg-[#003c46] text-white font-bold py-3 rounded-xl transition shadow-md text-base"
             >
               {t({
-                en: `Donate ৳${amount || 0}`,
-                bn: `দান করুন (৳${amount || 0})`,
+                en: `Donate Today (৳${amount || 0})`,
+                bn: `আজই দান করুন (৳${amount || 0})`,
               })}
             </button>
           </div>
 
           {/* Bank Information Cards */}
           <div className="space-y-4">
-            {/* Bank Card 1: Shahjalal Islami Bank */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 space-y-2 text-xs md:text-sm">
               <div className="flex items-center gap-2 font-bold text-emerald-800 border-b pb-2">
                 <span>🏦</span>

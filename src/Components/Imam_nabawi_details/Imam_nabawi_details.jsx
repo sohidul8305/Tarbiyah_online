@@ -288,7 +288,7 @@ const ImamNabawiDetails = () => {
               en: "Imam Nabawi 40 Hadiths Banner",
               bn: "ইমাম নববীর ৪০ হাদিস ব্যানার",
             })}
-            className="w-full max-w-3xl aspect-[3/1] sm:aspect-[4/1] object-cover object-[70%_40%] rounded-2xl border border-gray-100 shadow-lg ml-8 mr-auto mt-6"
+            className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
           />
 
           {/* Course Info Section - Below Banner */}
@@ -443,6 +443,45 @@ const ImamNabawiDetails = () => {
                     <div key={index} className="flex items-start gap-2">
                       <span className="text-[#00ADD2] mt-1 font-bold">✔</span>
                       <span className="text-[#002b2b]">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 6. COURSE CURRICULUM (40 Hadiths) */}
+              <div>
+                <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
+                  {t({ en: "COURSE CURRICULUM", bn: "কোর্স পাঠ্যসূচি" })}
+                </h2>
+                <div className="border border-gray-300 rounded-sm">
+                  {courseDetails.curriculum.map((sem, index) => (
+                    <div
+                      key={index}
+                      className="border-b border-gray-300 last:border-b-0 overflow-hidden"
+                    >
+                      <button
+                        onClick={() => toggleSemester(index)}
+                        className="w-full flex items-center justify-between p-3 bg-white hover:bg-gray-50 text-left font-medium text-[#002b2b] transition-colors text-sm"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-[#00ADD2] text-xs">
+                            {openSemester === index ? (
+                              <FaChevronUp />
+                            ) : (
+                              <FaChevronDown />
+                            )}
+                          </span>
+                          {sem.title}
+                        </span>
+                      </button>
+                      {openSemester === index && (
+                        <div className="p-4 bg-gray-50 border-t border-gray-200 text-xs text-gray-600">
+                          {t({
+                            en: "Detailed lesson plan for this Hadith will be provided.",
+                            bn: "এই হাদিসের বিস্তারিত পাঠ পরিকল্পনা এখানে দেওয়া হবে।",
+                          })}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

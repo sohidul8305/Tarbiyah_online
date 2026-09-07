@@ -23,10 +23,10 @@ import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 
 // Import banner image
-import surahmulkCoverImg from "../../image/mulksurahcover.jpg";
+import surahmulkCoverImg from "../../image/surahmulk.png";
 
 // Import instructor image (placeholder)
-import JUbairImg from "../../image/Abunoman.jpg";
+import NumanImg from "../../image/Abunoman.jpg"; // change to actual instructor image if available
 
 // --- Language Hook ---
 import { useState as useStateHook, useEffect } from "react";
@@ -76,7 +76,7 @@ const SurahmulkDetails = () => {
       name: t({ en: "Ustadh Abu Noman", bn: "উস্তায আবু নোমান" }),
       title: t({ en: "Senior Instructor", bn: "সিনিয়র শিক্ষক" }),
       subtitle: t({ en: "Quran & Tajweed", bn: "কুরআন ও তাজউইদ" }),
-      image: JUbairImg,
+      image: NumanImg,
     },
   ];
 
@@ -305,7 +305,7 @@ const SurahmulkDetails = () => {
               en: "Surah Al-Mulk Memorization Banner",
               bn: "সূরা মুলক হিফজ ব্যানার",
             })}
-            className="w-full max-w-3xl aspect-[3/1] sm:aspect-[4/1] object-cover object-[70%_40%] rounded-2xl border border-gray-100 shadow-lg ml-8 mr-auto mt-6"
+            className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src =
@@ -492,6 +492,45 @@ const SurahmulkDetails = () => {
                     <div key={index} className="flex items-start gap-2">
                       <span className="text-[#00ADD2] mt-1 font-bold">✔</span>
                       <span className="text-[#002b2b]">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 8. COURSE CURRICULUM (30 verses) */}
+              <div>
+                <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
+                  {t({ en: "COURSE CURRICULUM", bn: "কোর্স পাঠ্যসূচি" })}
+                </h2>
+                <div className="border border-gray-300 rounded-sm">
+                  {courseDetails.curriculum.map((item, index) => (
+                    <div
+                      key={index}
+                      className="border-b border-gray-300 last:border-b-0 overflow-hidden"
+                    >
+                      <button
+                        onClick={() => toggleSemester(index)}
+                        className="w-full flex items-center justify-between p-3 bg-white hover:bg-gray-50 text-left font-medium text-[#002b2b] transition-colors text-sm"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-[#00ADD2] text-xs">
+                            {openSemester === index ? (
+                              <FaChevronUp />
+                            ) : (
+                              <FaChevronDown />
+                            )}
+                          </span>
+                          {item.title}
+                        </span>
+                      </button>
+                      {openSemester === index && (
+                        <div className="p-4 bg-gray-50 border-t border-gray-200 text-xs text-gray-600">
+                          {t({
+                            en: "Video lesson for this verse will be available.",
+                            bn: "এই আয়াতের ভিডিও লেসন এখানে পাওয়া যাবে।",
+                          })}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
