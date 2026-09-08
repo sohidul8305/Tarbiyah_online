@@ -106,7 +106,7 @@ const Alemiah = () => {
                     en: "Alemiah Program Banner",
                     bn: "আলেমিয়াহ প্রোগ্রাম ব্যানার",
                   })}
-                  className="w-50px h-70px lg:h-90 rounded-xl shadow-xl"
+                  className="w-full h-full lg:h-[360px] rounded-xl shadow-xl object-fill"
                 />
               </div>
             </div>
@@ -114,7 +114,7 @@ const Alemiah = () => {
             {/* Content */}
             <div className="w-full lg:w-1/2 space-y-6">
               <div className="space-y-3">
-                <span className="inline-block bg-yellow-500/20 text-yellow-300 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-yellow-500/30 ml-100">
+                <span className="inline-block bg-yellow-500/20 text-yellow-300 px-4 py-1.5 rounded-full text-sm font-semibold backdrop-blur-sm border border-yellow-500/30">
                   {t({
                     en: "Admissions Open • Limited Seats",
                     bn: "ভর্তি চলছে • সীমিত আসন",
@@ -229,7 +229,7 @@ const Alemiah = () => {
                   <img
                     src={course.image}
                     alt={course.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-fill"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
 

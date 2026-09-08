@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import diplomabanner from "../../image/Course-Thumb.png";
-import diplomacover from "../../image/diplomacover.png";
+import diplomacover from "../../image/Course-Thumb.png";
 import { Link } from "react-router";
 import { useLanguage } from "../../context/useLanguage";
 import {

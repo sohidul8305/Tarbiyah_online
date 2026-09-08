@@ -2085,7 +2085,7 @@ const DiplomaDetails = () => {
                 <div className="text-3xl font-bold text-[#002b2b] mb-4">
                   ৳ 12,000
                 </div>
-                <Link to="/course/diploma/enroll">
+                <Link to="/admission-now">
                   <button className="w-full bg-[#008080] hover:bg-[#006666] text-white font-bold py-3 rounded-xl shadow-md transition-all mb-4">
                     {t({ en: "Enroll Now", bn: "এখনই নিবন্ধন করুন" })}
                   </button>

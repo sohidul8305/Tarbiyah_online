@@ -861,7 +861,7 @@ const HifzDetail = () => {
                   {t({ en: "Apply This Course", bn: "এই কোর্সে আবেদন করুন" })}
                 </h2>
                 <div className="flex items-center justify-center mb-4">
-                  <Link to="/course/kids/one-to-one/enroll" className="w-full">
+                  <Link to="/admission-now" className="w-full">
                     <button className="w-full bg-[#007a91] text-white font-bold py-3 text-xs rounded-md hover:opacity-90 transition cursor-pointer">
                       {t({ en: "Enroll Now", bn: "এখনই নিবন্ধন করুন" })}
                     </button>

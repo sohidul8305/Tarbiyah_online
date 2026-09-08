@@ -987,7 +987,7 @@ const NazeraDetails = () => {
                 </h1>
 
                 <div className="w-full text-white font-bold py-3 rounded-xl shadow-md transition-all mb-4">
-                  <Link to="/course/kids/nazera/enroll" className="w-full">
+                  <Link to="/admission-now" className="w-full">
                     <button className="w-full bg-[#006666] text-white font-bold py-3 text-xs rounded-md hover:opacity-90 transition cursor-pointer">
                       {t({ en: "Enroll Now", bn: "এখনই নিবন্ধন করুন" })}
                     </button>

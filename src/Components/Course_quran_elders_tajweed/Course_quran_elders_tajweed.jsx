@@ -1051,10 +1051,7 @@ const Course_quran_elders_tajweed = () => {
 
                 {/* Split Button with Links */}
                 <div className="flex items-center justify-center mb-6 relative">
-                  <Link
-                    to="/course/kids/tajweed/enrollbnagla"
-                    className="w-1/2"
-                  >
+                  <Link to="/admission-now" className="w-1/2">
                     <button className="w-full bg-[#007a91] text-white font-bold py-3 text-xs rounded-l-md hover:opacity-90 transition">
                       {t({ en: "Bangla Version", bn: "বাংলা ভার্সন" })}
                     </button>
@@ -1062,7 +1059,7 @@ const Course_quran_elders_tajweed = () => {
                   <div className="absolute w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#002b2b] font-medium shadow-md z-10 text-[10px]">
                     {t({ en: "Or", bn: "অথবা" })}
                   </div>
-                  <Link to="/enroll/tajweed/english-version" className="w-1/2">
+                  <Link to="/admission-now" className="w-1/2">
                     <button className="w-full bg-[#003d3d] text-white font-bold py-3 text-xs rounded-r-md hover:opacity-90 transition">
                       {t({ en: "English Version", bn: "ইংরেজি ভার্সন" })}
                     </button>

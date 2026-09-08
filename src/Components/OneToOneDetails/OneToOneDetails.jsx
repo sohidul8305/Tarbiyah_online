@@ -975,7 +975,7 @@ const OneToOneDetails = () => {
                   bn: "আপনার কোর্সে আবেদন করতে প্রস্তুত",
                 })}
               </span>
-              <Link to="admission-now">
+              <Link to="/admission-now">
                 <button className="bg-cyan-700 hover:bg-cyan-800 text-white font-bold px-6 py-2.5 rounded-lg text-sm shadow transition-all">
                   {t({ en: "Start Now", bn: "এখনই শুরু করুন" })}
                 </button>
@@ -1185,7 +1185,7 @@ const OneToOneDetails = () => {
                 </span>
               </div>
 
-              <Link to="/course/kids/one-to-one/enroll">
+              <Link to="/admission-now">
                 <button className="w-full bg-cyan-700 hover:bg-cyan-800 text-white font-bold py-3 px-4 rounded-lg shadow transition-all text-sm flex items-center justify-center gap-2">
                   <span>
                     {t({ en: "Enroll Now", bn: "এখনই নিবন্ধন করুন" })}
