@@ -10,6 +10,18 @@ import Najeraelders from "../../image/Thumb.jpg";
 import hifzquranImg from "../../image/banner (2).jpg";
 import NuraniyahcourseImg from "../../image/Quranforeldersbanner.jpg";
 
+// কুরআন পেইজের ইমেজসমূহ
+import Quidanuraniyah from "../../image/quidanuraniyahcover.png";
+import Qurannajeracover from "../../image/najeracover.jpg";
+import Adalthifzbanner from "../../image/adalthifzbanner.jpg";
+import adaltsbannerImg from "../../image/tajweedbanner - Copy.png";
+
+// Kids কম্পোনেন্টের ইমেজসমূহ
+import KidsImg from "../../image/quranstudis.jpg";
+import NuraniyaBannerIMG from "../../image/nuranibanner.jpg";
+import NazerakidsImg from "../../image/Thumb.jpg";
+import courseImg from "../../image/hifzthumbal.jpg";
+
 const Live_course = () => {
   // ভাষা কন্টেক্সট নিরাপদ ব্যবহার
   const languageContext = useLanguage();
@@ -19,7 +31,7 @@ const Live_course = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
 
-  // মোট ৬টি কোর্স লিস্ট সঠিক ইমেজসহ
+  // সকল কোর্স লিস্ট (সঠিক ক্যাটাগরি ও ইমেজসহ)
   const courses = [
     {
       id: 1,
@@ -36,7 +48,7 @@ const Live_course = () => {
       id: 2,
       title: language === "bn" ? "আলিমিয়াহ ফর কিডস" : "Allimiyah for Kids",
       slug: "/course/alemiah/alimiyah-kids",
-      category: "Recorded Course",
+      category: "Live Course",
       image: AlemiyahKids,
       instructor: t("instructor"),
     },
@@ -49,27 +61,79 @@ const Live_course = () => {
       instructor: t("instructor"),
     },
     {
-      id: 4,
-      title: language === "bn" ? "নাজেরা" : "Najera",
-      slug: "/course/quran/elders-nazera",
+      id: 7,
+      title: language === "bn" ? "কায়দা নুরানী" : "Quida Nurani",
+      slug: "/course/kids/quida-nurani",
       category: "Live Course",
-      image: Najeraelders,
+      image: NuraniyaBannerIMG,
       instructor: t("instructor"),
     },
     {
-      id: 5,
+      id: 8,
+      title: language === "bn" ? "নাজেরা কুরআন" : "Nazera Quran",
+      slug: "/course/kids/nazera",
+      category: "Live Course",
+      image: NazerakidsImg,
+      instructor: t("instructor"),
+    },
+    {
+      id: 9,
+      title: language === "bn" ? "হিফজুল কুরআন" : "Hifzul Quran",
+      slug: "/course/kids/hifz",
+      category: "Live Course",
+      image: courseImg,
+      instructor: t("instructor"),
+    },
+    {
+      id: 10,
+      title: language === "bn" ? "হিফজ রিভিশন" : "Hifz Revision",
+      slug: "/course/kids/hifz-revision",
+      category: "Live Course",
+      image: KidsImg,
+      instructor: t("instructor"),
+    },
+    {
+      id: 11,
+      title: language === "bn" ? "ওয়ান টু ওয়ান" : "One to One",
+      slug: "/course/kids/one-to-one",
+      category: "Live Course",
+      image: KidsImg,
+      instructor: t("instructor"),
+    },
+    // কুরআন পেইজ থেকে যুক্ত ৪টি কোর্স (ওয়ান টু ওয়ান এর পরে)
+    {
+      id: 12,
+      title: language === "bn" ? "কায়দায়ে নূরানিয়্যাহ" : "Qaida Nuraniyah",
+      slug: "/course/quran/elders-quida",
+      category: "Live Course",
+      image: Quidanuraniyah,
+      instructor: t("instructor"),
+    },
+    {
+      id: 13,
+      title: language === "bn" ? "কুরআন নাজেরা" : "Quran Nazera",
+      slug: "/course/quran/elders-nazera",
+      category: "Live Course",
+      image: Qurannajeracover,
+      instructor: t("instructor"),
+    },
+    {
+      id: 14,
       title: language === "bn" ? "বাকারা হিফজ" : "Bakarah Hifz",
       slug: "/course/Albakarah/details",
       category: "Live Course",
-      image: hifzquranImg,
+      image: Adalthifzbanner,
       instructor: t("instructor"),
     },
     {
-      id: 6,
-      title: language === "bn" ? "কায়দায়ে নূরানিয়্যাহ" : "Qaiday Nuraniyyah",
-      slug: "/course/quran/elders-quida",
+      id: 15,
+      title:
+        language === "bn"
+          ? "বেসিক তাজউইদ (লেভেল–১)"
+          : "Basic Tajweed (Level-1)",
+      slug: "/course/quran/elders-tajweed",
       category: "Live Course",
-      image: NuraniyahcourseImg,
+      image: adaltsbannerImg,
       instructor: t("instructor"),
     },
   ];
@@ -91,14 +155,14 @@ const Live_course = () => {
         <h1 className="text-3xl md:text-4xl font-bold text-[#004d4d] mb-3">
           {language === "bn" ? "আমাদের" : "OUR"}{" "}
           <span className="text-orange-500">
-            {language === "bn" ? "লাইভ" : "LIVE"}
+            {language === "bn" ? "লাইভ" : "Live"}
           </span>{" "}
-          {language === "bn" ? "কোর্সসমূহ" : "COURSE"}
+          {language === "bn" ? "কোর্সসমূহ" : "COURSES"}
         </h1>
         <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
           {language === "bn"
-            ? "সকল বয়স এবং স্তরের জন্য ডিজাইন করা আমাদের লাইভ কোর্সসমূহ অন্বেষণ করুন"
-            : "Explore our comprehensive live courses designed for all ages and levels"}
+            ? "সকল বয়স এবং স্তরের জন্য ডিজাইন করা আমাদের কোর্সসমূহ অন্বেষণ করুন"
+            : "Explore our comprehensive courses designed for all ages and levels"}
         </p>
       </div>
 
@@ -124,9 +188,6 @@ const Live_course = () => {
           <option value="Live Course">
             {language === "bn" ? "লাইভ কোর্স" : "Live Course"}
           </option>
-          <option value="Recorded Course">
-            {language === "bn" ? "রেকর্ডেড কোর্স" : "Recorded Course"}
-          </option>
         </select>
       </div>
 
@@ -138,12 +199,12 @@ const Live_course = () => {
             to={course.slug}
             className="block bg-white rounded-lg shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col"
           >
-            {/* কোর্সের ছবি */}
-            <div className="w-full h-48 bg-gray-100 overflow-hidden relative">
+            {/* কোর্সের ছবি (নিখুঁত সাইজিং ও ফিটিংয়ের জন্য আপডেট করা হয়েছে) */}
+            <div className="w-full h-48 bg-gray-100 overflow-hidden relative flex items-center justify-center">
               <img
                 src={course.image}
                 alt={course.title}
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-105 block"
               />
             </div>
 
