@@ -288,7 +288,7 @@ const ImamNabawiDetails = () => {
               en: "Imam Nabawi 40 Hadiths Banner",
               bn: "ইমাম নববীর ৪০ হাদিস ব্যানার",
             })}
-            className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
+            className="w-full max-w-3xl h-24 sm:h-60 md:h-60 object-cover object-top rounded-2xl border border-gray-100 ml-8 mr-72 -mt-6"
           />
 
           {/* Course Info Section - Below Banner */}
@@ -634,8 +634,8 @@ const ImamNabawiDetails = () => {
               </a>
 
               {/* Pricing & Enrollment Card */}
-              <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-[#007a91]">
-                <h1 className="text-2xl font-bold text-[#007a91] mb-5">
+              <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-[#007a91] -mt-6">
+                <h1 className="text-2xl font-bold text-[#007a91] mb-10">
                   {t({ en: "ENROLL NOW", bn: "এখনই নিবন্ধন করুন" })}
                 </h1>
 

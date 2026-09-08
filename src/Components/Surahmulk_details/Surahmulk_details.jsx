@@ -305,7 +305,7 @@ const SurahmulkDetails = () => {
               en: "Surah Al-Mulk Memorization Banner",
               bn: "সূরা মুলক হিফজ ব্যানার",
             })}
-            className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
+            className="w-full max-w-3xl h-24 sm:h-60 md:h-60 object-cover object-top rounded-2xl border border-gray-100 ml-8 mr-72 -mt-6"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src =
