@@ -166,6 +166,8 @@ import Age_barriers_details from "../Components/Age_barriers_details/Age_barrier
 import Student_support from "../Components/Student_support/Student_support";
 import Imam_nabawi_details from "../Components/Imam_nabawi_details/Imam_nabawi_details";
 import Surahmulk_details from "../Components/Surahmulk_details/Surahmulk_details";
+import Student_attendance from "../Components/Student_attendance/Student_attendance";
+import Course_notice from "../Components/Course_notice/Course_notice";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -511,6 +513,16 @@ export const router = createBrowserRouter([
   {
     path: "/admin-notification",
     element: <Admin_notification />,
+  },
+
+  // student dashboard routes
+  {
+    path: "/student-attendance/AQD-101",
+    element: <Student_attendance></Student_attendance>,
+  },
+  {
+    path: "/course-notices/AQD-101",
+    element: <Course_notice></Course_notice>,
   },
 
   // ==========================================

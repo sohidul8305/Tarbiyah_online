@@ -6,7 +6,6 @@ import Footer from "../../Components/Navbar/Footer/Footer";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
-  FaHome,
   FaUser,
   FaUniversity,
   FaFileAlt,
@@ -19,6 +18,10 @@ import {
   FaInfoCircle,
   FaExpand,
   FaMinus,
+  FaEdit,
+  FaPrint,
+  FaSync,
+  FaExchangeAlt,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -56,11 +59,14 @@ const StudentDashboard = () => {
     if (info) {
       const parsedInfo = JSON.parse(info);
       setStudentInfo({
-        name: parsedInfo.name || "",
+        name: parsedInfo.name || "Shakil Ahmmed",
         email: parsedInfo.email || "",
         phone: parsedInfo.phone || "",
-        class: parsedInfo.class || parsedInfo.course || "",
-        roll: parsedInfo.roll || "",
+        class:
+          parsedInfo.class ||
+          parsedInfo.course ||
+          "BA in Dawah and Islamic Studies",
+        roll: parsedInfo.roll || "26160110266",
         username: parsedInfo.username || "",
         status: parsedInfo.status || "Active",
         admissionDate: parsedInfo.admissionDate || parsedInfo.createdAt || "",
@@ -126,13 +132,13 @@ const StudentDashboard = () => {
       id: "result",
       path: "/student-result",
       icon: <FaFileAlt className="text-xl" />,
-      label: "Exam Result",
+      label: "Regular Exam Result",
     },
     {
       id: "payment",
       path: "/online-payment",
       icon: <FaCreditCard className="text-xl" />,
-      label: "Online Payment",
+      label: "Monthly Online Payment",
     },
     {
       id: "due",
@@ -243,24 +249,52 @@ const StudentDashboard = () => {
         )}
 
         <main className="flex-grow p-4 md:p-6 overflow-x-auto w-full">
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+          {/* Top Bar control buttons */}
+          <div className="bg-white p-3 rounded-sm shadow-sm border border-gray-200 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <h1 className="text-lg font-bold text-gray-800">
-                Student Dashboard
-              </h1>
-              <p className="text-sm text-gray-500">
-                Welcome back, {studentInfo.name}!
-              </p>
+              <h1 className="text-base font-bold text-gray-800">Dashboard</h1>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-gray-700 hidden sm:block">
-                {studentInfo.name}
-              </span>
+            <div className="flex items-center gap-2 text-gray-600">
               <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-lg font-bold transition-all shadow-sm"
+                title="Edit Profile"
+                className="p-1.5 hover:bg-gray-100 rounded border border-gray-300 text-xs"
               >
-                Logout
+                <FaEdit />
+              </button>
+              <button
+                title="Print"
+                onClick={() => window.print()}
+                className="p-1.5 hover:bg-gray-100 rounded border border-gray-300 text-xs"
+              >
+                <FaPrint />
+              </button>
+              <button
+                title="Fullscreen"
+                onClick={() => {
+                  if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                  } else {
+                    if (document.exitFullscreen) {
+                      document.exitFullscreen();
+                    }
+                  }
+                }}
+                className="p-1.5 hover:bg-gray-100 rounded border border-gray-300 text-xs"
+              >
+                <FaExpand />
+              </button>
+              <button
+                title="Refresh"
+                onClick={() => window.location.reload()}
+                className="p-1.5 hover:bg-gray-100 rounded border border-gray-300 text-xs"
+              >
+                <FaSync />
+              </button>
+              <button
+                title="Switch"
+                className="p-1.5 hover:bg-gray-100 rounded border border-gray-300 text-xs"
+              >
+                <FaExchangeAlt />
               </button>
             </div>
           </div>
@@ -279,23 +313,67 @@ const StudentDashboard = () => {
 };
 
 // ==========================================
-// ড্যাশবোর্ড কন্টেন্ট
+// ড্যাশবোর্ড কন্টেন্ট (ডাইনামিক কোর্স ডাটা সহ)
 // ==========================================
 
 const DashboardContent = ({ studentInfo }) => {
   const [paymentTab, setPaymentTab] = useState("summary");
+  const [courses, setCourses] = useState([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
 
-  // Student এর নিজের কোর্স
-  const courses = studentInfo.course
-    ? [
-        {
-          id: 1,
-          code: "CRS-101",
-          title: studentInfo.course,
-          section: "[Student]",
-        },
-      ]
-    : [{ id: 1, code: "N/A", title: "No course registered yet", section: "" }];
+  // ডাইনামিক কোর্স ডেটা ফেচ করার জন্য ইফেক্ট (আপনার ব্যাকএন্ড API বা রুট অনুযায়ী এটি এডজাস্ট করে নিতে পারেন)
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        // যদি আপনার API থাকে তবে এখানে ফেচ কল হবে, নিচে উদাহরণস্বরূপ লোকাল বা ডাইনামিক স্টেট হ্যান্ডেল করা হলো:
+        // const res = await fetch(`https://your-api-url/courses?email=${studentInfo.email}`);
+        // const data = await res.json();
+
+        // সাময়িকভাবে ডাইনামিক রেন্ডারিং লজিক বা প্রপস থেকে আসা কোর্স ডাটা ব্যবহার করা হচ্ছে:
+        const dynamicCourses = studentInfo.courses || [
+          {
+            id: 1,
+            code: "AQD-101",
+            title: "Aqeedah",
+            section: "[Brother-A-B16]",
+          },
+          {
+            id: 2,
+            code: "ATI-101",
+            title: "Adabu Talibil Il'm",
+            section: "[Brother-A-B16]",
+          },
+          {
+            id: 3,
+            code: "DNS-101",
+            title: "Da'wah & Sunnah",
+            section: "[Brother-A-B16]",
+          },
+          {
+            id: 4,
+            code: "FQH-101",
+            title: "Fiqh-I",
+            section: "[Brother-A-B16]",
+          },
+          {
+            id: 5,
+            code: "TAJ-101",
+            title: "Tajweed-I",
+            section: "[Brother-A-B16]",
+          },
+        ];
+        setCourses(dynamicCourses);
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+      } finally {
+        setLoadingCourses(false);
+      }
+    };
+
+    if (studentInfo) {
+      fetchCourses();
+    }
+  }, [studentInfo]);
 
   // Payment Calculation
   const paidAmount = parseFloat(studentInfo.paidAmount) || 0;
@@ -305,18 +383,19 @@ const DashboardContent = ({ studentInfo }) => {
 
   return (
     <div className="space-y-4">
-      {/* Welcome Banner - কালার পরিবর্তন */}
-      <div className="bg-[#00ADD2] text-white p-3 rounded-sm shadow-sm text-sm flex items-center">
+      {/* Welcome Banner */}
+      <div className="bg-[#6b2158] text-white p-3 rounded-sm shadow-sm text-sm flex items-center">
         <p>
           Assalamu alaikum wa rahmatullahi wa barakatuh. Ahlan wa Sahlan WA
           Masa'al Khair!{" "}
           <strong>
-            {studentInfo.name} [{studentInfo.roll || "N/A"}]
+            {studentInfo.name || "Shakil Ahmmed"} [
+            {studentInfo.roll || "26160110266"}]
           </strong>
         </p>
       </div>
 
-      {/* Important Links Section - কালার পরিবর্তন */}
+      {/* Important Links Section */}
       <div className="border border-[#00ADD2] bg-white rounded-sm shadow-sm">
         <div className="bg-[#00ADD2] text-white px-3 py-2 flex justify-between items-center rounded-t-sm">
           <div className="flex items-center gap-2 text-sm font-medium">
@@ -334,7 +413,7 @@ const DashboardContent = ({ studentInfo }) => {
 
         <div className="p-4 bg-[#f8f9fa]">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Card 1: Check Due & Payments */}
+            {/* Card 1 */}
             <div className="bg-[#78b866] text-white rounded-sm relative flex flex-col justify-between h-[100px] hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg leading-tight">
@@ -350,7 +429,7 @@ const DashboardContent = ({ studentInfo }) => {
               </Link>
             </div>
 
-            {/* Card 2: Semester Result */}
+            {/* Card 2 */}
             <div className="bg-[#8c1c44] text-white rounded-sm relative flex flex-col justify-between h-[100px] hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg leading-tight">
@@ -366,7 +445,7 @@ const DashboardContent = ({ studentInfo }) => {
               </Link>
             </div>
 
-            {/* Card 3: Online Registration */}
+            {/* Card 3 */}
             <div className="bg-[#00a65a] text-white rounded-sm relative flex flex-col justify-between h-[100px] hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg leading-tight">
@@ -382,7 +461,7 @@ const DashboardContent = ({ studentInfo }) => {
               </Link>
             </div>
 
-            {/* Card 4: Monthly Online Payment */}
+            {/* Card 4 */}
             <div className="bg-[#0073b7] text-white rounded-sm relative flex flex-col justify-between h-[100px] hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg leading-tight">
@@ -398,15 +477,15 @@ const DashboardContent = ({ studentInfo }) => {
               </Link>
             </div>
 
-            {/* ✅ Orange Warning Text - রাখবেন */}
+            {/* Orange Warning Text */}
             <div className="col-span-1 md:col-span-1 bg-[#f39c12] text-white text-xs p-2 rounded-sm leading-relaxed mt-2">
               আপনার পোর্টাল এবং ক্যাম্পাসের পাসওয়ার্ড যদি একই থাকে সে ক্ষেত্রে
               আপনি সরাসরি ক্যাম্পাসে লগইন হয়ে যেতে পারবেন, অন্যথায় আপনাকে
               ক্যাম্পাসে পাসওয়ার্ড দিয়ে লগইন করতে হবে।
             </div>
 
-            {/* ✅ Campus Login Card - রাখবেন, শুধু কালার পরিবর্তন */}
-            <div className="col-span-1 md:col-span-1 bg-[#00ADD2] text-white rounded-sm relative flex flex-col justify-between h-[100px] mt-2 hover:brightness-105 transition-all">
+            {/* Campus Login Card */}
+            <div className="col-span-1 md:col-span-1 bg-[#00a65a] text-white rounded-sm relative flex flex-col justify-between h-[100px] mt-2 hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg mb-1">Campus</h3>
                 <Link to="/campus-login">
@@ -417,7 +496,7 @@ const DashboardContent = ({ studentInfo }) => {
               </div>
               <FaGraduationCap className="absolute right-2 top-2 text-[60px] opacity-20 z-0" />
               <Link
-                to="#"
+                to="/campus-login"
                 className="bg-black/10 py-1 text-center text-xs hover:bg-black/20 cursor-pointer block transition-colors w-full mt-auto z-10"
               >
                 Go to Campus ➔
@@ -427,7 +506,7 @@ const DashboardContent = ({ studentInfo }) => {
         </div>
       </div>
 
-      {/* Registered Courses Section - Student এর নিজের কোর্স */}
+      {/* Registered Courses Section (Dynamic Mapping) */}
       <div className="border border-[#00ADD2] bg-white rounded-sm shadow-sm mb-6">
         <div className="flex items-center gap-2 p-2 border-b border-[#00ADD2] text-sm bg-[#f4f6f9] font-medium text-gray-700">
           <FaFileAlt className="text-[#00ADD2]" /> Registered Courses of
@@ -446,35 +525,54 @@ const DashboardContent = ({ studentInfo }) => {
               </tr>
             </thead>
             <tbody>
-              {courses.map((course, index) => (
-                <tr
-                  key={course.id}
-                  className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-4 py-3 align-top border-r border-gray-200 text-center">
-                    {index + 1}
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-[#00ADD2]">
-                      {course.code}: {course.title} {course.section}
-                    </p>
-                    <div className="text-[11px] text-[#00ADD2] flex gap-2 mt-1">
-                      <span className="cursor-pointer hover:underline">
-                        [Attendances]
-                      </span>
-                      <span className="cursor-pointer hover:underline">
-                        [Course Materials]
-                      </span>
-                      <span className="cursor-pointer hover:underline">
-                        [Course Notices]
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-500 italic mt-1 font-serif">
-                      BA in Dawah and Islamic Studies (Fall 2026 (Jul-Dec))
-                    </p>
+              {loadingCourses ? (
+                <tr>
+                  <td colSpan="2" className="text-center py-4 text-gray-500">
+                    Loading registered courses...
                   </td>
                 </tr>
-              ))}
+              ) : courses.length > 0 ? (
+                courses.map((course, index) => (
+                  <tr
+                    key={course.id || index}
+                    className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+                  >
+                    <td className="px-4 py-3 align-top border-r border-gray-200 text-center">
+                      {index + 1}
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-[#00ADD2]">
+                        {course.code}: {course.title}{" "}
+                        {course.section || "[Brother-A-B16]"}
+                      </p>
+                      <div className="text-[11px] text-[#00ADD2] flex gap-2 mt-1">
+                        <Link
+                          to={`/student-attendance/${course.code}`}
+                          className="hover:underline"
+                        >
+                          [Attendances]
+                        </Link>
+                        <Link
+                          to={`/course-notices/${course.code}`}
+                          className="hover:underline"
+                        >
+                          [Course Notices]
+                        </Link>
+                      </div>
+                      <p className="text-xs text-gray-500 italic mt-1 font-serif">
+                        {studentInfo.class || "BA in Dawah and Islamic Studies"}{" "}
+                        (Fall 2026 (Jul-Dec))
+                      </p>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="2" className="text-center py-4 text-gray-500">
+                    No registered courses found for this semester.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -563,7 +661,6 @@ const PaymentSection = ({
   );
 };
 
-// Payment Summary Component
 const PaymentSummary = ({ totalBill, totalPaid, totalDue, studentInfo }) => {
   const bill =
     typeof totalBill === "number" ? totalBill : parseFloat(totalBill) || 0;
@@ -641,7 +738,6 @@ const PaymentSummary = ({ totalBill, totalPaid, totalDue, studentInfo }) => {
   );
 };
 
-// All Bill Component
 const AllBill = ({ studentInfo }) => {
   const paidAmount = parseFloat(studentInfo.paidAmount) || 2280;
 
@@ -665,7 +761,6 @@ const AllBill = ({ studentInfo }) => {
   );
 };
 
-// Payment History Component
 const PaymentHistory = ({ studentInfo }) => {
   const paidAmount = parseFloat(studentInfo.paidAmount) || 0;
 
@@ -704,7 +799,6 @@ const PaymentHistory = ({ studentInfo }) => {
   );
 };
 
-// Online Payment History Component
 const OnlinePaymentHistory = ({ studentInfo }) => {
   const paidAmount = parseFloat(studentInfo.paidAmount) || 2280;
   const isPaid = studentInfo.paymentStatus === "Paid";
