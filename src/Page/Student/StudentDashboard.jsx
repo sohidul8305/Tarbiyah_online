@@ -1,8 +1,7 @@
 // src/Page/Student/StudentDashboard.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, Outlet } from "react-router-dom";
-import Navbar from "../../Components/Navbar/Navbar";
-import Footer from "../../Components/Navbar/Footer/Footer";
+
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -161,8 +160,6 @@ const StudentDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
-
       <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center">
         <h1 className="text-sm font-bold text-gray-800">Student Dashboard</h1>
         <button
@@ -306,8 +303,6 @@ const StudentDashboard = () => {
           )}
         </main>
       </div>
-
-      <Footer />
     </div>
   );
 };

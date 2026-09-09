@@ -1,33 +1,34 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
 import {
-  FaBuilding,
-  FaLaptopCode,
-  FaChalkboardTeacher,
-  FaBookOpen,
-  FaUserTie,
-  FaMapMarkerAlt,
-  FaHome,
-  FaTachometerAlt,
-  FaGraduationCap,
-  FaCalendarAlt,
-  FaBell,
+  Routes,
+  Route,
+  Link,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+import {
+  FaSearch,
   FaArrowLeft,
   FaVideo,
   FaFilePdf,
   FaQuestionCircle,
   FaClipboardList,
   FaAward,
+  FaBookOpen,
+  FaEllipsisV,
 } from "react-icons/fa";
-import { MdSupportAgent } from "react-icons/md";
 
 const Campus = () => {
   const [language, setLanguage] = useState(
     () => localStorage.getItem("language") || "en",
   );
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [selectedCourse, setSelectedCourse] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const handleStorageChange = () => {
@@ -37,24 +38,31 @@ const Campus = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  // নির্ধারিত পাথ অনুযায়ী একটিভ ট্যাব নির্ধারণ
+  const getCurrentTab = () => {
+    if (location.pathname.includes("/campus_dashboard")) return "dashboard";
+    if (location.pathname.includes("/my-courses")) return "my-courses";
+    return "home";
+  };
+
+  const activeTab = getCurrentTab();
+
   // ============= কনটেন্ট =============
   const content = {
     en: {
-      title: "Discover Our Campus",
-      subtitle: "Welcome to Tarbiyah Online & Offline Learning Environment",
-      offlineTitle: "Physical Campus & Office",
-      offlineDesc:
-        "Our physical campus provides an interactive and serene environment for students to excel in Islamic and modern education. Experience learning like never before.",
-      addressTitle: "Campus Address:",
-      address: "40/1, Safa Garden, Mohammadpur - 1207, Dhaka",
-      onlineTitle: "Virtual Campus",
-      onlineDesc:
-        "Experience our state-of-the-art virtual learning management system, live interactive classes, and 24/7 digital resource accessibility from anywhere in the world.",
-      facilitiesTitle: "Campus Facilities",
-      f1: "Modern Digital Classrooms",
-      f2: "Dedicated Student Support",
-      f3: "Rich Islamic Library & Resources",
-      f4: "Experienced Faculty Members",
+      homeTab: "Home",
+      dashboardTab: "Dashboard",
+      myCoursesTab: "My courses",
+      homeTitle: "Tarbiyah Campus",
+      virtualCampusTitle: "Tarbiyah Campus",
+      virtualCampusDesc: "Tarbiyah Virtual Campus & Learning Environment",
+      noticeBoard: "Notice Board",
+      noNotice: "There are no discussion topics yet in this forum",
+      courseOverview: "Course Overview",
+      all: "All",
+      searchPlaceholder: "Search courses...",
+      sortCourse: "Sort by course name",
+      cardView: "Card",
       backToCourses: "Back to My Courses",
       outcomeTitle: "Course Outcome",
       materialsTitle: "Materials",
@@ -66,25 +74,24 @@ const Campus = () => {
       videoRecording: "Video Recording",
       pdfNotes: "PDF Notes & Resources",
       quizzes: "Quizzes",
-      loginCampus: "Login Campus",
+      completed: "Completed",
+      instructor: "Instructor",
     },
     bn: {
-      title: "আমাদের ক্যাম্পাস আবিষ্কার করুন",
-      subtitle:
-        "তারবিয়াহ অনলাইন ও অফলাইন লার্নিং এনভায়রনমেন্টে আপনাকে স্বাগতম",
-      offlineTitle: "শারীরিক ক্যাম্পাস ও অফিস",
-      offlineDesc:
-        "আমাদের শারীরিক ক্যাম্পাস শিক্ষার্থীদের ইসলামি ও আধুনিক শিক্ষায় উৎকর্ষ সাধনের জন্য একটি শান্ত ও উপযোগী পরিবেশ প্রদান করে। আসুন এবং শিক্ষার নতুন অভিজ্ঞতা নিন।",
-      addressTitle: "ক্যাম্পাসের ঠিকানা:",
-      address: "৪০/১, সাফা গার্ডেন, মোহাম্মদপুর - ১২০৭, ঢাকা",
-      onlineTitle: "ভার্চুয়াল ক্যাম্পাস",
-      onlineDesc:
-        "বিশ্বের যেকোনো প্রান্ত থেকে আমাদের অত্যাধুনিক ভার্চুয়াল লার্নিং ম্যানেজমেন্ট সিস্টেম, লাইভ ইন্টারেক্টিভ ক্লাস এবং ২৪/৭ ডিজিটাল রিসোর্সের সুবিধা উপভোগ করুন।",
-      facilitiesTitle: "ক্যাম্পাসের সুবিধাসমূহ",
-      f1: "আধুনিক ডিজিটাল ক্লাসরুম",
-      f2: "ডেডিকেটেড স্টুডেন্ট সাপোর্ট",
-      f3: "সমৃদ্ধ ইসলামি লাইব্রেরি ও রিসোর্স",
-      f4: "অভিজ্ঞ শিক্ষক মণ্ডলী",
+      homeTab: "হোম",
+      dashboardTab: "ড্যাশবোর্ড",
+      myCoursesTab: "আমার কোর্সসমূহ",
+      homeTitle: "তারবিয়াহ ক্যাম্পাস",
+      virtualCampusTitle: "তারবিয়াহ ক্যাম্পাস",
+      virtualCampusDesc:
+        "তারবিয়াহ ভার্চুয়াল ক্যাম্পাস ও লার্নিং এনভায়রনমেন্ট",
+      noticeBoard: "নোটিশ বোর্ড",
+      noNotice: "এই ফরামে এখনও কোনো আলোচনার বিষয় নেই",
+      courseOverview: "কোর্স ওভারভিউ",
+      all: "সব",
+      searchPlaceholder: "কোর্স খুঁজুন...",
+      sortCourse: "কোর্সের নাম অনুযায়ী সাজান",
+      cardView: "কার্ড",
       backToCourses: "আমার কোর্সসমূহে ফিরে যান",
       outcomeTitle: "কোর্স আউটকাম",
       materialsTitle: "ম্যাটেরিয়ালস (Materials)",
@@ -96,7 +103,8 @@ const Campus = () => {
       videoRecording: "ভিডিও রেকর্ডিং",
       pdfNotes: "পিডিএফ নোটস",
       quizzes: "কুইজসমূহ",
-      loginCampus: "ক্যাম্পাস লগইন",
+      completed: "সম্পন্ন",
+      instructor: "শিক্ষক",
     },
   };
 
@@ -110,6 +118,7 @@ const Campus = () => {
       image: "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png",
       progress: "75%",
       instructor: "Mufti Abdullah",
+      semester: "First Semester",
       outcomeEn:
         "Gain deep foundational knowledge in Quran, Hadith, Fiqh, and Islamic History with modern academic standards.",
       outcomeBn:
@@ -122,10 +131,11 @@ const Campus = () => {
       image: "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png",
       progress: "40%",
       instructor: "Qari Ibrahim",
+      semester: "First Semester",
       outcomeEn:
         "Memorize the Holy Quran accurately with proper Makhraj, Tajweed, and regular revision under expert supervision.",
       outcomeBn:
-        "বিশেষজ্ঞ তত্ত্বাবধানে সঠিক মাখরাজ, তাজবীদ এবং নিয়মিত রিভিশনের মাধ্যমে পবিত্র কুরআন হিফজ সম্পন্ন করুন।",
+        "বিশেষজ্ঞ তত্ত্বাবধানে সঠিক মাখরাজ, তাজবীদ এবং নিয়মিত রিভিশনের মাধ্যমে পবিত্র কুরআন হিফজ সম্পন্ন করুন।",
     },
     {
       id: 3,
@@ -134,6 +144,7 @@ const Campus = () => {
       image: "https://i.ibb.co.com/7tWnV1pB/banner.jpg",
       progress: "90%",
       instructor: "Sheikh Mahmud",
+      semester: "First Semester",
       outcomeEn:
         "Build a strong Islamic moral character alongside essential Arabic language and basic Islamic studies designed for kids.",
       outcomeBn:
@@ -141,290 +152,343 @@ const Campus = () => {
     },
   ];
 
-  const facilities = [
-    {
-      id: "f1",
-      icon: <FaChalkboardTeacher className="text-4xl text-[#004d4d]" />,
-    },
-    { id: "f2", icon: <MdSupportAgent className="text-4xl text-[#004d4d]" /> },
-    { id: "f3", icon: <FaBookOpen className="text-4xl text-[#004d4d]" /> },
-    { id: "f4", icon: <FaUserTie className="text-4xl text-[#004d4d]" /> },
-  ];
+  const filteredCourses = enrolledCourses.filter((course) => {
+    const title = language === "en" ? course.titleEn : course.titleBn;
+    return title.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   return (
-    <div className="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen py-12 px-6 md:px-16 font-sans overflow-hidden">
-      <AnimatePresence mode="wait">
-        {/* ================= COURSE DETAIL VIEW ================= */}
-        {selectedCourse ? (
-          <motion.div
-            key="course-detail"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5 }}
-            className="max-w-6xl mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-gray-100"
-          >
-            <button
-              onClick={() => setSelectedCourse(null)}
-              className="flex items-center gap-2 text-[#004d4d] font-bold mb-6 hover:underline"
-            >
-              <FaArrowLeft /> {t.backToCourses}
-            </button>
+    <div className="bg-gray-50 min-h-screen font-sans">
+      {/* Top Navigation Tabs Bar */}
+      <div className="bg-white border-b border-gray-200 px-6 md:px-16 flex items-center space-x-8 shadow-sm">
+        <Link
+          to="/"
+          onClick={() => setSelectedCourse(null)}
+          className={`py-3 text-sm font-semibold transition-colors relative ${
+            activeTab === "home" && !selectedCourse
+              ? "text-gray-900 border-b-2 border-blue-600"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          {t.homeTab}
+        </Link>
+        <Link
+          to="/campus-dashboard"
+          onClick={() => setSelectedCourse(null)}
+          className={`py-3 text-sm font-semibold transition-colors relative ${
+            activeTab === "dashboard" && !selectedCourse
+              ? "text-gray-900 border-b-2 border-blue-600"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          {t.dashboardTab}
+        </Link>
+        <Link
+          to="/my-courses"
+          onClick={() => setSelectedCourse(null)}
+          className={`py-3 text-sm font-semibold transition-colors relative ${
+            activeTab === "my-courses" && !selectedCourse
+              ? "text-gray-900 border-b-2 border-blue-600"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          {t.myCoursesTab}
+        </Link>
+      </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10 items-center">
-              <div className="lg:col-span-1 h-60 rounded-2xl overflow-hidden shadow-md">
-                <img
-                  src={selectedCourse.image}
-                  alt={selectedCourse.titleEn}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="lg:col-span-2">
-                <span className="bg-teal-100 text-[#004d4d] text-xs font-bold px-3 py-1.5 rounded-full uppercase">
-                  Instructor: {selectedCourse.instructor}
-                </span>
-                <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mt-3 mb-4">
-                  {language === "en"
-                    ? selectedCourse.titleEn
-                    : selectedCourse.titleBn}
-                </h1>
-                <p className="text-gray-600 text-lg">
-                  Progress:{" "}
-                  <span className="font-bold text-[#004d4d]">
-                    {selectedCourse.progress}
-                  </span>{" "}
-                  Completed
-                </p>
-              </div>
-            </div>
-
-            <div className="mb-10 bg-teal-50/60 p-6 rounded-2xl border border-teal-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                {t.outcomeTitle}
-              </h2>
-              <p className="text-gray-700 leading-relaxed text-base">
-                {language === "en"
-                  ? selectedCourse.outcomeEn
-                  : selectedCourse.outcomeBn}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <FaAward className="text-[#004d4d]" /> {t.gradeTitle}
-                </h3>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between p-3.5 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <span className="font-semibold text-gray-800 text-sm">
-                      {t.classTest}
-                    </span>
-                    <span className="text-xs bg-teal-100 text-[#004d4d] px-2.5 py-1 rounded-full font-bold">
-                      A+
-                    </span>
-                  </li>
-                  <li className="flex items-center justify-between p-3.5 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <span className="font-semibold text-gray-800 text-sm">
-                      {t.midTermExam}
-                    </span>
-                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2.5 py-1 rounded-full font-bold">
-                      A
-                    </span>
-                  </li>
-                  <li className="flex items-center justify-between p-3.5 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <span className="font-semibold text-gray-800 text-sm">
-                      {t.finalExam}
-                    </span>
-                    <span className="text-xs bg-gray-200 text-gray-700 px-2.5 py-1 rounded-full font-bold">
-                      Pending
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <FaClipboardList className="text-[#004d4d]" />{" "}
-                  {t.materialsTitle}
-                </h3>
-                <ul className="space-y-3">
-                  <li className="flex items-center justify-between p-3.5 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <span className="font-semibold text-gray-800 text-sm">
-                      Lecture Slide 01
-                    </span>
-                    <span className="text-xs text-blue-600 font-bold hover:underline cursor-pointer">
-                      Download
-                    </span>
-                  </li>
-                  <li className="flex items-center justify-between p-3.5 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <span className="font-semibold text-gray-800 text-sm">
-                      Reference Book PDF
-                    </span>
-                    <span className="text-xs text-blue-600 font-bold hover:underline cursor-pointer">
-                      Download
-                    </span>
-                  </li>
-                  <li className="flex items-center justify-between p-3.5 bg-white rounded-xl shadow-sm border border-gray-100">
-                    <span className="font-semibold text-gray-800 text-sm">
-                      Syllabus Guide
-                    </span>
-                    <span className="text-xs text-blue-600 font-bold hover:underline cursor-pointer">
-                      View
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <FaBookOpen className="text-[#004d4d]" /> {t.modulesTitle}
-                </h3>
-                <ul className="space-y-3">
-                  <li className="flex items-center gap-3 p-3.5 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-teal-300 transition-colors cursor-pointer">
-                    <FaVideo className="text-red-500 text-lg flex-shrink-0" />
-                    <span className="font-semibold text-gray-800 text-sm">
-                      {t.videoRecording}
-                    </span>
-                  </li>
-                  <li className="flex items-center gap-3 p-3.5 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-teal-300 transition-colors cursor-pointer">
-                    <FaFilePdf className="text-blue-500 text-lg flex-shrink-0" />
-                    <span className="font-semibold text-gray-800 text-sm">
-                      {t.pdfNotes}
-                    </span>
-                  </li>
-                  <li className="flex items-center gap-3 p-3.5 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-teal-300 transition-colors cursor-pointer">
-                    <FaQuestionCircle className="text-green-500 text-lg flex-shrink-0" />
-                    <span className="font-semibold text-gray-800 text-sm">
-                      {t.quizzes}
-                    </span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </motion.div>
-        ) : (
-          <>
-            {/* ================= HOME SECTION ================= */}
+      {/* Main Content Area with Routes */}
+      <div className="py-8 px-4 md:px-12 max-w-6xl mx-auto">
+        <AnimatePresence mode="wait">
+          {selectedCourse ? (
+            /* ================= COURSE DETAIL VIEW ================= */
             <motion.div
-              key="home"
+              key="course-detail"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.5 }}
+              transition={{ duration: 0.4 }}
+              className="bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-gray-200"
             >
-              {/* হেডার */}
-              <div className="text-center max-w-3xl mx-auto mb-16">
-                <span className="bg-teal-100 text-[#004d4d] px-4 py-1.5 rounded-full text-sm font-semibold tracking-wide uppercase mb-4 inline-block shadow-sm">
-                  TARBIYAH EDUCATION
-                </span>
-                <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
-                  {t.title}
-                </h1>
-                <p className="text-gray-600 text-lg md:text-xl leading-relaxed">
-                  {t.subtitle}
+              <button
+                onClick={() => setSelectedCourse(null)}
+                className="flex items-center gap-2 text-[#004d4d] font-semibold mb-6 hover:underline"
+              >
+                <FaArrowLeft /> {t.backToCourses}
+              </button>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8 items-center">
+                <div className="lg:col-span-1 h-48 rounded-xl overflow-hidden shadow border border-gray-100">
+                  <img
+                    src={selectedCourse.image}
+                    alt={selectedCourse.titleEn}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="lg:col-span-2">
+                  <span className="bg-teal-50 text-[#004d4d] text-xs font-bold px-3 py-1 rounded-md uppercase border border-teal-100">
+                    {t.instructor}: {selectedCourse.instructor}
+                  </span>
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mt-2 mb-2">
+                    {language === "en"
+                      ? selectedCourse.titleEn
+                      : selectedCourse.titleBn}
+                  </h1>
+                  <p className="text-gray-600 text-sm">
+                    {selectedCourse.semester} • Progress:{" "}
+                    <span className="font-bold text-[#004d4d]">
+                      {selectedCourse.progress}
+                    </span>{" "}
+                    {t.completed}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mb-8 bg-teal-50/40 p-5 rounded-xl border border-teal-100">
+                <h2 className="text-xl font-bold text-gray-900 mb-2">
+                  {t.outcomeTitle}
+                </h2>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  {language === "en"
+                    ? selectedCourse.outcomeEn
+                    : selectedCourse.outcomeBn}
                 </p>
               </div>
 
-              {/* ================= CAMPUS CARDS ================= */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-6xl mx-auto mb-20">
-                {/* Physical Campus Card */}
-                <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden relative group border border-gray-100">
-                  <div className="h-2 bg-[#004d4d] w-full"></div>
-                  <div className="p-8">
-                    <div className="w-14 h-14 bg-teal-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                      <FaBuilding className="text-2xl text-[#004d4d]" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#004d4d] transition-colors">
-                      {t.offlineTitle}
-                    </h2>
-                    <p className="text-gray-600 mb-8 leading-relaxed">
-                      {t.offlineDesc}
-                    </p>
-                    <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 flex items-start gap-4">
-                      <FaMapMarkerAlt className="text-[#004d4d] mt-1 text-xl flex-shrink-0" />
-                      <div>
-                        <h4 className="font-bold text-gray-900 mb-1">
-                          {t.addressTitle}
-                        </h4>
-                        <p className="text-gray-600 text-sm">{t.address}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Virtual Campus Card with Login Button */}
-                <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 overflow-hidden relative group border border-gray-100">
-                  <div className="h-2 bg-yellow-500 w-full"></div>
-                  <div className="p-8">
-                    <div className="w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                      <FaLaptopCode className="text-2xl text-yellow-600" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-yellow-600 transition-colors">
-                      {t.onlineTitle}
-                    </h2>
-                    <p className="text-gray-600 mb-8 leading-relaxed">
-                      {t.onlineDesc}
-                    </p>
-                    <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 flex flex-col gap-4">
-                      <div className="flex items-start gap-4">
-                        <div className="w-3 h-3 rounded-full bg-green-500 mt-1.5 flex-shrink-0 animate-pulse"></div>
-                        <div>
-                          <h4 className="font-bold text-gray-900 mb-1">
-                            {language === "en"
-                              ? "Platform Access:"
-                              : "প্লাটফর্ম অ্যাক্সেস:"}
-                          </h4>
-                          <p className="text-gray-600 text-sm">
-                            {language === "en"
-                              ? "Available 24/7 via Student Portal Login."
-                              : "স্টুডেন্ট পোর্টাল লগইন এর মাধ্যমে ২৪/৭ উপলব্ধ।"}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Login Campus Button */}
-                      <Link to="/campus-login">
-                        <button className="w-full bg-[#004d4d] hover:bg-teal-800 text-white font-semibold py-2.5 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
-                          <FaLaptopCode className="text-lg" />
-                          {t.loginCampus}
-                        </button>
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* ================= FACILITIES ================= */}
-              <div className="max-w-6xl mx-auto bg-white p-10 md:p-14 rounded-3xl shadow-xl border border-gray-100">
-                <div className="text-center mb-12">
-                  <h3 className="text-3xl font-bold text-gray-900 mb-3">
-                    {t.facilitiesTitle}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                  <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <FaAward className="text-[#004d4d]" /> {t.gradeTitle}
                   </h3>
-                  <div className="w-20 h-1.5 bg-[#004d4d] mx-auto rounded-full"></div>
+                  <ul className="space-y-2.5">
+                    <li className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm">
+                      <span className="font-medium text-gray-700">
+                        {t.classTest}
+                      </span>
+                      <span className="text-xs bg-teal-100 text-[#004d4d] px-2 py-0.5 rounded font-bold">
+                        A+
+                      </span>
+                    </li>
+                    <li className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm">
+                      <span className="font-medium text-gray-700">
+                        {t.midTermExam}
+                      </span>
+                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded font-bold">
+                        A
+                      </span>
+                    </li>
+                    <li className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm">
+                      <span className="font-medium text-gray-700">
+                        {t.finalExam}
+                      </span>
+                      <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold">
+                        Pending
+                      </span>
+                    </li>
+                  </ul>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                  {facilities.map((facility) => (
-                    <div
-                      key={facility.id}
-                      className="flex flex-col items-center text-center p-6 bg-gray-50 rounded-2xl border border-gray-100 hover:border-teal-100 hover:shadow-lg transition-all duration-300 group"
-                    >
-                      <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-5 group-hover:bg-[#004d4d] transition-colors duration-300">
-                        <div className="group-hover:text-white transition-colors duration-300">
-                          {facility.icon}
-                        </div>
-                      </div>
-                      <p className="font-bold text-gray-800 text-lg leading-snug group-hover:text-[#004d4d] transition-colors">
-                        {t[facility.id]}
-                      </p>
-                    </div>
-                  ))}
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                  <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <FaClipboardList className="text-[#004d4d]" />{" "}
+                    {t.materialsTitle}
+                  </h3>
+                  <ul className="space-y-2.5">
+                    <li className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm">
+                      <span className="font-medium text-gray-700">
+                        Lecture Slide 01
+                      </span>
+                      <span className="text-xs text-blue-600 font-semibold hover:underline cursor-pointer">
+                        Download
+                      </span>
+                    </li>
+                    <li className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm">
+                      <span className="font-medium text-gray-700">
+                        Reference Book PDF
+                      </span>
+                      <span className="text-xs text-blue-600 font-semibold hover:underline cursor-pointer">
+                        Download
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
+                  <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+                    <FaBookOpen className="text-[#004d4d]" /> {t.modulesTitle}
+                  </h3>
+                  <ul className="space-y-2.5">
+                    <li className="flex items-center gap-2.5 p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm hover:bg-teal-50/50 cursor-pointer">
+                      <FaVideo className="text-red-500 text-sm flex-shrink-0" />
+                      <span className="font-medium text-gray-700">
+                        {t.videoRecording}
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2.5 p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm hover:bg-teal-50/50 cursor-pointer">
+                      <FaFilePdf className="text-blue-500 text-sm flex-shrink-0" />
+                      <span className="font-medium text-gray-700">
+                        {t.pdfNotes}
+                      </span>
+                    </li>
+                    <li className="flex items-center gap-2.5 p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm hover:bg-teal-50/50 cursor-pointer">
+                      <FaQuestionCircle className="text-green-500 text-sm flex-shrink-0" />
+                      <span className="font-medium text-gray-700">
+                        {t.quizzes}
+                      </span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+          ) : (
+            <Routes>
+              {/* ================= HOME ROUTE (/) ================= */}
+              <Route
+                path="/"
+                element={
+                  <motion.div
+                    key="home"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="space-y-8"
+                  >
+                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                      {t.homeTitle}
+                    </h1>
+
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-4xl">
+                      <h2 className="text-xl font-bold text-gray-900 mb-1">
+                        {t.virtualCampusTitle}
+                      </h2>
+                      <p className="text-gray-600 text-sm">
+                        {t.virtualCampusDesc}
+                      </p>
+                    </div>
+
+                    <div className="space-y-3 max-w-4xl">
+                      <h2 className="text-2xl font-bold text-gray-900">
+                        {t.noticeBoard}
+                      </h2>
+                      <div className="bg-[#d2e8ec] text-[#0a4654] p-4 rounded-md text-sm border border-[#bce0e6]">
+                        {t.noNotice}
+                      </div>
+                    </div>
+                  </motion.div>
+                }
+              />
+
+              {/* ================= DASHBOARD ROUTE (/dashboard) ================= */}
+              <Route
+                path="/dashboard"
+                element={
+                  <motion.div
+                    key="dashboard"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6"
+                  >
+                    <h2 className="text-xl font-bold text-gray-900">
+                      Dashboard Overview
+                    </h2>
+                    <p className="text-sm text-gray-600">
+                      Welcome back to your Tarbiyah Campus dashboard. Here is a
+                      summary of your academic activities.
+                    </p>
+                    {/* Additional dashboard components can go here */}
+                  </motion.div>
+                }
+              />
+
+              {/* ================= MY COURSES ROUTE (/my-courses) ================= */}
+              <Route
+                path="/my-courses"
+                element={
+                  <motion.div
+                    key="my-courses"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6"
+                  >
+                    <h2 className="text-xl font-bold text-gray-900">
+                      {t.courseOverview}
+                    </h2>
+
+                    <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-100">
+                      <div className="flex items-center gap-2">
+                        <button className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-md border border-gray-300">
+                          {t.all}
+                        </button>
+                        <div className="relative flex-1 sm:w-64">
+                          <FaSearch className="absolute left-3 top-3 text-gray-400 text-xs" />
+                          <input
+                            type="text"
+                            placeholder={t.searchPlaceholder}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-9 pr-4 py-1.5 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:border-[#004d4d]"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <select className="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none">
+                          <option>{t.sortCourse}</option>
+                        </select>
+                        <select className="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none">
+                          <option>{t.cardView}</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredCourses.map((course) => (
+                        <div
+                          key={course.id}
+                          onClick={() => setSelectedCourse(course)}
+                          className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col justify-between"
+                        >
+                          <div className="h-36 w-full overflow-hidden bg-gray-100 relative">
+                            <img
+                              src={course.image}
+                              alt={course.titleEn}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="p-4 flex flex-col flex-grow justify-between">
+                            <div>
+                              <h3 className="font-bold text-[#004d4d] text-base hover:underline mb-1">
+                                {language === "en"
+                                  ? course.titleEn
+                                  : course.titleBn}
+                              </h3>
+                              <p className="text-xs text-gray-500">
+                                {course.semester}
+                              </p>
+                            </div>
+                            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                              <span className="text-xs text-gray-600 font-medium">
+                                {course.progress} {t.completed}
+                              </span>
+                              <button className="text-gray-400 hover:text-gray-600 p-1">
+                                <FaEllipsisV className="text-xs" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+                }
+              />
+            </Routes>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

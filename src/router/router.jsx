@@ -168,6 +168,8 @@ import Imam_nabawi_details from "../Components/Imam_nabawi_details/Imam_nabawi_d
 import Surahmulk_details from "../Components/Surahmulk_details/Surahmulk_details";
 import Student_attendance from "../Components/Student_attendance/Student_attendance";
 import Course_notice from "../Components/Course_notice/Course_notice";
+import Campus_dashboard from "../Components/Campus_dashboard/Campus_dashboard";
+import My_courses from "../Components/My_courses/My_courses";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -523,6 +525,14 @@ export const router = createBrowserRouter([
   {
     path: "/course-notices/AQD-101",
     element: <Course_notice></Course_notice>,
+  },
+  {
+    path: "/campus-dashboard",
+    element: <Campus_dashboard></Campus_dashboard>,
+  },
+  {
+    path: "/my-courses",
+    element: <My_courses></My_courses>,
   },
 
   // ==========================================

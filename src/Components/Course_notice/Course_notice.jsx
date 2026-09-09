@@ -1,8 +1,6 @@
 // src/Components/Course_notice/Course_notice.jsx
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import Navbar from "../../Components/Navbar/Navbar";
-import Footer from "../../Components/Navbar/Footer/Footer";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -95,8 +93,6 @@ const Course_notice = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <Navbar />
-
       <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center">
         <h1 className="text-sm font-bold text-gray-800">Course Pane</h1>
         <button
@@ -243,7 +239,6 @@ const Course_notice = () => {
           </div>
         </main>
       </div>
-      <Footer />
     </div>
   );
 };
