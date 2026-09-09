@@ -41,6 +41,10 @@ const Class_routine = () => {
         en: "Quran for Elders",
         bn: "কুরআন ফর এল্ডারস",
       },
+      quranStudies: {
+        en: "Department Of Quran Studies",
+        bn: "ডিপার্টমেন্ট অব কুরআন স্টাডিজ",
+      },
     },
     tableHeaders: {
       day: { en: "Day", bn: "বার" },
@@ -58,13 +62,9 @@ const Class_routine = () => {
       en: "Download",
       bn: "ডাউনলোড",
     },
-    noRoutine: {
-      en: "No routine found for this program.",
-      bn: "এই প্রোগ্রামের জন্য কোনো রুটিন পাওয়া যায়নি।",
-    },
   };
 
-  // রুটিন ডেটা (ভাষা অনুযায়ী নাম এবং স্ট্যাটাস পরিবর্তন হবে)
+  // সাধারণ লিস্ট রুটিন ডেটা (Diploma)
   const routineData = [
     {
       key: "diploma",
@@ -78,57 +78,193 @@ const Class_routine = () => {
       teacher: { en: "Sheikh Ahmed", bn: "শায়খ আহমেদ" },
       status: { en: "Live", bn: "লাইভ" },
     },
-    {
-      key: "alemiah",
-      day: { en: "Sunday", bn: "রবিবার" },
-      program: {
-        en: "Tarbiyah Alemiah Program",
-        bn: "তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
-      },
-      subject: { en: "Nahw & Sarf", bn: "নাহু ও সরফ" },
-      time: { en: "07:30 PM - 09:00 PM", bn: "রাত ০৭:৩০ - ০৯:০০" },
-      teacher: { en: "Ustadh Ibrahim", bn: "ওস্তাদ ইব্রাহিম" },
-      status: { en: "Live", bn: "লাইভ" },
-    },
-    {
-      key: "kids",
-      day: { en: "Monday", bn: "সোমবার" },
-      program: {
-        en: "Tarbiyah Studies for Kids",
-        bn: "তারবিয়াহ স্টাডিজ ফর কিডস",
-      },
-      subject: { en: "Basic Arabic & Dua", bn: "বেসিক আরবি ও দোয়া" },
-      time: { en: "05:00 PM - 06:00 PM", bn: "বিকাল ০৫:০০ - ০৬:০০" },
-      teacher: { en: "Ustadha Maryam", bn: "ওস্তাদা মরিয়ম" },
-      status: { en: "Live", bn: "লাইভ" },
-      isKids: true, // কিডস এর জন্য ফ্ল্যাগ যোগ করা হলো
-    },
-    {
-      key: "quran",
-      day: { en: "Tuesday", bn: "মঙ্গলবার" },
-      program: {
-        en: "Quran for Elders",
-        bn: "কুরআন ফর এল্ডারস",
-      },
-      subject: {
-        en: "Qaida Nuraniyah & Tajweed",
-        bn: "কায়েদা নূরানিয়া ও তাজবীদ",
-      },
-      time: { en: "08:00 PM - 09:30 PM", bn: "রাত ০৮:০০ - ০৯:৩০" },
-      teacher: {
-        en: "Jubayer Ustad & Sumaiya Afrin",
-        bn: "জুবায়ের ওস্তাদ ও সুমাইয়া আফরিন",
-      },
-      status: { en: "Live", bn: "লাইভ" },
-      isElders: true,
-    },
   ];
 
-  // ফিল্টার লজিক
-  const filteredData =
-    selectedFilter === "All"
-      ? routineData
-      : routineData.filter((item) => item.key === selectedFilter);
+  // ১. Department Of Quran Studies (Matrix Grid Format)
+  const quranStudiesMatrix = {
+    key: "quranStudies",
+    title: {
+      en: "Department Of Quran Studies (Edition - September-2026)",
+      bn: "ডিপার্টমেন্ট অব কুরআন স্টাডিজ (সংস্করণ - সেপ্টেম্বর ২০২৬)",
+    },
+    fileUrl: "10z7GLK8JU3mi6JN-PvUeWD1dZdaXsz5n",
+    times: [
+      "6:00 – 8:00 AM",
+      "2:00 – 4:00 PM",
+      "6:00 – 8:00 PM",
+      "7:00 – 9:00 PM",
+      "9:00 – 11:00 PM",
+    ],
+    days: ["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    schedule: {
+      "6:00 – 8:00 AM": {
+        Tuesday: [{ sub: "Hifz / Nazeera / Nurani", teacher: "Reguler Batch" }],
+        Wednesday: [
+          { sub: "Hifz / Nazeera / Nurani", teacher: "Reguler Batch" },
+        ],
+        Thursday: [
+          { sub: "Hifz / Nazeera / Nurani", teacher: "Reguler Batch" },
+        ],
+        Friday: [{ sub: "Hifz / Nazeera / Nurani", teacher: "Reguler Batch" }],
+        Saturday: [],
+        Sunday: [],
+      },
+      "2:00 – 4:00 PM": {
+        Tuesday: [],
+        Wednesday: [],
+        Thursday: [],
+        Friday: [],
+        Saturday: [{ sub: "Nurani / Nazeera", teacher: "OVS Batch" }],
+        Sunday: [{ sub: "Nurani / Nazeera", teacher: "OVS Batch" }],
+      },
+      "6:00 – 8:00 PM": {
+        Tuesday: [{ sub: "Hifz / Nazeera / Nurani", teacher: "Reguler Batch" }],
+        Wednesday: [
+          { sub: "Hifz / Nazeera / Nurani", teacher: "Reguler Batch" },
+        ],
+        Thursday: [
+          { sub: "Hifz / Nazeera / Nurani", teacher: "Reguler Batch" },
+        ],
+        Friday: [{ sub: "Hifz / Nazeera / Nurani", teacher: "Reguler Batch" }],
+        Saturday: [],
+        Sunday: [],
+      },
+      "7:00 – 9:00 PM": {
+        Tuesday: [],
+        Wednesday: [],
+        Thursday: [],
+        Friday: [],
+        Saturday: [{ sub: "Nurani / Nazeera", teacher: "OVS Batch" }],
+        Sunday: [{ sub: "Nurani / Nazeera", teacher: "OVS Batch" }],
+      },
+      "9:00 – 11:00 PM": {
+        Tuesday: [{ sub: "Hifz / Nazeera", teacher: "Reguler Batch" }],
+        Wednesday: [{ sub: "Hifz / Nazeera", teacher: "Reguler Batch" }],
+        Thursday: [{ sub: "Hifz / Nazeera", teacher: "Reguler Batch" }],
+        Friday: [{ sub: "Hifz / Nazeera", teacher: "Reguler Batch" }],
+        Saturday: [],
+        Sunday: [],
+      },
+    },
+  };
+
+  // ২. Tarbiyah Alemiah Program (Matrix Grid Format)
+  const alimiyyahMatrix = {
+    key: "alemiah",
+    title: {
+      en: "Tarbiyah Alemiah Program Schedule (September-December 2026)",
+      bn: "তারবিয়াহ আলেমিয়াহ প্রোগ্রাম রুটিন (সেপ্টেম্বর-ডিসেম্বর ২০২৬)",
+    },
+    fileUrl: "10z7GLK8JU3mi6JN-PvUeWD1dZdaXsz5n",
+    times: ["6:40 – 7:20 PM", "7:21 – 8:00 PM", "8:01 – 8:40 PM"],
+    days: ["Thursday", "Friday", "Saturday", "Sunday"],
+    schedule: {
+      "6:40 – 7:20 PM": {
+        Thursday: [
+          { sub: "Quran Studies (Basic 4-5)", teacher: "Jubair Hussain" },
+          { sub: "Fiqh & Dua (Basic 1)", teacher: "Imam Husain" },
+        ],
+        Friday: [{ sub: "Seerah (Basic 4-5)", teacher: "Al Amin" }],
+        Saturday: [
+          { sub: "Reading Arabic (Advanced)", teacher: "Atiqullah Shahid" },
+        ],
+        Sunday: [],
+      },
+      "7:21 – 8:00 PM": {
+        Thursday: [
+          { sub: "Reading Arabic (Basic 4-5)", teacher: "Atiqullah Shahid" },
+          { sub: "Hadith (Basic 1)", teacher: "Abdullah Al-Mamun" },
+        ],
+        Friday: [
+          { sub: "Spoken Arabic (Basic 4-5)", teacher: "Atiqullah Shahid" },
+        ],
+        Saturday: [
+          { sub: "Quran Studies (Advanced)", teacher: "Jubair Hussain" },
+        ],
+        Sunday: [{ sub: "Fiqh (Advanced)", teacher: "Al Amin" }],
+      },
+      "8:01 – 8:40 PM": {
+        Thursday: [
+          { sub: "Hadith Studies (Basic 4-5)", teacher: "Al Amin" },
+          { sub: "Quran Studies (Basic 1)", teacher: "Jubair Hussain" },
+        ],
+        Friday: [{ sub: "Fiqh (Basic 4-5)", teacher: "Abdullah Al-Mamun" }],
+        Saturday: [
+          { sub: "Spoken Arabic (Advanced)", teacher: "Atiqullah Shahid" },
+        ],
+        Sunday: [
+          { sub: "Islamic History (Advanced)", teacher: "Hussain Hidoy" },
+        ],
+      },
+    },
+  };
+
+  // ৩. Quran for Elders (Matrix Grid)
+  const quranForEldersMatrix = {
+    key: "quran",
+    title: {
+      en: "Quran for Elders (Edition - September-2026)",
+      bn: "কুরআন ফর এল্ডারস (সংস্করণ - সেপ্টেম্বর ২০২৬)",
+    },
+    fileUrl: "10z7GLK8JU3mi6JN-PvUeWD1dZdaXsz5n",
+    times: ["6:00 – 7:00 AM", "3:00 – 4:30 PM", "8:00 – 9:00 PM"],
+    days: ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday"],
+    schedule: {
+      "6:00 – 7:00 AM": {
+        Saturday: [
+          { sub: "QAIDA NURANIYAH Batch-03", teacher: "Jubayer Ustad" },
+          { sub: "QAIDA NURANIYAH Batch-03", teacher: "Suraiya Afrin" },
+        ],
+        Sunday: [],
+        Monday: [
+          { sub: "QAIDA NURANIYAH Batch-03", teacher: "Jubayer Ustad" },
+          { sub: "QAIDA NURANIYAH Batch-03", teacher: "Suraiya Afrin" },
+        ],
+        Tuesday: [],
+        Wednesday: [],
+      },
+      "3:00 – 4:30 PM": {
+        Saturday: [],
+        Sunday: [
+          { sub: "Basic Tajweed Batch-06", teacher: "Jubayer Ustad" },
+          { sub: "Basic Tajweed Batch-06", teacher: "Suraiya Afrin" },
+        ],
+        Monday: [{ sub: "QAIDA NURANIYAH Batch-03", teacher: "Suraiya Afrin" }],
+        Tuesday: [
+          { sub: "Basic Tajweed Batch-06", teacher: "Jubayer Ustad" },
+          { sub: "Basic Tajweed Batch-06", teacher: "Suraiya Afrin" },
+        ],
+        Wednesday: [],
+      },
+      "8:00 – 9:00 PM": {
+        Saturday: [
+          { sub: "QAIDA NURANIYAH Batch-03", teacher: "Jubayer Ustad" },
+          { sub: "QAIDA NURANIYAH Batch-03", teacher: "Suraiya Afrin" },
+          { sub: "Najera Batch-02", teacher: "Jubayer Ustad" },
+          { sub: "Najera Batch-02", teacher: "Suraiya Afrin" },
+        ],
+        Sunday: [{ sub: "Basic Tajweed Batch-06", teacher: "Suraiya Afrin" }],
+        Monday: [
+          { sub: "QAIDA NURANIYAH Batch-03", teacher: "Jubayer Ustad" },
+          { sub: "QAIDA NURANIYAH Batch-03", teacher: "Suraiya Afrin" },
+          { sub: "Najera Batch-02", teacher: "Jubayer Ustad" },
+          { sub: "Najera Batch-02", teacher: "Suraiya Afrin" },
+        ],
+        Tuesday: [{ sub: "Basic Tajweed Batch-06", teacher: "Suraiya Afrin" }],
+        Wednesday: [{ sub: "Najera Batch-02", teacher: "Suraiya Afrin" }],
+      },
+    },
+  };
+
+  // ফিল্টার দৃশ্যমানতা লজিক
+  const showStandardTable =
+    selectedFilter === "All" || selectedFilter === "diploma";
+  const showQuranStudies =
+    selectedFilter === "All" || selectedFilter === "quranStudies";
+  const showAlimiyyahSchedule =
+    selectedFilter === "All" || selectedFilter === "alemiah";
+  const showQuranForElders =
+    selectedFilter === "All" || selectedFilter === "quran";
 
   return (
     <div className="bg-gray-50 min-h-screen py-10 px-6 md:px-16">
@@ -154,29 +290,39 @@ const Class_routine = () => {
             <option value="All">{t(content.allPrograms)}</option>
             <option value="diploma">{t(content.programs.diploma)}</option>
             <option value="alemiah">{t(content.programs.alemiah)}</option>
-            <option value="kids">{t(content.programs.kids)}</option>
+            <option value="quranStudies">
+              {t(content.programs.quranStudies)}
+            </option>
             <option value="quran">{t(content.programs.quran)}</option>
           </select>
         </div>
       </div>
 
-      {/* রুটিন টেবিল */}
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#004d4d] text-white text-sm">
-                <th className="py-4 px-6">{t(content.tableHeaders.day)}</th>
-                <th className="py-4 px-6">{t(content.tableHeaders.program)}</th>
-                <th className="py-4 px-6">{t(content.tableHeaders.subject)}</th>
-                <th className="py-4 px-6">{t(content.tableHeaders.time)}</th>
-                <th className="py-4 px-6">{t(content.tableHeaders.teacher)}</th>
-                <th className="py-4 px-6">{t(content.tableHeaders.status)}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200 text-sm text-gray-700">
-              {filteredData.length > 0 ? (
-                filteredData.map((item, index) => (
+      {/* ১. সাধারণ টেবিল (Diploma) */}
+      {showStandardTable && (
+        <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden mb-8">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-[#004d4d] text-white text-sm">
+                  <th className="py-4 px-6">{t(content.tableHeaders.day)}</th>
+                  <th className="py-4 px-6">
+                    {t(content.tableHeaders.program)}
+                  </th>
+                  <th className="py-4 px-6">
+                    {t(content.tableHeaders.subject)}
+                  </th>
+                  <th className="py-4 px-6">{t(content.tableHeaders.time)}</th>
+                  <th className="py-4 px-6">
+                    {t(content.tableHeaders.teacher)}
+                  </th>
+                  <th className="py-4 px-6">
+                    {t(content.tableHeaders.status)}
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 text-sm text-gray-700">
+                {routineData.map((item, index) => (
                   <tr
                     key={index}
                     className="hover:bg-gray-50 transition-colors"
@@ -189,76 +335,260 @@ const Class_routine = () => {
                     <td className="py-4 px-6 text-gray-600">{t(item.time)}</td>
                     <td className="py-4 px-6">{t(item.teacher)}</td>
                     <td className="py-4 px-6">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {/* স্ট্যাটাস ব্যাজ */}
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-bold ${
-                            item.status.en === "Live"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {t(item.status)}
-                        </span>
-
-                        {/* যদি এটি Quran for Elders হয় */}
-                        {item.isElders && (
-                          <div className="files-btn flex items-center gap-1.5 ml-2">
-                            <a
-                              href="https://drive.google.com/file/d/10z7GLK8JU3mi6JN-PvUeWD1dZdaXsz5n/view?usp=sharing"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="bg-teal-700 text-white px-2.5 py-1 rounded text-xs font-medium hover:bg-teal-800 transition-colors"
-                            >
-                              {t(content.viewBtn)}
-                            </a>
-                            <a
-                              href="https://drive.google.com/uc?export=download&id=10z7GLK8JU3mi6JN-PvUeWD1dZdaXsz5n"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="bg-[#004d4d] text-white px-2.5 py-1 rounded text-xs font-medium hover:bg-teal-900 transition-colors"
-                            >
-                              {t(content.downloadBtn)}
-                            </a>
-                          </div>
-                        )}
-
-                        {/* যদি এটি Tarbiyah Studies for Kids হয় */}
-                        {item.isKids && (
-                          <div className="files-btn flex items-center gap-1.5 ml-2">
-                            <a
-                              href="https://drive.google.com/file/d/17hj_OlfL20a6lMlISENA5gO6yifJz6lQ/view?usp=sharing"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="bg-teal-700 text-white px-2.5 py-1 rounded text-xs font-medium hover:bg-teal-800 transition-colors"
-                            >
-                              {t(content.viewBtn)}
-                            </a>
-                            <a
-                              href="https://drive.google.com/uc?export=download&id=17hj_OlfL20a6lMlISENA5gO6yifJz6lQ"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="bg-[#004d4d] text-white px-2.5 py-1 rounded text-xs font-medium hover:bg-teal-900 transition-colors"
-                            >
-                              {t(content.downloadBtn)}
-                            </a>
-                          </div>
-                        )}
-                      </div>
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                        {t(item.status)}
+                      </span>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="6" className="text-center py-6 text-gray-500">
-                    {t(content.noRoutine)}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* ২. Tarbiyah Alemiah Program (Matrix Grid) */}
+      {showAlimiyyahSchedule && (
+        <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden mb-8 border border-gray-200">
+          <div className="bg-[#004d4d] text-white px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h2 className="text-lg font-bold">{t(alimiyyahMatrix.title)}</h2>
+            <div className="flex items-center gap-2">
+              <a
+                href={`https://drive.google.com/file/d/${alimiyyahMatrix.fileUrl}/view?usp=sharing`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-teal-700 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-teal-800 transition-colors"
+              >
+                {t(content.viewBtn)}
+              </a>
+              <a
+                href={`https://drive.google.com/uc?export=download&id=${alimiyyahMatrix.fileUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white text-[#004d4d] px-3 py-1.5 rounded text-xs font-semibold hover:bg-gray-100 transition-colors"
+              >
+                {t(content.downloadBtn)}
+              </a>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-center border-collapse">
+              <thead>
+                <tr className="bg-gray-100 text-gray-700 text-sm border-b">
+                  <th className="py-3 px-4 border-r font-bold">
+                    {t(content.tableHeaders.time)}
+                  </th>
+                  {alimiyyahMatrix.days.map((day, dIdx) => (
+                    <th key={dIdx} className="py-3 px-4 border-r font-bold">
+                      {day}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 text-sm text-gray-700">
+                {alimiyyahMatrix.times.map((timeSlot, tIdx) => (
+                  <tr key={tIdx} className="hover:bg-gray-50">
+                    <td className="py-4 px-4 font-semibold bg-gray-50 border-r text-[#004d4d]">
+                      {timeSlot}
+                    </td>
+                    {alimiyyahMatrix.days.map((day, dIdx) => {
+                      const classList =
+                        alimiyyahMatrix.schedule[timeSlot]?.[day];
+                      return (
+                        <td
+                          key={dIdx}
+                          className="py-4 px-4 border-r align-middle"
+                        >
+                          {classList && classList.length > 0 ? (
+                            classList.map((cls, cIdx) => (
+                              <div
+                                key={cIdx}
+                                className="bg-blue-50 border border-blue-100 p-2 rounded-md mb-1 last:mb-0"
+                              >
+                                <p className="font-bold text-teal-900 text-xs">
+                                  {cls.sub}
+                                </p>
+                                <p className="text-gray-600 text-[11px] mt-0.5">
+                                  {cls.teacher}
+                                </p>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-gray-300 font-bold">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ৩. Department Of Quran Studies (Matrix Grid) */}
+      {showQuranStudies && (
+        <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden mb-8 border border-gray-200">
+          <div className="bg-[#004d4d] text-white px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h2 className="text-lg font-bold">{t(quranStudiesMatrix.title)}</h2>
+            <div className="flex items-center gap-2">
+              <a
+                href={`https://drive.google.com/file/d/${quranStudiesMatrix.fileUrl}/view?usp=sharing`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-teal-700 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-teal-800 transition-colors"
+              >
+                {t(content.viewBtn)}
+              </a>
+              <a
+                href={`https://drive.google.com/uc?export=download&id=${quranStudiesMatrix.fileUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white text-[#004d4d] px-3 py-1.5 rounded text-xs font-semibold hover:bg-gray-100 transition-colors"
+              >
+                {t(content.downloadBtn)}
+              </a>
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-center border-collapse">
+              <thead>
+                <tr className="bg-gray-100 text-gray-700 text-sm border-b">
+                  <th className="py-3 px-4 border-r font-bold">
+                    {t(content.tableHeaders.time)}
+                  </th>
+                  {quranStudiesMatrix.days.map((day, dIdx) => (
+                    <th key={dIdx} className="py-3 px-4 border-r font-bold">
+                      {day}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 text-sm text-gray-700">
+                {quranStudiesMatrix.times.map((timeSlot, tIdx) => (
+                  <tr key={tIdx} className="hover:bg-gray-50">
+                    <td className="py-4 px-4 font-semibold bg-gray-50 border-r text-[#004d4d]">
+                      {timeSlot}
+                    </td>
+                    {quranStudiesMatrix.days.map((day, dIdx) => {
+                      const classList =
+                        quranStudiesMatrix.schedule[timeSlot]?.[day];
+                      return (
+                        <td
+                          key={dIdx}
+                          className="py-4 px-4 border-r align-middle"
+                        >
+                          {classList && classList.length > 0 ? (
+                            classList.map((cls, cIdx) => (
+                              <div
+                                key={cIdx}
+                                className="bg-teal-50 border border-teal-100 p-2 rounded-md mb-1 last:mb-0"
+                              >
+                                <p className="font-bold text-teal-900 text-xs">
+                                  {cls.sub}
+                                </p>
+                                <p className="text-gray-600 text-[11px] mt-0.5">
+                                  {cls.teacher}
+                                </p>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-gray-300 font-bold">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ৪. Quran for Elders Matrix Grid */}
+      {showQuranForElders && (
+        <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-md overflow-hidden mb-8 border border-gray-200">
+          <div className="bg-[#004d4d] text-white px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <h2 className="text-lg font-bold">
+              {t(quranForEldersMatrix.title)}
+            </h2>
+            <div className="flex items-center gap-2">
+              <a
+                href={`https://drive.google.com/file/d/${quranForEldersMatrix.fileUrl}/view?usp=sharing`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-teal-700 text-white px-3 py-1.5 rounded text-xs font-medium hover:bg-teal-800 transition-colors"
+              >
+                {t(content.viewBtn)}
+              </a>
+              <a
+                href={`https://drive.google.com/uc?export=download&id=${quranForEldersMatrix.fileUrl}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white text-[#004d4d] px-3 py-1.5 rounded text-xs font-semibold hover:bg-gray-100 transition-colors"
+              >
+                {t(content.downloadBtn)}
+              </a>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-center border-collapse">
+              <thead>
+                <tr className="bg-gray-100 text-gray-700 text-sm border-b">
+                  <th className="py-3 px-4 border-r font-bold">
+                    {t(content.tableHeaders.time)}
+                  </th>
+                  {quranForEldersMatrix.days.map((day, dIdx) => (
+                    <th key={dIdx} className="py-3 px-4 border-r font-bold">
+                      {day}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 text-sm text-gray-700">
+                {quranForEldersMatrix.times.map((timeSlot, tIdx) => (
+                  <tr key={tIdx} className="hover:bg-gray-50">
+                    <td className="py-4 px-4 font-semibold bg-gray-50 border-r text-[#004d4d]">
+                      {timeSlot}
+                    </td>
+                    {quranForEldersMatrix.days.map((day, dIdx) => {
+                      const classList =
+                        quranForEldersMatrix.schedule[timeSlot]?.[day];
+                      return (
+                        <td
+                          key={dIdx}
+                          className="py-4 px-4 border-r align-middle"
+                        >
+                          {classList && classList.length > 0 ? (
+                            classList.map((cls, cIdx) => (
+                              <div
+                                key={cIdx}
+                                className="bg-blue-50 border border-blue-100 p-2 rounded-md mb-1 last:mb-0"
+                              >
+                                <p className="font-bold text-teal-900 text-xs">
+                                  {cls.sub}
+                                </p>
+                                <p className="text-gray-600 text-[11px] mt-0.5">
+                                  {cls.teacher}
+                                </p>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-gray-300 font-bold">—</span>
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
