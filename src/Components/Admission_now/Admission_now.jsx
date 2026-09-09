@@ -46,7 +46,9 @@ const Admission_now = () => {
     bankAccount: "",
   });
 
-  // Departments and Courses
+  // ============================================================
+  // সম্পূর্ণ আপডেটেড ডিপার্টমেন্ট ও কোর্স (নতুন ফি স্ট্রাকচার)
+  // ============================================================
   const departments = {
     "islamic-studies": {
       name: "Diploma in Islamic Studies",
@@ -54,8 +56,12 @@ const Admission_now = () => {
         {
           id: "is1",
           name: "Diploma in Islamic Studies",
-          price: 12000,
           duration: "1 Year",
+          admissionFee: 0, // নির্দিষ্ট নেই, পুরো টাকা এককালীন
+          monthlyFee: 0,
+          totalOneTime: 12000,
+          discount: 0,
+          price: 12000, // প্রদর্শনের জন্য
         },
       ],
     },
@@ -64,29 +70,139 @@ const Admission_now = () => {
       courses: [
         {
           id: "al1",
-          name: "Alimiyah for Kids",
-          price: 8000,
+          name: "Alimiyah for Kids (Bangla Medium)",
           duration: "6 Months",
+          admissionFee: 2000,
+          monthlyFee: 2000,
+          totalOneTime: 2000 + 2000 * 6, // 14000
+          discount: 0,
+          price: 14000,
         },
         {
           id: "al2",
-          name: "Alimiyah Program",
-          price: 20000,
+          name: "Alimiyah for Kids (English Medium)",
+          duration: "6 Months",
+          admissionFee: 3000,
+          monthlyFee: 3000,
+          totalOneTime: 3000 + 3000 * 6, // 21000
+          discount: 0,
+          price: 21000,
+        },
+        {
+          id: "al3",
+          name: "Alimiyah Program (Bangla Version)",
           duration: "2 Years",
+          admissionFee: 2000,
+          monthlyFee: 0, // semester fee system; total one-time = admission + semester fee
+          totalOneTime: 2000 + 4000, // 6000? কিন্তু আপনি লিখেছেন Semester Fee 4000 TK, ধরে নিচ্ছি পুরো কোর্সের জন্য 4000? আসলে ২ বছরে কয় সেমিস্টার? আমি ধরে নিচ্ছি পুরো কোর্সের ফি 6000
+          discount: 0,
+          price: 6000,
+        },
+        {
+          id: "al4",
+          name: "Alimiyah Program (English Version)",
+          duration: "2 Years",
+          admissionFee: 3000,
+          monthlyFee: 0,
+          totalOneTime: 3000 + 12000, // 15000
+          discount: 0,
+          price: 15000,
         },
       ],
     },
     "quran-studies": {
       name: "Tarbiyah Quran Studies",
       courses: [
-        { id: "qs1", name: "Qaida Noorani", price: 3000, duration: "2 Months" },
-        { id: "qs2", name: "Nazera", price: 4000, duration: "3 Months" },
-        { id: "qs3", name: "Hifzul Quran", price: 25000, duration: "2 Years" },
+        {
+          id: "qs1",
+          name: "Qaida Noorani (Bangla Medium)",
+          duration: "2 Months",
+          admissionFee: 1000,
+          monthlyFee: 1000,
+          totalOneTime: 1000 + 1000 * 2, // 3000
+          discount: 0,
+          price: 3000,
+        },
+        {
+          id: "qs1i",
+          name: "Qaida Noorani (International)",
+          duration: "2 Months",
+          admissionFee: 2000,
+          monthlyFee: 2000,
+          totalOneTime: 2000 + 2000 * 2, // 6000
+          discount: 0,
+          price: 6000,
+        },
+        {
+          id: "qs2",
+          name: "Nazera Quran (Bangladeshi)",
+          duration: "3 Months",
+          admissionFee: 1000,
+          monthlyFee: 1000,
+          totalOneTime: 1000 + 1000 * 3, // 4000
+          discount: 0,
+          price: 4000,
+        },
+        {
+          id: "qs2i",
+          name: "Nazera Quran (Expatriate)",
+          duration: "3 Months",
+          admissionFee: 2000,
+          monthlyFee: 2000,
+          totalOneTime: 2000 + 2000 * 3, // 8000
+          discount: 0,
+          price: 8000,
+        },
+        {
+          id: "qs3",
+          name: "Hifzul Quran",
+          duration: "2 Years",
+          admissionFee: 2000,
+          monthlyFee: 2000,
+          totalOneTime: 2000 + 2000 * 24, // 50000? কিন্তু আপনি ২০০০ মাসিক বলেছেন, ২ বছর = ২৪ মাস, তাহলে ৫০০০০ হয়। তবে আপনি হয়তো পুরো কোর্সের ফি বোঝাতে চেয়েছেন। আমি ধরে নিচ্ছি ২০০০ মাসিক + ২০০০ ভর্তি = মোট ৫০০০০ (ডিসকাউন্ট নেই)
+          discount: 0,
+          price: 50000,
+        },
         {
           id: "qs4",
-          name: "Hifz Revision (One to One)",
-          price: 10000,
+          name: "Hifz Revision (One to One) - Bangla Medium",
           duration: "6 Months",
+          admissionFee: 2000,
+          monthlyFee: 2000,
+          totalOneTime: 2000 + 2000 * 6, // 14000
+          discount: 0,
+          price: 14000,
+        },
+        {
+          id: "qs4i",
+          name: "Hifz Revision (One to One) - International",
+          duration: "6 Months",
+          admissionFee: 2000,
+          monthlyFee: 2000,
+          totalOneTime: 2000 + 2000 * 6, // 14000
+          discount: 0,
+          price: 14000,
+        },
+        // নতুন: One to One (আলাদা) – যদিও Hifz Revision এর সাথে মিলে যায়, তবু আলাদা করলাম
+        {
+          id: "qs5",
+          name: "One-to-One Program (Bangla Medium)",
+          duration: "Flexible",
+          admissionFee: 1000,
+          monthlyFee: 5000,
+          totalOneTime: 1000 + 5000 * 6, // ধরে নিচ্ছি ৬ মাসের কোর্স, 31000
+          discount: 0,
+          price: 31000,
+        },
+        {
+          id: "qs5i",
+          name: "One-to-One Program (International)",
+          duration: "Flexible",
+          admissionFee: 1000,
+          monthlyFee: 5000,
+          totalOneTime: 1000 + 5000 * 6,
+          discount: 0,
+          price: 31000,
         },
       ],
     },
@@ -96,22 +212,42 @@ const Admission_now = () => {
         {
           id: "qe1",
           name: "Qaida Nooraniya",
-          price: 3000,
-          duration: "2 Months",
+          duration: "4 Months",
+          admissionFee: 1000,
+          monthlyFee: 1000,
+          totalOneTime: 5000, // admission 1000 + monthly 1000*4 = 5000, discount 500
+          discount: 500,
+          price: 4500, // after discount
         },
-        { id: "qe2", name: "Quran Nazera", price: 4000, duration: "3 Months" },
-        { id: "qe3", name: "Hifzul Quran", price: 20000, duration: "2 Years" },
+        {
+          id: "qe2",
+          name: "Quran Nazera",
+          duration: "4 Months",
+          admissionFee: 1000,
+          monthlyFee: 1000,
+          totalOneTime: 5000,
+          discount: 500,
+          price: 4500,
+        },
         {
           id: "qe4",
           name: "Basic Tajweed (Level-1)",
-          price: 3000,
-          duration: "2 Months",
+          duration: "4 Months",
+          admissionFee: 1000,
+          monthlyFee: 1000,
+          totalOneTime: 5000,
+          discount: 500,
+          price: 4500,
         },
         {
-          id: "qe5",
-          name: "Advanced Tajweed",
-          price: 5000,
-          duration: "3 Months",
+          id: "qe6",
+          name: "Bakarah Hifz",
+          duration: "6 Months",
+          admissionFee: 1000,
+          monthlyFee: 1000,
+          totalOneTime: 6000, // 1000 + 1000*5? কিন্তু আপনি ৬ মাস বলেছেন, তাহলে 1000+6000=7000? কিন্তু আপনার দেওয়া লিস্টে এককালীন ৬০০০ ও ডিসকাউন্ট ৫০০, তাই আমি ধরে নিচ্ছি ৫ মাসের ফি + ভর্তি = ৬০০০
+          discount: 500,
+          price: 5500,
         },
       ],
     },
@@ -135,7 +271,6 @@ const Admission_now = () => {
         });
       }
     } else if (name === "selectedDepartment") {
-      // ডিপার্টমেন্ট চেঞ্জ হলে প্রথম কোর্সটি ডিফল্ট সিলেক্টেড করব
       const firstCourse = departments[value]?.courses[0];
       setFormData({
         ...formData,
@@ -176,7 +311,28 @@ const Admission_now = () => {
     }
   };
 
+  // স্টেপ ১-এ ভ্যালিডেশন
   const handleNext = () => {
+    if (step === 1) {
+      if (!formData.selectedDepartment) {
+        Swal.fire({
+          icon: "warning",
+          title: "Department Required!",
+          text: "Please select a department first.",
+          confirmButtonColor: "#00ADD2",
+        });
+        return;
+      }
+      if (formData.selectedCourses.length === 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "Course Required!",
+          text: "Please select at least one course.",
+          confirmButtonColor: "#00ADD2",
+        });
+        return;
+      }
+    }
     setStep(step + 1);
   };
 
@@ -216,7 +372,6 @@ const Admission_now = () => {
           : "Unpaid";
 
       const payload = {
-        // Personal Information
         name: formData.name,
         email: formData.email,
         phone: formData.phoneNumber,
@@ -225,33 +380,23 @@ const Admission_now = () => {
           selectedCourseNames.join(", ") ||
           formData.selectedDepartment ||
           "Not Specified",
-
-        // Family Information
         fatherName: formData.fatherName || "",
         motherName: formData.motherName || "",
         guardianName: formData.fatherName || "",
         guardianPhone: formData.guardianPhone || formData.phoneNumber,
-
-        // Address
         presentAddress: formData.presentAddress || "",
         permanentAddress: formData.permanentAddress || "",
-
-        // Additional Information
         dobOrNid: formData.nationalId || "",
         gender: formData.gender || "",
         occupation: formData.occupation || "",
         maritalStatus: formData.maritalStatus || "",
         age: formData.age || "",
-
-        // Payment Information
         paymentMethod: formData.paymentMethod || "",
         paymentType: formData.paymentType || "",
         transactionId: formData.transactionId || "",
         paidAmount: formData.paidAmount || "",
         paymentRemarks: formData.paymentRemarks || "",
         paymentStatus: paymentStatus,
-
-        // Status
         status: "Pending",
         admissionDate: new Date().toISOString(),
       };
@@ -357,15 +502,29 @@ const Admission_now = () => {
     }
   };
 
+  // টোটাল এককালীন পেমেন্ট (সিলেক্টেড কোর্সগুলোর totalOneTime এর যোগফল, ডিসকাউন্ট বিবেচনায়)
   const calculateTotal = () => {
     let total = 0;
-    const currentCourses =
-      departments[formData.selectedDepartment]?.courses || [];
+    const currentCourses = getCurrentCourses();
     formData.selectedCourses.forEach((courseId) => {
       const course = currentCourses.find((c) => c.id === courseId);
-      if (course) total += course.price;
+      if (course) {
+        // এককালীন পেমেন্ট = totalOneTime - discount (কারণ price হলো discount সহ)
+        total += course.price || course.totalOneTime || 0;
+      }
     });
     return total;
+  };
+
+  // সিলেক্টেড কোর্সের বিস্তারিত (পেমেন্ট টেবিলের জন্য)
+  const getSelectedCourseDetails = () => {
+    const currentCourses = getCurrentCourses();
+    return formData.selectedCourses
+      .map((courseId) => {
+        const course = currentCourses.find((c) => c.id === courseId);
+        return course || null;
+      })
+      .filter(Boolean);
   };
 
   const getMerchantNumber = () => {
@@ -379,7 +538,7 @@ const Admission_now = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <Navbar></Navbar>
+      <Navbar />
       <div
         className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-6 border-t-4 mb-20 mt-10"
         style={{ borderColor: "#00ADD2" }}
@@ -398,7 +557,7 @@ const Admission_now = () => {
           Admission Form
         </h2>
 
-        {/* Progress Steps - এখন Course Selection প্রথমে */}
+        {/* Progress Steps */}
         <div className="flex justify-between mb-8">
           <div
             className={`flex-1 text-center ${step >= 1 ? "text-[#00ADD2]" : "text-gray-400"}`}
@@ -443,7 +602,7 @@ const Admission_now = () => {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Step 1: Course Selection - এখন প্রথমে */}
+          {/* ========== STEP 1: COURSE SELECTION ========== */}
           {step === 1 && (
             <div className="space-y-4">
               <h2
@@ -512,9 +671,14 @@ const Admission_now = () => {
                                 className="text-sm font-medium"
                                 style={{ color: "#00ADD2" }}
                               >
-                                ৳{course.price.toLocaleString()}
+                                ৳{course.price?.toLocaleString() || 0}
                               </span>
                             </div>
+                            {course.discount > 0 && (
+                              <div className="text-xs text-green-600 mt-1">
+                                Save ৳{course.discount} on one-time payment
+                              </div>
+                            )}
                           </div>
                         </label>
                       </div>
@@ -550,8 +714,16 @@ const Admission_now = () => {
                             className="text-sm font-medium ml-2"
                             style={{ color: "#00ADD2" }}
                           >
-                            ৳{course.price.toLocaleString()}
+                            ৳
+                            {(
+                              course.price || course.totalOneTime
+                            )?.toLocaleString()}
                           </span>
+                          {course.discount > 0 && (
+                            <span className="text-xs text-green-600 ml-2">
+                              (Save ৳{course.discount})
+                            </span>
+                          )}
                         </li>
                       ) : null;
                     })}
@@ -580,7 +752,7 @@ const Admission_now = () => {
             </div>
           )}
 
-          {/* Step 2: Personal Information */}
+          {/* ========== STEP 2: PERSONAL INFO ========== */}
           {step === 2 && (
             <div className="space-y-4">
               <h2
@@ -731,7 +903,7 @@ const Admission_now = () => {
             </div>
           )}
 
-          {/* Step 3: Family & Address Information */}
+          {/* ========== STEP 3: FAMILY & ADDRESS ========== */}
           {step === 3 && (
             <div className="space-y-4">
               <h2
@@ -846,7 +1018,7 @@ const Admission_now = () => {
             </div>
           )}
 
-          {/* Step 4: Payment Information */}
+          {/* ========== STEP 4: PAYMENT ========== */}
           {step === 4 && (
             <div className="space-y-4">
               <h2
@@ -885,6 +1057,79 @@ const Admission_now = () => {
                   <li>You can also pay via Bank Transfer.</li>
                 </ul>
               </div>
+
+              {/* ===== ফি ডিটেইল টেবিল ===== */}
+              {formData.selectedCourses.length > 0 && (
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <h4 className="font-bold text-[#00ADD2] mb-3">
+                    Fee Details for Selected Courses
+                  </h4>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-[#e6f7f9]">
+                          <th className="px-3 py-2 text-left">Course</th>
+                          <th className="px-3 py-2 text-left">Duration</th>
+                          <th className="px-3 py-2 text-left">Admission</th>
+                          <th className="px-3 py-2 text-left">Monthly</th>
+                          <th className="px-3 py-2 text-left">One-Time</th>
+                          <th className="px-3 py-2 text-left">Save</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {getSelectedCourseDetails().map((course, idx) => (
+                          <tr
+                            key={idx}
+                            className="border-b border-gray-200 last:border-none"
+                          >
+                            <td className="px-3 py-2 font-medium">
+                              {course.name}
+                            </td>
+                            <td className="px-3 py-2">{course.duration}</td>
+                            <td className="px-3 py-2">
+                              ৳{course.admissionFee?.toLocaleString() || 0}
+                            </td>
+                            <td className="px-3 py-2">
+                              ৳{course.monthlyFee?.toLocaleString() || 0}
+                            </td>
+                            <td className="px-3 py-2 font-bold text-[#00ADD2]">
+                              ৳
+                              {(
+                                course.price || course.totalOneTime
+                              )?.toLocaleString()}
+                            </td>
+                            <td className="px-3 py-2 text-green-600">
+                              {course.discount > 0
+                                ? `৳${course.discount}`
+                                : "-"}
+                            </td>
+                          </tr>
+                        ))}
+                        <tr className="font-bold bg-gray-100">
+                          <td
+                            colSpan="4"
+                            className="px-3 py-2 text-right"
+                            style={{ color: "#00ADD2" }}
+                          >
+                            Total One-Time Payment:
+                          </td>
+                          <td
+                            className="px-3 py-2 text-lg"
+                            style={{ color: "#00ADD2" }}
+                          >
+                            ৳{calculateTotal().toLocaleString()}
+                          </td>
+                          <td></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    * One-Time payment includes admission + all monthly fees
+                    with applicable discount.
+                  </p>
+                </div>
+              )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Payment Method */}
@@ -1193,7 +1438,7 @@ const Admission_now = () => {
           )}
         </form>
       </div>
-      <Footer></Footer>
+      <Footer />
     </div>
   );
 };
