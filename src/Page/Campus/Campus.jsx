@@ -54,6 +54,7 @@ const Campus = () => {
       backToCourses: "Back to My Courses",
       outcomeTitle: "Course Outcome",
       materialsTitle: "Materials",
+
       modulesTitle: "Module Content",
       gradeTitle: "Grades & Results",
       classTest: "Class Test Score",
