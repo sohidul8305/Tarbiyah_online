@@ -44,7 +44,7 @@ const Kids = () => {
   const courses = [
     {
       id: "quida-nurani",
-      title: { en: "Quida Nurani", bn: "কায়দা নুরানী" },
+      title: { en: "Qaida Nurani", bn: "কায়দা নুরানী" },
       subtitle: {
         en: "First step of Quran learning for kids.",
         bn: "শিশুদের কুরআন শিক্ষার প্রথম ধাপ।",

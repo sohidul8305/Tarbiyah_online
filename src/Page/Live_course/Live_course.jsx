@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { FaGraduationCap } from "react-icons/fa";
 import { useLanguage } from "../../context/useLanguage";
 
-import diplomacover from "../../image/diplomacover.png";
+import diplomacover from "../../image/Course-Thumb.png";
 import Tarbiyahcourse from "../../image/Coursecover.png";
 import AlemiyahKids from "../../image/Alemiyahkids.png";
 import Najeraelders from "../../image/Thumb.jpg";
@@ -62,7 +62,7 @@ const Live_course = () => {
     },
     {
       id: 7,
-      title: language === "bn" ? "কায়দা নুরানী" : "Quida Nurani",
+      title: language === "bn" ? "কায়দা নুরানী" : " Qaida Nurani",
       slug: "/course/kids/quida-nurani",
       category: "Live Course",
       image: NuraniyaBannerIMG,
@@ -103,7 +103,7 @@ const Live_course = () => {
     // কুরআন পেইজ থেকে যুক্ত ৪টি কোর্স (ওয়ান টু ওয়ান এর পরে)
     {
       id: 12,
-      title: language === "bn" ? "কায়দায়ে নূরানিয়্যাহ" : "Qaida Nuraniyah",
+      title: language === "bn" ? "কায়দায়ে নূরানিয়্যাহ" : " Qaida Nuraniyah",
       slug: "/course/quran/elders-quida",
       category: "Live Course",
       image: Quidanuraniyah,

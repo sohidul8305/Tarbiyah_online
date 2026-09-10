@@ -7,17 +7,17 @@ import {
   FaFileAlt,
   FaCreditCard,
   FaMoneyBillWave,
-  FaWallet,
-  FaExclamationTriangle,
-  FaCheckCircle,
-  FaClock,
-  FaCalendarAlt,
-  FaArrowRight,
+  FaInfoCircle,
+  FaSync,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 
 const Due_payment = () => {
   const location = useLocation();
+  const [activeTab, setActiveTab] = useState("summary"); // summary, allBill, paymentHistory, onlineHistory
+  const [selectedSemester, setSelectedSemester] = useState(
+    "Fall 2026 (Jul-Dec)",
+  );
   const [studentInfo, setStudentInfo] = useState({
     name: "",
     email: "",
@@ -34,34 +34,27 @@ const Due_payment = () => {
     if (savedInfo) {
       const parsedInfo = JSON.parse(savedInfo);
       setStudentInfo({
-        name: parsedInfo.name || "",
+        name: parsedInfo.name || "Shakil Ahmmed",
         email: parsedInfo.email || "",
         phone: parsedInfo.phone || "",
         class: parsedInfo.class || "",
-        roll: parsedInfo.roll || "",
-        username: parsedInfo.username || "",
+        roll: parsedInfo.roll || "26160110266",
+        username: parsedInfo.username || "shakil",
         paymentStatus: parsedInfo.paymentStatus || "Unpaid",
-        paidAmount: parsedInfo.paidAmount || "0",
+        paidAmount: parsedInfo.paidAmount || "800",
       });
     }
   }, []);
 
-  // Due Details - Student এর তথ্য অনুযায়ী
-  const paidAmount = parseFloat(studentInfo.paidAmount) || 0;
-  const totalBill = paidAmount > 0 ? paidAmount : 2280;
-  const isPaid = studentInfo.paymentStatus === "Paid";
-  const totalDue = isPaid ? 0 : totalBill;
+  // Financial Summary Calculations based on Portal Layout
+  const previousAdvance = 0.0;
+  const thisSemesterBill = 1280.0;
+  const thisSemesterPaid = parseFloat(studentInfo.paidAmount) || 800.0;
+  const thisSemesterDue = thisSemesterBill - thisSemesterPaid;
 
-  const dueDetails = {
-    month: "জুন ২০২৬",
-    tuitionFee: totalBill > 0 ? totalBill * 0.6 : 1500,
-    examFee: totalBill > 0 ? totalBill * 0.25 : 500,
-    libraryFine: 0,
-    totalDue: totalDue,
-    totalBill: totalBill,
-    paidAmount: isPaid ? totalBill : 0,
-    status: isPaid ? "Paid" : "Due",
-  };
+  const totalBillDebit = 1280.0;
+  const totalPaidCredit = thisSemesterPaid;
+  const overAllDueOnBill = totalBillDebit - totalPaidCredit;
 
   // Sidebar Menu Items
   const menuItems = [
@@ -93,7 +86,7 @@ const Due_payment = () => {
       id: "payment",
       path: "/online-payment",
       icon: <FaCreditCard className="text-xl" />,
-      label: "Online Payment",
+      label: "Monthly Online Payment",
     },
     {
       id: "due",
@@ -125,14 +118,11 @@ const Due_payment = () => {
             return (
               <Link key={item.id} to={item.path}>
                 <button
-                  className={`
-                    w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all
-                    ${
-                      isActive
-                        ? "bg-[#e6f7f9] text-[#00ADD2] font-bold shadow-sm"
-                        : "text-gray-700 hover:bg-gray-50 hover:text-[#00ADD2]"
-                    }
-                  `}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                    isActive
+                      ? "bg-[#e6f7f9] text-[#00ADD2] font-bold shadow-sm"
+                      : "text-gray-700 hover:bg-gray-50 hover:text-[#00ADD2]"
+                  }`}
                 >
                   <span className="text-gray-600">{item.icon}</span>
                   <span className="text-sm">{item.label}</span>
@@ -143,225 +133,211 @@ const Due_payment = () => {
         </nav>
       </aside>
 
-      {/* মূল বকেয়া পেমেন্ট কন্টেন্ট */}
-      <div className="flex-1">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-[#00ADD2] to-[#00c4e6] p-6 text-white">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <FaMoneyBillWave /> বকেয়া ফি (Due Payment)
-                </h2>
-                <p className="text-sm opacity-80">
-                  {studentInfo.name} • {studentInfo.class} • Roll:{" "}
-                  {studentInfo.roll || "N/A"}
-                </p>
-              </div>
-              <div
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-                  isPaid ? "bg-green-500/30" : "bg-red-500/30"
-                }`}
-              >
-                {isPaid ? (
-                  <FaCheckCircle className="text-white" />
-                ) : (
-                  <FaExclamationTriangle className="text-white" />
-                )}
-                <span className="text-sm font-medium">
-                  {isPaid ? "পেইড" : "বকেয়া"}
-                </span>
-              </div>
-            </div>
+      {/* মূল কন্টেন্ট এরিয়া */}
+      <div className="flex-1 space-y-4">
+        {/* Important Notice Banner */}
+        <div className="bg-[#5cb85c] text-white rounded-t-lg shadow-sm">
+          <div className="px-4 py-2.5 flex items-center gap-2 font-semibold text-sm border-b border-white/20">
+            <FaInfoCircle /> Important Notice
           </div>
+          <div className="bg-white text-gray-800 px-4 py-3 text-sm rounded-b-lg border border-t-0 border-gray-200 flex items-center gap-2">
+            <span className="bg-gray-800 text-white text-xs px-2 py-0.5 rounded font-bold">
+              Note:
+            </span>
+            <span>Dear students: Please pay your payment to bKash.</span>
+          </div>
+        </div>
 
-          <div className="p-4 md:p-6">
-            {/* Due Summary Card */}
-            <div
-              className={`p-4 rounded-lg mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 ${
-                isPaid
-                  ? "bg-green-50 border border-green-200"
-                  : "bg-red-50 border border-red-200"
+        {/* Main Tab Navigation Container */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Tabs Header */}
+          <div className="flex flex-wrap border-b border-gray-200 bg-gray-50 px-4 pt-3 gap-2">
+            <button
+              onClick={() => setActiveTab("summary")}
+              className={`px-4 py-2 text-sm font-semibold rounded-t-lg border-t border-x transition ${
+                activeTab === "summary"
+                  ? "bg-white text-gray-800 border-gray-300 shadow-sm -mb-px"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-transparent"
               }`}
             >
+              Payment Summary
+            </button>
+            <button
+              onClick={() => setActiveTab("allBill")}
+              className={`px-4 py-2 text-sm font-semibold rounded-t-lg border-t border-x transition ${
+                activeTab === "allBill"
+                  ? "bg-white text-gray-800 border-gray-300 shadow-sm -mb-px"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-transparent"
+              }`}
+            >
+              All Bill (Debit)
+            </button>
+            <button
+              onClick={() => setActiveTab("paymentHistory")}
+              className={`px-4 py-2 text-sm font-semibold rounded-t-lg border-t border-x transition ${
+                activeTab === "paymentHistory"
+                  ? "bg-white text-gray-800 border-gray-300 shadow-sm -mb-px"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-transparent"
+              }`}
+            >
+              Payment History (Credit)
+            </button>
+            <button
+              onClick={() => setActiveTab("onlineHistory")}
+              className={`px-4 py-2 text-sm font-semibold rounded-t-lg border-t border-x transition ${
+                activeTab === "onlineHistory"
+                  ? "bg-white text-gray-800 border-gray-300 shadow-sm -mb-px"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 border-transparent"
+              }`}
+            >
+              Online Payment History
+            </button>
+          </div>
+
+          {/* Tab Content Body */}
+          <div className="p-4 md:p-6">
+            {activeTab === "summary" && (
               <div>
-                <p
-                  className={`text-sm font-medium ${
-                    isPaid ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {isPaid
-                    ? "✅ সমস্ত ফি পরিশোধ করা হয়েছে"
-                    : "⚠️ মোট বকেয়া পরিমাণ"}
-                </p>
-                <h3
-                  className={`text-3xl font-bold ${
-                    isPaid ? "text-green-700" : "text-red-700"
-                  }`}
-                >
-                  ৳ {dueDetails.totalDue.toFixed(2)}
-                </h3>
-                {isPaid && (
-                  <p className="text-sm text-green-600 mt-1">
-                    ধন্যবাদ! আপনার সকল ফি পরিশোধ করা হয়েছে।
-                  </p>
-                )}
-              </div>
-              <span
-                className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${
-                  isPaid
-                    ? "bg-green-200 text-green-800"
-                    : "bg-red-200 text-red-800 animate-pulse"
-                }`}
-              >
-                {isPaid ? "✅ পরিশোধিত" : "⏳ বকেয়া রয়েছে"}
-              </span>
-            </div>
-
-            {/* Payment Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-500">মোট বিল</p>
-                <p className="text-lg font-bold text-[#00ADD2]">
-                  ৳ {dueDetails.totalBill.toFixed(2)}
-                </p>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-500">পরিশোধিত</p>
-                <p className="text-lg font-bold text-green-600">
-                  ৳ {dueDetails.paidAmount.toFixed(2)}
-                </p>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-500">বকেয়া</p>
-                <p
-                  className={`text-lg font-bold ${isPaid ? "text-green-600" : "text-red-600"}`}
-                >
-                  ৳ {dueDetails.totalDue.toFixed(2)}
-                </p>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <p className="text-xs text-gray-500">স্ট্যাটাস</p>
-                <p
-                  className={`text-sm font-bold ${isPaid ? "text-green-600" : "text-red-600"}`}
-                >
-                  {isPaid ? "✅ Paid" : "⚠️ Due"}
-                </p>
-              </div>
-            </div>
-
-            {/* Fee Details Table */}
-            <div className="overflow-x-auto mb-6">
-              <h4 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                <FaCalendarAlt className="text-[#00ADD2]" /> ফি এর বিস্তারিত
-              </h4>
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200 text-sm text-gray-700">
-                    <th className="p-3 font-semibold">বিবরণ (Description)</th>
-                    <th className="p-3 font-semibold">মাস / খাত</th>
-                    <th className="p-3 font-semibold text-right">
-                      পরিমাণ (BDT)
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 text-sm">
-                  <tr className="hover:bg-gray-50 transition">
-                    <td className="p-3 font-medium text-gray-800">
-                      মাসিক টিউশন ফি
-                    </td>
-                    <td className="p-3 text-gray-600">{dueDetails.month}</td>
-                    <td className="p-3 text-right font-semibold">
-                      ৳ {dueDetails.tuitionFee.toFixed(2)}
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-50 transition">
-                    <td className="p-3 font-medium text-gray-800">
-                      পরীক্ষার ফি
-                    </td>
-                    <td className="p-3 text-gray-600">সেমিস্টার ফাইনাল</td>
-                    <td className="p-3 text-right font-semibold">
-                      ৳ {dueDetails.examFee.toFixed(2)}
-                    </td>
-                  </tr>
-                  <tr className="hover:bg-gray-50 transition">
-                    <td className="p-3 font-medium text-gray-800">
-                      লাইব্রেরি ফাইন
-                    </td>
-                    <td className="p-3 text-gray-600">প্রযোজ্য নয়</td>
-                    <td className="p-3 text-right font-semibold">
-                      ৳ {dueDetails.libraryFine.toFixed(2)}
-                    </td>
-                  </tr>
-                  <tr className="bg-gray-50 font-bold">
-                    <td className="p-3 text-gray-800">মোট</td>
-                    <td className="p-3 text-gray-600"></td>
-                    <td
-                      className={`p-3 text-right ${
-                        isPaid ? "text-green-600" : "text-red-600"
-                      }`}
+                {/* Semester Selection & Refresh Header */}
+                <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-200 mb-6 gap-3">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <span className="text-sm font-bold text-gray-700">
+                      📑 Payment Summary for
+                    </span>
+                    <select
+                      value={selectedSemester}
+                      onChange={(e) => setSelectedSemester(e.target.value)}
+                      className="px-3 py-1.5 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#00ADD2]"
                     >
-                      ৳ {dueDetails.totalDue.toFixed(2)}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* Payment Button */}
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t border-gray-200">
-              <div className="text-sm text-gray-500 flex items-center gap-2">
-                <FaClock className="text-[#00ADD2]" />
-                {isPaid ? (
-                  <span>✅ আপনার সকল ফি পরিশোধ করা হয়েছে</span>
-                ) : (
-                  <span>⏳ শেষ তারিখ: ৩০ জুন ২০২৬</span>
-                )}
-              </div>
-              <Link
-                to={isPaid ? "/student-dashboard" : "/online-payment"}
-                className={`${
-                  isPaid
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-[#00ADD2] hover:bg-[#008c9e]"
-                } text-white font-semibold px-6 py-3 rounded-lg shadow transition duration-200 flex items-center gap-2`}
-                onClick={(e) => {
-                  if (isPaid) {
-                    e.preventDefault();
-                  }
-                }}
-              >
-                <span>{isPaid ? "✅ ফি পরিশোধিত" : "বকেয়া পরিশোধ করুন"}</span>
-                {!isPaid && <FaArrowRight />}
-              </Link>
-            </div>
-
-            {/* Payment History */}
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-              <h4 className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                <FaWallet className="text-[#00ADD2]" /> পেমেন্ট ইতিহাস
-              </h4>
-              {isPaid ? (
-                <div className="flex items-center gap-2 text-green-600">
-                  <FaCheckCircle />
-                  <span className="text-sm">
-                    সর্বশেষ পেমেন্ট: {dueDetails.month} - ৳{" "}
-                    {dueDetails.totalBill.toFixed(2)}
-                  </span>
+                      <option value="Fall 2026 (Jul-Dec)">
+                        Fall 2026 (Jul-Dec)
+                      </option>
+                      <option value="Spring 2026 (Jan-Jun)">
+                        Spring 2026 (Jan-Jun)
+                      </option>
+                    </select>
+                  </div>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="flex items-center gap-1.5 bg-[#00ADD2] hover:bg-[#008c9e] text-white px-3 py-1.5 rounded-md text-sm font-semibold transition shadow-sm w-full sm:w-auto justify-center"
+                  >
+                    <FaSync className="text-xs" /> Refresh
+                  </button>
                 </div>
-              ) : (
-                <div className="flex items-center gap-2 text-yellow-600">
-                  <FaClock />
-                  <span className="text-sm">
-                    কোনো পেমেন্ট ইতিহাস পাওয়া যায়নি
-                  </span>
+
+                {/* Two Column Summary Layout */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left: Payment Summary for Semester */}
+                  <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                    <div className="bg-[#f8f9fa] px-4 py-2.5 border-b border-gray-200 font-bold text-sm text-gray-800">
+                      Payment Summary for {selectedSemester}
+                    </div>
+                    <div className="p-4 space-y-3 text-sm">
+                      <div className="flex justify-between border-b border-dashed border-gray-200 pb-2">
+                        <span className="text-gray-600 font-medium">
+                          Previous Advance:
+                        </span>
+                        <span className="font-semibold text-gray-800">
+                          {previousAdvance.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between border-b border-dashed border-gray-200 pb-2">
+                        <span className="text-gray-600 font-medium">
+                          This Semester Bill:
+                        </span>
+                        <span className="font-semibold text-gray-800">
+                          {thisSemesterBill.toFixed(2)}
+                        </span>
+                      </div>
+                      <hr className="border-gray-300 my-1" />
+                      <div className="flex justify-between border-b border-dashed border-gray-200 pb-2">
+                        <span className="text-gray-600 font-medium">
+                          This Semester Paid:
+                        </span>
+                        <span className="font-semibold text-gray-800">
+                          {thisSemesterPaid.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between pb-1">
+                        <span className="text-gray-600 font-medium">
+                          This Semester Due:
+                        </span>
+                        <span className="font-bold text-gray-800">
+                          {thisSemesterDue.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right: Over all Summary */}
+                  <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
+                    <div className="bg-[#f8f9fa] px-4 py-2.5 border-b border-gray-200 font-bold text-sm text-gray-800">
+                      Over all Summary
+                    </div>
+                    <div className="p-4 space-y-3 text-sm">
+                      <div className="flex justify-between border-b border-dashed border-gray-200 pb-2">
+                        <span className="text-gray-600 font-medium">
+                          Total Bill (Debit):
+                        </span>
+                        <span className="font-semibold text-gray-800">
+                          {totalBillDebit.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between border-b border-dashed border-gray-200 pb-2">
+                        <span className="text-gray-600 font-medium">
+                          Total Paid (Credit):
+                        </span>
+                        <span className="font-semibold text-gray-800">
+                          {totalPaidCredit.toFixed(2)}
+                        </span>
+                      </div>
+                      <hr className="border-gray-300 my-1" />
+                      <div className="flex justify-between items-center pb-1">
+                        <span className="text-gray-700 font-bold">
+                          Over All Due on Bill:
+                        </span>
+                        <span className="bg-[#d9534f] text-white font-bold px-3 py-1 rounded text-sm shadow-sm">
+                          {overAllDueOnBill.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
-              <div className="mt-2 text-xs text-gray-400">
-                <p>📌 ইউজারনেম: {studentInfo.username || "N/A"}</p>
-                <p>📌 স্ট্যাটাস: {isPaid ? "Paid" : "Pending"}</p>
               </div>
-            </div>
+            )}
+
+            {activeTab === "allBill" && (
+              <div className="text-center py-10 text-gray-500">
+                <p className="text-base font-semibold">
+                  সকল বিলের তালিকা (All Bill Debit Records)
+                </p>
+                <p className="text-xs mt-1">
+                  এখানে আপনার সকল সেমিস্টারের ডেবিট বিলের বিবরণ দেখানো হবে।
+                </p>
+              </div>
+            )}
+
+            {activeTab === "paymentHistory" && (
+              <div className="text-center py-10 text-gray-500">
+                <p className="text-base font-semibold">
+                  পেমেন্ট ইতিহাস (Payment History Credit)
+                </p>
+                <p className="text-xs mt-1">
+                  আপনার সফলভাবে পরিশোধিত পেমেন্টগুলোর তালিকা এখানে থাকবে।
+                </p>
+              </div>
+            )}
+
+            {activeTab === "onlineHistory" && (
+              <div className="text-center py-10 text-gray-500">
+                <p className="text-base font-semibold">
+                  অনলাইন পেমেন্ট ইতিহাস (Online Payment History)
+                </p>
+                <p className="text-xs mt-1">
+                  অনলাইন গেটওয়ের মাধ্যমে করা লেনদেনের রেকর্ড।
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

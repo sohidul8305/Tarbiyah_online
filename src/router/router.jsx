@@ -527,6 +527,10 @@ export const router = createBrowserRouter([
     element: <Course_notice></Course_notice>,
   },
   {
+    path: "/campus",
+    element: <Campus></Campus>,
+  },
+  {
     path: "/campus-dashboard",
     element: <Campus_dashboard></Campus_dashboard>,
   },

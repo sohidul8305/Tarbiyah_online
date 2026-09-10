@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Routes,
-  Route,
-  Link,
-  useNavigate,
-  useLocation,
-} from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   FaSearch,
   FaArrowLeft,
@@ -23,10 +17,7 @@ const Campus = () => {
   const [language, setLanguage] = useState(
     () => localStorage.getItem("language") || "en",
   );
-
-  const navigate = useNavigate();
   const location = useLocation();
-
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -38,16 +29,13 @@ const Campus = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // নির্ধারিত পাথ অনুযায়ী একটিভ ট্যাব নির্ধারণ
   const getCurrentTab = () => {
-    if (location.pathname.includes("/campus_dashboard")) return "dashboard";
+    if (location.pathname.includes("/campus-dashboard")) return "dashboard";
     if (location.pathname.includes("/my-courses")) return "my-courses";
     return "home";
   };
-
   const activeTab = getCurrentTab();
 
-  // ============= কনটেন্ট =============
   const content = {
     en: {
       homeTab: "Home",
@@ -86,11 +74,11 @@ const Campus = () => {
       virtualCampusDesc:
         "তারবিয়াহ ভার্চুয়াল ক্যাম্পাস ও লার্নিং এনভায়রনমেন্ট",
       noticeBoard: "নোটিশ বোর্ড",
-      noNotice: "এই ফরামে এখনও কোনো আলোচনার বিষয় নেই",
+      noNotice: "এই ফোরামে এখনও কোনো আলোচনার বিষয় নেই",
       courseOverview: "কোর্স ওভারভিউ",
       all: "সব",
       searchPlaceholder: "কোর্স খুঁজুন...",
-      sortCourse: "কোর্সের নাম অনুযায়ী সাজান",
+      sortCourse: "কোর্সের নাম অনুযায়ী সাজান",
       cardView: "কার্ড",
       backToCourses: "আমার কোর্সসমূহে ফিরে যান",
       outcomeTitle: "কোর্স আউটকাম",
@@ -107,7 +95,6 @@ const Campus = () => {
       instructor: "শিক্ষক",
     },
   };
-
   const t = content[language];
 
   const enrolledCourses = [
@@ -159,10 +146,10 @@ const Campus = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
-      {/* Top Navigation Tabs Bar */}
+      {/* ================= TOP NAVIGATION TABS BAR ================= */}
       <div className="bg-white border-b border-gray-200 px-6 md:px-16 flex items-center space-x-8 shadow-sm">
         <Link
-          to="/"
+          to="/campus"
           onClick={() => setSelectedCourse(null)}
           className={`py-3 text-sm font-semibold transition-colors relative ${
             activeTab === "home" && !selectedCourse
@@ -174,9 +161,8 @@ const Campus = () => {
         </Link>
         <Link
           to="/campus-dashboard"
-          onClick={() => setSelectedCourse(null)}
           className={`py-3 text-sm font-semibold transition-colors relative ${
-            activeTab === "dashboard" && !selectedCourse
+            activeTab === "dashboard"
               ? "text-gray-900 border-b-2 border-blue-600"
               : "text-gray-600 hover:text-gray-900"
           }`}
@@ -185,9 +171,8 @@ const Campus = () => {
         </Link>
         <Link
           to="/my-courses"
-          onClick={() => setSelectedCourse(null)}
           className={`py-3 text-sm font-semibold transition-colors relative ${
-            activeTab === "my-courses" && !selectedCourse
+            activeTab === "my-courses"
               ? "text-gray-900 border-b-2 border-blue-600"
               : "text-gray-600 hover:text-gray-900"
           }`}
@@ -196,7 +181,7 @@ const Campus = () => {
         </Link>
       </div>
 
-      {/* Main Content Area with Routes */}
+      {/* ================= MAIN CONTENT ================= */}
       <div className="py-8 px-4 md:px-12 max-w-6xl mx-auto">
         <AnimatePresence mode="wait">
           {selectedCourse ? (
@@ -340,152 +325,35 @@ const Campus = () => {
               </div>
             </motion.div>
           ) : (
-            <Routes>
-              {/* ================= HOME ROUTE (/) ================= */}
-              <Route
-                path="/"
-                element={
-                  <motion.div
-                    key="home"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                    className="space-y-8"
-                  >
-                    <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                      {t.homeTitle}
-                    </h1>
+            /* ================= HOME VIEW (Course List) ================= */
+            <motion.div
+              key="home"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-8"
+            >
+              <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                {t.homeTitle}
+              </h1>
 
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-4xl">
-                      <h2 className="text-xl font-bold text-gray-900 mb-1">
-                        {t.virtualCampusTitle}
-                      </h2>
-                      <p className="text-gray-600 text-sm">
-                        {t.virtualCampusDesc}
-                      </p>
-                    </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-4xl">
+                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  {t.virtualCampusTitle}
+                </h2>
+                <p className="text-gray-600 text-sm">{t.virtualCampusDesc}</p>
+              </div>
 
-                    <div className="space-y-3 max-w-4xl">
-                      <h2 className="text-2xl font-bold text-gray-900">
-                        {t.noticeBoard}
-                      </h2>
-                      <div className="bg-[#d2e8ec] text-[#0a4654] p-4 rounded-md text-sm border border-[#bce0e6]">
-                        {t.noNotice}
-                      </div>
-                    </div>
-                  </motion.div>
-                }
-              />
-
-              {/* ================= DASHBOARD ROUTE (/dashboard) ================= */}
-              <Route
-                path="/dashboard"
-                element={
-                  <motion.div
-                    key="dashboard"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6"
-                  >
-                    <h2 className="text-xl font-bold text-gray-900">
-                      Dashboard Overview
-                    </h2>
-                    <p className="text-sm text-gray-600">
-                      Welcome back to your Tarbiyah Campus dashboard. Here is a
-                      summary of your academic activities.
-                    </p>
-                    {/* Additional dashboard components can go here */}
-                  </motion.div>
-                }
-              />
-
-              {/* ================= MY COURSES ROUTE (/my-courses) ================= */}
-              <Route
-                path="/my-courses"
-                element={
-                  <motion.div
-                    key="my-courses"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3 }}
-                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-6"
-                  >
-                    <h2 className="text-xl font-bold text-gray-900">
-                      {t.courseOverview}
-                    </h2>
-
-                    <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-100">
-                      <div className="flex items-center gap-2">
-                        <button className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-md border border-gray-300">
-                          {t.all}
-                        </button>
-                        <div className="relative flex-1 sm:w-64">
-                          <FaSearch className="absolute left-3 top-3 text-gray-400 text-xs" />
-                          <input
-                            type="text"
-                            placeholder={t.searchPlaceholder}
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-9 pr-4 py-1.5 text-sm bg-white border border-gray-300 rounded-md focus:outline-none focus:border-[#004d4d]"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <select className="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none">
-                          <option>{t.sortCourse}</option>
-                        </select>
-                        <select className="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-md text-gray-700 focus:outline-none">
-                          <option>{t.cardView}</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {filteredCourses.map((course) => (
-                        <div
-                          key={course.id}
-                          onClick={() => setSelectedCourse(course)}
-                          className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer flex flex-col justify-between"
-                        >
-                          <div className="h-36 w-full overflow-hidden bg-gray-100 relative">
-                            <img
-                              src={course.image}
-                              alt={course.titleEn}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="p-4 flex flex-col flex-grow justify-between">
-                            <div>
-                              <h3 className="font-bold text-[#004d4d] text-base hover:underline mb-1">
-                                {language === "en"
-                                  ? course.titleEn
-                                  : course.titleBn}
-                              </h3>
-                              <p className="text-xs text-gray-500">
-                                {course.semester}
-                              </p>
-                            </div>
-                            <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
-                              <span className="text-xs text-gray-600 font-medium">
-                                {course.progress} {t.completed}
-                              </span>
-                              <button className="text-gray-400 hover:text-gray-600 p-1">
-                                <FaEllipsisV className="text-xs" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                }
-              />
-            </Routes>
+              <div className="space-y-3 max-w-4xl">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {t.noticeBoard}
+                </h2>
+                <div className="bg-[#d2e8ec] text-[#0a4654] p-4 rounded-md text-sm border border-[#bce0e6]">
+                  {t.noNotice}
+                </div>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
