@@ -15,7 +15,6 @@ const My_courses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCourse, setSelectedCourse] = useState(null);
 
-  // ভাষা বা ন্যাভবারের জন্য সাধারণ স্টেট বা ডিফল্ট মান
   const activeTab = "my-courses";
   const t = {
     homeTab: "Home",
@@ -23,12 +22,11 @@ const My_courses = () => {
     myCoursesTab: "My courses",
   };
 
-  // কোর্স ডেটা
   const courses = [
     {
       id: 1,
       code: "DNS 101 (2616)",
-      title: "দাওয়াহ ও সুন্নাহ",
+      title: "দাওয়াহ ও সুন্নাহ",
       semester: "First Semester",
       instructor: "Mufti Abdullah",
       image: "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png",
@@ -189,64 +187,76 @@ const My_courses = () => {
               </div>
             </div>
 
-            {/* Material / Mode & Modules (Video, PDF, Quiz) */}
+            {/* Material & Module Sections */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Material / Modules */}
+              {/* ================= MATERIAL SECTION ================= */}
               <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-3">
                 <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                  <FaBookOpen className="text-[#004d4d]" /> Material / Module
-                  Content
+                  <FaAward className="text-[#004d4d]" /> Material / Grad & Exams
                 </h2>
                 <ul className="space-y-2">
-                  <li className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
-                    <FaVideo className="text-red-500 text-sm" />
-                    <span className="font-medium text-gray-700">
-                      Video Recording (লেকচার ভিডিও)
-                    </span>
-                  </li>
-                  <li className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
-                    <FaFilePdf className="text-blue-500 text-sm" />
-                    <span className="font-medium text-gray-700">
-                      PDF Notes (নোট ও রিসোর্স)
-                    </span>
-                  </li>
-                  <li className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
-                    <FaQuestionCircle className="text-green-500 text-sm" />
-                    <span className="font-medium text-gray-700">
-                      Quiz (কুইজ ও মূল্যায়ন)
-                    </span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Grades & Exam Results */}
-              <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-3">
-                <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
-                  <FaAward className="text-[#004d4d]" /> Grades & Results (Grad)
-                </h2>
-                <ul className="space-y-2">
+                  {/* Grad */}
                   <li className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs">
-                    <span className="font-medium text-gray-700">
-                      Class Test
-                    </span>
+                    <span className="font-medium text-gray-700">Grad</span>
                     <span className="font-bold text-teal-700 bg-teal-100 px-2 py-0.5 rounded">
                       A+
                     </span>
                   </li>
+                  {/* Class Test */}
+                  <li className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs">
+                    <span className="font-medium text-gray-700">
+                      Class Test
+                    </span>
+                    <span className="font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
+                      85/100
+                    </span>
+                  </li>
+                  {/* Mid Term Exam */}
                   <li className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs">
                     <span className="font-medium text-gray-700">
                       Mid Term Exam
                     </span>
                     <span className="font-bold text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded">
-                      A
+                      42/50
                     </span>
                   </li>
+                  {/* Final Exam */}
                   <li className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs">
                     <span className="font-medium text-gray-700">
                       Final Exam
                     </span>
                     <span className="font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded">
                       Pending
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* ================= MODULE SECTION ================= */}
+              <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-3">
+                <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                  <FaBookOpen className="text-[#004d4d]" /> Module Content
+                </h2>
+                <ul className="space-y-2">
+                  {/* Video */}
+                  <li className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
+                    <FaVideo className="text-red-500 text-sm" />
+                    <span className="font-medium text-gray-700">
+                      Video Recording (লেকচার ভিডিও)
+                    </span>
+                  </li>
+                  {/* PDF */}
+                  <li className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
+                    <FaFilePdf className="text-blue-500 text-sm" />
+                    <span className="font-medium text-gray-700">
+                      PDF Notes (নোট ও রিসোর্স)
+                    </span>
+                  </li>
+                  {/* Quiz */}
+                  <li className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
+                    <FaQuestionCircle className="text-green-500 text-sm" />
+                    <span className="font-medium text-gray-700">
+                      Quiz (কুইজ ও মূল্যায়ন)
                     </span>
                   </li>
                 </ul>
