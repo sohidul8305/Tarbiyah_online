@@ -30,70 +30,27 @@ import {
   FaDatabase,
   FaUserCog,
   FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
   FaPlusCircle,
   FaDownload,
-  FaPrint,
   FaCheckCircle,
-  FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
   FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
   FaBookOpen,
   FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
   FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
   FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
   FaUserEdit,
   FaUserCircle,
   FaAddressCard,
+  FaGraduationCap,
+  FaSyncAlt,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Adminstudent_profile = () => {
@@ -111,128 +68,10 @@ const Adminstudent_profile = () => {
     joinDate: "",
   });
 
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      name: "Ahmed Hasan",
-      fatherName: "Abdul Hasan",
-      motherName: "Fatima Hasan",
-      class: "Class 8",
-      subject: "Tajweed",
-      roll: "01",
-      phone: "+880 1712 345678",
-      email: "ahmed@example.com",
-      address: "Mohammadpur, Dhaka",
-      dob: "2010-05-15",
-      gender: "Male",
-      bloodGroup: "A+",
-      religion: "Islam",
-      nationality: "Bangladeshi",
-      previousSchool: "Mohammadpur High School",
-      guardianContact: "+880 1812 345678",
-      status: "Active",
-      paymentStatus: "Paid",
-      admissionDate: "2026-01-15",
-      batch: "Batch 2026-A",
-      attendance: 92,
-      assignments: 85,
-      quiz: 78,
-      exam: 88,
-      progress: 85,
-      performance: "Excellent",
-      photo: null,
-    },
-    {
-      id: 2,
-      name: "Fatima Begum",
-      fatherName: "Mohammad Ali",
-      motherName: "Aisha Ali",
-      class: "Class 9",
-      subject: "Tafsir",
-      roll: "02",
-      phone: "+880 1723 456789",
-      email: "fatima@example.com",
-      address: "Mirpur, Dhaka",
-      dob: "2009-08-20",
-      gender: "Female",
-      bloodGroup: "B+",
-      religion: "Islam",
-      nationality: "Bangladeshi",
-      previousSchool: "Mirpur Girls School",
-      guardianContact: "+880 1823 456789",
-      status: "Active",
-      paymentStatus: "Paid",
-      admissionDate: "2026-02-01",
-      batch: "Batch 2026-B",
-      attendance: 88,
-      assignments: 90,
-      quiz: 82,
-      exam: 91,
-      progress: 87,
-      performance: "Excellent",
-      photo: null,
-    },
-    {
-      id: 3,
-      name: "Mohammad Ali",
-      fatherName: "Karim Ali",
-      motherName: "Rokeya Ali",
-      class: "Class 10",
-      subject: "Hadith",
-      roll: "05",
-      phone: "+880 1734 567890",
-      email: "ali@example.com",
-      address: "Uttara, Dhaka",
-      dob: "2008-03-10",
-      gender: "Male",
-      bloodGroup: "O+",
-      religion: "Islam",
-      nationality: "Bangladeshi",
-      previousSchool: "Uttara High School",
-      guardianContact: "+880 1834 567890",
-      status: "Pending",
-      paymentStatus: "Partial",
-      admissionDate: "2026-07-20",
-      batch: "-",
-      attendance: 0,
-      assignments: 0,
-      quiz: 0,
-      exam: 0,
-      progress: 0,
-      performance: "Pending",
-      photo: null,
-    },
-    {
-      id: 4,
-      name: "Aisha Rahman",
-      fatherName: "Rahman Khan",
-      motherName: "Shahida Khan",
-      class: "Class 7",
-      subject: "Fiqh",
-      roll: "06",
-      phone: "+880 1745 678901",
-      email: "aisha@example.com",
-      address: "Gulshan, Dhaka",
-      dob: "2011-11-05",
-      gender: "Female",
-      bloodGroup: "AB+",
-      religion: "Islam",
-      nationality: "Bangladeshi",
-      previousSchool: "Gulshan Model School",
-      guardianContact: "+880 1845 678901",
-      status: "Active",
-      paymentStatus: "Paid",
-      admissionDate: "2026-03-01",
-      batch: "Batch 2026-D",
-      attendance: 95,
-      assignments: 88,
-      quiz: 85,
-      exam: 90,
-      progress: 89,
-      performance: "Excellent",
-      photo: null,
-    },
-  ]);
+  // ✅ Dynamic students state
+  const [students, setStudents] = useState([]);
+  const [loadingStudents, setLoadingStudents] = useState(true);
+  const [studentsError, setStudentsError] = useState(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterClass, setFilterClass] = useState("All");
@@ -271,7 +110,7 @@ const Adminstudent_profile = () => {
     photo: null,
   });
 
-  // Load admin info
+  // ✅ Load admin info
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
@@ -287,6 +126,96 @@ const Adminstudent_profile = () => {
       });
     }
   }, [user]);
+
+  // ✅ Fetch students from backend
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const fetchStudents = async () => {
+    try {
+      setLoadingStudents(true);
+      setStudentsError(null);
+
+      console.log("📡 Fetching students from /api/students/all");
+
+      const res = await fetch("http://localhost:5000/api/students/all");
+      const data = await res.json();
+
+      console.log("📥 Students response:", data);
+
+      if (data.success) {
+        // ✅ MongoDB students → frontend format
+        const formatted = (data.students || []).map((s) => {
+          // Auto-calculate progress if missing
+          const attendance = s.attendance || 0;
+          const assignments = s.assignments || 0;
+          const quiz = s.quiz || 0;
+          const exam = s.exam || 0;
+          const progress =
+            s.progress ||
+            Math.round((attendance + assignments + quiz + exam) / 4);
+
+          let performance = s.performance;
+          if (!performance || performance === "Pending") {
+            if (progress >= 85) performance = "Excellent";
+            else if (progress >= 70) performance = "Good";
+            else if (progress >= 50) performance = "Average";
+            else performance = "Pending";
+          }
+
+          return {
+            id: s._id,
+            _id: s._id,
+            name: s.name || "Unknown",
+            fatherName: s.fatherName || s.guardianName || "",
+            motherName: s.motherName || "",
+            class: s.class || s.course || "N/A",
+            subject: s.subject || s.course || "N/A",
+            roll: s.roll || "N/A",
+            phone: s.phone || "",
+            email: s.email || "",
+            address: s.presentAddress || s.permanentAddress || "",
+            dob: s.dobOrNid || s.dateOfBirth || "",
+            gender: s.gender || "Male",
+            bloodGroup: s.bloodGroup || "N/A",
+            religion: s.religion || "Islam",
+            nationality: s.nationality || "Bangladeshi",
+            previousSchool: s.previousSchool || "",
+            guardianContact: s.guardianPhone || "",
+            status: s.status || "Pending",
+            paymentStatus: s.paymentStatus || "Unpaid",
+            admissionDate: s.admissionDate
+              ? new Date(s.admissionDate).toISOString().split("T")[0]
+              : s.createdAt
+                ? new Date(s.createdAt).toISOString().split("T")[0]
+                : "N/A",
+            batch: s.batch || "Not Assigned",
+            attendance,
+            assignments,
+            quiz,
+            exam,
+            progress,
+            performance,
+            course: s.course || "",
+            username: s.username || "",
+            enrolledCourses: s.enrolledCourses || [],
+            photo: null,
+          };
+        });
+
+        setStudents(formatted);
+        console.log(`✅ Loaded ${formatted.length} students from DB`);
+      } else {
+        setStudentsError(data.message || "Failed to load students");
+      }
+    } catch (err) {
+      console.error("❌ Fetch students error:", err);
+      setStudentsError("সার্ভারে সংযোগ করা যায়নি!");
+    } finally {
+      setLoadingStudents(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -312,16 +241,10 @@ const Adminstudent_profile = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
   };
 
   // Sidebar Menu Items
@@ -545,26 +468,32 @@ const Adminstudent_profile = () => {
   // Handle search and filter
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
-      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.fatherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.class.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchTerm.toLowerCase());
+      (student.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (student.fatherName || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (student.class || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (student.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (student.phone || "").includes(searchTerm);
+
     const matchesClass = filterClass === "All" || student.class === filterClass;
     const matchesStatus =
       filterStatus === "All" || student.status === filterStatus;
     const matchesPerformance =
       filterPerformance === "All" || student.performance === filterPerformance;
+
     return matchesSearch && matchesClass && matchesStatus && matchesPerformance;
   });
 
-  // Get unique values for filters
-  const uniqueClasses = ["All", ...new Set(students.map((s) => s.class))];
+  const uniqueClasses = [
+    "All",
+    ...new Set(students.map((s) => s.class).filter(Boolean)),
+  ];
   const uniquePerformances = [
     "All",
-    ...new Set(students.map((s) => s.performance)),
+    ...new Set(students.map((s) => s.performance).filter(Boolean)),
   ];
 
-  // Get status badge color
   const getStatusColor = (status) => {
     switch (status) {
       case "Active":
@@ -578,7 +507,6 @@ const Adminstudent_profile = () => {
     }
   };
 
-  // Get performance badge color
   const getPerformanceColor = (performance) => {
     switch (performance) {
       case "Excellent":
@@ -594,20 +522,17 @@ const Adminstudent_profile = () => {
     }
   };
 
-  // Get progress color
   const getProgressColor = (progress) => {
     if (progress >= 80) return "bg-green-500";
     if (progress >= 60) return "bg-yellow-500";
     return "bg-red-500";
   };
 
-  // Open details modal
   const openDetailsModal = (student) => {
     setSelectedStudent(student);
     setShowDetailsModal(true);
   };
 
-  // Open edit modal
   const openEditModal = (student) => {
     setSelectedStudent(student);
     setFormData({
@@ -641,7 +566,6 @@ const Adminstudent_profile = () => {
     setShowEditModal(true);
   };
 
-  // Open add modal
   const openAddModal = () => {
     setFormData({
       name: "",
@@ -674,13 +598,11 @@ const Adminstudent_profile = () => {
     setShowAddModal(true);
   };
 
-  // Calculate progress based on attendance, assignments, quiz, exam
   const calculateProgress = (attendance, assignments, quiz, exam) => {
     const total = (attendance + assignments + quiz + exam) / 4;
     return Math.round(total);
   };
 
-  // Determine performance based on progress
   const determinePerformance = (progress) => {
     if (progress >= 85) return "Excellent";
     if (progress >= 70) return "Good";
@@ -688,14 +610,12 @@ const Adminstudent_profile = () => {
     return "Poor";
   };
 
-  // Handle add student
   const handleAddStudent = (e) => {
     e.preventDefault();
     if (
       !formData.name ||
       !formData.fatherName ||
       !formData.class ||
-      !formData.subject ||
       !formData.phone
     ) {
       Swal.fire({
@@ -707,7 +627,6 @@ const Adminstudent_profile = () => {
       return;
     }
 
-    // Validate performance fields (0-100)
     const attendance = Math.min(
       100,
       Math.max(0, Number(formData.attendance) || 0),
@@ -718,8 +637,6 @@ const Adminstudent_profile = () => {
     );
     const quiz = Math.min(100, Math.max(0, Number(formData.quiz) || 0));
     const exam = Math.min(100, Math.max(0, Number(formData.exam) || 0));
-
-    // Calculate progress
     const progress = calculateProgress(attendance, assignments, quiz, exam);
     const performance = determinePerformance(progress);
 
@@ -745,12 +662,12 @@ const Adminstudent_profile = () => {
       paymentStatus: formData.paymentStatus,
       admissionDate: new Date().toISOString().split("T")[0],
       batch: formData.batch || "Not Assigned",
-      attendance: attendance,
-      assignments: assignments,
-      quiz: quiz,
-      exam: exam,
-      progress: progress,
-      performance: performance,
+      attendance,
+      assignments,
+      quiz,
+      exam,
+      progress,
+      performance,
       photo: null,
     };
 
@@ -758,32 +675,16 @@ const Adminstudent_profile = () => {
     setShowAddModal(false);
     Swal.fire({
       icon: "success",
-      title: "Student Added Successfully!",
-      text: `${formData.name} has been added to the system.`,
+      title: "Student Added!",
+      text: `${formData.name} added.`,
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle edit student
   const handleEditStudent = (e) => {
     e.preventDefault();
-    if (
-      !formData.name ||
-      !formData.fatherName ||
-      !formData.class ||
-      !formData.subject
-    ) {
-      Swal.fire({
-        icon: "warning",
-        title: "Please fill all required fields",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
 
-    // Validate and calculate for edit as well
     const attendance = Math.min(
       100,
       Math.max(0, Number(formData.attendance) || 0),
@@ -803,12 +704,12 @@ const Adminstudent_profile = () => {
           ? {
               ...s,
               ...formData,
-              attendance: attendance,
-              assignments: assignments,
-              quiz: quiz,
-              exam: exam,
-              progress: progress,
-              performance: performance,
+              attendance,
+              assignments,
+              quiz,
+              exam,
+              progress,
+              performance,
             }
           : s,
       ),
@@ -817,15 +718,13 @@ const Adminstudent_profile = () => {
     Swal.fire({
       icon: "success",
       title: "Student Updated!",
-      text: "Student profile has been updated successfully.",
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle delete student
-  const handleDeleteStudent = (id) => {
-    Swal.fire({
+  const handleDeleteStudent = async (id) => {
+    const result = await Swal.fire({
       title: "Delete Student?",
       text: "This action cannot be undone!",
       icon: "warning",
@@ -833,22 +732,28 @@ const Adminstudent_profile = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setStudents(students.filter((s) => s.id !== id));
-        Swal.fire("Deleted!", "Student has been deleted.", "success");
-      }
     });
-  };
 
-  // Handle file change
-  const handleFileChange = (e) => {
-    if (e.target.files[0]) {
-      setFormData({ ...formData, photo: e.target.files[0] });
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(
+          `http://localhost:5000/api/students/delete/${id}`,
+          { method: "DELETE" },
+        );
+        const data = await res.json();
+        if (data.success) {
+          setStudents(students.filter((s) => s.id !== id));
+          Swal.fire("Deleted!", "Student removed.", "success");
+        } else {
+          Swal.fire("Error!", data.message || "Failed to delete.", "error");
+        }
+      } catch (err) {
+        console.error("Delete error:", err);
+        Swal.fire("Error!", "Server connection failed.", "error");
+      }
     }
   };
 
-  // Render stars for performance
   const renderStars = (performance) => {
     let stars = 0;
     switch (performance) {
@@ -902,9 +807,7 @@ const Adminstudent_profile = () => {
             bg-white border-r border-gray-200 
             shadow-lg md:shadow-sm
             transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -1012,7 +915,6 @@ const Adminstudent_profile = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1021,7 +923,7 @@ const Adminstudent_profile = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
@@ -1033,7 +935,13 @@ const Adminstudent_profile = () => {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {/* Add Student Button */}
+              <button
+                onClick={fetchStudents}
+                className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                title="Refresh"
+              >
+                <FaSyncAlt size={12} /> Refresh
+              </button>
               <button
                 onClick={openAddModal}
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
@@ -1052,206 +960,243 @@ const Adminstudent_profile = () => {
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-blue-600">
-                {students.length}
+          {/* Loading / Error */}
+          {loadingStudents ? (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-12 text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-sm text-gray-500 mt-3">
+                Loading students from database...
               </p>
-              <p className="text-[10px] text-gray-500">Total Students</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-green-600">
-                {students.filter((s) => s.status === "Active").length}
-              </p>
-              <p className="text-[10px] text-gray-500">Active</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-yellow-600">
-                {students.filter((s) => s.status === "Pending").length}
-              </p>
-              <p className="text-[10px] text-gray-500">Pending</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-purple-600">
-                {students.filter((s) => s.performance === "Excellent").length}
-              </p>
-              <p className="text-[10px] text-gray-500">Excellent</p>
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
-            <div className="flex flex-col md:flex-row gap-2">
-              <div className="flex-1 relative">
-                <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
-                <input
-                  type="text"
-                  placeholder="Search students..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div className="flex items-center gap-1 flex-wrap">
-                <select
-                  value={filterClass}
-                  onChange={(e) => setFilterClass(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {uniqueClasses.map((cls) => (
-                    <option key={cls} value={cls}>
-                      {cls}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="All">Status</option>
-                  <option value="Active">Active</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-                <select
-                  value={filterPerformance}
-                  onChange={(e) => setFilterPerformance(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {uniquePerformances.map((perf) => (
-                    <option key={perf} value={perf}>
-                      {perf}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Students Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-hidden">
-            {filteredStudents.slice(0, 6).map((student) => (
-              <div
-                key={student.id}
-                className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden"
+          ) : studentsError ? (
+            <div className="bg-white border border-red-200 rounded-xl shadow-sm p-8 text-center">
+              <p className="text-red-500 font-bold text-lg mb-2">⚠️ Error</p>
+              <p className="text-gray-600 text-sm mb-4">{studentsError}</p>
+              <button
+                onClick={fetchStudents}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold"
               >
-                <div
-                  className={`h-1 ${
-                    student.status === "Active"
-                      ? "bg-green-500"
-                      : student.status === "Pending"
-                        ? "bg-yellow-500"
-                        : "bg-red-500"
-                  }`}
-                ></div>
-                <div className="p-3">
-                  <div className="flex items-start gap-2">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                      {student.name.charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-800 text-xs">
-                        {student.name}
-                      </h3>
-                      <p className="text-[10px] text-gray-500">
-                        {student.class} • {student.subject}
-                      </p>
-                      <div className="flex items-center gap-1 mt-0.5">
-                        <span
-                          className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(student.status)}`}
-                        >
-                          {student.status}
-                        </span>
-                        <span
-                          className={`text-[8px] px-1.5 py-0.5 rounded-full ${getPerformanceColor(student.performance)}`}
-                        >
-                          {student.performance}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                Retry
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                  <p className="text-lg font-bold text-blue-600">
+                    {students.length}
+                  </p>
+                  <p className="text-[10px] text-gray-500">Total Students</p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                  <p className="text-lg font-bold text-green-600">
+                    {students.filter((s) => s.status === "Active").length}
+                  </p>
+                  <p className="text-[10px] text-gray-500">Active</p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                  <p className="text-lg font-bold text-yellow-600">
+                    {students.filter((s) => s.status === "Pending").length}
+                  </p>
+                  <p className="text-[10px] text-gray-500">Pending</p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                  <p className="text-lg font-bold text-purple-600">
+                    {
+                      students.filter((s) => s.performance === "Excellent")
+                        .length
+                    }
+                  </p>
+                  <p className="text-[10px] text-gray-500">Excellent</p>
+                </div>
+              </div>
 
-                  <div className="mt-1.5 grid grid-cols-3 gap-1 text-center">
-                    <div className="bg-gray-50 rounded-lg p-1">
-                      <p className="text-[10px] font-bold text-green-600">
-                        {student.attendance}%
-                      </p>
-                      <p className="text-[8px] text-gray-500">Attendance</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-1">
-                      <p className="text-[10px] font-bold text-blue-600">
-                        {student.assignments}%
-                      </p>
-                      <p className="text-[8px] text-gray-500">Assignments</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-1">
-                      <p className="text-[10px] font-bold text-purple-600">
-                        {student.exam}%
-                      </p>
-                      <p className="text-[8px] text-gray-500">Exams</p>
-                    </div>
+              {/* Filters */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
+                <div className="flex flex-col md:flex-row gap-2">
+                  <div className="flex-1 relative">
+                    <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                    <input
+                      type="text"
+                      placeholder="Search students..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
                   </div>
-
-                  {/* Progress Bar */}
-                  <div className="mt-1.5">
-                    <div className="flex justify-between text-[8px] text-gray-500 mb-0.5">
-                      <span>Overall Progress</span>
-                      <span>{student.progress}%</span>
-                    </div>
-                    <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${getProgressColor(student.progress)}`}
-                        style={{ width: `${student.progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100">
-                    <button
-                      onClick={() => openDetailsModal(student)}
-                      className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all"
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <select
+                      value={filterClass}
+                      onChange={(e) => setFilterClass(e.target.value)}
+                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                     >
-                      View Profile
-                    </button>
-                    <button
-                      onClick={() => openEditModal(student)}
-                      className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
-                      title="Edit"
+                      {uniqueClasses.map((cls) => (
+                        <option key={cls} value={cls}>
+                          {cls}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                     >
-                      <FaEdit size={12} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteStudent(student.id)}
-                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
-                      title="Delete"
+                      <option value="All">Status</option>
+                      <option value="Active">Active</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Inactive">Inactive</option>
+                    </select>
+                    <select
+                      value={filterPerformance}
+                      onChange={(e) => setFilterPerformance(e.target.value)}
+                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                     >
-                      <FaTrash size={12} />
-                    </button>
+                      {uniquePerformances.map((perf) => (
+                        <option key={perf} value={perf}>
+                          {perf}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
 
-          {/* No Results */}
-          {filteredStudents.length === 0 && (
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center">
-              <FaUserGraduate className="text-5xl text-gray-300 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                No Students Found
-              </h3>
-              <p className="text-xs text-gray-500">
-                Try adjusting your search or filter criteria
-              </p>
-            </div>
+              {/* Students Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                {filteredStudents.map((student) => (
+                  <div
+                    key={student.id}
+                    className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden"
+                  >
+                    <div
+                      className={`h-1 ${
+                        student.status === "Active"
+                          ? "bg-green-500"
+                          : student.status === "Pending"
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                      }`}
+                    ></div>
+                    <div className="p-3">
+                      <div className="flex items-start gap-2">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                          {student.name.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-800 text-xs truncate">
+                            {student.name}
+                          </h3>
+                          <p className="text-[10px] text-gray-500 truncate">
+                            {student.class} • {student.subject}
+                          </p>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <span
+                              className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(student.status)}`}
+                            >
+                              {student.status}
+                            </span>
+                            <span
+                              className={`text-[8px] px-1.5 py-0.5 rounded-full ${getPerformanceColor(student.performance)}`}
+                            >
+                              {student.performance}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-1.5 grid grid-cols-3 gap-1 text-center">
+                        <div className="bg-gray-50 rounded-lg p-1">
+                          <p className="text-[10px] font-bold text-green-600">
+                            {student.attendance}%
+                          </p>
+                          <p className="text-[8px] text-gray-500">Attendance</p>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-1">
+                          <p className="text-[10px] font-bold text-blue-600">
+                            {student.assignments}%
+                          </p>
+                          <p className="text-[8px] text-gray-500">
+                            Assignments
+                          </p>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-1">
+                          <p className="text-[10px] font-bold text-purple-600">
+                            {student.exam}%
+                          </p>
+                          <p className="text-[8px] text-gray-500">Exams</p>
+                        </div>
+                      </div>
+
+                      <div className="mt-1.5">
+                        <div className="flex justify-between text-[8px] text-gray-500 mb-0.5">
+                          <span>Overall Progress</span>
+                          <span>{student.progress}%</span>
+                        </div>
+                        <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${getProgressColor(student.progress)}`}
+                            style={{ width: `${student.progress}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100">
+                        <button
+                          onClick={() => openDetailsModal(student)}
+                          className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all"
+                        >
+                          View Profile
+                        </button>
+                        <button
+                          onClick={() => openEditModal(student)}
+                          className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
+                          title="Edit"
+                        >
+                          <FaEdit size={12} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteStudent(student.id)}
+                          className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                          title="Delete"
+                        >
+                          <FaTrash size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {filteredStudents.length === 0 && students.length > 0 && (
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
+                  <FaUserGraduate className="text-5xl text-gray-300 mx-auto mb-3" />
+                  <h3 className="text-base font-bold text-gray-800 mb-0.5">
+                    No Matching Students
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Try adjusting filters or search
+                  </p>
+                </div>
+              )}
+
+              {students.length === 0 && (
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
+                  <FaUserGraduate className="text-5xl text-gray-300 mx-auto mb-3" />
+                  <h3 className="text-base font-bold text-gray-800 mb-0.5">
+                    No Students in Database
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Students will appear here after admission
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </main>
       </div>
 
-      {/* Add Student Modal */}
+      {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -1279,8 +1224,7 @@ const Adminstudent_profile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter student name"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
                 <div>
@@ -1294,8 +1238,7 @@ const Adminstudent_profile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, fatherName: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter father's name"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
               </div>
@@ -1303,18 +1246,34 @@ const Adminstudent_profile = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mother's Name
+                    Class *
                   </label>
                   <input
                     type="text"
-                    value={formData.motherName}
+                    required
+                    value={formData.class}
                     onChange={(e) =>
-                      setFormData({ ...formData, motherName: e.target.value })
+                      setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter mother's name"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Subject *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.subject}
+                    onChange={(e) =>
+                      setFormData({ ...formData, subject: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Phone *
@@ -1326,56 +1285,9 @@ const Adminstudent_profile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter phone number"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
-                  </label>
-                  <select
-                    required
-                    value={formData.class}
-                    onChange={(e) =>
-                      setFormData({ ...formData, class: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Class</option>
-                    <option value="Class 6">Class 6</option>
-                    <option value="Class 7">Class 7</option>
-                    <option value="Class 8">Class 8</option>
-                    <option value="Class 9">Class 9</option>
-                    <option value="Class 10">Class 10</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject *
-                  </label>
-                  <select
-                    required
-                    value={formData.subject}
-                    onChange={(e) =>
-                      setFormData({ ...formData, subject: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Subject</option>
-                    <option value="Tajweed">Tajweed</option>
-                    <option value="Tafsir">Tafsir</option>
-                    <option value="Hadith">Hadith</option>
-                    <option value="Fiqh">Fiqh</option>
-                    <option value="Aqeedah">Aqeedah</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Email
@@ -1386,350 +1298,22 @@ const Adminstudent_profile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter email address"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Roll Number
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.roll}
-                    onChange={(e) =>
-                      setFormData({ ...formData, roll: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter roll number"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date of Birth
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.dob}
-                    onChange={(e) =>
-                      setFormData({ ...formData, dob: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Gender
-                  </label>
-                  <select
-                    value={formData.gender}
-                    onChange={(e) =>
-                      setFormData({ ...formData, gender: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Blood Group
-                  </label>
-                  <select
-                    value={formData.bloodGroup}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bloodGroup: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Religion
-                  </label>
-                  <select
-                    value={formData.religion}
-                    onChange={(e) =>
-                      setFormData({ ...formData, religion: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="Islam">Islam</option>
-                    <option value="Hinduism">Hinduism</option>
-                    <option value="Christianity">Christianity</option>
-                    <option value="Buddhism">Buddhism</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nationality
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.nationality}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nationality: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter nationality"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) =>
-                      setFormData({ ...formData, status: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Pending">Pending</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
-                </label>
-                <textarea
-                  value={formData.address}
-                  onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
-                  }
-                  rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter address"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Previous School
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.previousSchool}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        previousSchool: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter previous school"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Guardian Contact
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.guardianContact}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        guardianContact: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Guardian contact number"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Payment Status
-                </label>
-                <select
-                  value={formData.paymentStatus}
-                  onChange={(e) =>
-                    setFormData({ ...formData, paymentStatus: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="Paid">Paid</option>
-                  <option value="Partial">Partial</option>
-                  <option value="Unpaid">Unpaid</option>
-                </select>
-              </div>
-
-              {/* Performance Section */}
-              <div className="border-t border-gray-200 pt-4 mt-2">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <FaChartLine className="text-blue-500" /> Performance Details
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Attendance (%)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.attendance}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          attendance: Math.min(
-                            100,
-                            Math.max(0, Number(e.target.value) || 0),
-                          ),
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0-100"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Assignments (%)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.assignments}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          assignments: Math.min(
-                            100,
-                            Math.max(0, Number(e.target.value) || 0),
-                          ),
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0-100"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Quiz (%)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.quiz}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          quiz: Math.min(
-                            100,
-                            Math.max(0, Number(e.target.value) || 0),
-                          ),
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0-100"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Exam (%)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.exam}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          exam: Math.min(
-                            100,
-                            Math.max(0, Number(e.target.value) || 0),
-                          ),
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0-100"
-                    />
-                  </div>
-                </div>
-                <div className="mt-3 bg-blue-50 rounded-lg p-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">
-                      Auto-calculated Progress:
-                    </span>
-                    <span className="font-bold text-blue-600">
-                      {calculateProgress(
-                        Number(formData.attendance) || 0,
-                        Number(formData.assignments) || 0,
-                        Number(formData.quiz) || 0,
-                        Number(formData.exam) || 0,
-                      )}
-                      %
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm mt-1">
-                    <span className="text-gray-600">Performance Rating:</span>
-                    <span
-                      className={`font-bold px-2 py-0.5 rounded-full text-xs ${getPerformanceColor(
-                        determinePerformance(
-                          calculateProgress(
-                            Number(formData.attendance) || 0,
-                            Number(formData.assignments) || 0,
-                            Number(formData.quiz) || 0,
-                            Number(formData.exam) || 0,
-                          ),
-                        ),
-                      )}`}
-                    >
-                      {determinePerformance(
-                        calculateProgress(
-                          Number(formData.attendance) || 0,
-                          Number(formData.assignments) || 0,
-                          Number(formData.quiz) || 0,
-                          Number(formData.exam) || 0,
-                        ),
-                      )}
-                    </span>
-                  </div>
                 </div>
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold"
                 >
                   <FaUserPlus className="inline mr-2" size={14} /> Add Student
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -1739,7 +1323,7 @@ const Adminstudent_profile = () => {
         </div>
       )}
 
-      {/* Student Profile Details Modal */}
+      {/* Details Modal */}
       {showDetailsModal && selectedStudent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
@@ -1755,10 +1339,9 @@ const Adminstudent_profile = () => {
               </button>
             </div>
             <div className="p-6">
-              {/* Student Header */}
               <div className="flex flex-col md:flex-row items-center gap-6 mb-6 pb-6 border-b border-gray-200">
                 <div className="w-24 h-24 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white text-4xl font-bold">
-                  {selectedStudent.name.charAt(0)}
+                  {selectedStudent.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 text-center md:text-left">
                   <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
@@ -1780,35 +1363,27 @@ const Adminstudent_profile = () => {
                     {selectedStudent.class} • {selectedStudent.subject}
                   </p>
                   <div className="flex flex-wrap gap-3 mt-2 text-sm text-gray-500 justify-center md:justify-start">
-                    <span>📧 {selectedStudent.email}</span>
+                    <span>📧 {selectedStudent.email || "N/A"}</span>
                     <span>📱 {selectedStudent.phone}</span>
                     <span>🎯 Roll: {selectedStudent.roll}</span>
-                    <span>
-                      📚 Batch: {selectedStudent.batch || "Not Assigned"}
-                    </span>
+                    <span>📚 Batch: {selectedStudent.batch}</span>
                   </div>
                   <div className="mt-2">
                     {renderStars(selectedStudent.performance)}
-                    <span className="text-sm font-semibold text-gray-600 ml-2">
-                      ({selectedStudent.performance})
-                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Details Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Personal Information */}
                 <div className="space-y-3">
                   <h4 className="font-semibold text-gray-800 text-sm border-b pb-2 flex items-center gap-2">
-                    <FaAddressCard className="text-blue-500" /> Personal
-                    Information
+                    <FaAddressCard className="text-blue-500" /> Personal Info
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Father's Name</span>
                       <span className="font-semibold">
-                        {selectedStudent.fatherName}
+                        {selectedStudent.fatherName || "N/A"}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -1818,21 +1393,15 @@ const Adminstudent_profile = () => {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Date of Birth</span>
-                      <span className="font-semibold">
-                        {selectedStudent.dob}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
                       <span className="text-gray-500">Gender</span>
                       <span className="font-semibold">
                         {selectedStudent.gender}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Blood Group</span>
+                      <span className="text-gray-500">NID/DOB</span>
                       <span className="font-semibold">
-                        {selectedStudent.bloodGroup}
+                        {selectedStudent.dob || "N/A"}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -1841,16 +1410,9 @@ const Adminstudent_profile = () => {
                         {selectedStudent.religion}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Nationality</span>
-                      <span className="font-semibold">
-                        {selectedStudent.nationality}
-                      </span>
-                    </div>
                   </div>
                 </div>
 
-                {/* Academic & Contact Information */}
                 <div className="space-y-3">
                   <h4 className="font-semibold text-gray-800 text-sm border-b pb-2 flex items-center gap-2">
                     <FaGraduationCap className="text-green-500" /> Academic &
@@ -1864,13 +1426,7 @@ const Adminstudent_profile = () => {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Previous School</span>
-                      <span className="font-semibold">
-                        {selectedStudent.previousSchool || "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Guardian Contact</span>
+                      <span className="text-gray-500">Guardian Phone</span>
                       <span className="font-semibold">
                         {selectedStudent.guardianContact || "N/A"}
                       </span>
@@ -1895,9 +1451,14 @@ const Adminstudent_profile = () => {
                         {selectedStudent.paymentStatus}
                       </span>
                     </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Courses</span>
+                      <span className="font-semibold text-xs">
+                        {selectedStudent.course || "N/A"}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Performance Stats */}
                   <div className="mt-3 bg-gray-50 rounded-lg p-3">
                     <h4 className="font-semibold text-gray-800 text-xs mb-2">
                       Performance Stats
@@ -1932,7 +1493,6 @@ const Adminstudent_profile = () => {
                 </div>
               </div>
 
-              {/* Overall Progress */}
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <h4 className="font-semibold text-gray-800 text-sm mb-2">
                   Overall Progress
@@ -1950,34 +1510,19 @@ const Adminstudent_profile = () => {
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex gap-3 pt-6 border-t border-gray-200 mt-6">
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
                     openEditModal(selectedStudent);
                   }}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaEdit className="inline mr-2" /> Edit Profile
                 </button>
                 <button
-                  onClick={() => {
-                    Swal.fire({
-                      icon: "success",
-                      title: "Profile Downloaded!",
-                      text: "Student profile has been downloaded as PDF.",
-                      timer: 1500,
-                      showConfirmButton: false,
-                    });
-                  }}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
-                >
-                  <FaDownload className="inline mr-2" /> Download
-                </button>
-                <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>
@@ -1987,13 +1532,13 @@ const Adminstudent_profile = () => {
         </div>
       )}
 
-      {/* Edit Student Modal */}
+      {/* Edit Modal */}
       {showEditModal && selectedStudent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaUserEdit className="text-green-600" /> Edit Student Profile
+                <FaUserEdit className="text-green-600" /> Edit Student
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -2015,8 +1560,7 @@ const Adminstudent_profile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter student name"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
                 <div>
@@ -2030,8 +1574,7 @@ const Adminstudent_profile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, fatherName: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter father's name"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
               </div>
@@ -2041,59 +1584,32 @@ const Adminstudent_profile = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Class *
                   </label>
-                  <select
+                  <input
+                    type="text"
                     required
                     value={formData.class}
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Class</option>
-                    <option value="Class 6">Class 6</option>
-                    <option value="Class 7">Class 7</option>
-                    <option value="Class 8">Class 8</option>
-                    <option value="Class 9">Class 9</option>
-                    <option value="Class 10">Class 10</option>
-                  </select>
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject *
+                    Subject
                   </label>
-                  <select
-                    required
+                  <input
+                    type="text"
                     value={formData.subject}
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Subject</option>
-                    <option value="Tajweed">Tajweed</option>
-                    <option value="Tafsir">Tafsir</option>
-                    <option value="Hadith">Hadith</option>
-                    <option value="Fiqh">Fiqh</option>
-                    <option value="Aqeedah">Aqeedah</option>
-                  </select>
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Roll Number
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.roll}
-                    onChange={(e) =>
-                      setFormData({ ...formData, roll: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter roll number"
-                  />
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Phone *
@@ -2105,13 +1621,9 @@ const Adminstudent_profile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter phone number"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Email
@@ -2122,83 +1634,12 @@ const Adminstudent_profile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter email address"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Guardian Contact
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.guardianContact}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        guardianContact: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Guardian contact number"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date of Birth
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.dob}
-                    onChange={(e) =>
-                      setFormData({ ...formData, dob: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Gender
-                  </label>
-                  <select
-                    value={formData.gender}
-                    onChange={(e) =>
-                      setFormData({ ...formData, gender: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Blood Group
-                  </label>
-                  <select
-                    value={formData.bloodGroup}
-                    onChange={(e) =>
-                      setFormData({ ...formData, bloodGroup: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="A+">A+</option>
-                    <option value="A-">A-</option>
-                    <option value="B+">B+</option>
-                    <option value="B-">B-</option>
-                    <option value="AB+">AB+</option>
-                    <option value="AB-">AB-</option>
-                    <option value="O+">O+</option>
-                    <option value="O-">O-</option>
-                  </select>
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Status
@@ -2208,178 +1649,45 @@ const Adminstudent_profile = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   >
                     <option value="Active">Active</option>
                     <option value="Pending">Pending</option>
                     <option value="Inactive">Inactive</option>
                   </select>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
-                </label>
-                <textarea
-                  value={formData.address}
-                  onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
-                  }
-                  rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter address"
-                />
-              </div>
-
-              {/* Performance Section in Edit */}
-              <div className="border-t border-gray-200 pt-4 mt-2">
-                <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                  <FaChartLine className="text-blue-500" /> Performance Details
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Attendance (%)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.attendance}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          attendance: Math.min(
-                            100,
-                            Math.max(0, Number(e.target.value) || 0),
-                          ),
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0-100"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Assignments (%)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.assignments}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          assignments: Math.min(
-                            100,
-                            Math.max(0, Number(e.target.value) || 0),
-                          ),
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0-100"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Quiz (%)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.quiz}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          quiz: Math.min(
-                            100,
-                            Math.max(0, Number(e.target.value) || 0),
-                          ),
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0-100"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
-                      Exam (%)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={formData.exam}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          exam: Math.min(
-                            100,
-                            Math.max(0, Number(e.target.value) || 0),
-                          ),
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="0-100"
-                    />
-                  </div>
-                </div>
-                <div className="mt-3 bg-blue-50 rounded-lg p-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600">
-                      Auto-calculated Progress:
-                    </span>
-                    <span className="font-bold text-blue-600">
-                      {calculateProgress(
-                        Number(formData.attendance) || 0,
-                        Number(formData.assignments) || 0,
-                        Number(formData.quiz) || 0,
-                        Number(formData.exam) || 0,
-                      )}
-                      %
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm mt-1">
-                    <span className="text-gray-600">Performance Rating:</span>
-                    <span
-                      className={`font-bold px-2 py-0.5 rounded-full text-xs ${getPerformanceColor(
-                        determinePerformance(
-                          calculateProgress(
-                            Number(formData.attendance) || 0,
-                            Number(formData.assignments) || 0,
-                            Number(formData.quiz) || 0,
-                            Number(formData.exam) || 0,
-                          ),
-                        ),
-                      )}`}
-                    >
-                      {determinePerformance(
-                        calculateProgress(
-                          Number(formData.attendance) || 0,
-                          Number(formData.assignments) || 0,
-                          Number(formData.quiz) || 0,
-                          Number(formData.exam) || 0,
-                        ),
-                      )}
-                    </span>
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Payment Status
+                  </label>
+                  <select
+                    value={formData.paymentStatus}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        paymentStatus: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    <option value="Paid">Paid</option>
+                    <option value="Partial">Partial</option>
+                    <option value="Unpaid">Unpaid</option>
+                  </select>
                 </div>
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Update Profile
+                  <FaSave className="inline mr-2" size={14} /> Update
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>

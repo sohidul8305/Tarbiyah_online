@@ -1,5 +1,5 @@
 // src/Page/Campus/Campus_dashboard.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
@@ -9,6 +9,87 @@ import {
   FaChevronRight,
   FaSpinner,
 } from "react-icons/fa";
+
+// ✅ Course Image Map — category/title অনুযায়ী আলাদা image
+const getCourseImage = (course) => {
+  if (course.image && course.image.trim() !== "") return course.image;
+
+  const title = (course.title || course.name || "").toLowerCase();
+  const category = (course.category || "").toLowerCase();
+  const dept = (course.department || "").toLowerCase();
+  const combined = `${title} ${category} ${dept}`;
+
+  // Quran / Hifz / Tajweed
+  if (
+    combined.includes("quran") ||
+    combined.includes("hifz") ||
+    combined.includes("tajweed") ||
+    combined.includes("nazera") ||
+    combined.includes("qaida") ||
+    combined.includes("tajwid")
+  ) {
+    return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
+  }
+
+  // Alimiyah / Islamic Studies
+  if (
+    combined.includes("alimiyah") ||
+    combined.includes("alimiya") ||
+    combined.includes("islamic") ||
+    combined.includes("diploma")
+  ) {
+    return "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png";
+  }
+
+  // Elders / General / Default
+  return "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
+};
+
+// ✅ Live Calendar Generator
+const generateCalendar = (date) => {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  const daysInMonth = lastDay.getDate();
+
+  // শনিবার থেকে শুরু (Sat = 0)
+  const startWeekday = (firstDay.getDay() + 1) % 7;
+
+  const prevMonthLastDay = new Date(year, month, 0).getDate();
+
+  const cells = [];
+
+  // আগের মাসের শেষ দিনগুলো
+  for (let i = startWeekday - 1; i >= 0; i--) {
+    cells.push({
+      day: prevMonthLastDay - i,
+      currentMonth: false,
+    });
+  }
+
+  // এই মাসের দিনগুলো
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push({
+      day: d,
+      currentMonth: true,
+      date: new Date(year, month, d),
+    });
+  }
+
+  // পরের মাসের প্রথম দিনগুলো (fill up to 6 rows = 42 cells)
+  const remaining = 42 - cells.length;
+  for (let i = 1; i <= remaining; i++) {
+    cells.push({
+      day: i,
+      currentMonth: false,
+    });
+  }
+
+  // 6 rows × 7 days = 42, কিন্তু 5 rows enough হলে 35
+  return cells.slice(0, cells.length > 35 ? 42 : 35);
+};
 
 const Campus_dashboard = () => {
   const navigate = useNavigate();
@@ -24,6 +105,9 @@ const Campus_dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ✅ Live Calendar State
+  const [currentDate, setCurrentDate] = useState(new Date());
+
   useEffect(() => {
     const handleStorageChange = () => {
       setLanguage(localStorage.getItem("language") || "en");
@@ -32,7 +116,7 @@ const Campus_dashboard = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // ✅ Courses fetch — শুধু এটাই থাকবে
+  // ✅ Courses fetch
   useEffect(() => {
     let isMounted = true;
 
@@ -45,7 +129,6 @@ const Campus_dashboard = () => {
         const isLoggedIn = localStorage.getItem("isCampusLoggedIn");
 
         if (!isLoggedIn || !studentStr) {
-          console.log("⚠️ Not logged in → /campus-login");
           navigate("/campus-login");
           return;
         }
@@ -70,10 +153,10 @@ const Campus_dashboard = () => {
         if (!isMounted) return;
 
         if (data.success) {
+          // ✅ Smart image assignment
           const list = (data.courses || []).map((c) => ({
             ...c,
-            image:
-              c.image || "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png",
+            image: getCourseImage(c),
           }));
           setCourses(list);
           console.log("✅ Loaded", list.length, "courses");
@@ -102,6 +185,78 @@ const Campus_dashboard = () => {
   };
   const activeTab = getCurrentTab();
 
+  // ✅ Calendar data (memoized)
+  const calendarData = useMemo(() => {
+    const cells = generateCalendar(currentDate);
+    const today = new Date();
+
+    return cells.map((cell) => {
+      const isToday =
+        cell.currentMonth &&
+        cell.date &&
+        cell.date.getDate() === today.getDate() &&
+        cell.date.getMonth() === today.getMonth() &&
+        cell.date.getFullYear() === today.getFullYear();
+
+      return { ...cell, isToday };
+    });
+  }, [currentDate]);
+
+  // ✅ Month name in EN/BN
+  const getMonthName = (date, lang) => {
+    const enMonths = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const bnMonths = [
+      "জানুয়ারি",
+      "ফেব্রুয়ারি",
+      "মার্চ",
+      "এপ্রিল",
+      "মে",
+      "জুন",
+      "জুলাই",
+      "আগস্ট",
+      "সেপ্টেম্বর",
+      "অক্টোবর",
+      "নভেম্বর",
+      "ডিসেম্বর",
+    ];
+    const months = lang === "bn" ? bnMonths : enMonths;
+    const year = date.getFullYear();
+    const yearStr =
+      lang === "bn"
+        ? year.toString().replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[d])
+        : year;
+    return `${months[date.getMonth()]} ${yearStr}`;
+  };
+
+  const handlePrevMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1),
+    );
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(
+      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1),
+    );
+  };
+
+  const handleToday = () => {
+    setCurrentDate(new Date());
+  };
+
   const content = {
     en: {
       homeTab: "Home",
@@ -116,18 +271,13 @@ const Campus_dashboard = () => {
       tarbiyahCalendar: "Tarbiyah Academic Calendar",
       today: "Today",
       monthLabel: "Month",
-      monthName: "September 2026",
       routineNote:
         "Please keep an eye on the official notice board to confirm dates related to the routine.",
       recentlyAccessed: "Recently accessed courses",
       calendarTitle: "Calendar",
       allCourses: "All courses",
       newEvent: "New event",
-      august: "‹ August",
-      september: "September 2026",
-      october: "October ›",
-      weekdaysBn: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-      weekdaysEn: ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"],
+      weekdays: ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"],
       firstSemester: "First Semester",
       allam: "Allam",
       welcome: "Welcome",
@@ -152,18 +302,13 @@ const Campus_dashboard = () => {
       tarbiyahCalendar: "তারবিয়াহ একাডেমিক ক্যালেন্ডার",
       today: "আজ",
       monthLabel: "মাস",
-      monthName: "সেপ্টেম্বর ২০২৬",
       routineNote:
         "রুটিন সম্পর্কিত তারিখগুলো নিশ্চিত হওয়ার জন্য অবশ্যই অফিসিয়াল নোটিশ বোর্ডে চোখ রাখুন।",
       recentlyAccessed: "সম্প্রতি অ্যাক্সেস করা কোর্সসমূহ",
       calendarTitle: "ক্যালেন্ডার",
       allCourses: "সব কোর্স",
       newEvent: "নতুন ইভেন্ট",
-      august: "‹ আগস্ট",
-      september: "সেপ্টেম্বর ২০২৬",
-      october: "অক্টোবর ›",
-      weekdaysBn: ["সোম", "মঙ্গল", "বুধ", "বৃহস্পতি", "শুক্র", "শনি", "রবি"],
-      weekdaysEn: ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"],
+      weekdays: ["শনি", "রবি", "সোম", "মঙ্গল", "বুধ", "বৃহস্পতি", "শুক্র"],
       firstSemester: "প্রথম সেমিস্টার",
       allam: "আলিম",
       welcome: "স্বাগতম",
@@ -256,7 +401,7 @@ const Campus_dashboard = () => {
             <p className="text-gray-600 text-sm mb-4">{error}</p>
             <button
               onClick={() => navigate("/campus-login")}
-              className="bg-[#004d4d] text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-teal-900"
+              className="bg-[#004d4d] text-white px-4 py-2 rounded-lg text-sm font-bold"
             >
               {t.retry}
             </button>
@@ -388,6 +533,10 @@ const Campus_dashboard = () => {
                           src={course.image}
                           alt={course.code || course.title}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.src =
+                              "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
+                          }}
                         />
                       </div>
                       <div className="p-3 flex items-center justify-between border-t border-gray-100">
@@ -411,91 +560,80 @@ const Campus_dashboard = () => {
               )}
             </div>
 
-            {/* CALENDAR */}
+            {/* ✅ LIVE CALENDAR */}
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-gray-100 pb-3 flex-wrap gap-3">
                 <h2 className="text-sm font-bold text-gray-800">
                   {t.tarbiyahCalendar}
                 </h2>
                 <div className="flex items-center gap-2 text-xs font-semibold text-gray-600">
-                  <button className="px-2.5 py-1 bg-gray-100 rounded border border-gray-300">
+                  <button
+                    onClick={handleToday}
+                    className="px-2.5 py-1 bg-gray-100 hover:bg-gray-200 rounded border border-gray-300 transition"
+                  >
                     {t.today}
                   </button>
-                  <button className="p-1 hover:bg-gray-100 rounded">
+                  <button
+                    onClick={handlePrevMonth}
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
                     <FaChevronLeft className="text-xs" />
                   </button>
-                  <span>{t.monthName}</span>
-                  <button className="p-1 hover:bg-gray-100 rounded">
+                  <span className="min-w-[120px] text-center">
+                    {getMonthName(currentDate, language)}
+                  </span>
+                  <button
+                    onClick={handleNextMonth}
+                    className="p-1 hover:bg-gray-100 rounded"
+                  >
                     <FaChevronRight className="text-xs" />
                   </button>
                 </div>
               </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full text-center text-xs border-collapse">
                   <thead>
                     <tr className="text-gray-500 border-b border-gray-200">
-                      {t.weekdaysBn.map((day, i) => (
-                        <th key={i} className="py-2">
+                      {t.weekdays.map((day, i) => (
+                        <th key={i} className="py-2 font-semibold">
                           {day}
                         </th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 text-gray-700">
-                    <tr>
-                      <td className="py-3 text-gray-300">31</td>
-                      <td className="py-3">1</td>
-                      <td className="py-3">2</td>
-                      <td className="py-3">3</td>
-                      <td className="py-3 font-bold text-teal-600 bg-teal-50 rounded">
-                        4
-                      </td>
-                      <td className="py-3">5</td>
-                      <td className="py-3">6</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3">7</td>
-                      <td className="py-3">8</td>
-                      <td className="py-3">
-                        <span className="font-bold text-white bg-blue-600 rounded-full w-7 h-7 mx-auto flex items-center justify-center">
-                          9
-                        </span>
-                      </td>
-                      <td className="py-3">10</td>
-                      <td className="py-3">11</td>
-                      <td className="py-3">12</td>
-                      <td className="py-3">13</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3">14</td>
-                      <td className="py-3">15</td>
-                      <td className="py-3">16</td>
-                      <td className="py-3">17</td>
-                      <td className="py-3">18</td>
-                      <td className="py-3">19</td>
-                      <td className="py-3">20</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3">21</td>
-                      <td className="py-3">22</td>
-                      <td className="py-3">23</td>
-                      <td className="py-3">24</td>
-                      <td className="py-3">25</td>
-                      <td className="py-3">26</td>
-                      <td className="py-3">27</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3">28</td>
-                      <td className="py-3">29</td>
-                      <td className="py-3">30</td>
-                      <td className="py-3 text-gray-300">1</td>
-                      <td className="py-3 text-gray-300">2</td>
-                      <td className="py-3 text-gray-300">3</td>
-                      <td className="py-3 text-gray-300">4</td>
-                    </tr>
+                    {Array.from({ length: calendarData.length / 7 }).map(
+                      (_, rowIdx) => (
+                        <tr key={rowIdx}>
+                          {calendarData
+                            .slice(rowIdx * 7, rowIdx * 7 + 7)
+                            .map((cell, colIdx) => (
+                              <td key={colIdx} className="py-3">
+                                {cell.isToday ? (
+                                  <span className="font-bold text-white bg-blue-600 rounded-full w-7 h-7 mx-auto flex items-center justify-center">
+                                    {cell.day}
+                                  </span>
+                                ) : (
+                                  <span
+                                    className={
+                                      cell.currentMonth
+                                        ? "text-gray-700"
+                                        : "text-gray-300"
+                                    }
+                                  >
+                                    {cell.day}
+                                  </span>
+                                )}
+                              </td>
+                            ))}
+                        </tr>
+                      ),
+                    )}
                   </tbody>
                 </table>
               </div>
+
               <p className="text-[11px] text-center text-gray-500 pt-2 border-t border-gray-100">
                 {t.routineNote}
               </p>
@@ -532,6 +670,10 @@ const Campus_dashboard = () => {
                           src={course.image}
                           alt={course.code || course.title}
                           className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.src =
+                              "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
+                          }}
                         />
                       </div>
                       <div className="p-3 flex items-center justify-between border-t border-gray-100">
