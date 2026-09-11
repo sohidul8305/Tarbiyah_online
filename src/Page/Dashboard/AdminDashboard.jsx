@@ -929,9 +929,6 @@ const DashboardContent = ({ stats, notifications }) => {
     </div>
   );
 };
-
-// AdminDashboard.jsx - StudentManagementContent Component
-
 const StudentManagementContent = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -940,6 +937,9 @@ const StudentManagementContent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // ✅ নতুন — Available Courses (backend থেকে আসবে)
+  const [availableCourses, setAvailableCourses] = useState([]);
+
   // ✅ Approve Modal State
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -947,6 +947,24 @@ const StudentManagementContent = () => {
   useEffect(() => {
     fetchStudents();
   }, [refreshKey]);
+
+  // ✅ নতুন — Available Courses লোড করা
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/courses/teacher/all",
+        );
+        const data = await response.json();
+        if (data.success) {
+          setAvailableCourses(data.courses || []);
+        }
+      } catch (err) {
+        console.error("❌ Error fetching courses:", err);
+      }
+    };
+    fetchCourses();
+  }, []);
 
   const fetchStudents = async () => {
     try {
@@ -990,7 +1008,7 @@ const StudentManagementContent = () => {
     }
   };
 
-  // ✅ Approve Student Function
+  // ✅ Approve Student Function (এখন enrolledCourses সহ)
   const handleApproveStudent = async () => {
     try {
       if (
@@ -1017,6 +1035,8 @@ const StudentManagementContent = () => {
             username: selectedStudent.username,
             password: selectedStudent.password,
             roll: selectedStudent.roll,
+            // ✅ নতুন — কোর্স আইডি অ্যারে
+            enrolledCourses: selectedStudent.enrolledCourses || [],
           }),
         },
       );
@@ -1031,6 +1051,7 @@ const StudentManagementContent = () => {
                 status: "Active",
                 username: selectedStudent.username,
                 roll: selectedStudent.roll,
+                enrolledCourses: selectedStudent.enrolledCourses || [],
               }
             : s,
         );
@@ -1051,6 +1072,7 @@ const StudentManagementContent = () => {
                 <p style="font-weight: bold; color: #004d4d; margin-bottom: 5px;">🔑 Login Credentials:</p>
                 <p><strong>Username:</strong> <span style="color: #004d4d;">${selectedStudent.username}</span></p>
                 <p><strong>Password:</strong> <span style="color: #004d4d;">${selectedStudent.password}</span></p>
+                <p style="margin-top: 8px;"><strong>Courses Assigned:</strong> <span style="color: #004d4d;">${(selectedStudent.enrolledCourses || []).length}</span></p>
               </div>
             </div>
           `,
@@ -1125,6 +1147,19 @@ const StudentManagementContent = () => {
         });
       }
     }
+  };
+
+  // ✅ নতুন — Course check/uncheck handler
+  const handleToggleCourse = (courseId) => {
+    const currentList = selectedStudent.enrolledCourses || [];
+    const updated = currentList.includes(courseId)
+      ? currentList.filter((id) => id !== courseId)
+      : [...currentList, courseId];
+
+    setSelectedStudent({
+      ...selectedStudent,
+      enrolledCourses: updated,
+    });
   };
 
   // Filter students
@@ -1204,6 +1239,7 @@ const StudentManagementContent = () => {
           </button>
         </div>
       </div>
+
       {/* Table */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
         <div className="overflow-x-auto h-full">
@@ -1283,14 +1319,14 @@ const StudentManagementContent = () => {
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center gap-1">
-                      {/* ✅ View Button */}
                       <button
                         onClick={() => {
                           setSelectedStudent({
                             ...student,
-                            username: "",
+                            username: student.username || "",
                             password: "",
                             roll: student.roll || "",
+                            enrolledCourses: student.enrolledCourses || [],
                           });
                           setShowApproveModal(true);
                         }}
@@ -1314,8 +1350,8 @@ const StudentManagementContent = () => {
           </table>
         </div>
       </div>
-      // AdminDashboard.jsx - StudentManagementContent এর Modal অংশ
-      {/* ✅ Approve Modal - এখানে আপনি নিজে Username এবং Password দিতে পারবেন */}
+
+      {/* ✅ Approve Modal */}
       {showApproveModal && selectedStudent && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
@@ -1378,7 +1414,7 @@ const StudentManagementContent = () => {
               </p>
             </div>
 
-            {/* ✅ এখানে আপনি নিজে Username এবং Password দিতে পারবেন */}
+            {/* Set Login Credentials */}
             <div className="space-y-3 border-t pt-3">
               <h4 className="text-sm font-bold text-gray-700">
                 🔑 Set Login Credentials
@@ -1402,7 +1438,6 @@ const StudentManagementContent = () => {
                 />
               </div>
 
-              {/* ✅ Username Input - আপনি এখানে Username দিবেন */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Username <span className="text-red-500">*</span>
@@ -1424,7 +1459,6 @@ const StudentManagementContent = () => {
                 </p>
               </div>
 
-              {/* ✅ Password Input - আপনি এখানে Password দিবেন */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password <span className="text-red-500">*</span>
@@ -1445,6 +1479,55 @@ const StudentManagementContent = () => {
                   💡 Default password: <strong>student123S@</strong>
                 </p>
               </div>
+            </div>
+
+            {/* ✅ নতুন — Course Selection UI */}
+            <div className="space-y-2 border-t pt-3 mt-3">
+              <h4 className="text-sm font-bold text-gray-700 flex items-center justify-between">
+                <span>📚 Assign Courses</span>
+                <span className="text-xs font-normal text-gray-500">
+                  {(selectedStudent.enrolledCourses || []).length} selected
+                </span>
+              </h4>
+
+              {availableCourses.length === 0 ? (
+                <p className="text-xs text-gray-400 italic">
+                  No courses available. Create courses from Batch & Course menu.
+                </p>
+              ) : (
+                <div className="border rounded-lg p-3 max-h-40 overflow-y-auto space-y-1.5 bg-gray-50">
+                  {availableCourses.map((course) => {
+                    const isChecked = (
+                      selectedStudent.enrolledCourses || []
+                    ).includes(course._id);
+                    return (
+                      <label
+                        key={course._id}
+                        className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-all ${
+                          isChecked
+                            ? "bg-teal-50 border border-teal-200"
+                            : "hover:bg-white border border-transparent"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => handleToggleCourse(course._id)}
+                          className="mt-0.5 h-4 w-4 text-[#004d4d] focus:ring-[#004d4d] border-gray-300 rounded cursor-pointer"
+                        />
+                        <div className="flex-1">
+                          <p className="text-xs font-semibold text-gray-800">
+                            {course.code}
+                          </p>
+                          <p className="text-[10px] text-gray-600">
+                            {course.title}
+                          </p>
+                        </div>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             {/* Action Buttons */}
