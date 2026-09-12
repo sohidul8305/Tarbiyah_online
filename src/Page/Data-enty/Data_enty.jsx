@@ -9,195 +9,32 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
-  FaClock,
-  FaBook,
-  FaFileAlt,
   FaChartLine,
   FaUserGraduate,
-  FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
   FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
-  FaPlusCircle,
-  FaDownload,
-  FaPrint,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
-  FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
-  FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
-  FaUserEdit,
-  FaUserCircle,
-  FaAddressCard,
-  FaChalkboard,
-  FaCalendarDay,
-  FaSchool as FaSchoolIcon,
-  FaUserTie,
-  FaBookReader,
-  FaStopwatch,
-  FaClipboardCheck,
-  FaExchangeAlt,
-  FaCheckDouble,
-  FaBan,
-  FaCheck,
-  FaTimes,
-  FaQuestion,
-  FaCalendarWeek,
-  FaChartBar,
-  FaFileDownload,
-  FaFilePdf,
-  FaFileExcel,
-  FaRegClock,
-  FaRegCalendarAlt,
-  FaRegCalendarCheck,
-  FaWhatsapp,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaGlobe as FaGlobeIcon,
-  FaEnvelope as FaEnvelopeIcon,
-  FaPhone as FaPhoneIcon,
-  FaUsers as FaUsersIcon,
-  FaCalendar,
-  FaClock as FaClockIcon2,
-  FaHourglassHalf,
-  FaCheckCircle as FaCheckCircleIcon,
-  FaTimesCircle as FaTimesCircleIcon,
-  FaBookmark,
-  FaListUl,
-  FaChevronRight,
-  FaChevronDown,
-  FaFolderOpen,
-  FaFile,
-  FaFilePdf as FaFilePdfIcon,
-  FaFileWord,
-  FaFilePowerpoint,
-  FaFileImage,
-  FaFileVideo,
-  FaFileAudio,
-  FaFileArchive,
-  FaFileCode,
-  FaFileExcel as FaFileExcelIcon,
-  FaFileAlt as FaFileAltIcon,
-  FaFolder,
-  FaCopy,
-  FaCut,
-  FaPaste,
-  FaShare,
-  FaStar as FaStarIcon,
-  FaRegStar,
-  FaRegFileAlt,
-  FaRegFilePdf,
-  FaRegFileWord,
-  FaRegFileExcel,
-  FaRegFilePowerpoint,
-  FaRegFileImage,
-  FaRegFileVideo,
-  FaRegFileArchive,
-  FaEraser,
-  FaTrashAlt,
-  FaCalendarTimes,
-  FaRedoAlt,
-  FaUndoAlt,
-  FaSync,
-  FaExclamationCircle,
-  FaInfoCircle as FaInfoCircleIcon,
-  FaMoneyCheck,
-  FaMoneyCheckAlt,
-  FaHandHoldingUsd,
-  FaDonate,
-  FaFileInvoice as FaFileInvoiceIcon2,
-  FaFileSignature,
-  FaReceipt as FaReceiptIcon,
-  FaCreditCard as FaCreditCardIcon,
-  FaPrint as FaPrintIcon,
-  FaShareAlt,
-  FaChartPie,
-  FaChartArea,
-  FaTasks,
-  FaCheckDouble as FaCheckDoubleIcon,
-  FaPen,
-  FaPencilAlt,
-  FaAward,
-  FaMedal,
-  FaTrophy,
   FaPlus,
-  FaCertificate as FaCertificateIcon,
-  FaTimes as FaTimesIcon,
-  FaUserCheck as FaUserCheckIcon,
-  FaUserMinus as FaUserMinusIcon,
-  FaChartLine as FaChartLineIcon,
-  FaMoneyBillWave as FaMoneyBillWaveIcon,
-  FaHandHoldingUsd as FaHandHoldingUsdIcon,
-  FaDatabase as FaDatabaseIcon,
-  FaCloudUploadAlt,
-  FaFileUpload,
-  FaFileImport,
+  FaSave,
+  FaArrowRight,
+  FaLayerGroup,
+  FaInfoCircle,
+  FaPhoneAlt,
+  FaGlobe,
+  FaBookOpen,
+  FaCalendarAlt,
+  FaCheckCircle,
+  FaHourglassHalf,
+  FaTimesCircle,
   FaFileExport,
+  FaSyncAlt,
+  FaWhatsapp,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Data_enty = () => {
@@ -215,138 +52,79 @@ const Data_enty = () => {
     joinDate: "",
   });
 
-  // Data entries
-  const [dataEntries, setDataEntries] = useState([
-    {
-      id: 1,
-      entryType: "Student",
-      name: "Ahmed Hasan",
-      studentId: "STU001",
-      class: "Class 8",
-      subject: "Tajweed",
-      phone: "+880 1712 345678",
-      email: "ahmed@example.com",
-      address: "Mohammadpur, Dhaka",
-      date: "2026-07-20",
-      status: "Active",
-      enteredBy: "Admin",
-      notes: "New student enrollment",
-    },
-    {
-      id: 2,
-      entryType: "Student",
-      name: "Fatima Begum",
-      studentId: "STU002",
-      class: "Class 9",
-      subject: "Tafsir",
-      phone: "+880 1723 456789",
-      email: "fatima@example.com",
-      address: "Mirpur, Dhaka",
-      date: "2026-07-19",
-      status: "Active",
-      enteredBy: "Admin",
-      notes: "Transferred from another branch",
-    },
-    {
-      id: 3,
-      entryType: "Teacher",
-      name: "Dr. Muhammad Abdullah",
-      teacherId: "TCH001",
-      subject: "Tajweed",
-      phone: "+880 1712 345678",
-      email: "abdullah@example.com",
-      address: "Mohammadpur, Dhaka",
-      date: "2026-07-18",
-      status: "Active",
-      enteredBy: "Admin",
-      notes: "Senior teacher - Tajweed specialist",
-    },
-    {
-      id: 4,
-      entryType: "Teacher",
-      name: "Ustadh Ahmad Ali",
-      teacherId: "TCH002",
-      subject: "Tafsir",
-      phone: "+880 1723 456789",
-      email: "ahmad@example.com",
-      address: "Mirpur, Dhaka",
-      date: "2026-07-17",
-      status: "Active",
-      enteredBy: "Admin",
-      notes: "Experienced Tafsir teacher",
-    },
-    {
-      id: 5,
-      entryType: "Student",
-      name: "Mohammad Ali",
-      studentId: "STU003",
-      class: "Class 10",
-      subject: "Hadith",
-      phone: "+880 1734 567890",
-      email: "ali@example.com",
-      address: "Uttara, Dhaka",
-      date: "2026-07-16",
-      status: "Pending",
-      enteredBy: "Admin",
-      notes: "Waiting for document verification",
-    },
-    {
-      id: 6,
-      entryType: "Student",
-      name: "Aisha Rahman",
-      studentId: "STU004",
-      class: "Class 7",
-      subject: "Fiqh",
-      phone: "+880 1745 678901",
-      email: "aisha@example.com",
-      address: "Gulshan, Dhaka",
-      date: "2026-07-15",
-      status: "Active",
-      enteredBy: "Admin",
-      notes: "",
-    },
-  ]);
+  // ✅ CRM Data Entries State
+  const [dataEntries, setDataEntries] = useState([]);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterType, setFilterType] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
-  const [filterDate, setFilterDate] = useState("");
+  const [filterCountry, setFilterCountry] = useState("All");
 
-  // Modal states
+  // Modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
 
-  // Form data
+  // Form
   const [formData, setFormData] = useState({
-    entryType: "Student",
-    name: "",
-    studentId: "",
-    teacherId: "",
-    class: "",
-    subject: "",
-    phone: "",
-    email: "",
-    address: "",
-    date: "",
-    status: "Active",
+    student: "",
+    guardian: "",
+    whatsapp: "",
+    country: "France",
+    interested: "",
+    status: "Interested",
+    nextFollowUp: "",
     notes: "",
   });
 
-  // Available options
-  const entryTypes = ["Student", "Teacher"];
-  const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
-  const subjects = [
-    "Tajweed",
-    "Tafsir",
-    "Hadith",
-    "Fiqh",
-    "Aqeedah",
-    "Arabic Grammar",
+  // Options
+  const countries = [
+    "Bangladesh",
+    "France",
+    "UK",
+    "USA",
+    "Saudi Arabia",
+    "UAE",
+    "Qatar",
+    "Kuwait",
+    "Italy",
+    "Germany",
+    "Canada",
+    "Australia",
+    "Malaysia",
+    "Other",
   ];
-  const statuses = ["Active", "Pending", "Inactive"];
+
+  const statusOptions = [
+    "Interested",
+    "Contacted",
+    "Enrolled",
+    "Not Interested",
+    "Follow-up",
+    "Pending",
+  ];
+
+  const interestedOptions = [
+    "Diploma in Islamic Studies",
+    "Alimiyah for Kids (Bangla Medium)",
+    "Alimiyah for Kids (English Medium)",
+    "Alimiyah Program (Bangla Version)",
+    "Alimiyah Program (English Version)",
+    "Qaida Noorani (Bangla Medium)",
+    "Qaida Noorani (International)",
+    "Nazera Quran (Bangladeshi)",
+    "Nazera Quran (Expatriate)",
+    "Hifzul Quran",
+    "Hifz Revision (One to One) - Bangla Medium",
+    "Hifz Revision (One to One) - International",
+    "Basic Tajweed (Level-1)",
+    "Bakarah Hifz",
+    "One-to-One Program",
+    "Tarbiyah Quran Studies",
+    "Quran for Elders",
+    "Other",
+  ];
 
   // Load admin info
   useEffect(() => {
@@ -365,9 +143,78 @@ const Data_enty = () => {
     }
   }, [user]);
 
-  // Save data entries to localStorage
+  // ✅ Load CRM data from localStorage on mount
   useEffect(() => {
-    localStorage.setItem("dataEntries", JSON.stringify(dataEntries));
+    const saved = localStorage.getItem("crmDataEntries");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setDataEntries(parsed);
+        } else {
+          // Seed default sample data
+          seedSampleData();
+        }
+      } catch (e) {
+        console.error("Failed to load:", e);
+        seedSampleData();
+      }
+    } else {
+      seedSampleData();
+    }
+  }, []);
+
+  const seedSampleData = () => {
+    const sample = [
+      {
+        id: 1,
+        student: "Yusuf Ibrahim",
+        guardian: "Ibrahim Khan",
+        whatsapp: "+33 6 12 34 56 78",
+        country: "France",
+        interested: "Hifzul Quran",
+        status: "Interested",
+        nextFollowUp: "2026-09-20",
+        notes: "Very interested, needs info about fees",
+        enteredBy: "Admin",
+        createdAt: "2026-09-10",
+      },
+      {
+        id: 2,
+        student: "Fatima Begum",
+        guardian: "Mohammad Ali",
+        whatsapp: "+33 6 98 76 54 32",
+        country: "France",
+        interested: "Alimiyah Program (English Version)",
+        status: "Contacted",
+        nextFollowUp: "2026-09-18",
+        notes: "Called - interested but needs time",
+        enteredBy: "Admin",
+        createdAt: "2026-09-08",
+      },
+      {
+        id: 3,
+        student: "Ahmed Hassan",
+        guardian: "Hassan Ahmed",
+        whatsapp: "+880 1712 345678",
+        country: "Bangladesh",
+        interested: "Diploma in Islamic Studies",
+        status: "Enrolled",
+        nextFollowUp: "2026-09-15",
+        notes: "Registration done",
+        enteredBy: "Admin",
+        createdAt: "2026-09-05",
+      },
+    ];
+    setDataEntries(sample);
+    localStorage.setItem("crmDataEntries", JSON.stringify(sample));
+  };
+
+  // Save to localStorage whenever dataEntries changes
+  useEffect(() => {
+    if (dataEntries.length > 0) {
+      localStorage.setItem("crmDataEntries", JSON.stringify(dataEntries));
+    }
   }, [dataEntries]);
 
   const handleLogout = async () => {
@@ -376,7 +223,6 @@ const Data_enty = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -394,17 +240,9 @@ const Data_enty = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
   // Sidebar Menu Items
   const menuItems = [
@@ -624,149 +462,126 @@ const Data_enty = () => {
     },
   ];
 
-  // Get status badge color
+  // Status colors
   const getStatusColor = (status) => {
     switch (status) {
-      case "Active":
+      case "Interested":
+        return "bg-blue-100 text-blue-700";
+      case "Contacted":
+        return "bg-purple-100 text-purple-700";
+      case "Enrolled":
         return "bg-green-100 text-green-700";
-      case "Pending":
-        return "bg-yellow-100 text-yellow-700";
-      case "Inactive":
+      case "Not Interested":
         return "bg-red-100 text-red-700";
+      case "Follow-up":
+        return "bg-yellow-100 text-yellow-700";
+      case "Pending":
+        return "bg-orange-100 text-orange-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
   };
 
-  // Get status icon
   const getStatusIcon = (status) => {
     switch (status) {
-      case "Active":
-        return <FaCheckCircleIcon className="text-green-500" />;
+      case "Interested":
+        return <FaInfoCircle className="text-blue-500" />;
+      case "Contacted":
+        return <FaPhoneAlt className="text-purple-500" />;
+      case "Enrolled":
+        return <FaCheckCircle className="text-green-500" />;
+      case "Not Interested":
+        return <FaTimesCircle className="text-red-500" />;
+      case "Follow-up":
       case "Pending":
         return <FaHourglassHalf className="text-yellow-500" />;
-      case "Inactive":
-        return <FaTimesCircleIcon className="text-red-500" />;
       default:
         return null;
     }
   };
 
-  // Get entry type badge color
-  const getTypeColor = (type) => {
-    switch (type) {
-      case "Student":
-        return "bg-blue-100 text-blue-700";
-      case "Teacher":
-        return "bg-purple-100 text-purple-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
-
-  // Get entry type icon
-  const getTypeIcon = (type) => {
-    switch (type) {
-      case "Student":
-        return <FaUserGraduate className="text-blue-500" />;
-      case "Teacher":
-        return <FaChalkboardTeacher className="text-purple-500" />;
-      default:
-        return null;
-    }
-  };
-
-  // Filter data entries
+  // Filter
   const filteredEntries = dataEntries.filter((entry) => {
     const matchesSearch =
-      entry.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.teacherId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entry.phone.includes(searchTerm);
-    const matchesType = filterType === "All" || entry.entryType === filterType;
+      (entry.student || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (entry.guardian || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (entry.whatsapp || "").includes(searchTerm) ||
+      (entry.interested || "").toLowerCase().includes(searchTerm.toLowerCase());
+
     const matchesStatus =
       filterStatus === "All" || entry.status === filterStatus;
-    const matchesDate = !filterDate || entry.date === filterDate;
-    return matchesSearch && matchesType && matchesStatus && matchesDate;
+    const matchesCountry =
+      filterCountry === "All" || entry.country === filterCountry;
+
+    return matchesSearch && matchesStatus && matchesCountry;
   });
 
-  // Get unique values for filters
-  const uniqueTypes = ["All", ...new Set(dataEntries.map((e) => e.entryType))];
-  const uniqueStatuses = ["All", ...new Set(dataEntries.map((e) => e.status))];
+  const uniqueCountries = [
+    "All",
+    ...new Set(dataEntries.map((e) => e.country).filter(Boolean)),
+  ];
+  const uniqueStatuses = [
+    "All",
+    ...new Set(dataEntries.map((e) => e.status).filter(Boolean)),
+  ];
 
-  // Format date
   const formatDate = (dateStr) => {
-    if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    if (!dateStr || dateStr === "-") return "-";
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("en-GB", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return dateStr;
+    }
   };
 
-  // Generate ID based on type
-  const generateId = (type) => {
-    const prefix = type === "Student" ? "STU" : "TCH";
-    const count = dataEntries.filter((e) => e.entryType === type).length + 1;
-    return `${prefix}${String(count).padStart(3, "0")}`;
-  };
-
-  // Open add modal
   const openAddModal = () => {
     setFormData({
-      entryType: "Student",
-      name: "",
-      studentId: "",
-      teacherId: "",
-      class: "",
-      subject: "",
-      phone: "",
-      email: "",
-      address: "",
-      date: new Date().toISOString().split("T")[0],
-      status: "Active",
+      student: "",
+      guardian: "",
+      whatsapp: "",
+      country: "France",
+      interested: "",
+      status: "Interested",
+      nextFollowUp: "",
       notes: "",
     });
     setShowAddModal(true);
   };
 
-  // Open edit modal
   const openEditModal = (entry) => {
     setSelectedEntry(entry);
     setFormData({
-      entryType: entry.entryType,
-      name: entry.name,
-      studentId: entry.studentId || "",
-      teacherId: entry.teacherId || "",
-      class: entry.class || "",
-      subject: entry.subject || "",
-      phone: entry.phone || "",
-      email: entry.email || "",
-      address: entry.address || "",
-      date: entry.date,
-      status: entry.status,
+      student: entry.student,
+      guardian: entry.guardian || "",
+      whatsapp: entry.whatsapp || "",
+      country: entry.country || "France",
+      interested: entry.interested || "",
+      status: entry.status || "Interested",
+      nextFollowUp: entry.nextFollowUp || "",
       notes: entry.notes || "",
     });
     setShowEditModal(true);
   };
 
-  // Open details modal
   const openDetailsModal = (entry) => {
     setSelectedEntry(entry);
     setShowDetailsModal(true);
   };
 
-  // Handle add data entry
   const handleAddEntry = (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.entryType || !formData.date) {
+    if (!formData.student || !formData.whatsapp) {
       Swal.fire({
         icon: "warning",
-        title: "Please fill all required fields",
-        timer: 1500,
+        title: "Required Fields Missing",
+        text: "Student name and WhatsApp number are required.",
+        timer: 2000,
         showConfirmButton: false,
       });
       return;
@@ -774,47 +589,38 @@ const Data_enty = () => {
 
     const newEntry = {
       id: Date.now(),
-      entryType: formData.entryType,
-      name: formData.name,
-      studentId:
-        formData.entryType === "Student"
-          ? formData.studentId || generateId("Student")
-          : undefined,
-      teacherId:
-        formData.entryType === "Teacher"
-          ? formData.teacherId || generateId("Teacher")
-          : undefined,
-      class: formData.class || "",
-      subject: formData.subject || "",
-      phone: formData.phone || "",
-      email: formData.email || "",
-      address: formData.address || "",
-      date: formData.date,
-      status: formData.status,
-      enteredBy: adminInfo.name,
+      student: formData.student,
+      guardian: formData.guardian || "",
+      whatsapp: formData.whatsapp,
+      country: formData.country || "",
+      interested: formData.interested || "",
+      status: formData.status || "Interested",
+      nextFollowUp: formData.nextFollowUp || "",
       notes: formData.notes || "",
+      enteredBy: adminInfo.name,
+      createdAt: new Date().toISOString().split("T")[0],
     };
 
-    setDataEntries([...dataEntries, newEntry]);
+    setDataEntries([newEntry, ...dataEntries]);
     setShowAddModal(false);
     Swal.fire({
       icon: "success",
       title: "Data Added!",
-      text: `${formData.entryType} data for ${formData.name} has been added.`,
+      text: `${formData.student}'s info has been added.`,
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle edit data entry
   const handleEditEntry = (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.entryType || !formData.date) {
+    if (!formData.student || !formData.whatsapp) {
       Swal.fire({
         icon: "warning",
-        title: "Please fill all required fields",
-        timer: 1500,
+        title: "Required Fields Missing",
+        text: "Student name and WhatsApp number are required.",
+        timer: 2000,
         showConfirmButton: false,
       });
       return;
@@ -825,23 +631,13 @@ const Data_enty = () => {
         entry.id === selectedEntry.id
           ? {
               ...entry,
-              entryType: formData.entryType,
-              name: formData.name,
-              studentId:
-                formData.entryType === "Student"
-                  ? formData.studentId
-                  : undefined,
-              teacherId:
-                formData.entryType === "Teacher"
-                  ? formData.teacherId
-                  : undefined,
-              class: formData.class || "",
-              subject: formData.subject || "",
-              phone: formData.phone || "",
-              email: formData.email || "",
-              address: formData.address || "",
-              date: formData.date,
+              student: formData.student,
+              guardian: formData.guardian || "",
+              whatsapp: formData.whatsapp,
+              country: formData.country || "",
+              interested: formData.interested || "",
               status: formData.status,
+              nextFollowUp: formData.nextFollowUp || "",
               notes: formData.notes || "",
             }
           : entry,
@@ -851,16 +647,14 @@ const Data_enty = () => {
     Swal.fire({
       icon: "success",
       title: "Data Updated!",
-      text: "Data entry has been updated successfully.",
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle delete data entry
   const handleDeleteEntry = (id) => {
     Swal.fire({
-      title: "Delete Data Entry?",
+      title: "Delete Entry?",
       text: "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
@@ -869,55 +663,82 @@ const Data_enty = () => {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        setDataEntries(dataEntries.filter((e) => e.id !== id));
-        Swal.fire("Deleted!", "Data entry has been deleted.", "success");
-      }
-    });
-  };
-
-  // Export data
-  const exportData = () => {
-    Swal.fire({
-      icon: "success",
-      title: "Data Exporting",
-      text: "All data is being exported to Excel format.",
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  };
-
-  // Import data
-  const importData = () => {
-    Swal.fire({
-      icon: "info",
-      title: "Import Data",
-      text: "Select a file to import data.",
-      showCancelButton: true,
-      confirmButtonColor: "#3b82f6",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: "Choose File",
-    }).then((result) => {
-      if (result.isConfirmed) {
+        const updated = dataEntries.filter((e) => e.id !== id);
+        setDataEntries(updated);
+        localStorage.setItem("crmDataEntries", JSON.stringify(updated));
         Swal.fire({
           icon: "success",
-          title: "Data Imported!",
-          text: "Data has been imported successfully.",
-          timer: 1500,
+          title: "Deleted!",
+          timer: 1200,
           showConfirmButton: false,
         });
       }
     });
   };
 
+  const exportData = () => {
+    const headers = [
+      "Student",
+      "Guardian",
+      "WhatsApp",
+      "Country",
+      "Interested",
+      "Status",
+      "Next Follow-up",
+      "Notes",
+    ];
+    const rows = dataEntries.map((e) => [
+      e.student,
+      e.guardian,
+      e.whatsapp,
+      e.country,
+      e.interested,
+      e.status,
+      e.nextFollowUp,
+      e.notes,
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${cell || ""}"`).join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `crm-data-${new Date().toISOString().split("T")[0]}.csv`;
+    link.click();
+
+    Swal.fire({
+      icon: "success",
+      title: "Exported!",
+      text: "Data exported as CSV file.",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  // Stats
+  const totalEntries = dataEntries.length;
+  const interestedCount = dataEntries.filter(
+    (e) => e.status === "Interested",
+  ).length;
+  const enrolledCount = dataEntries.filter(
+    (e) => e.status === "Enrolled",
+  ).length;
+  const followUpCount = dataEntries.filter(
+    (e) => e.status === "Follow-up" || e.status === "Contacted",
+  ).length;
+
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Data Entry</h1>
+          <h1 className="text-sm font-bold text-gray-800">CRM Data Entry</h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100"
           >
             {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
@@ -926,14 +747,8 @@ const Data_enty = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -964,21 +779,22 @@ const Data_enty = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
+                        className={
+                          activeSubMenu === item.id
+                            ? "rotate-180 transition-transform"
+                            : "transition-transform"
+                        }
                       >
                         <FaArrowRight size={12} />
                       </span>
@@ -993,7 +809,7 @@ const Data_enty = () => {
                               setActiveSubMenu(sub.id);
                               setIsSidebarOpen(false);
                             }}
-                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
+                            className={`block px-3 py-1.5 rounded-lg text-xs transition-all ${
                               activeSubMenu === sub.id
                                 ? "bg-teal-50 text-[#004d4d] font-bold"
                                 : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
@@ -1014,14 +830,11 @@ const Data_enty = () => {
                     }}
                   >
                     <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -1033,7 +846,7 @@ const Data_enty = () => {
 
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 mt-4 border-t border-gray-200 pt-4"
             >
               <FaSignOutAlt className="text-xl" />
               <span className="text-sm font-medium">Logout</span>
@@ -1045,7 +858,6 @@ const Data_enty = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1054,31 +866,27 @@ const Data_enty = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaDatabaseIcon className="text-blue-600" /> Data Entry
+                <FaDatabase className="text-blue-600" /> CRM Data Entry
               </h1>
-              <p className="text-xs text-gray-500">Manage CRM data entries</p>
+              <p className="text-xs text-gray-500">
+                Manage prospective students & follow-ups
+              </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
-                onClick={importData}
-                className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
-              >
-                <FaFileUpload size={12} /> Import
-              </button>
-              <button
                 onClick={exportData}
-                className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
-                <FaFileExport size={12} /> Export
+                <FaFileExport size={12} /> Export CSV
               </button>
               <button
                 onClick={openAddModal}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaPlus size={12} /> Add Data
               </button>
@@ -1087,7 +895,7 @@ const Data_enty = () => {
               </span>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
               >
                 Logout
               </button>
@@ -1096,71 +904,63 @@ const Data_enty = () => {
 
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-blue-600">
-                {dataEntries.length}
-              </p>
-              <p className="text-[10px] text-gray-500">Total Entries</p>
+            <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-blue-600">{totalEntries}</p>
+              <p className="text-[10px] text-gray-500">Total Leads</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-green-600">
-                {dataEntries.filter((e) => e.status === "Active").length}
-              </p>
-              <p className="text-[10px] text-gray-500">Active</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+            <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-purple-600">
-                {dataEntries.filter((e) => e.entryType === "Student").length}
+                {interestedCount}
               </p>
-              <p className="text-[10px] text-gray-500">Students</p>
+              <p className="text-[10px] text-gray-500">Interested</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-orange-600">
-                {dataEntries.filter((e) => e.entryType === "Teacher").length}
+            <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-green-600">
+                {enrolledCount}
               </p>
-              <p className="text-[10px] text-gray-500">Teachers</p>
+              <p className="text-[10px] text-gray-500">Enrolled</p>
+            </div>
+            <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-yellow-600">
+                {followUpCount}
+              </p>
+              <p className="text-[10px] text-gray-500">Need Follow-up</p>
             </div>
           </div>
 
           {/* Filters */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
+          <div className="bg-white border rounded-xl shadow-sm p-2 mb-3">
             <div className="flex flex-col md:flex-row gap-2">
               <div className="flex-1 relative">
                 <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search by name, ID, email or phone..."
+                  placeholder="Search student, guardian, WhatsApp..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-7 pr-2 py-1 text-xs border rounded-lg"
                 />
               </div>
               <div className="flex items-center gap-1 flex-wrap">
-                <input
-                  type="date"
-                  value={filterDate}
-                  onChange={(e) => setFilterDate(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
                 <select
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="px-1.5 py-1 text-xs border rounded-lg"
                 >
-                  {uniqueTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
+                  {uniqueStatuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
                 <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={filterCountry}
+                  onChange={(e) => setFilterCountry(e.target.value)}
+                  className="px-1.5 py-1 text-xs border rounded-lg"
                 >
-                  {uniqueStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {uniqueCountries.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
                     </option>
                   ))}
                 </select>
@@ -1168,9 +968,9 @@ const Data_enty = () => {
             </div>
           </div>
 
-          {/* Data Entries Table */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto max-h-[calc(100vh-380px)] overflow-y-auto">
+          {/* Table */}
+          <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto max-h-[calc(100vh-360px)] overflow-y-auto">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
@@ -1178,22 +978,25 @@ const Data_enty = () => {
                       #
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Type
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Name
+                      👨‍🎓 Student
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
-                      ID
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
-                      Class/Subject
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
-                      Date
+                      👨‍👩 Guardian
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Status
+                      📱 WhatsApp
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
+                      🌍 Country
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
+                      📚 Interested
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                      📊 Status
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
+                      📅 Next Follow-up
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600">
                       Actions
@@ -1203,37 +1006,31 @@ const Data_enty = () => {
                 <tbody className="divide-y divide-gray-100">
                   {filteredEntries.length > 0 ? (
                     filteredEntries.map((entry, index) => (
-                      <tr
-                        key={entry.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-3 py-2 font-medium text-gray-500">
-                          {index + 1}
-                        </td>
-                        <td className="px-3 py-2">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getTypeColor(entry.entryType)}`}
-                          >
-                            {getTypeIcon(entry.entryType)}
-                            {entry.entryType}
-                          </span>
-                        </td>
+                      <tr key={entry.id} className="hover:bg-gray-50">
+                        <td className="px-3 py-2 text-gray-500">{index + 1}</td>
                         <td className="px-3 py-2">
                           <div className="font-medium text-gray-800">
-                            {entry.name}
+                            {entry.student}
                           </div>
-                          <div className="text-[10px] text-gray-400">
-                            {entry.email}
-                          </div>
+                          {entry.notes && (
+                            <div className="text-[10px] text-gray-400 truncate max-w-[180px]">
+                              {entry.notes}
+                            </div>
+                          )}
                         </td>
                         <td className="px-3 py-2 hidden md:table-cell text-gray-600">
-                          {entry.studentId || entry.teacherId || "N/A"}
+                          {entry.guardian || "-"}
                         </td>
-                        <td className="px-3 py-2 hidden lg:table-cell text-gray-600">
-                          {entry.class || entry.subject || "N/A"}
+                        <td className="px-3 py-2 text-gray-700 font-mono text-[11px]">
+                          {entry.whatsapp}
                         </td>
-                        <td className="px-3 py-2 hidden sm:table-cell text-gray-600">
-                          {formatDate(entry.date)}
+                        <td className="px-3 py-2 hidden lg:table-cell">
+                          <span className="inline-flex items-center gap-1 text-gray-700">
+                            🌍 {entry.country || "-"}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 hidden lg:table-cell text-gray-600 text-[11px] max-w-[180px] truncate">
+                          {entry.interested || "-"}
                         </td>
                         <td className="px-3 py-2">
                           <span
@@ -1243,25 +1040,28 @@ const Data_enty = () => {
                             {entry.status}
                           </span>
                         </td>
+                        <td className="px-3 py-2 hidden sm:table-cell text-gray-600 text-[11px]">
+                          {formatDate(entry.nextFollowUp)}
+                        </td>
                         <td className="px-3 py-2">
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => openDetailsModal(entry)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
-                              title="View Details"
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                              title="View"
                             >
                               <FaEye size={12} />
                             </button>
                             <button
                               onClick={() => openEditModal(entry)}
-                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50 transition-all"
+                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
                               title="Edit"
                             >
                               <FaEdit size={12} />
                             </button>
                             <button
                               onClick={() => handleDeleteEntry(entry.id)}
-                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                               title="Delete"
                             >
                               <FaTrash size={12} />
@@ -1273,13 +1073,13 @@ const Data_enty = () => {
                   ) : (
                     <tr>
                       <td
-                        colSpan="8"
+                        colSpan="9"
                         className="px-3 py-8 text-center text-gray-500"
                       >
-                        <FaDatabaseIcon className="text-4xl text-gray-300 mx-auto mb-2" />
-                        <p>No data entries found</p>
+                        <FaDatabase className="text-4xl text-gray-300 mx-auto mb-2" />
+                        <p>No CRM data found</p>
                         <p className="text-[10px] text-gray-400 mt-1">
-                          Try adjusting your search or filter criteria
+                          Click 'Add Data' to add your first entry
                         </p>
                       </td>
                     </tr>
@@ -1291,209 +1091,98 @@ const Data_enty = () => {
         </main>
       </div>
 
-      {/* Add Data Modal */}
-      {showAddModal && (
+      {/* Add / Edit Modal (shared) */}
+      {(showAddModal || showEditModal) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlus className="text-blue-600" /> Add Data Entry
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-5 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                {showAddModal ? (
+                  <>
+                    <FaPlus className="text-blue-600" /> Add CRM Entry
+                  </>
+                ) : (
+                  <>
+                    <FaEdit className="text-yellow-600" /> Edit CRM Entry
+                  </>
+                )}
               </h3>
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={() => {
+                  setShowAddModal(false);
+                  setShowEditModal(false);
+                }}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <FiX size={24} />
+                <FiX size={22} />
               </button>
             </div>
-            <form onSubmit={handleAddEntry} className="p-6 space-y-4">
+            <form
+              onSubmit={showAddModal ? handleAddEntry : handleEditEntry}
+              className="p-5 space-y-3"
+            >
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Entry Type *
-                </label>
-                <select
-                  required
-                  value={formData.entryType}
-                  onChange={(e) =>
-                    setFormData({ ...formData, entryType: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {entryTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name *
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  👨‍🎓 Student Name *
                 </label>
                 <input
                   type="text"
                   required
-                  value={formData.name}
+                  value={formData.student}
                   onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
+                    setFormData({ ...formData, student: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter full name"
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter student name"
                 />
-              </div>
-
-              {formData.entryType === "Student" && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Student ID
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.studentId}
-                      onChange={(e) =>
-                        setFormData({ ...formData, studentId: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Auto-generated or enter manually"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Class
-                    </label>
-                    <select
-                      value={formData.class}
-                      onChange={(e) =>
-                        setFormData({ ...formData, class: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Select Class</option>
-                      {classes.map((cls) => (
-                        <option key={cls} value={cls}>
-                          {cls}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              )}
-
-              {formData.entryType === "Teacher" && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Teacher ID
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.teacherId}
-                      onChange={(e) =>
-                        setFormData({ ...formData, teacherId: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Auto-generated or enter manually"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Subject
-                    </label>
-                    <select
-                      value={formData.subject}
-                      onChange={(e) =>
-                        setFormData({ ...formData, subject: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Select Subject</option>
-                      {subjects.map((subject) => (
-                        <option key={subject} value={subject}>
-                          {subject}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter phone number"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter email address"
-                  />
-                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  👨‍👩 Guardian Name
                 </label>
-                <textarea
-                  value={formData.address}
+                <input
+                  type="text"
+                  value={formData.guardian}
                   onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
+                    setFormData({ ...formData, guardian: e.target.value })
                   }
-                  rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter address"
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter guardian name"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date *
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    📱 WhatsApp *
                   </label>
                   <input
-                    type="date"
+                    type="text"
                     required
-                    value={formData.date}
+                    value={formData.whatsapp}
                     onChange={(e) =>
-                      setFormData({ ...formData, date: e.target.value })
+                      setFormData({ ...formData, whatsapp: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                    placeholder="+33 6 12 34 56 78"
                   />
                 </div>
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    🌍 Country
                   </label>
                   <select
-                    value={formData.status}
+                    value={formData.country}
                     onChange={(e) =>
-                      setFormData({ ...formData, status: e.target.value })
+                      setFormData({ ...formData, country: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
                   >
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
+                    {countries.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
@@ -1501,275 +1190,94 @@ const Data_enty = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
-                </label>
-                <textarea
-                  value={formData.notes}
-                  onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
-                  }
-                  rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Add notes..."
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
-                <button
-                  type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
-                >
-                  <FaSave className="inline mr-2" size={14} /> Add Data
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Data Modal */}
-      {showEditModal && selectedEntry && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaEdit className="text-yellow-600" /> Edit Data Entry
-              </h3>
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <FiX size={24} />
-              </button>
-            </div>
-            <form onSubmit={handleEditEntry} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Entry Type *
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  📚 Interested In
                 </label>
                 <select
-                  required
-                  value={formData.entryType}
+                  value={formData.interested}
                   onChange={(e) =>
-                    setFormData({ ...formData, entryType: e.target.value })
+                    setFormData({ ...formData, interested: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
                 >
-                  {entryTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
+                  <option value="">Select Course</option>
+                  {interestedOptions.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter full name"
-                />
-              </div>
-
-              {formData.entryType === "Student" && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Student ID
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.studentId}
-                      onChange={(e) =>
-                        setFormData({ ...formData, studentId: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter student ID"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Class
-                    </label>
-                    <select
-                      value={formData.class}
-                      onChange={(e) =>
-                        setFormData({ ...formData, class: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Select Class</option>
-                      {classes.map((cls) => (
-                        <option key={cls} value={cls}>
-                          {cls}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              )}
-
-              {formData.entryType === "Teacher" && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Teacher ID
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.teacherId}
-                      onChange={(e) =>
-                        setFormData({ ...formData, teacherId: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter teacher ID"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Subject
-                    </label>
-                    <select
-                      value={formData.subject}
-                      onChange={(e) =>
-                        setFormData({ ...formData, subject: e.target.value })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Select Subject</option>
-                      {subjects.map((subject) => (
-                        <option key={subject} value={subject}>
-                          {subject}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter phone number"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter email address"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
-                </label>
-                <textarea
-                  value={formData.address}
-                  onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
-                  }
-                  rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter address"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date *
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.date}
-                    onChange={(e) =>
-                      setFormData({ ...formData, date: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    📊 Status
                   </label>
                   <select
                     value={formData.status}
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
                   >
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
+                    {statusOptions.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
                 </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">
+                    📅 Next Follow-up
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.nextFollowUp}
+                    onChange={(e) =>
+                      setFormData({ ...formData, nextFollowUp: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  📝 Notes
                 </label>
                 <textarea
                   value={formData.notes}
                   onChange={(e) =>
                     setFormData({ ...formData, notes: e.target.value })
                   }
-                  rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Add notes..."
+                  rows="3"
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                  placeholder="Additional notes..."
                 />
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-3 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold transition-all"
+                  className={`flex-1 ${
+                    showAddModal
+                      ? "bg-blue-600 hover:bg-blue-700"
+                      : "bg-yellow-500 hover:bg-yellow-600"
+                  } text-white py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2`}
                 >
-                  <FaSave className="inline mr-2" size={14} /> Update Data
+                  <FaSave size={14} />
+                  {showAddModal ? "Add Entry" : "Update Entry"}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  onClick={() => {
+                    setShowAddModal(false);
+                    setShowEditModal(false);
+                  }}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
                 >
                   Cancel
                 </button>
@@ -1783,41 +1291,28 @@ const Data_enty = () => {
       {showDetailsModal && selectedEntry && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaInfoCircle className="text-blue-600" /> Data Entry Details
+            <div className="p-5 border-b flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <FaInfoCircle className="text-blue-600" /> Lead Details
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <FiX size={24} />
+                <FiX size={22} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-                  {selectedEntry.name.charAt(0)}
+            <div className="p-5 space-y-3">
+              <div className="flex items-center gap-3 pb-3 border-b">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white text-xl font-bold">
+                  {selectedEntry.student?.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="text-lg font-bold text-gray-800">
-                      {selectedEntry.name}
-                    </h2>
-                    <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getTypeColor(selectedEntry.entryType)}`}
-                    >
-                      {getTypeIcon(selectedEntry.entryType)}
-                      {selectedEntry.entryType}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    {selectedEntry.studentId ||
-                      selectedEntry.teacherId ||
-                      "No ID"}
-                  </p>
+                  <h2 className="text-lg font-bold text-gray-800">
+                    {selectedEntry.student}
+                  </h2>
                   <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedEntry.status)}`}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(selectedEntry.status)}`}
                   >
                     {getStatusIcon(selectedEntry.status)}
                     {selectedEntry.status}
@@ -1825,87 +1320,73 @@ const Data_enty = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                {selectedEntry.class && (
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-[10px] text-gray-400">Class</p>
-                    <p className="text-sm font-semibold">
-                      {selectedEntry.class}
-                    </p>
-                  </div>
-                )}
-                {selectedEntry.subject && (
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-[10px] text-gray-400">Subject</p>
-                    <p className="text-sm font-semibold">
-                      {selectedEntry.subject}
-                    </p>
-                  </div>
-                )}
+              <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Phone</p>
-                  <p className="text-sm font-semibold">
-                    {selectedEntry.phone || "N/A"}
+                  <p className="text-[10px] text-gray-400">👨‍👩 Guardian</p>
+                  <p className="font-semibold">
+                    {selectedEntry.guardian || "-"}
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Email</p>
-                  <p className="text-sm font-semibold">
-                    {selectedEntry.email || "N/A"}
+                  <p className="text-[10px] text-gray-400">🌍 Country</p>
+                  <p className="font-semibold">
+                    {selectedEntry.country || "-"}
                   </p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Date</p>
-                  <p className="text-sm font-semibold">
-                    {formatDate(selectedEntry.date)}
+                <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                  <p className="text-[10px] text-gray-400">📱 WhatsApp</p>
+                  <p className="font-semibold font-mono">
+                    {selectedEntry.whatsapp}
                   </p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Entered By</p>
-                  <p className="text-sm font-semibold">
-                    {selectedEntry.enteredBy}
+                <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                  <p className="text-[10px] text-gray-400">📚 Interested In</p>
+                  <p className="font-semibold">
+                    {selectedEntry.interested || "-"}
                   </p>
                 </div>
-                {selectedEntry.address && (
-                  <div className="bg-gray-50 rounded-lg p-3 col-span-2">
-                    <p className="text-[10px] text-gray-400">Address</p>
-                    <p className="text-sm font-semibold">
-                      {selectedEntry.address}
-                    </p>
-                  </div>
-                )}
+                <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                  <p className="text-[10px] text-gray-400">📅 Next Follow-up</p>
+                  <p className="font-semibold">
+                    {formatDate(selectedEntry.nextFollowUp)}
+                  </p>
+                </div>
                 {selectedEntry.notes && (
                   <div className="bg-gray-50 rounded-lg p-3 col-span-2">
-                    <p className="text-[10px] text-gray-400">Notes</p>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {selectedEntry.notes}
-                    </p>
+                    <p className="text-[10px] text-gray-400">📝 Notes</p>
+                    <p className="text-gray-700 mt-1">{selectedEntry.notes}</p>
                   </div>
                 )}
+                <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                  <p className="text-[10px] text-gray-400">Entered By / On</p>
+                  <p className="text-xs">
+                    {selectedEntry.enteredBy} •{" "}
+                    {formatDate(selectedEntry.createdAt)}
+                  </p>
+                </div>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-2 pt-3 border-t">
+                <a
+                  href={`https://wa.me/${(selectedEntry.whatsapp || "").replace(/[^0-9]/g, "")}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-semibold text-sm text-center flex items-center justify-center gap-1"
+                >
+                  <FaWhatsapp /> WhatsApp
+                </a>
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
                     openEditModal(selectedEntry);
                   }}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg font-semibold text-sm"
                 >
-                  <FaEdit className="inline mr-2" /> Edit
-                </button>
-                <button
-                  onClick={() => {
-                    setShowDetailsModal(false);
-                    handleDeleteEntry(selectedEntry.id);
-                  }}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
-                >
-                  <FaTrash className="inline mr-2" /> Delete
+                  <FaEdit className="inline mr-1" /> Edit
                 </button>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>

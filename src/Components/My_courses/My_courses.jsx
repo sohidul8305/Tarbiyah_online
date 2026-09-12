@@ -22,6 +22,41 @@ const My_courses = () => {
   const [error, setError] = useState(null);
   const [student, setStudent] = useState(null);
 
+  // ✅ Course Image Map
+  const getCourseImage = (course) => {
+    if (course.image && course.image.trim() !== "") return course.image;
+
+    const title = (course.title || course.name || "").toLowerCase();
+
+    if (
+      title.includes("alimiyah") ||
+      title.includes("alimiya") ||
+      title.includes("alim")
+    ) {
+      return "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png";
+    }
+    if (
+      title.includes("hifz") ||
+      title.includes("tahfiz") ||
+      title.includes("revision")
+    ) {
+      return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
+    }
+    if (title.includes("qaida") || title.includes("noorani")) {
+      return "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
+    }
+    if (title.includes("nazera") || title.includes("nazira")) {
+      return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
+    }
+    if (title.includes("tajweed") || title.includes("tajwid")) {
+      return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
+    }
+    if (title.includes("elder")) {
+      return "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
+    }
+
+    return "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
+  };
   const activeTab = "my-courses";
   const t = {
     homeTab: "Home",

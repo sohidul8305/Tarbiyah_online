@@ -170,6 +170,7 @@ import Student_attendance from "../Components/Student_attendance/Student_attenda
 import Course_notice from "../Components/Course_notice/Course_notice";
 import Campus_dashboard from "../Components/Campus_dashboard/Campus_dashboard";
 import My_courses from "../Components/My_courses/My_courses";
+import Academicampus from "../Components/Academicampus/Academicampus";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -529,6 +530,10 @@ export const router = createBrowserRouter([
   {
     path: "/campus",
     element: <Campus></Campus>,
+  },
+  {
+    path: "/academicampus",
+    element: <Academicampus></Academicampus>,
   },
   {
     path: "/campus-dashboard",
