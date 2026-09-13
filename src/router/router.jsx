@@ -171,6 +171,8 @@ import Course_notice from "../Components/Course_notice/Course_notice";
 import Campus_dashboard from "../Components/Campus_dashboard/Campus_dashboard";
 import My_courses from "../Components/My_courses/My_courses";
 import Academicampus from "../Components/Academicampus/Academicampus";
+import BasicTazweed from "../Page/Admin/BasicTazweed";
+import NajeraBatch from "../Page/Admin/NajeraBatch";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -626,6 +628,23 @@ export const router = createBrowserRouter([
     ),
   },
 
+  // Department dashboard
+  {
+    path: "/admin-dashboard/basic-tazweed",
+    element: (
+      <PrivateRoute role="admin">
+        <BasicTazweed />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/admin-dashboard/najera-batch",
+    element: (
+      <PrivateRoute role="admin">
+        <NajeraBatch />
+      </PrivateRoute>
+    ),
+  },
   // ==========================================
   // ৭. সাব-ড্যাশবোর্ড পেজ (Teacher)
   // ==========================================

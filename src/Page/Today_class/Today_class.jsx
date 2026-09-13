@@ -25,17 +25,14 @@ import {
   FaTimesCircle,
   FaArrowRight,
   FaLayerGroup,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
   FaLink,
-  FaSpinner,
   FaSync,
-  FaBookOpen,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+// ✅ API Base URL
+const API_BASE = "http://localhost:5000/api";
 
 const Today_class = () => {
   const { user, logOut } = useAuth();
@@ -44,6 +41,7 @@ const Today_class = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [activeSubMenu, setActiveSubMenu] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterDepartment, setFilterDepartment] = useState("All");
@@ -63,107 +61,8 @@ const Today_class = () => {
     joinDate: "",
   });
 
-  // Today's Classes Data - 6 classes as per your requirement
-  const [todayClasses, setTodayClasses] = useState([
-    {
-      id: 1,
-      name: "Tajweed - Beginner Level",
-      subject: "Tajweed",
-      class: "Class 8",
-      teacher: "Ustadh Ahmad",
-      time: "09:00 AM - 10:00 AM",
-      days: ["Monday", "Wednesday"],
-      room: "Room 101",
-      students: 30,
-      status: "Ongoing",
-      link: "https://meet.google.com/abc-defg-hij",
-      department: "Islamic Studies",
-      attendance: 25,
-      totalStudents: 30,
-    },
-    {
-      id: 2,
-      name: "Tafsir - Quranic Studies",
-      subject: "Tafsir",
-      class: "Class 9",
-      teacher: "Ustadh Muhammad",
-      time: "11:00 AM - 12:00 PM",
-      days: ["Tuesday", "Thursday"],
-      room: "Room 102",
-      students: 25,
-      status: "Upcoming",
-      link: "https://meet.google.com/klm-nopq-rst",
-      department: "Islamic Studies",
-      attendance: 0,
-      totalStudents: 25,
-    },
-    {
-      id: 3,
-      name: "Hadith - Sahih Bukhari",
-      subject: "Hadith",
-      class: "Class 10",
-      teacher: "Ustadh Abdullah",
-      time: "10:00 AM - 11:30 AM",
-      days: ["Saturday", "Sunday"],
-      room: "Room 103",
-      students: 28,
-      status: "Completed",
-      link: "https://meet.google.com/xyz-uvwx-yz",
-      department: "Islamic Studies",
-      attendance: 28,
-      totalStudents: 28,
-    },
-    {
-      id: 4,
-      name: "Fiqh - Islamic Jurisprudence",
-      subject: "Fiqh",
-      class: "Class 7",
-      teacher: "Ustadh Yusuf",
-      time: "02:00 PM - 03:00 PM",
-      days: ["Monday", "Wednesday"],
-      room: "Room 104",
-      students: 20,
-      status: "Upcoming",
-      link: "https://meet.google.com/abc-xyz-123",
-      department: "Islamic Studies",
-      attendance: 0,
-      totalStudents: 20,
-    },
-    {
-      id: 5,
-      name: "Arabic Grammar (Nahu)",
-      subject: "Arabic Language",
-      class: "Class 6",
-      teacher: "Ustadhah Fatima",
-      time: "09:00 AM - 10:30 AM",
-      days: ["Tuesday", "Thursday"],
-      room: "Room 105",
-      students: 22,
-      status: "Ongoing",
-      link: "https://meet.google.com/def-ghi-456",
-      department: "Arabic Language",
-      attendance: 18,
-      totalStudents: 22,
-    },
-    {
-      id: 6,
-      name: "Quran Memorization",
-      subject: "Quran Studies",
-      class: "Class 8",
-      teacher: "Hafiz Umar",
-      time: "08:00 AM - 09:00 AM",
-      days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Saturday"],
-      room: "Room 106",
-      students: 35,
-      status: "Completed",
-      link: "https://meet.google.com/ghi-jkl-789",
-      department: "Quran Studies",
-      attendance: 35,
-      totalStudents: 35,
-    },
-  ]);
+  const [todayClasses, setTodayClasses] = useState([]);
 
-  // New class form state
   const [newClass, setNewClass] = useState({
     name: "",
     subject: "",
@@ -180,7 +79,6 @@ const Today_class = () => {
     totalStudents: 0,
   });
 
-  // Available days
   const availableDays = [
     "Saturday",
     "Sunday",
@@ -190,7 +88,7 @@ const Today_class = () => {
     "Thursday",
   ];
 
-  // Load admin info
+  // ✅ Load admin info
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
@@ -207,13 +105,42 @@ const Today_class = () => {
     }
   }, [user]);
 
+  // ✅ Fetch classes from API
+  const fetchClasses = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE}/today-classes`);
+      const data = await response.json();
+
+      if (data.success) {
+        setTodayClasses(data.classes || []);
+        console.log(`✅ Loaded ${data.classes?.length || 0} classes`);
+      } else {
+        console.error("❌ Failed to load classes:", data.message);
+      }
+    } catch (error) {
+      console.error("❌ Fetch error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Connection Error",
+        text: "Could not connect to server. Please check if backend is running.",
+        confirmButtonColor: "#004d4d",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ✅ Load classes on mount
+  useEffect(() => {
+    fetchClasses();
+  }, []);
+
   const handleLogout = async () => {
     try {
       await logOut();
       localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -231,20 +158,14 @@ const Today_class = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
   };
 
-  // Handle Add Class
-  const handleAddClass = () => {
+  // ✅ CREATE — Add new class via API
+  const handleAddClass = async () => {
     if (
       !newClass.name ||
       !newClass.subject ||
@@ -259,68 +180,126 @@ const Today_class = () => {
       return;
     }
 
-    const newId =
-      todayClasses.length > 0
-        ? Math.max(...todayClasses.map((c) => c.id)) + 1
-        : 1;
-    const classToAdd = {
-      ...newClass,
-      id: newId,
-      students: newClass.totalStudents || 0,
-      totalStudents: newClass.totalStudents || 0,
-      attendance: 0,
-      days: newClass.days || [],
-    };
-
-    setTodayClasses([...todayClasses, classToAdd]);
-    setShowAddModal(false);
-    setNewClass({
-      name: "",
-      subject: "",
-      class: "",
-      teacher: "",
-      time: "",
-      days: [],
-      room: "",
-      students: 0,
-      status: "Upcoming",
-      link: "",
-      department: "",
-      attendance: 0,
-      totalStudents: 0,
-    });
-
+    setSubmitting(true);
     Swal.fire({
-      icon: "success",
-      title: "Class Added!",
-      text: "New class has been created successfully.",
-      timer: 1500,
-      showConfirmButton: false,
+      title: "Creating class...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
     });
+
+    try {
+      const response = await fetch(`${API_BASE}/today-classes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newClass),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // ✅ Refresh the list
+        await fetchClasses();
+
+        setShowAddModal(false);
+        setNewClass({
+          name: "",
+          subject: "",
+          class: "",
+          teacher: "",
+          time: "",
+          days: [],
+          room: "",
+          students: 0,
+          status: "Upcoming",
+          link: "",
+          department: "",
+          attendance: 0,
+          totalStudents: 0,
+        });
+
+        Swal.fire({
+          icon: "success",
+          title: "Class Added!",
+          text: "New class has been created successfully.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Could not create class.",
+        });
+      }
+    } catch (error) {
+      console.error("❌ Create error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Connection Error",
+        text: "Could not connect to server.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // Handle Edit Class
-  const handleEditClass = () => {
+  // ✅ UPDATE — Edit class via API
+  const handleEditClass = async () => {
     if (!editingClass) return;
 
-    setTodayClasses(
-      todayClasses.map((c) => (c.id === editingClass.id ? editingClass : c)),
-    );
-    setShowEditModal(false);
-    setEditingClass(null);
-
+    setSubmitting(true);
     Swal.fire({
-      icon: "success",
-      title: "Class Updated!",
-      text: "Class has been updated successfully.",
-      timer: 1500,
-      showConfirmButton: false,
+      title: "Updating class...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
     });
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/today-classes/${editingClass._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(editingClass),
+        },
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        await fetchClasses();
+        setShowEditModal(false);
+        setEditingClass(null);
+
+        Swal.fire({
+          icon: "success",
+          title: "Class Updated!",
+          text: "Class has been updated successfully.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Could not update class.",
+        });
+      }
+    } catch (error) {
+      console.error("❌ Update error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Connection Error",
+        text: "Could not connect to server.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // Handle Delete Class
-  const handleDeleteClass = (id, name) => {
-    Swal.fire({
+  // ✅ DELETE — Delete class via API
+  const handleDeleteClass = async (id, name) => {
+    const result = await Swal.fire({
       title: `Delete "${name}"?`,
       text: "This action cannot be undone!",
       icon: "warning",
@@ -328,9 +307,26 @@ const Today_class = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setTodayClasses(todayClasses.filter((c) => c.id !== id));
+    });
+
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+      title: "Deleting...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    try {
+      const response = await fetch(`${API_BASE}/today-classes/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        await fetchClasses();
+
         Swal.fire({
           icon: "success",
           title: "Deleted!",
@@ -338,13 +334,26 @@ const Today_class = () => {
           timer: 1500,
           showConfirmButton: false,
         });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Could not delete class.",
+        });
       }
-    });
+    } catch (error) {
+      console.error("❌ Delete error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Connection Error",
+        text: "Could not connect to server.",
+      });
+    }
   };
 
-  // Handle Update Attendance
-  const handleUpdateAttendance = (id, newAttendance) => {
-    const cls = todayClasses.find((c) => c.id === id);
+  // ✅ UPDATE ATTENDANCE
+  const handleUpdateAttendance = async (id, newAttendance) => {
+    const cls = todayClasses.find((c) => c._id === id);
     if (!cls) return;
 
     if (newAttendance < 0 || newAttendance > cls.totalStudents) {
@@ -356,39 +365,79 @@ const Today_class = () => {
       return;
     }
 
-    setTodayClasses(
-      todayClasses.map((c) =>
-        c.id === id ? { ...c, attendance: newAttendance } : c,
-      ),
-    );
-    setShowDetailsModal(false);
-    setSelectedClass(null);
-
     Swal.fire({
-      icon: "success",
-      title: "Attendance Updated!",
-      text: "Attendance has been updated successfully.",
-      timer: 1500,
-      showConfirmButton: false,
+      title: "Updating attendance...",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
     });
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/today-classes/${id}/attendance`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ attendance: newAttendance }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        await fetchClasses();
+        setShowDetailsModal(false);
+        setSelectedClass(null);
+
+        Swal.fire({
+          icon: "success",
+          title: "Attendance Updated!",
+          text: "Attendance has been updated successfully.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message,
+        });
+      }
+    } catch (error) {
+      console.error("❌ Attendance error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Connection Error",
+        text: "Could not connect to server.",
+      });
+    }
   };
 
-  // Handle Update Status
-  const handleUpdateStatus = (id, newStatus) => {
-    setTodayClasses(
-      todayClasses.map((c) => (c.id === id ? { ...c, status: newStatus } : c)),
-    );
+  // ✅ UPDATE STATUS
+  const handleUpdateStatus = async (id, newStatus) => {
+    try {
+      const response = await fetch(`${API_BASE}/today-classes/${id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
 
-    Swal.fire({
-      icon: "success",
-      title: "Status Updated!",
-      text: `Class status changed to ${newStatus}`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
+      const data = await response.json();
+
+      if (data.success) {
+        await fetchClasses();
+        Swal.fire({
+          icon: "success",
+          title: "Status Updated!",
+          text: `Class status changed to ${newStatus}`,
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      console.error("❌ Status error:", error);
+    }
   };
 
-  // Toggle day selection
   const toggleDay = (day) => {
     setNewClass((prev) => {
       const days = prev.days.includes(day)
@@ -407,7 +456,6 @@ const Today_class = () => {
     });
   };
 
-  // Sidebar Menu Items
   const menuItems = [
     {
       id: "profile",
@@ -625,7 +673,6 @@ const Today_class = () => {
     },
   ];
 
-  // Filter classes
   const filteredClasses = todayClasses.filter((cls) => {
     const matchesSearch =
       cls.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -639,7 +686,6 @@ const Today_class = () => {
     return matchesSearch && matchesStatus && matchesDepartment && matchesClass;
   });
 
-  // Get unique values for filters
   const uniqueDepartments = [
     "All",
     ...new Set(todayClasses.map((c) => c.department).filter(Boolean)),
@@ -649,7 +695,6 @@ const Today_class = () => {
     ...new Set(todayClasses.map((c) => c.class).filter(Boolean)),
   ];
 
-  // Get status badge color
   const getStatusColor = (status) => {
     switch (status) {
       case "Ongoing":
@@ -665,7 +710,6 @@ const Today_class = () => {
     }
   };
 
-  // Get status icon
   const getStatusIcon = (status) => {
     switch (status) {
       case "Ongoing":
@@ -679,7 +723,6 @@ const Today_class = () => {
     }
   };
 
-  // Open details modal
   const openDetailsModal = (cls) => {
     setSelectedClass(cls);
     setShowDetailsModal(true);
@@ -715,10 +758,18 @@ const Today_class = () => {
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-xl font-bold">
-                  {adminInfo.name?.charAt(0) || "A"}
-                </span>
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
+                {adminInfo.profileImage ? (
+                  <img
+                    src={adminInfo.profileImage}
+                    alt="admin"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-xl font-bold">
+                    {adminInfo.name?.charAt(0) || "A"}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
@@ -817,7 +868,6 @@ const Today_class = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -825,7 +875,6 @@ const Today_class = () => {
           />
         )}
 
-        {/* Main Content */}
         <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -837,10 +886,18 @@ const Today_class = () => {
                 View and manage today's class schedule
               </p>
             </div>
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-gray-700 hidden sm:block">
                 {adminInfo.name}
               </span>
+              <button
+                onClick={fetchClasses}
+                disabled={loading}
+                className="bg-blue-500 hover:bg-blue-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm disabled:opacity-50 flex items-center gap-1"
+              >
+                <FaSync size={10} className={loading ? "animate-spin" : ""} />
+                {loading ? "Loading..." : "Refresh"}
+              </button>
               <button
                 onClick={handleLogout}
                 className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
@@ -961,164 +1018,180 @@ const Today_class = () => {
             </button>
           </div>
 
-          {/* Classes Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto h-[calc(100vh-420px)]">
-            {filteredClasses.map((cls) => (
-              <div
-                key={cls.id}
-                className={`bg-white border ${
-                  cls.status === "Ongoing"
-                    ? "border-green-300 shadow-md"
-                    : cls.status === "Upcoming"
-                      ? "border-yellow-300"
-                      : cls.status === "Completed"
-                        ? "border-blue-300"
-                        : "border-gray-200"
-                } rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col`}
-              >
-                <div
-                  className={`h-1 ${
-                    cls.status === "Ongoing"
-                      ? "bg-green-500"
-                      : cls.status === "Upcoming"
-                        ? "bg-yellow-500"
-                        : cls.status === "Completed"
-                          ? "bg-blue-500"
-                          : "bg-red-500"
-                  }`}
-                ></div>
-                <div className="p-3 flex-1 flex flex-col">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-gray-800 text-xs mb-0.5 line-clamp-2">
-                        {cls.name}
-                      </h3>
-                      <p className="text-[10px] text-gray-500">{cls.subject}</p>
-                    </div>
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full whitespace-nowrap ml-1 ${getStatusColor(cls.status)}`}
-                    >
-                      {cls.status}
-                    </span>
-                  </div>
+          {/* Loading */}
+          {loading && todayClasses.length === 0 && (
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <FaSync
+                  size={32}
+                  className="animate-spin text-purple-600 mx-auto mb-3"
+                />
+                <p className="text-sm text-gray-500">Loading classes...</p>
+              </div>
+            </div>
+          )}
 
-                  <div className="mt-1.5 space-y-0.5 text-[10px] flex-1">
-                    <p className="text-gray-600 flex items-center gap-1 truncate">
-                      <FaChalkboardTeacher
-                        className="text-gray-400 flex-shrink-0"
-                        size={10}
-                      />
-                      <span className="truncate">{cls.teacher}</span>
-                    </p>
-                    <p className="text-gray-600 flex items-center gap-1">
-                      <FaClockIcon
-                        className="text-gray-400 flex-shrink-0"
-                        size={10}
-                      />
-                      <span className="truncate">{cls.time}</span>
-                    </p>
-                    <p className="text-gray-600 flex items-center gap-1">
-                      <FaUsers
-                        className="text-gray-400 flex-shrink-0"
-                        size={10}
-                      />
-                      <span>{cls.students || 0} Students</span>
-                    </p>
-                    <p className="text-gray-600 flex items-center gap-1">
-                      <FaBook
-                        className="text-gray-400 flex-shrink-0"
-                        size={10}
-                      />
-                      <span className="truncate">{cls.class}</span>
-                    </p>
-                    {cls.days && cls.days.length > 0 && (
-                      <p className="text-gray-600 flex items-center gap-1">
-                        <FaCalendarAlt
+          {/* Classes Grid */}
+          {!loading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto h-[calc(100vh-420px)]">
+              {filteredClasses.map((cls) => (
+                <div
+                  key={cls._id}
+                  className={`bg-white border ${
+                    cls.status === "Ongoing"
+                      ? "border-green-300 shadow-md"
+                      : cls.status === "Upcoming"
+                        ? "border-yellow-300"
+                        : cls.status === "Completed"
+                          ? "border-blue-300"
+                          : "border-gray-200"
+                  } rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col`}
+                >
+                  <div
+                    className={`h-1 ${
+                      cls.status === "Ongoing"
+                        ? "bg-green-500"
+                        : cls.status === "Upcoming"
+                          ? "bg-yellow-500"
+                          : cls.status === "Completed"
+                            ? "bg-blue-500"
+                            : "bg-red-500"
+                    }`}
+                  ></div>
+                  <div className="p-3 flex-1 flex flex-col">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-800 text-xs mb-0.5 line-clamp-2">
+                          {cls.name}
+                        </h3>
+                        <p className="text-[10px] text-gray-500">
+                          {cls.subject}
+                        </p>
+                      </div>
+                      <span
+                        className={`text-[8px] px-1.5 py-0.5 rounded-full whitespace-nowrap ml-1 ${getStatusColor(cls.status)}`}
+                      >
+                        {cls.status}
+                      </span>
+                    </div>
+
+                    <div className="mt-1.5 space-y-0.5 text-[10px] flex-1">
+                      <p className="text-gray-600 flex items-center gap-1 truncate">
+                        <FaChalkboardTeacher
                           className="text-gray-400 flex-shrink-0"
                           size={10}
                         />
-                        <span className="truncate">{cls.days.join(", ")}</span>
+                        <span className="truncate">{cls.teacher}</span>
                       </p>
-                    )}
-                  </div>
-
-                  {/* Attendance Progress */}
-                  <div className="mt-1.5">
-                    <div className="flex justify-between text-[8px] text-gray-500 mb-0.5">
-                      <span>Attendance</span>
-                      <span>
-                        {cls.attendance || 0}/{cls.totalStudents || 0}
-                      </span>
+                      <p className="text-gray-600 flex items-center gap-1">
+                        <FaClockIcon
+                          className="text-gray-400 flex-shrink-0"
+                          size={10}
+                        />
+                        <span className="truncate">{cls.time}</span>
+                      </p>
+                      <p className="text-gray-600 flex items-center gap-1">
+                        <FaUsers
+                          className="text-gray-400 flex-shrink-0"
+                          size={10}
+                        />
+                        <span>{cls.students || 0} Students</span>
+                      </p>
+                      <p className="text-gray-600 flex items-center gap-1">
+                        <FaBook
+                          className="text-gray-400 flex-shrink-0"
+                          size={10}
+                        />
+                        <span className="truncate">{cls.class}</span>
+                      </p>
+                      {cls.days && cls.days.length > 0 && (
+                        <p className="text-gray-600 flex items-center gap-1">
+                          <FaCalendarAlt
+                            className="text-gray-400 flex-shrink-0"
+                            size={10}
+                          />
+                          <span className="truncate">
+                            {cls.days.join(", ")}
+                          </span>
+                        </p>
+                      )}
                     </div>
-                    <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${
-                          ((cls.attendance || 0) / (cls.totalStudents || 1)) *
-                            100 >=
-                          80
-                            ? "bg-green-500"
-                            : ((cls.attendance || 0) /
-                                  (cls.totalStudents || 1)) *
-                                  100 >=
-                                50
-                              ? "bg-yellow-500"
-                              : "bg-red-500"
-                        }`}
-                        style={{
-                          width: `${((cls.attendance || 0) / (cls.totalStudents || 1)) * 100}%`,
+
+                    <div className="mt-1.5">
+                      <div className="flex justify-between text-[8px] text-gray-500 mb-0.5">
+                        <span>Attendance</span>
+                        <span>
+                          {cls.attendance || 0}/{cls.totalStudents || 0}
+                        </span>
+                      </div>
+                      <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full ${
+                            ((cls.attendance || 0) / (cls.totalStudents || 1)) *
+                              100 >=
+                            80
+                              ? "bg-green-500"
+                              : ((cls.attendance || 0) /
+                                    (cls.totalStudents || 1)) *
+                                    100 >=
+                                  50
+                                ? "bg-yellow-500"
+                                : "bg-red-500"
+                          }`}
+                          style={{
+                            width: `${((cls.attendance || 0) / (cls.totalStudents || 1)) * 100}%`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100 flex-wrap">
+                      <a
+                        href={cls.link || "#"}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`${
+                          cls.status === "Ongoing"
+                            ? "bg-green-600 hover:bg-green-700"
+                            : cls.status === "Upcoming"
+                              ? "bg-yellow-600 hover:bg-yellow-700"
+                              : "bg-blue-600 hover:bg-blue-700"
+                        } text-white text-[8px] font-medium flex-1 text-center py-1 rounded transition-all flex items-center justify-center gap-0.5 min-w-[50px]`}
+                      >
+                        <FaLink size={8} /> Join
+                      </a>
+                      <button
+                        onClick={() => openDetailsModal(cls)}
+                        className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
+                        title="View Details"
+                      >
+                        <FaEye size={12} />
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingClass({ ...cls });
+                          setShowEditModal(true);
                         }}
-                      ></div>
+                        className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
+                        title="Edit"
+                      >
+                        <FaEdit size={12} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClass(cls._id, cls.name)}
+                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                        title="Delete"
+                      >
+                        <FaTrash size={12} />
+                      </button>
                     </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100 flex-wrap">
-                    <a
-                      href={cls.link || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={`${
-                        cls.status === "Ongoing"
-                          ? "bg-green-600 hover:bg-green-700"
-                          : cls.status === "Upcoming"
-                            ? "bg-yellow-600 hover:bg-yellow-700"
-                            : "bg-blue-600 hover:bg-blue-700"
-                      } text-white text-[8px] font-medium flex-1 text-center py-1 rounded transition-all flex items-center justify-center gap-0.5 min-w-[50px]`}
-                    >
-                      <FaLink size={8} /> Join
-                    </a>
-                    <button
-                      onClick={() => openDetailsModal(cls)}
-                      className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
-                      title="View Details"
-                    >
-                      <FaEye size={12} />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setEditingClass({ ...cls });
-                        setShowEditModal(true);
-                      }}
-                      className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
-                      title="Edit"
-                    >
-                      <FaEdit size={12} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClass(cls.id, cls.name)}
-                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
-                      title="Delete"
-                    >
-                      <FaTrash size={12} />
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
-          {/* No Results */}
-          {filteredClasses.length === 0 && (
+          {!loading && filteredClasses.length === 0 && (
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center">
               <FaCalendarAlt className="text-5xl text-gray-300 mx-auto mb-3" />
               <h3 className="text-base font-bold text-gray-800 mb-0.5">
@@ -1140,8 +1213,7 @@ const Today_class = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlusCircle className="text-purple-600" />
-                Add New Class
+                <FaPlusCircle className="text-purple-600" /> Add New Class
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1329,9 +1401,10 @@ const Today_class = () => {
             <div className="p-6 border-t border-gray-200 flex gap-3">
               <button
                 onClick={handleAddClass}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-semibold text-sm transition-all"
+                disabled={submitting}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-lg font-semibold text-sm transition-all disabled:opacity-50"
               >
-                Create Class
+                {submitting ? "Creating..." : "Create Class"}
               </button>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1350,8 +1423,7 @@ const Today_class = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaEdit className="text-green-600" />
-                Edit Class
+                <FaEdit className="text-green-600" /> Edit Class
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1542,9 +1614,10 @@ const Today_class = () => {
             <div className="p-6 border-t border-gray-200 flex gap-3">
               <button
                 onClick={handleEditClass}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-sm transition-all"
+                disabled={submitting}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-sm transition-all disabled:opacity-50"
               >
-                Update Class
+                {submitting ? "Updating..." : "Update Class"}
               </button>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1595,7 +1668,7 @@ const Today_class = () => {
                       <select
                         value={selectedClass.status}
                         onChange={(e) => {
-                          handleUpdateStatus(selectedClass.id, e.target.value);
+                          handleUpdateStatus(selectedClass._id, e.target.value);
                           setSelectedClass({
                             ...selectedClass,
                             status: e.target.value,
@@ -1718,7 +1791,6 @@ const Today_class = () => {
                     </div>
                   </div>
 
-                  {/* Update Attendance */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-semibold text-gray-800 mb-2">
                       Update Attendance
@@ -1741,7 +1813,7 @@ const Today_class = () => {
                       <button
                         onClick={() => {
                           handleUpdateAttendance(
-                            selectedClass.id,
+                            selectedClass._id,
                             selectedClass.attendance,
                           );
                         }}

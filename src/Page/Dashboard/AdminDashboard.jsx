@@ -314,9 +314,14 @@ const AdminDashboard = () => {
           label: "Today's Class",
         },
         {
-          id: "payment-overview",
-          path: "/admin-dashboard/payment-overview",
-          label: "Payment Overview",
+          id: "basic-tazweed payment overview",
+          path: "/admin-dashboard/basic-tazweed",
+          label: "Basic Tazweed Payment Overview ",
+        },
+        {
+          id: "najera-payment overview ",
+          path: "/admin-dashboard/najera-batch",
+          label: "Najera payment Overview",
         },
         {
           id: "new-admission",
@@ -355,6 +360,17 @@ const AdminDashboard = () => {
           id: "permission-permission",
           path: "/admin-students/permission",
           label: "Admission Permission",
+        },
+        // ✅ নতুন যোগ করা হলো
+        {
+          id: "basic-tazweed-student",
+          path: "/admin-dashboard/basic-tazweed",
+          label: "Basic Tazweed",
+        },
+        {
+          id: "najera-batch-student",
+          path: "/admin-dashboard/najera-batch",
+          label: "Najera Batch",
         },
       ],
     },
@@ -539,8 +555,8 @@ const AdminDashboard = () => {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+      =
       <Navbar />
-
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
@@ -751,10 +767,23 @@ const DashboardContent = ({ stats, notifications }) => {
     {
       label: (
         <Link
-          to="/admin-dashboard/payment-overview"
+          to="/admin-dashboard/basic-tazweed"
           className="hover:text-teal-600 text-[10px]"
         >
-          Payment Overview
+          Basic Tazweed Payment Overview
+        </Link>
+      ),
+      value: `৳${stats.totalIncome.toLocaleString()}`,
+      icon: <FaMoneyBillWave className="text-green-500" />,
+      color: "bg-green-50",
+    },
+    {
+      label: (
+        <Link
+          to="/admin-dashboard/najera-batch"
+          className="hover:text-teal-600 text-[10px]"
+        >
+          Najera Batch Payment Overview
         </Link>
       ),
       value: `৳${stats.totalIncome.toLocaleString()}`,
