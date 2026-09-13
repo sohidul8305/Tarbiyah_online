@@ -1,5 +1,5 @@
 // src/Page/Admin/Data_enty.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
@@ -10,7 +10,6 @@ import {
   FaMoneyBillWave,
   FaSignOutAlt,
   FaChartLine,
-  FaUserGraduate,
   FaCalendarCheck,
   FaUserTimes,
   FaDatabase,
@@ -24,18 +23,19 @@ import {
   FaLayerGroup,
   FaInfoCircle,
   FaPhoneAlt,
-  FaGlobe,
-  FaBookOpen,
-  FaCalendarAlt,
   FaCheckCircle,
   FaHourglassHalf,
   FaTimesCircle,
   FaFileExport,
-  FaSyncAlt,
   FaWhatsapp,
+  FaSyncAlt,
+  FaUserGraduate,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 const Data_enty = () => {
   const { user, logOut } = useAuth();
@@ -52,13 +52,16 @@ const Data_enty = () => {
     joinDate: "",
   });
 
-  // ✅ CRM Data Entries State
-  const [dataEntries, setDataEntries] = useState([]);
+  // ✅ Data Sources
+  const [crmEntries, setCrmEntries] = useState([]); // locally added CRM entries
+  const [admissionStudents, setAdmissionStudents] = useState([]); // from admission form
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
-  const [filterCountry, setFilterCountry] = useState("All");
+  const [filterSource, setFilterSource] = useState("All"); // All | CRM | Admission
 
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
@@ -71,7 +74,6 @@ const Data_enty = () => {
     student: "",
     guardian: "",
     whatsapp: "",
-    country: "France",
     interested: "",
     status: "Interested",
     nextFollowUp: "",
@@ -79,23 +81,6 @@ const Data_enty = () => {
   });
 
   // Options
-  const countries = [
-    "Bangladesh",
-    "France",
-    "UK",
-    "USA",
-    "Saudi Arabia",
-    "UAE",
-    "Qatar",
-    "Kuwait",
-    "Italy",
-    "Germany",
-    "Canada",
-    "Australia",
-    "Malaysia",
-    "Other",
-  ];
-
   const statusOptions = [
     "Interested",
     "Contacted",
@@ -126,6 +111,112 @@ const Data_enty = () => {
     "Other",
   ];
 
+  // ============================================
+  // Map student status → CRM status
+  // ============================================
+  const mapStudentStatus = (studentStatus) => {
+    if (studentStatus === "Active") return "Enrolled";
+    if (studentStatus === "Pending") return "Pending";
+    if (studentStatus === "Inactive") return "Not Interested";
+    return "Interested";
+  };
+
+  // ============================================
+  // Convert Student → CRM entry shape
+  // ============================================
+  const studentToCrmEntry = (s) => {
+    // Only include valid/available info
+    const entry = {
+      id: s._id || s.id,
+      _id: s._id || s.id,
+      student: s.name || "",
+      guardian: s.guardianName || s.fatherName || "",
+      whatsapp: s.phone || s.guardianPhone || "",
+      interested: s.course || s.class || "",
+      status: mapStudentStatus(s.status),
+      nextFollowUp: s.nextFollowUp
+        ? s.nextFollowUp.split("T")[0]
+        : s.admissionDate
+          ? s.admissionDate.split("T")[0]
+          : "",
+      notes: s.presentAddress || s.address || s.paymentRemarks || "",
+      enteredBy: "Admission Form",
+      createdAt: (s.createdAt || s.admissionDate || "").split("T")[0],
+      source: "admission",
+      isStudent: true,
+      studentId: s._id || s.id,
+      _original: s, // keep full student for details view
+    };
+    return entry;
+  };
+
+  // ============================================
+  // ✅ FETCH Admission Students (from backend)
+  // ============================================
+  const fetchAdmissionStudents = useCallback(async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/students/all`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const data = await res.json();
+      const list = data.students || data.data || [];
+
+      const mapped = Array.isArray(list) ? list.map(studentToCrmEntry) : [];
+      setAdmissionStudents(mapped);
+    } catch (err) {
+      console.warn("⚠️ Could not fetch admission students:", err.message);
+      setAdmissionStudents([]);
+    }
+  }, []);
+
+  // ============================================
+  // ✅ FETCH CRM entries (localStorage)
+  // ============================================
+  const fetchCrmEntries = useCallback(() => {
+    try {
+      const saved = localStorage.getItem("crmDataEntries");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          const tagged = parsed.map((e) => ({
+            ...e,
+            source: e.source || "crm",
+          }));
+          setCrmEntries(tagged);
+          return;
+        }
+      }
+      // Seed initial sample data (only once)
+      const sample = [];
+      setCrmEntries(sample);
+      localStorage.setItem("crmDataEntries", JSON.stringify(sample));
+    } catch (e) {
+      console.error("Failed to load CRM entries:", e);
+      setCrmEntries([]);
+    }
+  }, []);
+
+  // ============================================
+  // Master fetch
+  // ============================================
+  const fetchAll = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      fetchCrmEntries();
+      await fetchAdmissionStudents();
+    } catch (err) {
+      setError(err.message || "Failed to load data");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchCrmEntries, fetchAdmissionStudents]);
+
   // Load admin info
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
@@ -143,79 +234,24 @@ const Data_enty = () => {
     }
   }, [user]);
 
-  // ✅ Load CRM data from localStorage on mount
+  // Initial load
   useEffect(() => {
-    const saved = localStorage.getItem("crmDataEntries");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setDataEntries(parsed);
-        } else {
-          // Seed default sample data
-          seedSampleData();
-        }
-      } catch (e) {
-        console.error("Failed to load:", e);
-        seedSampleData();
-      }
-    } else {
-      seedSampleData();
-    }
-  }, []);
+    fetchAll();
+  }, [fetchAll]);
 
-  const seedSampleData = () => {
-    const sample = [
-      {
-        id: 1,
-        student: "Yusuf Ibrahim",
-        guardian: "Ibrahim Khan",
-        whatsapp: "+33 6 12 34 56 78",
-        country: "France",
-        interested: "Hifzul Quran",
-        status: "Interested",
-        nextFollowUp: "2026-09-20",
-        notes: "Very interested, needs info about fees",
-        enteredBy: "Admin",
-        createdAt: "2026-09-10",
-      },
-      {
-        id: 2,
-        student: "Fatima Begum",
-        guardian: "Mohammad Ali",
-        whatsapp: "+33 6 98 76 54 32",
-        country: "France",
-        interested: "Alimiyah Program (English Version)",
-        status: "Contacted",
-        nextFollowUp: "2026-09-18",
-        notes: "Called - interested but needs time",
-        enteredBy: "Admin",
-        createdAt: "2026-09-08",
-      },
-      {
-        id: 3,
-        student: "Ahmed Hassan",
-        guardian: "Hassan Ahmed",
-        whatsapp: "+880 1712 345678",
-        country: "Bangladesh",
-        interested: "Diploma in Islamic Studies",
-        status: "Enrolled",
-        nextFollowUp: "2026-09-15",
-        notes: "Registration done",
-        enteredBy: "Admin",
-        createdAt: "2026-09-05",
-      },
-    ];
-    setDataEntries(sample);
-    localStorage.setItem("crmDataEntries", JSON.stringify(sample));
-  };
-
-  // Save to localStorage whenever dataEntries changes
+  // Persist CRM entries only (not admission students)
   useEffect(() => {
-    if (dataEntries.length > 0) {
-      localStorage.setItem("crmDataEntries", JSON.stringify(dataEntries));
+    if (crmEntries.length > 0) {
+      localStorage.setItem("crmDataEntries", JSON.stringify(crmEntries));
     }
-  }, [dataEntries]);
+  }, [crmEntries]);
+
+  // ============================================
+  // ✅ Combined list (Admission + CRM)
+  // ============================================
+  const allEntries = useMemo(() => {
+    return [...admissionStudents, ...crmEntries];
+  }, [admissionStudents, crmEntries]);
 
   const handleLogout = async () => {
     try {
@@ -462,7 +498,6 @@ const Data_enty = () => {
     },
   ];
 
-  // Status colors
   const getStatusColor = (status) => {
     switch (status) {
       case "Interested":
@@ -500,8 +535,7 @@ const Data_enty = () => {
     }
   };
 
-  // Filter
-  const filteredEntries = dataEntries.filter((entry) => {
+  const filteredEntries = allEntries.filter((entry) => {
     const matchesSearch =
       (entry.student || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (entry.guardian || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -510,25 +544,23 @@ const Data_enty = () => {
 
     const matchesStatus =
       filterStatus === "All" || entry.status === filterStatus;
-    const matchesCountry =
-      filterCountry === "All" || entry.country === filterCountry;
 
-    return matchesSearch && matchesStatus && matchesCountry;
+    const matchesSource =
+      filterSource === "All" || entry.source === filterSource;
+
+    return matchesSearch && matchesStatus && matchesSource;
   });
 
-  const uniqueCountries = [
-    "All",
-    ...new Set(dataEntries.map((e) => e.country).filter(Boolean)),
-  ];
   const uniqueStatuses = [
     "All",
-    ...new Set(dataEntries.map((e) => e.status).filter(Boolean)),
+    ...new Set(allEntries.map((e) => e.status).filter(Boolean)),
   ];
 
   const formatDate = (dateStr) => {
     if (!dateStr || dateStr === "-") return "-";
     try {
       const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
       return date.toLocaleDateString("en-GB", {
         year: "numeric",
         month: "short",
@@ -544,7 +576,6 @@ const Data_enty = () => {
       student: "",
       guardian: "",
       whatsapp: "",
-      country: "France",
       interested: "",
       status: "Interested",
       nextFollowUp: "",
@@ -554,12 +585,28 @@ const Data_enty = () => {
   };
 
   const openEditModal = (entry) => {
+    // Prevent editing admission-sourced entries in CRM (they need Student Management)
+    if (entry.isStudent) {
+      Swal.fire({
+        icon: "info",
+        title: "Student Record",
+        text: "This is an admission student. Edit from Student Management page.",
+        timer: 2500,
+        showConfirmButton: true,
+        confirmButtonText: "Go to Student Management",
+        showCancelButton: true,
+        cancelButtonText: "Cancel",
+      }).then((res) => {
+        if (res.isConfirmed) navigate("/admin-students/add");
+      });
+      return;
+    }
+
     setSelectedEntry(entry);
     setFormData({
-      student: entry.student,
+      student: entry.student || "",
       guardian: entry.guardian || "",
       whatsapp: entry.whatsapp || "",
-      country: entry.country || "France",
       interested: entry.interested || "",
       status: entry.status || "Interested",
       nextFollowUp: entry.nextFollowUp || "",
@@ -573,6 +620,9 @@ const Data_enty = () => {
     setShowDetailsModal(true);
   };
 
+  // ============================================
+  // ✅ ADD (only CRM entries)
+  // ============================================
   const handleAddEntry = (e) => {
     e.preventDefault();
 
@@ -592,16 +642,16 @@ const Data_enty = () => {
       student: formData.student,
       guardian: formData.guardian || "",
       whatsapp: formData.whatsapp,
-      country: formData.country || "",
       interested: formData.interested || "",
       status: formData.status || "Interested",
       nextFollowUp: formData.nextFollowUp || "",
       notes: formData.notes || "",
       enteredBy: adminInfo.name,
       createdAt: new Date().toISOString().split("T")[0],
+      source: "crm",
     };
 
-    setDataEntries([newEntry, ...dataEntries]);
+    setCrmEntries([newEntry, ...crmEntries]);
     setShowAddModal(false);
     Swal.fire({
       icon: "success",
@@ -612,6 +662,9 @@ const Data_enty = () => {
     });
   };
 
+  // ============================================
+  // ✅ EDIT (only CRM entries)
+  // ============================================
   const handleEditEntry = (e) => {
     e.preventDefault();
 
@@ -626,15 +679,14 @@ const Data_enty = () => {
       return;
     }
 
-    setDataEntries(
-      dataEntries.map((entry) =>
+    setCrmEntries(
+      crmEntries.map((entry) =>
         entry.id === selectedEntry.id
           ? {
               ...entry,
               student: formData.student,
               guardian: formData.guardian || "",
               whatsapp: formData.whatsapp,
-              country: formData.country || "",
               interested: formData.interested || "",
               status: formData.status,
               nextFollowUp: formData.nextFollowUp || "",
@@ -652,28 +704,61 @@ const Data_enty = () => {
     });
   };
 
-  const handleDeleteEntry = (id) => {
-    Swal.fire({
-      title: "Delete Entry?",
-      text: "This action cannot be undone!",
+  // ============================================
+  // ✅ DELETE — handle CRM (local) vs Admission (API)
+  // ============================================
+  const handleDeleteEntry = async (entry) => {
+    const isStudent = entry.isStudent;
+    const id = entry.id || entry._id;
+
+    const result = await Swal.fire({
+      title: isStudent ? `Delete Student "${entry.student}"?` : "Delete Entry?",
+      text: isStudent
+        ? "This will permanently delete the student record!"
+        : "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const updated = dataEntries.filter((e) => e.id !== id);
-        setDataEntries(updated);
-        localStorage.setItem("crmDataEntries", JSON.stringify(updated));
-        Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          timer: 1200,
-          showConfirmButton: false,
-        });
-      }
     });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      if (isStudent) {
+        // Delete from backend
+        const res = await fetch(`${API_BASE_URL}/students/delete/${id}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.success === false) {
+          throw new Error(data.message || "Could not delete student.");
+        }
+
+        setAdmissionStudents(
+          admissionStudents.filter((e) => (e.id || e._id) !== id),
+        );
+      } else {
+        // Remove CRM local entry
+        setCrmEntries(crmEntries.filter((e) => e.id !== id));
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Delete Failed",
+        text: err.message || "Something went wrong.",
+      });
+    }
   };
 
   const exportData = () => {
@@ -681,21 +766,21 @@ const Data_enty = () => {
       "Student",
       "Guardian",
       "WhatsApp",
-      "Country",
       "Interested",
       "Status",
       "Next Follow-up",
       "Notes",
+      "Source",
     ];
-    const rows = dataEntries.map((e) => [
+    const rows = allEntries.map((e) => [
       e.student,
       e.guardian,
       e.whatsapp,
-      e.country,
       e.interested,
       e.status,
       e.nextFollowUp,
       e.notes,
+      e.source,
     ]);
 
     const csvContent = [headers, ...rows]
@@ -719,14 +804,17 @@ const Data_enty = () => {
   };
 
   // Stats
-  const totalEntries = dataEntries.length;
-  const interestedCount = dataEntries.filter(
+  const totalEntries = allEntries.length;
+  const admissionCount = admissionStudents.length;
+  const crmCount = crmEntries.length;
+  const interestedCount = allEntries.filter(
     (e) => e.status === "Interested",
   ).length;
-  const enrolledCount = dataEntries.filter(
+  const enrolledCount = allEntries.filter(
     (e) => e.status === "Enrolled",
   ).length;
-  const followUpCount = dataEntries.filter(
+  const pendingCount = allEntries.filter((e) => e.status === "Pending").length;
+  const followUpCount = allEntries.filter(
     (e) => e.status === "Follow-up" || e.status === "Contacted",
   ).length;
 
@@ -746,11 +834,9 @@ const Data_enty = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
             shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -879,6 +965,17 @@ const Data_enty = () => {
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
+                onClick={fetchAll}
+                disabled={isLoading}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 disabled:opacity-50"
+              >
+                <FaSyncAlt
+                  size={12}
+                  className={isLoading ? "animate-spin" : ""}
+                />
+                Refresh
+              </button>
+              <button
                 onClick={exportData}
                 className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
@@ -902,17 +999,31 @@ const Data_enty = () => {
             </div>
           </div>
 
+          {/* Error Banner */}
+          {error && (
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs rounded-lg p-2 mb-3 flex items-center justify-between">
+              <span>⚠️ {error}</span>
+              <button onClick={fetchAll} className="font-bold underline">
+                Retry
+              </button>
+            </div>
+          )}
+
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
             <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-blue-600">{totalEntries}</p>
               <p className="text-[10px] text-gray-500">Total Leads</p>
             </div>
             <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-purple-600">
-                {interestedCount}
+              <p className="text-lg font-bold text-teal-600">
+                {admissionCount}
               </p>
-              <p className="text-[10px] text-gray-500">Interested</p>
+              <p className="text-[10px] text-gray-500">From Admission</p>
+            </div>
+            <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-purple-600">{crmCount}</p>
+              <p className="text-[10px] text-gray-500">CRM Manual</p>
             </div>
             <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-green-600">
@@ -921,10 +1032,10 @@ const Data_enty = () => {
               <p className="text-[10px] text-gray-500">Enrolled</p>
             </div>
             <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-yellow-600">
-                {followUpCount}
+              <p className="text-lg font-bold text-orange-600">
+                {pendingCount}
               </p>
-              <p className="text-[10px] text-gray-500">Need Follow-up</p>
+              <p className="text-[10px] text-gray-500">Pending</p>
             </div>
           </div>
 
@@ -943,6 +1054,15 @@ const Data_enty = () => {
               </div>
               <div className="flex items-center gap-1 flex-wrap">
                 <select
+                  value={filterSource}
+                  onChange={(e) => setFilterSource(e.target.value)}
+                  className="px-1.5 py-1 text-xs border rounded-lg"
+                >
+                  <option value="All">All Sources</option>
+                  <option value="admission">Admission Form</option>
+                  <option value="crm">CRM Manual</option>
+                </select>
+                <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
                   className="px-1.5 py-1 text-xs border rounded-lg"
@@ -950,17 +1070,6 @@ const Data_enty = () => {
                   {uniqueStatuses.map((s) => (
                     <option key={s} value={s}>
                       {s}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={filterCountry}
-                  onChange={(e) => setFilterCountry(e.target.value)}
-                  className="px-1.5 py-1 text-xs border rounded-lg"
-                >
-                  {uniqueCountries.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
                     </option>
                   ))}
                 </select>
@@ -978,25 +1087,25 @@ const Data_enty = () => {
                       #
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      👨‍🎓 Student
+                      Source
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                      Student
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
-                      👨‍👩 Guardian
+                      Guardian
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      📱 WhatsApp
+                      WhatsApp
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
-                      🌍 Country
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
-                      📚 Interested
+                      Interested
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      📊 Status
+                      Status
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
-                      📅 Next Follow-up
+                      Next Follow-up
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600">
                       Actions
@@ -1004,72 +1113,98 @@ const Data_enty = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filteredEntries.length > 0 ? (
-                    filteredEntries.map((entry, index) => (
-                      <tr key={entry.id} className="hover:bg-gray-50">
-                        <td className="px-3 py-2 text-gray-500">{index + 1}</td>
-                        <td className="px-3 py-2">
-                          <div className="font-medium text-gray-800">
-                            {entry.student}
-                          </div>
-                          {entry.notes && (
-                            <div className="text-[10px] text-gray-400 truncate max-w-[180px]">
-                              {entry.notes}
+                  {isLoading ? (
+                    <tr>
+                      <td
+                        colSpan="9"
+                        className="px-3 py-10 text-center text-gray-500"
+                      >
+                        <FaSyncAlt className="text-3xl text-blue-500 mx-auto mb-2 animate-spin" />
+                        <p>Loading CRM data...</p>
+                      </td>
+                    </tr>
+                  ) : filteredEntries.length > 0 ? (
+                    filteredEntries.map((entry, index) => {
+                      const rowId = entry.id || entry._id;
+                      return (
+                        <tr
+                          key={`${entry.source}-${rowId}`}
+                          className="hover:bg-gray-50"
+                        >
+                          <td className="px-3 py-2 text-gray-500">
+                            {index + 1}
+                          </td>
+                          <td className="px-3 py-2">
+                            {entry.isStudent ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-teal-100 text-teal-700">
+                                <FaUserGraduate size={9} /> Admission
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-purple-100 text-purple-700">
+                                <FaDatabase size={9} /> CRM
+                              </span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="font-medium text-gray-800">
+                              {entry.student || "-"}
                             </div>
-                          )}
-                        </td>
-                        <td className="px-3 py-2 hidden md:table-cell text-gray-600">
-                          {entry.guardian || "-"}
-                        </td>
-                        <td className="px-3 py-2 text-gray-700 font-mono text-[11px]">
-                          {entry.whatsapp}
-                        </td>
-                        <td className="px-3 py-2 hidden lg:table-cell">
-                          <span className="inline-flex items-center gap-1 text-gray-700">
-                            🌍 {entry.country || "-"}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2 hidden lg:table-cell text-gray-600 text-[11px] max-w-[180px] truncate">
-                          {entry.interested || "-"}
-                        </td>
-                        <td className="px-3 py-2">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(entry.status)}`}
-                          >
-                            {getStatusIcon(entry.status)}
-                            {entry.status}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2 hidden sm:table-cell text-gray-600 text-[11px]">
-                          {formatDate(entry.nextFollowUp)}
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => openDetailsModal(entry)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
-                              title="View"
+                            {entry.notes && (
+                              <div className="text-[10px] text-gray-400 truncate max-w-[180px]">
+                                {entry.notes}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-3 py-2 hidden md:table-cell text-gray-600">
+                            {entry.guardian || "-"}
+                          </td>
+                          <td className="px-3 py-2 text-gray-700 font-mono text-[11px]">
+                            {entry.whatsapp || "-"}
+                          </td>
+                          <td className="px-3 py-2 hidden lg:table-cell text-gray-600 text-[11px] max-w-[180px] truncate">
+                            {entry.interested || "-"}
+                          </td>
+                          <td className="px-3 py-2">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(entry.status)}`}
                             >
-                              <FaEye size={12} />
-                            </button>
-                            <button
-                              onClick={() => openEditModal(entry)}
-                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
-                              title="Edit"
-                            >
-                              <FaEdit size={12} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteEntry(entry.id)}
-                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-                              title="Delete"
-                            >
-                              <FaTrash size={12} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                              {getStatusIcon(entry.status)}
+                              {entry.status}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 hidden sm:table-cell text-gray-600 text-[11px]">
+                            {formatDate(entry.nextFollowUp)}
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => openDetailsModal(entry)}
+                                className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                                title="View"
+                              >
+                                <FaEye size={12} />
+                              </button>
+                              <button
+                                onClick={() => openEditModal(entry)}
+                                className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
+                                title={
+                                  entry.isStudent ? "View Student" : "Edit"
+                                }
+                              >
+                                <FaEdit size={12} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteEntry(entry)}
+                                className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                                title="Delete"
+                              >
+                                <FaTrash size={12} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
                       <td
@@ -1091,7 +1226,7 @@ const Data_enty = () => {
         </main>
       </div>
 
-      {/* Add / Edit Modal (shared) */}
+      {/* Add / Edit Modal */}
       {(showAddModal || showEditModal) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
@@ -1123,7 +1258,7 @@ const Data_enty = () => {
             >
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  👨‍🎓 Student Name *
+                  Student *
                 </label>
                 <input
                   type="text"
@@ -1139,7 +1274,7 @@ const Data_enty = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  👨‍👩 Guardian Name
+                  Guardian
                 </label>
                 <input
                   type="text"
@@ -1152,46 +1287,25 @@ const Data_enty = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    📱 WhatsApp *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.whatsapp}
-                    onChange={(e) =>
-                      setFormData({ ...formData, whatsapp: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-                    placeholder="+33 6 12 34 56 78"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    🌍 Country
-                  </label>
-                  <select
-                    value={formData.country}
-                    onChange={(e) =>
-                      setFormData({ ...formData, country: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-                  >
-                    {countries.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  WhatsApp *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.whatsapp}
+                  onChange={(e) =>
+                    setFormData({ ...formData, whatsapp: e.target.value })
+                  }
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                  placeholder="+33 6 12 34 56 78"
+                />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  📚 Interested In
+                  Interested
                 </label>
                 <select
                   value={formData.interested}
@@ -1212,7 +1326,7 @@ const Data_enty = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    📊 Status
+                    Status
                   </label>
                   <select
                     value={formData.status}
@@ -1231,7 +1345,7 @@ const Data_enty = () => {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
-                    📅 Next Follow-up
+                    Next Follow-up
                   </label>
                   <input
                     type="date"
@@ -1246,7 +1360,7 @@ const Data_enty = () => {
 
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  📝 Notes
+                  Notes
                 </label>
                 <textarea
                   value={formData.notes}
@@ -1290,10 +1404,15 @@ const Data_enty = () => {
       {/* Details Modal */}
       {showDetailsModal && selectedEntry && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-5 border-b flex justify-between items-center">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-5 border-b flex justify-between items-center sticky top-0 bg-white">
               <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                 <FaInfoCircle className="text-blue-600" /> Lead Details
+                {selectedEntry.isStudent && (
+                  <span className="text-[10px] bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-semibold">
+                    Admission
+                  </span>
+                )}
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
@@ -1321,42 +1440,65 @@ const Data_enty = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-sm">
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">👨‍👩 Guardian</p>
+                <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                  <p className="text-[10px] text-gray-400">Student</p>
+                  <p className="font-semibold">
+                    {selectedEntry.student || "-"}
+                  </p>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                  <p className="text-[10px] text-gray-400">Guardian</p>
                   <p className="font-semibold">
                     {selectedEntry.guardian || "-"}
                   </p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">🌍 Country</p>
-                  <p className="font-semibold">
-                    {selectedEntry.country || "-"}
-                  </p>
-                </div>
+
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
-                  <p className="text-[10px] text-gray-400">📱 WhatsApp</p>
+                  <p className="text-[10px] text-gray-400">WhatsApp</p>
                   <p className="font-semibold font-mono">
-                    {selectedEntry.whatsapp}
+                    {selectedEntry.whatsapp || "-"}
                   </p>
                 </div>
+
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
-                  <p className="text-[10px] text-gray-400">📚 Interested In</p>
+                  <p className="text-[10px] text-gray-400">Interested</p>
                   <p className="font-semibold">
                     {selectedEntry.interested || "-"}
                   </p>
                 </div>
+
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
-                  <p className="text-[10px] text-gray-400">📅 Next Follow-up</p>
+                  <p className="text-[10px] text-gray-400">Status</p>
+                  <span
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 ${getStatusColor(selectedEntry.status)}`}
+                  >
+                    {getStatusIcon(selectedEntry.status)}
+                    {selectedEntry.status}
+                  </span>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                  <p className="text-[10px] text-gray-400">Next Follow-up</p>
                   <p className="font-semibold">
                     {formatDate(selectedEntry.nextFollowUp)}
                   </p>
                 </div>
+
                 {selectedEntry.notes && (
                   <div className="bg-gray-50 rounded-lg p-3 col-span-2">
-                    <p className="text-[10px] text-gray-400">📝 Notes</p>
+                    <p className="text-[10px] text-gray-400">Notes</p>
                     <p className="text-gray-700 mt-1">{selectedEntry.notes}</p>
                   </div>
                 )}
+
+                <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                  <p className="text-[10px] text-gray-400">Source</p>
+                  <p className="text-xs font-semibold">
+                    {selectedEntry.isStudent ? "Admission Form" : "CRM Manual"}
+                  </p>
+                </div>
+
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
                   <p className="text-[10px] text-gray-400">Entered By / On</p>
                   <p className="text-xs">
@@ -1382,7 +1524,8 @@ const Data_enty = () => {
                   }}
                   className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg font-semibold text-sm"
                 >
-                  <FaEdit className="inline mr-1" /> Edit
+                  <FaEdit className="inline mr-1" />
+                  {selectedEntry.isStudent ? "Manage" : "Edit"}
                 </button>
                 <button
                   onClick={() => setShowDetailsModal(false)}

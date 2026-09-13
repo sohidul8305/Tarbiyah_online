@@ -419,6 +419,8 @@ const Admission_now = () => {
         },
       );
 
+      // "https://api.tarbiyahonline.com/api/students/register/student"
+
       const data = await response.json();
       console.log("📥 Response:", data);
 

@@ -1,8 +1,10 @@
+// src/Page/Admin/AdminLogin.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Navbar/Footer/Footer";
 import { useAuth } from "../../Provider/AuthProvider";
+import { findAdminByCredentials } from "../../Config/adminUsers";
 import Swal from "sweetalert2";
 
 const AdminLogin = () => {
@@ -21,16 +23,73 @@ const AdminLogin = () => {
     e.preventDefault();
     setLoading(true);
 
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
     try {
-      const result = await signInUser(email.trim(), password.trim());
+      // ✅ STEP 1: predefined admin check (e.g., elders@tarabiyah.com)
+      const predefinedAdmin = findAdminByCredentials(
+        trimmedEmail,
+        trimmedPassword,
+      );
+
+      if (predefinedAdmin) {
+        console.log(
+          "✅ Predefined Admin Login:",
+          predefinedAdmin.profile.email,
+        );
+
+        localStorage.setItem(
+          "adminInfo",
+          JSON.stringify(predefinedAdmin.profile),
+        );
+        localStorage.setItem(
+          "adminStats",
+          JSON.stringify(predefinedAdmin.stats || {}),
+        );
+        localStorage.setItem("isAdminLoggedIn", "true");
+        localStorage.setItem("adminEmail", predefinedAdmin.profile.email);
+
+        await Swal.fire({
+          icon: "success",
+          title: `Welcome, ${predefinedAdmin.profile.name}! 🎉`,
+          html: `<p style="color:#004d4d; font-weight:600;">${predefinedAdmin.profile.department} Department</p>`,
+          timer: 1600,
+          showConfirmButton: false,
+        });
+
+        navigate("/admin-dashboard");
+        return;
+      }
+
+      // ✅ STEP 2: Firebase auth (regular admin)
+      const result = await signInUser(trimmedEmail, trimmedPassword);
       const user = result?.user || result;
 
-      console.log("✅ Admin Login successful:", user?.email);
+      console.log("✅ Firebase Admin Login:", user?.email);
+
+      const defaultAdminInfo = {
+        name: user?.displayName || "Admin",
+        email: user?.email || " elders@tarabiyah.com",
+        phone: "+880 1700 123456",
+        designation: "Administrator",
+        department: "Administration",
+        joinDate: "January 2024",
+        bio: "Experienced administrator with a passion for education and Islamic studies.",
+        address: "40/1, Safe Garden, Mohammadpur - 1207, Dhaka",
+        website: "https://tarabiyahonline.com",
+        profileImage: "",
+      };
+
+      localStorage.setItem("adminInfo", JSON.stringify(defaultAdminInfo));
+      localStorage.removeItem("adminStats");
+      localStorage.setItem("isAdminLoggedIn", "true");
+      localStorage.setItem("adminEmail", defaultAdminInfo.email);
 
       await Swal.fire({
         icon: "success",
         title: "Login Successful! 🎉",
-        text: `Welcome ${user?.displayName || "Admin"}!`,
+        text: `Welcome ${defaultAdminInfo.name}!`,
         timer: 1500,
         showConfirmButton: false,
       });
@@ -80,7 +139,7 @@ const AdminLogin = () => {
               Admin Login
             </h2>
             <p className="text-xs text-gray-400 mt-2">
-              Demo: admin@tarabiyah.com
+              Authorized personnel only
             </p>
           </div>
 

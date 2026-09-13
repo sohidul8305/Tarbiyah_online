@@ -1,5 +1,5 @@
-// src/Page/Admin/Admin_profile.jsx
-import React, { useState, useEffect } from "react";
+// src/Page/Admin_profile/Admin_profile.jsx
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
@@ -16,8 +16,6 @@ import {
   FaUsers,
   FaChalkboardTeacher,
   FaMoneyBillWave,
-  FaBell,
-  FaBook,
   FaChartLine,
   FaDatabase,
   FaUserTimes,
@@ -25,23 +23,74 @@ import {
   FaCalendarCheck,
   FaArrowRight,
   FaUserCog,
-  FaIdCard,
   FaBuilding,
   FaMapMarkerAlt,
   FaGlobe,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaInstagram,
+  FaSpinner,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdVerified,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-} from "react-icons/md";
+import { MdDashboard, MdVerified } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+// ✅ ImgBB API Key — .env file থেকে আসবে, না থাকলে fallback
+const IMAGEBB_API_KEY =
+  import.meta.env.VITE_IMAGEBB_API_KEY || "8bf6838d246dba2d2f07c95a50b28938";
+
+// ✅ Debug — console এ দেখাবে
+console.log(
+  "🔑 ImgBB API Key Status:",
+  IMAGEBB_API_KEY ? "✅ Set" : "❌ Missing",
+);
+
+// ✅ ImgBB Upload Function
+const uploadToImgBB = async (file) => {
+  console.log("🚀 Starting ImgBB upload...");
+  console.log(
+    "📁 File:",
+    file?.name,
+    "| Size:",
+    file?.size,
+    "| Type:",
+    file?.type,
+  );
+
+  if (!IMAGEBB_API_KEY) {
+    throw new Error("ImgBB API key missing!");
+  }
+
+  if (!file) throw new Error("No file provided");
+
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Please select a valid image file.");
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    throw new Error("Image size must be less than 2MB.");
+  }
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const response = await fetch(
+    `https://api.imgbb.com/1/upload?key=${IMAGEBB_API_KEY}`,
+    {
+      method: "POST",
+      body: formData,
+    },
+  );
+
+  console.log("📡 Response status:", response.status);
+
+  const data = await response.json();
+  console.log("📦 ImgBB response:", data);
+
+  if (!data.success) {
+    throw new Error(data.error?.message || "ImgBB upload failed");
+  }
+
+  const imageUrl = data.data.display_url || data.data.url;
+  console.log("✅ Image URL:", imageUrl);
+  return imageUrl;
+};
 
 const Admin_profile = () => {
   const { user, logOut } = useAuth();
@@ -50,6 +99,9 @@ const Admin_profile = () => {
   const [activeMenu, setActiveMenu] = useState("profile");
   const [activeSubMenu, setActiveSubMenu] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
+
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -60,12 +112,7 @@ const Admin_profile = () => {
     bio: "",
     address: "",
     website: "",
-    socialLinks: {
-      facebook: "",
-      twitter: "",
-      linkedin: "",
-      instagram: "",
-    },
+    profileImage: "",
   });
 
   const [editData, setEditData] = useState({});
@@ -74,9 +121,14 @@ const Admin_profile = () => {
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
-      const admin = JSON.parse(savedAdmin);
-      setAdminInfo(admin);
-      setEditData(admin);
+      try {
+        const admin = JSON.parse(savedAdmin);
+        setAdminInfo(admin);
+        setEditData(admin);
+        console.log("📥 Loaded adminInfo:", admin);
+      } catch (err) {
+        console.error("Failed to parse adminInfo:", err);
+      }
     } else {
       const defaultAdmin = {
         name: user?.displayName || "Admin",
@@ -88,12 +140,7 @@ const Admin_profile = () => {
         bio: "Experienced administrator with a passion for education and Islamic studies.",
         address: "40/1, Safe Garden, Mohammadpur - 1207, Dhaka",
         website: "https://tarabiyahonline.com",
-        socialLinks: {
-          facebook: "https://facebook.com/tarabiyah",
-          twitter: "https://twitter.com/tarabiyah",
-          linkedin: "https://linkedin.com/company/tarabiyah",
-          instagram: "https://instagram.com/tarabiyah",
-        },
+        profileImage: "",
       };
       setAdminInfo(defaultAdmin);
       setEditData(defaultAdmin);
@@ -112,8 +159,8 @@ const Admin_profile = () => {
     try {
       await logOut();
       localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
+      // ✅ adminInfo এবং adminStats remove করবেন না — image preserve থাকবে
 
       await Swal.fire({
         icon: "success",
@@ -136,7 +183,6 @@ const Admin_profile = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // ✅ Sidebar Menu Items - সম্পূর্ণ
   const menuItems = [
     {
       id: "profile",
@@ -354,11 +400,12 @@ const Admin_profile = () => {
     },
   ];
 
-  // Handle edit toggle
   const handleEditToggle = () => {
     if (isEditing) {
+      // ✅ Save
       setAdminInfo(editData);
       localStorage.setItem("adminInfo", JSON.stringify(editData));
+      console.log("💾 Saved adminInfo:", editData);
       Swal.fire({
         icon: "success",
         title: "Profile Updated!",
@@ -367,6 +414,7 @@ const Admin_profile = () => {
         showConfirmButton: false,
       });
     } else {
+      // ✅ Edit mode on
       setEditData({ ...adminInfo });
     }
     setIsEditing(!isEditing);
@@ -382,11 +430,97 @@ const Admin_profile = () => {
     setEditData({ ...editData, [name]: value });
   };
 
-  const handleSocialChange = (e) => {
-    const { name, value } = e.target;
-    setEditData({
-      ...editData,
-      socialLinks: { ...editData.socialLinks, [name]: value },
+  const handleImageClick = () => {
+    if (isEditing && !isUploadingImage) {
+      fileInputRef.current?.click();
+    }
+  };
+
+  // ✅ ImgBB Upload Handler
+  const handleImageChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    console.log("📷 File selected:", file.name);
+
+    // Type check
+    if (!file.type.startsWith("image/")) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid File",
+        text: "Please select a valid image file (JPG, PNG, etc).",
+      });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    // Size check
+    if (file.size > 2 * 1024 * 1024) {
+      Swal.fire({
+        icon: "warning",
+        title: "File Too Large",
+        text: "Image size must be less than 2MB.",
+      });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setIsUploadingImage(true);
+
+    // Loading popup
+    Swal.fire({
+      title: "Uploading image...",
+      text: "Please wait",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      const imageUrl = await uploadToImgBB(file);
+
+      // ✅ editData এ save
+      setEditData((prev) => ({ ...prev, profileImage: imageUrl }));
+
+      Swal.fire({
+        icon: "success",
+        title: "Image Uploaded!",
+        html: `
+          <p>Click <strong>Save</strong> to apply changes.</p>
+          <img src="${imageUrl}" style="max-width: 150px; max-height: 150px; border-radius: 8px; margin-top: 10px; border: 2px solid #004d4d;" />
+        `,
+        confirmButtonColor: "#004d4d",
+        confirmButtonText: "OK",
+      });
+    } catch (error) {
+      console.error("❌ Upload failed:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Upload Failed",
+        html: `
+          <p><strong>Error:</strong> ${error.message}</p>
+          <p style="font-size: 12px; color: #666; margin-top: 8px;">
+            Check ImgBB API key, internet connection, and file size (max 2MB).
+          </p>
+        `,
+        confirmButtonColor: "#004d4d",
+      });
+    } finally {
+      setIsUploadingImage(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setEditData({ ...editData, profileImage: "" });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    Swal.fire({
+      icon: "success",
+      title: "Image Removed",
+      text: "Click Save to apply changes.",
+      timer: 1200,
+      showConfirmButton: false,
     });
   };
 
@@ -418,13 +552,20 @@ const Admin_profile = () => {
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
-          {/* Sidebar Header */}
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-xl font-bold">
-                  {adminInfo.name?.charAt(0) || "A"}
-                </span>
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
+                {adminInfo.profileImage ? (
+                  <img
+                    src={adminInfo.profileImage}
+                    alt="admin"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-xl font-bold">
+                    {adminInfo.name?.charAt(0) || "A"}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
@@ -435,7 +576,6 @@ const Admin_profile = () => {
             </div>
           </div>
 
-          {/* ✅ Navigation Menu - ঠিক করা */}
           <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
@@ -510,7 +650,6 @@ const Admin_profile = () => {
               </div>
             ))}
 
-            {/* Logout Button */}
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -525,7 +664,6 @@ const Admin_profile = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -533,9 +671,7 @@ const Admin_profile = () => {
           />
         )}
 
-        {/* Main Content */}
         <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
-          {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
@@ -558,7 +694,6 @@ const Admin_profile = () => {
             </div>
           </div>
 
-          {/* Profile Content */}
           <div className="overflow-hidden h-[calc(100vh-170px)]">
             <div className="space-y-3 h-full overflow-hidden">
               {/* Profile Header */}
@@ -566,11 +701,12 @@ const Admin_profile = () => {
                 <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] h-20 md:h-24 relative">
                   <button
                     onClick={handleEditToggle}
+                    disabled={isUploadingImage}
                     className={`absolute top-2 right-2 ${
                       isEditing
                         ? "bg-green-500 hover:bg-green-600"
                         : "bg-white/20 hover:bg-white/30"
-                    } text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm`}
+                    } text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm disabled:opacity-50`}
                   >
                     {isEditing ? <FaSave size={12} /> : <FaEdit size={12} />}
                     {isEditing ? "Save" : "Edit"}
@@ -578,7 +714,8 @@ const Admin_profile = () => {
                   {isEditing && (
                     <button
                       onClick={handleCancelEdit}
-                      className="absolute top-2 right-20 bg-red-500/80 hover:bg-red-600 text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm"
+                      disabled={isUploadingImage}
+                      className="absolute top-2 right-20 bg-red-500/80 hover:bg-red-600 text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm disabled:opacity-50"
                     >
                       <FaTimes size={12} /> Cancel
                     </button>
@@ -587,13 +724,61 @@ const Admin_profile = () => {
 
                 <div className="px-4 pb-4 relative flex flex-col md:flex-row items-center md:items-end gap-4 -mt-10 md:-mt-8">
                   <div className="relative">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-white p-1 shadow-lg border-4 border-white flex items-center justify-center text-3xl bg-teal-50">
-                      <span>{adminInfo.name?.charAt(0) || "A"}</span>
+                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-white p-1 shadow-lg border-4 border-white flex items-center justify-center text-3xl bg-teal-50 overflow-hidden">
+                      {(
+                        isEditing
+                          ? editData.profileImage
+                          : adminInfo.profileImage
+                      ) ? (
+                        <img
+                          src={
+                            isEditing
+                              ? editData.profileImage
+                              : adminInfo.profileImage
+                          }
+                          alt="profile"
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      ) : (
+                        <span>{adminInfo.name?.charAt(0) || "A"}</span>
+                      )}
                     </div>
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+
                     {isEditing && (
-                      <button className="absolute bottom-0 right-0 bg-teal-600 text-white p-1 rounded-full border-2 border-white hover:bg-teal-700 transition-all">
-                        <FaCamera size={12} />
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          onClick={handleImageClick}
+                          disabled={isUploadingImage}
+                          title="Upload Image"
+                          className="absolute bottom-0 right-0 bg-teal-600 text-white p-1.5 rounded-full border-2 border-white hover:bg-teal-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isUploadingImage ? (
+                            <FaSpinner size={12} className="animate-spin" />
+                          ) : (
+                            <FaCamera size={12} />
+                          )}
+                        </button>
+
+                        {editData.profileImage && !isUploadingImage && (
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            title="Remove Image"
+                            className="absolute -top-1 -right-1 bg-red-500 text-white p-1 rounded-full border-2 border-white hover:bg-red-600 transition-all shadow-md"
+                          >
+                            <FaTimes size={10} />
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
 
@@ -677,9 +862,8 @@ const Admin_profile = () => {
                 </div>
               </div>
 
-              {/* Profile Content - Two Columns */}
+              {/* Two Columns */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-[calc(100vh-270px)] overflow-hidden">
-                {/* Left Column */}
                 <div className="lg:col-span-1 space-y-3 overflow-hidden">
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
                     <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
@@ -765,7 +949,6 @@ const Admin_profile = () => {
                   </div>
                 </div>
 
-                {/* Right Column */}
                 <div className="lg:col-span-2 space-y-3 overflow-hidden">
                   <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
                     <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
@@ -804,94 +987,79 @@ const Admin_profile = () => {
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
-                    <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
-                      <span className="text-blue-600">🌐</span> Social Links
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-1.5">
-                      {[
-                        {
-                          key: "facebook",
-                          icon: <FaFacebook />,
-                          color: "blue-600",
-                          label: "Facebook",
-                        },
-                        {
-                          key: "twitter",
-                          icon: <FaTwitter />,
-                          color: "blue-400",
-                          label: "Twitter",
-                        },
-                        {
-                          key: "linkedin",
-                          icon: <FaLinkedin />,
-                          color: "blue-700",
-                          label: "LinkedIn",
-                        },
-                        {
-                          key: "instagram",
-                          icon: <FaInstagram />,
-                          color: "pink-600",
-                          label: "Instagram",
-                        },
-                      ].map((social) => (
-                        <div
-                          key={social.key}
-                          className="flex flex-col items-center"
-                        >
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              name={social.key}
-                              value={editData.socialLinks?.[social.key] || ""}
-                              onChange={handleSocialChange}
-                              className="w-full border border-gray-300 rounded-lg px-1.5 py-0.5 text-[10px] focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                              placeholder={social.label}
-                            />
-                          ) : (
-                            <a
-                              href={adminInfo.socialLinks?.[social.key] || "#"}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`text-${social.color} hover:text-${social.color}/80 transition-all ${!adminInfo.socialLinks?.[social.key] ? "opacity-30 cursor-not-allowed" : ""}`}
-                              title={social.label}
-                            >
-                              {social.icon}
-                            </a>
-                          )}
-                          {!isEditing && (
-                            <p className="text-[8px] text-gray-400 mt-0.5">
-                              {social.label}
-                            </p>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
                   <div className="bg-gradient-to-r from-teal-50 to-teal-100/50 rounded-xl border border-teal-200 p-3 flex-1">
                     <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5">
-                      <span className="text-teal-600">📊</span> Account Stats
+                      <span className="text-teal-600">📊</span>{" "}
+                      {adminInfo.department || "Account"} Stats
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-teal-600">5</p>
-                        <p className="text-[10px] text-gray-500">Departments</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-blue-600">156</p>
-                        <p className="text-[10px] text-gray-500">Students</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-green-600">25</p>
-                        <p className="text-[10px] text-gray-500">Teachers</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-purple-600">12</p>
-                        <p className="text-[10px] text-gray-500">
-                          New Admissions
-                        </p>
-                      </div>
+                      {adminInfo.department === "Elders" ? (
+                        <>
+                          <div className="text-center">
+                            <p className="text-lg font-bold text-teal-600">3</p>
+                            <p className="text-[10px] text-gray-500">
+                              Sub-Departments
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-lg font-bold text-blue-600">
+                              42
+                            </p>
+                            <p className="text-[10px] text-gray-500">
+                              Elder Students
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-lg font-bold text-green-600">
+                              8
+                            </p>
+                            <p className="text-[10px] text-gray-500">
+                              Teachers
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-lg font-bold text-purple-600">
+                              5
+                            </p>
+                            <p className="text-[10px] text-gray-500">
+                              Active Batches
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-center">
+                            <p className="text-lg font-bold text-teal-600">5</p>
+                            <p className="text-[10px] text-gray-500">
+                              Departments
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-lg font-bold text-blue-600">
+                              156
+                            </p>
+                            <p className="text-[10px] text-gray-500">
+                              Students
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-lg font-bold text-green-600">
+                              25
+                            </p>
+                            <p className="text-[10px] text-gray-500">
+                              Teachers
+                            </p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-lg font-bold text-purple-600">
+                              12
+                            </p>
+                            <p className="text-[10px] text-gray-500">
+                              New Admissions
+                            </p>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

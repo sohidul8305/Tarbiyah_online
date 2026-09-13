@@ -78,177 +78,68 @@ const Department = () => {
     joinDate: "",
   });
 
+  // ✅ Quran for Elders Department — Quran.jsx এর সব Courses সহ
   const [departments] = useState([
-    {
-      id: 1,
-      name: "Diploma in Islamic Studies",
-      code: "DIS-101",
-      description:
-        "Comprehensive diploma program covering Islamic theology, jurisprudence, spirituality, and Quranic studies",
-      head: "Dr. Muhammad Abdullah",
-      totalStudents: 156,
-      totalTeachers: 12,
-      totalCourses: 8,
-      status: "Active",
-      courses: [
-        {
-          id: 1,
-          name: "Diploma in Islamic Studies",
-          code: "DIS-101",
-          students: 30,
-          teacher: "Ustadh Ahmad",
-          duration: "1 Year",
-          price: 12000,
-        },
-        {
-          id: 2,
-          name: "Advanced Islamic Studies",
-          code: "DIS-201",
-          students: 25,
-          teacher: "Ustadh Muhammad",
-          duration: "2 Years",
-          price: 20000,
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: "Tarbiyah Alimiyah",
-      code: "TA-101",
-      description:
-        "Comprehensive Alimiyah program for deep understanding of Islamic sciences, Arabic language, and Quranic studies",
-      head: "Maulana Abdul Karim",
-      totalStudents: 98,
-      totalTeachers: 10,
-      totalCourses: 6,
-      status: "Active",
-      courses: [
-        {
-          id: 3,
-          name: "Alimiyah for Kids",
-          code: "TA-101",
-          students: 22,
-          teacher: "Ustadhah Fatima",
-          duration: "6 Months",
-          price: 8000,
-        },
-        {
-          id: 4,
-          name: "Alimiyah Program",
-          code: "TA-201",
-          students: 18,
-          teacher: "Maulana Ibrahim",
-          duration: "2 Years",
-          price: 20000,
-        },
-      ],
-    },
-    {
-      id: 3,
-      name: "Tarbiyah Quran Studies",
-      code: "TQS-101",
-      description:
-        "Specialized Quran program focusing on memorization (Hifz), recitation (Tajweed), and understanding (Tafsir)",
-      head: "Hafiz Umar Farooq",
-      totalStudents: 112,
-      totalTeachers: 10,
-      totalCourses: 7,
-      status: "Active",
-      courses: [
-        {
-          id: 5,
-          name: "Qaida Noorani",
-          code: "TQS-101",
-          students: 35,
-          teacher: "Qari Yusuf",
-          duration: "2 Months",
-          price: 3000,
-        },
-        {
-          id: 6,
-          name: "Nazera",
-          code: "TQS-201",
-          students: 28,
-          teacher: "Qari Hasan",
-          duration: "3 Months",
-          price: 4000,
-        },
-        {
-          id: 7,
-          name: "Hifzul Quran",
-          code: "TQS-301",
-          students: 20,
-          teacher: "Hafiz Umar",
-          duration: "2 Years",
-          price: 25000,
-        },
-        {
-          id: 8,
-          name: "Hifz Revision (One to One)",
-          code: "TQS-401",
-          students: 15,
-          teacher: "Hafiz Abdullah",
-          duration: "6 Months",
-          price: 10000,
-        },
-      ],
-    },
     {
       id: 4,
       name: "Quran for Elders",
       code: "QFE-101",
       description:
         "Dedicated Quran program for elders focusing on easy learning methods, Tajweed, and Quranic understanding",
-      head: "Dr. Hasan Ali",
-      totalStudents: 85,
+      head: "Mahfujur Rahman",
+      totalStudents: 40,
       totalTeachers: 6,
-      totalCourses: 5,
+      totalCourses: 4,
       status: "Active",
       courses: [
         {
-          id: 9,
-          name: "Qaida Nooraniya",
+          id: 1,
+          name: "কায়দায়ে নূরানিয়্যাহ",
+          nameEn: "Qaida Nuraniyah",
           code: "QFE-101",
           students: 25,
           teacher: "Ustadh Hasan",
           duration: "2 Months",
           price: 3000,
+          subtitle: "সহি কুরআন শিক্ষার প্রথম ধাপ।",
+          link: "/course/quran/elders-quida",
         },
         {
-          id: 10,
-          name: "Quran Nazera",
+          id: 2,
+          name: "কুরআন নাজেরা",
+          nameEn: "Quran Nazera",
           code: "QFE-201",
           students: 20,
           teacher: "Qari Ayesha",
           duration: "3 Months",
           price: 4000,
+          subtitle: "তারতীলের সাথে সাবলীল কুরআন তিলাওয়াত।",
+          link: "/course/quran/elders-nazera",
         },
         {
-          id: 11,
-          name: "Hifzul Quran",
+          id: 3,
+          name: "বাকারা হিফজ",
+          nameEn: "Bakarah Hifz",
           code: "QFE-301",
           students: 15,
           teacher: "Hafiz Khalid",
-          duration: "2 Years",
-          price: 20000,
+          duration: "6 Months",
+          price: 8000,
+          subtitle:
+            "নিয়মিত মাশকের মাধ্যমে ধাপে ধাপে সম্পূর্ণ বাকারা হিফজ প্রোগ্রাম।",
+          link: "/course/Albakarah/details", // ✅ Custom link
         },
         {
-          id: 12,
-          name: "Basic Tajweed (Level-1)",
+          id: 4,
+          name: "বেসিক তাজউইদ (লেভেল–১)",
+          nameEn: "Basic Tajweed (Level-1)",
           code: "QFE-401",
           students: 18,
           teacher: "Ustadh Mahmud",
           duration: "2 Months",
           price: 3000,
-        },
-        {
-          id: 13,
-          name: "Advanced Tajweed",
-          code: "QFE-501",
-          students: 12,
-          teacher: "Qari Rashid",
-          duration: "3 Months",
-          price: 5000,
+          subtitle: "শুদ্ধ মাখরাজ ও তাজউইদের নিয়ম সহজভাবে শেখা।",
+          link: "/course/quran/elders-tajweed",
         },
       ],
     },
@@ -279,9 +170,8 @@ const Department = () => {
     try {
       await logOut();
       localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-
+      // ✅ adminInfo preserve
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -311,7 +201,7 @@ const Department = () => {
     }
   };
 
-  // Sidebar Menu Items with all links
+  // Sidebar Menu Items
   const menuItems = [
     {
       id: "profile",
@@ -536,13 +426,11 @@ const Department = () => {
       dept.head.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  // Open courses modal
   const openCoursesModal = (dept) => {
     setSelectedDepartment(dept);
     setShowCoursesModal(true);
   };
 
-  // Get status badge color
   const getStatusColor = (status) => {
     switch (status) {
       case "Active":
@@ -568,7 +456,7 @@ const Department = () => {
           </button>
         </div>
 
-        {/* Sidebar - No Scroll */}
+        {/* Sidebar */}
         <aside
           className={`
             fixed md:relative z-50
@@ -582,13 +470,20 @@ const Department = () => {
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
-          {/* Sidebar Header */}
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-xl font-bold">
-                  {adminInfo.name?.charAt(0) || "A"}
-                </span>
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
+                {adminInfo.profileImage ? (
+                  <img
+                    src={adminInfo.profileImage}
+                    alt="admin"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-xl font-bold">
+                    {adminInfo.name?.charAt(0) || "A"}
+                  </span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
@@ -599,7 +494,6 @@ const Department = () => {
             </div>
           </div>
 
-          {/* Navigation Menu - No Scroll */}
           <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
@@ -674,7 +568,6 @@ const Department = () => {
               </div>
             ))}
 
-            {/* Logout Button */}
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -689,7 +582,6 @@ const Department = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -697,7 +589,6 @@ const Department = () => {
           />
         )}
 
-        {/* Main Content - Full Screen */}
         <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
@@ -752,7 +643,7 @@ const Department = () => {
             </div>
           </div>
 
-          {/* Departments Grid - 4 Departments */}
+          {/* Departments Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3 h-[calc(100vh-240px)] overflow-hidden">
             {filteredDepartments.map((dept) => (
               <div
@@ -848,7 +739,6 @@ const Department = () => {
             ))}
           </div>
 
-          {/* No Results */}
           {filteredDepartments.length === 0 && (
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center">
               <FaBuilding className="text-5xl text-gray-300 mx-auto mb-3" />
@@ -906,19 +796,34 @@ const Department = () => {
                         <h4 className="font-semibold text-gray-800 text-sm">
                           {course.name}
                         </h4>
-                        <p className="text-xs text-gray-500">{course.code}</p>
+                        <p className="text-xs text-gray-500">
+                          {course.nameEn} • {course.code}
+                        </p>
+                        {course.subtitle && (
+                          <p className="text-[11px] text-gray-500 mt-1 italic">
+                            {course.subtitle}
+                          </p>
+                        )}
                       </div>
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full whitespace-nowrap">
                         {course.students} Students
                       </span>
                     </div>
-                    <div className="mt-2 flex items-center gap-4 text-xs text-gray-500">
+
+                    <div className="mt-2 flex items-center gap-4 text-xs text-gray-500 flex-wrap">
                       <span>👨‍🏫 {course.teacher}</span>
+                      <span>⏱️ {course.duration}</span>
+                      <span>💰 ৳{course.price}</span>
                     </div>
+
                     <div className="mt-2 flex items-center gap-1 pt-2 border-t border-gray-100">
-                      <button className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all">
+                      {/* ✅ View Details — course.link এ navigate করবে */}
+                      <Link
+                        to={course.link || "#"}
+                        className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all"
+                      >
                         View Details
-                      </button>
+                      </Link>
                       <button className="text-green-600 hover:text-green-800 p-1">
                         <FaEdit size={12} />
                       </button>

@@ -209,12 +209,15 @@ const Add_student = () => {
 
       console.log("🔄 Fetching students from API...");
 
-      const response = await fetch("http://localhost:5000/api/students/all", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "https://api.tarbiyahonline.com/api/students/all",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       console.log("📥 Response Status:", response.status);
 

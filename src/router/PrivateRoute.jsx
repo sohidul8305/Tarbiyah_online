@@ -1,4 +1,4 @@
-// PrivateRoute.jsx - সম্পূর্ণ ঠিক করা
+// src/Components/PrivateRoute.jsx - সম্পূর্ণ ঠিক করা
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../Provider/AuthProvider";
@@ -6,12 +6,21 @@ import { useAuth } from "../Provider/AuthProvider";
 const PrivateRoute = ({ children, role }) => {
   const { user, loading } = useAuth();
 
-  // লোকাল স্টোরেজ থেকে স্টুডেন্ট লগইন স্ট্যাটাস চেক
+  // ✅ লোকাল স্টোরেজ থেকে স্টুডেন্ট লগইন স্ট্যাটাস চেক
   const isStudentLoggedIn =
     localStorage.getItem("isStudentLoggedIn") === "true";
 
+  // ✅ নতুন — লোকাল স্টোরেজ থেকে predefined ADMIN লগইন চেক
+  // (যেমন: elders@tarabiyah.com, boys@tarabiyah.com)
+  const isAdminLoggedIn = localStorage.getItem("isAdminLoggedIn") === "true";
+  const adminEmail = localStorage.getItem("adminEmail");
+  const adminInfo = localStorage.getItem("adminInfo");
+  const isPredefinedAdmin = isAdminLoggedIn && adminEmail && adminInfo;
+
   console.log("🔍 PrivateRoute Check:", {
     isStudentLoggedIn,
+    isPredefinedAdmin,
+    adminEmail,
     userEmail: user?.email,
     userRole: user?.role,
     requiredRole: role,
@@ -41,14 +50,23 @@ const PrivateRoute = ({ children, role }) => {
     return children;
   }
 
-  // ✅ ২. ইউজার লগইন নাই
+  // ✅ ২. নতুন — predefined ADMIN লোকাল লগইন চেক
+  // (elders@tarabiyah.com, boys@tarabiyah.com ইত্যাদি)
+  if (role === "admin" && isPredefinedAdmin) {
+    console.log("✅ Predefined Admin logged in via localStorage:", adminEmail);
+    return children;
+  }
+
+  // ✅ ৩. Firebase ইউজার লগইন নাই
   if (!user) {
     console.log("🔒 No user, redirecting to login");
-    const loginRedirect = role === "student" ? "/student-login" : "/login";
+    let loginRedirect = "/login";
+    if (role === "student") loginRedirect = "/student-login";
+    else if (role === "admin") loginRedirect = "/admin-login";
     return <Navigate to={loginRedirect} replace />;
   }
 
-  // ✅ ৩. রোল চেক - যদি role প্রোভাইড করা থাকে
+  // ✅ ৪. রোল চেক - যদি role প্রোভাইড করা থাকে
   if (role) {
     const userRole = user.role || "student";
     if (userRole !== role) {
@@ -57,7 +75,7 @@ const PrivateRoute = ({ children, role }) => {
     }
   }
 
-  // ✅ ৪. সব ঠিক থাকলে children রিটার্ন
+  // ✅ ৫. সব ঠিক থাকলে children রিটার্ন
   console.log("✅ Access granted for:", user.email);
   return children;
 };

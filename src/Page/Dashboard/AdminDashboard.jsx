@@ -88,6 +88,21 @@ const AdminDashboard = () => {
     notifications: 8,
   });
 
+  // ✅ নতুন — localStorage থেকে department-specific stats load করো
+  useEffect(() => {
+    const savedStats = localStorage.getItem("adminStats");
+    if (savedStats) {
+      try {
+        const parsed = JSON.parse(savedStats);
+        if (parsed && Object.keys(parsed).length > 0) {
+          setStats((prev) => ({ ...prev, ...parsed }));
+        }
+      } catch (err) {
+        console.error("Failed to parse adminStats:", err);
+      }
+    }
+  }, []);
+
   const handleView = (student) => {
     Swal.fire({
       title: `📋 Student Details: ${student.name}`,
@@ -238,6 +253,7 @@ const AdminDashboard = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
+      localStorage.removeItem("adminStats"); // ✅ নতুন line
 
       await Swal.fire({
         icon: "success",
@@ -654,7 +670,7 @@ const AdminDashboard = () => {
           </nav>
 
           <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>© 2026 Pipilika Soft</p>
+            <p>©Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 
