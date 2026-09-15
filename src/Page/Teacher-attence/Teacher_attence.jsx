@@ -9,117 +9,40 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
   FaCalendarAlt,
   FaClock,
-  FaBook,
-  FaFileAlt,
   FaChartLine,
-  FaUserGraduate,
   FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
-  FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
-  FaEdit,
-  FaTrash,
   FaSearch,
-  FaFilter,
-  FaPlusCircle,
-  FaDownload,
-  FaPrint,
+  FaPlus,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
   FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
   FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
-  FaUserEdit,
-  FaUserCircle,
-  FaAddressCard,
-  FaChalkboard,
-  FaCalendarDay,
-  FaSchool as FaSchoolIcon,
-  FaUserTie,
-  FaBookReader,
-  FaStopwatch,
   FaClipboardCheck,
-  FaExchangeAlt,
-  FaCheckDouble,
-  FaBan,
+  FaCalendarDay,
+  FaCalendarWeek,
   FaCheck,
   FaTimes,
   FaQuestion,
-  FaCalendarWeek,
-  FaChartBar,
-  FaFileDownload,
-  FaFilePdf,
-  FaFileExcel,
-  FaRegClock,
-  FaRegCalendarAlt,
-  FaRegCalendarCheck,
-  FaPlus,
+  FaUserTie,
+  FaUserTimes,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+const API_BASE = "http://localhost:5000";
 
 const Teacher_attence = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+
+  // Layout
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("teacher-management");
   const [activeSubMenu, setActiveSubMenu] = useState("teacher-attendance");
@@ -132,168 +55,48 @@ const Teacher_attence = () => {
     joinDate: "",
   });
 
-  // Current date
   const today = new Date().toISOString().split("T")[0];
 
-  // Teachers list
-  const [teachers, setTeachers] = useState([
-    {
-      id: 1,
-      name: "Dr. Muhammad Abdullah",
-      teacherId: "TCH001",
-      subject: "Tajweed",
-      department: "Islamic Studies",
-      phone: "+880 1712 345678",
-      email: "abdullah@example.com",
-      joinDate: "2024-01-15",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Ustadh Ahmad Ali",
-      teacherId: "TCH002",
-      subject: "Tafsir",
-      department: "Islamic Studies",
-      phone: "+880 1723 456789",
-      email: "ahmad@example.com",
-      joinDate: "2024-02-01",
-      status: "Active",
-    },
-    {
-      id: 3,
-      name: "Ustadha Fatima Rahman",
-      teacherId: "TCH003",
-      subject: "Hadith",
-      department: "Islamic Studies",
-      phone: "+880 1734 567890",
-      email: "fatima@example.com",
-      joinDate: "2024-01-20",
-      status: "Active",
-    },
-    {
-      id: 4,
-      name: "Dr. Omar Farooq",
-      teacherId: "TCH004",
-      subject: "Fiqh",
-      department: "Islamic Law",
-      phone: "+880 1745 678901",
-      email: "omar@example.com",
-      joinDate: "2024-03-10",
-      status: "Active",
-    },
-    {
-      id: 5,
-      name: "Ustadh Yusuf Khan",
-      teacherId: "TCH005",
-      subject: "Aqeedah",
-      department: "Islamic Studies",
-      phone: "+880 1756 789012",
-      email: "yusuf@example.com",
-      joinDate: "2024-04-05",
-      status: "Active",
-    },
-    {
-      id: 6,
-      name: "Ustadh Ibrahim Malik",
-      teacherId: "TCH006",
-      subject: "Arabic Grammar",
-      department: "Arabic Language",
-      phone: "+880 1767 890123",
-      email: "ibrahim@example.com",
-      joinDate: "2024-05-01",
-      status: "Inactive",
-    },
-  ]);
+  // ✅ Teachers from API
+  const [teachers, setTeachers] = useState([]);
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Attendance records
-  const [attendanceRecords, setAttendanceRecords] = useState(() => {
-    const saved = localStorage.getItem("teacherAttendance");
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    // Generate some sample attendance data
-    const records = [];
-    const startDate = new Date();
-    startDate.setDate(startDate.getDate() - 30);
-
-    for (let i = 0; i < 30; i++) {
-      const date = new Date(startDate);
-      date.setDate(date.getDate() + i);
-      const dateStr = date.toISOString().split("T")[0];
-      // Skip Fridays
-      if (date.getDay() === 5) continue;
-
-      teachers.forEach((teacher) => {
-        const statuses = [
-          "Present",
-          "Present",
-          "Present",
-          "Present",
-          "Absent",
-          "Late",
-          "Leave",
-        ];
-        const randomStatus =
-          statuses[Math.floor(Math.random() * statuses.length)];
-        records.push({
-          id: `${dateStr}-${teacher.id}`,
-          teacherId: teacher.id,
-          date: dateStr,
-          status: randomStatus,
-          checkIn:
-            randomStatus === "Present" || randomStatus === "Late"
-              ? `${8 + Math.floor(Math.random() * 2)}:${String(Math.floor(Math.random() * 60)).padStart(2, "0")} ${Math.random() > 0.5 ? "AM" : "AM"}`
-              : null,
-          checkOut:
-            randomStatus === "Present" || randomStatus === "Late"
-              ? `${3 + Math.floor(Math.random() * 3)}:${String(Math.floor(Math.random() * 60)).padStart(2, "0")} ${Math.random() > 0.5 ? "PM" : "PM"}`
-              : null,
-          note:
-            randomStatus === "Late"
-              ? "Arrived 15 minutes late"
-              : randomStatus === "Absent"
-                ? "No notification"
-                : "",
-        });
-      });
-    }
-    return records;
-  });
-
-  // State for current date selection
+  // Selected date/month
   const [selectedDate, setSelectedDate] = useState(today);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-  // State for filters
+  // Filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("All");
   const [filterSubject, setFilterSubject] = useState("All");
-  const [filterDepartment, setFilterDepartment] = useState("All");
 
-  // State for modals
+  // Modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [showMarkModal, setShowMarkModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [markStatus, setMarkStatus] = useState("Present");
   const [markNote, setMarkNote] = useState("");
+  const [markCheckIn, setMarkCheckIn] = useState("");
+  const [markCheckOut, setMarkCheckOut] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  // State for view mode
+  // View mode
   const [viewMode, setViewMode] = useState("daily");
 
-  // Form data for add attendance
+  // Add form
   const [formData, setFormData] = useState({
     teacherId: "",
     teacherName: "",
-    date: "",
+    date: today,
     status: "Present",
     checkIn: "",
     checkOut: "",
     note: "",
   });
 
-  // Available options
   const statuses = ["Present", "Absent", "Late", "Leave"];
 
   // Load admin info
@@ -313,13 +116,50 @@ const Teacher_attence = () => {
     }
   }, [user]);
 
-  // Save attendance records to localStorage
+  // ✅ Fetch Teachers
+  const fetchTeachers = async () => {
+    try {
+      const response = await fetch(
+        `${API_BASE}/api/teacher-attendance/teachers`,
+      );
+      const data = await response.json();
+      if (data.success) {
+        setTeachers(data.teachers || []);
+      } else {
+        setTeachers([]);
+      }
+    } catch (err) {
+      console.error("❌ Fetch teachers:", err);
+      setTeachers([]);
+    }
+  };
+
+  // ✅ Fetch Attendance
+  const fetchAttendance = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch(`${API_BASE}/api/teacher-attendance/all`);
+      const data = await response.json();
+      if (data.success) {
+        setAttendanceRecords(data.attendance || []);
+      } else {
+        setError(data.message || "Failed to load");
+        setAttendanceRecords([]);
+      }
+    } catch (err) {
+      console.error("❌ Fetch attendance:", err);
+      setError(err.message);
+      setAttendanceRecords([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem(
-      "teacherAttendance",
-      JSON.stringify(attendanceRecords),
-    );
-  }, [attendanceRecords]);
+    fetchTeachers();
+    fetchAttendance();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -327,48 +167,34 @@ const Teacher_attence = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-
       await Swal.fire({
         icon: "success",
-        title: "Logged Out Successfully",
+        title: "Logged Out",
         timer: 1200,
         showConfirmButton: false,
       });
       navigate("/admin-login");
     } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
+      console.error(err);
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
+  // Sidebar menu
   const menuItems = [
     {
       id: "profile",
       path: "/admin-profile",
-      icon: <FaUser className="text-xl" />,
+      icon: <FaUser />,
       label: "Profile",
     },
     {
       id: "dashboard",
       path: "/admin-dashboard",
-      icon: <MdDashboard className="text-xl" />,
+      icon: <MdDashboard />,
       label: "Dashboard",
       subItems: [
         {
@@ -382,31 +208,16 @@ const Teacher_attence = () => {
           label: "Today's Class",
         },
         {
-          id: "basic-tazweed payment overview",
-          path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed Payment Overview",
-        },
-        {
-          id: "najera-payment overview",
-          path: "/admin-dashboard/najera-batch",
-          label: "Najera Payment Overview",
-        },
-        {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
           label: "New Admission",
-        },
-        {
-          id: "notification",
-          path: "/admin-dashboard/notification",
-          label: "Notification",
         },
       ],
     },
     {
       id: "student-management",
       path: "/admin-students",
-      icon: <FaUsers className="text-xl" />,
+      icon: <FaUsers />,
       label: "Student Management",
       subItems: [
         {
@@ -424,17 +235,12 @@ const Teacher_attence = () => {
           path: "/admin-students/profile",
           label: "Student Profile",
         },
-        {
-          id: "admission-permission",
-          path: "/admin-students/admission",
-          label: "Admission Permission",
-        },
       ],
     },
     {
       id: "teacher-management",
       path: "/admin-teachers",
-      icon: <FaChalkboardTeacher className="text-xl" />,
+      icon: <FaChalkboardTeacher />,
       label: "Teacher Management",
       subItems: [
         {
@@ -462,144 +268,60 @@ const Teacher_attence = () => {
     {
       id: "batch-course",
       path: "/admin-batch-course",
-      icon: <FaLayerGroup className="text-xl" />,
+      icon: <FaLayerGroup />,
       label: "Batch & Course",
-      subItems: [
-        {
-          id: "batch-make",
-          path: "/admin-batch-course/batch-make",
-          label: "Batch Make",
-        },
-        {
-          id: "course-make",
-          path: "/admin-batch-course/course-make",
-          label: "Course Make",
-        },
-        {
-          id: "syllabus",
-          path: "/admin-batch-course/syllabus",
-          label: "Syllabus",
-        },
-        {
-          id: "clear-routine",
-          path: "/admin-batch-course/clear-routine",
-          label: "Clear Routine",
-        },
-      ],
     },
     {
       id: "absence-student",
       path: "/admin-absence",
-      icon: <FaUserTimes className="text-xl" />,
+      icon: <FaUserTimes />,
       label: "Absence Student Community",
     },
     {
       id: "finance",
       path: "/admin-finance",
-      icon: <FaMoneyBillWave className="text-xl" />,
+      icon: <FaMoneyBillWave />,
       label: "Finance",
-      subItems: [
-        {
-          id: "admin-on-fee",
-          path: "/admin-finance/admin-fee",
-          label: "Admin on Fee",
-        },
-        {
-          id: "monthly-fee",
-          path: "/admin-finance/monthly-fee",
-          label: "Monthly Fee",
-        },
-        { id: "invoice", path: "/admin-finance/invoice", label: "Invoice" },
-        { id: "report", path: "/admin-finance/report", label: "Report" },
-      ],
     },
     {
       id: "exam",
       path: "/admin-exam",
-      icon: <FaCalendarCheck className="text-xl" />,
+      icon: <FaCalendarCheck />,
       label: "Exam",
-      subItems: [
-        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
-        {
-          id: "result-publish",
-          path: "/admin-exam/result",
-          label: "Result Publish",
-        },
-        {
-          id: "certificate-permission",
-          path: "/admin-exam/certificate",
-          label: "Certificate Permission",
-        },
-      ],
     },
     {
       id: "report-analytics",
       path: "/admin-reports",
-      icon: <FaChartLine className="text-xl" />,
+      icon: <FaChartLine />,
       label: "Report & Analytics",
-      subItems: [
-        {
-          id: "admission-report",
-          path: "/admin-reports/admission",
-          label: "Admission Report",
-        },
-        {
-          id: "attendance-report",
-          path: "/admin-reports/attendance",
-          label: "Attendance Report",
-        },
-        { id: "income", path: "/admin-reports/income", label: "Income" },
-      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
-      icon: <FaDatabase className="text-xl" />,
+      icon: <FaDatabase />,
       label: "CRM Management",
-      subItems: [
-        {
-          id: "data-entry",
-          path: "/admin-crm/data-entry",
-          label: "Data Entry",
-        },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
-      ],
     },
   ];
 
-  // Get attendance for a specific teacher on a specific date
+  // Get attendance for teacher+date
   const getTeacherAttendance = (teacherId, date) => {
     return attendanceRecords.find(
-      (record) => record.teacherId === teacherId && record.date === date,
+      (r) => String(r.teacherId) === String(teacherId) && r.date === date,
     );
   };
 
-  // Get attendance for a teacher for a specific month
-  const getTeacherMonthlyAttendance = (teacherId, month, year) => {
-    return attendanceRecords.filter((record) => {
-      const recordDate = new Date(record.date);
+  // Get monthly attendance for teacher
+  const getMonthlyAttendance = (teacherId, month, year) => {
+    return attendanceRecords.filter((r) => {
+      const d = new Date(r.date);
       return (
-        record.teacherId === teacherId &&
-        recordDate.getMonth() === month &&
-        recordDate.getFullYear() === year
+        String(r.teacherId) === String(teacherId) &&
+        d.getMonth() === month &&
+        d.getFullYear() === year
       );
     });
   };
 
-  // Get attendance status color
   const getStatusColor = (status) => {
     switch (status) {
       case "Present":
@@ -615,105 +337,192 @@ const Teacher_attence = () => {
     }
   };
 
-  // Get attendance status icon
   const getStatusIcon = (status) => {
     switch (status) {
       case "Present":
-        return <FaCheck className="text-green-500" />;
+        return <FaCheck className="text-green-500" size={10} />;
       case "Absent":
-        return <FaTimes className="text-red-500" />;
+        return <FaTimes className="text-red-500" size={10} />;
       case "Late":
-        return <FaClockIcon className="text-yellow-500" />;
+        return <FaClock className="text-yellow-500" size={10} />;
       case "Leave":
-        return <FaCalendarDay className="text-blue-500" />;
+        return <FaCalendarDay className="text-blue-500" size={10} />;
       default:
-        return <FaQuestion className="text-gray-500" />;
+        return <FaQuestion className="text-gray-500" size={10} />;
     }
   };
 
-  // Get status badge
-  const getStatusBadge = (status) => {
-    return (
-      <span
-        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(status)}`}
-      >
-        {getStatusIcon(status)}
-        {status}
-      </span>
-    );
+  const getStatusBadge = (status) => (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(status)}`}
+    >
+      {getStatusIcon(status)}
+      {status}
+    </span>
+  );
+
+  // ✅ Save attendance via POST
+  const saveAttendance = async () => {
+    if (!selectedTeacher) return;
+
+    try {
+      setSaving(true);
+
+      const payload = {
+        teacherId: selectedTeacher.id,
+        teacherName: selectedTeacher.name,
+        date: selectedDate,
+        status: markStatus,
+        checkIn:
+          markStatus === "Present" || markStatus === "Late"
+            ? markCheckIn || "09:00 AM"
+            : "",
+        checkOut:
+          markStatus === "Present" || markStatus === "Late"
+            ? markCheckOut || "04:00 PM"
+            : "",
+        note: markNote || "",
+      };
+
+      const response = await fetch(`${API_BASE}/api/teacher-attendance/mark`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setShowMarkModal(false);
+        setMarkNote("");
+        setMarkCheckIn("");
+        setMarkCheckOut("");
+
+        Swal.fire({
+          icon: "success",
+          title: data.updated ? "✅ Updated!" : "✅ Marked!",
+          text: `${selectedTeacher.name} → ${markStatus}`,
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        fetchAttendance();
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message,
+        });
+      }
+    } catch (err) {
+      console.error("❌ Save error:", err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  // Handle mark attendance (existing functionality)
+  // ✅ Add attendance via modal form
+  const handleAddAttendance = async (e) => {
+    e.preventDefault();
+
+    if (!formData.teacherId || !formData.date) {
+      Swal.fire({
+        icon: "warning",
+        title: "Teacher ও Date select করুন",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const teacher = teachers.find(
+      (t) => String(t.id) === String(formData.teacherId),
+    );
+    if (!teacher) return;
+
+    try {
+      setSaving(true);
+
+      const payload = {
+        teacherId: teacher.id,
+        teacherName: teacher.name,
+        date: formData.date,
+        status: formData.status,
+        checkIn:
+          formData.status !== "Absent" ? formData.checkIn || "09:00 AM" : "",
+        checkOut:
+          formData.status !== "Absent" ? formData.checkOut || "04:00 PM" : "",
+        note: formData.note || "",
+      };
+
+      const response = await fetch(`${API_BASE}/api/teacher-attendance/mark`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setShowAddModal(false);
+        setFormData({
+          teacherId: "",
+          teacherName: "",
+          date: today,
+          status: "Present",
+          checkIn: "",
+          checkOut: "",
+          note: "",
+        });
+
+        Swal.fire({
+          icon: "success",
+          title: "✅ Added!",
+          text: `${teacher.name} — ${formData.status}`,
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        fetchAttendance();
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message,
+        });
+      }
+    } catch (err) {
+      console.error("❌ Add error:", err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Mark modal opener
   const handleMarkAttendance = (teacher) => {
     setSelectedTeacher(teacher);
     const existing = getTeacherAttendance(teacher.id, selectedDate);
     if (existing) {
       setMarkStatus(existing.status);
       setMarkNote(existing.note || "");
+      setMarkCheckIn(existing.checkIn || "");
+      setMarkCheckOut(existing.checkOut || "");
     } else {
       setMarkStatus("Present");
       setMarkNote("");
+      setMarkCheckIn("");
+      setMarkCheckOut("");
     }
     setShowMarkModal(true);
   };
 
-  // Save attendance (existing functionality)
-  const saveAttendance = () => {
-    if (!selectedTeacher) return;
-
-    const existing = getTeacherAttendance(selectedTeacher.id, selectedDate);
-
-    if (existing) {
-      setAttendanceRecords(
-        attendanceRecords.map((record) =>
-          record.id === existing.id
-            ? {
-                ...record,
-                status: markStatus,
-                note: markNote,
-                checkIn:
-                  markStatus === "Present" || markStatus === "Late"
-                    ? "09:00 AM"
-                    : null,
-                checkOut:
-                  markStatus === "Present" || markStatus === "Late"
-                    ? "04:00 PM"
-                    : null,
-              }
-            : record,
-        ),
-      );
-    } else {
-      const newRecord = {
-        id: `${selectedDate}-${selectedTeacher.id}`,
-        teacherId: selectedTeacher.id,
-        date: selectedDate,
-        status: markStatus,
-        checkIn:
-          markStatus === "Present" || markStatus === "Late" ? "09:00 AM" : null,
-        checkOut:
-          markStatus === "Present" || markStatus === "Late" ? "04:00 PM" : null,
-        note: markNote,
-      };
-      setAttendanceRecords([...attendanceRecords, newRecord]);
-    }
-
-    setShowMarkModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "Attendance Marked!",
-      text: `${selectedTeacher.name} marked as ${markStatus}`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  };
-
-  // Open add modal for new attendance
   const openAddModal = () => {
     setFormData({
       teacherId: "",
       teacherName: "",
-      date: new Date().toISOString().split("T")[0],
+      date: today,
       status: "Present",
       checkIn: "",
       checkOut: "",
@@ -722,69 +531,9 @@ const Teacher_attence = () => {
     setShowAddModal(true);
   };
 
-  // Handle add attendance
-  const handleAddAttendance = (e) => {
-    e.preventDefault();
-
-    if (!formData.teacherId || !formData.date) {
-      Swal.fire({
-        icon: "warning",
-        title: "Please select teacher and date",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
-
-    const teacher = teachers.find((t) => t.id === parseInt(formData.teacherId));
-    if (!teacher) {
-      Swal.fire({
-        icon: "error",
-        title: "Teacher not found",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
-
-    // Check if attendance already exists for this teacher on this date
-    const existing = getTeacherAttendance(teacher.id, formData.date);
-    if (existing) {
-      Swal.fire({
-        icon: "warning",
-        title: "Attendance Already Exists",
-        text: `${teacher.name} already has attendance marked for ${formatDate(formData.date)}`,
-        confirmButtonColor: "#3b82f6",
-      });
-      return;
-    }
-
-    const newRecord = {
-      id: `${formData.date}-${teacher.id}`,
-      teacherId: teacher.id,
-      date: formData.date,
-      status: formData.status,
-      checkIn:
-        formData.status !== "Absent" ? formData.checkIn || "09:00 AM" : null,
-      checkOut:
-        formData.status !== "Absent" ? formData.checkOut || "04:00 PM" : null,
-      note: formData.note || "",
-    };
-
-    setAttendanceRecords([...attendanceRecords, newRecord]);
-    setShowAddModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "Attendance Added!",
-      text: `${teacher.name} marked as ${formData.status} for ${formatDate(formData.date)}`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  };
-
-  // Calculate attendance statistics
+  // Stats
   const calculateStats = (teacherId) => {
-    const monthRecords = getTeacherMonthlyAttendance(
+    const monthRecords = getMonthlyAttendance(
       teacherId,
       selectedMonth,
       selectedYear,
@@ -795,32 +544,26 @@ const Teacher_attence = () => {
     const late = monthRecords.filter((r) => r.status === "Late").length;
     const leave = monthRecords.filter((r) => r.status === "Leave").length;
     const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
-
     return { total, present, absent, late, leave, percentage };
   };
 
-  // Get filtered teachers
-  const filteredTeachers = teachers.filter((teacher) => {
+  // Filter teachers
+  const filteredTeachers = teachers.filter((t) => {
     const matchesSearch =
-      teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.teacherId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.subject.toLowerCase().includes(searchTerm.toLowerCase());
+      (t.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.teacherId || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.subject || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesSubject =
-      filterSubject === "All" || teacher.subject === filterSubject;
-    const matchesDepartment =
-      filterDepartment === "All" || teacher.department === filterDepartment;
-    return matchesSearch && matchesSubject && matchesDepartment;
+      filterSubject === "All" || t.subject === filterSubject;
+    return matchesSearch && matchesSubject;
   });
 
-  // Get unique values for filters
-  const uniqueSubjects = ["All", ...new Set(teachers.map((t) => t.subject))];
-  const uniqueDepartments = [
+  const uniqueSubjects = [
     "All",
-    ...new Set(teachers.map((t) => t.department)),
+    ...new Set(teachers.map((t) => t.subject).filter(Boolean)),
   ];
 
-  // Get month name
-  const getMonthName = (month) => {
+  const getMonthName = (m) => {
     const names = [
       "January",
       "February",
@@ -835,17 +578,11 @@ const Teacher_attence = () => {
       "November",
       "December",
     ];
-    return names[month];
+    return names[m];
   };
 
-  // Handle date change
-  const handleDateChange = (e) => {
-    setSelectedDate(e.target.value);
-  };
-
-  // Handle month change
-  const handleMonthChange = (direction) => {
-    if (direction === "prev") {
+  const handleMonthChange = (dir) => {
+    if (dir === "prev") {
       if (selectedMonth === 0) {
         setSelectedMonth(11);
         setSelectedYear(selectedYear - 1);
@@ -862,29 +599,23 @@ const Teacher_attence = () => {
     }
   };
 
-  // Calculate daily summary
   const getDailySummary = () => {
     const records = attendanceRecords.filter((r) => r.date === selectedDate);
-    const total = records.length;
-    const present = records.filter((r) => r.status === "Present").length;
-    const absent = records.filter((r) => r.status === "Absent").length;
-    const late = records.filter((r) => r.status === "Late").length;
-    const leave = records.filter((r) => r.status === "Leave").length;
-    return { total, present, absent, late, leave };
+    return {
+      total: records.length,
+      present: records.filter((r) => r.status === "Present").length,
+      absent: records.filter((r) => r.status === "Absent").length,
+      late: records.filter((r) => r.status === "Late").length,
+      leave: records.filter((r) => r.status === "Leave").length,
+    };
   };
 
   const dailySummary = getDailySummary();
 
-  // Handle view details
-  const viewTeacherDetails = (teacher) => {
-    setSelectedTeacher(teacher);
-    setShowDetailsModal(true);
-  };
-
-  // Format date
   const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+    if (!dateStr) return "N/A";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-US", {
       weekday: "short",
       year: "numeric",
       month: "short",
@@ -892,17 +623,27 @@ const Teacher_attence = () => {
     });
   };
 
+  // Loading
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-sm text-gray-500 mt-3">Loading attendance...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
-        <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">
-            Teacher Attendance
-          </h1>
+        <div className="md:hidden bg-white border-b p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
+          <h1 className="text-sm font-bold">Teacher Attendance</h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100"
           >
             {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
@@ -911,14 +652,9 @@ const Teacher_attence = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r
+            shadow-lg md:shadow-sm transition-all duration-300 h-full
+            overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -938,7 +674,7 @@ const Teacher_attence = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -949,24 +685,21 @@ const Teacher_attence = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm
                         ${
                           activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                            ? "bg-teal-50 text-[#004d4d] font-bold"
+                            : "text-gray-700 hover:bg-gray-50"
+                        }`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-gray-600">{item.icon}</span>
+                        <span>{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
-                      <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
-                      >
-                        <FaArrowRight size={12} />
-                      </span>
+                      <FaArrowRight
+                        size={12}
+                        className={activeSubMenu === item.id ? "rotate-90" : ""}
+                      />
                     </button>
                     {activeSubMenu === item.id && (
                       <div className="ml-6 space-y-1 mt-1">
@@ -974,15 +707,8 @@ const Teacher_attence = () => {
                           <Link
                             key={sub.id}
                             to={sub.path}
-                            onClick={() => {
-                              setActiveSubMenu(sub.id);
-                              setIsSidebarOpen(false);
-                            }}
-                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="block w-full text-left px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-gray-50"
                           >
                             {sub.label}
                           </Link>
@@ -991,24 +717,16 @@ const Teacher_attence = () => {
                     )}
                   </>
                 ) : (
-                  <Link
-                    to={item.path}
-                    onClick={() => {
-                      setActiveMenu(item.id);
-                      setIsSidebarOpen(false);
-                    }}
-                  >
+                  <Link to={item.path} onClick={() => setIsSidebarOpen(false)}>
                     <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
                         ${
                           activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                            ? "bg-teal-50 text-[#004d4d] font-bold"
+                            : "text-gray-700 hover:bg-gray-50"
+                        }`}
                     >
-                      <span className="text-gray-600">{item.icon}</span>
+                      <span>{item.icon}</span>
                       <span>{item.label}</span>
                     </button>
                   </Link>
@@ -1018,19 +736,14 @@ const Teacher_attence = () => {
 
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 mt-4 border-t pt-4"
             >
-              <FaSignOutAlt className="text-xl" />
+              <FaSignOutAlt />
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
-          <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>© 2026 Pipilika Soft</p>
-          </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1041,21 +754,20 @@ const Teacher_attence = () => {
         {/* Main Content */}
         <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
           {/* Top Bar */}
-          <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div className="bg-white p-3 rounded-xl shadow-sm border mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaClipboardCheck className="text-blue-600" /> Teacher
                 Attendance
               </h1>
               <p className="text-xs text-gray-500">
-                Mark and manage teacher attendance
+                {teachers.length} teachers • {attendanceRecords.length} records
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Add Attendance Button - This is the button you need */}
               <button
                 onClick={openAddModal}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-4 py-2 rounded-lg font-bold transition-all shadow-md flex items-center gap-2"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-4 py-2 rounded-lg font-bold flex items-center gap-2"
               >
                 <FaPlus size={14} /> Add Attendance
               </button>
@@ -1063,42 +775,49 @@ const Teacher_attence = () => {
                 onClick={() =>
                   setViewMode(viewMode === "daily" ? "monthly" : "daily")
                 }
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-medium transition-all flex items-center gap-1"
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1"
               >
                 {viewMode === "daily" ? (
                   <>
-                    <FaCalendarWeek size={12} /> Monthly View
+                    <FaCalendarWeek size={12} /> Monthly
                   </>
                 ) : (
                   <>
-                    <FaCalendarDay size={12} /> Daily View
+                    <FaCalendarDay size={12} /> Daily
                   </>
                 )}
               </button>
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
+              <button
+                onClick={() => {
+                  fetchTeachers();
+                  fetchAttendance();
+                }}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-medium"
+              >
+                🔄 Refresh
+              </button>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
               >
                 Logout
               </button>
             </div>
           </div>
 
-          {/* Date Selector & Summary */}
+          {/* Daily View */}
           {viewMode === "daily" ? (
             <>
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 mb-3">
+              {/* Date + Summary */}
+              <div className="bg-white border rounded-xl shadow-sm p-3 mb-3">
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-3">
                   <div className="flex items-center gap-2">
                     <FaCalendarAlt className="text-gray-400" />
                     <input
                       type="date"
                       value={selectedDate}
-                      onChange={handleDateChange}
-                      className="border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                      className="border rounded-lg px-3 py-1.5 text-sm"
                     />
                   </div>
                   <div className="flex items-center gap-3 flex-wrap">
@@ -1119,7 +838,7 @@ const Teacher_attence = () => {
                         📅 {dailySummary.leave}
                       </span>
                       <span className="text-gray-400">
-                        | Total: {dailySummary.total}
+                        | Total: {dailySummary.total}/{teachers.length}
                       </span>
                     </div>
                   </div>
@@ -1127,47 +846,34 @@ const Teacher_attence = () => {
               </div>
 
               {/* Filters */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
+              <div className="bg-white border rounded-xl shadow-sm p-2 mb-3">
                 <div className="flex flex-col md:flex-row gap-2">
                   <div className="flex-1 relative">
-                    <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                    <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                     <input
                       type="text"
                       placeholder="Search teachers..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full pl-7 pr-2 py-1 text-xs border rounded-lg"
                     />
                   </div>
-                  <div className="flex items-center gap-1 flex-wrap">
-                    <select
-                      value={filterSubject}
-                      onChange={(e) => setFilterSubject(e.target.value)}
-                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      {uniqueSubjects.map((subject) => (
-                        <option key={subject} value={subject}>
-                          {subject}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      value={filterDepartment}
-                      onChange={(e) => setFilterDepartment(e.target.value)}
-                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      {uniqueDepartments.map((dept) => (
-                        <option key={dept} value={dept}>
-                          {dept}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <select
+                    value={filterSubject}
+                    onChange={(e) => setFilterSubject(e.target.value)}
+                    className="px-1.5 py-1 text-xs border rounded-lg"
+                  >
+                    {uniqueSubjects.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
-              {/* Teachers Attendance List */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              {/* Table */}
+              <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto max-h-[calc(100vh-420px)] overflow-y-auto">
                   <table className="w-full text-xs">
                     <thead className="bg-gray-50 sticky top-0 z-10">
@@ -1178,19 +884,16 @@ const Teacher_attence = () => {
                         <th className="px-3 py-2 text-left font-semibold text-gray-600">
                           Teacher
                         </th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600">
                           Subject
-                        </th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
-                          Department
                         </th>
                         <th className="px-3 py-2 text-left font-semibold text-gray-600">
                           Status
                         </th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600">
                           Check In
                         </th>
-                        <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600">
                           Check Out
                         </th>
                         <th className="px-3 py-2 text-left font-semibold text-gray-600">
@@ -1198,65 +901,60 @@ const Teacher_attence = () => {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y">
                       {filteredTeachers.length > 0 ? (
-                        filteredTeachers.map((teacher, index) => {
-                          const attendance = getTeacherAttendance(
-                            teacher.id,
-                            selectedDate,
-                          );
+                        filteredTeachers.map((t, idx) => {
+                          const att = getTeacherAttendance(t.id, selectedDate);
                           return (
                             <tr
-                              key={teacher.id}
-                              className="hover:bg-gray-50 transition-colors"
+                              key={t._id || t.id}
+                              className="hover:bg-gray-50"
                             >
-                              <td className="px-3 py-2 font-medium text-gray-500">
-                                {index + 1}
+                              <td className="px-3 py-2 text-gray-500">
+                                {idx + 1}
                               </td>
                               <td className="px-3 py-2">
                                 <div className="font-medium text-gray-800">
-                                  {teacher.name}
+                                  {t.name}
                                 </div>
                                 <div className="text-[10px] text-gray-400">
-                                  {teacher.teacherId}
+                                  {t.teacherId} • {t.designation}
                                 </div>
                               </td>
-                              <td className="px-3 py-2 hidden md:table-cell text-gray-600">
-                                {teacher.subject}
-                              </td>
-                              <td className="px-3 py-2 hidden lg:table-cell text-gray-600">
-                                {teacher.department}
+                              <td className="px-3 py-2 text-gray-600">
+                                {t.subject}
                               </td>
                               <td className="px-3 py-2">
-                                {attendance ? (
-                                  getStatusBadge(attendance.status)
+                                {att ? (
+                                  getStatusBadge(att.status)
                                 ) : (
                                   <span className="text-gray-400 text-[10px]">
                                     Not Marked
                                   </span>
                                 )}
                               </td>
-                              <td className="px-3 py-2 hidden sm:table-cell text-gray-600">
-                                {attendance?.checkIn || "-"}
+                              <td className="px-3 py-2 text-gray-600">
+                                {att?.checkIn || "-"}
                               </td>
-                              <td className="px-3 py-2 hidden sm:table-cell text-gray-600">
-                                {attendance?.checkOut || "-"}
+                              <td className="px-3 py-2 text-gray-600">
+                                {att?.checkOut || "-"}
                               </td>
                               <td className="px-3 py-2">
                                 <div className="flex items-center gap-1">
                                   <button
-                                    onClick={() =>
-                                      handleMarkAttendance(teacher)
-                                    }
-                                    className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
-                                    title="Mark Attendance"
+                                    onClick={() => handleMarkAttendance(t)}
+                                    className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                                    title="Mark"
                                   >
                                     <FaClipboardCheck size={14} />
                                   </button>
                                   <button
-                                    onClick={() => viewTeacherDetails(teacher)}
-                                    className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
-                                    title="View Details"
+                                    onClick={() => {
+                                      setSelectedTeacher(t);
+                                      setShowDetailsModal(true);
+                                    }}
+                                    className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
+                                    title="View"
                                   >
                                     <FaEye size={14} />
                                   </button>
@@ -1268,14 +966,11 @@ const Teacher_attence = () => {
                       ) : (
                         <tr>
                           <td
-                            colSpan="8"
+                            colSpan="7"
                             className="px-3 py-8 text-center text-gray-500"
                           >
                             <FaChalkboardTeacher className="text-4xl text-gray-300 mx-auto mb-2" />
-                            <p>No teachers found</p>
-                            <p className="text-[10px] text-gray-400 mt-1">
-                              Try adjusting your search or filter criteria
-                            </p>
+                            <p>{error || "No teachers found"}</p>
                           </td>
                         </tr>
                       )}
@@ -1285,13 +980,12 @@ const Teacher_attence = () => {
               </div>
             </>
           ) : (
-            // Monthly View
+            // Monthly view
             <div className="space-y-3">
-              {/* Month Selector */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 flex items-center justify-between">
+              <div className="bg-white border rounded-xl shadow-sm p-3 flex items-center justify-between">
                 <button
                   onClick={() => handleMonthChange("prev")}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="p-2 rounded-lg hover:bg-gray-100"
                 >
                   <FaArrowLeft />
                 </button>
@@ -1300,14 +994,13 @@ const Teacher_attence = () => {
                 </h3>
                 <button
                   onClick={() => handleMonthChange("next")}
-                  className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="p-2 rounded-lg hover:bg-gray-100"
                 >
                   <FaArrowRight />
                 </button>
               </div>
 
-              {/* Monthly Attendance Table */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
                 <div className="overflow-x-auto max-h-[calc(100vh-300px)] overflow-y-auto">
                   <table className="w-full text-xs">
                     <thead className="bg-gray-50 sticky top-0 z-10">
@@ -1338,51 +1031,48 @@ const Teacher_attence = () => {
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {teachers.map((teacher) => {
-                        const stats = calculateStats(teacher.id);
+                    <tbody className="divide-y">
+                      {teachers.map((t) => {
+                        const s = calculateStats(t.id);
                         return (
-                          <tr
-                            key={teacher.id}
-                            className="hover:bg-gray-50 transition-colors"
-                          >
+                          <tr key={t._id || t.id} className="hover:bg-gray-50">
                             <td className="px-2 py-2">
-                              <div className="font-medium text-gray-800 text-xs">
-                                {teacher.name}
+                              <div className="font-medium text-gray-800">
+                                {t.name}
                               </div>
                               <div className="text-[10px] text-gray-400">
-                                {teacher.teacherId}
+                                {t.teacherId} • {t.designation}
                               </div>
                             </td>
                             <td className="px-2 py-2 text-center font-medium">
-                              {stats.total}
+                              {s.total}
                             </td>
                             <td className="px-2 py-2 text-center text-green-600 font-medium">
-                              {stats.present}
+                              {s.present}
                             </td>
                             <td className="px-2 py-2 text-center text-red-600 font-medium">
-                              {stats.absent}
+                              {s.absent}
                             </td>
                             <td className="px-2 py-2 text-center text-yellow-600 font-medium">
-                              {stats.late}
+                              {s.late}
                             </td>
                             <td className="px-2 py-2 text-center text-blue-600 font-medium">
-                              {stats.leave}
+                              {s.leave}
                             </td>
                             <td className="px-2 py-2 text-center font-bold">
-                              {stats.percentage}%
+                              {s.percentage}%
                             </td>
                             <td className="px-2 py-2 text-center">
                               <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden mx-auto">
                                 <div
                                   className={`h-full rounded-full ${
-                                    stats.percentage >= 85
+                                    s.percentage >= 85
                                       ? "bg-green-500"
-                                      : stats.percentage >= 70
+                                      : s.percentage >= 70
                                         ? "bg-yellow-500"
                                         : "bg-red-500"
                                   }`}
-                                  style={{ width: `${stats.percentage}%` }}
+                                  style={{ width: `${s.percentage}%` }}
                                 />
                               </div>
                             </td>
@@ -1398,13 +1088,13 @@ const Teacher_attence = () => {
         </main>
       </div>
 
-      {/* Add Attendance Modal */}
+      {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlus className="text-blue-600" /> Add Attendance Record
+                <FaPlus className="text-blue-600" /> Add Attendance
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1422,22 +1112,22 @@ const Teacher_attence = () => {
                   required
                   value={formData.teacherId}
                   onChange={(e) => {
-                    const teacherId = e.target.value;
-                    const teacher = teachers.find(
-                      (t) => t.id === parseInt(teacherId),
+                    const tid = e.target.value;
+                    const t = teachers.find(
+                      (x) => String(x.id) === String(tid),
                     );
                     setFormData({
                       ...formData,
-                      teacherId: teacherId,
-                      teacherName: teacher ? teacher.name : "",
+                      teacherId: tid,
+                      teacherName: t ? t.name : "",
                     });
                   }}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 >
                   <option value="">Select Teacher</option>
-                  {teachers.map((teacher) => (
-                    <option key={teacher.id} value={teacher.id}>
-                      {teacher.name} ({teacher.teacherId}) - {teacher.subject}
+                  {teachers.map((t) => (
+                    <option key={t._id || t.id} value={t.id}>
+                      {t.name} ({t.teacherId}) — {t.designation}
                     </option>
                   ))}
                 </select>
@@ -1454,7 +1144,7 @@ const Teacher_attence = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, date: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
 
@@ -1463,20 +1153,18 @@ const Teacher_attence = () => {
                   Status *
                 </label>
                 <div className="grid grid-cols-2 gap-2">
-                  {statuses.map((status) => (
+                  {statuses.map((s) => (
                     <button
-                      key={status}
+                      key={s}
                       type="button"
-                      onClick={() =>
-                        setFormData({ ...formData, status: status })
-                      }
+                      onClick={() => setFormData({ ...formData, status: s })}
                       className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                        formData.status === status
-                          ? `${getStatusColor(status)} border-2 border-blue-500`
+                        formData.status === s
+                          ? `${getStatusColor(s)} border-2 border-blue-500`
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      {status}
+                      {s}
                     </button>
                   ))}
                 </div>
@@ -1494,8 +1182,8 @@ const Teacher_attence = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, checkIn: e.target.value })
                       }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="e.g., 09:00 AM"
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                      placeholder="09:00 AM"
                     />
                   </div>
                   <div>
@@ -1508,8 +1196,8 @@ const Teacher_attence = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, checkOut: e.target.value })
                       }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="e.g., 04:00 PM"
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                      placeholder="04:00 PM"
                     />
                   </div>
                 </div>
@@ -1525,22 +1213,24 @@ const Teacher_attence = () => {
                     setFormData({ ...formData, note: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                   placeholder="Add note..."
                 />
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  disabled={saving}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold disabled:opacity-50"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Add Attendance
+                  <FaSave className="inline mr-2" size={14} />
+                  {saving ? "Saving..." : "Add Attendance"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -1550,7 +1240,7 @@ const Teacher_attence = () => {
         </div>
       )}
 
-      {/* Mark Attendance Modal */}
+      {/* Mark Modal */}
       {showMarkModal && selectedTeacher && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
@@ -1575,21 +1265,50 @@ const Teacher_attence = () => {
                   Status
                 </label>
                 <div className="grid grid-cols-2 gap-2">
-                  {["Present", "Absent", "Late", "Leave"].map((status) => (
+                  {statuses.map((s) => (
                     <button
-                      key={status}
-                      onClick={() => setMarkStatus(status)}
+                      key={s}
+                      onClick={() => setMarkStatus(s)}
                       className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                        markStatus === status
-                          ? `${getStatusColor(status)} border-2 border-blue-500`
+                        markStatus === s
+                          ? `${getStatusColor(s)} border-2 border-blue-500`
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      {status}
+                      {s}
                     </button>
                   ))}
                 </div>
               </div>
+
+              {(markStatus === "Present" || markStatus === "Late") && (
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Check In
+                    </label>
+                    <input
+                      type="text"
+                      value={markCheckIn}
+                      onChange={(e) => setMarkCheckIn(e.target.value)}
+                      className="w-full border rounded-lg px-3 py-1.5 text-sm"
+                      placeholder="09:00 AM"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Check Out
+                    </label>
+                    <input
+                      type="text"
+                      value={markCheckOut}
+                      onChange={(e) => setMarkCheckOut(e.target.value)}
+                      className="w-full border rounded-lg px-3 py-1.5 text-sm"
+                      placeholder="04:00 PM"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1599,7 +1318,7 @@ const Teacher_attence = () => {
                   value={markNote}
                   onChange={(e) => setMarkNote(e.target.value)}
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                   placeholder="Add a note..."
                 />
               </div>
@@ -1607,13 +1326,15 @@ const Teacher_attence = () => {
               <div className="flex gap-3">
                 <button
                   onClick={saveAttendance}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold text-sm transition-all"
+                  disabled={saving}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold text-sm disabled:opacity-50"
                 >
-                  <FaSave className="inline mr-2" /> Save
+                  <FaSave className="inline mr-2" />{" "}
+                  {saving ? "Saving..." : "Save"}
                 </button>
                 <button
                   onClick={() => setShowMarkModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
                 >
                   Cancel
                 </button>
@@ -1623,14 +1344,13 @@ const Teacher_attence = () => {
         </div>
       )}
 
-      {/* Teacher Details Modal */}
+      {/* Details Modal */}
       {showDetailsModal && selectedTeacher && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaUserTie className="text-blue-600" /> Teacher Attendance
-                Details
+                <FaUserTie className="text-blue-600" /> Attendance Details
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
@@ -1640,7 +1360,7 @@ const Teacher_attence = () => {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <div className="flex items-start gap-4 pb-4 border-b border-gray-200">
+              <div className="flex items-start gap-4 pb-4 border-b">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-teal-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
                   {selectedTeacher.name.charAt(0)}
                 </div>
@@ -1649,7 +1369,7 @@ const Teacher_attence = () => {
                     {selectedTeacher.name}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    {selectedTeacher.teacherId}
+                    {selectedTeacher.teacherId} • {selectedTeacher.designation}
                   </p>
                   <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
                     <span>📚 {selectedTeacher.subject}</span>
@@ -1662,110 +1382,121 @@ const Teacher_attence = () => {
               {/* Monthly Stats */}
               <div>
                 <h4 className="font-semibold text-gray-700 text-sm mb-2">
-                  Monthly Attendance Summary ({getMonthName(selectedMonth)}{" "}
-                  {selectedYear})
+                  Summary — {getMonthName(selectedMonth)} {selectedYear}
                 </h4>
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                  {(() => {
-                    const stats = calculateStats(selectedTeacher.id);
-                    return (
-                      <>
-                        <div className="bg-gray-50 rounded-lg p-2 text-center">
-                          <p className="text-lg font-bold text-gray-700">
-                            {stats.total}
-                          </p>
-                          <p className="text-[10px] text-gray-500">
-                            Total Days
-                          </p>
-                        </div>
-                        <div className="bg-green-50 rounded-lg p-2 text-center">
-                          <p className="text-lg font-bold text-green-600">
-                            {stats.present}
-                          </p>
-                          <p className="text-[10px] text-gray-500">Present</p>
-                        </div>
-                        <div className="bg-red-50 rounded-lg p-2 text-center">
-                          <p className="text-lg font-bold text-red-600">
-                            {stats.absent}
-                          </p>
-                          <p className="text-[10px] text-gray-500">Absent</p>
-                        </div>
-                        <div className="bg-yellow-50 rounded-lg p-2 text-center">
-                          <p className="text-lg font-bold text-yellow-600">
-                            {stats.late}
-                          </p>
-                          <p className="text-[10px] text-gray-500">Late</p>
-                        </div>
-                        <div className="bg-blue-50 rounded-lg p-2 text-center">
-                          <p className="text-lg font-bold text-blue-600">
-                            {stats.leave}
-                          </p>
-                          <p className="text-[10px] text-gray-500">Leave</p>
-                        </div>
-                      </>
-                    );
-                  })()}
-                </div>
+                {(() => {
+                  const s = calculateStats(selectedTeacher.id);
+                  return (
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                      <div className="bg-gray-50 rounded-lg p-2 text-center">
+                        <p className="text-lg font-bold text-gray-700">
+                          {s.total}
+                        </p>
+                        <p className="text-[10px] text-gray-500">Total</p>
+                      </div>
+                      <div className="bg-green-50 rounded-lg p-2 text-center">
+                        <p className="text-lg font-bold text-green-600">
+                          {s.present}
+                        </p>
+                        <p className="text-[10px] text-gray-500">Present</p>
+                      </div>
+                      <div className="bg-red-50 rounded-lg p-2 text-center">
+                        <p className="text-lg font-bold text-red-600">
+                          {s.absent}
+                        </p>
+                        <p className="text-[10px] text-gray-500">Absent</p>
+                      </div>
+                      <div className="bg-yellow-50 rounded-lg p-2 text-center">
+                        <p className="text-lg font-bold text-yellow-600">
+                          {s.late}
+                        </p>
+                        <p className="text-[10px] text-gray-500">Late</p>
+                      </div>
+                      <div className="bg-blue-50 rounded-lg p-2 text-center">
+                        <p className="text-lg font-bold text-blue-600">
+                          {s.leave}
+                        </p>
+                        <p className="text-[10px] text-gray-500">Leave</p>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
-              {/* Recent Attendance */}
+              {/* Recent records */}
               <div>
                 <h4 className="font-semibold text-gray-700 text-sm mb-2">
-                  Recent Attendance Records
+                  Recent Records
                 </h4>
-                <div className="max-h-60 overflow-y-auto">
+                <div className="max-h-60 overflow-y-auto border rounded-lg">
                   <table className="w-full text-xs">
                     <thead className="bg-gray-50 sticky top-0">
                       <tr>
                         <th className="px-2 py-1 text-left">Date</th>
                         <th className="px-2 py-1 text-left">Status</th>
-                        <th className="px-2 py-1 text-left">Check In</th>
-                        <th className="px-2 py-1 text-left">Check Out</th>
+                        <th className="px-2 py-1 text-left">In</th>
+                        <th className="px-2 py-1 text-left">Out</th>
                         <th className="px-2 py-1 text-left">Note</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y">
                       {attendanceRecords
-                        .filter((r) => r.teacherId === selectedTeacher.id)
+                        .filter(
+                          (r) =>
+                            String(r.teacherId) === String(selectedTeacher.id),
+                        )
                         .sort((a, b) => b.date.localeCompare(a.date))
-                        .slice(0, 10)
-                        .map((record) => (
-                          <tr key={record.id} className="hover:bg-gray-50">
+                        .slice(0, 15)
+                        .map((r) => (
+                          <tr key={r._id}>
                             <td className="px-2 py-1.5">
-                              {formatDate(record.date)}
+                              {formatDate(r.date)}
                             </td>
                             <td className="px-2 py-1.5">
-                              {getStatusBadge(record.status)}
+                              {getStatusBadge(r.status)}
                             </td>
                             <td className="px-2 py-1.5 text-gray-600">
-                              {record.checkIn || "-"}
+                              {r.checkIn || "-"}
                             </td>
                             <td className="px-2 py-1.5 text-gray-600">
-                              {record.checkOut || "-"}
+                              {r.checkOut || "-"}
                             </td>
                             <td className="px-2 py-1.5 text-gray-500 text-[10px]">
-                              {record.note || "-"}
+                              {r.note || "-"}
                             </td>
                           </tr>
                         ))}
+                      {attendanceRecords.filter(
+                        (r) =>
+                          String(r.teacherId) === String(selectedTeacher.id),
+                      ).length === 0 && (
+                        <tr>
+                          <td
+                            colSpan="5"
+                            className="px-2 py-4 text-center text-gray-400"
+                          >
+                            No records yet
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
                     handleMarkAttendance(selectedTeacher);
                   }}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaClipboardCheck className="inline mr-2" /> Mark Attendance
                 </button>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>

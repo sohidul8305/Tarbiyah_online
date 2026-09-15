@@ -7,9 +7,8 @@ import { Autoplay, Pagination } from "swiper/modules";
 // Swiper CSS
 import "swiper/css";
 import "swiper/css/pagination";
+import BakarahBannerImg from "../../image/Bakarah.png";
 
-import HifzadaltsBannerImg from "../../image/adalthifzbanner.jpg";
-import HIfzadaltscoursImg from "../../image/adaltfifzcourse.jpg";
 import {
   FaArrowLeft,
   FaStar,
@@ -761,7 +760,7 @@ const Course_quran_elders_hifz = () => {
 
           {/* Hero Section Banner */}
           <img
-            src={HifzadaltsBannerImg}
+            src={BakarahBannerImg}
             alt={t({
               en: "Surah Al-Baqarah Hifz Banner",
               bn: "সূরা বাকারা হিফজ ব্যানার",
@@ -1288,7 +1287,7 @@ const Course_quran_elders_hifz = () => {
                 className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer"
               >
                 <img
-                  src={HIfzadaltscoursImg}
+                  src={BakarahBannerImg}
                   alt={t({ en: "Course Video", bn: "কোর্স ভিডিও" })}
                   className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />

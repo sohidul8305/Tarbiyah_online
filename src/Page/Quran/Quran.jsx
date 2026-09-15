@@ -4,8 +4,9 @@ import Quranforeldersbanner from "../../image/Quranforeldersbanner.jpg";
 import Adalthifzbanner from "../../image/adalthifzbanner.jpg";
 import adaltsbannerImg from "../../image/tajweedbanner - Copy.png";
 import AdvancedtajweedImg from "../../image/tajweedbanner - Copy.png";
-import Qurannajeracover from "../../image/najeracover.jpg";
+import Qurannajeracover from "../../image/najerabanner.jpg";
 import Quidanuraniyah from "../../image/quidanuraniyahcover.png";
+import BakarahBannerImg from "../../image/Bakarah.png";
 import {
   FaCheckCircle,
   FaClock,
@@ -128,7 +129,7 @@ const Quran = () => {
         bn: "নিয়মিত মাশকের মাধ্যমে ধাপে ধাপে সম্পূর্ণ বাকারা হিফজ প্রোগ্রাম।",
         en: "Step-by-step complete Surah Al-Baqarah through regular practice.",
       },
-      image: Adalthifzbanner,
+      image: BakarahBannerImg,
       link: "/course/Albakarah/details", // Custom route for Bakarah Hifz
     },
     {
