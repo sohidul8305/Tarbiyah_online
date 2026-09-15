@@ -8,6 +8,7 @@ import NazerakidsImg from "../../image/Thumb.jpg";
 import HifjulBannerImg from "../../image/hifjulbanner.png";
 import courseImg from "../../image/hifzthumbal.jpg";
 import HIfjthumbelImg from "../../image/Hifjcover.jpg";
+import OnetoOneImg from "../../image/OnetoOnebanner.jpg";
 import {
   FaCheckCircle,
   FaClock,
@@ -81,12 +82,15 @@ const Kids = () => {
     },
     {
       id: "one-to-one",
-      title: { en: "One to One", bn: "ওয়ান টু ওয়ান" },
+      title: {
+        en: "One to One Quran Revision ",
+        bn: "ওয়ান টু ওয়ান কুরআন রিভিশন ",
+      },
       subtitle: {
         en: "Personalized Quran learning at flexible times.",
         bn: "ফ্লেক্সিবল সময়ে পার্সোনালাইজড কুরআন লার্নিং",
       },
-      image: KidsImg,
+      image: OnetoOneImg,
     },
   ];
 
