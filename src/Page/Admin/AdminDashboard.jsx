@@ -316,10 +316,10 @@ const AdminDashboard = () => {
         {
           id: "basic-tazweed payment overview",
           path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed Payment Overview ",
+          label: "Basic Tazweed Payment Overview",
         },
         {
-          id: "najera-payment overview ",
+          id: "najera-payment overview",
           path: "/admin-dashboard/najera-batch",
           label: "Najera payment Overview",
         },
@@ -365,12 +365,12 @@ const AdminDashboard = () => {
         {
           id: "basic-tazweed-student",
           path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed",
+          label: "Basic Tazweed payment overview",
         },
         {
           id: "najera-batch-student",
           path: "/admin-dashboard/najera-batch",
-          label: "Najera Batch",
+          label: "Najera Batch payment overview ",
         },
       ],
     },
@@ -555,7 +555,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-      =
       <Navbar />
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}

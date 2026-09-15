@@ -1031,8 +1031,8 @@ const NajeraBatch = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaBookOpen className="text-blue-600" /> Najera Batch — Payment
-                Overview
+                <FaBookOpen className="text-blue-600" />
+                Najera Batch-02 — Payment Overview
               </h1>
               <p className="text-xs text-gray-500">
                 Manage Najera batch payments & students ({students.length}{" "}

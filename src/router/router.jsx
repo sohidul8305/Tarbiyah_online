@@ -39,7 +39,8 @@ import StudentLogin from "../Page/Login/StudentLogin";
 // ===== ড্যাশবোর্ড পেজ =====
 import StudentDashboard from "../Page/Student/StudentDashboard";
 import TeacherDashboard from "../Page/Dashboard/TeacherDashboard";
-import AdminDashboard from "../Page/Dashboard/AdminDashboard";
+// import AdminDashboard from "../Page/Dashboard/AdminDashboard";
+import AdminDashboard from "../Page/Admin/AdminDashboard";
 
 // ===== ড্যাশবোর্ড চাইল্ড পেজ =====
 // Student

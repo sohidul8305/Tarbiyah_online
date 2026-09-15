@@ -3,7 +3,8 @@ import { Link } from "react-router";
 // Swiper and required modules
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
-import KidsImg from "../../image/kids.jpg";
+import HifjCoverImg from "../../image/Hifjcover.jpg";
+import HifjbannerImg from "../../image/Hifjthumbell.jpg";
 
 // Swiper CSS
 import "swiper/css";
@@ -470,7 +471,7 @@ const HifzRevisionDetails = () => {
             {/* Top Banner Image - STATIC KidsImg */}
             <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden shadow-md bg-cyan-900 relative">
               <img
-                src={KidsImg}
+                src={HifjCoverImg}
                 alt={courseDetails.title}
                 className="w-full h-full object-cover opacity-90"
               />
@@ -913,7 +914,7 @@ const HifzRevisionDetails = () => {
                 className="relative rounded-lg overflow-hidden shadow mb-4 bg-black group cursor-pointer block h-40"
               >
                 <img
-                  src={KidsImg}
+                  src={HifjbannerImg}
                   alt={t({ en: "Course Video", bn: "কোর্স ভিডিও" })}
                   className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform"
                 />

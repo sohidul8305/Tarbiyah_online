@@ -9,80 +9,27 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
-  FaClock,
-  FaBook,
-  FaFileAlt,
   FaChartLine,
-  FaUserGraduate,
   FaUserPlus,
   FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
-  FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
   FaListAlt,
   FaEye,
-  FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
   FaPlusCircle,
-  FaDownload,
-  FaPrint,
   FaCheckCircle,
-  FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
-  FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
+  FaCamera,
   FaSave,
   FaUndo,
-  FaUpload,
-  FaCamera,
+  FaLayerGroup,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+const API_BASE = "http://localhost:5000";
 
 const Add_student = () => {
   const { user, logOut } = useAuth();
@@ -99,17 +46,16 @@ const Add_student = () => {
     joinDate: "",
   });
 
-  // State for students list
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ Approve Modal State
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  // Form Data
-  const [formData, setFormData] = useState({
+  // ✅ Initial Form Data
+  const initialFormData = {
+    // Personal
     name: "",
     email: "",
     phone: "",
@@ -133,15 +79,43 @@ const Add_student = () => {
     paymentStatus: "Unpaid",
     admissionDate: "",
     photo: null,
-  });
 
+    // ✅ Image Fields
+    studentId: "",
+    country: "BD",
+    batch: "",
+    scholarshipAmount: "",
+    courseFee: "",
+    paidAmount: "",
+    transactionId: "",
+    dueAmount: "",
+    julyAugust: "",
+    september: "",
+    paymentMethodSept: "",
+    paymentDateSept: "",
+    transactionIdSept: "",
+    october: "",
+    paymentMethodOct: "",
+    paymentDateOct: "",
+    transactionIdOct: "",
+    november: "",
+    paymentMethodNov: "",
+    paymentDateNov: "",
+    transactionIdNov: "",
+    december: "",
+    paymentMethodDec: "",
+    paymentDateDec: "",
+    transactionIdDec: "",
+    comments: "",
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCourse, setFilterCourse] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
   const [showStudentList, setShowStudentList] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // Courses List
   const coursesList = [
     "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
     "আলিমিয়াহ ফর কিডস",
@@ -156,7 +130,6 @@ const Add_student = () => {
     "বেসিক তাজউইদ (লেভেল–১)",
     "অ্যাডভান্সড তাজউইদ",
   ];
-
   const subjectList = [
     "Tajweed",
     "Tafsir",
@@ -167,7 +140,6 @@ const Add_student = () => {
     "Arabic Literature",
     "Quran Memorization",
   ];
-
   const bloodGroupList = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
   const religionList = [
     "Islam",
@@ -179,6 +151,13 @@ const Add_student = () => {
   const genderList = ["Male", "Female", "Other"];
   const statusList = ["Active", "Pending", "Inactive"];
   const paymentStatusList = ["Paid", "Partial", "Unpaid"];
+  const batchList = [
+    "Basic Tazweed 6th Batch",
+    "Najera Batch-02",
+    "Basic Tazweed",
+    "Najera",
+    "Hifz Batch",
+  ];
 
   // Load admin info
   useEffect(() => {
@@ -197,7 +176,7 @@ const Add_student = () => {
     }
   }, [user]);
 
-  // Fetch students from API
+  // Fetch students
   useEffect(() => {
     fetchStudentsFromAPI();
   }, [refreshKey]);
@@ -207,98 +186,49 @@ const Add_student = () => {
       setLoading(true);
       setError(null);
 
-      console.log("🔄 Fetching students from API...");
-
-      const response = await fetch(
-        "https://api.tarbiyahonline.com/api/students/all",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      console.log("📥 Response Status:", response.status);
-
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text();
-        console.error("❌ Response is not JSON:", text.substring(0, 200));
-
-        if (text.includes("<!DOCTYPE")) {
-          throw new Error(
-            "Backend server is not running! Please start the server.",
-          );
-        }
-        throw new Error("Server returned invalid response.");
-      }
-
+      const response = await fetch(`${API_BASE}/api/students/all`);
       const data = await response.json();
-      console.log("📥 Response Data:", data);
 
       if (data.success) {
-        const studentList = data.students || [];
-        console.log(`✅ Found ${studentList.length} students from API`);
-        setStudents(studentList);
-
-        if (studentList.length === 0) {
-          setError("No students found. Please register a student first.");
-        }
+        setStudents(data.students || []);
       } else {
-        setError(data.message || "Failed to fetch students");
+        setError(data.message || "Failed to fetch");
         setStudents([]);
       }
-    } catch (error) {
-      console.error("❌ Error fetching students:", error);
-      setError(`Error: ${error.message}`);
+    } catch (err) {
+      console.error("❌ Fetch Error:", err);
+      setError(`Error: ${err.message}`);
       setStudents([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Approve Student Function
+  // ✅ Approve student
   const handleApproveStudent = async () => {
+    if (!selectedStudent) return;
+
+    if (!selectedStudent.username || !selectedStudent.password) {
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Info!",
+        text: "Username এবং Password দিন।",
+      });
+      return;
+    }
+
     try {
-      if (!selectedStudent) {
-        Swal.fire({
-          icon: "error",
-          title: "Error!",
-          text: "No student selected.",
-        });
-        return;
-      }
-
-      if (!selectedStudent.username || !selectedStudent.password) {
-        Swal.fire({
-          icon: "warning",
-          title: "Information Missing!",
-          text: "Please provide username and password.",
-        });
-        return;
-      }
-
       Swal.fire({
         title: "Processing...",
         allowOutsideClick: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
+        didOpen: () => Swal.showLoading(),
       });
 
-      console.log("📤 Sending Approve Request:");
-      console.log("📤 ID:", selectedStudent._id);
-      console.log("📤 Username:", selectedStudent.username);
-      console.log("📤 Password:", selectedStudent.password);
-
       const response = await fetch(
-        `http://localhost:5000/api/students/approve/${selectedStudent._id}`,
+        `${API_BASE}/api/students/approve/${selectedStudent._id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             username: selectedStudent.username,
             password: selectedStudent.password,
@@ -306,78 +236,41 @@ const Add_student = () => {
         },
       );
 
-      console.log("📥 Response Status:", response.status);
-
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await response.text();
-        console.error("❌ Response is not JSON:", text.substring(0, 200));
-
-        if (text.includes("<!DOCTYPE")) {
-          throw new Error(
-            "Backend server is not running! Please start the server.",
-          );
-        }
-        throw new Error("Server returned invalid response.");
-      }
-
       const data = await response.json();
-      console.log("📥 Response Data:", data);
 
       if (data.success) {
-        const updatedStudents = students.map((s) =>
-          s._id === selectedStudent._id
-            ? {
-                ...s,
-                status: "Active",
-                username: selectedStudent.username,
-              }
-            : s,
-        );
-        setStudents(updatedStudents);
         setShowApproveModal(false);
         setSelectedStudent(null);
+        setRefreshKey((p) => p + 1);
 
         Swal.fire({
           icon: "success",
-          title: "✅ Student Approved!",
-          html: `
-            <div style="text-align: left;">
-              <p><strong>Student:</strong> ${selectedStudent.name}</p>
-              <p><strong>Course:</strong> ${selectedStudent.course || "N/A"}</p>
-              <hr style="margin: 10px 0;">
-              <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
-                <p style="font-weight: bold; color: #004d4d;">🔑 Login Credentials:</p>
-                <p><strong>Username:</strong> ${selectedStudent.username}</p>
-                <p><strong>Password:</strong> ${selectedStudent.password}</p>
-              </div>
-            </div>
-          `,
+          title: "✅ Approved!",
+          html: `<div style="text-align:left">
+            <p><strong>Username:</strong> ${selectedStudent.username}</p>
+            <p><strong>Password:</strong> ${selectedStudent.password}</p>
+          </div>`,
           confirmButtonColor: "#004d4d",
-          confirmButtonText: "OK",
         });
       } else {
         Swal.fire({
           icon: "error",
           title: "Failed!",
-          text: data.message || "Could not approve student.",
+          text: data.message,
         });
       }
-    } catch (error) {
-      console.error("❌ Error:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: error.message || "Could not approve student. Please try again.",
-      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
     }
   };
 
-  // Register Student
+  // ✅ Register student
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formData.password !== formData.confirmPassword) {
+    // Validation
+    if (formData.password && formData.password !== formData.confirmPassword) {
       Swal.fire({
         icon: "error",
         title: "পাসওয়ার্ড মেলে নি!",
@@ -386,20 +279,11 @@ const Add_student = () => {
       return;
     }
 
-    if (formData.password.length > 0 && formData.password.length < 6) {
+    if (formData.password && formData.password.length < 6) {
       Swal.fire({
         icon: "error",
-        title: "পাসওয়ার্ড খুব ছোট!",
-        text: "পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে।",
-      });
-      return;
-    }
-
-    if (formData.phone.length < 11) {
-      Swal.fire({
-        icon: "error",
-        title: "ভুল ফোন নম্বর!",
-        text: "ফোন নম্বরটি ১১ ডিজিটের হতে হবে।",
+        title: "পাসওয়ার্ড ছোট!",
+        text: "কমপক্ষে ৬ অক্ষর হতে হবে।",
       });
       return;
     }
@@ -407,123 +291,59 @@ const Add_student = () => {
     if (!formData.name || !formData.phone || !formData.course) {
       Swal.fire({
         icon: "warning",
-        title: "Required Fields Missing!",
-        text: "Name, Phone and Course are required.",
-        timer: 2000,
-        showConfirmButton: false,
+        title: "Required Fields!",
+        text: "Name, Phone, Course আবশ্যক।",
       });
       return;
     }
 
     try {
-      console.log("📤 Sending Registration Data:", {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        course: formData.course,
-        fatherName: formData.fatherName,
-        motherName: formData.motherName,
-        paymentStatus: formData.paymentStatus,
-        admissionDate: formData.admissionDate,
-      });
-
       const response = await fetch(
-        "http://localhost:5000/api/students/register/student",
+        `${API_BASE}/api/students/register/student`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: formData.name,
-            email: formData.email || "",
-            phone: formData.phone,
+            ...formData,
             password: formData.password || "default123",
-            course: formData.course,
-            presentAddress: formData.presentAddress || "",
-            permanentAddress: formData.permanentAddress || "",
-            dobOrNid: formData.dobOrNid || "",
-            guardianName: formData.guardianName || formData.fatherName || "",
-            guardianPhone: formData.guardianPhone || formData.phone,
-            subject: formData.subject,
-            fatherName: formData.fatherName,
-            motherName: formData.motherName,
-            gender: formData.gender,
-            bloodGroup: formData.bloodGroup,
-            nationality: formData.nationality,
-            religion: formData.religion,
-            previousSchool: formData.previousSchool,
-            status: formData.status,
-            paymentStatus: formData.paymentStatus,
-            admissionDate: formData.admissionDate,
           }),
         },
       );
 
       const data = await response.json();
-      console.log("📥 Response:", data);
 
       if (data.success) {
         Swal.fire({
           icon: "success",
-          title: "✅ Student Registered!",
-          html: `
-            <div style="text-align: left;">
-              <p><strong>নাম:</strong> ${formData.name}</p>
-              <p><strong>কোর্স:</strong> ${formData.course}</p>
-              <p><strong>ফোন:</strong> ${formData.phone}</p>
-              <p><strong>ইমেইল:</strong> ${formData.email || "N/A"}</p>
-              <hr style="margin: 10px 0;">
-              <p style="color: #004d4d; font-weight: bold;">
-                ✅ Student registered successfully!
-              </p>
-            </div>
-          `,
+          title: "✅ Registered!",
+          html: `<div style="text-align:left">
+            <p><strong>নাম:</strong> ${formData.name}</p>
+            <p><strong>কোর্স:</strong> ${formData.course}</p>
+            <p><strong>ফোন:</strong> ${formData.phone}</p>
+            <p><strong>Batch:</strong> ${formData.batch || "N/A"}</p>
+            <p><strong>Course Fee:</strong> ${formData.courseFee || 0}</p>
+            <p><strong>Paid:</strong> ${formData.paidAmount || 0}</p>
+          </div>`,
           timer: 3000,
           showConfirmButton: true,
         });
 
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          password: "",
-          confirmPassword: "",
-          course: "",
-          subject: "",
-          fatherName: "",
-          motherName: "",
-          guardianName: "",
-          guardianPhone: "",
-          presentAddress: "",
-          permanentAddress: "",
-          dobOrNid: "",
-          gender: "Male",
-          bloodGroup: "A+",
-          nationality: "Bangladeshi",
-          religion: "Islam",
-          previousSchool: "",
-          status: "Pending",
-          paymentStatus: "Unpaid",
-          admissionDate: "",
-          photo: null,
-        });
-
-        setRefreshKey((prev) => prev + 1);
+        setFormData(initialFormData);
+        setRefreshKey((p) => p + 1);
         setShowStudentList(true);
       } else {
         Swal.fire({
           icon: "error",
-          title: "Registration Failed!",
-          text: data.message || "Could not register student.",
+          title: "Failed!",
+          text: data.message || "Could not register",
         });
       }
-    } catch (error) {
-      console.error("❌ Registration Error:", error);
+    } catch (err) {
+      console.error("❌ Register Error:", err);
       Swal.fire({
         icon: "error",
         title: "Error!",
-        text: "Could not connect to server. Please try again.",
+        text: "Server connection failed.",
       });
     }
   };
@@ -534,35 +354,21 @@ const Add_student = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-
       await Swal.fire({
         icon: "success",
-        title: "Logged Out Successfully",
+        title: "Logged Out",
         timer: 1200,
         showConfirmButton: false,
       });
       navigate("/admin-login");
     } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
+      console.error(err);
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -576,31 +382,7 @@ const Add_student = () => {
   };
 
   const handleCancel = () => {
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      password: "",
-      confirmPassword: "",
-      course: "",
-      subject: "",
-      fatherName: "",
-      motherName: "",
-      guardianName: "",
-      guardianPhone: "",
-      presentAddress: "",
-      permanentAddress: "",
-      dobOrNid: "",
-      gender: "Male",
-      bloodGroup: "A+",
-      nationality: "Bangladeshi",
-      religion: "Islam",
-      previousSchool: "",
-      status: "Pending",
-      paymentStatus: "Unpaid",
-      admissionDate: "",
-      photo: null,
-    });
+    setFormData(initialFormData);
     setShowStudentList(true);
   };
 
@@ -617,185 +399,150 @@ const Add_student = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch(
-          `http://localhost:5000/api/students/delete/${id}`,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
+        const response = await fetch(`${API_BASE}/api/students/delete/${id}`, {
+          method: "DELETE",
+        });
         const data = await response.json();
 
         if (data.success) {
           Swal.fire({
             icon: "success",
             title: "Deleted!",
-            text: "Student has been deleted.",
             timer: 1500,
             showConfirmButton: false,
           });
-          setRefreshKey((prev) => prev + 1);
+          setRefreshKey((p) => p + 1);
         } else {
-          Swal.fire({
-            icon: "error",
-            title: "Failed!",
-            text: data.message || "Could not delete student.",
-          });
+          Swal.fire({ icon: "error", title: "Failed!", text: data.message });
         }
-      } catch (error) {
-        console.error("❌ Error deleting student:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Failed!",
-          text: "Could not delete student.",
-        });
+      } catch (err) {
+        console.error(err);
       }
     }
   };
 
-  // ✅ View Details - একটাই handleView ফাংশন থাকবে
+  // ✅ View Details
   const handleView = async (student) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/students/details/${student._id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
+        `${API_BASE}/api/students/details/${student._id}`,
       );
 
-      let fullStudent = student;
-
+      let full = student;
       if (response.ok) {
         const data = await response.json();
-        if (data.success) {
-          fullStudent = data.student;
-        }
+        if (data.success) full = data.student;
       }
 
-      console.log("📥 Student Data:", fullStudent);
-
       Swal.fire({
-        title: `📋 Student Details: ${fullStudent.name}`,
+        title: `📋 ${full.name}`,
         html: `
-          <div style="text-align: left; font-size: 13px; max-height: 450px; overflow-y: auto;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-              <p><strong>নাম:</strong> ${fullStudent.name || "N/A"}</p>
-              <p><strong>ফোন:</strong> ${fullStudent.phone || "N/A"}</p>
-              <p><strong>ইমেইল:</strong> ${fullStudent.email || "N/A"}</p>
-              <p><strong>কোর্স:</strong> ${fullStudent.course || fullStudent.class || "N/A"}</p>
-              
-              <p><strong>ইউজারনেম:</strong> ${fullStudent.username ? `<span style="color: #004d4d; font-weight: bold;">${fullStudent.username}</span>` : '<span style="color: red;">Not assigned</span>'}</p>
-              <p><strong>পাসওয়ার্ড:</strong> ${fullStudent.password ? `<span style="color: #004d4d; font-weight: bold;">${fullStudent.password}</span>` : '<span style="color: red;">Not set</span>'}</p>
-              
-              <p><strong>স্ট্যাটাস:</strong> ${fullStudent.status || "Pending"}</p>
-              <p><strong>পিতার নাম:</strong> ${fullStudent.fatherName || fullStudent.guardianName || "N/A"}</p>
-              <p><strong>অভিভাবক:</strong> ${fullStudent.guardianName || "N/A"}</p>
-              <p><strong>অভিভাবক ফোন:</strong> ${fullStudent.guardianPhone || "N/A"}</p>
-              <p><strong>বর্তমান ঠিকানা:</strong> ${fullStudent.presentAddress || fullStudent.address || "N/A"}</p>
-              <p><strong>স্থায়ী ঠিকানা:</strong> ${fullStudent.permanentAddress || "N/A"}</p>
-              <p><strong>পরিচয়পত্র:</strong> ${fullStudent.dobOrNid || "N/A"}</p>
-              <p><strong>পেমেন্ট মেথড:</strong> ${
-                fullStudent.paymentMethod === "bkash"
-                  ? "bKash"
-                  : fullStudent.paymentMethod === "nagod"
-                    ? "Nagad"
-                    : fullStudent.paymentMethod === "rocket"
-                      ? "Rocket"
-                      : fullStudent.paymentMethod === "bank"
-                        ? "Bank Transfer"
-                        : fullStudent.paymentMethod === "ssl"
-                          ? "SSL Commerz"
-                          : fullStudent.paymentMethod || "N/A"
-              }</p>
-              <p><strong>ট্রানজেকশন আইডি:</strong> ${fullStudent.transactionId || "N/A"}</p>
-              <p><strong>পেমেন্ট স্ট্যাটাস:</strong> ${fullStudent.paymentStatus || (fullStudent.paidAmount ? "Paid" : "Unpaid")}</p>
-              <p><strong>ভর্তি তারিখ:</strong> ${fullStudent.admissionDate ? new Date(fullStudent.admissionDate).toLocaleDateString() : "N/A"}</p>
-            </div>
-            <hr style="margin: 10px 0;">
-            
-            ${
-              fullStudent.username && fullStudent.password
-                ? `
-              <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac; margin-bottom: 10px;">
-                <p style="font-weight: bold; color: #004d4d; margin-bottom: 5px;">🔑 Login Credentials:</p>
-                <p><strong>Username:</strong> <span style="color: #004d4d;">${fullStudent.username}</span></p>
-                <p><strong>Password:</strong> <span style="color: #004d4d;">${fullStudent.password}</span></p>
+          <div style="text-align:left; font-size:13px; max-height:500px; overflow-y:auto;">
+            <div style="background:#f0fdfa; padding:10px; border-radius:8px; border:1px solid #99f6e4; margin-bottom:8px;">
+              <p style="font-weight:bold; color:#0f766e; margin-bottom:6px;">👤 Personal</p>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+                <p><strong>Student ID:</strong> ${full.studentId || "N/A"}</p>
+                <p><strong>Name:</strong> ${full.name || "N/A"}</p>
+                <p><strong>Phone:</strong> ${full.phone || "N/A"}</p>
+                <p><strong>Email:</strong> ${full.email || "N/A"}</p>
+                <p><strong>Country:</strong> ${full.country || "N/A"}</p>
+                <p><strong>Course:</strong> ${full.course || "N/A"}</p>
+                <p><strong>Batch:</strong> ${full.batch || "N/A"}</p>
+                <p><strong>Status:</strong> ${full.status || "Pending"}</p>
               </div>
-            `
+            </div>
+
+            <div style="background:#fef3c7; padding:10px; border-radius:8px; border:1px solid #fcd34d; margin-bottom:8px;">
+              <p style="font-weight:bold; color:#92400e; margin-bottom:6px;">💰 Payment Info</p>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+                <p><strong>Scholarship:</strong> ${full.scholarshipAmount || 0}</p>
+                <p><strong>Course Fee:</strong> ${full.courseFee || 0}</p>
+                <p><strong>Paid:</strong> ${full.paidAmount || 0}</p>
+                <p><strong>Due:</strong> <span style="color:red;font-weight:bold;">${full.dueAmount || 0}</span></p>
+                <p><strong>Transaction ID:</strong> ${full.transactionId || "---"}</p>
+                <p><strong>July-August:</strong> ${full.julyAugust || 0}</p>
+              </div>
+            </div>
+
+            <div style="background:#dbeafe; padding:10px; border-radius:8px; border:1px solid #93c5fd; margin-bottom:8px;">
+              <p style="font-weight:bold; color:#1e40af; margin-bottom:6px;">📅 Monthly Payments</p>
+              <table style="width:100%; font-size:11px; border-collapse:collapse;">
+                <tr style="background:#93c5fd;">
+                  <th style="padding:4px;text-align:left;">Month</th>
+                  <th style="padding:4px;text-align:left;">Amount</th>
+                  <th style="padding:4px;text-align:left;">Method</th>
+                  <th style="padding:4px;text-align:left;">Date</th>
+                  <th style="padding:4px;text-align:left;">TXN ID</th>
+                </tr>
+                <tr>
+                  <td style="padding:4px;">Sept</td>
+                  <td style="padding:4px;">${full.september || 0}</td>
+                  <td style="padding:4px;">${full.paymentMethodSept || "---"}</td>
+                  <td style="padding:4px;">${full.paymentDateSept || "---"}</td>
+                  <td style="padding:4px;">${full.transactionIdSept || "---"}</td>
+                </tr>
+                <tr style="background:#eff6ff;">
+                  <td style="padding:4px;">Oct</td>
+                  <td style="padding:4px;">${full.october || 0}</td>
+                  <td style="padding:4px;">${full.paymentMethodOct || "---"}</td>
+                  <td style="padding:4px;">${full.paymentDateOct || "---"}</td>
+                  <td style="padding:4px;">${full.transactionIdOct || "---"}</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px;">Nov</td>
+                  <td style="padding:4px;">${full.november || 0}</td>
+                  <td style="padding:4px;">${full.paymentMethodNov || "---"}</td>
+                  <td style="padding:4px;">${full.paymentDateNov || "---"}</td>
+                  <td style="padding:4px;">${full.transactionIdNov || "---"}</td>
+                </tr>
+                <tr style="background:#eff6ff;">
+                  <td style="padding:4px;">Dec</td>
+                  <td style="padding:4px;">${full.december || 0}</td>
+                  <td style="padding:4px;">${full.paymentMethodDec || "---"}</td>
+                  <td style="padding:4px;">${full.paymentDateDec || "---"}</td>
+                  <td style="padding:4px;">${full.transactionIdDec || "---"}</td>
+                </tr>
+              </table>
+              <p style="margin-top:6px;"><strong>Comments:</strong> ${full.comments || "N/A"}</p>
+            </div>
+
+            ${
+              full.username && full.password
+                ? `<div style="background:#f0fdf4; padding:10px; border-radius:8px; border:2px solid #86efac;">
+                    <p style="font-weight:bold; color:#004d4d;">🔑 Login</p>
+                    <p><strong>Username:</strong> ${full.username}</p>
+                    <p><strong>Password:</strong> ${full.password}</p>
+                  </div>`
                 : ""
             }
-            
-            <p style="font-size: 11px; color: #666;">রেজিস্ট্রেশন: ${fullStudent.createdAt ? new Date(fullStudent.createdAt).toLocaleString() : "N/A"}</p>
           </div>
         `,
         confirmButtonColor: "#3b82f6",
         confirmButtonText: "Close",
-        width: 650,
+        width: 720,
       });
-    } catch (error) {
-      console.error("❌ Error fetching student details:", error);
-      // Fallback: আগের ডেটা দিয়ে দেখান
-      Swal.fire({
-        title: `📋 Student Details: ${student.name}`,
-        html: `
-          <div style="text-align: left; font-size: 13px; max-height: 450px; overflow-y: auto;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
-              <p><strong>নাম:</strong> ${student.name || "N/A"}</p>
-              <p><strong>ফোন:</strong> ${student.phone || "N/A"}</p>
-              <p><strong>ইমেইল:</strong> ${student.email || "N/A"}</p>
-              <p><strong>কোর্স:</strong> ${student.course || student.class || "N/A"}</p>
-              <p><strong>ইউজারনেম:</strong> ${student.username ? `<span style="color: #004d4d; font-weight: bold;">${student.username}</span>` : '<span style="color: red;">Not assigned</span>'}</p>
-              <p><strong>পাসওয়ার্ড:</strong> ${student.password ? `<span style="color: #004d4d; font-weight: bold;">${student.password}</span>` : '<span style="color: red;">Not set</span>'}</p>
-              <p><strong>স্ট্যাটাস:</strong> ${student.status || "Pending"}</p>
-              <p><strong>পিতার নাম:</strong> ${student.fatherName || student.guardianName || "N/A"}</p>
-              <p><strong>মাতার নাম:</strong> ${student.motherName || "N/A"}</p>
-              <p><strong>অভিভাবক:</strong> ${student.guardianName || "N/A"}</p>
-              <p><strong>অভিভাবক ফোন:</strong> ${student.guardianPhone || "N/A"}</p>
-              <p><strong>বর্তমান ঠিকানা:</strong> ${student.presentAddress || student.address || "N/A"}</p>
-              <p><strong>স্থায়ী ঠিকানা:</strong> ${student.permanentAddress || "N/A"}</p>
-              <p><strong>পরিচয়পত্র:</strong> ${student.dobOrNid || "N/A"}</p>
-              <p><strong>পেমেন্ট মেথড:</strong> ${student.paymentMethod || "N/A"}</p>
-              <p><strong>ট্রানজেকশন আইডি:</strong> ${student.transactionId || "N/A"}</p>
-              <p><strong>পেমেন্ট স্ট্যাটাস:</strong> ${student.paymentStatus || "Unpaid"}</p>
-              <p><strong>ভর্তি তারিখ:</strong> ${student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : "N/A"}</p>
-            </div>
-            <hr style="margin: 10px 0;">
-            <p style="font-size: 11px; color: #666;">রেজিস্ট্রেশন: ${student.createdAt ? new Date(student.createdAt).toLocaleString() : "N/A"}</p>
-          </div>
-        `,
-        confirmButtonColor: "#3b82f6",
-        confirmButtonText: "Close",
-        width: 650,
-      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error", text: err.message });
     }
   };
 
-  // Filter students
-  const filteredStudents = students.filter((student) => {
+  // Filter
+  const filteredStudents = students.filter((s) => {
     const matchesSearch =
-      student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.phone?.includes(searchTerm) ||
-      student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (student.course || student.class)
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
-    const matchesCourse =
-      filterCourse === "All" ||
-      (student.course || student.class) === filterCourse;
-    const matchesStatus =
-      filterStatus === "All" || student.status === filterStatus;
+      s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.phone?.includes(searchTerm) ||
+      s.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      s.course?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCourse = filterCourse === "All" || s.course === filterCourse;
+    const matchesStatus = filterStatus === "All" || s.status === filterStatus;
     return matchesSearch && matchesCourse && matchesStatus;
   });
 
   const uniqueCourses = [
     "All",
-    ...new Set(students.map((s) => s.course || s.class).filter(Boolean)),
+    ...new Set(students.map((s) => s.course).filter(Boolean)),
   ];
 
   const getStatusColor = (status) => {
@@ -811,18 +558,17 @@ const Add_student = () => {
     }
   };
 
-  // Sidebar Menu Items
   const menuItems = [
     {
       id: "profile",
       path: "/admin-profile",
-      icon: <FaUser className="text-xl" />,
+      icon: <FaUser />,
       label: "Profile",
     },
     {
       id: "dashboard",
       path: "/admin-dashboard",
-      icon: <MdDashboard className="text-xl" />,
+      icon: <MdDashboard />,
       label: "Dashboard",
       subItems: [
         {
@@ -836,26 +582,16 @@ const Add_student = () => {
           label: "Today's Class",
         },
         {
-          id: "payment-overview",
-          path: "/admin-dashboard/payment-overview",
-          label: "Payment Overview",
-        },
-        {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
           label: "New Admission",
-        },
-        {
-          id: "notification",
-          path: "/admin-dashboard/notification",
-          label: "Notification",
         },
       ],
     },
     {
       id: "student-management",
       path: "/admin-students",
-      icon: <FaUsers className="text-xl" />,
+      icon: <FaUsers />,
       label: "Student Management",
       subItems: [
         {
@@ -873,17 +609,12 @@ const Add_student = () => {
           path: "/admin-students/profile",
           label: "Student Profile",
         },
-        {
-          id: "admission-permission",
-          path: "/admin-students/admission",
-          label: "Admission Permission",
-        },
       ],
     },
     {
       id: "teacher-management",
       path: "/admin-teachers",
-      icon: <FaChalkboardTeacher className="text-xl" />,
+      icon: <FaChalkboardTeacher />,
       label: "Teacher Management",
       subItems: [
         {
@@ -896,22 +627,12 @@ const Add_student = () => {
           path: "/admin-teachers/schedule",
           label: "Class Schedule",
         },
-        {
-          id: "teacher-attendance",
-          path: "/admin-teachers/attendance",
-          label: "Teacher Attendance",
-        },
-        {
-          id: "teacher-overview",
-          path: "/admin-teachers/overview",
-          label: "Teacher Overview",
-        },
       ],
     },
     {
       id: "batch-course",
       path: "/admin-batch-course",
-      icon: <FaLayerGroup className="text-xl" />,
+      icon: <FaLayerGroup />,
       label: "Batch & Course",
       subItems: [
         {
@@ -924,119 +645,40 @@ const Add_student = () => {
           path: "/admin-batch-course/course-make",
           label: "Course Make",
         },
-        {
-          id: "syllabus",
-          path: "/admin-batch-course/syllabus",
-          label: "Syllabus",
-        },
-        {
-          id: "clear-routine",
-          path: "/admin-batch-course/clear-routine",
-          label: "Clear Routine",
-        },
       ],
-    },
-    {
-      id: "absence-student",
-      path: "/admin-absence",
-      icon: <FaUserTimes className="text-xl" />,
-      label: "Absence Student Community",
     },
     {
       id: "finance",
       path: "/admin-finance",
-      icon: <FaMoneyBillWave className="text-xl" />,
+      icon: <FaMoneyBillWave />,
       label: "Finance",
-      subItems: [
-        {
-          id: "admin-on-fee",
-          path: "/admin-finance/admin-fee",
-          label: "Admin on Fee",
-        },
-        {
-          id: "monthly-fee",
-          path: "/admin-finance/monthly-fee",
-          label: "Monthly Fee",
-        },
-        { id: "invoice", path: "/admin-finance/invoice", label: "Invoice" },
-        { id: "report", path: "/admin-finance/report", label: "Report" },
-      ],
     },
     {
       id: "exam",
       path: "/admin-exam",
-      icon: <FaCalendarCheck className="text-xl" />,
+      icon: <FaCalendarCheck />,
       label: "Exam",
-      subItems: [
-        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
-        {
-          id: "result-publish",
-          path: "/admin-exam/result",
-          label: "Result Publish",
-        },
-        {
-          id: "certificate-permission",
-          path: "/admin-exam/certificate",
-          label: "Certificate Permission",
-        },
-      ],
     },
     {
       id: "report-analytics",
       path: "/admin-reports",
-      icon: <FaChartLine className="text-xl" />,
+      icon: <FaChartLine />,
       label: "Report & Analytics",
-      subItems: [
-        {
-          id: "admission-report",
-          path: "/admin-reports/admission",
-          label: "Admission Report",
-        },
-        {
-          id: "attendance-report",
-          path: "/admin-reports/attendance",
-          label: "Attendance Report",
-        },
-        { id: "income", path: "/admin-reports/income", label: "Income" },
-      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
-      icon: <FaDatabase className="text-xl" />,
+      icon: <FaDatabase />,
       label: "CRM Management",
-      subItems: [
-        {
-          id: "data-entry",
-          path: "/admin-crm/data-entry",
-          label: "Data Entry",
-        },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
-      ],
     },
   ];
 
   if (loading) {
     return (
-      <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="text-sm text-gray-500 mt-3">Loading students...</p>
-          </div>
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-sm text-gray-500 mt-3">Loading...</p>
         </div>
       </div>
     );
@@ -1046,11 +688,11 @@ const Add_student = () => {
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
-        <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Add Student</h1>
+        <div className="md:hidden bg-white border-b p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
+          <h1 className="text-sm font-bold">Add Student</h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100"
           >
             {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
@@ -1059,14 +701,8 @@ const Add_student = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r
+            transition-all duration-300 h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -1086,7 +722,7 @@ const Add_student = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -1097,24 +733,17 @@ const Add_student = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm
+                        ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-700 hover:bg-gray-50"}`}
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-gray-600">{item.icon}</span>
+                        <span>{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
-                      <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
-                      >
-                        <FaArrowRight size={12} />
-                      </span>
+                      <FaArrowRight
+                        size={12}
+                        className={activeSubMenu === item.id ? "rotate-90" : ""}
+                      />
                     </button>
                     {activeSubMenu === item.id && (
                       <div className="ml-6 space-y-1 mt-1">
@@ -1122,11 +751,8 @@ const Add_student = () => {
                           <Link
                             key={sub.id}
                             to={sub.path}
-                            onClick={() => {
-                              setActiveSubMenu(item.id);
-                              setIsSidebarOpen(false);
-                            }}
-                            className="block w-full text-left px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-gray-50 hover:text-[#004d4d] transition-all"
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="block w-full text-left px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-gray-50"
                           >
                             {sub.label}
                           </Link>
@@ -1135,24 +761,12 @@ const Add_student = () => {
                     )}
                   </>
                 ) : (
-                  <Link
-                    to={item.path}
-                    onClick={() => {
-                      setActiveMenu(item.id);
-                      setIsSidebarOpen(false);
-                    }}
-                  >
+                  <Link to={item.path} onClick={() => setIsSidebarOpen(false)}>
                     <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
+                        ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-700 hover:bg-gray-50"}`}
                     >
-                      <span className="text-gray-600">{item.icon}</span>
+                      <span>{item.icon}</span>
                       <span>{item.label}</span>
                     </button>
                   </Link>
@@ -1162,19 +776,14 @@ const Add_student = () => {
 
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 mt-4 border-t pt-4"
             >
-              <FaSignOutAlt className="text-xl" />
+              <FaSignOutAlt />
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
-          <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>© 2026 Pipilika Soft</p>
-          </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1182,87 +791,76 @@ const Add_student = () => {
           />
         )}
 
-        {/* Main Content */}
+        {/* Main */}
         <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
-          {/* Top Bar */}
-          <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          {/* Top */}
+          <div className="bg-white p-3 rounded-xl shadow-sm border mb-3 flex flex-col sm:flex-row justify-between gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaUserPlus className="text-blue-600" /> Add Student
               </h1>
               <p className="text-xs text-gray-500">
-                {students.length} students registered in the system
+                {students.length} students registered
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
-              >
-                Logout
-              </button>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
+            >
+              Logout
+            </button>
           </div>
 
-          {/* Toggle View */}
+          {/* Toggle */}
           <div className="flex gap-2 mb-3">
             <button
               onClick={() => setShowStudentList(true)}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                showStudentList
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-              }`}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold
+                ${showStudentList ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"}`}
             >
               <FaListAlt className="inline mr-1" size={12} /> Student List
             </button>
             <button
               onClick={() => setShowStudentList(false)}
-              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                !showStudentList
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-600 hover:bg-gray-300"
-              }`}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold
+                ${!showStudentList ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"}`}
             >
-              <FaUserPlus className="inline mr-1" size={12} /> Add Student
+              <FaPlusCircle className="inline mr-1" size={12} /> Add Student
             </button>
           </div>
 
           {showStudentList ? (
-            // Student List View
+            // ============ LIST VIEW ============
             <div className="space-y-3 overflow-hidden h-[calc(100vh-240px)]">
               {/* Filters */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2">
+              <div className="bg-white border rounded-xl shadow-sm p-2">
                 <div className="flex flex-col md:flex-row gap-2">
                   <div className="flex-1 relative">
-                    <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                    <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                     <input
                       type="text"
-                      placeholder="Search by name, phone, email..."
+                      placeholder="Search name, phone, studentId, email..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full pl-7 pr-2 py-1 text-xs border rounded-lg"
                     />
                   </div>
                   <div className="flex items-center gap-1">
                     <select
                       value={filterCourse}
                       onChange={(e) => setFilterCourse(e.target.value)}
-                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="px-1.5 py-1 text-xs border rounded-lg"
                     >
-                      {uniqueCourses.map((cls) => (
-                        <option key={cls} value={cls}>
-                          {cls}
+                      {uniqueCourses.map((c) => (
+                        <option key={c} value={c}>
+                          {c}
                         </option>
                       ))}
                     </select>
                     <select
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
-                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="px-1.5 py-1 text-xs border rounded-lg"
                     >
                       <option value="All">All Status</option>
                       <option value="Active">Active</option>
@@ -1270,8 +868,8 @@ const Add_student = () => {
                       <option value="Inactive">Inactive</option>
                     </select>
                     <button
-                      onClick={() => setRefreshKey((prev) => prev + 1)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"
+                      onClick={() => setRefreshKey((p) => p + 1)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold"
                     >
                       🔄 Refresh
                     </button>
@@ -1279,129 +877,126 @@ const Add_student = () => {
                 </div>
               </div>
 
-              {/* Students Table */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
+              {/* Table */}
+              <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
+                <div className="overflow-auto max-h-[calc(100vh-340px)]">
                   <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                    <thead className="bg-gray-50 border-b sticky top-0 z-10">
                       <tr>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           #
                         </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Student ID
+                        </th>
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Name & Contact
                         </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Course
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Country
                         </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Payment Method
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Course / Batch
                         </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Transaction ID
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Scholarship
                         </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Payment Status
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Course Fee
                         </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Admission Date
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Paid
                         </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Due
+                        </th>
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          TXN ID
+                        </th>
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Status
                         </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y">
                       {filteredStudents.length > 0 ? (
-                        filteredStudents.map((student, index) => (
-                          <tr
-                            key={student._id || student.id}
-                            className="hover:bg-gray-50 transition-colors"
-                          >
-                            <td className="px-3 py-2 text-xs text-gray-500">
-                              {index + 1}
+                        filteredStudents.map((s, idx) => (
+                          <tr key={s._id} className="hover:bg-gray-50">
+                            <td className="px-2 py-2 text-xs text-gray-500">
+                              {idx + 1}
                             </td>
-                            <td className="px-3 py-2">
-                              <div>
-                                <p className="text-xs font-medium text-gray-800">
-                                  {student.name}
+                            <td className="px-2 py-2 text-xs font-semibold text-blue-600">
+                              {s.studentId || "N/A"}
+                            </td>
+                            <td className="px-2 py-2">
+                              <p className="text-xs font-medium">{s.name}</p>
+                              <p className="text-[10px] text-gray-500">
+                                📱 {s.phone}
+                              </p>
+                              {s.email && (
+                                <p className="text-[10px] text-gray-400">
+                                  ✉️ {s.email}
                                 </p>
-                                <p className="text-[10px] text-gray-500">
-                                  📱 {student.phone}
+                              )}
+                            </td>
+                            <td className="px-2 py-2 text-xs">
+                              {s.country || "N/A"}
+                            </td>
+                            <td className="px-2 py-2 text-xs">
+                              <p>{s.course || "N/A"}</p>
+                              {s.batch && (
+                                <p className="text-[10px] text-teal-600">
+                                  {s.batch}
                                 </p>
-                                {student.email && (
-                                  <p className="text-[10px] text-gray-400">
-                                    ✉️ {student.email}
-                                  </p>
-                                )}
-                              </div>
+                              )}
                             </td>
-                            <td className="px-3 py-2 text-xs text-gray-600">
-                              {student.course || student.class || "N/A"}
+                            <td className="px-2 py-2 text-xs">
+                              {s.scholarshipAmount || 0}
                             </td>
-                            <td className="px-3 py-2 text-xs text-gray-600">
-                              {student.paymentMethod === "bkash"
-                                ? "bKash"
-                                : student.paymentMethod === "nagod"
-                                  ? "Nagad"
-                                  : student.paymentMethod === "rocket"
-                                    ? "Rocket"
-                                    : student.paymentMethod === "bank"
-                                      ? "Bank Transfer"
-                                      : student.paymentMethod === "ssl"
-                                        ? "SSL Commerz"
-                                        : student.paymentMethod || "N/A"}
+                            <td className="px-2 py-2 text-xs">
+                              {s.courseFee || 0}
                             </td>
-                            <td className="px-3 py-2 text-xs text-gray-600">
-                              {student.transactionId || "N/A"}
+                            <td className="px-2 py-2 text-xs text-green-600 font-semibold">
+                              {s.paidAmount || 0}
                             </td>
-                            <td className="px-3 py-2">
+                            <td className="px-2 py-2 text-xs">
                               <span
-                                className={`text-[8px] px-1.5 py-0.5 rounded-full ${
-                                  student.paymentStatus === "Paid"
-                                    ? "bg-green-100 text-green-700"
-                                    : student.paymentStatus === "Partial"
-                                      ? "bg-yellow-100 text-yellow-700"
-                                      : "bg-red-100 text-red-700"
+                                className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                                  Number(s.dueAmount) > 0
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-green-100 text-green-700"
                                 }`}
                               >
-                                {student.paymentStatus || "Unpaid"}
+                                {s.dueAmount || 0}
                               </span>
                             </td>
-                            <td className="px-3 py-2 text-xs text-gray-600">
-                              {student.admissionDate
-                                ? new Date(
-                                    student.admissionDate,
-                                  ).toLocaleDateString()
-                                : "N/A"}
+                            <td className="px-2 py-2 text-xs">
+                              {s.transactionId || "---"}
                             </td>
-                            <td className="px-3 py-2">
+                            <td className="px-2 py-2">
                               <span
-                                className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(student.status)}`}
+                                className={`text-[10px] px-1.5 py-0.5 rounded-full ${getStatusColor(s.status)}`}
                               >
-                                {student.status || "Pending"}
+                                {s.status || "Pending"}
                               </span>
                             </td>
-                            <td className="px-3 py-2">
+                            <td className="px-2 py-2">
                               <div className="flex items-center gap-1">
-                                {/* View Button */}
                                 <button
-                                  onClick={() => handleView(student)}
+                                  onClick={() => handleView(s)}
                                   className="text-blue-600 hover:text-blue-800 p-0.5"
                                   title="View"
                                 >
                                   <FaEye size={12} />
                                 </button>
-
-                                {/* Approve Button - শুধু Pending Student এর জন্য */}
-                                {student.status === "Pending" && (
+                                {s.status === "Pending" && (
                                   <button
                                     onClick={() => {
                                       setSelectedStudent({
-                                        ...student,
+                                        ...s,
                                         username: "",
                                         password: "student123S@",
                                       });
@@ -1413,12 +1008,8 @@ const Add_student = () => {
                                     <FaCheckCircle size={12} />
                                   </button>
                                 )}
-
-                                {/* Delete Button */}
                                 <button
-                                  onClick={() =>
-                                    handleDelete(student._id, student.name)
-                                  }
+                                  onClick={() => handleDelete(s._id, s.name)}
                                   className="text-red-600 hover:text-red-800 p-0.5"
                                   title="Delete"
                                 >
@@ -1431,7 +1022,7 @@ const Add_student = () => {
                       ) : (
                         <tr>
                           <td
-                            colSpan="9"
+                            colSpan="12"
                             className="px-4 py-8 text-center text-gray-500 text-sm"
                           >
                             {error || "No students found"}
@@ -1444,17 +1035,17 @@ const Add_student = () => {
               </div>
             </div>
           ) : (
-            // Add Student Form
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 overflow-y-auto h-[calc(100vh-240px)]">
+            // ============ ADD FORM ============
+            <div className="bg-white border rounded-xl shadow-sm p-4 overflow-y-auto h-[calc(100vh-240px)]">
               <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
                 <FaUserPlus className="text-blue-600" /> New Student
                 Registration
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Photo Upload */}
+                {/* Photo */}
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                  <div className="w-20 h-20 rounded-full bg-gray-100 border-2 border-dashed flex items-center justify-center overflow-hidden">
                     {formData.photo ? (
                       <img
                         src={URL.createObjectURL(formData.photo)}
@@ -1466,14 +1057,14 @@ const Add_student = () => {
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium mb-1">
                       Student Photo
                     </label>
                     <input
                       type="file"
                       accept="image/*"
                       onChange={handleFileChange}
-                      className="text-xs border border-gray-300 rounded-lg px-3 py-1.5"
+                      className="text-xs border rounded-lg px-3 py-1.5"
                     />
                     <p className="text-[10px] text-gray-400 mt-0.5">
                       JPG, PNG (Max 2MB)
@@ -1481,14 +1072,27 @@ const Add_student = () => {
                   </div>
                 </div>
 
-                {/* Personal Information */}
+                {/* Personal Info */}
                 <div className="bg-blue-50 p-3 rounded-lg">
                   <h3 className="text-sm font-bold text-blue-700 mb-2">
                     👤 Personal Information
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
+                        Student ID
+                      </label>
+                      <input
+                        type="text"
+                        name="studentId"
+                        value={formData.studentId}
+                        onChange={handleInputChange}
+                        placeholder="TET26FB6001"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
                         Full Name *
                       </label>
                       <input
@@ -1497,27 +1101,13 @@ const Add_student = () => {
                         required
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter student name"
+                        placeholder="Enter name"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email *
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        required
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter email address"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number *
+                      <label className="block text-sm font-medium mb-1">
+                        Phone *
                       </label>
                       <input
                         type="tel"
@@ -1525,98 +1115,107 @@ const Add_student = () => {
                         required
                         value={formData.phone}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
                         placeholder="017XXXXXXXX"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Date of Birth / NID
+                      <label className="block text-sm font-medium mb-1">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="email@example.com"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Country
                       </label>
                       <input
                         type="text"
-                        name="dobOrNid"
-                        value={formData.dobOrNid}
+                        name="country"
+                        value={formData.country}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="DD-MM-YYYY or NID Number"
+                        placeholder="BD / France / Qatar"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
+                        Batch
+                      </label>
+                      <select
+                        name="batch"
+                        value={formData.batch}
+                        onChange={handleInputChange}
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      >
+                        <option value="">Select Batch</option>
+                        {batchList.map((b) => (
+                          <option key={b} value={b}>
+                            {b}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
                         Gender
                       </label>
                       <select
                         name="gender"
                         value={formData.gender}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       >
                         {genderList.map((g) => (
-                          <option key={g} value={g}>
-                            {g}
-                          </option>
+                          <option key={g}>{g}</option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Blood Group
                       </label>
                       <select
                         name="bloodGroup"
                         value={formData.bloodGroup}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       >
-                        {bloodGroupList.map((bg) => (
-                          <option key={bg} value={bg}>
-                            {bg}
-                          </option>
+                        {bloodGroupList.map((b) => (
+                          <option key={b}>{b}</option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Nationality
+                      <label className="block text-sm font-medium mb-1">
+                        DOB / NID
                       </label>
                       <input
                         type="text"
-                        name="nationality"
-                        value={formData.nationality}
+                        name="dobOrNid"
+                        value={formData.dobOrNid}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Nationality"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Religion
-                      </label>
-                      <select
-                        name="religion"
-                        value={formData.religion}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                      >
-                        {religionList.map((r) => (
-                          <option key={r} value={r}>
-                            {r}
-                          </option>
-                        ))}
-                      </select>
                     </div>
                   </div>
                 </div>
 
-                {/* Academic Information */}
+                {/* Academic */}
                 <div className="bg-green-50 p-3 rounded-lg">
                   <h3 className="text-sm font-bold text-green-700 mb-2">
-                    📚 Academic Information
+                    📚 Academic
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Course *
                       </label>
                       <select
@@ -1624,58 +1223,41 @@ const Add_student = () => {
                         required
                         value={formData.course}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       >
                         <option value="">Select Course</option>
-                        {coursesList.map((cls) => (
-                          <option key={cls} value={cls}>
-                            {cls}
-                          </option>
+                        {coursesList.map((c) => (
+                          <option key={c}>{c}</option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Subject
                       </label>
                       <select
                         name="subject"
                         value={formData.subject}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       >
                         <option value="">Select Subject</option>
-                        {subjectList.map((sub) => (
-                          <option key={sub} value={sub}>
-                            {sub}
-                          </option>
+                        {subjectList.map((s) => (
+                          <option key={s}>{s}</option>
                         ))}
                       </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Previous School
-                      </label>
-                      <input
-                        type="text"
-                        name="previousSchool"
-                        value={formData.previousSchool}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Previous school name"
-                      />
                     </div>
                   </div>
                 </div>
 
-                {/* Guardian Information */}
+                {/* Guardian */}
                 <div className="bg-purple-50 p-3 rounded-lg">
                   <h3 className="text-sm font-bold text-purple-700 mb-2">
-                    👨‍👩‍👦 Guardian Information
+                    👨‍👩‍👦 Guardian
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Father's Name
                       </label>
                       <input
@@ -1683,12 +1265,11 @@ const Add_student = () => {
                         name="fatherName"
                         value={formData.fatherName}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Father's name"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Mother's Name
                       </label>
                       <input
@@ -1696,47 +1277,44 @@ const Add_student = () => {
                         name="motherName"
                         value={formData.motherName}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Mother's name"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Guardian's Name
+                      <label className="block text-sm font-medium mb-1">
+                        Guardian Name
                       </label>
                       <input
                         type="text"
                         name="guardianName"
                         value={formData.guardianName}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Guardian's name"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Guardian's Phone
+                      <label className="block text-sm font-medium mb-1">
+                        Guardian Phone
                       </label>
                       <input
                         type="text"
                         name="guardianPhone"
                         value={formData.guardianPhone}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Guardian's phone number"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Address Information */}
+                {/* Address */}
                 <div className="bg-yellow-50 p-3 rounded-lg">
                   <h3 className="text-sm font-bold text-yellow-700 mb-2">
-                    📍 Address Information
+                    📍 Address
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Present Address
                       </label>
                       <input
@@ -1744,12 +1322,11 @@ const Add_student = () => {
                         name="presentAddress"
                         value={formData.presentAddress}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Present address"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Permanent Address
                       </label>
                       <input
@@ -1757,21 +1334,209 @@ const Add_student = () => {
                         name="permanentAddress"
                         value={formData.permanentAddress}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Permanent address"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Login & Status Information */}
+                {/* ================= PAYMENT & BATCH ================= */}
+                <div className="bg-teal-50 p-3 rounded-lg">
+                  <h3 className="text-sm font-bold text-teal-700 mb-2">
+                    💰 Payment & Batch Information
+                  </h3>
+
+                  {/* Row 1: Scholarship, Course Fee, Paid, Due */}
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Scholarship Amount
+                      </label>
+                      <input
+                        type="number"
+                        name="scholarshipAmount"
+                        value={formData.scholarshipAmount}
+                        onChange={handleInputChange}
+                        placeholder="0"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Course Fee
+                      </label>
+                      <input
+                        type="number"
+                        name="courseFee"
+                        value={formData.courseFee}
+                        onChange={handleInputChange}
+                        placeholder="5000"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Paid Amount
+                      </label>
+                      <input
+                        type="number"
+                        name="paidAmount"
+                        value={formData.paidAmount}
+                        onChange={handleInputChange}
+                        placeholder="5000"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Due Amount
+                      </label>
+                      <input
+                        type="number"
+                        name="dueAmount"
+                        value={formData.dueAmount}
+                        onChange={handleInputChange}
+                        placeholder="Auto (leave blank)"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 2: Transaction ID + July-August */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Transaction ID (Admission)
+                      </label>
+                      <input
+                        type="text"
+                        name="transactionId"
+                        value={formData.transactionId}
+                        onChange={handleInputChange}
+                        placeholder="DGD9CFHU69"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        July-August (Admission)
+                      </label>
+                      <input
+                        type="number"
+                        name="julyAugust"
+                        value={formData.julyAugust}
+                        onChange={handleInputChange}
+                        placeholder="5000"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Monthly Payments */}
+                  {[
+                    { key: "sept", label: "September" },
+                    { key: "oct", label: "October" },
+                    { key: "nov", label: "November" },
+                    { key: "dec", label: "December" },
+                  ].map((m) => {
+                    const capKey =
+                      m.key.charAt(0).toUpperCase() + m.key.slice(1);
+                    const amountKey = m.key === "sept" ? "september" : m.key;
+                    return (
+                      <div
+                        key={m.key}
+                        className="bg-white p-3 rounded-lg border border-teal-200 mb-3"
+                      >
+                        <h4 className="text-xs font-bold text-teal-700 mb-2">
+                          📅 {m.label} Payment
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium mb-1">
+                              Amount
+                            </label>
+                            <input
+                              type="number"
+                              name={amountKey}
+                              value={formData[amountKey]}
+                              onChange={handleInputChange}
+                              placeholder="0"
+                              className="w-full border rounded-lg px-3 py-1.5 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium mb-1">
+                              Payment Method
+                            </label>
+                            <select
+                              name={`paymentMethod${capKey}`}
+                              value={formData[`paymentMethod${capKey}`]}
+                              onChange={handleInputChange}
+                              className="w-full border rounded-lg px-3 py-1.5 text-sm"
+                            >
+                              <option value="">Select</option>
+                              <option value="Bank">Bank</option>
+                              <option value="bKash">bKash</option>
+                              <option value="Nagad">Nagad</option>
+                              <option value="Rocket">Rocket</option>
+                              <option value="Cash">Cash</option>
+                              <option value="---">---</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium mb-1">
+                              Date
+                            </label>
+                            <input
+                              type="date"
+                              name={`paymentDate${capKey}`}
+                              value={formData[`paymentDate${capKey}`]}
+                              onChange={handleInputChange}
+                              className="w-full border rounded-lg px-3 py-1.5 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium mb-1">
+                              Transaction ID
+                            </label>
+                            <input
+                              type="text"
+                              name={`transactionId${capKey}`}
+                              value={formData[`transactionId${capKey}`]}
+                              onChange={handleInputChange}
+                              placeholder="TXN ID"
+                              className="w-full border rounded-lg px-3 py-1.5 text-sm"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Comments */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Comments
+                    </label>
+                    <input
+                      type="text"
+                      name="comments"
+                      value={formData.comments}
+                      onChange={handleInputChange}
+                      placeholder="All clear / Any note..."
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Login & Status */}
                 <div className="bg-red-50 p-3 rounded-lg">
                   <h3 className="text-sm font-bold text-red-700 mb-2">
                     🔐 Login & Status
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Password
                       </label>
                       <input
@@ -1779,12 +1544,12 @@ const Add_student = () => {
                         name="password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="6+ characters"
+                        placeholder="6+ chars (blank = default123)"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Confirm Password
                       </label>
                       <input
@@ -1792,46 +1557,42 @@ const Add_student = () => {
                         name="confirmPassword"
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Re-enter password"
+                        placeholder="Re-enter"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Status
                       </label>
                       <select
                         name="status"
                         value={formData.status}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       >
                         {statusList.map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
+                          <option key={s}>{s}</option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium mb-1">
                         Payment Status
                       </label>
                       <select
                         name="paymentStatus"
                         value={formData.paymentStatus}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       >
-                        {paymentStatusList.map((ps) => (
-                          <option key={ps} value={ps}>
-                            {ps}
-                          </option>
+                        {paymentStatusList.map((p) => (
+                          <option key={p}>{p}</option>
                         ))}
                       </select>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium mb-1">
                         Admission Date
                       </label>
                       <input
@@ -1839,24 +1600,24 @@ const Add_student = () => {
                         name="admissionDate"
                         value={formData.admissionDate}
                         onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500"
+                        className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Submit Buttons */}
-                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                {/* Buttons */}
+                <div className="flex gap-3 pt-4 border-t">
                   <button
                     type="submit"
-                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2"
                   >
                     <FaSave size={14} /> Register Student
                   </button>
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold flex items-center justify-center gap-2"
                   >
                     <FaUndo size={14} /> Cancel
                   </button>
@@ -1870,10 +1631,9 @@ const Add_student = () => {
       {/* Approve Modal */}
       {showApproveModal && selectedStudent && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <div className="flex justify-between items-center mb-4 border-b pb-3">
-              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <h3 className="text-lg font-bold flex items-center gap-2">
                 <FaCheckCircle className="text-green-600" /> Approve Student
               </h3>
               <button
@@ -1881,49 +1641,32 @@ const Add_student = () => {
                   setShowApproveModal(false);
                   setSelectedStudent(null);
                 }}
-                className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                className="text-gray-400 hover:text-gray-600 text-xl"
               >
                 ✕
               </button>
             </div>
 
-            {/* Student Information */}
-            <div className="bg-gray-50 p-4 rounded-lg mb-4 space-y-1">
+            <div className="bg-gray-50 p-4 rounded-lg mb-4 space-y-1 text-sm">
               <p>
                 <strong>Name:</strong> {selectedStudent.name}
               </p>
               <p>
-                <strong>Email:</strong> {selectedStudent.email || "N/A"}
-              </p>
-              <p>
-                <strong>Phone:</strong> {selectedStudent.phone || "N/A"}
+                <strong>Student ID:</strong>{" "}
+                {selectedStudent.studentId || "N/A"}
               </p>
               <p>
                 <strong>Course:</strong> {selectedStudent.course || "N/A"}
               </p>
               <p>
-                <strong>Guardian:</strong>{" "}
-                {selectedStudent.guardianName ||
-                  selectedStudent.fatherName ||
-                  "N/A"}
-              </p>
-              <p>
-                <strong>Status:</strong>{" "}
-                <span className="text-yellow-600 font-semibold">
-                  {selectedStudent.status || "Pending"}
-                </span>
+                <strong>Batch:</strong> {selectedStudent.batch || "N/A"}
               </p>
             </div>
 
-            {/* Username এবং Password */}
-            <div className="space-y-3 border-t pt-3">
-              <h4 className="text-sm font-bold text-gray-700">
-                🔑 Set Login Credentials
-              </h4>
-
+            <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Username <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium mb-1">
+                  Username *
                 </label>
                 <input
                   type="text"
@@ -1934,17 +1677,13 @@ const Add_student = () => {
                       username: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
                   placeholder="Enter username"
                 />
-                <p className="text-xs text-gray-400 mt-1">
-                  💡 Enter a unique username for student login
-                </p>
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password <span className="text-red-500">*</span>
+                <label className="block text-sm font-medium mb-1">
+                  Password *
                 </label>
                 <input
                   type="text"
@@ -1955,31 +1694,26 @@ const Add_student = () => {
                       password: e.target.value,
                     })
                   }
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Enter password"
+                  className="w-full px-3 py-2 border rounded-lg text-sm"
                 />
-                <p className="text-xs text-gray-400 mt-1">
-                  💡 Default password: <strong>student123S@</strong>
-                </p>
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end gap-2 mt-4 pt-3 border-t">
               <button
                 onClick={() => {
                   setShowApproveModal(false);
                   setSelectedStudent(null);
                 }}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg font-medium"
+                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
               >
                 Cancel
               </button>
               <button
                 onClick={handleApproveStudent}
-                className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2 font-medium"
+                className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
               >
-                <FaCheckCircle size={14} /> Approve & Activate
+                <FaCheckCircle size={14} /> Approve
               </button>
             </div>
           </div>

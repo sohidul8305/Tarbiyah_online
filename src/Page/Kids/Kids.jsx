@@ -7,6 +7,7 @@ import NuraniyaBannerIMG from "../../image/nuranibanner.jpg";
 import NazerakidsImg from "../../image/Thumb.jpg";
 import HifjulBannerImg from "../../image/hifjulbanner.png";
 import courseImg from "../../image/hifzthumbal.jpg";
+import HIfjthumbelImg from "../../image/Hifjcover.jpg";
 import {
   FaCheckCircle,
   FaClock,
@@ -76,7 +77,7 @@ const Kids = () => {
         en: "Regular practice to keep memorized Quran strong and accurate.",
         bn: "মুখস্থ কুরআনকে দৃঢ় ও নির্ভুল রাখার নিয়মিত অনুশীলন",
       },
-      image: KidsImg,
+      image: HIfjthumbelImg,
     },
     {
       id: "one-to-one",
