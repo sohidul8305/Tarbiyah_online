@@ -6,21 +6,20 @@ import { useLanguage } from "../../context/useLanguage";
 import diplomacover from "../../image/Course-Thumb.png";
 import Tarbiyahcourse from "../../image/Coursecover.png";
 import AlemiyahKids from "../../image/Alemiyahkids.png";
-import Najeraelders from "../../image/Thumb.jpg";
-import hifzquranImg from "../../image/banner (2).jpg";
-import NuraniyahcourseImg from "../../image/Quranforeldersbanner.jpg";
 
 // কুরআন পেইজের ইমেজসমূহ
 import Quidanuraniyah from "../../image/quidanuraniyahcover.png";
-import Qurannajeracover from "../../image/najeracover.jpg";
-import Adalthifzbanner from "../../image/adalthifzbanner.jpg";
+import Qurannajeracover from "../../image/najerabanner.jpg";
+import Adalthifzbanner from "../../image/Bakarah.png";
 import adaltsbannerImg from "../../image/Besic Tazweed.jpg";
+import hifzImg from "../../image/Hifjcover.jpg";
 
 // Kids কম্পোনেন্টের ইমেজসমূহ
-import KidsImg from "../../image/quranstudis.jpg";
-import NuraniyaBannerIMG from "../../image/nuranibanner.jpg";
+
+import NuraniyaBannerIMG from "../../image/quidanuraniyah.jpg";
 import NazerakidsImg from "../../image/Thumb.jpg";
 import courseImg from "../../image/hifzthumbal.jpg";
+import OnetoOneImg from "../../image/OnetoOnebanner.jpg";
 
 const Live_course = () => {
   // ভাষা কন্টেক্সট নিরাপদ ব্যবহার
@@ -89,7 +88,7 @@ const Live_course = () => {
       title: language === "bn" ? "হিফজ রিভিশন" : "Hifz Revision",
       slug: "/course/kids/hifz-revision",
       category: "Live Course",
-      image: KidsImg,
+      image: hifzImg,
       instructor: t("instructor"),
     },
     {
@@ -97,7 +96,7 @@ const Live_course = () => {
       title: language === "bn" ? "ওয়ান টু ওয়ান" : "One to One",
       slug: "/course/kids/one-to-one",
       category: "Live Course",
-      image: KidsImg,
+      image: OnetoOneImg,
       instructor: t("instructor"),
     },
     // কুরআন পেইজ থেকে যুক্ত ৪টি কোর্স (ওয়ান টু ওয়ান এর পরে)

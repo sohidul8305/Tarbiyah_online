@@ -6,10 +6,9 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
 
-import DiplomaBanner from "../../image/Course-Thumb.png";
+import DiplomaBanner from "../../image/diplomabanner.jpg";
 import Alemiyah from "../../image/alemiyahkidsbanner.png";
 import Najeraadealts from "../../image/najerabanner.jpg";
-import HifjulBanner from "../../image/hifjulbanner.png";
 import Quidanuraniyah from "../../image/quidanuraniyahbanner.png";
 
 const Banner = () => {
