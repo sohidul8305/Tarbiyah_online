@@ -8,8 +8,8 @@ import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 
-import TajwidbannerImg from "../../image/tajweedbanner - Copy.png";
-import TajwidcourseImg from "../../image/tajweedcourse.png";
+import TajwidbannerImg from "../../image/Besic Tazweed.jpg";
+import TajwidcourseImg from "../../image/Besic Tazweed.jpg";
 import {
   FaArrowLeft,
   FaStar,

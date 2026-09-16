@@ -35,7 +35,7 @@ import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_API_BASE_URL || "http://api.tarbiyahonline.com/api";
 
 const Data_enty = () => {
   const { user, logOut } = useAuth();

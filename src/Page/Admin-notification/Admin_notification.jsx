@@ -26,7 +26,7 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "http://api.tarbiyahonline.com/api";
 
 const Admin_notification = () => {
   const { user, logOut } = useAuth();

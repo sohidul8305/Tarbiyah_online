@@ -16,7 +16,7 @@ import JakariyahmasudImg from "../../image/jakariyah.png";
 import Aldullahalmamun from "../../image/Abdullahmanun.jpg";
 import abdullahkafi from "../../image/Abdullah Kafi.png";
 import AlminImg from "../../image/Alamin.png";
-import TorikImg from "../../image/Torikul Islam.jpg";
+import TorikImg from "../../image/torik.png";
 import Atiqullah from "../../image/atikullah.png";
 import Avator from "../../image/arartor.png";
 import Avatorboys from "../../image/Avatorboys.png";

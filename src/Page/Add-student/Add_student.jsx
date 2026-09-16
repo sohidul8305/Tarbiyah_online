@@ -29,7 +29,7 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = "http://api.tarbiyahonline.com";
 
 const Add_student = () => {
   const { user, logOut } = useAuth();

@@ -139,7 +139,7 @@ const Adminstudent_profile = () => {
 
       console.log("📡 Fetching students from /api/students/all");
 
-      const res = await fetch("http://localhost:5000/api/students/all");
+      const res = await fetch("http://api.tarbiyahonline.com/api/students/all");
       const data = await res.json();
 
       console.log("📥 Students response:", data);
@@ -742,7 +742,7 @@ const Adminstudent_profile = () => {
     if (result.isConfirmed) {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/students/delete/${id}`,
+          `http://api.tarbiyahonline.com/api/students/delete/${id}`,
           { method: "DELETE" },
         );
         const data = await res.json();

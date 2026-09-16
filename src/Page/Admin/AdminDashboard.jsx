@@ -295,6 +295,7 @@ const AdminDashboard = () => {
     {
       id: "notification",
       icon: <FaBell className="text-xl" />,
+      path: "/admin-notification",
       label: "Notification",
     },
     {
@@ -997,7 +998,7 @@ const StudentManagementContent = () => {
     const fetchCourses = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/courses/teacher/all",
+          "http://api.tarbiyahonline.com/api/courses/teacher/all",
         );
         const data = await response.json();
         if (data.success) {
@@ -1013,14 +1014,18 @@ const StudentManagementContent = () => {
   const fetchStudents = async () => {
     try {
       setLoading(true);
+
       setError(null);
 
-      const response = await fetch("http://localhost:5000/api/students/all", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "http://api.tarbiyahonline.com/api/students/all",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
-      });
+      );
 
       if (response.status === 404) {
         setError(
@@ -1069,7 +1074,7 @@ const StudentManagementContent = () => {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/students/approve/${selectedStudent._id}`,
+        `http://api.tarbiyahonline.com/api/students/approve/${selectedStudent._id}`,
         {
           method: "PUT",
           headers: {
@@ -1155,7 +1160,7 @@ const StudentManagementContent = () => {
     if (result.isConfirmed) {
       try {
         const response = await fetch(
-          `http://localhost:5000/api/students/delete/${id}`,
+          `http://api.tarbiyahonline.com/api/students/delete/${id}`,
           {
             method: "DELETE",
             headers: {

@@ -57,11 +57,14 @@ const Student_support = () => {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/api/support/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        "http://api.tarbiyahonline.com/api/support/submit",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        },
+      );
       const data = await response.json();
       if (data.success) {
         alert(
@@ -106,7 +109,7 @@ const Student_support = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/support/status?type=${searchBy}&value=${searchValue.trim()}`,
+        `http://api.tarbiyahonline.com/api/support/status?type=${searchBy}&value=${searchValue.trim()}`,
       );
 
       let data;
@@ -163,7 +166,7 @@ const Student_support = () => {
     setIsSendingReply(true);
     try {
       const response = await fetch(
-        `http://localhost:5000/api/support/ticket/${selectedTicket.supportNo}/reply`,
+        `http://api.tarbiyahonline.com/api/support/ticket/${selectedTicket.supportNo}/reply`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

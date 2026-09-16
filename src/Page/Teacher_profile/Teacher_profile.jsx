@@ -44,7 +44,7 @@ import Swal from "sweetalert2";
 import { useAuth } from "../../Provider/AuthProvider";
 import axios from "axios";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "http://api.tarbiyahonline.com";
 
 const TeacherProfile = () => {
   const { user, logOut } = useAuth();

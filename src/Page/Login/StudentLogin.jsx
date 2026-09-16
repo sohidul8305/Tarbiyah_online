@@ -19,16 +19,19 @@ const StudentLogin = () => {
     try {
       console.log("📤 Login Request:", { username, password });
 
-      const response = await fetch("http://localhost:5000/api/students/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const response = await fetch(
+        "http://api.tarbiyahonline.com/api/students/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: username.trim(),
+            password: password.trim(),
+          }),
         },
-        body: JSON.stringify({
-          username: username.trim(),
-          password: password.trim(),
-        }),
-      });
+      );
 
       console.log("📥 Response Status:", response.status);
 

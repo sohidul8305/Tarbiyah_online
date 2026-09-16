@@ -160,7 +160,7 @@ const Campus_dashboard = () => {
           return;
         }
 
-        const apiUrl = `http://localhost:5000/api/students/my-courses/${studentId}`;
+        const apiUrl = `http://api.tarbiyahonline.com/api/students/my-courses/${studentId}`;
         console.log("📡 Fetching:", apiUrl);
 
         const response = await fetch(apiUrl);

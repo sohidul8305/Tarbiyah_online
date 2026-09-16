@@ -14,7 +14,7 @@ import NuraniyahcourseImg from "../../image/Quranforeldersbanner.jpg";
 import Quidanuraniyah from "../../image/quidanuraniyahcover.png";
 import Qurannajeracover from "../../image/najeracover.jpg";
 import Adalthifzbanner from "../../image/adalthifzbanner.jpg";
-import adaltsbannerImg from "../../image/tajweedbanner - Copy.png";
+import adaltsbannerImg from "../../image/Besic Tazweed.jpg";
 
 // Kids কম্পোনেন্টের ইমেজসমূহ
 import KidsImg from "../../image/quranstudis.jpg";
