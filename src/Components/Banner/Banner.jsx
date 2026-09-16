@@ -29,7 +29,7 @@ const Banner = () => {
         }
       `}</style>
 
-      {/* বাম-ডানে বড় করার জন্য উইডথ বাড়িয়ে দেওয়া হয়েছে */}
+      {/* বাম-ডানে বড় করার জন্য উইডথ বাড়িয়ে দেওয়া হয়েছে */}
       <div className="w-full max-w-[100%] xl:max-w-[100%] mx-auto rounded-xl overflow-hidden shadow-lg">
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
@@ -40,13 +40,14 @@ const Banner = () => {
           autoplay={{ delay: 3000, disableOnInteraction: false }}
           className="h-[250px] sm:h-[350px] md:h-[450px] lg:h-[500px] w-full bg-black"
         >
-          {/* স্লাইড ১ (DiplomaBanner - object-fill দিয়ে পুরো ফ্রেমে ফিট করা হয়েছে) */}
+          {/* স্লাইড ১ (DiplomaBanner - object-position দিয়ে নিচে শিফট করা হয়েছে) */}
           <SwiperSlide>
             <div className="w-full h-full overflow-hidden bg-black flex items-center justify-center">
               <img
                 src={DiplomaBanner}
                 alt="Diploma Banner"
-                className="w-full h-full object-fill auto-zoom-img"
+                className="w-full h-full object-cover auto-zoom-img"
+                style={{ objectPosition: "center 30%" }}
               />
             </div>
           </SwiperSlide>
