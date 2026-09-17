@@ -998,7 +998,7 @@ const StudentManagementContent = () => {
     const fetchCourses = async () => {
       try {
         const response = await fetch(
-          "http://api.tarbiyahonline.com/api/courses/teacher/all",
+          "https://api.tarbiyahonline.com/api/courses/teacher/all",
         );
         const data = await response.json();
         if (data.success) {
@@ -1018,7 +1018,7 @@ const StudentManagementContent = () => {
       setError(null);
 
       const response = await fetch(
-        "http://api.tarbiyahonline.com/api/students/all",
+        "https://api.tarbiyahonline.com/api/students/all",
         {
           method: "GET",
           headers: {
@@ -1074,7 +1074,7 @@ const StudentManagementContent = () => {
       }
 
       const response = await fetch(
-        `http://api.tarbiyahonline.com/api/students/approve/${selectedStudent._id}`,
+        `https://api.tarbiyahonline.com/api/students/approve/${selectedStudent._id}`,
         {
           method: "PUT",
           headers: {
@@ -1160,7 +1160,7 @@ const StudentManagementContent = () => {
     if (result.isConfirmed) {
       try {
         const response = await fetch(
-          `http://api.tarbiyahonline.com/api/students/delete/${id}`,
+          `https://api.tarbiyahonline.com/api/students/delete/${id}`,
           {
             method: "DELETE",
             headers: {

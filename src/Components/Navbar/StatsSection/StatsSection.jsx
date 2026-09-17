@@ -22,7 +22,7 @@ const StatsSection = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://api.tarbiyahonline.com/api/stats")
+    fetch("https://api.tarbiyahonline.com/api/stats")
       .then((res) => res.json())
       .then((data) => {
         // ব্যাকএন্ড থেকে আসা ডেটাকে অ্যারে ফরম্যাটে রূপান্তর করা

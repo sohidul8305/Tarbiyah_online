@@ -58,7 +58,7 @@ const Student_support = () => {
 
     try {
       const response = await fetch(
-        "http://api.tarbiyahonline.com/api/support/submit",
+        "https://api.tarbiyahonline.com/api/support/submit",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -109,7 +109,7 @@ const Student_support = () => {
 
     try {
       const response = await fetch(
-        `http://api.tarbiyahonline.com/api/support/status?type=${searchBy}&value=${searchValue.trim()}`,
+        `https://api.tarbiyahonline.com/api/support/status?type=${searchBy}&value=${searchValue.trim()}`,
       );
 
       let data;
@@ -166,7 +166,7 @@ const Student_support = () => {
     setIsSendingReply(true);
     try {
       const response = await fetch(
-        `http://api.tarbiyahonline.com/api/support/ticket/${selectedTicket.supportNo}/reply`,
+        `https://api.tarbiyahonline.com/api/support/ticket/${selectedTicket.supportNo}/reply`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

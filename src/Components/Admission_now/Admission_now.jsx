@@ -409,7 +409,7 @@ const Admission_now = () => {
       console.log("📤 ===========================");
 
       const response = await fetch(
-        "http://api.tarbiyahonline.com/api/students/register/student",
+        "https://api.tarbiyahonline.com/api/students/register/student",
         {
           method: "POST",
           headers: {

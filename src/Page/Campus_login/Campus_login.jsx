@@ -23,7 +23,7 @@ const Campus_login = () => {
 
     try {
       const response = await fetch(
-        "http://api.tarbiyahonline.com/api/students/login",
+        "https://api.tarbiyahonline.com/api/students/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

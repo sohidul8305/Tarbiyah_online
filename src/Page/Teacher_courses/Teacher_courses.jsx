@@ -31,7 +31,7 @@ import { FiMenu, FiX } from "react-icons/fi";
 import Swal from "sweetalert2";
 import { useAuth } from "../../Provider/AuthProvider";
 
-const API_URL = "http://api.tarbiyahonline.com/api";
+const API_URL = "https://api.tarbiyahonline.com/api";
 
 const TeacherCourses = () => {
   const { user, logOut } = useAuth();
@@ -366,7 +366,7 @@ const TeacherCourses = () => {
       console.log("📤 Sending course data:", courseData);
 
       const response = await fetch(
-        "http://api.tarbiyahonline.com/api/courses/create",
+        "https://api.tarbiyahonline.com/api/courses/create",
         {
           method: "POST",
           headers: {

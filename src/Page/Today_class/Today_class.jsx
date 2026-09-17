@@ -32,7 +32,7 @@ import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 // ✅ API Base URL
-const API_BASE = "http://api.tarbiyahonline.com/api";
+const API_BASE = "https://api.tarbiyahonline.com/api";
 
 const Today_class = () => {
   const { user, logOut } = useAuth();

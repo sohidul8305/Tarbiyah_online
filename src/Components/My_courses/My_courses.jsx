@@ -90,7 +90,7 @@ const My_courses = () => {
           return;
         }
 
-        const apiUrl = `http://api.tarbiyahonline.com/api/students/my-courses/${studentId}`;
+        const apiUrl = `https://api.tarbiyahonline.com/api/students/my-courses/${studentId}`;
         console.log("📡 [MyCourses] Fetching:", apiUrl);
 
         const response = await fetch(apiUrl);

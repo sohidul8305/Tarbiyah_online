@@ -28,7 +28,7 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-const API_BASE = "http://api.tarbiyahonline.com/api";
+const API_BASE = "https://api.tarbiyahonline.com/api";
 
 const BasicTazweed = () => {
   const { user, logOut } = useAuth();

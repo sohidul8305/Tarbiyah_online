@@ -95,7 +95,9 @@ const Student_admission = () => {
       setFetchError(null);
 
       console.log("📡 Fetching students...");
-      const res = await fetch("http://api.tarbiyahonline.com/api/students/all");
+      const res = await fetch(
+        "https://api.tarbiyahonline.com/api/students/all",
+      );
       const data = await res.json();
       console.log("📥 Response:", data);
 
@@ -523,7 +525,7 @@ const Student_admission = () => {
       const roll = "R" + Date.now().toString().slice(-4);
 
       const res = await fetch(
-        `http://api.tarbiyahonline.com/api/students/approve/${request.id}`,
+        `https://api.tarbiyahonline.com/api/students/approve/${request.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -617,7 +619,7 @@ const Student_admission = () => {
     try {
       // Update status to rejected using DELETE (removes from DB)
       const res = await fetch(
-        `http://api.tarbiyahonline.com/api/students/delete/${selectedRequest.id}`,
+        `https://api.tarbiyahonline.com/api/students/delete/${selectedRequest.id}`,
         { method: "DELETE" },
       );
       const data = await res.json();
@@ -704,7 +706,7 @@ const Student_admission = () => {
         const roll = "R" + Date.now().toString().slice(-4) + successCount;
 
         const res = await fetch(
-          `http://api.tarbiyahonline.com/api/students/approve/${req.id}`,
+          `https://api.tarbiyahonline.com/api/students/approve/${req.id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
