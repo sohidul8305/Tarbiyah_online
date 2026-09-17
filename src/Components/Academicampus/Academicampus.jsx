@@ -96,7 +96,7 @@ const Academicampus = () => {
               <div>
                 <h4 className="font-semibold text-gray-900">
                   {t({
-                    en: "Regular Study Circles",
+                    en: "",
                     bn: "নিয়মিত তালিম ও স্টাডি সার্কেল",
                   })}
                 </h4>
