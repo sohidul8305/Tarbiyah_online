@@ -7,6 +7,21 @@ import { useAuth } from "../../Provider/AuthProvider";
 import { findAdminByCredentials } from "../../Config/adminUsers";
 import Swal from "sweetalert2";
 
+// ✅ Helper: আগের save করা profile load করে merge করা
+const getSavedProfile = (email) => {
+  try {
+    const saved = localStorage.getItem("adminInfo");
+    if (!saved) return null;
+    const parsed = JSON.parse(saved);
+    // same admin হলে আগের edited data ফেরত দাও
+    if (parsed?.email === email) return parsed;
+    return null;
+  } catch (err) {
+    console.error("⚠️ Failed to parse saved adminInfo:", err);
+    return null;
+  }
+};
+
 const AdminLogin = () => {
   const auth = useAuth() || {};
   const signInUser =
@@ -39,21 +54,34 @@ const AdminLogin = () => {
           predefinedAdmin.profile.email,
         );
 
-        localStorage.setItem(
-          "adminInfo",
-          JSON.stringify(predefinedAdmin.profile),
+        // ✅ আগের save করা profile চেক — থাকলে সেটাই রাখো
+        const savedProfile = getSavedProfile(predefinedAdmin.profile.email);
+
+        const finalProfile = savedProfile
+          ? {
+              ...predefinedAdmin.profile, // predefined critical fields
+              ...savedProfile, // ✅ user-edited fields override
+            }
+          : predefinedAdmin.profile;
+
+        console.log(
+          savedProfile
+            ? "♻️ Existing profile restored for predefined admin"
+            : "🆕 New predefined admin — default profile set",
         );
+
+        localStorage.setItem("adminInfo", JSON.stringify(finalProfile));
         localStorage.setItem(
           "adminStats",
           JSON.stringify(predefinedAdmin.stats || {}),
         );
         localStorage.setItem("isAdminLoggedIn", "true");
-        localStorage.setItem("adminEmail", predefinedAdmin.profile.email);
+        localStorage.setItem("adminEmail", finalProfile.email);
 
         await Swal.fire({
           icon: "success",
-          title: `Welcome, ${predefinedAdmin.profile.name}! 🎉`,
-          html: `<p style="color:#004d4d; font-weight:600;">${predefinedAdmin.profile.department} Department</p>`,
+          title: `Welcome, ${finalProfile.name}! 🎉`,
+          html: `<p style="color:#004d4d; font-weight:600;">${finalProfile.department} Department</p>`,
           timer: 1600,
           showConfirmButton: false,
         });
@@ -68,9 +96,12 @@ const AdminLogin = () => {
 
       console.log("✅ Firebase Admin Login:", user?.email);
 
+      // ✅ আগের save করা profile চেক — থাকলে সেটাই ব্যবহার করো
+      const savedProfile = getSavedProfile(user?.email);
+
       const defaultAdminInfo = {
         name: user?.displayName || "Admin",
-        email: user?.email || " elders@tarabiyah.com",
+        email: user?.email || "elders@tarabiyah.com", // 👈 leading space fixed
         phone: "+880 1700 123456",
         designation: "Administrator",
         department: "Administration",
@@ -81,15 +112,31 @@ const AdminLogin = () => {
         profileImage: "",
       };
 
-      localStorage.setItem("adminInfo", JSON.stringify(defaultAdminInfo));
+      const finalProfile = savedProfile
+        ? {
+            ...defaultAdminInfo,
+            ...savedProfile, // ✅ user-edited fields override
+            // নিশ্চিত করো email & name ঠিক আছে
+            name: savedProfile.name || user?.displayName || "Admin",
+            email: user?.email || savedProfile.email,
+          }
+        : defaultAdminInfo;
+
+      console.log(
+        savedProfile
+          ? "♻️ Existing Firebase admin profile restored"
+          : "🆕 New Firebase admin — default profile set",
+      );
+
+      localStorage.setItem("adminInfo", JSON.stringify(finalProfile));
       localStorage.removeItem("adminStats");
       localStorage.setItem("isAdminLoggedIn", "true");
-      localStorage.setItem("adminEmail", defaultAdminInfo.email);
+      localStorage.setItem("adminEmail", finalProfile.email);
 
       await Swal.fire({
         icon: "success",
         title: "Login Successful! 🎉",
-        text: `Welcome ${defaultAdminInfo.name}!`,
+        text: `Welcome ${finalProfile.name}!`,
         timer: 1500,
         showConfirmButton: false,
       });
