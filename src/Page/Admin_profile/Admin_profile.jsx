@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
+import adminImg from "../../image/mahfuz.png";
 import {
   FaUser,
   FaEnvelope,
@@ -38,14 +39,14 @@ const IMAGEBB_API_KEY =
 // ✅ Image-এর জন্য আলাদা localStorage key
 const ADMIN_IMAGE_KEY = "adminProfileImage";
 
+// ✅ Default fallback image
+const DEFAULT_PROFILE_IMAGE = adminImg;
+
 // ✅ ImgBB Upload
 const uploadToImgBB = async (file) => {
   console.log("🚀 Starting ImgBB upload...");
 
-  if (!IMAGEBB_API_KEY) {
-    throw new Error("ImgBB API key missing!");
-  }
-
+  if (!IMAGEBB_API_KEY) throw new Error("ImgBB API key missing!");
   if (!file) throw new Error("No file provided");
 
   if (!file.type.startsWith("image/")) {
@@ -73,12 +74,8 @@ const uploadToImgBB = async (file) => {
     throw new Error(data.error?.message || "ImgBB upload failed");
   }
 
-  // ✅ সবসময় direct URL নিবো
   const imageUrl = data.data.url || data.data.display_url;
-
-  if (!imageUrl) {
-    throw new Error("ImgBB didn't return a valid URL");
-  }
+  if (!imageUrl) throw new Error("ImgBB didn't return a valid URL");
 
   console.log("✅ Image URL:", imageUrl);
   return imageUrl;
@@ -114,12 +111,10 @@ const Admin_profile = () => {
   // ✅ Load admin info — merge saved image from separate key
   // ============================================================
   useEffect(() => {
-    // ✅ ১. localStorage থেকে adminInfo
     const savedAdmin = localStorage.getItem("adminInfo");
-    // ✅ ২. localStorage থেকে saved image (separate key)
     const savedImage = localStorage.getItem(ADMIN_IMAGE_KEY) || "";
 
-    let admin;
+    let admin = null;
     if (savedAdmin) {
       try {
         admin = JSON.parse(savedAdmin);
@@ -151,20 +146,26 @@ const Admin_profile = () => {
     };
 
     console.log(
-      "📥 Loaded admin with image:",
-      merged.profileImage ? "✅" : "❌",
+      "📥 Loaded admin image:",
+      merged.profileImage ? "✅" : "❌ (using fallback)",
     );
 
     setAdminInfo(merged);
     setEditData(merged);
+    setImageLoadError(false); // ✅ reset on load
   }, [user]);
 
+  // ✅ Reset image error when URL changes (edit mode / upload)
+  const currentImageUrl = isEditing
+    ? editData.profileImage
+    : adminInfo.profileImage;
+
+  useEffect(() => {
+    setImageLoadError(false);
+  }, [currentImageUrl]);
+
   const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
   };
 
   const handleLogout = async () => {
@@ -172,7 +173,7 @@ const Admin_profile = () => {
       await logOut();
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminEmail");
-      // ✅ adminInfo এবং adminProfileImage remove করবেন না
+      // ✅ adminInfo & adminProfileImage preserve থাকবে
 
       await Swal.fire({
         icon: "success",
@@ -191,9 +192,7 @@ const Admin_profile = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const menuItems = [
     {
@@ -417,23 +416,20 @@ const Admin_profile = () => {
     },
   ];
 
-  // ✅ Save — image সহ সব data
+  // ✅ Save
   const handleEditToggle = () => {
     if (isEditing) {
-      // ✅ Save
       const dataToSave = { ...editData };
-
       setAdminInfo(dataToSave);
       localStorage.setItem("adminInfo", JSON.stringify(dataToSave));
 
-      // ✅ Image আলাদা key তেও save (login/refresh এ preserve হবে)
       if (dataToSave.profileImage) {
         localStorage.setItem(ADMIN_IMAGE_KEY, dataToSave.profileImage);
       } else {
         localStorage.removeItem(ADMIN_IMAGE_KEY);
       }
 
-      console.log("💾 Saved adminInfo with image:", dataToSave.profileImage);
+      console.log("💾 Saved image:", dataToSave.profileImage || "(none)");
 
       Swal.fire({
         icon: "success",
@@ -443,7 +439,6 @@ const Admin_profile = () => {
         showConfirmButton: false,
       });
     } else {
-      // ✅ Edit mode on
       setEditData({ ...adminInfo });
     }
     setIsEditing(!isEditing);
@@ -452,6 +447,7 @@ const Admin_profile = () => {
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditData({ ...adminInfo });
+    setImageLoadError(false);
   };
 
   const handleInputChange = (e) => {
@@ -460,23 +456,18 @@ const Admin_profile = () => {
   };
 
   const handleImageClick = () => {
-    if (isEditing && !isUploadingImage) {
-      fileInputRef.current?.click();
-    }
+    if (isEditing && !isUploadingImage) fileInputRef.current?.click();
   };
 
-  // ✅ ImgBB Upload Handler
   const handleImageChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    console.log("📷 File selected:", file.name);
 
     if (!file.type.startsWith("image/")) {
       Swal.fire({
         icon: "error",
         title: "Invalid File",
-        text: "Please select a valid image file (JPG, PNG, etc).",
+        text: "Please select a valid image file.",
       });
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
@@ -499,31 +490,21 @@ const Admin_profile = () => {
       title: "Uploading image...",
       text: "Please wait",
       allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
+      didOpen: () => Swal.showLoading(),
     });
 
     try {
       const imageUrl = await uploadToImgBB(file);
 
-      // ✅ ১. editData তে save
       setEditData((prev) => ({ ...prev, profileImage: imageUrl }));
-
-      // ✅ ২. সাথে সাথে adminInfo তেও save (instant preview)
       setAdminInfo((prev) => ({ ...prev, profileImage: imageUrl }));
-
-      // ✅ ৩. সাথে সাথে localStorage এর separate key তে save
-      // (login/refresh এ preserve হবে)
       localStorage.setItem(ADMIN_IMAGE_KEY, imageUrl);
-
-      console.log("✅ Image saved to localStorage + state");
 
       Swal.fire({
         icon: "success",
         title: "Image Uploaded!",
         html: `
-          <p>Click <strong>Save</strong> to update other fields (optional).</p>
+          <p>Click <strong>Save</strong> to apply other changes (optional).</p>
           <img src="${imageUrl}" style="max-width: 150px; max-height: 150px; border-radius: 8px; margin-top: 10px; border: 2px solid #004d4d;" />
         `,
         confirmButtonColor: "#004d4d",
@@ -534,12 +515,7 @@ const Admin_profile = () => {
       Swal.fire({
         icon: "error",
         title: "Upload Failed",
-        html: `
-          <p><strong>Error:</strong> ${error.message}</p>
-          <p style="font-size: 12px; color: #666; margin-top: 8px;">
-            Check ImgBB API key, internet connection, and file size.
-          </p>
-        `,
+        html: `<p><strong>Error:</strong> ${error.message}</p>`,
         confirmButtonColor: "#004d4d",
       });
     } finally {
@@ -553,6 +529,7 @@ const Admin_profile = () => {
     setAdminInfo((prev) => ({ ...prev, profileImage: "" }));
     localStorage.removeItem(ADMIN_IMAGE_KEY);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    setImageLoadError(false);
 
     Swal.fire({
       icon: "success",
@@ -562,11 +539,6 @@ const Admin_profile = () => {
       showConfirmButton: false,
     });
   };
-
-  // ✅ Image source থেকে যেই URL pick করি
-  const currentImageUrl = isEditing
-    ? editData.profileImage
-    : adminInfo.profileImage;
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -590,9 +562,7 @@ const Admin_profile = () => {
             bg-white border-r border-gray-200 
             shadow-lg md:shadow-sm
             transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -605,11 +575,14 @@ const Admin_profile = () => {
                     alt="admin"
                     className="w-full h-full object-cover"
                     onError={() => setImageLoadError(true)}
+                    onLoad={() => setImageLoadError(false)}
                   />
                 ) : (
-                  <span className="text-xl font-bold">
-                    {adminInfo.name?.charAt(0) || "A"}
-                  </span>
+                  <img
+                    src={DEFAULT_PROFILE_IMAGE}
+                    alt="default admin"
+                    className="w-full h-full object-cover"
+                  />
                 )}
               </div>
               <div className="flex-1 min-w-0">
@@ -643,9 +616,7 @@ const Admin_profile = () => {
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${
-                          activeSubMenu === item.id ? "rotate-180" : ""
-                        }`}
+                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
                       >
                         <FaArrowRight size={12} />
                       </span>
@@ -764,7 +735,7 @@ const Admin_profile = () => {
 
               <div className="px-4 pb-4 relative flex flex-col md:flex-row items-center md:items-end gap-4 -mt-10 md:-mt-8">
                 <div className="relative">
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-white p-1 shadow-lg border-4 border-white flex items-center justify-center text-3xl bg-teal-50 overflow-hidden">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-white p-1 shadow-lg border-4 border-white flex items-center justify-center overflow-hidden">
                     {currentImageUrl && !imageLoadError ? (
                       <img
                         key={currentImageUrl}
@@ -772,18 +743,17 @@ const Admin_profile = () => {
                         alt="profile"
                         className="w-full h-full object-cover rounded-lg"
                         onError={() => {
-                          console.error(
-                            "❌ Image failed to load:",
-                            currentImageUrl,
-                          );
+                          console.error("❌ Image failed:", currentImageUrl);
                           setImageLoadError(true);
                         }}
                         onLoad={() => setImageLoadError(false)}
                       />
                     ) : (
-                      <span className="text-teal-700 font-bold">
-                        {adminInfo.name?.charAt(0) || "A"}
-                      </span>
+                      <img
+                        src={DEFAULT_PROFILE_IMAGE}
+                        alt="default profile"
+                        className="w-full h-full object-cover rounded-lg"
+                      />
                     )}
                   </div>
 
@@ -995,10 +965,10 @@ const Admin_profile = () => {
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
                     {[
-                      { label: "Edit Profile", icon: "✏️", color: "blue" },
-                      { label: "Change Password", icon: "🔒", color: "red" },
-                      { label: "Settings", icon: "⚙️", color: "gray" },
-                      { label: "Support", icon: "💬", color: "green" },
+                      { label: "Edit Profile", icon: "✏️" },
+                      { label: "Change Password", icon: "🔒" },
+                      { label: "Settings", icon: "⚙️" },
+                      { label: "Support", icon: "💬" },
                     ].map((item, index) => (
                       <button
                         key={index}
@@ -1025,16 +995,20 @@ const Admin_profile = () => {
                   </div>
                 </div>
 
-                {/* ✅ Debug Info — Development এর জন্য */}
+                {/* Debug Info */}
                 <div className="bg-yellow-50 rounded-xl border border-yellow-200 p-3">
                   <h3 className="text-xs font-bold text-yellow-800 mb-1">
                     🔧 Debug Info
                   </h3>
                   <p className="text-[10px] text-yellow-700 break-all">
-                    <strong>Image URL:</strong> {currentImageUrl || "(empty)"}
+                    <strong>Image URL:</strong>{" "}
+                    {currentImageUrl || "(using default)"}
                   </p>
                   <p className="text-[10px] text-yellow-700 mt-1">
                     <strong>Storage Key:</strong> {ADMIN_IMAGE_KEY}
+                  </p>
+                  <p className="text-[10px] text-yellow-700 mt-1">
+                    <strong>Load Error:</strong> {imageLoadError ? "Yes" : "No"}
                   </p>
                 </div>
               </div>
