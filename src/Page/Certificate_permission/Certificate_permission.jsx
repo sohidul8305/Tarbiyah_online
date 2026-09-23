@@ -1,6 +1,6 @@
 // src/Page/Admin/Certificate_permission.jsx
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -186,9 +186,10 @@ const ELDERS_DEFAULT_REQUESTS = [
 const Certificate_permission = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("exam");
-  const [activeSubMenu, setActiveSubMenu] = useState("certificate-permission");
+  const [expandedMenu, setExpandedMenu] = useState("exam");
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -198,13 +199,11 @@ const Certificate_permission = () => {
     joinDate: "",
   });
 
-  // ✅ Elders students from API
   const [eldersStudents, setEldersStudents] = useState(
     ELDERS_STUDENTS_FALLBACK,
   );
   const [studentsLoading, setStudentsLoading] = useState(true);
 
-  // ✅ Certificate requests
   const [certificateRequests, setCertificateRequests] = useState(() => {
     const saved = localStorage.getItem("eldersCertificateRequests");
     if (saved) {
@@ -249,119 +248,9 @@ const Certificate_permission = () => {
   const certificateTypes = ["Completion", "Merit", "Honors", "Participation"];
   const grades = ["A+", "A", "A-", "B", "C", "D", "F"];
 
-  // Load admin info
-  useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminInfo");
-    if (savedAdmin) {
-      try {
-        setAdminInfo(JSON.parse(savedAdmin));
-      } catch (err) {
-        console.error(err);
-      }
-    } else {
-      setAdminInfo({
-        name: user?.displayName || "Admin",
-        email: user?.email || "admin@tarabiyah.com",
-        phone: "01700000000",
-        designation: "Administrator",
-        department: "Quran for Elders",
-        joinDate: "January 2024",
-      });
-    }
-  }, [user]);
-
   // ============================================================
-  // ✅ Fetch elders students from API
+  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
   // ============================================================
-  const fetchEldersStudents = async () => {
-    try {
-      setStudentsLoading(true);
-      let eldersList = [...ELDERS_STUDENTS_FALLBACK];
-
-      try {
-        const res = await fetch(`${API_BASE}/api/students/all`);
-        const text = await res.text();
-
-        if (!text.trim().startsWith("<")) {
-          const data = JSON.parse(text);
-          if (data.success && Array.isArray(data.students)) {
-            const all = data.students || [];
-            const elders = all.filter((s) => isEldersCourse(s.course));
-
-            console.log("📥 Total students:", all.length);
-            console.log("✅ Elders students:", elders.length);
-
-            elders.forEach((s) => {
-              const formatted = {
-                _id: s._id,
-                name: s.name || "",
-                studentId: s.studentId || s._id?.slice(-8) || "N/A",
-                course: s.course || "",
-                primaryCourse: getPrimaryCourse(s.course),
-                class: s.batch || s.class || "Elders Batch A",
-                batch: s.batch || "Batch-03",
-                phone: s.phone || "",
-                email: s.email || "",
-                status: s.status || "Pending",
-              };
-
-              const exists = eldersList.some(
-                (e) =>
-                  (e.name || "").toLowerCase() ===
-                  (formatted.name || "").toLowerCase(),
-              );
-              if (!exists) eldersList.push(formatted);
-            });
-          }
-        }
-      } catch (apiErr) {
-        console.warn("API fetch skipped:", apiErr.message);
-      }
-
-      console.log("✅ Final elders students:", eldersList.length);
-      setEldersStudents(eldersList);
-    } catch (err) {
-      console.error("❌ Fetch students error:", err);
-      setEldersStudents(ELDERS_STUDENTS_FALLBACK);
-    } finally {
-      setStudentsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEldersStudents();
-  }, []);
-
-  // Save requests to localStorage
-  useEffect(() => {
-    localStorage.setItem(
-      "eldersCertificateRequests",
-      JSON.stringify(certificateRequests),
-    );
-  }, [certificateRequests]);
-
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminInfo");
-      localStorage.removeItem("adminEmail");
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-      navigate("/admin-login");
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  const toggleSubMenu = (menu) =>
-    setActiveSubMenu(activeSubMenu === menu ? null : menu);
-
   const menuItems = [
     {
       id: "profile",
@@ -384,6 +273,16 @@ const Certificate_permission = () => {
           id: "today-class",
           path: "/admin-dashboard/today-class",
           label: "Today's Class",
+        },
+        {
+          id: "basic-tazweed",
+          path: "/admin-dashboard/basic-tazweed",
+          label: "Basic Tazweed Payment Overview",
+        },
+        {
+          id: "najera-batch",
+          path: "/admin-dashboard/najera-batch",
+          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -547,14 +446,176 @@ const Certificate_permission = () => {
       path: "/admin-reports",
       icon: <FaChartLine className="text-xl" />,
       label: "Report & Analytics",
+      subItems: [
+        {
+          id: "admission-report",
+          path: "/admin-reports/admission",
+          label: "Admission Report",
+        },
+        {
+          id: "attendance-report",
+          path: "/admin-reports/attendance",
+          label: "Attendance Report",
+        },
+        { id: "income", path: "/admin-reports/income", label: "Income" },
+      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
       icon: <FaDatabase className="text-xl" />,
       label: "CRM Management",
+      subItems: [
+        {
+          id: "data-entry",
+          path: "/admin-crm/data-entry",
+          label: "Data Entry",
+        },
+      ],
+    },
+    {
+      id: "salary",
+      path: "/admin-salary",
+      icon: <FaMoneyBillWave className="text-xl" />,
+      label: "Salary",
+      subItems: [
+        {
+          id: "total-salary",
+          path: "/admin-salary/total",
+          label: "Total Salary",
+        },
+        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
+      ],
     },
   ];
+
+  // ✅ URL থেকে active auto-detect
+  const getActiveFromPath = () => {
+    const currentPath = location.pathname;
+    for (const item of menuItems) {
+      if (item.subItems) {
+        const match = item.subItems.find((s) => s.path === currentPath);
+        if (match) return { menu: item.id, sub: match.id };
+      }
+      if (item.path === currentPath) return { menu: item.id, sub: null };
+    }
+    return { menu: null, sub: null };
+  };
+
+  const { menu: activeMenu, sub: activeSubMenu } = getActiveFromPath();
+
+  // Auto-expand parent
+  useEffect(() => {
+    if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
+  }, [activeMenu, activeSubMenu]);
+
+  // Load admin info
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminInfo");
+    if (savedAdmin) {
+      try {
+        setAdminInfo(JSON.parse(savedAdmin));
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      setAdminInfo({
+        name: user?.displayName || "Admin",
+        email: user?.email || "admin@tarabiyah.com",
+        phone: "01700000000",
+        designation: "Administrator",
+        department: "Quran for Elders",
+        joinDate: "January 2024",
+      });
+    }
+  }, [user]);
+
+  // ============================================================
+  // Fetch elders students
+  // ============================================================
+  const fetchEldersStudents = async () => {
+    try {
+      setStudentsLoading(true);
+      let eldersList = [...ELDERS_STUDENTS_FALLBACK];
+
+      try {
+        const res = await fetch(`${API_BASE}/api/students/all`);
+        const text = await res.text();
+
+        if (!text.trim().startsWith("<")) {
+          const data = JSON.parse(text);
+          if (data.success && Array.isArray(data.students)) {
+            const all = data.students || [];
+            const elders = all.filter((s) => isEldersCourse(s.course));
+
+            elders.forEach((s) => {
+              const formatted = {
+                _id: s._id,
+                name: s.name || "",
+                studentId: s.studentId || s._id?.slice(-8) || "N/A",
+                course: s.course || "",
+                primaryCourse: getPrimaryCourse(s.course),
+                class: s.batch || s.class || "Elders Batch A",
+                batch: s.batch || "Batch-03",
+                phone: s.phone || "",
+                email: s.email || "",
+                status: s.status || "Pending",
+              };
+
+              const exists = eldersList.some(
+                (e) =>
+                  (e.name || "").toLowerCase() ===
+                  (formatted.name || "").toLowerCase(),
+              );
+              if (!exists) eldersList.push(formatted);
+            });
+          }
+        }
+      } catch (apiErr) {
+        console.warn("API fetch skipped:", apiErr.message);
+      }
+
+      setEldersStudents(eldersList);
+    } catch (err) {
+      console.error("❌ Fetch students error:", err);
+      setEldersStudents(ELDERS_STUDENTS_FALLBACK);
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEldersStudents();
+  }, []);
+
+  // Save requests
+  useEffect(() => {
+    localStorage.setItem(
+      "eldersCertificateRequests",
+      JSON.stringify(certificateRequests),
+    );
+  }, [certificateRequests]);
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("adminEmail");
+      await Swal.fire({
+        icon: "success",
+        title: "Logged Out Successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      navigate("/admin-login");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setExpandedMenu(expandedMenu === menu ? null : menu);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -649,9 +710,6 @@ const Certificate_permission = () => {
     ...new Set(certificateRequests.map((r) => r.class)),
   ];
 
-  // ============================================================
-  // Modal handlers
-  // ============================================================
   const openAddModal = () => {
     const first = eldersStudents[0];
     setFormData({
@@ -705,7 +763,6 @@ const Certificate_permission = () => {
 
   const handleAddRequest = (e) => {
     e.preventDefault();
-
     if (
       !formData.studentName ||
       !formData.class ||
@@ -720,7 +777,6 @@ const Certificate_permission = () => {
       });
       return;
     }
-
     const newRequest = {
       id: Date.now(),
       studentName: formData.studentName,
@@ -741,7 +797,6 @@ const Certificate_permission = () => {
       approvedBy: null,
       approvedDate: null,
     };
-
     setCertificateRequests([...certificateRequests, newRequest]);
     setShowAddModal(false);
     Swal.fire({
@@ -798,7 +853,6 @@ const Certificate_permission = () => {
       });
       return;
     }
-
     Swal.fire({
       title: "Reject Certificate?",
       text: `Reject certificate for ${selectedRequest.studentName}?`,
@@ -867,8 +921,7 @@ const Certificate_permission = () => {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -927,76 +980,72 @@ const Certificate_permission = () => {
           </div>
 
           <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
-            {menuItems.map((item) => (
-              <div key={item.id}>
-                {item.subItems ? (
-                  <>
-                    <button
-                      onClick={() => {
-                        setActiveMenu(item.id);
-                        toggleSubMenu(item.id);
-                        setIsSidebarOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
+            {menuItems.map((item) => {
+              const isParentActive = activeMenu === item.id;
+              return (
+                <div key={item.id}>
+                  {item.subItems ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          toggleSubMenu(item.id);
+                          setIsSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-600">{item.icon}</span>
+                          <span>{item.label}</span>
+                        </div>
+                        <span
+                          className={`transition-transform ${expandedMenu === item.id ? "rotate-90" : ""}`}
+                        >
+                          <FaArrowRight size={12} />
+                        </span>
+                      </button>
+                      {expandedMenu === item.id && (
+                        <div className="ml-6 space-y-1 mt-1">
+                          {item.subItems.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              to={sub.path}
+                              onClick={() => setIsSidebarOpen(false)}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
+                                activeSubMenu === sub.id
+                                  ? "bg-teal-50 text-[#004d4d] font-bold"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
+                              }`}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={() => setIsSidebarOpen(false)}
                     >
-                      <div className="flex items-center gap-3">
+                      <button
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }`}
+                      >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
-                      </div>
-                      <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
-                      >
-                        <FaArrowRight size={12} />
-                      </span>
-                    </button>
-                    {activeSubMenu === item.id && (
-                      <div className="ml-6 space-y-1 mt-1">
-                        {item.subItems.map((sub) => (
-                          <Link
-                            key={sub.id}
-                            to={sub.path}
-                            onClick={() => {
-                              setActiveSubMenu(sub.id);
-                              setIsSidebarOpen(false);
-                            }}
-                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
-                          >
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <Link
-                    to={item.path}
-                    onClick={() => {
-                      setActiveMenu(item.id);
-                      setIsSidebarOpen(false);
-                    }}
-                  >
-                    <button
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
-                    >
-                      <span className="text-gray-600">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </button>
-                  </Link>
-                )}
-              </div>
-            ))}
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
 
             <button
               onClick={handleLogout}
@@ -1062,7 +1111,7 @@ const Certificate_permission = () => {
             </div>
           </div>
 
-          {/* ✅ Elders Students Card */}
+          {/* Elders Students Card */}
           <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
             <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
               <FaUsers size={12} /> Elders Students ({eldersStudents.length})
@@ -1303,9 +1352,6 @@ const Certificate_permission = () => {
                       >
                         <FaCertificate className="text-4xl text-gray-300 mx-auto mb-2" />
                         <p>No elders certificate requests found</p>
-                        <p className="text-[10px] text-gray-400 mt-1">
-                          উপরে "Add Request" ক্লিক করে যোগ করুন
-                        </p>
                       </td>
                     </tr>
                   )}

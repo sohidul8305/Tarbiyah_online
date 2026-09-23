@@ -1,6 +1,6 @@
 // src/Page/Admin/Income.jsx
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -9,198 +9,36 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
-  FaClock,
-  FaBook,
-  FaFileAlt,
   FaChartLine,
-  FaUserGraduate,
-  FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
   FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
-  FaPlusCircle,
-  FaDownload,
-  FaPrint,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
-  FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
+  FaPlus,
   FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
-  FaUserEdit,
-  FaUserCircle,
-  FaAddressCard,
-  FaChalkboard,
-  FaCalendarDay,
-  FaSchool as FaSchoolIcon,
-  FaUserTie,
-  FaBookReader,
-  FaStopwatch,
-  FaClipboardCheck,
-  FaExchangeAlt,
-  FaCheckDouble,
-  FaBan,
-  FaCheck,
-  FaTimes,
-  FaQuestion,
-  FaCalendarWeek,
-  FaChartBar,
-  FaFileDownload,
-  FaFilePdf,
-  FaFileExcel,
-  FaRegClock,
-  FaRegCalendarAlt,
-  FaRegCalendarCheck,
-  FaWhatsapp,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaGlobe as FaGlobeIcon,
-  FaEnvelope as FaEnvelopeIcon,
-  FaPhone as FaPhoneIcon,
-  FaUsers as FaUsersIcon,
-  FaCalendar,
-  FaClock as FaClockIcon2,
+  FaArrowRight,
+  FaLayerGroup,
+  FaInfoCircle,
+  FaExclamationCircle,
   FaHourglassHalf,
   FaCheckCircle as FaCheckCircleIcon,
-  FaTimesCircle as FaTimesCircleIcon,
-  FaBookmark,
-  FaListUl,
-  FaChevronRight,
-  FaChevronDown,
-  FaFolderOpen,
-  FaFile,
   FaFilePdf as FaFilePdfIcon,
-  FaFileWord,
-  FaFilePowerpoint,
-  FaFileImage,
-  FaFileVideo,
-  FaFileAudio,
-  FaFileArchive,
-  FaFileCode,
   FaFileExcel as FaFileExcelIcon,
-  FaFileAlt as FaFileAltIcon,
-  FaFolder,
-  FaCopy,
-  FaCut,
-  FaPaste,
-  FaShare,
-  FaStar as FaStarIcon,
-  FaRegStar,
-  FaRegFileAlt,
-  FaRegFilePdf,
-  FaRegFileWord,
-  FaRegFileExcel,
-  FaRegFilePowerpoint,
-  FaRegFileImage,
-  FaRegFileVideo,
-  FaRegFileArchive,
-  FaEraser,
-  FaTrashAlt,
-  FaCalendarTimes,
-  FaRedoAlt,
-  FaUndoAlt,
-  FaSync,
-  FaExclamationCircle,
-  FaInfoCircle as FaInfoCircleIcon,
-  FaMoneyCheck,
-  FaMoneyCheckAlt,
-  FaHandHoldingUsd,
-  FaDonate,
-  FaFileInvoice as FaFileInvoiceIcon2,
-  FaFileSignature,
-  FaReceipt as FaReceiptIcon,
-  FaCreditCard as FaCreditCardIcon,
-  FaPrint as FaPrintIcon,
-  FaShareAlt,
-  FaChartPie,
-  FaChartArea,
-  FaTasks,
-  FaCheckDouble as FaCheckDoubleIcon,
-  FaPen,
-  FaPencilAlt,
-  FaAward,
-  FaMedal,
-  FaTrophy,
-  FaPlus,
-  FaCertificate as FaCertificateIcon,
-  FaTimes as FaTimesIcon,
-  FaUserCheck as FaUserCheckIcon,
-  FaUserMinus as FaUserMinusIcon,
-  FaChartLine as FaChartLineIcon,
   FaMoneyBillWave as FaMoneyBillWaveIcon,
-  FaHandHoldingUsd as FaHandHoldingUsdIcon,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Income = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("report-analytics");
-  const [activeSubMenu, setActiveSubMenu] = useState("income");
+  const [expandedMenu, setExpandedMenu] = useState("report-analytics");
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -310,20 +148,17 @@ const Income = () => {
     },
   ]);
 
-  // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterCategory, setFilterCategory] = useState("All");
   const [filterMethod, setFilterMethod] = useState("All");
   const [filterDate, setFilterDate] = useState("");
 
-  // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedIncome, setSelectedIncome] = useState(null);
 
-  // Form data
   const [formData, setFormData] = useState({
     source: "",
     category: "",
@@ -335,7 +170,6 @@ const Income = () => {
     transactionId: "",
   });
 
-  // Available options
   const categories = ["Student Fee", "Admission Fee", "Donation", "Other"];
   const methods = [
     "Cash",
@@ -348,65 +182,9 @@ const Income = () => {
   ];
   const statuses = ["Received", "Pending", "Overdue"];
 
-  // Load admin info
-  useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminInfo");
-    if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
-    } else {
-      setAdminInfo({
-        name: user?.displayName || "Admin",
-        email: user?.email || "admin@tarabiyah.com",
-        phone: "01700000000",
-        designation: "Administrator",
-        department: "Administration",
-        joinDate: "January 2024",
-      });
-    }
-  }, [user]);
-
-  // Save income records to localStorage
-  useEffect(() => {
-    localStorage.setItem("incomeRecords", JSON.stringify(incomeRecords));
-  }, [incomeRecords]);
-
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminInfo");
-      localStorage.removeItem("adminEmail");
-
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-      navigate("/admin-login");
-    } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
-    }
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
+  // ============================================================
+  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
+  // ============================================================
   const menuItems = [
     {
       id: "profile",
@@ -431,9 +209,14 @@ const Income = () => {
           label: "Today's Class",
         },
         {
-          id: "payment-overview",
-          path: "/admin-dashboard/payment-overview",
-          label: "Payment Overview",
+          id: "basic-tazweed",
+          path: "/admin-dashboard/basic-tazweed",
+          label: "Basic Tazweed Payment Overview",
+        },
+        {
+          id: "najera-batch",
+          path: "/admin-dashboard/najera-batch",
+          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -624,7 +407,72 @@ const Income = () => {
     },
   ];
 
-  // Get status badge color
+  // ✅ URL থেকে active auto-detect
+  const getActiveFromPath = () => {
+    const currentPath = location.pathname;
+    for (const item of menuItems) {
+      if (item.subItems) {
+        const match = item.subItems.find((s) => s.path === currentPath);
+        if (match) return { menu: item.id, sub: match.id };
+      }
+      if (item.path === currentPath) return { menu: item.id, sub: null };
+    }
+    return { menu: null, sub: null };
+  };
+
+  const { menu: activeMenu, sub: activeSubMenu } = getActiveFromPath();
+
+  // Auto-expand parent of active submenu
+  useEffect(() => {
+    if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
+  }, [activeMenu, activeSubMenu]);
+
+  // Load admin info
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminInfo");
+    if (savedAdmin) setAdminInfo(JSON.parse(savedAdmin));
+    else
+      setAdminInfo({
+        name: user?.displayName || "Admin",
+        email: user?.email || "admin@tarabiyah.com",
+        phone: "01700000000",
+        designation: "Administrator",
+        department: "Administration",
+        joinDate: "January 2024",
+      });
+  }, [user]);
+
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem("incomeRecords", JSON.stringify(incomeRecords));
+  }, [incomeRecords]);
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("adminEmail");
+      await Swal.fire({
+        icon: "success",
+        title: "Logged Out Successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      navigate("/admin-login");
+    } catch (err) {
+      console.error("Logout error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Logout Failed",
+        text: "Please try again",
+      });
+    }
+  };
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setExpandedMenu(expandedMenu === menu ? null : menu);
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Received":
@@ -638,7 +486,6 @@ const Income = () => {
     }
   };
 
-  // Get status icon
   const getStatusIcon = (status) => {
     switch (status) {
       case "Received":
@@ -652,7 +499,6 @@ const Income = () => {
     }
   };
 
-  // Get category badge color
   const getCategoryColor = (category) => {
     switch (category) {
       case "Student Fee":
@@ -668,7 +514,6 @@ const Income = () => {
     }
   };
 
-  // Filter income records
   const filteredRecords = incomeRecords.filter((record) => {
     const matchesSearch =
       record.source.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -690,7 +535,6 @@ const Income = () => {
     );
   });
 
-  // Get unique values for filters
   const uniqueStatuses = [
     "All",
     ...new Set(incomeRecords.map((r) => r.status)),
@@ -701,7 +545,6 @@ const Income = () => {
   ];
   const uniqueMethods = ["All", ...new Set(incomeRecords.map((r) => r.method))];
 
-  // Calculate totals
   const totalIncome = incomeRecords.reduce((sum, r) => sum + r.amount, 0);
   const totalReceived = incomeRecords
     .filter((r) => r.status === "Received")
@@ -713,23 +556,16 @@ const Income = () => {
     .filter((r) => r.status === "Overdue")
     .reduce((sum, r) => sum + r.amount, 0);
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return `৳${amount.toLocaleString()}`;
-  };
-
-  // Format date
+  const formatCurrency = (amount) => `৳${amount.toLocaleString()}`;
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
   };
 
-  // Open add modal
   const openAddModal = () => {
     setFormData({
       source: "",
@@ -744,7 +580,6 @@ const Income = () => {
     setShowAddModal(true);
   };
 
-  // Open edit modal
   const openEditModal = (record) => {
     setSelectedIncome(record);
     setFormData({
@@ -760,16 +595,13 @@ const Income = () => {
     setShowEditModal(true);
   };
 
-  // Open details modal
   const openDetailsModal = (record) => {
     setSelectedIncome(record);
     setShowDetailsModal(true);
   };
 
-  // Handle add income
   const handleAddIncome = (e) => {
     e.preventDefault();
-
     if (
       !formData.source ||
       !formData.category ||
@@ -784,7 +616,6 @@ const Income = () => {
       });
       return;
     }
-
     const newRecord = {
       id: Date.now(),
       source: formData.source,
@@ -799,7 +630,6 @@ const Income = () => {
         formData.transactionId ||
         `TXN${String(incomeRecords.length + 1).padStart(3, "0")}`,
     };
-
     setIncomeRecords([...incomeRecords, newRecord]);
     setShowAddModal(false);
     Swal.fire({
@@ -811,10 +641,8 @@ const Income = () => {
     });
   };
 
-  // Handle edit income
   const handleEditIncome = (e) => {
     e.preventDefault();
-
     if (
       !formData.source ||
       !formData.category ||
@@ -829,7 +657,6 @@ const Income = () => {
       });
       return;
     }
-
     setIncomeRecords(
       incomeRecords.map((record) =>
         record.id === selectedIncome.id
@@ -859,7 +686,6 @@ const Income = () => {
     });
   };
 
-  // Handle delete income
   const handleDeleteIncome = (id) => {
     Swal.fire({
       title: "Delete Income Record?",
@@ -877,8 +703,7 @@ const Income = () => {
     });
   };
 
-  // Download report
-  const downloadReport = () => {
+  const downloadReport = () =>
     Swal.fire({
       icon: "success",
       title: "Report Downloading",
@@ -886,10 +711,7 @@ const Income = () => {
       timer: 1500,
       showConfirmButton: false,
     });
-  };
-
-  // Export to Excel
-  const exportToExcel = () => {
+  const exportToExcel = () =>
     Swal.fire({
       icon: "success",
       title: "Exporting to Excel",
@@ -897,12 +719,7 @@ const Income = () => {
       timer: 1500,
       showConfirmButton: false,
     });
-  };
-
-  // Print report
-  const printReport = () => {
-    window.print();
-  };
+  const printReport = () => window.print();
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -921,14 +738,9 @@ const Income = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm transition-all duration-300 ease-in-out
+            h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -948,83 +760,74 @@ const Income = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
-            {menuItems.map((item) => (
-              <div key={item.id}>
-                {item.subItems ? (
-                  <>
-                    <button
-                      onClick={() => {
-                        setActiveMenu(item.id);
-                        toggleSubMenu(item.id);
-                        setIsSidebarOpen(false);
-                      }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
+            {menuItems.map((item) => {
+              const isParentActive = activeMenu === item.id;
+
+              return (
+                <div key={item.id}>
+                  {item.subItems ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          toggleSubMenu(item.id);
+                          setIsSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
                             ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
                             : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-600">{item.icon}</span>
+                          <span>{item.label}</span>
+                        </div>
+                        <span
+                          className={`transition-transform ${expandedMenu === item.id ? "rotate-90" : ""}`}
+                        >
+                          <FaArrowRight size={12} />
+                        </span>
+                      </button>
+                      {expandedMenu === item.id && (
+                        <div className="ml-6 space-y-1 mt-1">
+                          {item.subItems.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              to={sub.path}
+                              onClick={() => setIsSidebarOpen(false)}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
+                                activeSubMenu === sub.id
+                                  ? "bg-teal-50 text-[#004d4d] font-bold"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
+                              }`}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={() => setIsSidebarOpen(false)}
                     >
-                      <div className="flex items-center gap-3">
+                      <button
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }`}
+                      >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
-                      </div>
-                      <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
-                      >
-                        <FaArrowRight size={12} />
-                      </span>
-                    </button>
-                    {activeSubMenu === item.id && (
-                      <div className="ml-6 space-y-1 mt-1">
-                        {item.subItems.map((sub) => (
-                          <Link
-                            key={sub.id}
-                            to={sub.path}
-                            onClick={() => {
-                              setActiveSubMenu(sub.id);
-                              setIsSidebarOpen(false);
-                            }}
-                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
-                          >
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <Link
-                    to={item.path}
-                    onClick={() => {
-                      setActiveMenu(item.id);
-                      setIsSidebarOpen(false);
-                    }}
-                  >
-                    <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
-                    >
-                      <span className="text-gray-600">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </button>
-                  </Link>
-                )}
-              </div>
-            ))}
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
 
             <button
               onClick={handleLogout}
@@ -1040,7 +843,6 @@ const Income = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1049,7 +851,7 @@ const Income = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
@@ -1091,7 +893,7 @@ const Income = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
+          {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-blue-600">
@@ -1137,38 +939,38 @@ const Income = () => {
                   type="date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 />
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {uniqueStatuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterCategory}
                   onChange={(e) => setFilterCategory(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueCategories.map((category) => (
-                    <option key={category} value={category}>
-                      {category}
+                  {uniqueCategories.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterMethod}
                   onChange={(e) => setFilterMethod(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueMethods.map((method) => (
-                    <option key={method} value={method}>
-                      {method}
+                  {uniqueMethods.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
                     </option>
                   ))}
                 </select>
@@ -1176,7 +978,7 @@ const Income = () => {
             </div>
           </div>
 
-          {/* Income Records Table */}
+          {/* Table */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto max-h-[calc(100vh-380px)] overflow-y-auto">
               <table className="w-full text-xs">
@@ -1254,21 +1056,21 @@ const Income = () => {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => openDetailsModal(record)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
                               title="View Details"
                             >
                               <FaEye size={12} />
                             </button>
                             <button
                               onClick={() => openEditModal(record)}
-                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50 transition-all"
+                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
                               title="Edit"
                             >
                               <FaEdit size={12} />
                             </button>
                             <button
                               onClick={() => handleDeleteIncome(record.id)}
-                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                               title="Delete"
                             >
                               <FaTrash size={12} />
@@ -1325,11 +1127,10 @@ const Income = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, source: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   placeholder="e.g., Monthly Fee - Ahmed Hasan"
                 />
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1341,12 +1142,12 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">Select Category</option>
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
+                    {categories.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
@@ -1366,12 +1167,10 @@ const Income = () => {
                         amount: parseFloat(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter amount"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1384,7 +1183,7 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, date: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1396,18 +1195,17 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, method: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">Select Method</option>
-                    {methods.map((method) => (
-                      <option key={method} value={method}>
-                        {method}
+                    {methods.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1418,11 +1216,11 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
+                    {statuses.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
@@ -1440,12 +1238,11 @@ const Income = () => {
                         transactionId: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="Enter transaction ID"
                   />
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
@@ -1456,22 +1253,21 @@ const Income = () => {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   placeholder="Add description..."
                 />
               </div>
-
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 rounded-lg font-semibold"
                 >
                   <FaSave className="inline mr-2" size={14} /> Add Income
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -1508,11 +1304,9 @@ const Income = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, source: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Monthly Fee - Ahmed Hasan"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1524,11 +1318,11 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
+                    {categories.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
@@ -1548,12 +1342,10 @@ const Income = () => {
                         amount: parseFloat(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter amount"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1566,7 +1358,7 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, date: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1578,17 +1370,16 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, method: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {methods.map((method) => (
-                      <option key={method} value={method}>
-                        {method}
+                    {methods.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1599,11 +1390,11 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
+                    {statuses.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
@@ -1621,12 +1412,10 @@ const Income = () => {
                         transactionId: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter transaction ID"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
@@ -1637,22 +1426,20 @@ const Income = () => {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Add description..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold"
                 >
                   <FaSave className="inline mr-2" size={14} /> Update Income
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -1694,7 +1481,6 @@ const Income = () => {
                   {selectedIncome.status}
                 </span>
               </div>
-
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-[10px] text-gray-400">Category</p>
@@ -1733,7 +1519,6 @@ const Income = () => {
                   </div>
                 )}
               </div>
-
               {selectedIncome.description && (
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-[10px] text-gray-400">Description</p>
@@ -1742,14 +1527,13 @@ const Income = () => {
                   </p>
                 </div>
               )}
-
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
                     openEditModal(selectedIncome);
                   }}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaEdit className="inline mr-2" /> Edit
                 </button>
@@ -1758,13 +1542,13 @@ const Income = () => {
                     setShowDetailsModal(false);
                     handleDeleteIncome(selectedIncome.id);
                   }}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaTrash className="inline mr-2" /> Delete
                 </button>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>

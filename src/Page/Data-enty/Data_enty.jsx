@@ -1,6 +1,6 @@
 // src/Page/Admin/Data_enty.jsx
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -40,9 +40,10 @@ const API_BASE_URL =
 const Data_enty = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("crm-management");
-  const [activeSubMenu, setActiveSubMenu] = useState("data-entry");
+  const [expandedMenu, setExpandedMenu] = useState("crm-management");
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -53,15 +54,15 @@ const Data_enty = () => {
   });
 
   // ✅ Data Sources
-  const [crmEntries, setCrmEntries] = useState([]); // locally added CRM entries
-  const [admissionStudents, setAdmissionStudents] = useState([]); // from admission form
+  const [crmEntries, setCrmEntries] = useState([]);
+  const [admissionStudents, setAdmissionStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
-  const [filterSource, setFilterSource] = useState("All"); // All | CRM | Admission
+  const [filterSource, setFilterSource] = useState("All");
 
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
@@ -125,8 +126,7 @@ const Data_enty = () => {
   // Convert Student → CRM entry shape
   // ============================================
   const studentToCrmEntry = (s) => {
-    // Only include valid/available info
-    const entry = {
+    return {
       id: s._id || s.id,
       _id: s._id || s.id,
       student: s.name || "",
@@ -145,13 +145,12 @@ const Data_enty = () => {
       source: "admission",
       isStudent: true,
       studentId: s._id || s.id,
-      _original: s, // keep full student for details view
+      _original: s,
     };
-    return entry;
   };
 
   // ============================================
-  // ✅ FETCH Admission Students (from backend)
+  // FETCH Admission Students
   // ============================================
   const fetchAdmissionStudents = useCallback(async () => {
     try {
@@ -174,7 +173,7 @@ const Data_enty = () => {
   }, []);
 
   // ============================================
-  // ✅ FETCH CRM entries (localStorage)
+  // FETCH CRM entries (localStorage)
   // ============================================
   const fetchCrmEntries = useCallback(() => {
     try {
@@ -190,7 +189,6 @@ const Data_enty = () => {
           return;
         }
       }
-      // Seed initial sample data (only once)
       const sample = [];
       setCrmEntries(sample);
       localStorage.setItem("crmDataEntries", JSON.stringify(sample));
@@ -200,14 +198,10 @@ const Data_enty = () => {
     }
   }, []);
 
-  // ============================================
-  // Master fetch
-  // ============================================
   const fetchAll = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-
       fetchCrmEntries();
       await fetchAdmissionStudents();
     } catch (err) {
@@ -239,16 +233,14 @@ const Data_enty = () => {
     fetchAll();
   }, [fetchAll]);
 
-  // Persist CRM entries only (not admission students)
+  // Persist CRM entries
   useEffect(() => {
     if (crmEntries.length > 0) {
       localStorage.setItem("crmDataEntries", JSON.stringify(crmEntries));
     }
   }, [crmEntries]);
 
-  // ============================================
-  // ✅ Combined list (Admission + CRM)
-  // ============================================
+  // Combined list
   const allEntries = useMemo(() => {
     return [...admissionStudents, ...crmEntries];
   }, [admissionStudents, crmEntries]);
@@ -278,9 +270,11 @@ const Data_enty = () => {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleSubMenu = (menu) =>
-    setActiveSubMenu(activeSubMenu === menu ? null : menu);
+    setExpandedMenu(expandedMenu === menu ? null : menu);
 
-  // Sidebar Menu Items
+  // ============================================================
+  // ✅ Sidebar Menu Items — সব route সহ (Updated)
+  // ============================================================
   const menuItems = [
     {
       id: "profile",
@@ -305,9 +299,14 @@ const Data_enty = () => {
           label: "Today's Class",
         },
         {
-          id: "payment-overview",
-          path: "/admin-dashboard/payment-overview",
-          label: "Payment Overview",
+          id: "basic-tazweed",
+          path: "/admin-dashboard/basic-tazweed",
+          label: "Basic Tazweed Payment Overview",
+        },
+        {
+          id: "najera-batch",
+          path: "/admin-dashboard/najera-batch",
+          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -498,6 +497,26 @@ const Data_enty = () => {
     },
   ];
 
+  // ✅ URL থেকে active menu/submenu auto-detect
+  const getActiveFromPath = () => {
+    const currentPath = location.pathname;
+    for (const item of menuItems) {
+      if (item.subItems) {
+        const match = item.subItems.find((s) => s.path === currentPath);
+        if (match) return { menu: item.id, sub: match.id };
+      }
+      if (item.path === currentPath) return { menu: item.id, sub: null };
+    }
+    return { menu: null, sub: null };
+  };
+
+  const { menu: activeMenu, sub: activeSubMenu } = getActiveFromPath();
+
+  // ✅ Auto-expand parent of active submenu
+  useEffect(() => {
+    if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
+  }, [activeMenu, activeSubMenu]);
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Interested":
@@ -585,7 +604,6 @@ const Data_enty = () => {
   };
 
   const openEditModal = (entry) => {
-    // Prevent editing admission-sourced entries in CRM (they need Student Management)
     if (entry.isStudent) {
       Swal.fire({
         icon: "info",
@@ -620,9 +638,6 @@ const Data_enty = () => {
     setShowDetailsModal(true);
   };
 
-  // ============================================
-  // ✅ ADD (only CRM entries)
-  // ============================================
   const handleAddEntry = (e) => {
     e.preventDefault();
 
@@ -662,9 +677,6 @@ const Data_enty = () => {
     });
   };
 
-  // ============================================
-  // ✅ EDIT (only CRM entries)
-  // ============================================
   const handleEditEntry = (e) => {
     e.preventDefault();
 
@@ -704,9 +716,6 @@ const Data_enty = () => {
     });
   };
 
-  // ============================================
-  // ✅ DELETE — handle CRM (local) vs Admission (API)
-  // ============================================
   const handleDeleteEntry = async (entry) => {
     const isStudent = entry.isStudent;
     const id = entry.id || entry._id;
@@ -727,7 +736,6 @@ const Data_enty = () => {
 
     try {
       if (isStudent) {
-        // Delete from backend
         const res = await fetch(`${API_BASE_URL}/students/delete/${id}`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -742,7 +750,6 @@ const Data_enty = () => {
           admissionStudents.filter((e) => (e.id || e._id) !== id),
         );
       } else {
-        // Remove CRM local entry
         setCrmEntries(crmEntries.filter((e) => e.id !== id));
       }
 
@@ -854,81 +861,76 @@ const Data_enty = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
-            {menuItems.map((item) => (
-              <div key={item.id}>
-                {item.subItems ? (
-                  <>
-                    <button
-                      onClick={() => {
-                        setActiveMenu(item.id);
-                        toggleSubMenu(item.id);
-                        setIsSidebarOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
+            {menuItems.map((item) => {
+              const isParentActive = activeMenu === item.id;
+
+              return (
+                <div key={item.id}>
+                  {item.subItems ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          toggleSubMenu(item.id);
+                          setIsSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                          isParentActive
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-600">{item.icon}</span>
+                          <span>{item.label}</span>
+                        </div>
+                        <span
+                          className={`transition-transform ${
+                            expandedMenu === item.id ? "rotate-90" : ""
+                          }`}
+                        >
+                          <FaArrowRight size={12} />
+                        </span>
+                      </button>
+                      {expandedMenu === item.id && (
+                        <div className="ml-6 space-y-1 mt-1">
+                          {item.subItems.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              to={sub.path}
+                              onClick={() => setIsSidebarOpen(false)}
+                              className={`block px-3 py-1.5 rounded-lg text-xs transition-all ${
+                                activeSubMenu === sub.id
+                                  ? "bg-teal-50 text-[#004d4d] font-bold"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
+                              }`}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={() => setIsSidebarOpen(false)}
                     >
-                      <div className="flex items-center gap-3">
+                      <button
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
+                          isParentActive
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }`}
+                      >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
-                      </div>
-                      <span
-                        className={
-                          activeSubMenu === item.id
-                            ? "rotate-180 transition-transform"
-                            : "transition-transform"
-                        }
-                      >
-                        <FaArrowRight size={12} />
-                      </span>
-                    </button>
-                    {activeSubMenu === item.id && (
-                      <div className="ml-6 space-y-1 mt-1">
-                        {item.subItems.map((sub) => (
-                          <Link
-                            key={sub.id}
-                            to={sub.path}
-                            onClick={() => {
-                              setActiveSubMenu(sub.id);
-                              setIsSidebarOpen(false);
-                            }}
-                            className={`block px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
-                          >
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <Link
-                    to={item.path}
-                    onClick={() => {
-                      setActiveMenu(item.id);
-                      setIsSidebarOpen(false);
-                    }}
-                  >
-                    <button
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
-                    >
-                      <span className="text-gray-600">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </button>
-                  </Link>
-                )}
-              </div>
-            ))}
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
 
             <button
               onClick={handleLogout}

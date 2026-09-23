@@ -1,6 +1,6 @@
 // src/Page/Admin/Result_publish.jsx
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -9,191 +9,40 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
-  FaClock,
-  FaBook,
-  FaFileAlt,
-  FaChartLine,
-  FaUserGraduate,
-  FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
+  FaChartLine,
   FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
-  FaPlusCircle,
-  FaDownload,
-  FaPrint,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
   FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
-  FaUserEdit,
-  FaUserCircle,
-  FaAddressCard,
-  FaChalkboard,
-  FaCalendarDay,
-  FaSchool as FaSchoolIcon,
-  FaUserTie,
-  FaBookReader,
-  FaStopwatch,
-  FaClipboardCheck,
-  FaExchangeAlt,
-  FaCheckDouble,
+  FaPlus,
   FaBan,
-  FaCheck,
-  FaTimes,
-  FaQuestion,
-  FaCalendarWeek,
-  FaChartBar,
   FaFileDownload,
-  FaFilePdf,
-  FaFileExcel,
-  FaRegClock,
-  FaRegCalendarAlt,
-  FaRegCalendarCheck,
-  FaWhatsapp,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaGlobe as FaGlobeIcon,
-  FaEnvelope as FaEnvelopeIcon,
-  FaPhone as FaPhoneIcon,
-  FaUsers as FaUsersIcon,
-  FaCalendar,
-  FaClock as FaClockIcon2,
-  FaHourglassHalf,
+  FaListUl,
+  FaPencilAlt,
+  FaTrophy,
+  FaMedal,
+  FaCertificate,
   FaCheckCircle as FaCheckCircleIcon,
   FaTimesCircle as FaTimesCircleIcon,
-  FaBookmark,
-  FaListUl,
-  FaChevronRight,
-  FaChevronDown,
-  FaFolderOpen,
-  FaFile,
-  FaFilePdf as FaFilePdfIcon,
-  FaFileWord,
-  FaFilePowerpoint,
-  FaFileImage,
-  FaFileVideo,
-  FaFileAudio,
-  FaFileArchive,
-  FaFileCode,
-  FaFileExcel as FaFileExcelIcon,
-  FaFileAlt as FaFileAltIcon,
-  FaFolder,
-  FaCopy,
-  FaCut,
-  FaPaste,
-  FaShare,
-  FaStar as FaStarIcon,
-  FaRegStar,
-  FaRegFileAlt,
-  FaRegFilePdf,
-  FaRegFileWord,
-  FaRegFileExcel,
-  FaRegFilePowerpoint,
-  FaRegFileImage,
-  FaRegFileVideo,
-  FaRegFileArchive,
-  FaEraser,
-  FaTrashAlt,
-  FaCalendarTimes,
-  FaRedoAlt,
-  FaUndoAlt,
-  FaSync,
-  FaExclamationCircle,
-  FaInfoCircle as FaInfoCircleIcon,
-  FaMoneyCheck,
-  FaMoneyCheckAlt,
-  FaHandHoldingUsd,
-  FaDonate,
-  FaFileInvoice as FaFileInvoiceIcon2,
-  FaFileSignature,
-  FaReceipt as FaReceiptIcon,
-  FaCreditCard as FaCreditCardIcon,
-  FaPrint as FaPrintIcon,
-  FaShareAlt,
-  FaChartPie,
-  FaChartArea,
-  FaTasks,
-  FaCheckDouble as FaCheckDoubleIcon,
-  FaPen,
-  FaPencilAlt,
-  FaAward,
-  FaMedal,
-  FaTrophy,
-  FaPlus,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Result_publish = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("exam");
-  const [activeSubMenu, setActiveSubMenu] = useState("result-publish");
+  const [expandedMenu, setExpandedMenu] = useState("exam");
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -400,13 +249,11 @@ const Result_publish = () => {
     },
   ]);
 
-  // State for filters
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterClass, setFilterClass] = useState("All");
   const [filterSubject, setFilterSubject] = useState("All");
 
-  // State for modals
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -414,7 +261,6 @@ const Result_publish = () => {
   const [selectedExam, setSelectedExam] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  // State for result entry
   const [resultFormData, setResultFormData] = useState({
     studentName: "",
     roll: "",
@@ -423,65 +269,9 @@ const Result_publish = () => {
     status: "Pass",
   });
 
-  // Load admin info
-  useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminInfo");
-    if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
-    } else {
-      setAdminInfo({
-        name: user?.displayName || "Admin",
-        email: user?.email || "admin@tarabiyah.com",
-        phone: "01700000000",
-        designation: "Administrator",
-        department: "Administration",
-        joinDate: "January 2024",
-      });
-    }
-  }, [user]);
-
-  // Save exams to localStorage
-  useEffect(() => {
-    localStorage.setItem("examResults", JSON.stringify(exams));
-  }, [exams]);
-
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminInfo");
-      localStorage.removeItem("adminEmail");
-
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-      navigate("/admin-login");
-    } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
-    }
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
+  // ============================================================
+  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
+  // ============================================================
   const menuItems = [
     {
       id: "profile",
@@ -506,9 +296,14 @@ const Result_publish = () => {
           label: "Today's Class",
         },
         {
-          id: "payment-overview",
-          path: "/admin-dashboard/payment-overview",
-          label: "Payment Overview",
+          id: "basic-tazweed",
+          path: "/admin-dashboard/basic-tazweed",
+          label: "Basic Tazweed Payment Overview",
+        },
+        {
+          id: "najera-batch",
+          path: "/admin-dashboard/najera-batch",
+          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -649,6 +444,22 @@ const Result_publish = () => {
           path: "/admin-exam/certificate",
           label: "Certificate Permission",
         },
+        { id: "grad", path: "/admin-exam/grad", label: "Grad" },
+        {
+          id: "class-test",
+          path: "/admin-exam/class-test",
+          label: "Class Test",
+        },
+        {
+          id: "mid-term",
+          path: "/admin-exam/mid-term",
+          label: "Mid Term Exam",
+        },
+        {
+          id: "final-exam",
+          path: "/admin-exam/final-exam",
+          label: "Final Exam",
+        },
       ],
     },
     {
@@ -699,7 +510,71 @@ const Result_publish = () => {
     },
   ];
 
-  // Get status badge color
+  // ✅ URL থেকে active auto-detect
+  const getActiveFromPath = () => {
+    const currentPath = location.pathname;
+    for (const item of menuItems) {
+      if (item.subItems) {
+        const match = item.subItems.find((s) => s.path === currentPath);
+        if (match) return { menu: item.id, sub: match.id };
+      }
+      if (item.path === currentPath) return { menu: item.id, sub: null };
+    }
+    return { menu: null, sub: null };
+  };
+
+  const { menu: activeMenu, sub: activeSubMenu } = getActiveFromPath();
+
+  // Auto-expand parent of active submenu
+  useEffect(() => {
+    if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
+  }, [activeMenu, activeSubMenu]);
+
+  // Load admin info
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminInfo");
+    if (savedAdmin) setAdminInfo(JSON.parse(savedAdmin));
+    else
+      setAdminInfo({
+        name: user?.displayName || "Admin",
+        email: user?.email || "admin@tarabiyah.com",
+        phone: "01700000000",
+        designation: "Administrator",
+        department: "Administration",
+        joinDate: "January 2024",
+      });
+  }, [user]);
+
+  useEffect(() => {
+    localStorage.setItem("examResults", JSON.stringify(exams));
+  }, [exams]);
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("adminEmail");
+      await Swal.fire({
+        icon: "success",
+        title: "Logged Out Successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      navigate("/admin-login");
+    } catch (err) {
+      console.error("Logout error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Logout Failed",
+        text: "Please try again",
+      });
+    }
+  };
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setExpandedMenu(expandedMenu === menu ? null : menu);
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Published":
@@ -713,7 +588,6 @@ const Result_publish = () => {
     }
   };
 
-  // Get grade color
   const getGradeColor = (grade) => {
     switch (grade) {
       case "A+":
@@ -733,7 +607,6 @@ const Result_publish = () => {
     }
   };
 
-  // Get grade icon
   const getGradeIcon = (grade) => {
     switch (grade) {
       case "A+":
@@ -752,7 +625,6 @@ const Result_publish = () => {
     }
   };
 
-  // Calculate grade based on marks
   const calculateGrade = (marks) => {
     if (marks >= 90) return "A+";
     if (marks >= 80) return "A";
@@ -762,12 +634,10 @@ const Result_publish = () => {
     return "F";
   };
 
-  // Calculate status based on marks
   const calculateStatus = (marks, passingMarks = 40) => {
     return marks >= passingMarks ? "Pass" : "Fail";
   };
 
-  // Filter exams
   const filteredExams = exams.filter((exam) => {
     const matchesSearch =
       exam.examName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -783,23 +653,18 @@ const Result_publish = () => {
     return matchesSearch && matchesStatus && matchesClass && matchesSubject;
   });
 
-  // Get unique values for filters
   const uniqueClasses = ["All", ...new Set(exams.map((e) => e.class))];
   const uniqueSubjects = ["All", ...new Set(exams.map((e) => e.subject))];
 
-  // Open publish modal
   const openPublishModal = (exam) => {
     setSelectedExam(exam);
     setShowPublishModal(true);
   };
-
-  // Open details modal
   const openDetailsModal = (exam) => {
     setSelectedExam(exam);
     setShowDetailsModal(true);
   };
 
-  // Open edit modal for student result
   const openEditModal = (exam, student) => {
     setSelectedExam(exam);
     setSelectedStudent(student);
@@ -813,7 +678,6 @@ const Result_publish = () => {
     setShowEditModal(true);
   };
 
-  // Open add result modal
   const openAddResultModal = (exam) => {
     setSelectedExam(exam);
     setResultFormData({
@@ -826,7 +690,6 @@ const Result_publish = () => {
     setShowAddResultModal(true);
   };
 
-  // Handle publish result
   const handlePublishResult = () => {
     Swal.fire({
       title: "Publish Results?",
@@ -853,7 +716,7 @@ const Result_publish = () => {
         Swal.fire({
           icon: "success",
           title: "Results Published!",
-          text: `Results for ${selectedExam.examName} have been published successfully.`,
+          text: `Results for ${selectedExam.examName} have been published.`,
           timer: 1500,
           showConfirmButton: false,
         });
@@ -861,7 +724,6 @@ const Result_publish = () => {
     });
   };
 
-  // Handle unpublish result
   const handleUnpublishResult = (exam) => {
     Swal.fire({
       title: "Unpublish Results?",
@@ -876,11 +738,7 @@ const Result_publish = () => {
         setExams(
           exams.map((e) =>
             e.id === exam.id
-              ? {
-                  ...e,
-                  published: false,
-                  publishDate: null,
-                }
+              ? { ...e, published: false, publishDate: null }
               : e,
           ),
         );
@@ -895,10 +753,8 @@ const Result_publish = () => {
     });
   };
 
-  // Handle add student result
   const handleAddResult = (e) => {
     e.preventDefault();
-
     if (!resultFormData.studentName || !resultFormData.roll) {
       Swal.fire({
         icon: "warning",
@@ -909,7 +765,6 @@ const Result_publish = () => {
       });
       return;
     }
-
     if (
       !resultFormData.marks ||
       resultFormData.marks < 0 ||
@@ -924,35 +779,29 @@ const Result_publish = () => {
       });
       return;
     }
-
-    // Check if student already has a result for this exam
     const existingResult = selectedExam.results.find(
       (r) =>
         r.studentName === resultFormData.studentName ||
         r.roll === resultFormData.roll,
     );
-
     if (existingResult) {
       Swal.fire({
         icon: "warning",
         title: "Student Already Has Result",
-        text: `${resultFormData.studentName} (Roll: ${resultFormData.roll}) already has a result for this exam.`,
+        text: `${resultFormData.studentName} (Roll: ${resultFormData.roll}) already has a result.`,
         confirmButtonColor: "#3b82f6",
       });
       return;
     }
-
     const grade = calculateGrade(resultFormData.marks);
     const status = calculateStatus(resultFormData.marks);
-
     const newResult = {
       studentName: resultFormData.studentName,
       roll: resultFormData.roll,
       marks: resultFormData.marks,
-      grade: grade,
-      status: status,
+      grade,
+      status,
     };
-
     setExams(
       exams.map((exam) =>
         exam.id === selectedExam.id
@@ -964,28 +813,23 @@ const Result_publish = () => {
           : exam,
       ),
     );
-
-    // Update selected exam
     setSelectedExam({
       ...selectedExam,
       results: [...selectedExam.results, newResult],
       totalStudents: selectedExam.totalStudents + 1,
     });
-
     setShowAddResultModal(false);
     Swal.fire({
       icon: "success",
       title: "Result Added!",
-      text: `Result for ${resultFormData.studentName} has been added successfully.`,
+      text: `Result for ${resultFormData.studentName} has been added.`,
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle edit student result
   const handleEditResult = (e) => {
     e.preventDefault();
-
     if (
       !resultFormData.marks ||
       resultFormData.marks < 0 ||
@@ -1000,10 +844,8 @@ const Result_publish = () => {
       });
       return;
     }
-
     const grade = calculateGrade(resultFormData.marks);
     const status = calculateStatus(resultFormData.marks);
-
     setExams(
       exams.map((exam) =>
         exam.id === selectedExam.id
@@ -1011,12 +853,7 @@ const Result_publish = () => {
               ...exam,
               results: exam.results.map((student) =>
                 student.studentName === selectedStudent.studentName
-                  ? {
-                      ...student,
-                      marks: resultFormData.marks,
-                      grade: grade,
-                      status: status,
-                    }
+                  ? { ...student, marks: resultFormData.marks, grade, status }
                   : student,
               ),
             }
@@ -1033,7 +870,6 @@ const Result_publish = () => {
     });
   };
 
-  // Handle delete student result
   const handleDeleteResult = (exam, student) => {
     Swal.fire({
       title: "Delete Result?",
@@ -1069,14 +905,12 @@ const Result_publish = () => {
     });
   };
 
-  // Generate result report
   const generateReport = (exam) => {
     const passed = exam.results.filter((r) => r.status === "Pass").length;
     const failed = exam.results.filter((r) => r.status === "Fail").length;
     const average = Math.round(
       exam.results.reduce((sum, r) => sum + r.marks, 0) / exam.results.length,
     );
-
     Swal.fire({
       title: "Result Summary",
       html: `
@@ -1089,8 +923,7 @@ const Result_publish = () => {
           <p><strong>Failed:</strong> ${failed} (${Math.round((failed / exam.results.length) * 100)}%)</p>
           <p><strong>Average Marks:</strong> ${average}</p>
           <p><strong>Status:</strong> ${exam.published ? "✅ Published" : "📝 Draft"}</p>
-        </div>
-      `,
+        </div>`,
       icon: "info",
       confirmButtonColor: "#3b82f6",
       confirmButtonText: "Download Report",
@@ -1107,11 +940,9 @@ const Result_publish = () => {
     });
   };
 
-  // Format date
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -1135,14 +966,9 @@ const Result_publish = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm transition-all duration-300 ease-in-out
+            h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -1162,83 +988,73 @@ const Result_publish = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
-            {menuItems.map((item) => (
-              <div key={item.id}>
-                {item.subItems ? (
-                  <>
-                    <button
-                      onClick={() => {
-                        setActiveMenu(item.id);
-                        toggleSubMenu(item.id);
-                        setIsSidebarOpen(false);
-                      }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
+            {menuItems.map((item) => {
+              const isParentActive = activeMenu === item.id;
+              return (
+                <div key={item.id}>
+                  {item.subItems ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          toggleSubMenu(item.id);
+                          setIsSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
                             ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
                             : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-600">{item.icon}</span>
+                          <span>{item.label}</span>
+                        </div>
+                        <span
+                          className={`transition-transform ${expandedMenu === item.id ? "rotate-90" : ""}`}
+                        >
+                          <FaArrowRight size={12} />
+                        </span>
+                      </button>
+                      {expandedMenu === item.id && (
+                        <div className="ml-6 space-y-1 mt-1">
+                          {item.subItems.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              to={sub.path}
+                              onClick={() => setIsSidebarOpen(false)}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
+                                activeSubMenu === sub.id
+                                  ? "bg-teal-50 text-[#004d4d] font-bold"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
+                              }`}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={() => setIsSidebarOpen(false)}
                     >
-                      <div className="flex items-center gap-3">
+                      <button
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }`}
+                      >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
-                      </div>
-                      <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
-                      >
-                        <FaArrowRight size={12} />
-                      </span>
-                    </button>
-                    {activeSubMenu === item.id && (
-                      <div className="ml-6 space-y-1 mt-1">
-                        {item.subItems.map((sub) => (
-                          <Link
-                            key={sub.id}
-                            to={sub.path}
-                            onClick={() => {
-                              setActiveSubMenu(sub.id);
-                              setIsSidebarOpen(false);
-                            }}
-                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
-                          >
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <Link
-                    to={item.path}
-                    onClick={() => {
-                      setActiveMenu(item.id);
-                      setIsSidebarOpen(false);
-                    }}
-                  >
-                    <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
-                    >
-                      <span className="text-gray-600">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </button>
-                  </Link>
-                )}
-              </div>
-            ))}
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
 
             <button
               onClick={handleLogout}
@@ -1254,7 +1070,6 @@ const Result_publish = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1262,8 +1077,8 @@ const Result_publish = () => {
           />
         )}
 
-        {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        {/* Main Content — আগের মতোই আছে */}
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
@@ -1326,14 +1141,14 @@ const Result_publish = () => {
                   placeholder="Search by exam name, code, subject or teacher..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg"
                 />
               </div>
               <div className="flex items-center gap-1 flex-wrap">
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
                   <option value="All">All Status</option>
                   <option value="Published">Published</option>
@@ -1342,7 +1157,7 @@ const Result_publish = () => {
                 <select
                   value={filterClass}
                   onChange={(e) => setFilterClass(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
                   {uniqueClasses.map((cls) => (
                     <option key={cls} value={cls}>
@@ -1353,7 +1168,7 @@ const Result_publish = () => {
                 <select
                   value={filterSubject}
                   onChange={(e) => setFilterSubject(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
                   {uniqueSubjects.map((subject) => (
                     <option key={subject} value={subject}>
@@ -1443,7 +1258,6 @@ const Result_publish = () => {
                       </div>
                     </div>
 
-                    {/* Result Summary */}
                     {exam.results.length > 0 && (
                       <div className="mt-1.5 flex items-center gap-2 text-[10px]">
                         <span className="text-green-600">
@@ -1472,24 +1286,23 @@ const Result_publish = () => {
                       </div>
                     )}
 
-                    {/* Actions */}
                     <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100 flex-wrap">
                       <button
                         onClick={() => openDetailsModal(exam)}
-                        className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all"
+                        className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50"
                       >
-                        <FaEye className="inline mr-1" size={10} /> View Results
+                        <FaEye className="inline mr-1" size={10} /> View
                       </button>
                       <button
                         onClick={() => openAddResultModal(exam)}
-                        className="text-green-600 hover:text-green-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-green-200 hover:bg-green-50 transition-all"
+                        className="text-green-600 hover:text-green-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-green-200 hover:bg-green-50"
                       >
-                        <FaPlus className="inline mr-1" size={10} /> Add Result
+                        <FaPlus className="inline mr-1" size={10} /> Add
                       </button>
                       {!exam.published && exam.status === "Completed" && (
                         <button
                           onClick={() => openPublishModal(exam)}
-                          className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all"
+                          className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50"
                         >
                           <FaCheckCircleIcon
                             className="inline mr-1"
@@ -1501,15 +1314,15 @@ const Result_publish = () => {
                       {exam.published && (
                         <button
                           onClick={() => handleUnpublishResult(exam)}
-                          className="text-red-600 hover:text-red-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-red-200 hover:bg-red-50 transition-all"
+                          className="text-red-600 hover:text-red-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-red-200 hover:bg-red-50"
                         >
                           <FaBan className="inline mr-1" size={10} /> Unpublish
                         </button>
                       )}
                       <button
                         onClick={() => generateReport(exam)}
-                        className="text-purple-600 hover:text-purple-800 p-1 rounded hover:bg-purple-50 transition-all"
-                        title="Generate Report"
+                        className="text-purple-600 hover:text-purple-800 p-1 rounded hover:bg-purple-50"
+                        title="Report"
                       >
                         <FaFileDownload size={12} />
                       </button>
@@ -1570,13 +1383,13 @@ const Result_publish = () => {
               <div className="flex gap-3">
                 <button
                   onClick={handlePublishResult}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaCheckCircleIcon className="inline mr-2" /> Confirm Publish
                 </button>
                 <button
                   onClick={() => setShowPublishModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
                 >
                   Cancel
                 </button>
@@ -1602,7 +1415,6 @@ const Result_publish = () => {
                   {selectedExam.class} • {selectedExam.subject}
                 </p>
               </div>
-
               <form onSubmit={handleAddResult} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1618,11 +1430,10 @@ const Result_publish = () => {
                         studentName: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="Enter student name"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Roll Number *
@@ -1637,11 +1448,10 @@ const Result_publish = () => {
                         roll: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="Enter roll number"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Marks (0-100) *
@@ -1658,7 +1468,7 @@ const Result_publish = () => {
                         marks: parseInt(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="Enter marks"
                   />
                   <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
@@ -1673,29 +1483,24 @@ const Result_publish = () => {
                     <div>
                       <span className="text-gray-500">Status:</span>
                       <span
-                        className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
-                          calculateStatus(resultFormData.marks) === "Pass"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
+                        className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${calculateStatus(resultFormData.marks) === "Pass" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
                       >
                         {calculateStatus(resultFormData.marks)}
                       </span>
                     </div>
                   </div>
                 </div>
-
-                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <div className="flex gap-3 pt-4 border-t">
                   <button
                     type="submit"
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-sm transition-all"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-sm"
                   >
                     <FaSave className="inline mr-2" size={14} /> Add Result
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowAddResultModal(false)}
-                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
+                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
                   >
                     Cancel
                   </button>
@@ -1738,7 +1543,7 @@ const Result_publish = () => {
                       setShowDetailsModal(false);
                       openAddResultModal(selectedExam);
                     }}
-                    className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                    className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
                   >
                     <FaPlus size={12} /> Add Result
                   </button>
@@ -1805,11 +1610,7 @@ const Result_publish = () => {
                         </td>
                         <td className="px-3 py-2">
                           <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                              student.status === "Pass"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-red-100 text-red-700"
-                            }`}
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${student.status === "Pass" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
                           >
                             {student.status === "Pass" ? (
                               <FaCheckCircleIcon
@@ -1831,7 +1632,7 @@ const Result_publish = () => {
                               onClick={() =>
                                 openEditModal(selectedExam, student)
                               }
-                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50 transition-all"
+                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
                               title="Edit"
                             >
                               <FaEdit size={14} />
@@ -1840,7 +1641,7 @@ const Result_publish = () => {
                               onClick={() =>
                                 handleDeleteResult(selectedExam, student)
                               }
-                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                               title="Delete"
                             >
                               <FaTrash size={14} />
@@ -1856,15 +1657,6 @@ const Result_publish = () => {
                           className="px-3 py-8 text-center text-gray-500"
                         >
                           <p>No results added yet</p>
-                          <button
-                            onClick={() => {
-                              setShowDetailsModal(false);
-                              openAddResultModal(selectedExam);
-                            }}
-                            className="mt-2 bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1 mx-auto"
-                          >
-                            <FaPlus size={12} /> Add First Result
-                          </button>
                         </td>
                       </tr>
                     )}
@@ -1872,10 +1664,10 @@ const Result_publish = () => {
                 </table>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>
@@ -1907,7 +1699,6 @@ const Result_publish = () => {
                   {selectedExam.subject}
                 </p>
               </div>
-
               <form onSubmit={handleEditResult} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1925,7 +1716,7 @@ const Result_publish = () => {
                         marks: parseInt(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="Enter marks"
                   />
                   <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
@@ -1940,29 +1731,24 @@ const Result_publish = () => {
                     <div>
                       <span className="text-gray-500">Status:</span>
                       <span
-                        className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
-                          calculateStatus(resultFormData.marks) === "Pass"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-700"
-                        }`}
+                        className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${calculateStatus(resultFormData.marks) === "Pass" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
                       >
                         {calculateStatus(resultFormData.marks)}
                       </span>
                     </div>
                   </div>
                 </div>
-
-                <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <div className="flex gap-3 pt-4 border-t">
                   <button
                     type="submit"
-                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold text-sm transition-all"
+                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold text-sm"
                   >
                     <FaSave className="inline mr-2" size={14} /> Update Result
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowEditModal(false)}
-                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
+                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
                   >
                     Cancel
                   </button>

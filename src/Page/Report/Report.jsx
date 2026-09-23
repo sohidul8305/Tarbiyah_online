@@ -1,6 +1,6 @@
 // src/Page/Admin/Report.jsx
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -18,13 +18,10 @@ import {
   FaSearch,
   FaFilter,
   FaPlus,
-  FaCheckCircle,
-  FaTimesCircle,
   FaArrowRight,
   FaLayerGroup,
   FaSave,
   FaUserTimes,
-  FaHourglassHalf,
   FaFilePdf,
   FaFileExcel,
   FaPrint,
@@ -109,9 +106,10 @@ const isEldersCourse = (courseStr) => {
 const Report = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("finance");
-  const [activeSubMenu, setActiveSubMenu] = useState("report");
+  const [expandedMenu, setExpandedMenu] = useState("finance");
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -121,7 +119,6 @@ const Report = () => {
     joinDate: "",
   });
 
-  // ✅ Elders students from API
   const [eldersStudents, setEldersStudents] = useState([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
 
@@ -144,7 +141,6 @@ const Report = () => {
     description: "",
   });
 
-  // ✅ Custom reports (elders only)
   const [customReports, setCustomReports] = useState(() => {
     const saved = localStorage.getItem("eldersCustomReports");
     if (saved) {
@@ -191,9 +187,7 @@ const Report = () => {
   const reportTypes = ["financial", "performance", "teacher"];
   const formats = ["PDF", "Excel", "CSV"];
 
-  // ============================================================
-  // ✅ Elders Department Report Data
-  // ============================================================
+  // Financial data
   const [financialData] = useState({
     totalRevenue: 63600,
     totalExpenses: 25000,
@@ -268,98 +262,9 @@ const Report = () => {
     ],
   });
 
-  // Load admin info
-  useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminInfo");
-    if (savedAdmin) {
-      try {
-        setAdminInfo(JSON.parse(savedAdmin));
-      } catch (err) {
-        console.error(err);
-      }
-    } else {
-      setAdminInfo({
-        name: user?.displayName || "Admin",
-        email: user?.email || "admin@tarabiyah.com",
-        phone: "01700000000",
-        designation: "Administrator",
-        department: "Quran for Elders",
-        joinDate: "January 2024",
-      });
-    }
-  }, [user]);
-
   // ============================================================
-  // ✅ Fetch elders students from API
+  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
   // ============================================================
-  const fetchEldersStudents = async () => {
-    try {
-      setStudentsLoading(true);
-      const res = await fetch(`${API_BASE}/api/students/all`);
-      const text = await res.text();
-
-      if (!text.trim().startsWith("<")) {
-        const data = JSON.parse(text);
-        if (data.success && Array.isArray(data.students)) {
-          const all = data.students || [];
-          const elders = all.filter((s) => isEldersCourse(s.course));
-
-          console.log("📥 Total students:", all.length);
-          console.log("✅ Elders students:", elders.length);
-
-          const formatted = elders.map((s) => ({
-            _id: s._id,
-            name: s.name || "",
-            studentId: s.studentId || s._id?.slice(-8) || "N/A",
-            course: s.course || "",
-            class: s.batch || s.class || "Elders Batch A",
-            batch: s.batch || "Batch-03",
-            phone: s.phone || "",
-            email: s.email || "",
-            status: s.status || "Pending",
-          }));
-
-          setEldersStudents(formatted);
-        }
-      }
-    } catch (err) {
-      console.error("❌ Fetch students error:", err);
-    } finally {
-      setStudentsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEldersStudents();
-  }, []);
-
-  // Save custom reports
-  useEffect(() => {
-    localStorage.setItem("eldersCustomReports", JSON.stringify(customReports));
-  }, [customReports]);
-
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminInfo");
-      localStorage.removeItem("adminEmail");
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-      navigate("/admin-login");
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  const toggleSubMenu = (menu) =>
-    setActiveSubMenu(activeSubMenu === menu ? null : menu);
-
   const menuItems = [
     {
       id: "profile",
@@ -382,6 +287,16 @@ const Report = () => {
           id: "today-class",
           path: "/admin-dashboard/today-class",
           label: "Today's Class",
+        },
+        {
+          id: "basic-tazweed",
+          path: "/admin-dashboard/basic-tazweed",
+          label: "Basic Tazweed Payment Overview",
+        },
+        {
+          id: "najera-batch",
+          path: "/admin-dashboard/najera-batch",
+          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -510,20 +425,184 @@ const Report = () => {
       path: "/admin-exam",
       icon: <FaCalendarCheck className="text-xl" />,
       label: "Exam",
+      subItems: [
+        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
+        {
+          id: "result-publish",
+          path: "/admin-exam/result",
+          label: "Result Publish",
+        },
+        {
+          id: "certificate-permission",
+          path: "/admin-exam/certificate",
+          label: "Certificate Permission",
+        },
+        { id: "grad", path: "/admin-exam/grad", label: "Grad" },
+        {
+          id: "class-test",
+          path: "/admin-exam/class-test",
+          label: "Class Test",
+        },
+        {
+          id: "mid-term",
+          path: "/admin-exam/mid-term",
+          label: "Mid Term Exam",
+        },
+        {
+          id: "final-exam",
+          path: "/admin-exam/final-exam",
+          label: "Final Exam",
+        },
+      ],
     },
     {
       id: "report-analytics",
       path: "/admin-reports",
       icon: <FaChartLine className="text-xl" />,
       label: "Report & Analytics",
+      subItems: [
+        {
+          id: "admission-report",
+          path: "/admin-reports/admission",
+          label: "Admission Report",
+        },
+        {
+          id: "attendance-report",
+          path: "/admin-reports/attendance",
+          label: "Attendance Report",
+        },
+        { id: "income", path: "/admin-reports/income", label: "Income" },
+      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
       icon: <FaDatabase className="text-xl" />,
       label: "CRM Management",
+      subItems: [
+        {
+          id: "data-entry",
+          path: "/admin-crm/data-entry",
+          label: "Data Entry",
+        },
+      ],
+    },
+    {
+      id: "salary",
+      path: "/admin-salary",
+      icon: <FaMoneyBillWave className="text-xl" />,
+      label: "Salary",
+      subItems: [
+        {
+          id: "total-salary",
+          path: "/admin-salary/total",
+          label: "Total Salary",
+        },
+        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
+      ],
     },
   ];
+
+  // ✅ URL থেকে active auto-detect
+  const getActiveFromPath = () => {
+    const currentPath = location.pathname;
+    for (const item of menuItems) {
+      if (item.subItems) {
+        const match = item.subItems.find((s) => s.path === currentPath);
+        if (match) return { menu: item.id, sub: match.id };
+      }
+      if (item.path === currentPath) return { menu: item.id, sub: null };
+    }
+    return { menu: null, sub: null };
+  };
+
+  const { menu: activeMenu, sub: activeSubMenu } = getActiveFromPath();
+
+  useEffect(() => {
+    if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
+  }, [activeMenu, activeSubMenu]);
+
+  // Load admin info
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminInfo");
+    if (savedAdmin) {
+      try {
+        setAdminInfo(JSON.parse(savedAdmin));
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      setAdminInfo({
+        name: user?.displayName || "Admin",
+        email: user?.email || "admin@tarabiyah.com",
+        phone: "01700000000",
+        designation: "Administrator",
+        department: "Quran for Elders",
+        joinDate: "January 2024",
+      });
+    }
+  }, [user]);
+
+  const fetchEldersStudents = async () => {
+    try {
+      setStudentsLoading(true);
+      const res = await fetch(`${API_BASE}/api/students/all`);
+      const text = await res.text();
+
+      if (!text.trim().startsWith("<")) {
+        const data = JSON.parse(text);
+        if (data.success && Array.isArray(data.students)) {
+          const all = data.students || [];
+          const elders = all.filter((s) => isEldersCourse(s.course));
+          const formatted = elders.map((s) => ({
+            _id: s._id,
+            name: s.name || "",
+            studentId: s.studentId || s._id?.slice(-8) || "N/A",
+            course: s.course || "",
+            class: s.batch || s.class || "Elders Batch A",
+            batch: s.batch || "Batch-03",
+            phone: s.phone || "",
+            email: s.email || "",
+            status: s.status || "Pending",
+          }));
+          setEldersStudents(formatted);
+        }
+      }
+    } catch (err) {
+      console.error("❌ Fetch students error:", err);
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEldersStudents();
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("eldersCustomReports", JSON.stringify(customReports));
+  }, [customReports]);
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("adminEmail");
+      await Swal.fire({
+        icon: "success",
+        title: "Logged Out Successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      navigate("/admin-login");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setExpandedMenu(expandedMenu === menu ? null : menu);
 
   const getReportTypeLabel = (type) => {
     switch (type) {
@@ -555,8 +634,7 @@ const Report = () => {
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -583,9 +661,7 @@ const Report = () => {
     });
   };
 
-  const printReport = () => {
-    window.print();
-  };
+  const printReport = () => window.print();
 
   const getReportTitle = () => {
     switch (reportType) {
@@ -616,7 +692,6 @@ const Report = () => {
 
   const handleAddReport = (e) => {
     e.preventDefault();
-
     if (!formData.reportName || !formData.reportType) {
       Swal.fire({
         icon: "warning",
@@ -626,7 +701,6 @@ const Report = () => {
       });
       return;
     }
-
     const newReport = {
       id: Date.now(),
       reportName: formData.reportName,
@@ -640,7 +714,6 @@ const Report = () => {
       generatedDate: new Date().toISOString().split("T")[0],
       generatedBy: adminInfo.name,
     };
-
     setCustomReports([...customReports, newReport]);
     setShowAddModal(false);
     Swal.fire({
@@ -674,9 +747,6 @@ const Report = () => {
     });
   };
 
-  // ============================================================
-  // ✅ Render Financial Report
-  // ============================================================
   const renderFinancialReport = () => (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -757,16 +827,13 @@ const Report = () => {
                 <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="bg-blue-500 h-full rounded-full"
-                    style={{
-                      width: `${(item.collected / item.total) * 100}%`,
-                    }}
+                    style={{ width: `${(item.collected / item.total) * 100}%` }}
                   ></div>
                 </div>
               </div>
             ))}
           </div>
         </div>
-
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
           <h4 className="font-semibold text-gray-700 text-sm mb-3">
             Payment Methods
@@ -796,7 +863,6 @@ const Report = () => {
     </div>
   );
 
-  // ✅ Render Performance Report
   const renderPerformanceReport = () => (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -841,13 +907,7 @@ const Report = () => {
               </div>
               <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${
-                    item.average >= 85
-                      ? "bg-green-500"
-                      : item.average >= 70
-                        ? "bg-yellow-500"
-                        : "bg-red-500"
-                  }`}
+                  className={`h-full rounded-full ${item.average >= 85 ? "bg-green-500" : item.average >= 70 ? "bg-yellow-500" : "bg-red-500"}`}
                   style={{ width: `${item.average}%` }}
                 ></div>
               </div>
@@ -870,13 +930,7 @@ const Report = () => {
                 </div>
                 <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${
-                      item.average >= 85
-                        ? "bg-green-500"
-                        : item.average >= 70
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
-                    }`}
+                    className={`h-full rounded-full ${item.average >= 85 ? "bg-green-500" : item.average >= 70 ? "bg-yellow-500" : "bg-red-500"}`}
                     style={{ width: `${item.average}%` }}
                   ></div>
                 </div>
@@ -884,7 +938,6 @@ const Report = () => {
             ))}
           </div>
         </div>
-
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
           <h4 className="font-semibold text-gray-700 text-sm mb-3">
             Attendance Trend
@@ -898,13 +951,7 @@ const Report = () => {
                 </div>
                 <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${
-                      item.attendance >= 80
-                        ? "bg-green-500"
-                        : item.attendance >= 70
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
-                    }`}
+                    className={`h-full rounded-full ${item.attendance >= 80 ? "bg-green-500" : item.attendance >= 70 ? "bg-yellow-500" : "bg-red-500"}`}
                     style={{ width: `${item.attendance}%` }}
                   ></div>
                 </div>
@@ -916,7 +963,6 @@ const Report = () => {
     </div>
   );
 
-  // ✅ Render Teacher Report
   const renderTeacherReport = () => (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -1030,76 +1076,72 @@ const Report = () => {
           </div>
 
           <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
-            {menuItems.map((item) => (
-              <div key={item.id}>
-                {item.subItems ? (
-                  <>
-                    <button
-                      onClick={() => {
-                        setActiveMenu(item.id);
-                        toggleSubMenu(item.id);
-                        setIsSidebarOpen(false);
-                      }}
-                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
+            {menuItems.map((item) => {
+              const isParentActive = activeMenu === item.id;
+              return (
+                <div key={item.id}>
+                  {item.subItems ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          toggleSubMenu(item.id);
+                          setIsSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-600">{item.icon}</span>
+                          <span>{item.label}</span>
+                        </div>
+                        <span
+                          className={`transition-transform ${expandedMenu === item.id ? "rotate-90" : ""}`}
+                        >
+                          <FaArrowRight size={12} />
+                        </span>
+                      </button>
+                      {expandedMenu === item.id && (
+                        <div className="ml-6 space-y-1 mt-1">
+                          {item.subItems.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              to={sub.path}
+                              onClick={() => setIsSidebarOpen(false)}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
+                                activeSubMenu === sub.id
+                                  ? "bg-teal-50 text-[#004d4d] font-bold"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
+                              }`}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={() => setIsSidebarOpen(false)}
                     >
-                      <div className="flex items-center gap-3">
+                      <button
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }`}
+                      >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
-                      </div>
-                      <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
-                      >
-                        <FaArrowRight size={12} />
-                      </span>
-                    </button>
-                    {activeSubMenu === item.id && (
-                      <div className="ml-6 space-y-1 mt-1">
-                        {item.subItems.map((sub) => (
-                          <Link
-                            key={sub.id}
-                            to={sub.path}
-                            onClick={() => {
-                              setActiveSubMenu(sub.id);
-                              setIsSidebarOpen(false);
-                            }}
-                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
-                          >
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <Link
-                    to={item.path}
-                    onClick={() => {
-                      setActiveMenu(item.id);
-                      setIsSidebarOpen(false);
-                    }}
-                  >
-                    <button
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
-                    >
-                      <span className="text-gray-600">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </button>
-                  </Link>
-                )}
-              </div>
-            ))}
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
 
             <button
               onClick={handleLogout}
@@ -1146,7 +1188,7 @@ const Report = () => {
                 <FaSyncAlt
                   size={12}
                   className={studentsLoading ? "animate-spin" : ""}
-                />
+                />{" "}
                 Refresh
               </button>
               <button
@@ -1182,7 +1224,7 @@ const Report = () => {
             </div>
           </div>
 
-          {/* ✅ Elders Students Card */}
+          {/* Elders Students Card */}
           <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
             <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
               <FaUsers size={12} /> Elders Students ({eldersStudents.length})
@@ -1228,31 +1270,19 @@ const Report = () => {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setReportType("financial")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  reportType === "financial"
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${reportType === "financial" ? "bg-blue-600 text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
               >
                 <FaMoneyBillWave className="inline mr-1" /> Financial Report
               </button>
               <button
                 onClick={() => setReportType("performance")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  reportType === "performance"
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${reportType === "performance" ? "bg-blue-600 text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
               >
                 <FaUserGraduate className="inline mr-1" /> Student Performance
               </button>
               <button
                 onClick={() => setReportType("teacher")}
-                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  reportType === "teacher"
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
+                className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all ${reportType === "teacher" ? "bg-blue-600 text-white shadow-sm" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
               >
                 <FaChalkboardTeacher className="inline mr-1" /> Teacher
                 Performance
@@ -1334,8 +1364,7 @@ const Report = () => {
                                       <p><strong>Format:</strong> ${report.format}</p>
                                       <p><strong>By:</strong> ${report.generatedBy}</p>
                                       ${report.description ? `<p><strong>Description:</strong> ${report.description}</p>` : ""}
-                                    </div>
-                                  `,
+                                    </div>`,
                                   confirmButtonColor: "#3b82f6",
                                   confirmButtonText: "Close",
                                 });
@@ -1435,7 +1464,6 @@ const Report = () => {
               {months[selectedMonth]} {selectedYear} | {selectedCourse} |{" "}
               {selectedStatus}
             </p>
-
             {reportType === "financial" && renderFinancialReport()}
             {reportType === "performance" && renderPerformanceReport()}
             {reportType === "teacher" && renderTeacherReport()}
@@ -1474,7 +1502,6 @@ const Report = () => {
                   placeholder="e.g., Monthly Financial - Sept 2026"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Report Type *
@@ -1494,7 +1521,6 @@ const Report = () => {
                   ))}
                 </select>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1539,7 +1565,6 @@ const Report = () => {
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1579,7 +1604,6 @@ const Report = () => {
                   </select>
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Format
@@ -1598,7 +1622,6 @@ const Report = () => {
                   ))}
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
@@ -1613,7 +1636,6 @@ const Report = () => {
                   placeholder="Short description..."
                 />
               </div>
-
               <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"

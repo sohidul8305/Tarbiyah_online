@@ -1,6 +1,6 @@
 // src/Page/Admin/Exam_make.jsx
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -9,187 +9,38 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
-  FaClock,
-  FaBook,
-  FaFileAlt,
-  FaChartLine,
-  FaUserGraduate,
-  FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
+  FaChartLine,
   FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
-  FaPlusCircle,
-  FaDownload,
-  FaPrint,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
   FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
-  FaUserEdit,
-  FaUserCircle,
-  FaAddressCard,
-  FaChalkboard,
-  FaCalendarDay,
-  FaSchool as FaSchoolIcon,
-  FaUserTie,
-  FaBookReader,
-  FaStopwatch,
+  FaPlusCircle,
   FaClipboardCheck,
-  FaExchangeAlt,
+  FaListUl,
+  FaInfoCircle,
   FaCheckDouble,
-  FaBan,
-  FaCheck,
-  FaTimes,
-  FaQuestion,
-  FaCalendarWeek,
-  FaChartBar,
-  FaFileDownload,
-  FaFilePdf,
-  FaFileExcel,
-  FaRegClock,
-  FaRegCalendarAlt,
-  FaRegCalendarCheck,
-  FaWhatsapp,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaGlobe as FaGlobeIcon,
-  FaEnvelope as FaEnvelopeIcon,
-  FaPhone as FaPhoneIcon,
-  FaUsers as FaUsersIcon,
-  FaCalendar,
-  FaClock as FaClockIcon2,
-  FaHourglassHalf,
+  FaPencilAlt,
   FaCheckCircle as FaCheckCircleIcon,
   FaTimesCircle as FaTimesCircleIcon,
-  FaBookmark,
-  FaListUl,
-  FaChevronRight,
-  FaChevronDown,
-  FaFolderOpen,
-  FaFile,
-  FaFilePdf as FaFilePdfIcon,
-  FaFileWord,
-  FaFilePowerpoint,
-  FaFileImage,
-  FaFileVideo,
-  FaFileAudio,
-  FaFileArchive,
-  FaFileCode,
-  FaFileExcel as FaFileExcelIcon,
-  FaFileAlt as FaFileAltIcon,
-  FaFolder,
-  FaCopy,
-  FaCut,
-  FaPaste,
-  FaShare,
-  FaStar as FaStarIcon,
-  FaRegStar,
-  FaRegFileAlt,
-  FaRegFilePdf,
-  FaRegFileWord,
-  FaRegFileExcel,
-  FaRegFilePowerpoint,
-  FaRegFileImage,
-  FaRegFileVideo,
-  FaRegFileArchive,
-  FaEraser,
-  FaTrashAlt,
-  FaCalendarTimes,
-  FaRedoAlt,
-  FaUndoAlt,
-  FaSync,
-  FaExclamationCircle,
-  FaInfoCircle as FaInfoCircleIcon,
-  FaMoneyCheck,
-  FaMoneyCheckAlt,
-  FaHandHoldingUsd,
-  FaDonate,
-  FaFileInvoice as FaFileInvoiceIcon2,
-  FaFileSignature,
-  FaReceipt as FaReceiptIcon,
-  FaCreditCard as FaCreditCardIcon,
-  FaPrint as FaPrintIcon,
-  FaShareAlt,
-  FaChartPie,
-  FaChartArea,
-  FaTasks,
-  FaCheckDouble as FaCheckDoubleIcon,
-  FaPen,
-  FaPencilAlt,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Exam_make = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("exam");
-  const [activeSubMenu, setActiveSubMenu] = useState("exam-make");
+  const [expandedMenu, setExpandedMenu] = useState("exam");
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -370,21 +221,18 @@ const Exam_make = () => {
     },
   ]);
 
-  // State for filters
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterClass, setFilterClass] = useState("All");
   const [filterSubject, setFilterSubject] = useState("All");
   const [filterType, setFilterType] = useState("All");
 
-  // State for modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showQuestionsModal, setShowQuestionsModal] = useState(false);
   const [selectedExam, setSelectedExam] = useState(null);
 
-  // Form data
   const [formData, setFormData] = useState({
     examName: "",
     examCode: "",
@@ -402,7 +250,6 @@ const Exam_make = () => {
     questions: [],
   });
 
-  // Question form data
   const [questionFormData, setQuestionFormData] = useState({
     type: "MCQ",
     question: "",
@@ -411,7 +258,6 @@ const Exam_make = () => {
     correctAnswer: "",
   });
 
-  // Available options
   const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
   const subjects = [
     "Tajweed",
@@ -433,65 +279,9 @@ const Exam_make = () => {
   const statuses = ["Draft", "Published", "Completed", "Cancelled"];
   const questionTypes = ["MCQ", "Written", "True/False", "Fill in the Blanks"];
 
-  // Load admin info
-  useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminInfo");
-    if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
-    } else {
-      setAdminInfo({
-        name: user?.displayName || "Admin",
-        email: user?.email || "admin@tarabiyah.com",
-        phone: "01700000000",
-        designation: "Administrator",
-        department: "Administration",
-        joinDate: "January 2024",
-      });
-    }
-  }, [user]);
-
-  // Save exams to localStorage
-  useEffect(() => {
-    localStorage.setItem("exams", JSON.stringify(exams));
-  }, [exams]);
-
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminInfo");
-      localStorage.removeItem("adminEmail");
-
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-      navigate("/admin-login");
-    } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
-    }
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
+  // ============================================================
+  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
+  // ============================================================
   const menuItems = [
     {
       id: "profile",
@@ -516,9 +306,14 @@ const Exam_make = () => {
           label: "Today's Class",
         },
         {
-          id: "payment-overview",
-          path: "/admin-dashboard/payment-overview",
-          label: "Payment Overview",
+          id: "basic-tazweed",
+          path: "/admin-dashboard/basic-tazweed",
+          label: "Basic Tazweed Payment Overview",
+        },
+        {
+          id: "najera-batch",
+          path: "/admin-dashboard/najera-batch",
+          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -659,6 +454,22 @@ const Exam_make = () => {
           path: "/admin-exam/certificate",
           label: "Certificate Permission",
         },
+        { id: "grad", path: "/admin-exam/grad", label: "Grad" },
+        {
+          id: "class-test",
+          path: "/admin-exam/class-test",
+          label: "Class Test",
+        },
+        {
+          id: "mid-term",
+          path: "/admin-exam/mid-term",
+          label: "Mid Term Exam",
+        },
+        {
+          id: "final-exam",
+          path: "/admin-exam/final-exam",
+          label: "Final Exam",
+        },
       ],
     },
     {
@@ -709,7 +520,72 @@ const Exam_make = () => {
     },
   ];
 
-  // Get status badge color
+  // ✅ URL থেকে active auto-detect
+  const getActiveFromPath = () => {
+    const currentPath = location.pathname;
+    for (const item of menuItems) {
+      if (item.subItems) {
+        const match = item.subItems.find((s) => s.path === currentPath);
+        if (match) return { menu: item.id, sub: match.id };
+      }
+      if (item.path === currentPath) return { menu: item.id, sub: null };
+    }
+    return { menu: null, sub: null };
+  };
+
+  const { menu: activeMenu, sub: activeSubMenu } = getActiveFromPath();
+
+  // Auto-expand parent of active submenu
+  useEffect(() => {
+    if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
+  }, [activeMenu, activeSubMenu]);
+
+  // Load admin info
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminInfo");
+    if (savedAdmin) setAdminInfo(JSON.parse(savedAdmin));
+    else
+      setAdminInfo({
+        name: user?.displayName || "Admin",
+        email: user?.email || "admin@tarabiyah.com",
+        phone: "01700000000",
+        designation: "Administrator",
+        department: "Administration",
+        joinDate: "January 2024",
+      });
+  }, [user]);
+
+  // Save exams
+  useEffect(() => {
+    localStorage.setItem("exams", JSON.stringify(exams));
+  }, [exams]);
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("adminEmail");
+      await Swal.fire({
+        icon: "success",
+        title: "Logged Out Successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      navigate("/admin-login");
+    } catch (err) {
+      console.error("Logout error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Logout Failed",
+        text: "Please try again",
+      });
+    }
+  };
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setExpandedMenu(expandedMenu === menu ? null : menu);
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Published":
@@ -725,7 +601,6 @@ const Exam_make = () => {
     }
   };
 
-  // Get status icon
   const getStatusIcon = (status) => {
     switch (status) {
       case "Published":
@@ -733,7 +608,7 @@ const Exam_make = () => {
       case "Draft":
         return <FaPencilAlt className="text-yellow-500" />;
       case "Completed":
-        return <FaCheckDoubleIcon className="text-blue-500" />;
+        return <FaCheckDouble className="text-blue-500" />;
       case "Cancelled":
         return <FaTimesCircleIcon className="text-red-500" />;
       default:
@@ -741,7 +616,6 @@ const Exam_make = () => {
     }
   };
 
-  // Filter exams
   const filteredExams = exams.filter((exam) => {
     const matchesSearch =
       exam.examName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -763,13 +637,11 @@ const Exam_make = () => {
     );
   });
 
-  // Get unique values for filters
   const uniqueStatuses = ["All", ...new Set(exams.map((e) => e.status))];
   const uniqueClasses = ["All", ...new Set(exams.map((e) => e.class))];
   const uniqueSubjects = ["All", ...new Set(exams.map((e) => e.subject))];
   const uniqueTypes = ["All", ...new Set(exams.map((e) => e.type))];
 
-  // Generate exam code
   const generateExamCode = (examName) => {
     const prefix = examName.substring(0, 2).toUpperCase();
     const year = new Date().getFullYear();
@@ -777,7 +649,6 @@ const Exam_make = () => {
     return `${prefix}-${year}-${String(count).padStart(2, "0")}`;
   };
 
-  // Open add modal
   const openAddModal = () => {
     setFormData({
       examName: "",
@@ -798,7 +669,6 @@ const Exam_make = () => {
     setShowAddModal(true);
   };
 
-  // Open edit modal
   const openEditModal = (exam) => {
     setSelectedExam(exam);
     setFormData({
@@ -820,22 +690,17 @@ const Exam_make = () => {
     setShowEditModal(true);
   };
 
-  // Open details modal
   const openDetailsModal = (exam) => {
     setSelectedExam(exam);
     setShowDetailsModal(true);
   };
-
-  // Open questions modal
   const openQuestionsModal = (exam) => {
     setSelectedExam(exam);
     setShowQuestionsModal(true);
   };
 
-  // Handle add exam
   const handleAddExam = (e) => {
     e.preventDefault();
-
     if (
       !formData.examName ||
       !formData.class ||
@@ -852,7 +717,6 @@ const Exam_make = () => {
       });
       return;
     }
-
     const newExam = {
       id: Date.now(),
       examName: formData.examName,
@@ -874,22 +738,19 @@ const Exam_make = () => {
       createdAt: new Date().toISOString().split("T")[0],
       questions: formData.questions || [],
     };
-
     setExams([...exams, newExam]);
     setShowAddModal(false);
     Swal.fire({
       icon: "success",
       title: "Exam Created!",
-      text: `${formData.examName} has been created successfully.`,
+      text: `${formData.examName} has been created.`,
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle edit exam
   const handleEditExam = (e) => {
     e.preventDefault();
-
     if (
       !formData.examName ||
       !formData.class ||
@@ -906,7 +767,6 @@ const Exam_make = () => {
       });
       return;
     }
-
     setExams(
       exams.map((exam) =>
         exam.id === selectedExam.id
@@ -934,13 +794,12 @@ const Exam_make = () => {
     Swal.fire({
       icon: "success",
       title: "Exam Updated!",
-      text: "Exam has been updated successfully.",
+      text: "Exam updated successfully.",
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle delete exam
   const handleDeleteExam = (id) => {
     Swal.fire({
       title: "Delete Exam?",
@@ -958,10 +817,8 @@ const Exam_make = () => {
     });
   };
 
-  // Handle add question
   const handleAddQuestion = (e) => {
     e.preventDefault();
-
     if (!questionFormData.question || !questionFormData.marks) {
       Swal.fire({
         icon: "warning",
@@ -971,14 +828,12 @@ const Exam_make = () => {
       });
       return;
     }
-
     const newQuestion = {
       id: Date.now(),
       type: questionFormData.type,
       question: questionFormData.question,
       marks: questionFormData.marks,
     };
-
     setExams(
       exams.map((exam) =>
         exam.id === selectedExam.id
@@ -986,13 +841,10 @@ const Exam_make = () => {
           : exam,
       ),
     );
-
-    // Update selected exam
     setSelectedExam({
       ...selectedExam,
       questions: [...selectedExam.questions, newQuestion],
     });
-
     setQuestionFormData({
       type: "MCQ",
       question: "",
@@ -1000,17 +852,14 @@ const Exam_make = () => {
       options: ["", "", "", ""],
       correctAnswer: "",
     });
-
     Swal.fire({
       icon: "success",
       title: "Question Added!",
-      text: "Question has been added successfully.",
       timer: 1000,
       showConfirmButton: false,
     });
   };
 
-  // Handle delete question
   const handleDeleteQuestion = (questionId) => {
     Swal.fire({
       title: "Delete Question?",
@@ -1036,12 +885,11 @@ const Exam_make = () => {
           ...selectedExam,
           questions: selectedExam.questions.filter((q) => q.id !== questionId),
         });
-        Swal.fire("Deleted!", "Question has been deleted.", "success");
+        Swal.fire("Deleted!", "Question deleted.", "success");
       }
     });
   };
 
-  // Handle publish exam
   const handlePublishExam = (id) => {
     Swal.fire({
       title: "Publish Exam?",
@@ -1061,7 +909,6 @@ const Exam_make = () => {
         Swal.fire({
           icon: "success",
           title: "Exam Published!",
-          text: "Exam has been published successfully.",
           timer: 1500,
           showConfirmButton: false,
         });
@@ -1069,11 +916,9 @@ const Exam_make = () => {
     });
   };
 
-  // Format date
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -1097,14 +942,9 @@ const Exam_make = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm transition-all duration-300 ease-in-out
+            h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -1124,83 +964,73 @@ const Exam_make = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
-            {menuItems.map((item) => (
-              <div key={item.id}>
-                {item.subItems ? (
-                  <>
-                    <button
-                      onClick={() => {
-                        setActiveMenu(item.id);
-                        toggleSubMenu(item.id);
-                        setIsSidebarOpen(false);
-                      }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
+            {menuItems.map((item) => {
+              const isParentActive = activeMenu === item.id;
+              return (
+                <div key={item.id}>
+                  {item.subItems ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          toggleSubMenu(item.id);
+                          setIsSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
                             ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
                             : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-600">{item.icon}</span>
+                          <span>{item.label}</span>
+                        </div>
+                        <span
+                          className={`transition-transform ${expandedMenu === item.id ? "rotate-90" : ""}`}
+                        >
+                          <FaArrowRight size={12} />
+                        </span>
+                      </button>
+                      {expandedMenu === item.id && (
+                        <div className="ml-6 space-y-1 mt-1">
+                          {item.subItems.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              to={sub.path}
+                              onClick={() => setIsSidebarOpen(false)}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
+                                activeSubMenu === sub.id
+                                  ? "bg-teal-50 text-[#004d4d] font-bold"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
+                              }`}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={() => setIsSidebarOpen(false)}
                     >
-                      <div className="flex items-center gap-3">
+                      <button
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }`}
+                      >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
-                      </div>
-                      <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
-                      >
-                        <FaArrowRight size={12} />
-                      </span>
-                    </button>
-                    {activeSubMenu === item.id && (
-                      <div className="ml-6 space-y-1 mt-1">
-                        {item.subItems.map((sub) => (
-                          <Link
-                            key={sub.id}
-                            to={sub.path}
-                            onClick={() => {
-                              setActiveSubMenu(sub.id);
-                              setIsSidebarOpen(false);
-                            }}
-                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
-                          >
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <Link
-                    to={item.path}
-                    onClick={() => {
-                      setActiveMenu(item.id);
-                      setIsSidebarOpen(false);
-                    }}
-                  >
-                    <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
-                    >
-                      <span className="text-gray-600">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </button>
-                  </Link>
-                )}
-              </div>
-            ))}
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
 
             <button
               onClick={handleLogout}
@@ -1216,7 +1046,6 @@ const Exam_make = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1225,7 +1054,7 @@ const Exam_make = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
@@ -1289,51 +1118,51 @@ const Exam_make = () => {
                   placeholder="Search by name, code, subject or teacher..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg"
                 />
               </div>
               <div className="flex items-center gap-1 flex-wrap">
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {uniqueStatuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterClass}
                   onChange={(e) => setFilterClass(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueClasses.map((cls) => (
-                    <option key={cls} value={cls}>
-                      {cls}
+                  {uniqueClasses.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterSubject}
                   onChange={(e) => setFilterSubject(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueSubjects.map((subject) => (
-                    <option key={subject} value={subject}>
-                      {subject}
+                  {uniqueSubjects.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
+                  {uniqueTypes.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
                     </option>
                   ))}
                 </select>
@@ -1350,15 +1179,7 @@ const Exam_make = () => {
                   className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden"
                 >
                   <div
-                    className={`h-1 ${
-                      exam.status === "Published"
-                        ? "bg-green-500"
-                        : exam.status === "Draft"
-                          ? "bg-yellow-500"
-                          : exam.status === "Completed"
-                            ? "bg-blue-500"
-                            : "bg-red-500"
-                    }`}
+                    className={`h-1 ${exam.status === "Published" ? "bg-green-500" : exam.status === "Draft" ? "bg-yellow-500" : exam.status === "Completed" ? "bg-blue-500" : "bg-red-500"}`}
                   ></div>
                   <div className="p-3">
                     <div className="flex items-start justify-between">
@@ -1420,7 +1241,7 @@ const Exam_make = () => {
 
                     {exam.status === "Completed" && (
                       <div className="mt-1 flex items-center gap-2 text-[10px]">
-                        <span className="text-gray-400">Avg Score:</span>
+                        <span className="text-gray-400">Avg:</span>
                         <span className="font-bold text-blue-600">
                           {exam.averageScore}%
                         </span>
@@ -1431,24 +1252,23 @@ const Exam_make = () => {
                       </div>
                     )}
 
-                    {/* Actions */}
                     <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100">
                       <button
                         onClick={() => openDetailsModal(exam)}
-                        className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all"
+                        className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50"
                       >
                         <FaEye className="inline mr-1" size={10} /> View
                       </button>
                       <button
                         onClick={() => openQuestionsModal(exam)}
-                        className="text-purple-600 hover:text-purple-800 p-1 rounded hover:bg-purple-50 transition-all"
+                        className="text-purple-600 hover:text-purple-800 p-1 rounded hover:bg-purple-50"
                         title="Questions"
                       >
                         <FaListUl size={12} />
                       </button>
                       <button
                         onClick={() => openEditModal(exam)}
-                        className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
+                        className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
                         title="Edit"
                       >
                         <FaEdit size={12} />
@@ -1456,7 +1276,7 @@ const Exam_make = () => {
                       {exam.status === "Draft" && (
                         <button
                           onClick={() => handlePublishExam(exam.id)}
-                          className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
+                          className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
                           title="Publish"
                         >
                           <FaCheckCircleIcon size={12} />
@@ -1464,7 +1284,7 @@ const Exam_make = () => {
                       )}
                       <button
                         onClick={() => handleDeleteExam(exam.id)}
-                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                         title="Delete"
                       >
                         <FaTrash size={12} />
@@ -1515,11 +1335,10 @@ const Exam_make = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, examName: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   placeholder="e.g., Midterm Exam 2026"
                 />
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1531,7 +1350,7 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, examCode: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="e.g., MT-2026-01"
                   />
                 </div>
@@ -1545,7 +1364,7 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">Select Class</option>
                     {classes.map((cls) => (
@@ -1556,7 +1375,6 @@ const Exam_make = () => {
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1568,12 +1386,12 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">Select Subject</option>
-                    {subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
+                    {subjects.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
@@ -1588,18 +1406,17 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, teacher: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">Select Teacher</option>
-                    {teachers.map((teacher) => (
-                      <option key={teacher} value={teacher}>
-                        {teacher}
+                    {teachers.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1612,7 +1429,7 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, date: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1626,12 +1443,11 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, time: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="e.g., 10:00 AM - 12:00 PM"
                   />
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1643,7 +1459,7 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, duration: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="e.g., 2 hours"
                   />
                 </div>
@@ -1657,7 +1473,7 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, type: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     {examTypes.map((type) => (
                       <option key={type} value={type}>
@@ -1667,7 +1483,6 @@ const Exam_make = () => {
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1682,7 +1497,7 @@ const Exam_make = () => {
                         totalMarks: parseInt(e.target.value) || 100,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     min="1"
                   />
                 </div>
@@ -1699,12 +1514,11 @@ const Exam_make = () => {
                         passingMarks: parseInt(e.target.value) || 40,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     min="0"
                   />
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
@@ -1714,7 +1528,7 @@ const Exam_make = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
                   {statuses.map((status) => (
                     <option key={status} value={status}>
@@ -1723,7 +1537,6 @@ const Exam_make = () => {
                   ))}
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
@@ -1734,22 +1547,21 @@ const Exam_make = () => {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   placeholder="Enter exam description..."
                 />
               </div>
-
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold"
                 >
                   <FaSave className="inline mr-2" size={14} /> Create Exam
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -1786,11 +1598,9 @@ const Exam_make = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, examName: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g., Midterm Exam 2026"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1802,8 +1612,7 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, examCode: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., MT-2026-01"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1816,7 +1625,7 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     {classes.map((cls) => (
                       <option key={cls} value={cls}>
@@ -1826,7 +1635,6 @@ const Exam_make = () => {
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1838,11 +1646,11 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
+                    {subjects.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
@@ -1857,17 +1665,16 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, teacher: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {teachers.map((teacher) => (
-                      <option key={teacher} value={teacher}>
-                        {teacher}
+                    {teachers.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1880,7 +1687,7 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, date: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1894,12 +1701,10 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, time: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., 10:00 AM - 12:00 PM"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1911,8 +1716,7 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, duration: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., 2 hours"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1925,7 +1729,7 @@ const Exam_make = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, type: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     {examTypes.map((type) => (
                       <option key={type} value={type}>
@@ -1935,7 +1739,6 @@ const Exam_make = () => {
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1950,7 +1753,7 @@ const Exam_make = () => {
                         totalMarks: parseInt(e.target.value) || 100,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     min="1"
                   />
                 </div>
@@ -1967,12 +1770,11 @@ const Exam_make = () => {
                         passingMarks: parseInt(e.target.value) || 40,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     min="0"
                   />
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
@@ -1982,7 +1784,7 @@ const Exam_make = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
                   {statuses.map((status) => (
                     <option key={status} value={status}>
@@ -1991,7 +1793,6 @@ const Exam_make = () => {
                   ))}
                 </select>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
@@ -2002,22 +1803,20 @@ const Exam_make = () => {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter exam description..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold"
                 >
                   <FaSave className="inline mr-2" size={14} /> Update Exam
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -2044,7 +1843,6 @@ const Exam_make = () => {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              {/* Add Question Form */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <h4 className="font-semibold text-gray-700 text-sm mb-3">
                   Add New Question
@@ -2063,7 +1861,7 @@ const Exam_make = () => {
                             type: e.target.value,
                           })
                         }
-                        className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
                       >
                         {questionTypes.map((type) => (
                           <option key={type} value={type}>
@@ -2086,13 +1884,13 @@ const Exam_make = () => {
                             marks: parseInt(e.target.value) || 5,
                           })
                         }
-                        className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-sm"
                       />
                     </div>
                     <div className="flex items-end">
                       <button
                         type="submit"
-                        className="w-full bg-purple-600 hover:bg-purple-700 text-white py-1.5 rounded-lg text-sm font-semibold transition-all"
+                        className="w-full bg-purple-600 hover:bg-purple-700 text-white py-1.5 rounded-lg text-sm font-semibold"
                       >
                         <FaPlusCircle className="inline mr-1" size={14} /> Add
                         Question
@@ -2113,14 +1911,13 @@ const Exam_make = () => {
                           question: e.target.value,
                         })
                       }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                       placeholder="Enter question"
                     />
                   </div>
                 </form>
               </div>
 
-              {/* Questions List */}
               <div>
                 <h4 className="font-semibold text-gray-700 text-sm mb-2">
                   Questions ({selectedExam.questions.length})
@@ -2156,10 +1953,10 @@ const Exam_make = () => {
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   onClick={() => setShowQuestionsModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>
@@ -2266,7 +2063,7 @@ const Exam_make = () => {
                       </p>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-3">
-                      <p className="text-[10px] text-gray-400">Average Score</p>
+                      <p className="text-[10px] text-gray-400">Avg Score</p>
                       <p className="text-sm font-semibold text-purple-600">
                         {selectedExam.averageScore}%
                       </p>
@@ -2284,13 +2081,13 @@ const Exam_make = () => {
                 </div>
               )}
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
                     openQuestionsModal(selectedExam);
                   }}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaListUl className="inline mr-2" /> Manage Questions
                 </button>
@@ -2299,13 +2096,13 @@ const Exam_make = () => {
                     setShowDetailsModal(false);
                     openEditModal(selectedExam);
                   }}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaEdit className="inline mr-2" /> Edit
                 </button>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>

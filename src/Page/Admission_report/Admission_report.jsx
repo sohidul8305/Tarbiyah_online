@@ -1,6 +1,6 @@
 // src/Page/Admin/Admission_report.jsx
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -9,196 +9,38 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
-  FaClock,
-  FaBook,
-  FaFileAlt,
-  FaChartLine,
-  FaUserGraduate,
-  FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
+  FaLayerGroup,
   FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
+  FaChartLine,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
   FaEdit,
   FaTrash,
-  FaSearch,
   FaFilter,
-  FaPlusCircle,
-  FaDownload,
-  FaPrint,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
-  FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
   FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
-  FaUserEdit,
-  FaUserCircle,
-  FaAddressCard,
-  FaChalkboard,
-  FaCalendarDay,
-  FaSchool as FaSchoolIcon,
-  FaUserTie,
-  FaBookReader,
-  FaStopwatch,
-  FaClipboardCheck,
-  FaExchangeAlt,
-  FaCheckDouble,
-  FaBan,
-  FaCheck,
-  FaTimes,
-  FaQuestion,
-  FaCalendarWeek,
-  FaChartBar,
-  FaFileDownload,
-  FaFilePdf,
-  FaFileExcel,
-  FaRegClock,
-  FaRegCalendarAlt,
-  FaRegCalendarCheck,
-  FaWhatsapp,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaGlobe as FaGlobeIcon,
-  FaEnvelope as FaEnvelopeIcon,
-  FaPhone as FaPhoneIcon,
-  FaUsers as FaUsersIcon,
-  FaCalendar,
-  FaClock as FaClockIcon2,
+  FaPlus,
+  FaArrowRight,
+  FaInfoCircle,
+  FaUserPlus,
   FaHourglassHalf,
   FaCheckCircle as FaCheckCircleIcon,
   FaTimesCircle as FaTimesCircleIcon,
-  FaBookmark,
-  FaListUl,
-  FaChevronRight,
-  FaChevronDown,
-  FaFolderOpen,
-  FaFile,
   FaFilePdf as FaFilePdfIcon,
-  FaFileWord,
-  FaFilePowerpoint,
-  FaFileImage,
-  FaFileVideo,
-  FaFileAudio,
-  FaFileArchive,
-  FaFileCode,
   FaFileExcel as FaFileExcelIcon,
-  FaFileAlt as FaFileAltIcon,
-  FaFolder,
-  FaCopy,
-  FaCut,
-  FaPaste,
-  FaShare,
-  FaStar as FaStarIcon,
-  FaRegStar,
-  FaRegFileAlt,
-  FaRegFilePdf,
-  FaRegFileWord,
-  FaRegFileExcel,
-  FaRegFilePowerpoint,
-  FaRegFileImage,
-  FaRegFileVideo,
-  FaRegFileArchive,
-  FaEraser,
-  FaTrashAlt,
-  FaCalendarTimes,
-  FaRedoAlt,
-  FaUndoAlt,
-  FaSync,
-  FaExclamationCircle,
-  FaInfoCircle as FaInfoCircleIcon,
-  FaMoneyCheck,
-  FaMoneyCheckAlt,
-  FaHandHoldingUsd,
-  FaDonate,
-  FaFileInvoice as FaFileInvoiceIcon2,
-  FaFileSignature,
-  FaReceipt as FaReceiptIcon,
-  FaCreditCard as FaCreditCardIcon,
   FaPrint as FaPrintIcon,
-  FaShareAlt,
-  FaChartPie,
-  FaChartArea,
-  FaTasks,
-  FaCheckDouble as FaCheckDoubleIcon,
-  FaPen,
-  FaPencilAlt,
-  FaAward,
-  FaMedal,
-  FaTrophy,
-  FaPlus,
-  FaCertificate as FaCertificateIcon,
-  FaTimes as FaTimesIcon,
-  FaUserCheck as FaUserCheckIcon,
-  FaUserMinus as FaUserMinusIcon,
   FaChartLine as FaChartLineIcon,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Admission_report = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("report-analytics");
-  const [activeSubMenu, setActiveSubMenu] = useState("admission-report");
+  const [expandedMenu, setExpandedMenu] = useState("report-analytics");
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -220,7 +62,6 @@ const Admission_report = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedAdmission, setSelectedAdmission] = useState(null);
 
-  // Form data
   const [formData, setFormData] = useState({
     studentName: "",
     studentId: "",
@@ -236,7 +77,6 @@ const Admission_report = () => {
     notes: "",
   });
 
-  // Report data
   const [admissionData, setAdmissionData] = useState({
     totalApplications: 156,
     approvedApplications: 98,
@@ -247,7 +87,6 @@ const Admission_report = () => {
     conversionRate: 63,
   });
 
-  // Admission records for table
   const [admissionRecords, setAdmissionRecords] = useState([
     {
       id: 1,
@@ -341,7 +180,6 @@ const Admission_report = () => {
     },
   ]);
 
-  // Monthly admission data
   const monthlyData = [
     { month: "January", applications: 25, approved: 18, rejected: 7 },
     { month: "February", applications: 20, approved: 14, rejected: 6 },
@@ -357,7 +195,6 @@ const Admission_report = () => {
     { month: "December", applications: 0, approved: 0, rejected: 0 },
   ];
 
-  // Class wise admission data
   const classWiseData = [
     { class: "Class 6", applications: 25, approved: 18, enrolled: 15 },
     { class: "Class 7", applications: 30, approved: 22, enrolled: 19 },
@@ -366,14 +203,12 @@ const Admission_report = () => {
     { class: "Class 10", applications: 38, approved: 28, enrolled: 25 },
   ];
 
-  // Gender wise data
   const genderData = [
     { gender: "Male", count: 85 },
     { gender: "Female", count: 57 },
     { gender: "Other", count: 0 },
   ];
 
-  // Subject wise data
   const subjectWiseData = [
     { subject: "Tajweed", count: 35 },
     { subject: "Tafsir", count: 28 },
@@ -383,7 +218,6 @@ const Admission_report = () => {
     { subject: "Arabic Grammar", count: 12 },
   ];
 
-  // Available options
   const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
   const subjects = [
     "Tajweed",
@@ -394,66 +228,24 @@ const Admission_report = () => {
     "Arabic Grammar",
   ];
   const statuses = ["Pending", "Approved", "Rejected"];
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
 
-  // Load admin info
-  useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminInfo");
-    if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
-    } else {
-      setAdminInfo({
-        name: user?.displayName || "Admin",
-        email: user?.email || "admin@tarabiyah.com",
-        phone: "01700000000",
-        designation: "Administrator",
-        department: "Administration",
-        joinDate: "January 2024",
-      });
-    }
-  }, [user]);
-
-  // Save admission records to localStorage
-  useEffect(() => {
-    localStorage.setItem("admissionRecords", JSON.stringify(admissionRecords));
-  }, [admissionRecords]);
-
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminInfo");
-      localStorage.removeItem("adminEmail");
-
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-      navigate("/admin-login");
-    } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
-    }
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
+  // ============================================================
+  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
+  // ============================================================
   const menuItems = [
     {
       id: "profile",
@@ -478,9 +270,14 @@ const Admission_report = () => {
           label: "Today's Class",
         },
         {
-          id: "payment-overview",
-          path: "/admin-dashboard/payment-overview",
-          label: "Payment Overview",
+          id: "basic-tazweed",
+          path: "/admin-dashboard/basic-tazweed",
+          label: "Basic Tazweed Payment Overview",
+        },
+        {
+          id: "najera-batch",
+          path: "/admin-dashboard/najera-batch",
+          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -671,7 +468,72 @@ const Admission_report = () => {
     },
   ];
 
-  // Get status badge color
+  // ✅ URL থেকে active auto-detect
+  const getActiveFromPath = () => {
+    const currentPath = location.pathname;
+    for (const item of menuItems) {
+      if (item.subItems) {
+        const match = item.subItems.find((s) => s.path === currentPath);
+        if (match) return { menu: item.id, sub: match.id };
+      }
+      if (item.path === currentPath) return { menu: item.id, sub: null };
+    }
+    return { menu: null, sub: null };
+  };
+
+  const { menu: activeMenu, sub: activeSubMenu } = getActiveFromPath();
+
+  // Auto-expand parent of active submenu
+  useEffect(() => {
+    if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
+  }, [activeMenu, activeSubMenu]);
+
+  // Load admin info
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminInfo");
+    if (savedAdmin) setAdminInfo(JSON.parse(savedAdmin));
+    else
+      setAdminInfo({
+        name: user?.displayName || "Admin",
+        email: user?.email || "admin@tarabiyah.com",
+        phone: "01700000000",
+        designation: "Administrator",
+        department: "Administration",
+        joinDate: "January 2024",
+      });
+  }, [user]);
+
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem("admissionRecords", JSON.stringify(admissionRecords));
+  }, [admissionRecords]);
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("adminEmail");
+      await Swal.fire({
+        icon: "success",
+        title: "Logged Out Successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      navigate("/admin-login");
+    } catch (err) {
+      console.error("Logout error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Logout Failed",
+        text: "Please try again",
+      });
+    }
+  };
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setExpandedMenu(expandedMenu === menu ? null : menu);
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Approved":
@@ -685,7 +547,6 @@ const Admission_report = () => {
     }
   };
 
-  // Get status icon
   const getStatusIcon = (status) => {
     switch (status) {
       case "Approved":
@@ -699,24 +560,17 @@ const Admission_report = () => {
     }
   };
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return `৳${amount.toLocaleString()}`;
-  };
-
-  // Format date
+  const formatCurrency = (amount) => `৳${amount.toLocaleString()}`;
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
   };
 
-  // Download report
-  const downloadReport = () => {
+  const downloadReport = () =>
     Swal.fire({
       icon: "success",
       title: "Report Downloading",
@@ -724,10 +578,7 @@ const Admission_report = () => {
       timer: 1500,
       showConfirmButton: false,
     });
-  };
-
-  // Export to Excel
-  const exportToExcel = () => {
+  const exportToExcel = () =>
     Swal.fire({
       icon: "success",
       title: "Exporting to Excel",
@@ -735,45 +586,18 @@ const Admission_report = () => {
       timer: 1500,
       showConfirmButton: false,
     });
-  };
+  const printReport = () => window.print();
 
-  // Print report
-  const printReport = () => {
-    window.print();
-  };
-
-  // Get filtered monthly data
   const getFilteredMonthlyData = () => {
-    if (selectedMonth === "All") {
-      return monthlyData;
-    }
+    if (selectedMonth === "All") return monthlyData;
     return monthlyData.filter(
       (_, index) => index === months.indexOf(selectedMonth),
     );
   };
 
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  const generateStudentId = () =>
+    `STU${String(admissionRecords.length + 1).padStart(3, "0")}`;
 
-  // Generate student ID
-  const generateStudentId = () => {
-    const count = admissionRecords.length + 1;
-    return `STU${String(count).padStart(3, "0")}`;
-  };
-
-  // Open add modal
   const openAddModal = () => {
     setFormData({
       studentName: "",
@@ -792,7 +616,6 @@ const Admission_report = () => {
     setShowAddModal(true);
   };
 
-  // Open edit modal
   const openEditModal = (record) => {
     setSelectedAdmission(record);
     setFormData({
@@ -812,16 +635,13 @@ const Admission_report = () => {
     setShowEditModal(true);
   };
 
-  // Open details modal
   const openDetailsModal = (record) => {
     setSelectedAdmission(record);
     setShowDetailsModal(true);
   };
 
-  // Handle add admission
   const handleAddAdmission = (e) => {
     e.preventDefault();
-
     if (
       !formData.studentName ||
       !formData.class ||
@@ -836,7 +656,6 @@ const Admission_report = () => {
       });
       return;
     }
-
     const newRecord = {
       id: Date.now(),
       studentName: formData.studentName,
@@ -852,10 +671,7 @@ const Admission_report = () => {
       previousSchool: formData.previousSchool || "",
       notes: formData.notes || "",
     };
-
     setAdmissionRecords([...admissionRecords, newRecord]);
-
-    // Update admission data stats
     const totalApps = admissionData.totalApplications + 1;
     const pendingApps =
       formData.status === "Pending"
@@ -870,7 +686,6 @@ const Admission_report = () => {
         ? admissionData.rejectedApplications + 1
         : admissionData.rejectedApplications;
     const conversionRate = Math.round((approvedApps / totalApps) * 100);
-
     setAdmissionData({
       ...admissionData,
       totalApplications: totalApps,
@@ -879,7 +694,6 @@ const Admission_report = () => {
       rejectedApplications: rejectedApps,
       conversionRate: conversionRate || 0,
     });
-
     setShowAddModal(false);
     Swal.fire({
       icon: "success",
@@ -890,10 +704,8 @@ const Admission_report = () => {
     });
   };
 
-  // Handle edit admission
   const handleEditAdmission = (e) => {
     e.preventDefault();
-
     if (
       !formData.studentName ||
       !formData.class ||
@@ -908,7 +720,6 @@ const Admission_report = () => {
       });
       return;
     }
-
     setAdmissionRecords(
       admissionRecords.map((record) =>
         record.id === selectedAdmission.id
@@ -930,23 +741,18 @@ const Admission_report = () => {
           : record,
       ),
     );
-
-    // Update stats based on status change
     const oldStatus = selectedAdmission.status;
     const newStatus = formData.status;
     if (oldStatus !== newStatus) {
       let pendingApps = admissionData.pendingApplications;
       let approvedApps = admissionData.approvedApplications;
       let rejectedApps = admissionData.rejectedApplications;
-
       if (oldStatus === "Pending") pendingApps--;
       else if (oldStatus === "Approved") approvedApps--;
       else if (oldStatus === "Rejected") rejectedApps--;
-
       if (newStatus === "Pending") pendingApps++;
       else if (newStatus === "Approved") approvedApps++;
       else if (newStatus === "Rejected") rejectedApps++;
-
       const conversionRate = Math.round(
         (approvedApps / admissionData.totalApplications) * 100,
       );
@@ -958,7 +764,6 @@ const Admission_report = () => {
         conversionRate: conversionRate || 0,
       });
     }
-
     setShowEditModal(false);
     Swal.fire({
       icon: "success",
@@ -969,7 +774,6 @@ const Admission_report = () => {
     });
   };
 
-  // Handle delete admission
   const handleDeleteAdmission = (id) => {
     Swal.fire({
       title: "Delete Admission Record?",
@@ -983,17 +787,13 @@ const Admission_report = () => {
       if (result.isConfirmed) {
         const deleted = admissionRecords.find((r) => r.id === id);
         setAdmissionRecords(admissionRecords.filter((r) => r.id !== id));
-
-        // Update stats
         const totalApps = admissionData.totalApplications - 1;
         let pendingApps = admissionData.pendingApplications;
         let approvedApps = admissionData.approvedApplications;
         let rejectedApps = admissionData.rejectedApplications;
-
         if (deleted.status === "Pending") pendingApps--;
         else if (deleted.status === "Approved") approvedApps--;
         else if (deleted.status === "Rejected") rejectedApps--;
-
         const conversionRate =
           totalApps > 0 ? Math.round((approvedApps / totalApps) * 100) : 0;
         setAdmissionData({
@@ -1004,13 +804,11 @@ const Admission_report = () => {
           rejectedApplications: rejectedApps,
           conversionRate: conversionRate || 0,
         });
-
         Swal.fire("Deleted!", "Admission record has been deleted.", "success");
       }
     });
   };
 
-  // Handle approve admission
   const handleApproveAdmission = (id) => {
     Swal.fire({
       title: "Approve Admission?",
@@ -1023,12 +821,10 @@ const Admission_report = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         setAdmissionRecords(
-          admissionRecords.map((record) =>
-            record.id === id ? { ...record, status: "Approved" } : record,
+          admissionRecords.map((r) =>
+            r.id === id ? { ...r, status: "Approved" } : r,
           ),
         );
-
-        // Update stats
         const pendingApps = admissionData.pendingApplications - 1;
         const approvedApps = admissionData.approvedApplications + 1;
         const conversionRate = Math.round(
@@ -1040,7 +836,6 @@ const Admission_report = () => {
           approvedApplications: approvedApps,
           conversionRate: conversionRate || 0,
         });
-
         Swal.fire({
           icon: "success",
           title: "Admission Approved!",
@@ -1052,7 +847,6 @@ const Admission_report = () => {
     });
   };
 
-  // Handle reject admission
   const handleRejectAdmission = (id) => {
     Swal.fire({
       title: "Reject Admission?",
@@ -1065,12 +859,10 @@ const Admission_report = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         setAdmissionRecords(
-          admissionRecords.map((record) =>
-            record.id === id ? { ...record, status: "Rejected" } : record,
+          admissionRecords.map((r) =>
+            r.id === id ? { ...r, status: "Rejected" } : r,
           ),
         );
-
-        // Update stats
         const pendingApps = admissionData.pendingApplications - 1;
         const rejectedApps = admissionData.rejectedApplications + 1;
         setAdmissionData({
@@ -1078,7 +870,6 @@ const Admission_report = () => {
           pendingApplications: pendingApps,
           rejectedApplications: rejectedApps,
         });
-
         Swal.fire({
           icon: "success",
           title: "Admission Rejected",
@@ -1107,14 +898,9 @@ const Admission_report = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm transition-all duration-300 ease-in-out
+            h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -1134,83 +920,73 @@ const Admission_report = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
-            {menuItems.map((item) => (
-              <div key={item.id}>
-                {item.subItems ? (
-                  <>
-                    <button
-                      onClick={() => {
-                        setActiveMenu(item.id);
-                        toggleSubMenu(item.id);
-                        setIsSidebarOpen(false);
-                      }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
+            {menuItems.map((item) => {
+              const isParentActive = activeMenu === item.id;
+              return (
+                <div key={item.id}>
+                  {item.subItems ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          toggleSubMenu(item.id);
+                          setIsSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
                             ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
                             : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-600">{item.icon}</span>
+                          <span>{item.label}</span>
+                        </div>
+                        <span
+                          className={`transition-transform ${expandedMenu === item.id ? "rotate-90" : ""}`}
+                        >
+                          <FaArrowRight size={12} />
+                        </span>
+                      </button>
+                      {expandedMenu === item.id && (
+                        <div className="ml-6 space-y-1 mt-1">
+                          {item.subItems.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              to={sub.path}
+                              onClick={() => setIsSidebarOpen(false)}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
+                                activeSubMenu === sub.id
+                                  ? "bg-teal-50 text-[#004d4d] font-bold"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
+                              }`}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={() => setIsSidebarOpen(false)}
                     >
-                      <div className="flex items-center gap-3">
+                      <button
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }`}
+                      >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
-                      </div>
-                      <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
-                      >
-                        <FaArrowRight size={12} />
-                      </span>
-                    </button>
-                    {activeSubMenu === item.id && (
-                      <div className="ml-6 space-y-1 mt-1">
-                        {item.subItems.map((sub) => (
-                          <Link
-                            key={sub.id}
-                            to={sub.path}
-                            onClick={() => {
-                              setActiveSubMenu(sub.id);
-                              setIsSidebarOpen(false);
-                            }}
-                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
-                          >
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <Link
-                    to={item.path}
-                    onClick={() => {
-                      setActiveMenu(item.id);
-                      setIsSidebarOpen(false);
-                    }}
-                  >
-                    <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
-                    >
-                      <span className="text-gray-600">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </button>
-                  </Link>
-                )}
-              </div>
-            ))}
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
 
             <button
               onClick={handleLogout}
@@ -1226,7 +1002,6 @@ const Admission_report = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1235,7 +1010,7 @@ const Admission_report = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
@@ -1323,7 +1098,7 @@ const Admission_report = () => {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="px-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
               >
                 <option value={2024}>2024</option>
                 <option value={2025}>2025</option>
@@ -1333,7 +1108,7 @@ const Admission_report = () => {
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
-                className="px-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
               >
                 <option value="All">All Months</option>
                 {months.map((month) => (
@@ -1345,29 +1120,31 @@ const Admission_report = () => {
               <select
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
-                className="px-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
               >
                 <option value="All">All Classes</option>
-                <option value="Class 6">Class 6</option>
-                <option value="Class 7">Class 7</option>
-                <option value="Class 8">Class 8</option>
-                <option value="Class 9">Class 9</option>
-                <option value="Class 10">Class 10</option>
+                {classes.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
               </select>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
               >
                 <option value="All">All Status</option>
-                <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
-                <option value="Rejected">Rejected</option>
+                {statuses.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
 
-          {/* Monthly Admission Chart */}
+          {/* Monthly Chart */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-3">
             <h4 className="font-semibold text-gray-700 text-sm mb-3">
               Monthly Admission Trends
@@ -1378,9 +1155,8 @@ const Admission_report = () => {
                   item.applications === 0 &&
                   item.approved === 0 &&
                   item.rejected === 0
-                ) {
+                )
                   return null;
-                }
                 return (
                   <div key={index}>
                     <div className="flex justify-between text-xs mb-1">
@@ -1407,12 +1183,6 @@ const Admission_report = () => {
                   </div>
                 );
               })}
-              {getFilteredMonthlyData().filter((item) => item.applications > 0)
-                .length === 0 && (
-                <p className="text-center text-gray-400 text-sm py-4">
-                  No data available for selected filters
-                </p>
-              )}
             </div>
             <div className="flex gap-4 mt-3 text-xs">
               <span className="flex items-center gap-1">
@@ -1460,20 +1230,6 @@ const Admission_report = () => {
                   </div>
                 ))}
               </div>
-              <div className="flex gap-4 mt-3 text-xs">
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 bg-blue-500 rounded"></span>{" "}
-                  Applications
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 bg-green-500 rounded"></span>{" "}
-                  Approved
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 bg-purple-500 rounded"></span>{" "}
-                  Enrolled
-                </span>
-              </div>
             </div>
 
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
@@ -1491,13 +1247,7 @@ const Admission_report = () => {
                     </div>
                     <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${
-                          item.gender === "Male"
-                            ? "bg-blue-500"
-                            : item.gender === "Female"
-                              ? "bg-pink-500"
-                              : "bg-purple-500"
-                        }`}
+                        className={`h-full rounded-full ${item.gender === "Male" ? "bg-blue-500" : item.gender === "Female" ? "bg-pink-500" : "bg-purple-500"}`}
                         style={{ width: `${(item.count / 85) * 100}%` }}
                       ></div>
                     </div>
@@ -1508,7 +1258,7 @@ const Admission_report = () => {
           </div>
 
           {/* Subject Wise */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-3">
             <h4 className="font-semibold text-gray-700 text-sm mb-3">
               Subject Wise Enrollment
             </h4>
@@ -1534,7 +1284,7 @@ const Admission_report = () => {
           </div>
 
           {/* Admission Records Table */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mt-3">
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="flex items-center justify-between p-3 border-b border-gray-200">
               <h4 className="font-semibold text-gray-700 text-sm">
                 Admission Records ({admissionRecords.length})
@@ -1606,7 +1356,7 @@ const Admission_report = () => {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => openDetailsModal(record)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
                               title="View Details"
                             >
                               <FaEye size={12} />
@@ -1617,7 +1367,7 @@ const Admission_report = () => {
                                   onClick={() =>
                                     handleApproveAdmission(record.id)
                                   }
-                                  className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
+                                  className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
                                   title="Approve"
                                 >
                                   <FaCheckCircleIcon size={12} />
@@ -1626,7 +1376,7 @@ const Admission_report = () => {
                                   onClick={() =>
                                     handleRejectAdmission(record.id)
                                   }
-                                  className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                                  className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                                   title="Reject"
                                 >
                                   <FaTimesCircleIcon size={12} />
@@ -1635,14 +1385,14 @@ const Admission_report = () => {
                             )}
                             <button
                               onClick={() => openEditModal(record)}
-                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50 transition-all"
+                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
                               title="Edit"
                             >
                               <FaEdit size={12} />
                             </button>
                             <button
                               onClick={() => handleDeleteAdmission(record.id)}
-                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                               title="Delete"
                             >
                               <FaTrash size={12} />
@@ -1697,8 +1447,7 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, studentName: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter student name"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1711,12 +1460,10 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, studentId: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Auto-generated"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1728,12 +1475,12 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">Select Class</option>
-                    {classes.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
+                    {classes.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
@@ -1748,18 +1495,17 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">Select Subject</option>
-                    {subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
+                    {subjects.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Application Date *
@@ -1774,10 +1520,9 @@ const Admission_report = () => {
                       applicationDate: e.target.value,
                     })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
@@ -1787,16 +1532,15 @@ const Admission_report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
-                  {statuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {statuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1808,8 +1552,7 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, parentName: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter parent's name"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1822,12 +1565,10 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, parentPhone: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter parent's phone"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
@@ -1838,11 +1579,9 @@ const Admission_report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter email address"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Address
@@ -1853,11 +1592,9 @@ const Admission_report = () => {
                     setFormData({ ...formData, address: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter address"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Previous School
@@ -1868,11 +1605,9 @@ const Admission_report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, previousSchool: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter previous school"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Notes
@@ -1883,22 +1618,20 @@ const Admission_report = () => {
                     setFormData({ ...formData, notes: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Add notes..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold"
                 >
                   <FaSave className="inline mr-2" size={14} /> Add Admission
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -1936,8 +1669,7 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, studentName: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter student name"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1950,12 +1682,10 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, studentId: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter student ID"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1967,11 +1697,11 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {classes.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
+                    {classes.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
@@ -1986,17 +1716,16 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
+                    {subjects.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Application Date *
@@ -2011,10 +1740,9 @@ const Admission_report = () => {
                       applicationDate: e.target.value,
                     })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
@@ -2024,16 +1752,15 @@ const Admission_report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
-                  {statuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {statuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -2045,8 +1772,7 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, parentName: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter parent's name"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -2059,12 +1785,10 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, parentPhone: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter parent's phone"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
@@ -2075,11 +1799,9 @@ const Admission_report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter email address"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Address
@@ -2090,11 +1812,9 @@ const Admission_report = () => {
                     setFormData({ ...formData, address: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter address"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Previous School
@@ -2105,11 +1825,9 @@ const Admission_report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, previousSchool: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter previous school"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Notes
@@ -2120,22 +1838,20 @@ const Admission_report = () => {
                     setFormData({ ...formData, notes: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Add notes..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Update Admission
+                  <FaSave className="inline mr-2" size={14} /> Update
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -2241,7 +1957,7 @@ const Admission_report = () => {
                         setShowDetailsModal(false);
                         handleApproveAdmission(selectedAdmission.id);
                       }}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                     >
                       <FaCheckCircleIcon className="inline mr-2" /> Approve
                     </button>
@@ -2250,7 +1966,7 @@ const Admission_report = () => {
                         setShowDetailsModal(false);
                         handleRejectAdmission(selectedAdmission.id);
                       }}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                     >
                       <FaTimesCircleIcon className="inline mr-2" /> Reject
                     </button>
@@ -2261,13 +1977,13 @@ const Admission_report = () => {
                     setShowDetailsModal(false);
                     openEditModal(selectedAdmission);
                   }}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaEdit className="inline mr-2" /> Edit
                 </button>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>

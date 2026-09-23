@@ -1,6 +1,6 @@
 // src/Page/Admin/Total_salary.jsx
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -9,203 +9,36 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
-  FaClock,
-  FaBook,
-  FaFileAlt,
-  FaChartLine,
-  FaUserGraduate,
-  FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
+  FaLayerGroup,
   FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
+  FaChartLine,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
-  FaPlusCircle,
-  FaDownload,
-  FaPrint,
-  FaCheckCircle,
-  FaTimesCircle,
-  FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
-  FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
   FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
-  FaUserEdit,
-  FaUserCircle,
-  FaAddressCard,
-  FaChalkboard,
-  FaCalendarDay,
-  FaSchool as FaSchoolIcon,
-  FaUserTie,
-  FaBookReader,
-  FaStopwatch,
-  FaClipboardCheck,
-  FaExchangeAlt,
-  FaCheckDouble,
-  FaBan,
-  FaCheck,
-  FaTimes,
-  FaQuestion,
-  FaCalendarWeek,
-  FaChartBar,
-  FaFileDownload,
-  FaFilePdf,
-  FaFileExcel,
-  FaRegClock,
-  FaRegCalendarAlt,
-  FaRegCalendarCheck,
-  FaWhatsapp,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaGlobe as FaGlobeIcon,
-  FaEnvelope as FaEnvelopeIcon,
-  FaPhone as FaPhoneIcon,
-  FaUsers as FaUsersIcon,
-  FaCalendar,
-  FaClock as FaClockIcon2,
+  FaPlus,
+  FaArrowRight,
+  FaInfoCircle,
+  FaExclamationCircle,
   FaHourglassHalf,
   FaCheckCircle as FaCheckCircleIcon,
-  FaTimesCircle as FaTimesCircleIcon,
-  FaBookmark,
-  FaListUl,
-  FaChevronRight,
-  FaChevronDown,
-  FaFolderOpen,
-  FaFile,
   FaFilePdf as FaFilePdfIcon,
-  FaFileWord,
-  FaFilePowerpoint,
-  FaFileImage,
-  FaFileVideo,
-  FaFileAudio,
-  FaFileArchive,
-  FaFileCode,
   FaFileExcel as FaFileExcelIcon,
-  FaFileAlt as FaFileAltIcon,
-  FaFolder,
-  FaCopy,
-  FaCut,
-  FaPaste,
-  FaShare,
-  FaStar as FaStarIcon,
-  FaRegStar,
-  FaRegFileAlt,
-  FaRegFilePdf,
-  FaRegFileWord,
-  FaRegFileExcel,
-  FaRegFilePowerpoint,
-  FaRegFileImage,
-  FaRegFileVideo,
-  FaRegFileArchive,
-  FaEraser,
-  FaTrashAlt,
-  FaCalendarTimes,
-  FaRedoAlt,
-  FaUndoAlt,
-  FaSync,
-  FaExclamationCircle,
-  FaInfoCircle as FaInfoCircleIcon,
-  FaMoneyCheck,
-  FaMoneyCheckAlt,
-  FaHandHoldingUsd,
-  FaDonate,
-  FaFileInvoice as FaFileInvoiceIcon2,
-  FaFileSignature,
-  FaReceipt as FaReceiptIcon,
-  FaCreditCard as FaCreditCardIcon,
-  FaPrint as FaPrintIcon,
-  FaShareAlt,
-  FaChartPie,
-  FaChartArea,
-  FaTasks,
-  FaCheckDouble as FaCheckDoubleIcon,
-  FaPen,
-  FaPencilAlt,
-  FaAward,
-  FaMedal,
-  FaTrophy,
-  FaPlus,
-  FaCertificate as FaCertificateIcon,
-  FaTimes as FaTimesIcon,
-  FaUserCheck as FaUserCheckIcon,
-  FaUserMinus as FaUserMinusIcon,
-  FaChartLine as FaChartLineIcon,
   FaMoneyBillWave as FaMoneyBillWaveIcon,
-  FaHandHoldingUsd as FaHandHoldingUsdIcon,
-  FaDatabase as FaDatabaseIcon,
-  FaCloudUploadAlt,
-  FaFileUpload,
-  FaFileImport,
-  FaFileExport,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const Total_salary = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("salary");
-  const [activeSubMenu, setActiveSubMenu] = useState("total-salary");
+  const [expandedMenu, setExpandedMenu] = useState("salary");
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -215,250 +48,9 @@ const Total_salary = () => {
     joinDate: "",
   });
 
-  // Salary records
-  const [salaryRecords, setSalaryRecords] = useState([
-    {
-      id: 1,
-      teacherName: "Dr. Muhammad Abdullah",
-      teacherId: "TCH001",
-      subject: "Tajweed",
-      month: "July",
-      year: 2026,
-      basicSalary: 45000,
-      allowance: 5000,
-      bonus: 2000,
-      deduction: 1000,
-      netSalary: 51000,
-      paymentDate: "2026-07-25",
-      paymentMethod: "Bank Transfer",
-      status: "Paid",
-      transactionId: "TXN-SAL-001",
-      notes: "Regular monthly salary",
-    },
-    {
-      id: 2,
-      teacherName: "Ustadh Ahmad Ali",
-      teacherId: "TCH002",
-      subject: "Tafsir",
-      month: "July",
-      year: 2026,
-      basicSalary: 40000,
-      allowance: 4000,
-      bonus: 1500,
-      deduction: 500,
-      netSalary: 45000,
-      paymentDate: "2026-07-25",
-      paymentMethod: "bKash",
-      status: "Paid",
-      transactionId: "TXN-SAL-002",
-      notes: "",
-    },
-    {
-      id: 3,
-      teacherName: "Ustadha Fatima Rahman",
-      teacherId: "TCH003",
-      subject: "Hadith",
-      month: "July",
-      year: 2026,
-      basicSalary: 38000,
-      allowance: 3000,
-      bonus: 1000,
-      deduction: 0,
-      netSalary: 42000,
-      paymentDate: null,
-      paymentMethod: null,
-      status: "Pending",
-      transactionId: null,
-      notes: "Payment pending for this month",
-    },
-    {
-      id: 4,
-      teacherName: "Dr. Omar Farooq",
-      teacherId: "TCH004",
-      subject: "Fiqh",
-      month: "July",
-      year: 2026,
-      basicSalary: 50000,
-      allowance: 6000,
-      bonus: 3000,
-      deduction: 2000,
-      netSalary: 57000,
-      paymentDate: "2026-07-24",
-      paymentMethod: "Bank Transfer",
-      status: "Paid",
-      transactionId: "TXN-SAL-004",
-      notes: "Includes performance bonus",
-    },
-    {
-      id: 5,
-      teacherName: "Ustadh Yusuf Khan",
-      teacherId: "TCH005",
-      subject: "Aqeedah",
-      month: "July",
-      year: 2026,
-      basicSalary: 35000,
-      allowance: 3000,
-      bonus: 1000,
-      deduction: 1000,
-      netSalary: 38000,
-      paymentDate: null,
-      paymentMethod: null,
-      status: "Pending",
-      transactionId: null,
-      notes: "Awaiting salary approval",
-    },
-    {
-      id: 6,
-      teacherName: "Ustadh Ibrahim Malik",
-      teacherId: "TCH006",
-      subject: "Arabic Grammar",
-      month: "June",
-      year: 2026,
-      basicSalary: 32000,
-      allowance: 2000,
-      bonus: 500,
-      deduction: 0,
-      netSalary: 34500,
-      paymentDate: "2026-06-25",
-      paymentMethod: "Nagad",
-      status: "Paid",
-      transactionId: "TXN-SAL-006",
-      notes: "Salary for June 2026",
-    },
-  ]);
-
-  // Filters
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("All");
-  const [filterMonth, setFilterMonth] = useState("All");
-  const [filterYear, setFilterYear] = useState("All");
-
-  // Modal states
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [selectedSalary, setSelectedSalary] = useState(null);
-
-  // Form data
-  const [formData, setFormData] = useState({
-    teacherName: "",
-    teacherId: "",
-    subject: "",
-    month: "",
-    year: new Date().getFullYear(),
-    basicSalary: 0,
-    allowance: 0,
-    bonus: 0,
-    deduction: 0,
-    netSalary: 0,
-    paymentDate: "",
-    paymentMethod: "",
-    status: "Pending",
-    transactionId: "",
-    notes: "",
-  });
-
-  // Available options
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  const years = [2024, 2025, 2026, 2027];
-  const teachers = [
-    "Dr. Muhammad Abdullah",
-    "Ustadh Ahmad Ali",
-    "Ustadha Fatima Rahman",
-    "Dr. Omar Farooq",
-    "Ustadh Yusuf Khan",
-    "Ustadh Ibrahim Malik",
-  ];
-  const subjects = [
-    "Tajweed",
-    "Tafsir",
-    "Hadith",
-    "Fiqh",
-    "Aqeedah",
-    "Arabic Grammar",
-  ];
-  const paymentMethods = [
-    "Cash",
-    "Bank Transfer",
-    "bKash",
-    "Nagad",
-    "Rocket",
-    "Check",
-  ];
-  const statuses = ["Paid", "Pending", "Overdue"];
-
-  // Load admin info
-  useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminInfo");
-    if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
-    } else {
-      setAdminInfo({
-        name: user?.displayName || "Admin",
-        email: user?.email || "admin@tarabiyah.com",
-        phone: "01700000000",
-        designation: "Administrator",
-        department: "Administration",
-        joinDate: "January 2024",
-      });
-    }
-  }, [user]);
-
-  // Save salary records to localStorage
-  useEffect(() => {
-    localStorage.setItem("salaryRecords", JSON.stringify(salaryRecords));
-  }, [salaryRecords]);
-
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminInfo");
-      localStorage.removeItem("adminEmail");
-
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-      navigate("/admin-login");
-    } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
-    }
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
+  // ============================================================
+  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
+  // ============================================================
   const menuItems = [
     {
       id: "profile",
@@ -483,9 +75,14 @@ const Total_salary = () => {
           label: "Today's Class",
         },
         {
-          id: "payment-overview",
-          path: "/admin-dashboard/payment-overview",
-          label: "Payment Overview",
+          id: "basic-tazweed",
+          path: "/admin-dashboard/basic-tazweed",
+          label: "Basic Tazweed Payment Overview",
+        },
+        {
+          id: "najera-batch",
+          path: "/admin-dashboard/najera-batch",
+          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -676,7 +273,255 @@ const Total_salary = () => {
     },
   ];
 
-  // Get status badge color
+  // ✅ URL থেকে active menu/submenu auto-detect
+  const getActiveFromPath = () => {
+    const currentPath = location.pathname;
+    for (const item of menuItems) {
+      if (item.subItems) {
+        const match = item.subItems.find((s) => s.path === currentPath);
+        if (match) return { menu: item.id, sub: match.id };
+      }
+      if (item.path === currentPath) return { menu: item.id, sub: null };
+    }
+    return { menu: null, sub: null };
+  };
+
+  const { menu: activeMenu, sub: activeSubMenu } = getActiveFromPath();
+
+  // ============================================
+  // Salary records state
+  // ============================================
+  const [salaryRecords, setSalaryRecords] = useState([
+    {
+      id: 1,
+      teacherName: "Dr. Muhammad Abdullah",
+      teacherId: "TCH001",
+      subject: "Tajweed",
+      month: "July",
+      year: 2026,
+      basicSalary: 45000,
+      allowance: 5000,
+      bonus: 2000,
+      deduction: 1000,
+      netSalary: 51000,
+      paymentDate: "2026-07-25",
+      paymentMethod: "Bank Transfer",
+      status: "Paid",
+      transactionId: "TXN-SAL-001",
+      notes: "Regular monthly salary",
+    },
+    {
+      id: 2,
+      teacherName: "Ustadh Ahmad Ali",
+      teacherId: "TCH002",
+      subject: "Tafsir",
+      month: "July",
+      year: 2026,
+      basicSalary: 40000,
+      allowance: 4000,
+      bonus: 1500,
+      deduction: 500,
+      netSalary: 45000,
+      paymentDate: "2026-07-25",
+      paymentMethod: "bKash",
+      status: "Paid",
+      transactionId: "TXN-SAL-002",
+      notes: "",
+    },
+    {
+      id: 3,
+      teacherName: "Ustadha Fatima Rahman",
+      teacherId: "TCH003",
+      subject: "Hadith",
+      month: "July",
+      year: 2026,
+      basicSalary: 38000,
+      allowance: 3000,
+      bonus: 1000,
+      deduction: 0,
+      netSalary: 42000,
+      paymentDate: null,
+      paymentMethod: null,
+      status: "Pending",
+      transactionId: null,
+      notes: "Payment pending for this month",
+    },
+    {
+      id: 4,
+      teacherName: "Dr. Omar Farooq",
+      teacherId: "TCH004",
+      subject: "Fiqh",
+      month: "July",
+      year: 2026,
+      basicSalary: 50000,
+      allowance: 6000,
+      bonus: 3000,
+      deduction: 2000,
+      netSalary: 57000,
+      paymentDate: "2026-07-24",
+      paymentMethod: "Bank Transfer",
+      status: "Paid",
+      transactionId: "TXN-SAL-004",
+      notes: "Includes performance bonus",
+    },
+    {
+      id: 5,
+      teacherName: "Ustadh Yusuf Khan",
+      teacherId: "TCH005",
+      subject: "Aqeedah",
+      month: "July",
+      year: 2026,
+      basicSalary: 35000,
+      allowance: 3000,
+      bonus: 1000,
+      deduction: 1000,
+      netSalary: 38000,
+      paymentDate: null,
+      paymentMethod: null,
+      status: "Pending",
+      transactionId: null,
+      notes: "Awaiting salary approval",
+    },
+    {
+      id: 6,
+      teacherName: "Ustadh Ibrahim Malik",
+      teacherId: "TCH006",
+      subject: "Arabic Grammar",
+      month: "June",
+      year: 2026,
+      basicSalary: 32000,
+      allowance: 2000,
+      bonus: 500,
+      deduction: 0,
+      netSalary: 34500,
+      paymentDate: "2026-06-25",
+      paymentMethod: "Nagad",
+      status: "Paid",
+      transactionId: "TXN-SAL-006",
+      notes: "Salary for June 2026",
+    },
+  ]);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterMonth, setFilterMonth] = useState("All");
+  const [filterYear, setFilterYear] = useState("All");
+
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedSalary, setSelectedSalary] = useState(null);
+
+  const [formData, setFormData] = useState({
+    teacherName: "",
+    teacherId: "",
+    subject: "",
+    month: "",
+    year: new Date().getFullYear(),
+    basicSalary: 0,
+    allowance: 0,
+    bonus: 0,
+    deduction: 0,
+    netSalary: 0,
+    paymentDate: "",
+    paymentMethod: "",
+    status: "Pending",
+    transactionId: "",
+    notes: "",
+  });
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const years = [2024, 2025, 2026, 2027];
+  const teachers = [
+    "Dr. Muhammad Abdullah",
+    "Ustadh Ahmad Ali",
+    "Ustadha Fatima Rahman",
+    "Dr. Omar Farooq",
+    "Ustadh Yusuf Khan",
+    "Ustadh Ibrahim Malik",
+  ];
+  const subjects = [
+    "Tajweed",
+    "Tafsir",
+    "Hadith",
+    "Fiqh",
+    "Aqeedah",
+    "Arabic Grammar",
+  ];
+  const paymentMethods = [
+    "Cash",
+    "Bank Transfer",
+    "bKash",
+    "Nagad",
+    "Rocket",
+    "Check",
+  ];
+  const statuses = ["Paid", "Pending", "Overdue"];
+
+  // Load admin info
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminInfo");
+    if (savedAdmin) setAdminInfo(JSON.parse(savedAdmin));
+    else
+      setAdminInfo({
+        name: user?.displayName || "Admin",
+        email: user?.email || "admin@tarabiyah.com",
+        phone: "01700000000",
+        designation: "Administrator",
+        department: "Administration",
+        joinDate: "January 2024",
+      });
+  }, [user]);
+
+  // ✅ Auto-expand parent of active submenu
+  useEffect(() => {
+    if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
+  }, [activeMenu, activeSubMenu]);
+
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem("salaryRecords", JSON.stringify(salaryRecords));
+  }, [salaryRecords]);
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("adminEmail");
+      await Swal.fire({
+        icon: "success",
+        title: "Logged Out Successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      navigate("/admin-login");
+    } catch (err) {
+      console.error("Logout error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Logout Failed",
+        text: "Please try again",
+      });
+    }
+  };
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setExpandedMenu(expandedMenu === menu ? null : menu);
+
   const getStatusColor = (status) => {
     switch (status) {
       case "Paid":
@@ -690,7 +535,6 @@ const Total_salary = () => {
     }
   };
 
-  // Get status icon
   const getStatusIcon = (status) => {
     switch (status) {
       case "Paid":
@@ -704,7 +548,6 @@ const Total_salary = () => {
     }
   };
 
-  // Filter salary records
   const filteredRecords = salaryRecords.filter((record) => {
     const matchesSearch =
       record.teacherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -718,7 +561,6 @@ const Total_salary = () => {
     return matchesSearch && matchesStatus && matchesMonth && matchesYear;
   });
 
-  // Get unique values for filters
   const uniqueStatuses = [
     "All",
     ...new Set(salaryRecords.map((r) => r.status)),
@@ -729,7 +571,6 @@ const Total_salary = () => {
     ...new Set(salaryRecords.map((r) => r.year.toString())),
   ];
 
-  // Calculate totals
   const totalSalary = salaryRecords.reduce((sum, r) => sum + r.netSalary, 0);
   const totalPaid = salaryRecords
     .filter((r) => r.status === "Paid")
@@ -741,28 +582,18 @@ const Total_salary = () => {
     .filter((r) => r.status === "Overdue")
     .reduce((sum, r) => sum + r.netSalary, 0);
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return `৳${amount.toLocaleString()}`;
-  };
-
-  // Format date
+  const formatCurrency = (amount) => `৳${amount.toLocaleString()}`;
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
   };
+  const calculateNetSalary = (basic, allowance, bonus, deduction) =>
+    basic + allowance + bonus - deduction;
 
-  // Calculate net salary
-  const calculateNetSalary = (basic, allowance, bonus, deduction) => {
-    return basic + allowance + bonus - deduction;
-  };
-
-  // Open add modal
   const openAddModal = () => {
     setFormData({
       teacherName: "",
@@ -784,7 +615,6 @@ const Total_salary = () => {
     setShowAddModal(true);
   };
 
-  // Open edit modal
   const openEditModal = (record) => {
     setSelectedSalary(record);
     setFormData({
@@ -807,16 +637,13 @@ const Total_salary = () => {
     setShowEditModal(true);
   };
 
-  // Open details modal
   const openDetailsModal = (record) => {
     setSelectedSalary(record);
     setShowDetailsModal(true);
   };
 
-  // Handle add salary
   const handleAddSalary = (e) => {
     e.preventDefault();
-
     if (
       !formData.teacherName ||
       !formData.subject ||
@@ -831,14 +658,12 @@ const Total_salary = () => {
       });
       return;
     }
-
     const netSalary = calculateNetSalary(
       formData.basicSalary,
       formData.allowance || 0,
       formData.bonus || 0,
       formData.deduction || 0,
     );
-
     const newRecord = {
       id: Date.now(),
       teacherName: formData.teacherName,
@@ -852,7 +677,7 @@ const Total_salary = () => {
       allowance: parseFloat(formData.allowance) || 0,
       bonus: parseFloat(formData.bonus) || 0,
       deduction: parseFloat(formData.deduction) || 0,
-      netSalary: netSalary,
+      netSalary,
       paymentDate:
         formData.status === "Paid"
           ? formData.paymentDate || new Date().toISOString().split("T")[0]
@@ -866,7 +691,6 @@ const Total_salary = () => {
           : null,
       notes: formData.notes || "",
     };
-
     setSalaryRecords([...salaryRecords, newRecord]);
     setShowAddModal(false);
     Swal.fire({
@@ -878,10 +702,8 @@ const Total_salary = () => {
     });
   };
 
-  // Handle edit salary
   const handleEditSalary = (e) => {
     e.preventDefault();
-
     if (
       !formData.teacherName ||
       !formData.subject ||
@@ -896,14 +718,12 @@ const Total_salary = () => {
       });
       return;
     }
-
     const netSalary = calculateNetSalary(
       formData.basicSalary,
       formData.allowance || 0,
       formData.bonus || 0,
       formData.deduction || 0,
     );
-
     setSalaryRecords(
       salaryRecords.map((record) =>
         record.id === selectedSalary.id
@@ -918,7 +738,7 @@ const Total_salary = () => {
               allowance: parseFloat(formData.allowance) || 0,
               bonus: parseFloat(formData.bonus) || 0,
               deduction: parseFloat(formData.deduction) || 0,
-              netSalary: netSalary,
+              netSalary,
               paymentDate:
                 formData.status === "Paid"
                   ? formData.paymentDate ||
@@ -946,7 +766,6 @@ const Total_salary = () => {
     });
   };
 
-  // Handle delete salary
   const handleDeleteSalary = (id) => {
     Swal.fire({
       title: "Delete Salary Record?",
@@ -964,7 +783,6 @@ const Total_salary = () => {
     });
   };
 
-  // Handle mark as paid
   const handleMarkAsPaid = (record) => {
     Swal.fire({
       title: "Mark as Paid?",
@@ -1002,8 +820,7 @@ const Total_salary = () => {
     });
   };
 
-  // Download report
-  const downloadReport = () => {
+  const downloadReport = () =>
     Swal.fire({
       icon: "success",
       title: "Report Downloading",
@@ -1011,10 +828,7 @@ const Total_salary = () => {
       timer: 1500,
       showConfirmButton: false,
     });
-  };
-
-  // Export to Excel
-  const exportToExcel = () => {
+  const exportToExcel = () =>
     Swal.fire({
       icon: "success",
       title: "Exporting to Excel",
@@ -1022,7 +836,6 @@ const Total_salary = () => {
       timer: 1500,
       showConfirmButton: false,
     });
-  };
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -1041,14 +854,9 @@ const Total_salary = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm transition-all duration-300 ease-in-out
+            h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -1068,83 +876,74 @@ const Total_salary = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
-            {menuItems.map((item) => (
-              <div key={item.id}>
-                {item.subItems ? (
-                  <>
-                    <button
-                      onClick={() => {
-                        setActiveMenu(item.id);
-                        toggleSubMenu(item.id);
-                        setIsSidebarOpen(false);
-                      }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
+            {menuItems.map((item) => {
+              const isParentActive = activeMenu === item.id;
+
+              return (
+                <div key={item.id}>
+                  {item.subItems ? (
+                    <>
+                      <button
+                        onClick={() => {
+                          toggleSubMenu(item.id);
+                          setIsSidebarOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
                             ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
                             : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-600">{item.icon}</span>
+                          <span>{item.label}</span>
+                        </div>
+                        <span
+                          className={`transition-transform ${expandedMenu === item.id ? "rotate-90" : ""}`}
+                        >
+                          <FaArrowRight size={12} />
+                        </span>
+                      </button>
+                      {expandedMenu === item.id && (
+                        <div className="ml-6 space-y-1 mt-1">
+                          {item.subItems.map((sub) => (
+                            <Link
+                              key={sub.id}
+                              to={sub.path}
+                              onClick={() => setIsSidebarOpen(false)}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
+                                activeSubMenu === sub.id
+                                  ? "bg-teal-50 text-[#004d4d] font-bold"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
+                              }`}
+                            >
+                              {sub.label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={() => setIsSidebarOpen(false)}
                     >
-                      <div className="flex items-center gap-3">
+                      <button
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                          isParentActive
+                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                        }`}
+                      >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
-                      </div>
-                      <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
-                      >
-                        <FaArrowRight size={12} />
-                      </span>
-                    </button>
-                    {activeSubMenu === item.id && (
-                      <div className="ml-6 space-y-1 mt-1">
-                        {item.subItems.map((sub) => (
-                          <Link
-                            key={sub.id}
-                            to={sub.path}
-                            onClick={() => {
-                              setActiveSubMenu(sub.id);
-                              setIsSidebarOpen(false);
-                            }}
-                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
-                          >
-                            {sub.label}
-                          </Link>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <Link
-                    to={item.path}
-                    onClick={() => {
-                      setActiveMenu(item.id);
-                      setIsSidebarOpen(false);
-                    }}
-                  >
-                    <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
-                    >
-                      <span className="text-gray-600">{item.icon}</span>
-                      <span>{item.label}</span>
-                    </button>
-                  </Link>
-                )}
-              </div>
-            ))}
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              );
+            })}
 
             <button
               onClick={handleLogout}
@@ -1160,7 +959,6 @@ const Total_salary = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1169,7 +967,7 @@ const Total_salary = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
@@ -1211,7 +1009,7 @@ const Total_salary = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
+          {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-blue-600">
@@ -1249,40 +1047,40 @@ const Total_salary = () => {
                   placeholder="Search by teacher name, ID or transaction ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg"
                 />
               </div>
               <div className="flex items-center gap-1 flex-wrap">
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {uniqueStatuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterMonth}
                   onChange={(e) => setFilterMonth(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueMonths.map((month) => (
-                    <option key={month} value={month}>
-                      {month}
+                  {uniqueMonths.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterYear}
                   onChange={(e) => setFilterYear(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueYears.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
+                  {uniqueYears.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
                     </option>
                   ))}
                 </select>
@@ -1290,7 +1088,7 @@ const Total_salary = () => {
             </div>
           </div>
 
-          {/* Salary Records Table */}
+          {/* Table */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto max-h-[calc(100vh-380px)] overflow-y-auto">
               <table className="w-full text-xs">
@@ -1364,7 +1162,7 @@ const Total_salary = () => {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => openDetailsModal(record)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
                               title="View Details"
                             >
                               <FaEye size={12} />
@@ -1372,7 +1170,7 @@ const Total_salary = () => {
                             {record.status !== "Paid" && (
                               <button
                                 onClick={() => handleMarkAsPaid(record)}
-                                className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
+                                className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
                                 title="Mark as Paid"
                               >
                                 <FaCheckCircleIcon size={12} />
@@ -1380,14 +1178,14 @@ const Total_salary = () => {
                             )}
                             <button
                               onClick={() => openEditModal(record)}
-                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50 transition-all"
+                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
                               title="Edit"
                             >
                               <FaEdit size={12} />
                             </button>
                             <button
                               onClick={() => handleDeleteSalary(record.id)}
-                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                               title="Delete"
                             >
                               <FaTrash size={12} />
@@ -1441,27 +1239,26 @@ const Total_salary = () => {
                   required
                   value={formData.teacherName}
                   onChange={(e) => {
-                    const teacher = e.target.value;
+                    const t = e.target.value;
                     setFormData({
                       ...formData,
-                      teacherName: teacher,
-                      teacherId: teacher
-                        ? `TCH${String(salaryRecords.filter((r) => r.teacherName === teacher).length + 1).padStart(3, "0")}`
+                      teacherName: t,
+                      teacherId: t
+                        ? `TCH${String(salaryRecords.filter((r) => r.teacherName === t).length + 1).padStart(3, "0")}`
                         : "",
-                      subject: teacher ? subjects[0] : "",
+                      subject: t ? subjects[0] : "",
                     });
                   }}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
                   <option value="">Select Teacher</option>
-                  {teachers.map((teacher) => (
-                    <option key={teacher} value={teacher}>
-                      {teacher}
+                  {teachers.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
                     </option>
                   ))}
                 </select>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1473,7 +1270,7 @@ const Total_salary = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, teacherId: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="Auto-generated"
                   />
                 </div>
@@ -1487,18 +1284,17 @@ const Total_salary = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">Select Subject</option>
-                    {subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
+                    {subjects.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1510,12 +1306,12 @@ const Total_salary = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, month: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">Select Month</option>
-                    {months.map((month) => (
-                      <option key={month} value={month}>
-                        {month}
+                    {months.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
                       </option>
                     ))}
                   </select>
@@ -1533,18 +1329,16 @@ const Total_salary = () => {
                         year: parseInt(e.target.value),
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Year</option>
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
+                    {years.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1556,20 +1350,19 @@ const Total_salary = () => {
                     min="0"
                     value={formData.basicSalary}
                     onChange={(e) => {
-                      const basic = parseFloat(e.target.value) || 0;
+                      const b = parseFloat(e.target.value) || 0;
                       setFormData({
                         ...formData,
-                        basicSalary: basic,
+                        basicSalary: b,
                         netSalary: calculateNetSalary(
-                          basic,
+                          b,
                           formData.allowance,
                           formData.bonus,
                           formData.deduction,
                         ),
                       });
                     }}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter basic salary"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1581,24 +1374,22 @@ const Total_salary = () => {
                     min="0"
                     value={formData.allowance}
                     onChange={(e) => {
-                      const allowance = parseFloat(e.target.value) || 0;
+                      const a = parseFloat(e.target.value) || 0;
                       setFormData({
                         ...formData,
-                        allowance: allowance,
+                        allowance: a,
                         netSalary: calculateNetSalary(
                           formData.basicSalary,
-                          allowance,
+                          a,
                           formData.bonus,
                           formData.deduction,
                         ),
                       });
                     }}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter allowance"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1609,20 +1400,19 @@ const Total_salary = () => {
                     min="0"
                     value={formData.bonus}
                     onChange={(e) => {
-                      const bonus = parseFloat(e.target.value) || 0;
+                      const b = parseFloat(e.target.value) || 0;
                       setFormData({
                         ...formData,
-                        bonus: bonus,
+                        bonus: b,
                         netSalary: calculateNetSalary(
                           formData.basicSalary,
                           formData.allowance,
-                          bonus,
+                          b,
                           formData.deduction,
                         ),
                       });
                     }}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter bonus"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1634,24 +1424,22 @@ const Total_salary = () => {
                     min="0"
                     value={formData.deduction}
                     onChange={(e) => {
-                      const deduction = parseFloat(e.target.value) || 0;
+                      const d = parseFloat(e.target.value) || 0;
                       setFormData({
                         ...formData,
-                        deduction: deduction,
+                        deduction: d,
                         netSalary: calculateNetSalary(
                           formData.basicSalary,
                           formData.allowance,
                           formData.bonus,
-                          deduction,
+                          d,
                         ),
                       });
                     }}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter deduction"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
-
               <div className="bg-blue-50 rounded-lg p-3">
                 <div className="flex justify-between text-sm">
                   <span className="font-medium text-gray-600">Net Salary:</span>
@@ -1667,7 +1455,6 @@ const Total_salary = () => {
                   </span>
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
@@ -1677,16 +1464,15 @@ const Total_salary = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
-                  {statuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {statuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
               </div>
-
               {formData.status === "Paid" && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
@@ -1703,7 +1489,7 @@ const Total_salary = () => {
                             paymentDate: e.target.value,
                           })
                         }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
@@ -1718,12 +1504,12 @@ const Total_salary = () => {
                             paymentMethod: e.target.value,
                           })
                         }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                       >
                         <option value="">Select Method</option>
-                        {paymentMethods.map((method) => (
-                          <option key={method} value={method}>
-                            {method}
+                        {paymentMethods.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
                           </option>
                         ))}
                       </select>
@@ -1742,13 +1528,12 @@ const Total_salary = () => {
                           transactionId: e.target.value,
                         })
                       }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                       placeholder="Enter transaction ID"
                     />
                   </div>
                 </>
               )}
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Notes
@@ -1759,22 +1544,21 @@ const Total_salary = () => {
                     setFormData({ ...formData, notes: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   placeholder="Add notes..."
                 />
               </div>
-
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold"
                 >
                   <FaSave className="inline mr-2" size={14} /> Add Salary
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -1810,16 +1594,15 @@ const Total_salary = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, teacherName: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
-                  {teachers.map((teacher) => (
-                    <option key={teacher} value={teacher}>
-                      {teacher}
+                  {teachers.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
                     </option>
                   ))}
                 </select>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1831,8 +1614,7 @@ const Total_salary = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, teacherId: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter teacher ID"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1845,17 +1627,16 @@ const Total_salary = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
+                    {subjects.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1867,11 +1648,11 @@ const Total_salary = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, month: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {months.map((month) => (
-                      <option key={month} value={month}>
-                        {month}
+                    {months.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
                       </option>
                     ))}
                   </select>
@@ -1889,17 +1670,16 @@ const Total_salary = () => {
                         year: parseInt(e.target.value),
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
+                    {years.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1911,20 +1691,19 @@ const Total_salary = () => {
                     min="0"
                     value={formData.basicSalary}
                     onChange={(e) => {
-                      const basic = parseFloat(e.target.value) || 0;
+                      const b = parseFloat(e.target.value) || 0;
                       setFormData({
                         ...formData,
-                        basicSalary: basic,
+                        basicSalary: b,
                         netSalary: calculateNetSalary(
-                          basic,
+                          b,
                           formData.allowance,
                           formData.bonus,
                           formData.deduction,
                         ),
                       });
                     }}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter basic salary"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1936,24 +1715,22 @@ const Total_salary = () => {
                     min="0"
                     value={formData.allowance}
                     onChange={(e) => {
-                      const allowance = parseFloat(e.target.value) || 0;
+                      const a = parseFloat(e.target.value) || 0;
                       setFormData({
                         ...formData,
-                        allowance: allowance,
+                        allowance: a,
                         netSalary: calculateNetSalary(
                           formData.basicSalary,
-                          allowance,
+                          a,
                           formData.bonus,
                           formData.deduction,
                         ),
                       });
                     }}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter allowance"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1964,20 +1741,19 @@ const Total_salary = () => {
                     min="0"
                     value={formData.bonus}
                     onChange={(e) => {
-                      const bonus = parseFloat(e.target.value) || 0;
+                      const b = parseFloat(e.target.value) || 0;
                       setFormData({
                         ...formData,
-                        bonus: bonus,
+                        bonus: b,
                         netSalary: calculateNetSalary(
                           formData.basicSalary,
                           formData.allowance,
-                          bonus,
+                          b,
                           formData.deduction,
                         ),
                       });
                     }}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter bonus"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1989,24 +1765,22 @@ const Total_salary = () => {
                     min="0"
                     value={formData.deduction}
                     onChange={(e) => {
-                      const deduction = parseFloat(e.target.value) || 0;
+                      const d = parseFloat(e.target.value) || 0;
                       setFormData({
                         ...formData,
-                        deduction: deduction,
+                        deduction: d,
                         netSalary: calculateNetSalary(
                           formData.basicSalary,
                           formData.allowance,
                           formData.bonus,
-                          deduction,
+                          d,
                         ),
                       });
                     }}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter deduction"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
-
               <div className="bg-blue-50 rounded-lg p-3">
                 <div className="flex justify-between text-sm">
                   <span className="font-medium text-gray-600">Net Salary:</span>
@@ -2022,7 +1796,6 @@ const Total_salary = () => {
                   </span>
                 </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
@@ -2032,16 +1805,15 @@ const Total_salary = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
-                  {statuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {statuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
               </div>
-
               {formData.status === "Paid" && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
@@ -2058,7 +1830,7 @@ const Total_salary = () => {
                             paymentDate: e.target.value,
                           })
                         }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
@@ -2073,11 +1845,11 @@ const Total_salary = () => {
                             paymentMethod: e.target.value,
                           })
                         }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                       >
-                        {paymentMethods.map((method) => (
-                          <option key={method} value={method}>
-                            {method}
+                        {paymentMethods.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
                           </option>
                         ))}
                       </select>
@@ -2096,13 +1868,11 @@ const Total_salary = () => {
                           transactionId: e.target.value,
                         })
                       }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter transaction ID"
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     />
                   </div>
                 </>
               )}
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Notes
@@ -2113,22 +1883,20 @@ const Total_salary = () => {
                     setFormData({ ...formData, notes: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Add notes..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Update Salary
+                  <FaSave className="inline mr-2" size={14} /> Update
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -2170,7 +1938,6 @@ const Total_salary = () => {
                   {selectedSalary.status}
                 </span>
               </div>
-
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-[10px] text-gray-400">Subject</p>
@@ -2215,7 +1982,6 @@ const Total_salary = () => {
                   </p>
                 </div>
               </div>
-
               {selectedSalary.paymentDate && (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-gray-50 rounded-lg p-3">
@@ -2232,7 +1998,6 @@ const Total_salary = () => {
                   </div>
                 </div>
               )}
-
               {selectedSalary.transactionId && (
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-[10px] text-gray-400">Transaction ID</p>
@@ -2241,7 +2006,6 @@ const Total_salary = () => {
                   </p>
                 </div>
               )}
-
               {selectedSalary.notes && (
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-[10px] text-gray-400">Notes</p>
@@ -2250,7 +2014,6 @@ const Total_salary = () => {
                   </p>
                 </div>
               )}
-
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 {selectedSalary.status !== "Paid" && (
                   <button
@@ -2258,7 +2021,7 @@ const Total_salary = () => {
                       setShowDetailsModal(false);
                       handleMarkAsPaid(selectedSalary);
                     }}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                   >
                     <FaCheckCircleIcon className="inline mr-2" /> Mark as Paid
                   </button>
@@ -2268,7 +2031,7 @@ const Total_salary = () => {
                     setShowDetailsModal(false);
                     openEditModal(selectedSalary);
                   }}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaEdit className="inline mr-2" /> Edit
                 </button>
@@ -2277,13 +2040,13 @@ const Total_salary = () => {
                     setShowDetailsModal(false);
                     handleDeleteSalary(selectedSalary.id);
                   }}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaTrash className="inline mr-2" /> Delete
                 </button>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>

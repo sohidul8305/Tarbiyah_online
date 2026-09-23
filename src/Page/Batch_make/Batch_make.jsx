@@ -305,6 +305,16 @@ const Batch_make = () => {
           label: "Today's Class",
         },
         {
+          id: "basic-tazweed",
+          path: "/admin-dashboard/basic-tazweed",
+          label: "Basic Tazweed Payment Overview",
+        },
+        {
+          id: "najera-batch",
+          path: "/admin-dashboard/najera-batch",
+          label: "Najera Payment Overview",
+        },
+        {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
           label: "New Admission",
@@ -411,24 +421,101 @@ const Batch_make = () => {
       path: "/admin-finance",
       icon: <FaMoneyBillWave className="text-xl" />,
       label: "Finance",
+      subItems: [
+        {
+          id: "admin-on-fee",
+          path: "/admin-finance/admin-fee",
+          label: "Admin on Fee",
+        },
+        {
+          id: "monthly-fee",
+          path: "/admin-finance/monthly-fee",
+          label: "Monthly Fee",
+        },
+        { id: "invoice", path: "/admin-finance/invoice", label: "Invoice" },
+        { id: "report", path: "/admin-finance/report", label: "Report" },
+      ],
     },
     {
       id: "exam",
       path: "/admin-exam",
       icon: <FaCalendarCheck className="text-xl" />,
       label: "Exam",
+      subItems: [
+        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
+        {
+          id: "result-publish",
+          path: "/admin-exam/result",
+          label: "Result Publish",
+        },
+        {
+          id: "certificate-permission",
+          path: "/admin-exam/certificate",
+          label: "Certificate Permission",
+        },
+        { id: "grad", path: "/admin-exam/grad", label: "Grad" },
+        {
+          id: "class-test",
+          path: "/admin-exam/class-test",
+          label: "Class Test",
+        },
+        {
+          id: "mid-term",
+          path: "/admin-exam/mid-term",
+          label: "Mid Term Exam",
+        },
+        {
+          id: "final-exam",
+          path: "/admin-exam/final-exam",
+          label: "Final Exam",
+        },
+      ],
     },
     {
       id: "report-analytics",
       path: "/admin-reports",
       icon: <FaChartLine className="text-xl" />,
       label: "Report & Analytics",
+      subItems: [
+        {
+          id: "admission-report",
+          path: "/admin-reports/admission",
+          label: "Admission Report",
+        },
+        {
+          id: "attendance-report",
+          path: "/admin-reports/attendance",
+          label: "Attendance Report",
+        },
+        { id: "income", path: "/admin-reports/income", label: "Income" },
+      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
       icon: <FaDatabase className="text-xl" />,
       label: "CRM Management",
+      subItems: [
+        {
+          id: "data-entry",
+          path: "/admin-crm/data-entry",
+          label: "Data Entry",
+        },
+      ],
+    },
+    {
+      id: "salary",
+      path: "/admin-salary",
+      icon: <FaMoneyBillWave className="text-xl" />,
+      label: "Salary",
+      subItems: [
+        {
+          id: "total-salary",
+          path: "/admin-salary/total",
+          label: "Total Salary",
+        },
+        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
+      ],
     },
   ];
 

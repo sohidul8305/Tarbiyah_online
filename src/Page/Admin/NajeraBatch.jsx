@@ -279,12 +279,12 @@ const NajeraBatch = () => {
         {
           id: "basic-tazweed",
           path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed",
+          label: "Basic Tazweed Payment Overview",
         },
         {
           id: "najera-batch",
           path: "/admin-dashboard/najera-batch",
-          label: "Najera Batch",
+          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -424,6 +424,22 @@ const NajeraBatch = () => {
           id: "certificate-permission",
           path: "/admin-exam/certificate",
           label: "Certificate Permission",
+        },
+        { id: "grad", path: "/admin-exam/grad", label: "Grad" },
+        {
+          id: "class-test",
+          path: "/admin-exam/class-test",
+          label: "Class Test",
+        },
+        {
+          id: "mid-term",
+          path: "/admin-exam/mid-term",
+          label: "Mid Term Exam",
+        },
+        {
+          id: "final-exam",
+          path: "/admin-exam/final-exam",
+          label: "Final Exam",
         },
       ],
     },

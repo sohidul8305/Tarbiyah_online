@@ -27,6 +27,7 @@ import {
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+import { FaUserTimes } from "react-icons/fa";
 
 const API_BASE = "https://api.tarbiyahonline.com";
 
@@ -635,13 +636,13 @@ const Add_student = () => {
     {
       id: "profile",
       path: "/admin-profile",
-      icon: <FaUser />,
+      icon: <FaUser className="text-xl" />,
       label: "Profile",
     },
     {
       id: "dashboard",
       path: "/admin-dashboard",
-      icon: <MdDashboard />,
+      icon: <MdDashboard className="text-xl" />,
       label: "Dashboard",
       subItems: [
         {
@@ -655,16 +656,31 @@ const Add_student = () => {
           label: "Today's Class",
         },
         {
+          id: "basic-tazweed",
+          path: "/admin-dashboard/basic-tazweed",
+          label: "Basic Tazweed Payment Overview",
+        },
+        {
+          id: "najera-batch",
+          path: "/admin-dashboard/najera-batch",
+          label: "Najera Payment Overview",
+        },
+        {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
           label: "New Admission",
+        },
+        {
+          id: "notification",
+          path: "/admin-dashboard/notification",
+          label: "Notification",
         },
       ],
     },
     {
       id: "student-management",
       path: "/admin-students",
-      icon: <FaUsers />,
+      icon: <FaUsers className="text-xl" />,
       label: "Student Management",
       subItems: [
         {
@@ -682,12 +698,17 @@ const Add_student = () => {
           path: "/admin-students/profile",
           label: "Student Profile",
         },
+        {
+          id: "admission-permission",
+          path: "/admin-students/admission",
+          label: "Admission Permission",
+        },
       ],
     },
     {
       id: "teacher-management",
       path: "/admin-teachers",
-      icon: <FaChalkboardTeacher />,
+      icon: <FaChalkboardTeacher className="text-xl" />,
       label: "Teacher Management",
       subItems: [
         {
@@ -700,12 +721,22 @@ const Add_student = () => {
           path: "/admin-teachers/schedule",
           label: "Class Schedule",
         },
+        {
+          id: "teacher-attendance",
+          path: "/admin-teachers/attendance",
+          label: "Teacher Attendance",
+        },
+        {
+          id: "teacher-overview",
+          path: "/admin-teachers/overview",
+          label: "Teacher Overview",
+        },
       ],
     },
     {
       id: "batch-course",
       path: "/admin-batch-course",
-      icon: <FaLayerGroup />,
+      icon: <FaLayerGroup className="text-xl" />,
       label: "Batch & Course",
       subItems: [
         {
@@ -718,34 +749,126 @@ const Add_student = () => {
           path: "/admin-batch-course/course-make",
           label: "Course Make",
         },
+        {
+          id: "syllabus",
+          path: "/admin-batch-course/syllabus",
+          label: "Syllabus",
+        },
+        {
+          id: "clear-routine",
+          path: "/admin-batch-course/clear-routine",
+          label: "Clear Routine",
+        },
       ],
+    },
+    {
+      id: "absence-student",
+      path: "/admin-absence",
+      icon: <FaUserTimes className="text-xl" />,
+      label: "Absence Student Community",
     },
     {
       id: "finance",
       path: "/admin-finance",
-      icon: <FaMoneyBillWave />,
+      icon: <FaMoneyBillWave className="text-xl" />,
       label: "Finance",
+      subItems: [
+        {
+          id: "admin-on-fee",
+          path: "/admin-finance/admin-fee",
+          label: "Admin on Fee",
+        },
+        {
+          id: "monthly-fee",
+          path: "/admin-finance/monthly-fee",
+          label: "Monthly Fee",
+        },
+        { id: "invoice", path: "/admin-finance/invoice", label: "Invoice" },
+        { id: "report", path: "/admin-finance/report", label: "Report" },
+      ],
     },
     {
       id: "exam",
       path: "/admin-exam",
-      icon: <FaCalendarCheck />,
+      icon: <FaCalendarCheck className="text-xl" />,
       label: "Exam",
+      subItems: [
+        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
+        {
+          id: "result-publish",
+          path: "/admin-exam/result",
+          label: "Result Publish",
+        },
+        {
+          id: "certificate-permission",
+          path: "/admin-exam/certificate",
+          label: "Certificate Permission",
+        },
+        { id: "grad", path: "/admin-exam/grad", label: "Grad" },
+        {
+          id: "class-test",
+          path: "/admin-exam/class-test",
+          label: "Class Test",
+        },
+        {
+          id: "mid-term",
+          path: "/admin-exam/mid-term",
+          label: "Mid Term Exam",
+        },
+        {
+          id: "final-exam",
+          path: "/admin-exam/final-exam",
+          label: "Final Exam",
+        },
+      ],
     },
     {
       id: "report-analytics",
       path: "/admin-reports",
-      icon: <FaChartLine />,
+      icon: <FaChartLine className="text-xl" />,
       label: "Report & Analytics",
+      subItems: [
+        {
+          id: "admission-report",
+          path: "/admin-reports/admission",
+          label: "Admission Report",
+        },
+        {
+          id: "attendance-report",
+          path: "/admin-reports/attendance",
+          label: "Attendance Report",
+        },
+        { id: "income", path: "/admin-reports/income", label: "Income" },
+      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
-      icon: <FaDatabase />,
+      icon: <FaDatabase className="text-xl" />,
       label: "CRM Management",
+      subItems: [
+        {
+          id: "data-entry",
+          path: "/admin-crm/data-entry",
+          label: "Data Entry",
+        },
+      ],
+    },
+    {
+      id: "salary",
+      path: "/admin-salary",
+      icon: <FaMoneyBillWave className="text-xl" />,
+      label: "Salary",
+      subItems: [
+        {
+          id: "total-salary",
+          path: "/admin-salary/total",
+          label: "Total Salary",
+        },
+        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
+      ],
     },
   ];
-
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">

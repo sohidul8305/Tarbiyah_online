@@ -152,10 +152,10 @@ const Admin_profile = () => {
 
     setAdminInfo(merged);
     setEditData(merged);
-    setImageLoadError(false); // ✅ reset on load
+    setImageLoadError(false);
   }, [user]);
 
-  // ✅ Reset image error when URL changes (edit mode / upload)
+  // ✅ Reset image error when URL changes
   const currentImageUrl = isEditing
     ? editData.profileImage
     : adminInfo.profileImage;
@@ -543,16 +543,14 @@ const Admin_profile = () => {
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Mobile Header */}
-        <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Admin Profile</h1>
-          <button
-            onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-          </button>
-        </div>
+        {/* ✅ Mobile Floating Menu Button (Navbar এর বদলে) */}
+        <button
+          onClick={toggleSidebar}
+          className="md:hidden fixed top-4 left-4 z-50 bg-[#004d4d] text-white p-3 rounded-full shadow-lg hover:bg-[#006666] transition-all"
+          aria-label="Toggle Menu"
+        >
+          {isSidebarOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+        </button>
 
         {/* Sidebar */}
         <aside
@@ -566,6 +564,7 @@ const Admin_profile = () => {
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
+          {/* Sidebar Header (profile summary) */}
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
@@ -594,7 +593,8 @@ const Admin_profile = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
+          {/* Sidebar Nav */}
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-120px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -662,6 +662,7 @@ const Admin_profile = () => {
               </div>
             ))}
 
+            {/* Logout Button */}
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -670,12 +671,9 @@ const Admin_profile = () => {
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
-          <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>© 2026 Pipilika Soft</p>
-          </div>
         </aside>
 
+        {/* Mobile overlay */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -683,31 +681,10 @@ const Admin_profile = () => {
           />
         )}
 
-        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
-          <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-            <div>
-              <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaUser className="text-blue-600" /> Admin Profile
-              </h1>
-              <p className="text-xs text-gray-500">
-                View and manage your profile information
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-
+        {/* Main Content */}
+        <main className="flex-1 p-4 md:p-6 pt-20 md:pt-6 w-full overflow-auto">
           <div className="space-y-3">
-            {/* Profile Header */}
+            {/* Profile Header Card */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] h-20 md:h-24 relative">
                 <button
@@ -734,6 +711,7 @@ const Admin_profile = () => {
               </div>
 
               <div className="px-4 pb-4 relative flex flex-col md:flex-row items-center md:items-end gap-4 -mt-10 md:-mt-8">
+                {/* Avatar */}
                 <div className="relative">
                   <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-white p-1 shadow-lg border-4 border-white flex items-center justify-center overflow-hidden">
                     {currentImageUrl && !imageLoadError ? (
@@ -795,6 +773,7 @@ const Admin_profile = () => {
                   )}
                 </div>
 
+                {/* Name & Designation */}
                 <div className="text-center md:text-left flex-grow">
                   {isEditing ? (
                     <input
@@ -872,7 +851,7 @@ const Admin_profile = () => {
               </div>
             </div>
 
-            {/* Two Columns */}
+            {/* Two Column Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
               <div className="lg:col-span-1 space-y-3">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">

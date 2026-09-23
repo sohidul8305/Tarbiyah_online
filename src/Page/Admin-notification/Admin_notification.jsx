@@ -350,11 +350,6 @@ const Admin_notification = () => {
       label: "Profile",
     },
     {
-      id: "notification",
-      icon: <FaBell className="text-xl" />,
-      label: "Notification",
-    },
-    {
       id: "dashboard",
       path: "/admin-dashboard",
       icon: <MdDashboard className="text-xl" />,
@@ -519,6 +514,22 @@ const Admin_notification = () => {
           path: "/admin-exam/certificate",
           label: "Certificate Permission",
         },
+        { id: "grad", path: "/admin-exam/grad", label: "Grad" },
+        {
+          id: "class-test",
+          path: "/admin-exam/class-test",
+          label: "Class Test",
+        },
+        {
+          id: "mid-term",
+          path: "/admin-exam/mid-term",
+          label: "Mid Term Exam",
+        },
+        {
+          id: "final-exam",
+          path: "/admin-exam/final-exam",
+          label: "Final Exam",
+        },
       ],
     },
     {
@@ -551,6 +562,20 @@ const Admin_notification = () => {
           path: "/admin-crm/data-entry",
           label: "Data Entry",
         },
+      ],
+    },
+    {
+      id: "salary",
+      path: "/admin-salary",
+      icon: <FaMoneyBillWave className="text-xl" />,
+      label: "Salary",
+      subItems: [
+        {
+          id: "total-salary",
+          path: "/admin-salary/total",
+          label: "Total Salary",
+        },
+        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
       ],
     },
   ];
