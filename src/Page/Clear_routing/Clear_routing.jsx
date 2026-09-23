@@ -9,165 +9,462 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
   FaCalendarAlt,
-  FaClock,
-  FaBook,
-  FaFileAlt,
-  FaChartLine,
-  FaUserGraduate,
-  FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
-  FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
+  FaChartLine,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
-  FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
   FaPlusCircle,
-  FaDownload,
-  FaPrint,
+  FaArrowRight,
+  FaLayerGroup,
+  FaSave,
+  FaUserTimes,
+  FaHourglassHalf,
+  FaCheckDouble,
   FaCheckCircle,
   FaTimesCircle,
-  FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
-  FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
-  FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
-  FaUserEdit,
-  FaUserCircle,
-  FaAddressCard,
-  FaChalkboard,
-  FaCalendarDay,
-  FaSchool as FaSchoolIcon,
-  FaUserTie,
-  FaBookReader,
-  FaStopwatch,
-  FaClipboardCheck,
-  FaExchangeAlt,
-  FaCheckDouble,
-  FaBan,
-  FaCheck,
-  FaTimes,
-  FaQuestion,
-  FaCalendarWeek,
-  FaChartBar,
-  FaFileDownload,
-  FaFilePdf,
-  FaFileExcel,
-  FaRegClock,
-  FaRegCalendarAlt,
-  FaRegCalendarCheck,
-  FaWhatsapp,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaGlobe as FaGlobeIcon,
-  FaEnvelope as FaEnvelopeIcon,
-  FaPhone as FaPhoneIcon,
-  FaUsers as FaUsersIcon,
-  FaCalendar,
-  FaClock as FaClockIcon2,
-  FaHourglassHalf,
-  FaCheckCircle as FaCheckCircleIcon,
-  FaTimesCircle as FaTimesCircleIcon,
-  FaBookmark,
-  FaListUl,
-  FaChevronRight,
-  FaChevronDown,
-  FaFolderOpen,
-  FaFile,
-  FaFilePdf as FaFilePdfIcon,
-  FaFileWord,
-  FaFilePowerpoint,
-  FaFileImage,
-  FaFileVideo,
-  FaFileAudio,
-  FaFileArchive,
-  FaFileCode,
-  FaFileExcel as FaFileExcelIcon,
-  FaFileAlt as FaFileAltIcon,
-  FaFolder,
-  FaCopy,
-  FaCut,
-  FaPaste,
-  FaShare,
-  FaStar as FaStarIcon,
-  FaRegStar,
-  FaRegFileAlt,
-  FaRegFilePdf,
-  FaRegFileWord,
-  FaRegFileExcel,
-  FaRegFilePowerpoint,
-  FaRegFileImage,
-  FaRegFileVideo,
-  FaRegFileArchive,
-  FaEraser,
   FaTrashAlt,
-  FaCalendarTimes,
-  FaRedoAlt,
-  FaUndoAlt,
-  FaSync,
+  FaEraser,
   FaExclamationCircle,
-  FaInfoCircle as FaInfoCircleIcon,
+  FaCalendarTimes,
   FaPlus,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+// ============================================================
+// ✅ ELDERS DEPARTMENT — শুধু এই ২ জন teacher ও elders courses
+// ============================================================
+const ELDERS_TEACHERS = [
+  { name: "Jubayer Ahmad", id: "TCH001", designation: "Senior Teacher" },
+  { name: "Sumaiya Afrin Mim", id: "TCH002", designation: "Junior Teacher" },
+];
+
+const ELDERS_COURSES = [
+  "Qaida Nuraniyah",
+  "Quran Nazera",
+  "Najera",
+  "Basic Tajweed",
+  "Bakarah Hifz",
+];
+
+const ELDERS_BATCHES = [
+  "Batch-03",
+  "Batch-06",
+  "Batch-02",
+  "Batch-01",
+  "Batch-04",
+];
+
+const ELDERS_CLASSES = [
+  "Elders Batch A",
+  "Elders Batch B",
+  "Elders Batch C",
+  "Elders Batch D",
+  "Elders Batch E",
+];
+
+// ✅ Elders default routines (image এর schedule এর মতো)
+const ELDERS_DEFAULT_ROUTINES = [
+  // ===== Morning: 6:00 - 7:00 AM =====
+  {
+    id: 1,
+    teacher: "Jubayer Ahmad",
+    subject: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    day: "Saturday",
+    time: "06:00 AM - 07:00 AM",
+    room: "Online Room 1",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-01",
+    endDate: "2026-12-31",
+    students: 18,
+    createdBy: "Admin",
+    createdAt: "2026-07-25",
+  },
+  {
+    id: 2,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    day: "Saturday",
+    time: "06:00 AM - 07:00 AM",
+    room: "Online Room 1",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-01",
+    endDate: "2026-12-31",
+    students: 18,
+    createdBy: "Admin",
+    createdAt: "2026-07-25",
+  },
+  {
+    id: 3,
+    teacher: "Jubayer Ahmad",
+    subject: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    day: "Monday",
+    time: "06:00 AM - 07:00 AM",
+    room: "Online Room 1",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-01",
+    endDate: "2026-12-31",
+    students: 18,
+    createdBy: "Admin",
+    createdAt: "2026-07-25",
+  },
+  {
+    id: 4,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    day: "Monday",
+    time: "06:00 AM - 07:00 AM",
+    room: "Online Room 1",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-01",
+    endDate: "2026-12-31",
+    students: 18,
+    createdBy: "Admin",
+    createdAt: "2026-07-25",
+  },
+
+  // ===== Afternoon: 3:00 - 4:30 PM =====
+  {
+    id: 5,
+    teacher: "Jubayer Ahmad",
+    subject: "Basic Tajweed",
+    class: "Elders Batch B",
+    batch: "Batch-06",
+    day: "Sunday",
+    time: "03:00 PM - 04:30 PM",
+    room: "Online Room 2",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-15",
+    endDate: "2026-12-31",
+    students: 15,
+    createdBy: "Admin",
+    createdAt: "2026-08-10",
+  },
+  {
+    id: 6,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Basic Tajweed",
+    class: "Elders Batch B",
+    batch: "Batch-06",
+    day: "Sunday",
+    time: "03:00 PM - 04:30 PM",
+    room: "Online Room 2",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-15",
+    endDate: "2026-12-31",
+    students: 15,
+    createdBy: "Admin",
+    createdAt: "2026-08-10",
+  },
+  {
+    id: 7,
+    teacher: "Jubayer Ahmad",
+    subject: "Basic Tajweed",
+    class: "Elders Batch B",
+    batch: "Batch-06",
+    day: "Tuesday",
+    time: "03:00 PM - 04:30 PM",
+    room: "Online Room 2",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-15",
+    endDate: "2026-12-31",
+    students: 15,
+    createdBy: "Admin",
+    createdAt: "2026-08-10",
+  },
+  {
+    id: 8,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Basic Tajweed",
+    class: "Elders Batch B",
+    batch: "Batch-06",
+    day: "Tuesday",
+    time: "03:00 PM - 04:30 PM",
+    room: "Online Room 2",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-15",
+    endDate: "2026-12-31",
+    students: 15,
+    createdBy: "Admin",
+    createdAt: "2026-08-10",
+  },
+  {
+    id: 9,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    day: "Saturday",
+    time: "03:00 PM - 04:30 PM",
+    room: "Online Room 1",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-01",
+    endDate: "2026-12-31",
+    students: 18,
+    createdBy: "Admin",
+    createdAt: "2026-07-25",
+  },
+  {
+    id: 10,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    day: "Monday",
+    time: "03:00 PM - 04:30 PM",
+    room: "Online Room 1",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-01",
+    endDate: "2026-12-31",
+    students: 18,
+    createdBy: "Admin",
+    createdAt: "2026-07-25",
+  },
+
+  // ===== Evening: 8:00 - 9:00 PM =====
+  {
+    id: 11,
+    teacher: "Jubayer Ahmad",
+    subject: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    day: "Saturday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 1",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-01",
+    endDate: "2026-12-31",
+    students: 18,
+    createdBy: "Admin",
+    createdAt: "2026-07-25",
+  },
+  {
+    id: 12,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    day: "Saturday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 1",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-01",
+    endDate: "2026-12-31",
+    students: 18,
+    createdBy: "Admin",
+    createdAt: "2026-07-25",
+  },
+  {
+    id: 13,
+    teacher: "Jubayer Ahmad",
+    subject: "Najera",
+    class: "Elders Batch C",
+    batch: "Batch-02",
+    day: "Saturday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 3",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-09-01",
+    endDate: "2026-12-31",
+    students: 12,
+    createdBy: "Admin",
+    createdAt: "2026-08-25",
+  },
+  {
+    id: 14,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Najera",
+    class: "Elders Batch C",
+    batch: "Batch-02",
+    day: "Saturday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 3",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-09-01",
+    endDate: "2026-12-31",
+    students: 12,
+    createdBy: "Admin",
+    createdAt: "2026-08-25",
+  },
+  {
+    id: 15,
+    teacher: "Jubayer Ahmad",
+    subject: "Basic Tajweed",
+    class: "Elders Batch B",
+    batch: "Batch-06",
+    day: "Sunday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 2",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-15",
+    endDate: "2026-12-31",
+    students: 15,
+    createdBy: "Admin",
+    createdAt: "2026-08-10",
+  },
+  {
+    id: 16,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Basic Tajweed",
+    class: "Elders Batch B",
+    batch: "Batch-06",
+    day: "Sunday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 2",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-15",
+    endDate: "2026-12-31",
+    students: 15,
+    createdBy: "Admin",
+    createdAt: "2026-08-10",
+  },
+  {
+    id: 17,
+    teacher: "Jubayer Ahmad",
+    subject: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    day: "Monday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 1",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-01",
+    endDate: "2026-12-31",
+    students: 18,
+    createdBy: "Admin",
+    createdAt: "2026-07-25",
+  },
+  {
+    id: 18,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    day: "Monday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 1",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-01",
+    endDate: "2026-12-31",
+    students: 18,
+    createdBy: "Admin",
+    createdAt: "2026-07-25",
+  },
+  {
+    id: 19,
+    teacher: "Jubayer Ahmad",
+    subject: "Najera",
+    class: "Elders Batch C",
+    batch: "Batch-02",
+    day: "Monday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 3",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-09-01",
+    endDate: "2026-12-31",
+    students: 12,
+    createdBy: "Admin",
+    createdAt: "2026-08-25",
+  },
+  {
+    id: 20,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Najera",
+    class: "Elders Batch C",
+    batch: "Batch-02",
+    day: "Monday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 3",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-09-01",
+    endDate: "2026-12-31",
+    students: 12,
+    createdBy: "Admin",
+    createdAt: "2026-08-25",
+  },
+  {
+    id: 21,
+    teacher: "Jubayer Ahmad",
+    subject: "Basic Tajweed",
+    class: "Elders Batch B",
+    batch: "Batch-06",
+    day: "Tuesday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 2",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-15",
+    endDate: "2026-12-31",
+    students: 15,
+    createdBy: "Admin",
+    createdAt: "2026-08-10",
+  },
+  {
+    id: 22,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Basic Tajweed",
+    class: "Elders Batch B",
+    batch: "Batch-06",
+    day: "Tuesday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 2",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-08-15",
+    endDate: "2026-12-31",
+    students: 15,
+    createdBy: "Admin",
+    createdAt: "2026-08-10",
+  },
+  {
+    id: 23,
+    teacher: "Sumaiya Afrin Mim",
+    subject: "Najera",
+    class: "Elders Batch C",
+    batch: "Batch-02",
+    day: "Wednesday",
+    time: "08:00 PM - 09:00 PM",
+    room: "Online Room 3",
+    status: "Active",
+    semester: "Fall 2026",
+    startDate: "2026-09-01",
+    endDate: "2026-12-31",
+    students: 12,
+    createdBy: "Admin",
+    createdAt: "2026-08-25",
+  },
+];
 
 const Clear_routing = () => {
   const { user, logOut } = useAuth();
@@ -175,249 +472,51 @@ const Clear_routing = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("batch-course");
   const [activeSubMenu, setActiveSubMenu] = useState("clear-routine");
+
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
     phone: "",
     designation: "",
-    department: "",
+    department: "Quran for Elders",
     joinDate: "",
   });
 
-  // Routine data
-  const [routines, setRoutines] = useState([
-    {
-      id: 1,
-      teacher: "Dr. Muhammad Abdullah",
-      subject: "Tajweed",
-      class: "Class 8",
-      batch: "Batch 2026-A",
-      day: "Saturday",
-      time: "10:00 AM - 11:30 AM",
-      room: "Room 201",
-      status: "Active",
-      semester: "Fall 2026",
-      startDate: "2026-01-15",
-      endDate: "2026-12-15",
-      students: 25,
-      createdBy: "Admin",
-      createdAt: "2026-01-10",
-    },
-    {
-      id: 2,
-      teacher: "Dr. Muhammad Abdullah",
-      subject: "Tajweed",
-      class: "Class 8",
-      batch: "Batch 2026-A",
-      day: "Monday",
-      time: "10:00 AM - 11:30 AM",
-      room: "Room 201",
-      status: "Active",
-      semester: "Fall 2026",
-      startDate: "2026-01-15",
-      endDate: "2026-12-15",
-      students: 25,
-      createdBy: "Admin",
-      createdAt: "2026-01-10",
-    },
-    {
-      id: 3,
-      teacher: "Dr. Muhammad Abdullah",
-      subject: "Tajweed",
-      class: "Class 8",
-      batch: "Batch 2026-A",
-      day: "Wednesday",
-      time: "10:00 AM - 11:30 AM",
-      room: "Room 201",
-      status: "Active",
-      semester: "Fall 2026",
-      startDate: "2026-01-15",
-      endDate: "2026-12-15",
-      students: 25,
-      createdBy: "Admin",
-      createdAt: "2026-01-10",
-    },
-    {
-      id: 4,
-      teacher: "Ustadh Ahmad Ali",
-      subject: "Tafsir",
-      class: "Class 9",
-      batch: "Batch 2026-B",
-      day: "Sunday",
-      time: "09:00 AM - 10:30 AM",
-      room: "Room 102",
-      status: "Active",
-      semester: "Fall 2026",
-      startDate: "2026-02-01",
-      endDate: "2026-12-01",
-      students: 30,
-      createdBy: "Admin",
-      createdAt: "2026-02-01",
-    },
-    {
-      id: 5,
-      teacher: "Ustadh Ahmad Ali",
-      subject: "Tafsir",
-      class: "Class 9",
-      batch: "Batch 2026-B",
-      day: "Tuesday",
-      time: "09:00 AM - 10:30 AM",
-      room: "Room 102",
-      status: "Active",
-      semester: "Fall 2026",
-      startDate: "2026-02-01",
-      endDate: "2026-12-01",
-      students: 30,
-      createdBy: "Admin",
-      createdAt: "2026-02-01",
-    },
-    {
-      id: 6,
-      teacher: "Ustadh Ahmad Ali",
-      subject: "Tafsir",
-      class: "Class 9",
-      batch: "Batch 2026-B",
-      day: "Thursday",
-      time: "09:00 AM - 10:30 AM",
-      room: "Room 102",
-      status: "Active",
-      semester: "Fall 2026",
-      startDate: "2026-02-01",
-      endDate: "2026-12-01",
-      students: 30,
-      createdBy: "Admin",
-      createdAt: "2026-02-01",
-    },
-    {
-      id: 7,
-      teacher: "Ustadha Fatima Rahman",
-      subject: "Hadith",
-      class: "Class 10",
-      batch: "Batch 2026-C",
-      day: "Saturday",
-      time: "11:30 AM - 01:00 PM",
-      room: "Room 305",
-      status: "Active",
-      semester: "Fall 2026",
-      startDate: "2026-03-01",
-      endDate: "2026-11-30",
-      students: 22,
-      createdBy: "Admin",
-      createdAt: "2026-03-01",
-    },
-    {
-      id: 8,
-      teacher: "Ustadha Fatima Rahman",
-      subject: "Hadith",
-      class: "Class 10",
-      batch: "Batch 2026-C",
-      day: "Tuesday",
-      time: "11:30 AM - 01:00 PM",
-      room: "Room 305",
-      status: "Active",
-      semester: "Fall 2026",
-      startDate: "2026-03-01",
-      endDate: "2026-11-30",
-      students: 22,
-      createdBy: "Admin",
-      createdAt: "2026-03-01",
-    },
-    {
-      id: 9,
-      teacher: "Dr. Omar Farooq",
-      subject: "Fiqh",
-      class: "Class 7",
-      batch: "Batch 2026-D",
-      day: "Monday",
-      time: "02:00 PM - 03:30 PM",
-      room: "Room 203",
-      status: "Pending",
-      semester: "Spring 2026",
-      startDate: "2026-07-15",
-      endDate: "2026-12-15",
-      students: 0,
-      createdBy: "Admin",
-      createdAt: "2026-07-15",
-    },
-    {
-      id: 10,
-      teacher: "Dr. Omar Farooq",
-      subject: "Fiqh",
-      class: "Class 7",
-      batch: "Batch 2026-D",
-      day: "Wednesday",
-      time: "02:00 PM - 03:30 PM",
-      room: "Room 203",
-      status: "Pending",
-      semester: "Spring 2026",
-      startDate: "2026-07-15",
-      endDate: "2026-12-15",
-      students: 0,
-      createdBy: "Admin",
-      createdAt: "2026-07-15",
-    },
-    {
-      id: 11,
-      teacher: "Ustadh Yusuf Khan",
-      subject: "Aqeedah",
-      class: "Class 6",
-      batch: "Batch 2026-E",
-      day: "Sunday",
-      time: "03:30 PM - 05:00 PM",
-      room: "Room 101",
-      status: "Completed",
-      semester: "Spring 2026",
-      startDate: "2026-08-01",
-      endDate: "2026-12-15",
-      students: 18,
-      createdBy: "Admin",
-      createdAt: "2026-08-01",
-    },
-    {
-      id: 12,
-      teacher: "Ustadh Ibrahim Malik",
-      subject: "Arabic Grammar",
-      class: "Class 7",
-      batch: "Batch 2026-F",
-      day: "Saturday",
-      time: "10:00 AM - 11:30 AM",
-      room: "Room 304",
-      status: "Cancelled",
-      semester: "Fall 2026",
-      startDate: "2026-09-01",
-      endDate: "2026-12-20",
-      students: 28,
-      createdBy: "Admin",
-      createdAt: "2026-09-01",
-    },
-  ]);
+  // ✅ Elders routines
+  const [routines, setRoutines] = useState(() => {
+    const saved = localStorage.getItem("eldersRoutines");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    return ELDERS_DEFAULT_ROUTINES;
+  });
 
-  // State for filters
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterTeacher, setFilterTeacher] = useState("All");
   const [filterClass, setFilterClass] = useState("All");
   const [filterDay, setFilterDay] = useState("All");
 
-  // State for selection
   const [selectedRoutines, setSelectedRoutines] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
 
-  // State for modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showClearModal, setShowClearModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRoutine, setSelectedRoutine] = useState(null);
-  const [clearType, setClearType] = useState("single"); // single, selected, all
+  const [clearType, setClearType] = useState("single");
   const [clearFilter, setClearFilter] = useState({
     teacher: "",
     class: "",
     status: "",
-    dateRange: "",
   });
 
-  // State for form data
   const [formData, setFormData] = useState({
     teacher: "",
     subject: "",
@@ -426,23 +525,13 @@ const Clear_routing = () => {
     day: "",
     time: "",
     room: "",
-    semester: "",
+    semester: "Fall 2026",
     startDate: "",
     endDate: "",
     students: 0,
     status: "Pending",
   });
 
-  // Available options
-  const teachers = [
-    "Dr. Muhammad Abdullah",
-    "Ustadh Ahmad Ali",
-    "Ustadha Fatima Rahman",
-    "Dr. Omar Farooq",
-    "Ustadh Yusuf Khan",
-    "Ustadh Ibrahim Malik",
-  ];
-  const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
   const daysOfWeek = [
     "Saturday",
     "Sunday",
@@ -458,22 +547,26 @@ const Clear_routing = () => {
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        setAdminInfo(JSON.parse(savedAdmin));
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: "Quran for Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
-  // Save routines to localStorage
+  // Save routines
   useEffect(() => {
-    localStorage.setItem("routines", JSON.stringify(routines));
+    localStorage.setItem("eldersRoutines", JSON.stringify(routines));
   }, [routines]);
 
   const handleLogout = async () => {
@@ -482,7 +575,6 @@ const Clear_routing = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -491,28 +583,15 @@ const Clear_routing = () => {
       });
       navigate("/admin-login");
     } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
+      console.error(err);
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
+  // Sidebar menu
   const menuItems = [
     {
       id: "profile",
@@ -535,16 +614,6 @@ const Clear_routing = () => {
           id: "today-class",
           path: "/admin-dashboard/today-class",
           label: "Today's Class",
-        },
-        {
-          id: "basic-tazweed payment overview",
-          path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed Payment Overview",
-        },
-        {
-          id: "najera-payment overview",
-          path: "/admin-dashboard/najera-batch",
-          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -653,89 +722,27 @@ const Clear_routing = () => {
       path: "/admin-finance",
       icon: <FaMoneyBillWave className="text-xl" />,
       label: "Finance",
-      subItems: [
-        {
-          id: "admin-on-fee",
-          path: "/admin-finance/admin-fee",
-          label: "Admin on Fee",
-        },
-        {
-          id: "monthly-fee",
-          path: "/admin-finance/monthly-fee",
-          label: "Monthly Fee",
-        },
-        { id: "invoice", path: "/admin-finance/invoice", label: "Invoice" },
-        { id: "report", path: "/admin-finance/report", label: "Report" },
-      ],
     },
     {
       id: "exam",
       path: "/admin-exam",
       icon: <FaCalendarCheck className="text-xl" />,
       label: "Exam",
-      subItems: [
-        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
-        {
-          id: "result-publish",
-          path: "/admin-exam/result",
-          label: "Result Publish",
-        },
-        {
-          id: "certificate-permission",
-          path: "/admin-exam/certificate",
-          label: "Certificate Permission",
-        },
-      ],
     },
     {
       id: "report-analytics",
       path: "/admin-reports",
       icon: <FaChartLine className="text-xl" />,
       label: "Report & Analytics",
-      subItems: [
-        {
-          id: "admission-report",
-          path: "/admin-reports/admission",
-          label: "Admission Report",
-        },
-        {
-          id: "attendance-report",
-          path: "/admin-reports/attendance",
-          label: "Attendance Report",
-        },
-        { id: "income", path: "/admin-reports/income", label: "Income" },
-      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
       icon: <FaDatabase className="text-xl" />,
       label: "CRM Management",
-      subItems: [
-        {
-          id: "data-entry",
-          path: "/admin-crm/data-entry",
-          label: "Data Entry",
-        },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
-      ],
     },
   ];
 
-  // Get status badge color
   const getStatusColor = (status) => {
     switch (status) {
       case "Active":
@@ -751,30 +758,30 @@ const Clear_routing = () => {
     }
   };
 
-  // Get status icon
   const getStatusIcon = (status) => {
     switch (status) {
       case "Active":
-        return <FaCheckCircleIcon className="text-green-500" />;
+        return <FaCheckCircle className="text-green-500" size={10} />;
       case "Pending":
-        return <FaHourglassHalf className="text-yellow-500" />;
+        return <FaHourglassHalf className="text-yellow-500" size={10} />;
       case "Completed":
-        return <FaCheckDouble className="text-blue-500" />;
+        return <FaCheckDouble className="text-blue-500" size={10} />;
       case "Cancelled":
-        return <FaTimesCircleIcon className="text-red-500" />;
+        return <FaTimesCircle className="text-red-500" size={10} />;
       default:
         return null;
     }
   };
 
-  // Filter routines
   const filteredRoutines = routines.filter((routine) => {
+    const s = searchTerm.toLowerCase();
     const matchesSearch =
-      routine.teacher.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      routine.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      routine.class.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      routine.batch.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      routine.room.toLowerCase().includes(searchTerm.toLowerCase());
+      !s ||
+      (routine.teacher || "").toLowerCase().includes(s) ||
+      (routine.subject || "").toLowerCase().includes(s) ||
+      (routine.class || "").toLowerCase().includes(s) ||
+      (routine.batch || "").toLowerCase().includes(s) ||
+      (routine.room || "").toLowerCase().includes(s);
     const matchesStatus =
       filterStatus === "All" || routine.status === filterStatus;
     const matchesTeacher =
@@ -790,13 +797,11 @@ const Clear_routing = () => {
     );
   });
 
-  // Get unique values for filters
   const uniqueStatuses = ["All", ...new Set(routines.map((r) => r.status))];
   const uniqueTeachers = ["All", ...new Set(routines.map((r) => r.teacher))];
   const uniqueClasses = ["All", ...new Set(routines.map((r) => r.class))];
   const uniqueDays = ["All", ...daysOfWeek];
 
-  // Handle select all
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedRoutines([]);
@@ -806,7 +811,6 @@ const Clear_routing = () => {
     setSelectAll(!selectAll);
   };
 
-  // Handle select single
   const handleSelectSingle = (id) => {
     if (selectedRoutines.includes(id)) {
       setSelectedRoutines(selectedRoutines.filter((rid) => rid !== id));
@@ -815,13 +819,12 @@ const Clear_routing = () => {
     }
   };
 
-  // Open add modal
   const openAddModal = () => {
     setFormData({
-      teacher: "",
-      subject: "",
-      class: "",
-      batch: "",
+      teacher: ELDERS_TEACHERS[0].name,
+      subject: ELDERS_COURSES[0],
+      class: ELDERS_CLASSES[0],
+      batch: ELDERS_BATCHES[0],
       day: daysOfWeek[0],
       time: "",
       room: "",
@@ -834,14 +837,12 @@ const Clear_routing = () => {
     setShowAddModal(true);
   };
 
-  // Clear single routine
   const clearSingleRoutine = (routine) => {
     setSelectedRoutine(routine);
     setClearType("single");
     setShowConfirmModal(true);
   };
 
-  // Clear selected routines
   const clearSelectedRoutines = () => {
     if (selectedRoutines.length === 0) {
       Swal.fire({
@@ -857,26 +858,22 @@ const Clear_routing = () => {
     setShowConfirmModal(true);
   };
 
-  // Clear all routines with filter
   const clearAllRoutines = () => {
     setClearType("all");
     setShowClearModal(true);
   };
 
-  // Confirm clear
   const confirmClear = () => {
     if (clearType === "single" && selectedRoutine) {
-      // Clear single routine
       setRoutines(routines.filter((r) => r.id !== selectedRoutine.id));
       Swal.fire({
         icon: "success",
         title: "Routine Cleared!",
-        text: `"${selectedRoutine.subject}" routine has been cleared.`,
+        text: `"${selectedRoutine.subject}" routine cleared.`,
         timer: 1500,
         showConfirmButton: false,
       });
     } else if (clearType === "selected") {
-      // Clear selected routines
       const count = selectedRoutines.length;
       setRoutines(routines.filter((r) => !selectedRoutines.includes(r.id)));
       setSelectedRoutines([]);
@@ -884,7 +881,7 @@ const Clear_routing = () => {
       Swal.fire({
         icon: "success",
         title: "Routines Cleared!",
-        text: `${count} routine(s) have been cleared.`,
+        text: `${count} routine(s) cleared.`,
         timer: 1500,
         showConfirmButton: false,
       });
@@ -893,26 +890,21 @@ const Clear_routing = () => {
     setSelectedRoutine(null);
   };
 
-  // Confirm clear all with filters
   const confirmClearAll = () => {
     let filtered = [...routines];
-
-    if (clearFilter.teacher) {
+    if (clearFilter.teacher)
       filtered = filtered.filter((r) => r.teacher === clearFilter.teacher);
-    }
-    if (clearFilter.class) {
+    if (clearFilter.class)
       filtered = filtered.filter((r) => r.class === clearFilter.class);
-    }
-    if (clearFilter.status) {
+    if (clearFilter.status)
       filtered = filtered.filter((r) => r.status === clearFilter.status);
-    }
 
     const count = filtered.length;
     if (count === 0) {
       Swal.fire({
         icon: "warning",
         title: "No Routines Found",
-        text: "No routines match the selected filters.",
+        text: "No routines match selected filters.",
         timer: 1500,
         showConfirmButton: false,
       });
@@ -922,7 +914,7 @@ const Clear_routing = () => {
 
     Swal.fire({
       title: "Clear All Routines?",
-      text: `This will clear ${count} routine(s) matching your filters. This action cannot be undone!`,
+      text: `Clear ${count} routine(s). Cannot be undone!`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -935,16 +927,11 @@ const Clear_routing = () => {
         setSelectedRoutines([]);
         setSelectAll(false);
         setShowClearModal(false);
-        setClearFilter({
-          teacher: "",
-          class: "",
-          status: "",
-          dateRange: "",
-        });
+        setClearFilter({ teacher: "", class: "", status: "" });
         Swal.fire({
           icon: "success",
           title: "All Routines Cleared!",
-          text: `${count} routine(s) have been cleared.`,
+          text: `${count} routine(s) cleared.`,
           timer: 1500,
           showConfirmButton: false,
         });
@@ -952,7 +939,6 @@ const Clear_routing = () => {
     });
   };
 
-  // Edit routine
   const openEditModal = (routine) => {
     setSelectedRoutine(routine);
     setFormData({
@@ -972,7 +958,6 @@ const Clear_routing = () => {
     setShowEditModal(true);
   };
 
-  // Handle add routine
   const handleAddRoutine = (e) => {
     e.preventDefault();
 
@@ -994,17 +979,9 @@ const Clear_routing = () => {
 
     const newRoutine = {
       id: Date.now(),
-      teacher: formData.teacher,
-      subject: formData.subject,
-      class: formData.class,
+      ...formData,
       batch: formData.batch || "Not Assigned",
-      day: formData.day,
-      time: formData.time,
       room: formData.room || "TBD",
-      status: formData.status,
-      semester: formData.semester || "Fall 2026",
-      startDate: formData.startDate || new Date().toISOString().split("T")[0],
-      endDate: formData.endDate || "",
       students: parseInt(formData.students) || 0,
       createdBy: adminInfo.name,
       createdAt: new Date().toISOString().split("T")[0],
@@ -1015,13 +992,12 @@ const Clear_routing = () => {
     Swal.fire({
       icon: "success",
       title: "Routine Added!",
-      text: `New routine for ${formData.teacher} - ${formData.subject} has been added.`,
+      text: `${formData.teacher} - ${formData.subject}`,
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle edit routine
   const handleEditRoutine = (e) => {
     e.preventDefault();
 
@@ -1046,18 +1022,8 @@ const Clear_routing = () => {
         r.id === selectedRoutine.id
           ? {
               ...r,
-              teacher: formData.teacher,
-              subject: formData.subject,
-              class: formData.class,
-              batch: formData.batch || "Not Assigned",
-              day: formData.day,
-              time: formData.time,
-              room: formData.room,
-              semester: formData.semester || "Fall 2026",
-              startDate: formData.startDate || r.startDate,
-              endDate: formData.endDate || r.endDate,
+              ...formData,
               students: parseInt(formData.students) || 0,
-              status: formData.status,
             }
           : r,
       ),
@@ -1066,13 +1032,11 @@ const Clear_routing = () => {
     Swal.fire({
       icon: "success",
       title: "Routine Updated!",
-      text: "Routine has been updated successfully.",
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Format date
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     const date = new Date(dateStr);
@@ -1083,7 +1047,6 @@ const Clear_routing = () => {
     });
   };
 
-  // Calculate stats
   const totalRoutines = routines.length;
   const activeRoutines = routines.filter((r) => r.status === "Active").length;
   const pendingRoutines = routines.filter((r) => r.status === "Pending").length;
@@ -1096,10 +1059,12 @@ const Clear_routing = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Clear Routine</h1>
+          <h1 className="text-sm font-bold text-gray-800">
+            Clear Routine (Elders)
+          </h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100"
           >
             {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
@@ -1108,14 +1073,8 @@ const Clear_routing = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -1135,7 +1094,7 @@ const Clear_routing = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -1146,21 +1105,20 @@ const Clear_routing = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
+                        className={`transition-transform ${
+                          activeSubMenu === item.id ? "rotate-180" : ""
+                        }`}
                       >
                         <FaArrowRight size={12} />
                       </span>
@@ -1196,14 +1154,11 @@ const Clear_routing = () => {
                     }}
                   >
                     <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -1227,7 +1182,6 @@ const Clear_routing = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1236,43 +1190,44 @@ const Clear_routing = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaEraser className="text-red-600" /> Clear Routine
+                <FaEraser className="text-red-600" /> Clear Routine —
+                <span className="text-teal-700">Quran For Elders</span>
               </h1>
               <p className="text-xs text-gray-500">
-                View, manage and clear class routines
+                Jubayer Ahmad • Sumaiya Afrin Mim — elders department routines
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={openAddModal}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaPlus size={12} /> Add Routine
               </button>
               <button
                 onClick={clearSelectedRoutines}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaTrashAlt size={12} /> Clear Selected (
                 {selectedRoutines.length})
               </button>
               <button
                 onClick={clearAllRoutines}
-                className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
-                <FaTimesCircleIcon size={12} /> Clear All
+                <FaTimesCircle size={12} /> Clear All
               </button>
               <span className="text-xs font-semibold text-gray-700 hidden sm:block">
                 {adminInfo.name}
               </span>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
               >
                 Logout
               </button>
@@ -1309,57 +1264,57 @@ const Clear_routing = () => {
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
             <div className="flex flex-col md:flex-row gap-2">
               <div className="flex-1 relative">
-                <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search by teacher, subject, class or batch..."
+                  placeholder="Search elders routines..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="flex items-center gap-1 flex-wrap">
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {uniqueStatuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterTeacher}
                   onChange={(e) => setFilterTeacher(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueTeachers.map((teacher) => (
-                    <option key={teacher} value={teacher}>
-                      {teacher}
+                  {uniqueTeachers.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterClass}
                   onChange={(e) => setFilterClass(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueClasses.map((cls) => (
-                    <option key={cls} value={cls}>
-                      {cls}
+                  {uniqueClasses.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterDay}
                   onChange={(e) => setFilterDay(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueDays.map((day) => (
-                    <option key={day} value={day}>
-                      {day}
+                  {uniqueDays.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
                     </option>
                   ))}
                 </select>
@@ -1470,14 +1425,14 @@ const Clear_routing = () => {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => openEditModal(routine)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
                               title="Edit"
                             >
                               <FaEdit size={12} />
                             </button>
                             <button
                               onClick={() => clearSingleRoutine(routine)}
-                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                               title="Clear"
                             >
                               <FaEraser size={12} />
@@ -1493,10 +1448,7 @@ const Clear_routing = () => {
                         className="px-3 py-8 text-center text-gray-500"
                       >
                         <FaCalendarTimes className="text-4xl text-gray-300 mx-auto mb-2" />
-                        <p>No routines found</p>
-                        <p className="text-[10px] text-gray-400 mt-1">
-                          Try adjusting your search or filter criteria
-                        </p>
+                        <p>No elders routines found</p>
                       </td>
                     </tr>
                   )}
@@ -1511,9 +1463,9 @@ const Clear_routing = () => {
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlus className="text-blue-600" /> Add New Routine
+                <FaPlus className="text-blue-600" /> Add Elders Routine
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1523,6 +1475,11 @@ const Clear_routing = () => {
               </button>
             </div>
             <form onSubmit={handleAddRoutine} className="p-6 space-y-4">
+              <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
+                💡 Department: <strong>Quran For Elders</strong> — elders
+                teachers ও courses
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1534,30 +1491,35 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, teacher: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Teacher</option>
-                    {teachers.map((teacher) => (
-                      <option key={teacher} value={teacher}>
-                        {teacher}
+                    <option value="">Select Elders Teacher</option>
+                    {ELDERS_TEACHERS.map((t) => (
+                      <option key={t.id} value={t.name}>
+                        {t.name} — {t.designation}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject *
+                    Course / Subject *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     required
                     value={formData.subject}
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter subject"
-                  />
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="">Select Course</option>
+                    {ELDERS_COURSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -1572,12 +1534,11 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Class</option>
-                    {classes.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
+                    {ELDERS_CLASSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
@@ -1586,15 +1547,19 @@ const Clear_routing = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Batch
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.batch}
                     onChange={(e) =>
                       setFormData({ ...formData, batch: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., Batch 2026-A"
-                  />
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  >
+                    {ELDERS_BATCHES.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -1609,7 +1574,7 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, day: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     {daysOfWeek.map((day) => (
                       <option key={day} value={day}>
@@ -1629,8 +1594,8 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, time: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., 10:00 AM - 11:30 AM"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    placeholder="e.g., 06:00 AM - 07:00 AM"
                   />
                 </div>
               </div>
@@ -1646,8 +1611,8 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, room: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., Room 201"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    placeholder="Online Room 1"
                   />
                 </div>
                 <div>
@@ -1659,11 +1624,11 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, semester: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {semesters.map((semester) => (
-                      <option key={semester} value={semester}>
-                        {semester}
+                    {semesters.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
@@ -1681,7 +1646,7 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, startDate: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1694,7 +1659,7 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, endDate: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
@@ -1714,8 +1679,7 @@ const Clear_routing = () => {
                         students: parseInt(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Number of students"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1727,28 +1691,28 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
+                    {statuses.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold"
                 >
                   <FaSave className="inline mr-2" size={14} /> Add Routine
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -1761,49 +1725,43 @@ const Clear_routing = () => {
       {/* Confirm Clear Modal */}
       {showConfirmModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                  <FaExclamationCircle className="text-red-600 text-2xl" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-800">
-                    Confirm Clear
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {clearType === "single" && selectedRoutine
-                      ? `Clear "${selectedRoutine.subject}" routine?`
-                      : `Clear ${selectedRoutines.length} selected routine(s)?`}
-                  </p>
-                </div>
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <FaExclamationCircle className="text-red-600 text-2xl" />
               </div>
-              <p className="text-sm text-gray-600 mb-6">
-                {clearType === "single" && selectedRoutine
-                  ? `This will remove the ${selectedRoutine.subject} routine for ${selectedRoutine.teacher} on ${selectedRoutine.day}.`
-                  : `This will remove ${selectedRoutines.length} routine(s) from the system.`}
-                <br />
-                <span className="text-red-500 font-medium">
-                  This action cannot be undone!
-                </span>
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={confirmClear}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold text-sm transition-all"
-                >
-                  <FaTrashAlt className="inline mr-2" /> Yes, Clear
-                </button>
-                <button
-                  onClick={() => {
-                    setShowConfirmModal(false);
-                    setSelectedRoutine(null);
-                  }}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
-                >
-                  Cancel
-                </button>
+              <div>
+                <h3 className="text-xl font-bold text-gray-800">
+                  Confirm Clear
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {clearType === "single" && selectedRoutine
+                    ? `Clear "${selectedRoutine.subject}"?`
+                    : `Clear ${selectedRoutines.length} routine(s)?`}
+                </p>
               </div>
+            </div>
+            <p className="text-sm text-gray-600 mb-6">
+              <span className="text-red-500 font-medium">
+                This action cannot be undone!
+              </span>
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={confirmClear}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold text-sm"
+              >
+                <FaTrashAlt className="inline mr-2" /> Yes, Clear
+              </button>
+              <button
+                onClick={() => {
+                  setShowConfirmModal(false);
+                  setSelectedRoutine(null);
+                }}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -1812,99 +1770,88 @@ const Clear_routing = () => {
       {/* Clear All Modal */}
       {showClearModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">
-                <FaTimesCircleIcon className="text-red-600" /> Clear All
-                Routines
-              </h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Select filters to narrow down which routines to clear:
-              </p>
-              <div className="space-y-3 mb-6">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Teacher
-                  </label>
-                  <select
-                    value={clearFilter.teacher}
-                    onChange={(e) =>
-                      setClearFilter({
-                        ...clearFilter,
-                        teacher: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">All Teachers</option>
-                    {teachers.map((teacher) => (
-                      <option key={teacher} value={teacher}>
-                        {teacher}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Class
-                  </label>
-                  <select
-                    value={clearFilter.class}
-                    onChange={(e) =>
-                      setClearFilter({ ...clearFilter, class: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">All Classes</option>
-                    {classes.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={clearFilter.status}
-                    onChange={(e) =>
-                      setClearFilter({ ...clearFilter, status: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">All Statuses</option>
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <button
-                  onClick={confirmClearAll}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold text-sm transition-all"
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">
+              <FaTimesCircle className="text-red-600" /> Clear Elders Routines
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Filter করুন কোন routine গুলো clear করবেন:
+            </p>
+            <div className="space-y-3 mb-6">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Teacher
+                </label>
+                <select
+                  value={clearFilter.teacher}
+                  onChange={(e) =>
+                    setClearFilter({ ...clearFilter, teacher: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
-                  <FaTrashAlt className="inline mr-2" /> Clear All
-                </button>
-                <button
-                  onClick={() => {
-                    setShowClearModal(false);
-                    setClearFilter({
-                      teacher: "",
-                      class: "",
-                      status: "",
-                      dateRange: "",
-                    });
-                  }}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
-                >
-                  Cancel
-                </button>
+                  <option value="">All Elders Teachers</option>
+                  {ELDERS_TEACHERS.map((t) => (
+                    <option key={t.id} value={t.name}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
               </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Class
+                </label>
+                <select
+                  value={clearFilter.class}
+                  onChange={(e) =>
+                    setClearFilter({ ...clearFilter, class: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="">All Classes</option>
+                  {ELDERS_CLASSES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={clearFilter.status}
+                  onChange={(e) =>
+                    setClearFilter({ ...clearFilter, status: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="">All Statuses</option>
+                  {statuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={confirmClearAll}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold text-sm"
+              >
+                <FaTrashAlt className="inline mr-2" /> Clear All
+              </button>
+              <button
+                onClick={() => {
+                  setShowClearModal(false);
+                  setClearFilter({ teacher: "", class: "", status: "" });
+                }}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -1914,9 +1861,9 @@ const Clear_routing = () => {
       {showEditModal && selectedRoutine && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaEdit className="text-green-600" /> Edit Routine
+                <FaEdit className="text-green-600" /> Edit Elders Routine
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1937,11 +1884,11 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, teacher: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {teachers.map((teacher) => (
-                      <option key={teacher} value={teacher}>
-                        {teacher}
+                    {ELDERS_TEACHERS.map((t) => (
+                      <option key={t.id} value={t.name}>
+                        {t.name} — {t.designation}
                       </option>
                     ))}
                   </select>
@@ -1950,16 +1897,20 @@ const Clear_routing = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Subject *
                   </label>
-                  <input
-                    type="text"
+                  <select
                     required
                     value={formData.subject}
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter subject"
-                  />
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  >
+                    {ELDERS_COURSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -1974,11 +1925,11 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {classes.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
+                    {ELDERS_CLASSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
@@ -1987,15 +1938,19 @@ const Clear_routing = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Batch
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.batch}
                     onChange={(e) =>
                       setFormData({ ...formData, batch: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., Batch 2026-A"
-                  />
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  >
+                    {ELDERS_BATCHES.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -2010,7 +1965,7 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, day: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
                     {daysOfWeek.map((day) => (
                       <option key={day} value={day}>
@@ -2030,8 +1985,7 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, time: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., 10:00 AM - 11:30 AM"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
@@ -2047,8 +2001,7 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, room: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., Room 201"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -2060,11 +2013,11 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, semester: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {semesters.map((semester) => (
-                      <option key={semester} value={semester}>
-                        {semester}
+                    {semesters.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
@@ -2082,7 +2035,7 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, startDate: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -2095,7 +2048,7 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, endDate: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
@@ -2115,8 +2068,7 @@ const Clear_routing = () => {
                         students: parseInt(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Number of students"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -2128,28 +2080,28 @@ const Clear_routing = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
+                    {statuses.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold"
                 >
                   <FaSave className="inline mr-2" size={14} /> Update Routine
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>

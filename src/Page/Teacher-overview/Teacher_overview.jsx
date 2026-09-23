@@ -9,120 +9,122 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
   FaCalendarAlt,
   FaClock,
-  FaBook,
-  FaFileAlt,
   FaChartLine,
-  FaUserGraduate,
   FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
-  FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
-  FaEdit,
-  FaTrash,
   FaSearch,
-  FaFilter,
-  FaPlusCircle,
   FaDownload,
-  FaPrint,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
   FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
   FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
-  FaUserEdit,
-  FaUserCircle,
+  FaUserTimes,
   FaAddressCard,
-  FaChalkboard,
-  FaCalendarDay,
-  FaSchool as FaSchoolIcon,
-  FaUserTie,
-  FaBookReader,
-  FaStopwatch,
-  FaClipboardCheck,
-  FaExchangeAlt,
-  FaCheckDouble,
-  FaBan,
-  FaCheck,
-  FaTimes,
-  FaQuestion,
-  FaCalendarWeek,
-  FaChartBar,
-  FaFileDownload,
-  FaFilePdf,
-  FaFileExcel,
-  FaRegClock,
-  FaRegCalendarAlt,
-  FaRegCalendarCheck,
-  FaWhatsapp,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaGlobe as FaGlobeIcon,
+  FaGraduationCap,
+  FaUserCircle,
   FaEnvelope as FaEnvelopeIcon,
   FaPhone as FaPhoneIcon,
   FaPlus,
+  FaUserTie,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+// ============================================================
+// ✅ ২ জন ELDERS TEACHER — সম্পূর্ণ profile
+// ============================================================
+const ELDERS_TEACHERS = [
+  {
+    id: 1,
+    _id: "TCH_FIXED_001",
+    name: "Jubayer Ahmad",
+    teacherId: "TCH001",
+    subject: "Quran For Elders",
+    department: "Quran For Elders",
+    email: "jubayer@tarabiyah.com",
+    phone: "+880 1712 345678",
+    address: "Mohammadpur, Dhaka",
+    joinDate: "2024-01-15",
+    status: "Active",
+    gender: "Male",
+    dob: "1985-05-15",
+    qualification: "Masters in Quranic Sciences",
+    experience: "10 years",
+    specialization: "Qaida Nuraniyah & Basic Tajweed",
+    bio: "Senior teacher of Quran For Elders department with expertise in Qaida Nuraniyah, Basic Tajweed, and Najera. Over 10 years of teaching experience with adult learners.",
+    socialMedia: {
+      facebook: "https://facebook.com/jubayer",
+      twitter: "",
+      linkedin: "",
+      website: "",
+    },
+    totalStudents: 45,
+    classes: [
+      "Qaida Nuraniyah Batch-03",
+      "Basic Tajweed Batch-06",
+      "Najera Batch-02",
+    ],
+    attendance: 95,
+    rating: 4.8,
+    reviews: 87,
+    salary: 45000,
+    performance: "Excellent",
+    designation: "Senior Teacher",
+    courses: [
+      { name: "Qaida Nuraniyah", batch: "Batch-03", students: 18 },
+      { name: "Basic Tajweed", batch: "Batch-06", students: 15 },
+      { name: "Najera", batch: "Batch-02", students: 12 },
+    ],
+  },
+  {
+    id: 2,
+    _id: "TCH_FIXED_002",
+    name: "Sumaiya Afrin Mim",
+    teacherId: "TCH002",
+    subject: "Quran For Elders",
+    department: "Quran For Elders",
+    email: "sumaiya@tarabiyah.com",
+    phone: "+880 1723 456789",
+    address: "Mirpur, Dhaka",
+    joinDate: "2024-02-01",
+    status: "Active",
+    gender: "Female",
+    dob: "1995-08-20",
+    qualification: "Masters in Islamic Studies",
+    experience: "5 years",
+    specialization: "Qaida Nuraniyah & Quran Nazera",
+    bio: "Junior teacher of Quran For Elders department focused on adult Quran learning, Qaida Nuraniyah, and Quran Nazera. Passionate about teaching elders with patience and care.",
+    socialMedia: {
+      facebook: "https://facebook.com/sumaiya",
+      twitter: "",
+      linkedin: "",
+      website: "",
+    },
+    totalStudents: 38,
+    classes: [
+      "Qaida Nuraniyah Batch-03",
+      "Basic Tajweed Batch-06",
+      "Najera Batch-02",
+    ],
+    attendance: 92,
+    rating: 4.9,
+    reviews: 64,
+    salary: 35000,
+    performance: "Excellent",
+    designation: "Junior Teacher",
+    courses: [
+      { name: "Qaida Nuraniyah", batch: "Batch-03", students: 16 },
+      { name: "Basic Tajweed", batch: "Batch-06", students: 14 },
+      { name: "Najera", batch: "Batch-02", students: 8 },
+    ],
+  },
+];
 
 const Teacher_overview = () => {
   const { user, logOut } = useAuth();
@@ -135,221 +137,41 @@ const Teacher_overview = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "",
+    department: "Quran for Elders",
     joinDate: "",
   });
 
-  // Teachers data with comprehensive information
-  const [teachers, setTeachers] = useState([
-    {
-      id: 1,
-      name: "Dr. Muhammad Abdullah",
-      teacherId: "TCH001",
-      subject: "Tajweed",
-      department: "Islamic Studies",
-      email: "abdullah@example.com",
-      phone: "+880 1712 345678",
-      address: "Mohammadpur, Dhaka",
-      joinDate: "2024-01-15",
-      status: "Active",
-      gender: "Male",
-      dob: "1980-05-15",
-      qualification: "PhD in Islamic Studies",
-      experience: "12 years",
-      specialization: "Quranic Sciences",
-      bio: "Expert in Tajweed with over 12 years of teaching experience. Authored 3 books on Quranic recitation.",
-      socialMedia: {
-        facebook: "https://facebook.com/abdullah",
-        twitter: "https://twitter.com/abdullah",
-        linkedin: "https://linkedin.com/in/abdullah",
-        website: "https://abdullah.com",
-      },
-      totalStudents: 45,
-      classes: ["Class 8", "Class 9"],
-      attendance: 95,
-      rating: 4.8,
-      reviews: 127,
-      salary: 45000,
-      performance: "Excellent",
-    },
-    {
-      id: 2,
-      name: "Ustadh Ahmad Ali",
-      teacherId: "TCH002",
-      subject: "Tafsir",
-      department: "Islamic Studies",
-      email: "ahmad@example.com",
-      phone: "+880 1723 456789",
-      address: "Mirpur, Dhaka",
-      joinDate: "2024-02-01",
-      status: "Active",
-      gender: "Male",
-      dob: "1985-08-20",
-      qualification: "Masters in Tafsir",
-      experience: "8 years",
-      specialization: "Tafsir and Ulum al-Quran",
-      bio: "Specialized in Tafsir with focus on contemporary applications of Quranic teachings.",
-      socialMedia: {
-        facebook: "https://facebook.com/ahmad",
-        twitter: "https://twitter.com/ahmad",
-        linkedin: "https://linkedin.com/in/ahmad",
-        website: "https://ahmad.com",
-      },
-      totalStudents: 38,
-      classes: ["Class 9", "Class 10"],
-      attendance: 88,
-      rating: 4.9,
-      reviews: 98,
-      salary: 40000,
-      performance: "Excellent",
-    },
-    {
-      id: 3,
-      name: "Ustadha Fatima Rahman",
-      teacherId: "TCH003",
-      subject: "Hadith",
-      department: "Islamic Studies",
-      email: "fatima@example.com",
-      phone: "+880 1734 567890",
-      address: "Uttara, Dhaka",
-      joinDate: "2024-01-20",
-      status: "Active",
-      gender: "Female",
-      dob: "1988-03-10",
-      qualification: "Masters in Hadith Sciences",
-      experience: "6 years",
-      specialization: "Hadith Authentication",
-      bio: "Expert in Hadith sciences with specialization in authentication and classification.",
-      socialMedia: {
-        facebook: "https://facebook.com/fatima",
-        twitter: "https://twitter.com/fatima",
-        linkedin: "https://linkedin.com/in/fatima",
-        website: "https://fatima.com",
-      },
-      totalStudents: 42,
-      classes: ["Class 10"],
-      attendance: 92,
-      rating: 4.7,
-      reviews: 84,
-      salary: 38000,
-      performance: "Good",
-    },
-    {
-      id: 4,
-      name: "Dr. Omar Farooq",
-      teacherId: "TCH004",
-      subject: "Fiqh",
-      department: "Islamic Law",
-      email: "omar@example.com",
-      phone: "+880 1745 678901",
-      address: "Gulshan, Dhaka",
-      joinDate: "2024-03-10",
-      status: "Active",
-      gender: "Male",
-      dob: "1978-11-25",
-      qualification: "PhD in Islamic Jurisprudence",
-      experience: "15 years",
-      specialization: "Fiqh and Usul al-Fiqh",
-      bio: "Renowned expert in Islamic jurisprudence with specialization in contemporary issues.",
-      socialMedia: {
-        facebook: "https://facebook.com/omar",
-        twitter: "https://twitter.com/omar",
-        linkedin: "https://linkedin.com/in/omar",
-        website: "https://omar.com",
-      },
-      totalStudents: 35,
-      classes: ["Class 7", "Class 8", "Class 9"],
-      attendance: 90,
-      rating: 4.6,
-      reviews: 112,
-      salary: 50000,
-      performance: "Excellent",
-    },
-    {
-      id: 5,
-      name: "Ustadh Yusuf Khan",
-      teacherId: "TCH005",
-      subject: "Aqeedah",
-      department: "Islamic Studies",
-      email: "yusuf@example.com",
-      phone: "+880 1756 789012",
-      address: "Dhanmondi, Dhaka",
-      joinDate: "2024-04-05",
-      status: "Active",
-      gender: "Male",
-      dob: "1990-07-30",
-      qualification: "Masters in Aqeedah",
-      experience: "5 years",
-      specialization: "Aqeedah and Islamic Theology",
-      bio: "Passionate teacher of Islamic theology with focus on classical and modern perspectives.",
-      socialMedia: {
-        facebook: "https://facebook.com/yusuf",
-        twitter: "https://twitter.com/yusuf",
-        linkedin: "https://linkedin.com/in/yusuf",
-        website: "https://yusuf.com",
-      },
-      totalStudents: 30,
-      classes: ["Class 6"],
-      attendance: 85,
-      rating: 4.5,
-      reviews: 67,
-      salary: 35000,
-      performance: "Good",
-    },
-    {
-      id: 6,
-      name: "Ustadh Ibrahim Malik",
-      teacherId: "TCH006",
-      subject: "Arabic Grammar",
-      department: "Arabic Language",
-      email: "ibrahim@example.com",
-      phone: "+880 1767 890123",
-      address: "Baridhara, Dhaka",
-      joinDate: "2024-05-01",
-      status: "Active",
-      gender: "Male",
-      dob: "1985-09-15",
-      qualification: "Masters in Arabic Language",
-      experience: "7 years",
-      specialization: "Arabic Grammar and Literature",
-      bio: "Expert in Arabic grammar with focus on making classical Arabic accessible to modern learners.",
-      socialMedia: {
-        facebook: "https://facebook.com/ibrahim",
-        twitter: "https://twitter.com/ibrahim",
-        linkedin: "https://linkedin.com/in/ibrahim",
-        website: "https://ibrahim.com",
-      },
-      totalStudents: 28,
-      classes: ["Class 6", "Class 7"],
-      attendance: 78,
-      rating: 4.3,
-      reviews: 56,
-      salary: 32000,
-      performance: "Average",
-    },
-  ]);
+  // ✅ Elders teachers (local state so add/edit works)
+  const [teachers, setTeachers] = useState(() => {
+    const saved = localStorage.getItem("eldersTeachersOverview");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    return ELDERS_TEACHERS;
+  });
 
-  // State for filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterDepartment, setFilterDepartment] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterPerformance, setFilterPerformance] = useState("All");
 
-  // State for selected teacher
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
-  // Form data for adding teacher
   const [formData, setFormData] = useState({
     name: "",
     teacherId: "",
-    subject: "",
-    department: "",
+    subject: "Quran For Elders",
+    department: "Quran For Elders",
     email: "",
     phone: "",
     address: "",
-    joinDate: "",
+    joinDate: new Date().toISOString().split("T")[0],
     status: "Active",
     gender: "Male",
     dob: "",
@@ -357,12 +179,6 @@ const Teacher_overview = () => {
     experience: "",
     specialization: "",
     bio: "",
-    socialMedia: {
-      facebook: "",
-      twitter: "",
-      linkedin: "",
-      website: "",
-    },
     totalStudents: 0,
     classes: [],
     attendance: 0,
@@ -370,52 +186,51 @@ const Teacher_overview = () => {
     reviews: 0,
     salary: 0,
     performance: "Good",
+    designation: "Teacher",
   });
 
-  // Available options
-  const departments = [
-    "Islamic Studies",
-    "Islamic Law",
-    "Arabic Language",
-    "Quranic Sciences",
-    "Tafsir",
-    "Hadith",
-    "Fiqh",
-  ];
-  const subjects = [
-    "Tajweed",
-    "Tafsir",
-    "Hadith",
-    "Fiqh",
-    "Aqeedah",
-    "Arabic Grammar",
-    "Quranic Sciences",
-  ];
+  // ✅ Elders-only options
+  const performances = ["Excellent", "Good", "Average", "Poor"];
   const statuses = ["Active", "Inactive", "On Leave"];
   const genders = ["Male", "Female", "Other"];
-  const performances = ["Excellent", "Good", "Average", "Poor"];
-  const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
+  const eldersClasses = [
+    "Qaida Nuraniyah Batch-03",
+    "Basic Tajweed Batch-06",
+    "Najera Batch-02",
+    "Hifz Batch-01",
+  ];
+  const eldersSpecializations = [
+    "Qaida Nuraniyah",
+    "Basic Tajweed",
+    "Quran Nazera",
+    "Najera",
+    "Bakarah Hifz",
+  ];
 
   // Load admin info
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        setAdminInfo(JSON.parse(savedAdmin));
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: "Quran for Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
-  // Save teachers to localStorage
+  // Save to localStorage
   useEffect(() => {
-    localStorage.setItem("teachers", JSON.stringify(teachers));
+    localStorage.setItem("eldersTeachersOverview", JSON.stringify(teachers));
   }, [teachers]);
 
   const handleLogout = async () => {
@@ -424,7 +239,6 @@ const Teacher_overview = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -433,28 +247,15 @@ const Teacher_overview = () => {
       });
       navigate("/admin-login");
     } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
+      console.error(err);
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
+  // Sidebar menu
   const menuItems = [
     {
       id: "profile",
@@ -477,16 +278,6 @@ const Teacher_overview = () => {
           id: "today-class",
           path: "/admin-dashboard/today-class",
           label: "Today's Class",
-        },
-        {
-          id: "basic-tazweed payment overview",
-          path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed Payment Overview",
-        },
-        {
-          id: "najera-payment overview",
-          path: "/admin-dashboard/najera-batch",
-          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -561,28 +352,6 @@ const Teacher_overview = () => {
       path: "/admin-batch-course",
       icon: <FaLayerGroup className="text-xl" />,
       label: "Batch & Course",
-      subItems: [
-        {
-          id: "batch-make",
-          path: "/admin-batch-course/batch-make",
-          label: "Batch Make",
-        },
-        {
-          id: "course-make",
-          path: "/admin-batch-course/course-make",
-          label: "Course Make",
-        },
-        {
-          id: "syllabus",
-          path: "/admin-batch-course/syllabus",
-          label: "Syllabus",
-        },
-        {
-          id: "clear-routine",
-          path: "/admin-batch-course/clear-routine",
-          label: "Clear Routine",
-        },
-      ],
     },
     {
       id: "absence-student",
@@ -595,89 +364,27 @@ const Teacher_overview = () => {
       path: "/admin-finance",
       icon: <FaMoneyBillWave className="text-xl" />,
       label: "Finance",
-      subItems: [
-        {
-          id: "admin-on-fee",
-          path: "/admin-finance/admin-fee",
-          label: "Admin on Fee",
-        },
-        {
-          id: "monthly-fee",
-          path: "/admin-finance/monthly-fee",
-          label: "Monthly Fee",
-        },
-        { id: "invoice", path: "/admin-finance/invoice", label: "Invoice" },
-        { id: "report", path: "/admin-finance/report", label: "Report" },
-      ],
     },
     {
       id: "exam",
       path: "/admin-exam",
       icon: <FaCalendarCheck className="text-xl" />,
       label: "Exam",
-      subItems: [
-        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
-        {
-          id: "result-publish",
-          path: "/admin-exam/result",
-          label: "Result Publish",
-        },
-        {
-          id: "certificate-permission",
-          path: "/admin-exam/certificate",
-          label: "Certificate Permission",
-        },
-      ],
     },
     {
       id: "report-analytics",
       path: "/admin-reports",
       icon: <FaChartLine className="text-xl" />,
       label: "Report & Analytics",
-      subItems: [
-        {
-          id: "admission-report",
-          path: "/admin-reports/admission",
-          label: "Admission Report",
-        },
-        {
-          id: "attendance-report",
-          path: "/admin-reports/attendance",
-          label: "Attendance Report",
-        },
-        { id: "income", path: "/admin-reports/income", label: "Income" },
-      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
       icon: <FaDatabase className="text-xl" />,
       label: "CRM Management",
-      subItems: [
-        {
-          id: "data-entry",
-          path: "/admin-crm/data-entry",
-          label: "Data Entry",
-        },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
-      ],
     },
   ];
 
-  // Get status badge color
   const getStatusColor = (status) => {
     switch (status) {
       case "Active":
@@ -691,7 +398,6 @@ const Teacher_overview = () => {
     }
   };
 
-  // Get performance badge color
   const getPerformanceColor = (performance) => {
     switch (performance) {
       case "Excellent":
@@ -707,7 +413,6 @@ const Teacher_overview = () => {
     }
   };
 
-  // Render stars for rating
   const renderStars = (rating) => {
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating - fullStars >= 0.5;
@@ -733,59 +438,61 @@ const Teacher_overview = () => {
     );
   };
 
-  // Filter teachers
+  // Filter
   const filteredTeachers = teachers.filter((teacher) => {
+    const s = searchTerm.toLowerCase();
     const matchesSearch =
-      teacher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.teacherId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      teacher.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesDepartment =
-      filterDepartment === "All" || teacher.department === filterDepartment;
+      !s ||
+      (teacher.name || "").toLowerCase().includes(s) ||
+      (teacher.teacherId || "").toLowerCase().includes(s) ||
+      (teacher.subject || "").toLowerCase().includes(s) ||
+      (teacher.email || "").toLowerCase().includes(s);
     const matchesStatus =
       filterStatus === "All" || teacher.status === filterStatus;
     const matchesPerformance =
       filterPerformance === "All" || teacher.performance === filterPerformance;
-    return (
-      matchesSearch && matchesDepartment && matchesStatus && matchesPerformance
-    );
+    return matchesSearch && matchesStatus && matchesPerformance;
   });
 
-  // Get unique values for filters
-  const uniqueDepartments = [
+  const uniqueStatuses = [
     "All",
-    ...new Set(teachers.map((t) => t.department)),
+    ...new Set(teachers.map((t) => t.status).filter(Boolean)),
   ];
-  const uniqueStatuses = ["All", ...new Set(teachers.map((t) => t.status))];
   const uniquePerformances = [
     "All",
-    ...new Set(teachers.map((t) => t.performance)),
+    ...new Set(teachers.map((t) => t.performance).filter(Boolean)),
   ];
 
-  // Calculate stats
+  // Stats
   const totalTeachers = teachers.length;
   const activeTeachers = teachers.filter((t) => t.status === "Active").length;
-  const totalStudents = teachers.reduce((sum, t) => sum + t.totalStudents, 0);
-  const avgAttendance = Math.round(
-    teachers.reduce((sum, t) => sum + t.attendance, 0) / teachers.length,
+  const totalStudents = teachers.reduce(
+    (sum, t) => sum + (t.totalStudents || 0),
+    0,
   );
+  const avgAttendance =
+    teachers.length > 0
+      ? Math.round(
+          teachers.reduce((sum, t) => sum + (t.attendance || 0), 0) /
+            teachers.length,
+        )
+      : 0;
   const avgRating =
-    teachers.reduce((sum, t) => sum + t.rating, 0) / teachers.length;
+    teachers.length > 0
+      ? teachers.reduce((sum, t) => sum + (t.rating || 0), 0) / teachers.length
+      : 0;
 
-  // Open details modal
   const openDetailsModal = (teacher) => {
     setSelectedTeacher(teacher);
     setShowDetailsModal(true);
   };
 
-  // Open add modal
   const openAddModal = () => {
     setFormData({
       name: "",
       teacherId: "",
-      subject: "",
-      department: "",
+      subject: "Quran For Elders",
+      department: "Quran For Elders",
       email: "",
       phone: "",
       address: "",
@@ -797,12 +504,6 @@ const Teacher_overview = () => {
       experience: "",
       specialization: "",
       bio: "",
-      socialMedia: {
-        facebook: "",
-        twitter: "",
-        linkedin: "",
-        website: "",
-      },
       totalStudents: 0,
       classes: [],
       attendance: 0,
@@ -810,21 +511,15 @@ const Teacher_overview = () => {
       reviews: 0,
       salary: 0,
       performance: "Good",
+      designation: "Teacher",
     });
     setShowAddModal(true);
   };
 
-  // Handle add teacher
   const handleAddTeacher = (e) => {
     e.preventDefault();
 
-    if (
-      !formData.name ||
-      !formData.subject ||
-      !formData.department ||
-      !formData.email ||
-      !formData.phone
-    ) {
+    if (!formData.name || !formData.email || !formData.phone) {
       Swal.fire({
         icon: "warning",
         title: "Please fill all required fields",
@@ -836,16 +531,17 @@ const Teacher_overview = () => {
 
     const newTeacher = {
       id: Date.now(),
+      _id: "LOCAL_" + Date.now(),
       name: formData.name,
       teacherId:
         formData.teacherId ||
         `TCH${String(teachers.length + 1).padStart(3, "0")}`,
       subject: formData.subject,
-      department: formData.department,
+      department: "Quran For Elders",
       email: formData.email,
       phone: formData.phone,
       address: formData.address || "",
-      joinDate: formData.joinDate || new Date().toISOString().split("T")[0],
+      joinDate: formData.joinDate,
       status: formData.status,
       gender: formData.gender,
       dob: formData.dob || "",
@@ -853,33 +549,29 @@ const Teacher_overview = () => {
       experience: formData.experience || "0 years",
       specialization: formData.specialization || "",
       bio: formData.bio || "",
-      socialMedia: {
-        facebook: formData.socialMedia?.facebook || "",
-        twitter: formData.socialMedia?.twitter || "",
-        linkedin: formData.socialMedia?.linkedin || "",
-        website: formData.socialMedia?.website || "",
-      },
+      socialMedia: { facebook: "", twitter: "", linkedin: "", website: "" },
       totalStudents: parseInt(formData.totalStudents) || 0,
       classes: formData.classes || [],
       attendance: parseInt(formData.attendance) || 0,
       rating: parseFloat(formData.rating) || 0,
       reviews: parseInt(formData.reviews) || 0,
       salary: parseInt(formData.salary) || 0,
-      performance: formData.performance || "Good",
+      performance: formData.performance,
+      designation: formData.designation || "Teacher",
+      courses: [],
     };
 
     setTeachers([...teachers, newTeacher]);
     setShowAddModal(false);
     Swal.fire({
       icon: "success",
-      title: "Teacher Added!",
-      text: `${formData.name} has been added successfully.`,
+      title: "✅ Elders Teacher Added!",
+      text: `${formData.name} added to Quran For Elders.`,
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle delete teacher
   const handleDeleteTeacher = (id) => {
     Swal.fire({
       title: "Delete Teacher?",
@@ -892,12 +584,16 @@ const Teacher_overview = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         setTeachers(teachers.filter((t) => t.id !== id));
-        Swal.fire("Deleted!", "Teacher has been deleted.", "success");
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
       }
     });
   };
 
-  // Format date
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     const date = new Date(dateStr);
@@ -908,7 +604,6 @@ const Teacher_overview = () => {
     });
   };
 
-  // Get initials
   const getInitials = (name) => {
     return name
       .split(" ")
@@ -923,10 +618,12 @@ const Teacher_overview = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Teacher Overview</h1>
+          <h1 className="text-sm font-bold text-gray-800">
+            Teacher Overview (Elders)
+          </h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100"
           >
             {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
@@ -935,14 +632,8 @@ const Teacher_overview = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -962,7 +653,7 @@ const Teacher_overview = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -973,21 +664,20 @@ const Teacher_overview = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
+                        className={`transition-transform ${
+                          activeSubMenu === item.id ? "rotate-180" : ""
+                        }`}
                       >
                         <FaArrowRight size={12} />
                       </span>
@@ -1023,14 +713,11 @@ const Teacher_overview = () => {
                     }}
                   >
                     <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -1054,7 +741,6 @@ const Teacher_overview = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1063,36 +749,37 @@ const Teacher_overview = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaChalkboardTeacher className="text-blue-600" /> Teacher
-                Overview
+                Overview —
+                <span className="text-teal-700">Quran For Elders</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Complete overview of all teachers and their performance
+                Jubayer Ahmad • Sumaiya Afrin Mim — elders department
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={openAddModal}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaPlus size={12} /> Add Teacher
               </button>
               <button
-                onClick={() => {
+                onClick={() =>
                   Swal.fire({
                     icon: "info",
                     title: "Export Report",
-                    text: "Teacher report will be downloaded as PDF.",
+                    text: "Elders teacher report will be downloaded as PDF.",
                     timer: 1500,
                     showConfirmButton: false,
-                  });
-                }}
-                className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                  })
+                }
+                className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaDownload size={12} /> Export
               </button>
@@ -1101,7 +788,7 @@ const Teacher_overview = () => {
               </span>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
               >
                 Logout
               </button>
@@ -1112,7 +799,7 @@ const Teacher_overview = () => {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-blue-600">{totalTeachers}</p>
-              <p className="text-[10px] text-gray-500">Total Teachers</p>
+              <p className="text-[10px] text-gray-500">Elders Teachers</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-green-600">
@@ -1147,43 +834,32 @@ const Teacher_overview = () => {
                 <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search by name, ID, subject, department..."
+                  placeholder="Search elders teachers..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="flex items-center gap-1 flex-wrap">
                 <select
-                  value={filterDepartment}
-                  onChange={(e) => setFilterDepartment(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {uniqueDepartments.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
-                <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {uniqueStatuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterPerformance}
                   onChange={(e) => setFilterPerformance(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniquePerformances.map((perf) => (
-                    <option key={perf} value={perf}>
-                      {perf}
+                  {uniquePerformances.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
                     </option>
                   ))}
                 </select>
@@ -1192,7 +868,7 @@ const Teacher_overview = () => {
           </div>
 
           {/* Teachers Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-hidden">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {filteredTeachers.length > 0 ? (
               filteredTeachers.map((teacher) => (
                 <div
@@ -1208,10 +884,10 @@ const Teacher_overview = () => {
                           : "bg-red-500"
                     }`}
                   ></div>
-                  <div className="p-3">
+                  <div className="p-4">
                     <div className="flex items-start gap-3">
                       <div
-                        className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-base flex-shrink-0 ${
+                        className={`w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0 ${
                           teacher.performance === "Excellent"
                             ? "bg-gradient-to-r from-green-500 to-teal-500"
                             : teacher.performance === "Good"
@@ -1223,71 +899,97 @@ const Teacher_overview = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <h3 className="font-semibold text-gray-800 text-xs truncate">
+                          <h3 className="font-bold text-gray-800 text-sm truncate">
                             {teacher.name}
                           </h3>
                           <span
-                            className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(teacher.status)}`}
+                            className={`text-[9px] px-1.5 py-0.5 rounded-full ${getStatusColor(teacher.status)}`}
                           >
                             {teacher.status}
                           </span>
                         </div>
                         <p className="text-[10px] text-gray-500">
-                          {teacher.teacherId} • {teacher.subject}
+                          {teacher.teacherId} • {teacher.designation}
                         </p>
-                        <div className="flex items-center gap-1 mt-0.5">
+                        <p className="text-[10px] text-teal-600 font-medium">
+                          {teacher.department}
+                        </p>
+                        <div className="flex items-center gap-1 mt-1">
                           <span
-                            className={`text-[8px] px-1.5 py-0.5 rounded-full ${getPerformanceColor(teacher.performance)}`}
+                            className={`text-[9px] px-1.5 py-0.5 rounded-full ${getPerformanceColor(teacher.performance)}`}
                           >
                             {teacher.performance}
-                          </span>
-                          <span className="text-[8px] text-gray-400">•</span>
-                          <span className="text-[8px] text-gray-400">
-                            {teacher.department}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="mt-2 grid grid-cols-3 gap-1 text-center">
-                      <div className="bg-gray-50 rounded-lg p-1">
-                        <p className="text-[10px] font-bold text-blue-600">
+                    {/* Contact */}
+                    <div className="mt-2 text-[10px] text-gray-500 flex flex-wrap gap-2">
+                      <span className="flex items-center gap-1">
+                        <FaEnvelopeIcon size={9} /> {teacher.email}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <FaPhoneIcon size={9} /> {teacher.phone}
+                      </span>
+                    </div>
+
+                    {/* Stats */}
+                    <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+                      <div className="bg-blue-50 rounded-lg p-2">
+                        <p className="text-sm font-bold text-blue-600">
                           {teacher.totalStudents}
                         </p>
-                        <p className="text-[8px] text-gray-500">Students</p>
+                        <p className="text-[9px] text-gray-500">Students</p>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-1">
-                        <p className="text-[10px] font-bold text-green-600">
+                      <div className="bg-green-50 rounded-lg p-2">
+                        <p className="text-sm font-bold text-green-600">
                           {teacher.attendance}%
                         </p>
-                        <p className="text-[8px] text-gray-500">Attendance</p>
+                        <p className="text-[9px] text-gray-500">Attendance</p>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-1">
-                        <p className="text-[10px] font-bold text-yellow-600">
-                          {teacher.classes.length}
+                      <div className="bg-purple-50 rounded-lg p-2">
+                        <p className="text-sm font-bold text-purple-600">
+                          {teacher.classes?.length || 0}
                         </p>
-                        <p className="text-[8px] text-gray-500">Classes</p>
+                        <p className="text-[9px] text-gray-500">Batches</p>
                       </div>
                     </div>
 
-                    <div className="mt-1.5">
-                      <div className="flex justify-between text-[8px] text-gray-500 mb-0.5">
-                        <span>Rating</span>
+                    {/* Courses */}
+                    {teacher.courses && teacher.courses.length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-[9px] font-bold text-gray-500 mb-1">
+                          COURSES
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {teacher.courses.map((c, idx) => (
+                            <span
+                              key={idx}
+                              className="text-[9px] bg-teal-50 border border-teal-200 text-teal-700 px-1.5 py-0.5 rounded"
+                            >
+                              {c.name} · {c.batch} · {c.students}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Rating + Salary */}
+                    <div className="mt-3 flex items-center justify-between text-[10px]">
+                      <div className="flex items-center gap-1">
                         {renderStars(teacher.rating)}
                       </div>
-                      <div className="flex justify-between text-[8px] text-gray-500">
-                        <span>Salary</span>
-                        <span className="font-semibold">
-                          ৳{teacher.salary.toLocaleString()}
-                        </span>
-                      </div>
+                      <span className="font-semibold text-gray-700">
+                        ৳{(teacher.salary || 0).toLocaleString()}
+                      </span>
                     </div>
 
                     {/* Actions */}
-                    <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100">
+                    <div className="mt-3 flex items-center gap-1 pt-2 border-t border-gray-100">
                       <button
                         onClick={() => openDetailsModal(teacher)}
-                        className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all"
+                        className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1.5 rounded border border-blue-200 hover:bg-blue-50"
                       >
                         <FaEye className="inline mr-1" size={10} /> View Profile
                       </button>
@@ -1301,25 +1003,17 @@ const Teacher_overview = () => {
                             showConfirmButton: false,
                           });
                         }}
-                        className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
+                        className="text-green-600 hover:text-green-800 p-1.5 rounded hover:bg-green-50"
                         title="Send Email"
                       >
                         <FaEnvelopeIcon size={12} />
                       </button>
                       <button
-                        onClick={() => {
-                          Swal.fire({
-                            icon: "info",
-                            title: "Call Teacher",
-                            text: `Calling ${teacher.name} at ${teacher.phone}`,
-                            timer: 1500,
-                            showConfirmButton: false,
-                          });
-                        }}
-                        className="text-purple-600 hover:text-purple-800 p-1 rounded hover:bg-purple-50 transition-all"
-                        title="Call"
+                        onClick={() => handleDeleteTeacher(teacher.id)}
+                        className="text-red-600 hover:text-red-800 p-1.5 rounded hover:bg-red-50"
+                        title="Delete"
                       >
-                        <FaPhoneIcon size={12} />
+                        <FaUserTimes size={12} />
                       </button>
                     </div>
                   </div>
@@ -1329,11 +1023,9 @@ const Teacher_overview = () => {
               <div className="col-span-full bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center">
                 <FaChalkboardTeacher className="text-5xl text-gray-300 mx-auto mb-3" />
                 <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                  No Teachers Found
+                  No Elders Teachers Found
                 </h3>
-                <p className="text-xs text-gray-500">
-                  Try adjusting your search or filter criteria
-                </p>
+                <p className="text-xs text-gray-500">Try adjusting filters</p>
               </div>
             )}
           </div>
@@ -1346,7 +1038,7 @@ const Teacher_overview = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlus className="text-blue-600" /> Add New Teacher
+                <FaPlus className="text-blue-600" /> Add New Elders Teacher
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1356,6 +1048,11 @@ const Teacher_overview = () => {
               </button>
             </div>
             <form onSubmit={handleAddTeacher} className="p-6 space-y-4">
+              <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
+                💡 Department: <strong>Quran For Elders</strong> — অটোমেটিক সেট
+                হবে
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1368,7 +1065,7 @@ const Teacher_overview = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="Enter full name"
                   />
                 </div>
@@ -1382,52 +1079,9 @@ const Teacher_overview = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, teacherId: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="Auto-generated"
                   />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject *
-                  </label>
-                  <select
-                    required
-                    value={formData.subject}
-                    onChange={(e) =>
-                      setFormData({ ...formData, subject: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Subject</option>
-                    {subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Department *
-                  </label>
-                  <select
-                    required
-                    value={formData.department}
-                    onChange={(e) =>
-                      setFormData({ ...formData, department: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Department</option>
-                    {departments.map((dept) => (
-                      <option key={dept} value={dept}>
-                        {dept}
-                      </option>
-                    ))}
-                  </select>
                 </div>
               </div>
 
@@ -1443,8 +1097,7 @@ const Teacher_overview = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, email: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter email address"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1458,9 +1111,49 @@ const Teacher_overview = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter phone number"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Designation
+                  </label>
+                  <select
+                    value={formData.designation}
+                    onChange={(e) =>
+                      setFormData({ ...formData, designation: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="Senior Teacher">Senior Teacher</option>
+                    <option value="Junior Teacher">Junior Teacher</option>
+                    <option value="Teacher">Teacher</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Specialization
+                  </label>
+                  <select
+                    value={formData.specialization}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        specialization: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="">Select Specialization</option>
+                    {eldersSpecializations.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -1474,43 +1167,33 @@ const Teacher_overview = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, gender: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {genders.map((gender) => (
-                      <option key={gender} value={gender}>
-                        {gender}
+                    {genders.map((g) => (
+                      <option key={g} value={g}>
+                        {g}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date of Birth
+                    Status
                   </label>
-                  <input
-                    type="date"
-                    value={formData.dob}
+                  <select
+                    value={formData.status}
                     onChange={(e) =>
-                      setFormData({ ...formData, dob: e.target.value })
+                      setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  >
+                    {statuses.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
-                </label>
-                <textarea
-                  value={formData.address}
-                  onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
-                  }
-                  rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter address"
-                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1527,8 +1210,8 @@ const Teacher_overview = () => {
                         qualification: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter qualification"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    placeholder="e.g., Masters in Islamic Studies"
                   />
                 </div>
                 <div>
@@ -1541,64 +1224,13 @@ const Teacher_overview = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, experience: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                     placeholder="e.g., 5 years"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Specialization
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.specialization}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        specialization: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter specialization"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) =>
-                      setFormData({ ...formData, status: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Join Date
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.joinDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, joinDate: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Salary (৳)
@@ -1613,13 +1245,9 @@ const Teacher_overview = () => {
                         salary: parseInt(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter salary"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Performance
@@ -1629,43 +1257,30 @@ const Teacher_overview = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, performance: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {performances.map((perf) => (
-                      <option key={perf} value={perf}>
-                        {perf}
+                    {performances.map((p) => (
+                      <option key={p} value={p}>
+                        {p}
                       </option>
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Classes
-                  </label>
-                  <select
-                    multiple
-                    value={formData.classes}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        classes: Array.from(
-                          e.target.selectedOptions,
-                          (option) => option.value,
-                        ),
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent h-20"
-                  >
-                    {classes.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-[10px] text-gray-400 mt-1">
-                    Hold Ctrl/Cmd to select multiple
-                  </p>
-                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  value={formData.address}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  placeholder="Dhaka, Bangladesh"
+                />
               </div>
 
               <div>
@@ -1677,111 +1292,23 @@ const Teacher_overview = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, bio: e.target.value })
                   }
-                  rows="3"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter teacher bio..."
+                  rows="2"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  placeholder="Short bio..."
                 />
               </div>
 
-              <div className="border-t border-gray-200 pt-4">
-                <h4 className="text-sm font-semibold text-gray-700 mb-2">
-                  Social Media Links
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Facebook
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.socialMedia?.facebook || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          socialMedia: {
-                            ...formData.socialMedia,
-                            facebook: e.target.value,
-                          },
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="https://facebook.com/username"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Twitter
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.socialMedia?.twitter || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          socialMedia: {
-                            ...formData.socialMedia,
-                            twitter: e.target.value,
-                          },
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="https://twitter.com/username"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      LinkedIn
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.socialMedia?.linkedin || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          socialMedia: {
-                            ...formData.socialMedia,
-                            linkedin: e.target.value,
-                          },
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="https://linkedin.com/in/username"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Website
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.socialMedia?.website || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          socialMedia: {
-                            ...formData.socialMedia,
-                            website: e.target.value,
-                          },
-                        })
-                      }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="https://yourwebsite.com"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold"
                 >
                   <FaSave className="inline mr-2" size={14} /> Add Teacher
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -1791,10 +1318,10 @@ const Teacher_overview = () => {
         </div>
       )}
 
-      {/* Teacher Details Modal */}
+      {/* Details Modal */}
       {showDetailsModal && selectedTeacher && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <FaUserCircle className="text-blue-600" /> Teacher Profile
@@ -1807,7 +1334,6 @@ const Teacher_overview = () => {
               </button>
             </div>
             <div className="p-6">
-              {/* Header */}
               <div className="flex flex-col md:flex-row items-center gap-6 mb-6 pb-6 border-b border-gray-200">
                 <div
                   className={`w-24 h-24 rounded-full flex items-center justify-center text-white text-4xl font-bold ${
@@ -1837,12 +1363,14 @@ const Teacher_overview = () => {
                     </span>
                   </div>
                   <p className="text-sm text-gray-500">
-                    {selectedTeacher.teacherId} • {selectedTeacher.subject}
+                    {selectedTeacher.teacherId} • {selectedTeacher.designation}
+                  </p>
+                  <p className="text-sm text-teal-700 font-semibold">
+                    {selectedTeacher.department}
                   </p>
                   <div className="flex flex-wrap gap-3 mt-2 text-sm text-gray-500 justify-center md:justify-start">
                     <span>📧 {selectedTeacher.email}</span>
                     <span>📱 {selectedTeacher.phone}</span>
-                    <span>🏛️ {selectedTeacher.department}</span>
                     <span>📚 {selectedTeacher.experience}</span>
                   </div>
                   <div className="mt-2 flex items-center justify-center md:justify-start gap-2">
@@ -1854,13 +1382,10 @@ const Teacher_overview = () => {
                 </div>
               </div>
 
-              {/* Details Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Personal Information */}
                 <div className="space-y-3">
                   <h4 className="font-semibold text-gray-800 text-sm border-b pb-2 flex items-center gap-2">
-                    <FaAddressCard className="text-blue-500" /> Personal
-                    Information
+                    <FaAddressCard className="text-blue-500" /> Personal Info
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
@@ -1882,14 +1407,14 @@ const Teacher_overview = () => {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Date of Birth</span>
+                      <span className="text-gray-500">DOB</span>
                       <span className="font-semibold">
                         {formatDate(selectedTeacher.dob)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Address</span>
-                      <span className="font-semibold">
+                      <span className="font-semibold text-right max-w-[60%]">
                         {selectedTeacher.address}
                       </span>
                     </div>
@@ -1902,11 +1427,9 @@ const Teacher_overview = () => {
                   </div>
                 </div>
 
-                {/* Professional Information */}
                 <div className="space-y-3">
                   <h4 className="font-semibold text-gray-800 text-sm border-b pb-2 flex items-center gap-2">
                     <FaGraduationCap className="text-green-500" /> Professional
-                    Information
                   </h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
@@ -1929,76 +1452,20 @@ const Teacher_overview = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Department</span>
-                      <span className="font-semibold">
+                      <span className="font-semibold text-teal-700">
                         {selectedTeacher.department}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Subjects</span>
-                      <span className="font-semibold">
-                        {selectedTeacher.subject}
+                      <span className="text-gray-500">Batches</span>
+                      <span className="font-semibold text-right max-w-[60%]">
+                        {(selectedTeacher.classes || []).join(", ") || "-"}
                       </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Classes</span>
-                      <span className="font-semibold">
-                        {selectedTeacher.classes.join(", ")}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Social Media */}
-                  <div className="mt-3">
-                    <h4 className="font-semibold text-gray-800 text-xs mb-2">
-                      Social Media
-                    </h4>
-                    <div className="flex gap-2">
-                      {selectedTeacher.socialMedia?.facebook && (
-                        <a
-                          href={selectedTeacher.socialMedia.facebook}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          <FaFacebook size={18} />
-                        </a>
-                      )}
-                      {selectedTeacher.socialMedia?.twitter && (
-                        <a
-                          href={selectedTeacher.socialMedia.twitter}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:text-blue-600"
-                        >
-                          <FaTwitter size={18} />
-                        </a>
-                      )}
-                      {selectedTeacher.socialMedia?.linkedin && (
-                        <a
-                          href={selectedTeacher.socialMedia.linkedin}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-700 hover:text-blue-900"
-                        >
-                          <FaLinkedin size={18} />
-                        </a>
-                      )}
-                      {selectedTeacher.socialMedia?.website && (
-                        <a
-                          href={selectedTeacher.socialMedia.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-600 hover:text-gray-800"
-                        >
-                          <FaGlobeIcon size={18} />
-                        </a>
-                      )}
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Bio */}
               {selectedTeacher.bio && (
                 <div className="mt-6 pt-4 border-t border-gray-200">
                   <h4 className="font-semibold text-gray-800 text-sm mb-2">
@@ -2010,7 +1477,33 @@ const Teacher_overview = () => {
                 </div>
               )}
 
-              {/* Performance Stats */}
+              {/* Courses */}
+              {selectedTeacher.courses &&
+                selectedTeacher.courses.length > 0 && (
+                  <div className="mt-6 pt-4 border-t border-gray-200">
+                    <h4 className="font-semibold text-gray-800 text-sm mb-3">
+                      Assigned Courses
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      {selectedTeacher.courses.map((c, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-teal-50 border border-teal-200 rounded-lg p-3"
+                        >
+                          <p className="text-xs font-bold text-teal-800">
+                            {c.name}
+                          </p>
+                          <p className="text-[10px] text-gray-600">{c.batch}</p>
+                          <p className="text-[10px] text-gray-500 mt-1">
+                            👥 {c.students} students
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* Stats */}
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <h4 className="font-semibold text-gray-800 text-sm mb-3">
                   Performance Stats
@@ -2030,20 +1523,19 @@ const Teacher_overview = () => {
                   </div>
                   <div className="bg-yellow-50 rounded-lg p-3 text-center">
                     <p className="text-lg font-bold text-yellow-600">
-                      {selectedTeacher.classes.length}
+                      {selectedTeacher.classes?.length || 0}
                     </p>
-                    <p className="text-[10px] text-gray-500">Classes</p>
+                    <p className="text-[10px] text-gray-500">Batches</p>
                   </div>
                   <div className="bg-purple-50 rounded-lg p-3 text-center">
                     <p className="text-lg font-bold text-purple-600">
-                      ৳{selectedTeacher.salary.toLocaleString()}
+                      ৳{(selectedTeacher.salary || 0).toLocaleString()}
                     </p>
-                    <p className="text-[10px] text-gray-500">Monthly Salary</p>
+                    <p className="text-[10px] text-gray-500">Salary</p>
                   </div>
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex gap-3 pt-6 border-t border-gray-200 mt-6">
                 <button
                   onClick={() => {
@@ -2051,32 +1543,30 @@ const Teacher_overview = () => {
                     Swal.fire({
                       icon: "success",
                       title: "Profile Downloaded!",
-                      text: "Teacher profile has been downloaded as PDF.",
-                      timer: 1500,
+                      timer: 1200,
                       showConfirmButton: false,
                     });
                   }}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
-                  <FaDownload className="inline mr-2" /> Download Profile
+                  <FaDownload className="inline mr-2" /> Download
                 </button>
                 <button
                   onClick={() => {
                     Swal.fire({
                       icon: "success",
                       title: "Email Sent!",
-                      text: `Email sent to ${selectedTeacher.name}`,
-                      timer: 1500,
+                      timer: 1200,
                       showConfirmButton: false,
                     });
                   }}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaEnvelopeIcon className="inline mr-2" /> Send Email
                 </button>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>

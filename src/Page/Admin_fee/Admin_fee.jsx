@@ -9,172 +9,193 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
   FaCalendarAlt,
-  FaClock,
-  FaBook,
-  FaFileAlt,
   FaChartLine,
-  FaUserGraduate,
   FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
-  FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
   FaPlusCircle,
-  FaDownload,
-  FaPrint,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
   FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
-  FaUserEdit,
-  FaUserCircle,
-  FaAddressCard,
-  FaChalkboard,
-  FaCalendarDay,
-  FaSchool as FaSchoolIcon,
-  FaUserTie,
-  FaBookReader,
-  FaStopwatch,
-  FaClipboardCheck,
-  FaExchangeAlt,
-  FaCheckDouble,
-  FaBan,
-  FaCheck,
-  FaTimes,
-  FaQuestion,
-  FaCalendarWeek,
-  FaChartBar,
-  FaFileDownload,
-  FaFilePdf,
-  FaFileExcel,
-  FaRegClock,
-  FaRegCalendarAlt,
-  FaRegCalendarCheck,
-  FaWhatsapp,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaGlobe as FaGlobeIcon,
-  FaEnvelope as FaEnvelopeIcon,
-  FaPhone as FaPhoneIcon,
-  FaUsers as FaUsersIcon,
-  FaCalendar,
-  FaClock as FaClockIcon2,
+  FaUserTimes,
   FaHourglassHalf,
-  FaCheckCircle as FaCheckCircleIcon,
-  FaTimesCircle as FaTimesCircleIcon,
-  FaBookmark,
-  FaListUl,
-  FaChevronRight,
-  FaChevronDown,
-  FaFolderOpen,
-  FaFile,
-  FaFilePdf as FaFilePdfIcon,
-  FaFileWord,
-  FaFilePowerpoint,
-  FaFileImage,
-  FaFileVideo,
-  FaFileAudio,
-  FaFileArchive,
-  FaFileCode,
-  FaFileExcel as FaFileExcelIcon,
-  FaFileAlt as FaFileAltIcon,
-  FaFolder,
-  FaCopy,
-  FaCut,
-  FaPaste,
-  FaShare,
-  FaStar as FaStarIcon,
-  FaRegStar,
-  FaRegFileAlt,
-  FaRegFilePdf,
-  FaRegFileWord,
-  FaRegFileExcel,
-  FaRegFilePowerpoint,
-  FaRegFileImage,
-  FaRegFileVideo,
-  FaRegFileArchive,
-  FaEraser,
-  FaTrashAlt,
-  FaCalendarTimes,
-  FaRedoAlt,
-  FaUndoAlt,
-  FaSync,
   FaExclamationCircle,
-  FaInfoCircle as FaInfoCircleIcon,
-  FaMoneyCheck,
-  FaMoneyCheckAlt,
-  FaHandHoldingUsd,
-  FaDonate,
-  FaFileInvoice as FaFileInvoiceIcon2,
-  FaFileSignature,
-  FaReceipt as FaReceiptIcon,
-  FaCreditCard as FaCreditCardIcon,
+  FaFileDownload,
+  FaFileInvoice,
+  FaSyncAlt,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+const API_BASE = "https://api.tarbiyahonline.com";
+
+// ============================================================
+// ✅ ELDERS DEPARTMENT
+// ============================================================
+const ELDERS_TEACHERS = ["Jubayer Ahmad", "Sumaiya Afrin Mim"];
+
+const ELDERS_COURSES = [
+  "Qaida Nuraniyah",
+  "Quran Nazera",
+  "Najera",
+  "Basic Tajweed",
+  "Bakarah Hifz",
+];
+
+const ELDERS_CLASSES = [
+  "Elders Batch A",
+  "Elders Batch B",
+  "Elders Batch C",
+  "Elders Batch D",
+  "Elders Batch E",
+];
+
+const ELDERS_BATCHES = [
+  "Batch-01",
+  "Batch-02",
+  "Batch-03",
+  "Batch-04",
+  "Batch-05",
+  "Batch-06",
+];
+
+// ✅ Elders course check (English + Bengali)
+const ELDERS_COURSE_KEYWORDS = [
+  "qaida nuraniyah",
+  "qaida nooraniya",
+  "qaida noorani",
+  "qaida nurani",
+  "qaidah nuraniyah",
+  "qaidah nooraniya",
+  "qaidah noorani",
+  "quran nazera",
+  "nazera quran",
+  "quran najera",
+  "najera quran",
+  "bakarah hifz",
+  "bakara hifz",
+  "baqarah hifz",
+  "baqara hifz",
+  "basic tajweed",
+];
+
+const isSingleEldersCourse = (singleCourse) => {
+  const p = String(singleCourse).toLowerCase().trim();
+  if (!p) return false;
+  return ELDERS_COURSE_KEYWORDS.some((c) => {
+    if (p === c) return true;
+    if (p.includes(c)) return true;
+    if (c.includes(p) && p.length >= 8) return true;
+    return false;
+  });
+};
+
+const isEldersCourse = (courseStr) => {
+  if (!courseStr) return false;
+  const parts = String(courseStr)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (parts.length === 0) return false;
+  return parts.every((part) => isSingleEldersCourse(part));
+};
+
+// ✅ Get primary course from course string
+const getPrimaryCourse = (courseStr) => {
+  if (!courseStr) return "";
+  const first = String(courseStr).split(",")[0].trim().toLowerCase();
+  if (first.includes("qaida")) return "Qaida Nuraniyah";
+  if (first.includes("najera") || first.includes("nazera")) return "Najera";
+  if (first.includes("tajweed")) return "Basic Tajweed";
+  if (first.includes("bakarah") || first.includes("bakara"))
+    return "Bakarah Hifz";
+  return "Qaida Nuraniyah";
+};
+
+// ✅ 2 Elders Students — fallback
+const ELDERS_STUDENTS_FALLBACK = [
+  {
+    _id: "ELDERS_STU_001",
+    name: "Omer Faruk",
+    studentId: "TET26FB6001",
+    course: "Qaida Nooraniya, Bakarah Hifz",
+    primaryCourse: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    phone: "",
+    email: "omer@gmail.com",
+    courseFee: 5000,
+    scholarshipAmount: 0,
+    paidAmount: 0,
+    dueAmount: 0,
+  },
+  {
+    _id: "ELDERS_STU_002",
+    name: "Ikramm",
+    studentId: "TET26FB6002",
+    course: "Qaida Nooraniya, Bakarah Hifz",
+    primaryCourse: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    phone: "",
+    email: "ikramm@gmail.com",
+    courseFee: 5000,
+    scholarshipAmount: 0,
+    paidAmount: 0,
+    dueAmount: 0,
+  },
+];
+
+// ✅ Sample default fee records
+const ELDERS_DEFAULT_FEES = [
+  {
+    id: 1,
+    studentName: "Omer Faruk",
+    studentId: "TET26FB6001",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    subject: "Qaida Nuraniyah",
+    month: "September",
+    year: 2026,
+    amount: 5000,
+    paidAmount: 5000,
+    dueAmount: 0,
+    paymentDate: "2026-09-05",
+    paymentMethod: "bKash",
+    status: "Paid",
+    transactionId: "DGD9CFHU69",
+    notes: "Full payment",
+    collectedBy: "Admin",
+    invoiceNumber: "INV-2026-001",
+  },
+  {
+    id: 2,
+    studentName: "Ikramm",
+    studentId: "TET26FB6002",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    subject: "Qaida Nuraniyah",
+    month: "September",
+    year: 2026,
+    amount: 5000,
+    paidAmount: 3000,
+    dueAmount: 2000,
+    paymentDate: "2026-09-06",
+    paymentMethod: "Nagad",
+    status: "Partial",
+    transactionId: "DGX9PQ45MN",
+    notes: "Partial payment - remaining due",
+    collectedBy: "Admin",
+    invoiceNumber: "INV-2026-002",
+  },
+];
 
 const Admin_fee = () => {
   const { user, logOut } = useAuth();
@@ -187,184 +208,47 @@ const Admin_fee = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "",
+    department: "Quran for Elders",
     joinDate: "",
   });
 
-  // Fee records
-  const [feeRecords, setFeeRecords] = useState([
-    {
-      id: 1,
-      studentName: "Ahmed Hasan",
-      studentId: "STU001",
-      class: "Class 8",
-      subject: "Tajweed",
-      month: "January",
-      year: 2026,
-      amount: 2500,
-      paidAmount: 2500,
-      dueAmount: 0,
-      paymentDate: "2026-01-15",
-      paymentMethod: "Bank Transfer",
-      status: "Paid",
-      transactionId: "TXN001",
-      notes: "Paid in full",
-      collectedBy: "Admin",
-      invoiceNumber: "INV-2026-001",
-    },
-    {
-      id: 2,
-      studentName: "Fatima Begum",
-      studentId: "STU002",
-      class: "Class 9",
-      subject: "Tafsir",
-      month: "January",
-      year: 2026,
-      amount: 3000,
-      paidAmount: 2000,
-      dueAmount: 1000,
-      paymentDate: "2026-01-20",
-      paymentMethod: "Cash",
-      status: "Partial",
-      transactionId: "TXN002",
-      notes: "Partial payment - remaining due",
-      collectedBy: "Admin",
-      invoiceNumber: "INV-2026-002",
-    },
-    {
-      id: 3,
-      studentName: "Mohammad Ali",
-      studentId: "STU003",
-      class: "Class 10",
-      subject: "Hadith",
-      month: "January",
-      year: 2026,
-      amount: 2800,
-      paidAmount: 0,
-      dueAmount: 2800,
-      paymentDate: null,
-      paymentMethod: null,
-      status: "Unpaid",
-      transactionId: null,
-      notes: "Payment pending",
-      collectedBy: null,
-      invoiceNumber: "INV-2026-003",
-    },
-    {
-      id: 4,
-      studentName: "Aisha Rahman",
-      studentId: "STU004",
-      class: "Class 7",
-      subject: "Fiqh",
-      month: "January",
-      year: 2026,
-      amount: 2200,
-      paidAmount: 2200,
-      dueAmount: 0,
-      paymentDate: "2026-01-18",
-      paymentMethod: "Mobile Banking (bKash)",
-      status: "Paid",
-      transactionId: "TXN004",
-      notes: "Paid via bKash",
-      collectedBy: "Admin",
-      invoiceNumber: "INV-2026-004",
-    },
-    {
-      id: 5,
-      studentName: "Rahim Uddin",
-      studentId: "STU005",
-      class: "Class 8",
-      subject: "Tajweed",
-      month: "January",
-      year: 2026,
-      amount: 2500,
-      paidAmount: 2500,
-      dueAmount: 0,
-      paymentDate: "2026-01-22",
-      paymentMethod: "Bank Transfer",
-      status: "Paid",
-      transactionId: "TXN005",
-      notes: "",
-      collectedBy: "Admin",
-      invoiceNumber: "INV-2026-005",
-    },
-    {
-      id: 6,
-      studentName: "Sadia Afrin",
-      studentId: "STU006",
-      class: "Class 10",
-      subject: "Hadith",
-      month: "January",
-      year: 2026,
-      amount: 2800,
-      paidAmount: 1500,
-      dueAmount: 1300,
-      paymentDate: "2026-01-25",
-      paymentMethod: "Cash",
-      status: "Partial",
-      transactionId: "TXN006",
-      notes: "Partial payment",
-      collectedBy: "Admin",
-      invoiceNumber: "INV-2026-006",
-    },
-    {
-      id: 7,
-      studentName: "Hasan Mahmud",
-      studentId: "STU007",
-      class: "Class 6",
-      subject: "Tajweed",
-      month: "February",
-      year: 2026,
-      amount: 2000,
-      paidAmount: 2000,
-      dueAmount: 0,
-      paymentDate: "2026-02-05",
-      paymentMethod: "Mobile Banking (Nagad)",
-      status: "Paid",
-      transactionId: "TXN007",
-      notes: "",
-      collectedBy: "Admin",
-      invoiceNumber: "INV-2026-007",
-    },
-    {
-      id: 8,
-      studentName: "Khadija Akhter",
-      studentId: "STU008",
-      class: "Class 9",
-      subject: "Tafsir",
-      month: "February",
-      year: 2026,
-      amount: 3000,
-      paidAmount: 0,
-      dueAmount: 3000,
-      paymentDate: null,
-      paymentMethod: null,
-      status: "Unpaid",
-      transactionId: null,
-      notes: "Awaiting payment",
-      collectedBy: null,
-      invoiceNumber: "INV-2026-008",
-    },
-  ]);
+  // ✅ Elders students from API
+  const [eldersStudents, setEldersStudents] = useState(
+    ELDERS_STUDENTS_FALLBACK,
+  );
+  const [studentsLoading, setStudentsLoading] = useState(true);
 
-  // State for filters
+  // ✅ Elders fee records
+  const [feeRecords, setFeeRecords] = useState(() => {
+    const saved = localStorage.getItem("eldersFeeRecords");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    return ELDERS_DEFAULT_FEES;
+  });
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterClass, setFilterClass] = useState("All");
+  const [filterCourse, setFilterCourse] = useState("All");
   const [filterMonth, setFilterMonth] = useState("All");
   const [filterYear, setFilterYear] = useState("All");
 
-  // State for modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedFee, setSelectedFee] = useState(null);
 
-  // State for form data
   const [formData, setFormData] = useState({
     studentName: "",
     studentId: "",
     class: "",
+    batch: "",
     subject: "",
     month: "",
     year: new Date().getFullYear(),
@@ -378,7 +262,6 @@ const Admin_fee = () => {
     invoiceNumber: "",
   });
 
-  // Available options
   const months = [
     "January",
     "February",
@@ -394,46 +277,98 @@ const Admin_fee = () => {
     "December",
   ];
   const years = [2024, 2025, 2026, 2027, 2028];
-  const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
-  const subjects = [
-    "Tajweed",
-    "Tafsir",
-    "Hadith",
-    "Fiqh",
-    "Aqeedah",
-    "Arabic Grammar",
-  ];
-  const paymentMethods = [
-    "Cash",
-    "Bank Transfer",
-    "Mobile Banking (bKash)",
-    "Mobile Banking (Nagad)",
-    "Mobile Banking (Rocket)",
-    "Check",
-    "Credit Card",
-  ];
+  const paymentMethods = ["Cash", "bKash", "Nagad", "Rocket", "Bank Transfer"];
   const statuses = ["Paid", "Partial", "Unpaid", "Overdue"];
 
   // Load admin info
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        setAdminInfo(JSON.parse(savedAdmin));
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: "Quran for Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
-  // Save fee records to localStorage
+  // ============================================================
+  // ✅ Fetch elders students from API
+  // ============================================================
+  const fetchEldersStudents = async () => {
+    try {
+      setStudentsLoading(true);
+      let eldersList = [...ELDERS_STUDENTS_FALLBACK];
+
+      try {
+        const res = await fetch(`${API_BASE}/api/students/all`);
+        const text = await res.text();
+
+        if (!text.trim().startsWith("<")) {
+          const data = JSON.parse(text);
+          if (data.success && Array.isArray(data.students)) {
+            const all = data.students || [];
+            const elders = all.filter((s) => isEldersCourse(s.course));
+
+            console.log("📥 Total students from API:", all.length);
+            console.log("✅ Elders students:", elders.length);
+
+            elders.forEach((s) => {
+              const formatted = {
+                _id: s._id,
+                name: s.name || "",
+                studentId: s.studentId || s._id?.slice(-8) || "N/A",
+                course: s.course || "",
+                primaryCourse: getPrimaryCourse(s.course),
+                class: s.batch || s.class || "Elders Batch A",
+                batch: s.batch || "Batch-03",
+                phone: s.phone || "",
+                email: s.email || "",
+                courseFee: Number(s.courseFee) || 5000,
+                scholarshipAmount: Number(s.scholarshipAmount) || 0,
+                paidAmount: Number(s.paidAmount) || 0,
+                dueAmount: Number(s.dueAmount) || 0,
+              };
+
+              const exists = eldersList.some(
+                (e) =>
+                  (e.name || "").toLowerCase() ===
+                  (formatted.name || "").toLowerCase(),
+              );
+              if (!exists) eldersList.push(formatted);
+            });
+          }
+        }
+      } catch (apiErr) {
+        console.warn("API fetch skipped:", apiErr.message);
+      }
+
+      console.log("✅ Final elders students:", eldersList.length);
+      setEldersStudents(eldersList);
+    } catch (err) {
+      console.error("❌ Fetch students error:", err);
+      setEldersStudents(ELDERS_STUDENTS_FALLBACK);
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem("feeRecords", JSON.stringify(feeRecords));
+    fetchEldersStudents();
+  }, []);
+
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem("eldersFeeRecords", JSON.stringify(feeRecords));
   }, [feeRecords]);
 
   const handleLogout = async () => {
@@ -442,7 +377,6 @@ const Admin_fee = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -451,28 +385,14 @@ const Admin_fee = () => {
       });
       navigate("/admin-login");
     } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
+      console.error(err);
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
   const menuItems = [
     {
       id: "profile",
@@ -495,11 +415,6 @@ const Admin_fee = () => {
           id: "today-class",
           path: "/admin-dashboard/today-class",
           label: "Today's Class",
-        },
-        {
-          id: "payment-overview",
-          path: "/admin-dashboard/payment-overview",
-          label: "Payment Overview",
         },
         {
           id: "new-admission",
@@ -628,69 +543,21 @@ const Admin_fee = () => {
       path: "/admin-exam",
       icon: <FaCalendarCheck className="text-xl" />,
       label: "Exam",
-      subItems: [
-        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
-        {
-          id: "result-publish",
-          path: "/admin-exam/result",
-          label: "Result Publish",
-        },
-        {
-          id: "certificate-permission",
-          path: "/admin-exam/certificate",
-          label: "Certificate Permission",
-        },
-      ],
     },
     {
       id: "report-analytics",
       path: "/admin-reports",
       icon: <FaChartLine className="text-xl" />,
       label: "Report & Analytics",
-      subItems: [
-        {
-          id: "admission-report",
-          path: "/admin-reports/admission",
-          label: "Admission Report",
-        },
-        {
-          id: "attendance-report",
-          path: "/admin-reports/attendance",
-          label: "Attendance Report",
-        },
-        { id: "income", path: "/admin-reports/income", label: "Income" },
-      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
       icon: <FaDatabase className="text-xl" />,
       label: "CRM Management",
-      subItems: [
-        {
-          id: "data-entry",
-          path: "/admin-crm/data-entry",
-          label: "Data Entry",
-        },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
-      ],
     },
   ];
 
-  // Get status badge color
   const getStatusColor = (status) => {
     switch (status) {
       case "Paid":
@@ -706,30 +573,32 @@ const Admin_fee = () => {
     }
   };
 
-  // Get status icon
   const getStatusIcon = (status) => {
     switch (status) {
       case "Paid":
-        return <FaCheckCircleIcon className="text-green-500" />;
+        return <FaCheckCircle className="text-green-500" size={10} />;
       case "Partial":
-        return <FaHourglassHalf className="text-yellow-500" />;
+        return <FaHourglassHalf className="text-yellow-500" size={10} />;
       case "Unpaid":
-        return <FaTimesCircleIcon className="text-red-500" />;
+        return <FaTimesCircle className="text-red-500" size={10} />;
       case "Overdue":
-        return <FaExclamationCircle className="text-red-600" />;
+        return <FaExclamationCircle className="text-red-600" size={10} />;
       default:
         return null;
     }
   };
 
-  // Filter fee records
   const filteredFees = feeRecords.filter((fee) => {
+    const s = searchTerm.toLowerCase();
     const matchesSearch =
-      fee.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      fee.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      fee.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase());
+      !s ||
+      (fee.studentName || "").toLowerCase().includes(s) ||
+      (fee.studentId || "").toLowerCase().includes(s) ||
+      (fee.invoiceNumber || "").toLowerCase().includes(s);
     const matchesStatus = filterStatus === "All" || fee.status === filterStatus;
     const matchesClass = filterClass === "All" || fee.class === filterClass;
+    const matchesCourse =
+      filterCourse === "All" || fee.subject === filterCourse;
     const matchesMonth = filterMonth === "All" || fee.month === filterMonth;
     const matchesYear =
       filterYear === "All" || fee.year === parseInt(filterYear);
@@ -737,48 +606,44 @@ const Admin_fee = () => {
       matchesSearch &&
       matchesStatus &&
       matchesClass &&
+      matchesCourse &&
       matchesMonth &&
       matchesYear
     );
   });
 
-  // Get unique values for filters
   const uniqueStatuses = ["All", ...new Set(feeRecords.map((f) => f.status))];
   const uniqueClasses = ["All", ...new Set(feeRecords.map((f) => f.class))];
+  const uniqueCourses = ["All", ...new Set(feeRecords.map((f) => f.subject))];
   const uniqueMonths = ["All", ...new Set(feeRecords.map((f) => f.month))];
   const uniqueYears = [
     "All",
     ...new Set(feeRecords.map((f) => f.year.toString())),
   ];
 
-  // Generate invoice number
   const generateInvoiceNumber = () => {
-    const date = new Date();
-    const year = date.getFullYear();
+    const year = new Date().getFullYear();
     const count = feeRecords.length + 1;
     return `INV-${year}-${String(count).padStart(4, "0")}`;
   };
 
-  // Calculate totals
-  const totalAmount = feeRecords.reduce((sum, f) => sum + f.amount, 0);
-  const totalPaid = feeRecords.reduce((sum, f) => sum + f.paidAmount, 0);
-  const totalDue = feeRecords.reduce((sum, f) => sum + f.dueAmount, 0);
-  const paidCount = feeRecords.filter((f) => f.status === "Paid").length;
-  const unpaidCount = feeRecords.filter((f) => f.status === "Unpaid").length;
-  const partialCount = feeRecords.filter((f) => f.status === "Partial").length;
+  const totalAmount = feeRecords.reduce((sum, f) => sum + (f.amount || 0), 0);
+  const totalPaid = feeRecords.reduce((sum, f) => sum + (f.paidAmount || 0), 0);
+  const totalDue = feeRecords.reduce((sum, f) => sum + (f.dueAmount || 0), 0);
   const collectionRate =
     totalAmount > 0 ? Math.round((totalPaid / totalAmount) * 100) : 0;
 
-  // Open add modal
   const openAddModal = () => {
+    const first = eldersStudents[0];
     setFormData({
-      studentName: "",
-      studentId: "",
-      class: "",
-      subject: "",
+      studentName: first?.name || "",
+      studentId: first?.studentId || "",
+      class: first?.class || ELDERS_CLASSES[0],
+      batch: first?.batch || "Batch-03",
+      subject: first?.primaryCourse || ELDERS_COURSES[0],
       month: months[new Date().getMonth()],
       year: new Date().getFullYear(),
-      amount: 0,
+      amount: first?.courseFee || 5000,
       paidAmount: 0,
       paymentDate: "",
       paymentMethod: "",
@@ -790,13 +655,28 @@ const Admin_fee = () => {
     setShowAddModal(true);
   };
 
-  // Open edit modal
+  // ✅ Student select → auto-fill
+  const handleStudentSelect = (studentId) => {
+    const s = eldersStudents.find((st) => st._id === studentId);
+    if (!s) return;
+    setFormData((prev) => ({
+      ...prev,
+      studentName: s.name,
+      studentId: s.studentId,
+      class: s.class,
+      batch: s.batch,
+      subject: s.primaryCourse || s.course,
+      amount: s.courseFee || prev.amount,
+    }));
+  };
+
   const openEditModal = (fee) => {
     setSelectedFee(fee);
     setFormData({
       studentName: fee.studentName,
       studentId: fee.studentId,
       class: fee.class,
+      batch: fee.batch || "",
       subject: fee.subject,
       month: fee.month,
       year: fee.year,
@@ -812,13 +692,11 @@ const Admin_fee = () => {
     setShowEditModal(true);
   };
 
-  // Open details modal
   const openDetailsModal = (fee) => {
     setSelectedFee(fee);
     setShowDetailsModal(true);
   };
 
-  // Handle add fee
   const handleAddFee = (e) => {
     e.preventDefault();
 
@@ -837,23 +715,21 @@ const Admin_fee = () => {
       return;
     }
 
-    // Calculate due amount
-    const paidAmount = formData.paidAmount || 0;
+    const paidAmount = Number(formData.paidAmount) || 0;
     const dueAmount = formData.amount - paidAmount;
     const status =
-      dueAmount === 0 ? "Paid" : paidAmount > 0 ? "Partial" : "Unpaid";
+      dueAmount <= 0 ? "Paid" : paidAmount > 0 ? "Partial" : "Unpaid";
 
     const newFee = {
       id: Date.now(),
       studentName: formData.studentName,
-      studentId:
-        formData.studentId ||
-        `STU${String(feeRecords.length + 1).padStart(3, "0")}`,
+      studentId: formData.studentId,
       class: formData.class,
+      batch: formData.batch || "",
       subject: formData.subject || "N/A",
       month: formData.month,
       year: formData.year,
-      amount: formData.amount,
+      amount: Number(formData.amount),
       paidAmount: paidAmount,
       dueAmount: dueAmount,
       paymentDate:
@@ -864,8 +740,7 @@ const Admin_fee = () => {
       status: status,
       transactionId:
         paidAmount > 0
-          ? formData.transactionId ||
-            `TXN${String(feeRecords.length + 1).padStart(3, "0")}`
+          ? formData.transactionId || `TXN${Date.now().toString().slice(-6)}`
           : null,
       notes: formData.notes || "",
       collectedBy: paidAmount > 0 ? adminInfo.name : null,
@@ -876,14 +751,13 @@ const Admin_fee = () => {
     setShowAddModal(false);
     Swal.fire({
       icon: "success",
-      title: "Fee Record Added!",
-      text: `Fee record for ${formData.studentName} has been created.`,
+      title: "✅ Fee Record Added!",
+      text: formData.studentName,
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle edit fee
   const handleEditFee = (e) => {
     e.preventDefault();
 
@@ -902,11 +776,10 @@ const Admin_fee = () => {
       return;
     }
 
-    // Calculate due amount
-    const paidAmount = formData.paidAmount || 0;
+    const paidAmount = Number(formData.paidAmount) || 0;
     const dueAmount = formData.amount - paidAmount;
     const status =
-      dueAmount === 0 ? "Paid" : paidAmount > 0 ? "Partial" : "Unpaid";
+      dueAmount <= 0 ? "Paid" : paidAmount > 0 ? "Partial" : "Unpaid";
 
     setFeeRecords(
       feeRecords.map((f) =>
@@ -916,10 +789,11 @@ const Admin_fee = () => {
               studentName: formData.studentName,
               studentId: formData.studentId,
               class: formData.class,
+              batch: formData.batch || "",
               subject: formData.subject || "N/A",
               month: formData.month,
               year: formData.year,
-              amount: formData.amount,
+              amount: Number(formData.amount),
               paidAmount: paidAmount,
               dueAmount: dueAmount,
               paymentDate:
@@ -940,14 +814,12 @@ const Admin_fee = () => {
     setShowEditModal(false);
     Swal.fire({
       icon: "success",
-      title: "Fee Record Updated!",
-      text: "Fee record has been updated successfully.",
+      title: "✅ Updated!",
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle delete fee
   const handleDeleteFee = (id) => {
     Swal.fire({
       title: "Delete Fee Record?",
@@ -960,12 +832,16 @@ const Admin_fee = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         setFeeRecords(feeRecords.filter((f) => f.id !== id));
-        Swal.fire("Deleted!", "Fee record has been deleted.", "success");
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
       }
     });
   };
 
-  // Handle mark as paid
   const handleMarkAsPaid = (fee) => {
     Swal.fire({
       title: "Mark as Paid?",
@@ -989,15 +865,14 @@ const Admin_fee = () => {
                   paymentMethod: f.paymentMethod || "Cash",
                   collectedBy: adminInfo.name,
                   transactionId:
-                    f.transactionId || `TXN${String(Date.now()).slice(-6)}`,
+                    f.transactionId || `TXN${Date.now().toString().slice(-6)}`,
                 }
               : f,
           ),
         );
         Swal.fire({
           icon: "success",
-          title: "Marked as Paid!",
-          text: `${fee.studentName}'s fee has been marked as paid.`,
+          title: "✅ Marked as Paid!",
           timer: 1500,
           showConfirmButton: false,
         });
@@ -1005,12 +880,8 @@ const Admin_fee = () => {
     });
   };
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return `৳${amount.toLocaleString()}`;
-  };
+  const formatCurrency = (amount) => `৳${(amount || 0).toLocaleString()}`;
 
-  // Format date
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     const date = new Date(dateStr);
@@ -1026,10 +897,12 @@ const Admin_fee = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Fee Management</h1>
+          <h1 className="text-sm font-bold text-gray-800">
+            Fee Management (Elders)
+          </h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100"
           >
             {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
@@ -1038,14 +911,8 @@ const Admin_fee = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -1065,7 +932,7 @@ const Admin_fee = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -1076,21 +943,20 @@ const Admin_fee = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
+                        className={`transition-transform ${
+                          activeSubMenu === item.id ? "rotate-180" : ""
+                        }`}
                       >
                         <FaArrowRight size={12} />
                       </span>
@@ -1126,14 +992,11 @@ const Admin_fee = () => {
                     }}
                   >
                     <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -1157,7 +1020,6 @@ const Admin_fee = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1166,48 +1028,100 @@ const Admin_fee = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaMoneyBillWave className="text-green-600" /> Fee Management
+                <FaMoneyBillWave className="text-green-600" /> Fee Management —
+                <span className="text-teal-700">Quran For Elders</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Manage student fees and payments
+                {studentsLoading
+                  ? "Loading elders students..."
+                  : `${eldersStudents.length} elders student${eldersStudents.length !== 1 ? "s" : ""} • Qaida • Nazera • Najera • Tajweed • Bakarah Hifz`}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={fetchEldersStudents}
+                disabled={studentsLoading}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 disabled:opacity-50"
+              >
+                <FaSyncAlt
+                  size={12}
+                  className={studentsLoading ? "animate-spin" : ""}
+                />
+                Refresh
+              </button>
               <button
                 onClick={openAddModal}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaPlusCircle size={12} /> Add Fee
               </button>
               <button
-                onClick={() => {
+                onClick={() =>
                   Swal.fire({
                     icon: "info",
                     title: "Export Report",
-                    text: "Fee report will be downloaded as PDF.",
+                    text: "Elders fee report will be downloaded.",
                     timer: 1500,
                     showConfirmButton: false,
-                  });
-                }}
-                className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                  })
+                }
+                className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaFileDownload size={12} /> Export
               </button>
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
               >
                 Logout
               </button>
             </div>
+          </div>
+
+          {/* ✅ Elders Students Card */}
+          <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
+            <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
+              <FaUsers size={12} /> Elders Students ({eldersStudents.length})
+            </p>
+            {studentsLoading && eldersStudents.length === 0 ? (
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div>
+                Loading from API...
+              </div>
+            ) : eldersStudents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {eldersStudents.map((s) => (
+                  <div
+                    key={s._id}
+                    className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      {(s.name || "S").charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-gray-800 truncate">
+                        {s.name}
+                      </p>
+                      <p className="text-[10px] text-gray-500 truncate">
+                        {s.studentId} • {s.class}
+                      </p>
+                      <p className="text-[10px] text-teal-600 truncate">
+                        {s.course}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-500 italic">
+                No elders students found.
+              </p>
+            )}
           </div>
 
           {/* Stats */}
@@ -1222,13 +1136,13 @@ const Admin_fee = () => {
               <p className="text-lg font-bold text-green-600">
                 {formatCurrency(totalPaid)}
               </p>
-              <p className="text-[10px] text-gray-500">Total Collected</p>
+              <p className="text-[10px] text-gray-500">Collected</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-red-600">
                 {formatCurrency(totalDue)}
               </p>
-              <p className="text-[10px] text-gray-500">Total Due</p>
+              <p className="text-[10px] text-gray-500">Due</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-purple-600">
@@ -1248,57 +1162,68 @@ const Admin_fee = () => {
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
             <div className="flex flex-col md:flex-row gap-2">
               <div className="flex-1 relative">
-                <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
                   placeholder="Search by student name, ID or invoice..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="flex items-center gap-1 flex-wrap">
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {uniqueStatuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterClass}
                   onChange={(e) => setFilterClass(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueClasses.map((cls) => (
-                    <option key={cls} value={cls}>
-                      {cls}
+                  {uniqueClasses.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={filterCourse}
+                  onChange={(e) => setFilterCourse(e.target.value)}
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
+                >
+                  {uniqueCourses.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterMonth}
                   onChange={(e) => setFilterMonth(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueMonths.map((month) => (
-                    <option key={month} value={month}>
-                      {month}
+                  {uniqueMonths.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterYear}
                   onChange={(e) => setFilterYear(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueYears.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
+                  {uniqueYears.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
                     </option>
                   ))}
                 </select>
@@ -1306,9 +1231,9 @@ const Admin_fee = () => {
             </div>
           </div>
 
-          {/* Fee Records Table */}
+          {/* Table */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto max-h-[calc(100vh-380px)] overflow-y-auto">
+            <div className="overflow-x-auto max-h-[calc(100vh-500px)] overflow-y-auto">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
@@ -1344,10 +1269,7 @@ const Admin_fee = () => {
                 <tbody className="divide-y divide-gray-100">
                   {filteredFees.length > 0 ? (
                     filteredFees.map((fee, index) => (
-                      <tr
-                        key={fee.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
+                      <tr key={fee.id} className="hover:bg-gray-50">
                         <td className="px-3 py-2 font-medium text-gray-500">
                           {index + 1}
                         </td>
@@ -1386,30 +1308,30 @@ const Admin_fee = () => {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => openDetailsModal(fee)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
-                              title="View Details"
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                              title="View"
                             >
                               <FaEye size={12} />
                             </button>
                             {fee.status !== "Paid" && (
                               <button
                                 onClick={() => handleMarkAsPaid(fee)}
-                                className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
+                                className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
                                 title="Mark as Paid"
                               >
-                                <FaCheckCircleIcon size={12} />
+                                <FaCheckCircle size={12} />
                               </button>
                             )}
                             <button
                               onClick={() => openEditModal(fee)}
-                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50 transition-all"
+                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
                               title="Edit"
                             >
                               <FaEdit size={12} />
                             </button>
                             <button
                               onClick={() => handleDeleteFee(fee.id)}
-                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                               title="Delete"
                             >
                               <FaTrash size={12} />
@@ -1425,10 +1347,7 @@ const Admin_fee = () => {
                         className="px-3 py-8 text-center text-gray-500"
                       >
                         <FaMoneyBillWave className="text-4xl text-gray-300 mx-auto mb-2" />
-                        <p>No fee records found</p>
-                        <p className="text-[10px] text-gray-400 mt-1">
-                          Try adjusting your search or filter criteria
-                        </p>
+                        <p>No elders fee records found</p>
                       </td>
                     </tr>
                   )}
@@ -1443,9 +1362,9 @@ const Admin_fee = () => {
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlusCircle className="text-green-600" /> Add Fee Record
+                <FaPlusCircle className="text-green-600" /> Add Elders Fee
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1455,7 +1374,35 @@ const Admin_fee = () => {
               </button>
             </div>
             <form onSubmit={handleAddFee} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
+                💡 Student select করলে বাকি information auto-fill হবে
+              </div>
+
+              {/* Student dropdown */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Elders Student *
+                </label>
+                <select
+                  required
+                  value={
+                    eldersStudents.find(
+                      (s) => s.studentId === formData.studentId,
+                    )?._id || ""
+                  }
+                  onChange={(e) => handleStudentSelect(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="">Select Student</option>
+                  {eldersStudents.map((s) => (
+                    <option key={s._id} value={s._id}>
+                      {s.name} — {s.course}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Student Name *
@@ -1464,11 +1411,8 @@ const Admin_fee = () => {
                     type="text"
                     required
                     value={formData.studentName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, studentName: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter student name"
+                    readOnly
+                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
                   />
                 </div>
                 <div>
@@ -1478,58 +1422,61 @@ const Admin_fee = () => {
                   <input
                     type="text"
                     value={formData.studentId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, studentId: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter student ID"
+                    readOnly
+                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Class *
                   </label>
-                  <select
-                    required
+                  <input
+                    type="text"
                     value={formData.class}
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Class</option>
-                    {classes.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
-                      </option>
-                    ))}
-                  </select>
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject
+                    Batch
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.batch}
+                    onChange={(e) =>
+                      setFormData({ ...formData, batch: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Course *
                   </label>
                   <select
+                    required
                     value={formData.subject}
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Subject</option>
-                    {subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
+                    {ELDERS_COURSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Month *
@@ -1540,16 +1487,19 @@ const Admin_fee = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, month: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">Select Month</option>
-                    {months.map((month) => (
-                      <option key={month} value={month}>
-                        {month}
+                    {months.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
                       </option>
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Year *
@@ -1563,19 +1513,15 @@ const Admin_fee = () => {
                         year: parseInt(e.target.value),
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Year</option>
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
+                    {years.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
                       </option>
                     ))}
                   </select>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Amount (৳) *
@@ -1591,10 +1537,12 @@ const Admin_fee = () => {
                         amount: parseFloat(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter amount"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Paid Amount (৳)
@@ -1609,55 +1557,53 @@ const Admin_fee = () => {
                         paidAmount: parseFloat(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter paid amount"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
+                {formData.paidAmount > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Payment Method
+                    </label>
+                    <select
+                      value={formData.paymentMethod}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          paymentMethod: e.target.value,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Select</option>
+                      {paymentMethods.map((m) => (
+                        <option key={m} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               {formData.paidAmount > 0 && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Payment Date
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.paymentDate}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            paymentDate: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Payment Method
-                      </label>
-                      <select
-                        value={formData.paymentMethod}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            paymentMethod: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="">Select Payment Method</option>
-                        {paymentMethods.map((method) => (
-                          <option key={method} value={method}>
-                            {method}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Payment Date
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.paymentDate}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          paymentDate: e.target.value,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Transaction ID
@@ -1671,11 +1617,11 @@ const Admin_fee = () => {
                           transactionId: e.target.value,
                         })
                       }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter transaction ID"
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                      placeholder="TXN ID"
                     />
                   </div>
-                </>
+                </div>
               )}
 
               <div>
@@ -1688,37 +1634,21 @@ const Admin_fee = () => {
                     setFormData({ ...formData, notes: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Add notes..."
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Invoice Number
-                </label>
-                <input
-                  type="text"
-                  value={formData.invoiceNumber}
-                  onChange={(e) =>
-                    setFormData({ ...formData, invoiceNumber: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Invoice number"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 rounded-lg font-semibold"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Add Fee Record
+                  <FaSave className="inline mr-2" size={14} /> Add Fee
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -1732,9 +1662,9 @@ const Admin_fee = () => {
       {showEditModal && selectedFee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaEdit className="text-yellow-600" /> Edit Fee Record
+                <FaEdit className="text-yellow-600" /> Edit Elders Fee
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1744,7 +1674,7 @@ const Admin_fee = () => {
               </button>
             </div>
             <form onSubmit={handleEditFee} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Student Name *
@@ -1756,8 +1686,7 @@ const Admin_fee = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, studentName: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter student name"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1770,53 +1699,61 @@ const Admin_fee = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, studentId: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter student ID"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Class *
                   </label>
-                  <select
+                  <input
+                    type="text"
                     required
                     value={formData.class}
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    {classes.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
-                      </option>
-                    ))}
-                  </select>
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject
+                    Batch
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.batch}
+                    onChange={(e) =>
+                      setFormData({ ...formData, batch: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Course *
                   </label>
                   <select
+                    required
                     value={formData.subject}
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
+                    {ELDERS_COURSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Month *
@@ -1827,15 +1764,18 @@ const Admin_fee = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, month: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {months.map((month) => (
-                      <option key={month} value={month}>
-                        {month}
+                    {months.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
                       </option>
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Year *
@@ -1849,18 +1789,15 @@ const Admin_fee = () => {
                         year: parseInt(e.target.value),
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {years.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
+                    {years.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
                       </option>
                     ))}
                   </select>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Amount (৳) *
@@ -1876,10 +1813,12 @@ const Admin_fee = () => {
                         amount: parseFloat(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter amount"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Paid Amount (৳)
@@ -1894,55 +1833,53 @@ const Admin_fee = () => {
                         paidAmount: parseFloat(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter paid amount"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
+                {formData.paidAmount > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Payment Method
+                    </label>
+                    <select
+                      value={formData.paymentMethod}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          paymentMethod: e.target.value,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Select</option>
+                      {paymentMethods.map((m) => (
+                        <option key={m} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
               </div>
 
               {formData.paidAmount > 0 && (
-                <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Payment Date
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.paymentDate}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            paymentDate: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Payment Method
-                      </label>
-                      <select
-                        value={formData.paymentMethod}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            paymentMethod: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="">Select Payment Method</option>
-                        {paymentMethods.map((method) => (
-                          <option key={method} value={method}>
-                            {method}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Payment Date
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.paymentDate}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          paymentDate: e.target.value,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Transaction ID
@@ -1956,11 +1893,10 @@ const Admin_fee = () => {
                           transactionId: e.target.value,
                         })
                       }
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Enter transaction ID"
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
                     />
                   </div>
-                </>
+                </div>
               )}
 
               <div>
@@ -1973,22 +1909,21 @@ const Admin_fee = () => {
                     setFormData({ ...formData, notes: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Add notes..."
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Update Fee Record
+                  <FaSave className="inline mr-2" size={14} /> Update Fee
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -2002,9 +1937,9 @@ const Admin_fee = () => {
       {showDetailsModal && selectedFee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaFileInvoiceIcon className="text-blue-600" /> Fee Details
+                <FaFileInvoice className="text-blue-600" /> Elders Fee Details
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
@@ -2014,7 +1949,7 @@ const Admin_fee = () => {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+              <div className="flex items-center justify-between pb-4 border-b">
                 <div>
                   <h2 className="text-xl font-bold text-gray-800">
                     {selectedFee.studentName}
@@ -2037,7 +1972,13 @@ const Admin_fee = () => {
                   <p className="text-sm font-semibold">{selectedFee.class}</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Subject</p>
+                  <p className="text-[10px] text-gray-400">Batch</p>
+                  <p className="text-sm font-semibold">
+                    {selectedFee.batch || "-"}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Course</p>
                   <p className="text-sm font-semibold">{selectedFee.subject}</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
@@ -2053,35 +1994,34 @@ const Admin_fee = () => {
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Paid Amount</p>
+                  <p className="text-[10px] text-gray-400">Paid</p>
                   <p className="text-sm font-semibold text-green-600">
                     {formatCurrency(selectedFee.paidAmount)}
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Due Amount</p>
+                  <p className="text-[10px] text-gray-400">Due</p>
                   <p className="text-sm font-semibold text-red-600">
                     {formatCurrency(selectedFee.dueAmount)}
                   </p>
                 </div>
-              </div>
-
-              {selectedFee.paymentDate && (
-                <div className="grid grid-cols-2 gap-3">
+                {selectedFee.paymentDate && (
                   <div className="bg-gray-50 rounded-lg p-3">
                     <p className="text-[10px] text-gray-400">Payment Date</p>
                     <p className="text-sm font-semibold">
                       {formatDate(selectedFee.paymentDate)}
                     </p>
                   </div>
+                )}
+                {selectedFee.paymentMethod && (
                   <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-[10px] text-gray-400">Payment Method</p>
+                    <p className="text-[10px] text-gray-400">Method</p>
                     <p className="text-sm font-semibold">
-                      {selectedFee.paymentMethod || "-"}
+                      {selectedFee.paymentMethod}
                     </p>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
               {selectedFee.transactionId && (
                 <div className="bg-gray-50 rounded-lg p-3">
@@ -2103,7 +2043,7 @@ const Admin_fee = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Invoice Number</p>
+                  <p className="text-[10px] text-gray-400">Invoice</p>
                   <p className="text-sm font-semibold">
                     {selectedFee.invoiceNumber}
                   </p>
@@ -2116,16 +2056,16 @@ const Admin_fee = () => {
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 {selectedFee.status !== "Paid" && (
                   <button
                     onClick={() => {
                       setShowDetailsModal(false);
                       handleMarkAsPaid(selectedFee);
                     }}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                   >
-                    <FaCheckCircleIcon className="inline mr-2" /> Mark as Paid
+                    <FaCheckCircle className="inline mr-2" /> Mark as Paid
                   </button>
                 )}
                 <button
@@ -2133,13 +2073,13 @@ const Admin_fee = () => {
                     setShowDetailsModal(false);
                     openEditModal(selectedFee);
                   }}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaEdit className="inline mr-2" /> Edit
                 </button>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>

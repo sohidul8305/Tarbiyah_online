@@ -174,6 +174,7 @@ import My_courses from "../Components/My_courses/My_courses";
 import Academicampus from "../Components/Academicampus/Academicampus";
 import BasicTazweed from "../Page/Admin/BasicTazweed";
 import NajeraBatch from "../Page/Admin/NajeraBatch";
+import Student_exam from "../Page/Student_exam/Student_exam";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -545,6 +546,14 @@ export const router = createBrowserRouter([
   {
     path: "/my-courses",
     element: <My_courses></My_courses>,
+  },
+  {
+    path: "/admin-exam",
+    element: <Student_exam></Student_exam>,
+  },
+  {
+    path: "/admin-reports",
+    element: <Report></Report>,
   },
 
   // ==========================================

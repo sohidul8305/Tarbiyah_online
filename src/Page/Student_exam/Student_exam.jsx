@@ -1,6 +1,6 @@
-// src/Page/Admin/Invoice.jsx
+// src/Page/Admin/Student_exam.jsx
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -11,26 +11,30 @@ import {
   FaSignOutAlt,
   FaCalendarCheck,
   FaChartLine,
+  FaUserTimes,
   FaDatabase,
   FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
   FaPlusCircle,
-  FaDownload,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
   FaLayerGroup,
   FaSave,
-  FaUserTimes,
   FaHourglassHalf,
-  FaExclamationCircle,
-  FaFileInvoice,
-  FaEnvelope as FaEnvelopeIcon,
+  FaFileAlt,
   FaSyncAlt,
+  FaClipboardList,
 } from "react-icons/fa";
-import { MdDashboard } from "react-icons/md";
+import {
+  MdDashboard,
+  MdGrade,
+  MdQuiz,
+  MdAssignment,
+  MdVerified,
+} from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const API_BASE = "https://api.tarbiyahonline.com";
@@ -128,7 +132,7 @@ const ELDERS_STUDENTS_FALLBACK = [
     batch: "Batch-03",
     phone: "",
     email: "omer@gmail.com",
-    courseFee: 5000,
+    status: "Active",
   },
   {
     _id: "ELDERS_STU_002",
@@ -140,74 +144,208 @@ const ELDERS_STUDENTS_FALLBACK = [
     batch: "Batch-03",
     phone: "",
     email: "ikramm@gmail.com",
-    courseFee: 5000,
+    status: "Active",
   },
 ];
 
-// ✅ Sample elders invoices
-const ELDERS_DEFAULT_INVOICES = [
+// ============================================================
+// ✅ EXAM TYPES
+// ============================================================
+const EXAM_TYPES = {
+  GRAD: "Grad",
+  CLASS_TEST: "Class Test",
+  MID_TERM: "Mid Term",
+  FINAL_EXAM: "Final Exam",
+  WEEKLY: "Weekly Test",
+  QUIZ: "Quiz",
+};
+
+const EXAM_TYPE_LIST = [
+  EXAM_TYPES.GRAD,
+  EXAM_TYPES.CLASS_TEST,
+  EXAM_TYPES.MID_TERM,
+  EXAM_TYPES.FINAL_EXAM,
+  EXAM_TYPES.WEEKLY,
+  EXAM_TYPES.QUIZ,
+];
+
+// ============================================================
+// ✅ Sample exam records
+// ============================================================
+const ELDERS_DEFAULT_EXAMS = [
   {
     id: 1,
-    invoiceNumber: "INV-2026-0001",
+    examType: EXAM_TYPES.GRAD,
+    examTitle: "Final Grade - Qaida Nuraniyah",
     studentName: "Omer Faruk",
     studentId: "TET26FB6001",
+    course: "Qaida Nuraniyah",
     class: "Elders Batch A",
     batch: "Batch-03",
-    subject: "Qaida Nuraniyah",
-    month: "September",
-    year: 2026,
-    amount: 5000,
-    paidAmount: 5000,
-    dueAmount: 0,
-    status: "Paid",
-    issueDate: "2026-09-01",
-    dueDate: "2026-09-30",
-    paymentDate: "2026-09-05",
-    paymentMethod: "bKash",
-    transactionId: "DGD9CFHU69",
-    notes: "Paid in full",
-    items: [
-      { description: "Qaida Nuraniyah - Monthly Fee (Sep 2026)", amount: 5000 },
-    ],
-    subtotal: 5000,
-    tax: 0,
-    total: 5000,
+    teacher: "Jubayer Ahmad",
+    examDate: "2026-09-15",
+    totalMarks: 100,
+    obtainedMarks: 92,
+    grade: "A+",
+    status: "Completed",
+    remarks: "Outstanding performance",
+    createdAt: "2026-09-15",
   },
   {
     id: 2,
-    invoiceNumber: "INV-2026-0002",
+    examType: EXAM_TYPES.GRAD,
+    examTitle: "Final Grade - Qaida Nuraniyah",
     studentName: "Ikramm",
     studentId: "TET26FB6002",
+    course: "Qaida Nuraniyah",
     class: "Elders Batch A",
     batch: "Batch-03",
-    subject: "Qaida Nuraniyah",
-    month: "September",
-    year: 2026,
-    amount: 5000,
-    paidAmount: 3000,
-    dueAmount: 2000,
-    status: "Partial",
-    issueDate: "2026-09-01",
-    dueDate: "2026-09-30",
-    paymentDate: "2026-09-06",
-    paymentMethod: "Nagad",
-    transactionId: "DGX9PQ45MN",
-    notes: "Partial payment - remaining due",
-    items: [
-      { description: "Qaida Nuraniyah - Monthly Fee (Sep 2026)", amount: 5000 },
-    ],
-    subtotal: 5000,
-    tax: 0,
-    total: 5000,
+    teacher: "Sumaiya Afrin Mim",
+    examDate: "2026-09-15",
+    totalMarks: 100,
+    obtainedMarks: 85,
+    grade: "A",
+    status: "Completed",
+    remarks: "Very good effort",
+    createdAt: "2026-09-15",
+  },
+  {
+    id: 3,
+    examType: EXAM_TYPES.CLASS_TEST,
+    examTitle: "Class Test - Week 3",
+    studentName: "Omer Faruk",
+    studentId: "TET26FB6001",
+    course: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    teacher: "Jubayer Ahmad",
+    examDate: "2026-09-20",
+    totalMarks: 50,
+    obtainedMarks: 44,
+    grade: "A+",
+    status: "Completed",
+    remarks: "Excellent",
+    createdAt: "2026-09-20",
+  },
+  {
+    id: 4,
+    examType: EXAM_TYPES.CLASS_TEST,
+    examTitle: "Class Test - Week 4",
+    studentName: "Ikramm",
+    studentId: "TET26FB6002",
+    course: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    teacher: "Sumaiya Afrin Mim",
+    examDate: "2026-09-27",
+    totalMarks: 50,
+    obtainedMarks: 40,
+    grade: "A",
+    status: "Completed",
+    remarks: "Good progress",
+    createdAt: "2026-09-27",
+  },
+  {
+    id: 5,
+    examType: EXAM_TYPES.MID_TERM,
+    examTitle: "Mid Term Exam 2026",
+    studentName: "Omer Faruk",
+    studentId: "TET26FB6001",
+    course: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    teacher: "Jubayer Ahmad",
+    examDate: "2026-10-15",
+    totalMarks: 100,
+    obtainedMarks: 88,
+    grade: "A",
+    status: "Upcoming",
+    remarks: "",
+    createdAt: "2026-09-25",
+  },
+  {
+    id: 6,
+    examType: EXAM_TYPES.MID_TERM,
+    examTitle: "Mid Term Exam 2026",
+    studentName: "Ikramm",
+    studentId: "TET26FB6002",
+    course: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    teacher: "Sumaiya Afrin Mim",
+    examDate: "2026-10-15",
+    totalMarks: 100,
+    obtainedMarks: 0,
+    grade: "-",
+    status: "Upcoming",
+    remarks: "",
+    createdAt: "2026-09-25",
+  },
+  {
+    id: 7,
+    examType: EXAM_TYPES.FINAL_EXAM,
+    examTitle: "Final Exam 2026",
+    studentName: "Omer Faruk",
+    studentId: "TET26FB6001",
+    course: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    teacher: "Jubayer Ahmad",
+    examDate: "2026-12-15",
+    totalMarks: 100,
+    obtainedMarks: 0,
+    grade: "-",
+    status: "Upcoming",
+    remarks: "",
+    createdAt: "2026-09-01",
+  },
+  {
+    id: 8,
+    examType: EXAM_TYPES.FINAL_EXAM,
+    examTitle: "Final Exam 2026",
+    studentName: "Ikramm",
+    studentId: "TET26FB6002",
+    course: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    teacher: "Sumaiya Afrin Mim",
+    examDate: "2026-12-15",
+    totalMarks: 100,
+    obtainedMarks: 0,
+    grade: "-",
+    status: "Upcoming",
+    remarks: "",
+    createdAt: "2026-09-01",
   },
 ];
 
-const Invoice = () => {
+// ============================================================
+// ✅ URL Path → Tab ID mapping
+// ============================================================
+const getTabFromPath = (pathname) => {
+  if (pathname.includes("/admin-exam/grad")) return "grad";
+  if (pathname.includes("/admin-exam/class-test")) return "class-test";
+  if (pathname.includes("/admin-exam/mid-term")) return "mid-term";
+  if (pathname.includes("/admin-exam/final-exam")) return "final";
+  if (pathname.includes("/admin-exam/student-exam")) return "all";
+  // default — Student exam page with all
+  return "all";
+};
+
+const Student_exam = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("finance");
-  const [activeSubMenu, setActiveSubMenu] = useState("invoice");
+  const [activeMenu, setActiveMenu] = useState("exam");
+  const [activeSubMenu, setActiveSubMenu] = useState("student-exam");
+
+  // ✅ URL থেকে tab auto-set
+  const [activeTab, setActiveTab] = useState(() =>
+    getTabFromPath(location.pathname),
+  );
+
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -223,9 +361,9 @@ const Invoice = () => {
   );
   const [studentsLoading, setStudentsLoading] = useState(true);
 
-  // ✅ Elders invoices
-  const [invoices, setInvoices] = useState(() => {
-    const saved = localStorage.getItem("eldersInvoices");
+  // ✅ Elders exams
+  const [exams, setExams] = useState(() => {
+    const saved = localStorage.getItem("eldersStudentExams");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -234,51 +372,46 @@ const Invoice = () => {
         console.error(err);
       }
     }
-    return ELDERS_DEFAULT_INVOICES;
+    return ELDERS_DEFAULT_EXAMS;
   });
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
-  const [filterMonth, setFilterMonth] = useState("All");
-  const [filterYear, setFilterYear] = useState("All");
+  const [filterCourse, setFilterCourse] = useState("All");
+  const [filterType, setFilterType] = useState("All");
 
-  const [showGenerateModal, setShowGenerateModal] = useState(false);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedExam, setSelectedExam] = useState(null);
 
   const [formData, setFormData] = useState({
+    examType: EXAM_TYPES.CLASS_TEST,
+    examTitle: "",
     studentName: "",
     studentId: "",
+    course: "",
     class: "",
     batch: "",
-    subject: "",
-    month: "",
-    year: new Date().getFullYear(),
-    amount: 0,
-    paidAmount: 0,
-    issueDate: "",
-    dueDate: "",
-    items: [{ description: "", amount: 0 }],
-    notes: "",
+    teacher: "",
+    examDate: "",
+    totalMarks: 100,
+    obtainedMarks: 0,
+    grade: "-",
+    status: "Upcoming",
+    remarks: "",
   });
 
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  const years = [2024, 2025, 2026, 2027];
-  const statuses = ["All", "Paid", "Partial", "Unpaid", "Overdue"];
+  const statuses = ["Upcoming", "Completed", "Cancelled"];
+
+  // ============================================================
+  // ✅ URL change হলে tab update
+  // ============================================================
+  useEffect(() => {
+    const tabFromPath = getTabFromPath(location.pathname);
+    setActiveTab(tabFromPath);
+    console.log("📍 Path:", location.pathname, "→ Tab:", tabFromPath);
+  }, [location.pathname]);
 
   // Load admin info
   useEffect(() => {
@@ -333,7 +466,7 @@ const Invoice = () => {
                 batch: s.batch || "Batch-03",
                 phone: s.phone || "",
                 email: s.email || "",
-                courseFee: Number(s.courseFee) || 5000,
+                status: s.status || "Pending",
               };
 
               const exists = eldersList.some(
@@ -363,10 +496,10 @@ const Invoice = () => {
     fetchEldersStudents();
   }, []);
 
-  // Save to localStorage
+  // Save exams
   useEffect(() => {
-    localStorage.setItem("eldersInvoices", JSON.stringify(invoices));
-  }, [invoices]);
+    localStorage.setItem("eldersStudentExams", JSON.stringify(exams));
+  }, [exams]);
 
   const handleLogout = async () => {
     try {
@@ -540,6 +673,35 @@ const Invoice = () => {
       path: "/admin-exam",
       icon: <FaCalendarCheck className="text-xl" />,
       label: "Exam",
+      subItems: [
+        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
+        {
+          id: "result-publish",
+          path: "/admin-exam/result",
+          label: "Result Publish",
+        },
+        {
+          id: "certificate-permission",
+          path: "/admin-exam/certificate",
+          label: "Certificate Permission",
+        },
+        { id: "grad", path: "/admin-exam/grad", label: "Grad" },
+        {
+          id: "class-test",
+          path: "/admin-exam/class-test",
+          label: "Class Test",
+        },
+        {
+          id: "mid-term",
+          path: "/admin-exam/mid-term",
+          label: "Mid Term Exam",
+        },
+        {
+          id: "final-exam",
+          path: "/admin-exam/final-exam",
+          label: "Final Exam",
+        },
+      ],
     },
     {
       id: "report-analytics",
@@ -555,16 +717,48 @@ const Invoice = () => {
     },
   ];
 
+  // ============================================================
+  // HELPERS
+  // ============================================================
+  const calculateGrade = (obtained, total) => {
+    if (!total || total === 0) return "-";
+    const pct = (obtained / total) * 100;
+    if (pct >= 90) return "A+";
+    if (pct >= 80) return "A";
+    if (pct >= 70) return "A-";
+    if (pct >= 60) return "B";
+    if (pct >= 50) return "C";
+    if (pct >= 40) return "D";
+    return "F";
+  };
+
+  const getGradeColor = (grade) => {
+    switch (grade) {
+      case "A+":
+      case "A":
+        return "bg-green-100 text-green-700";
+      case "A-":
+      case "B":
+        return "bg-blue-100 text-blue-700";
+      case "C":
+        return "bg-yellow-100 text-yellow-700";
+      case "D":
+        return "bg-orange-100 text-orange-700";
+      case "F":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
-      case "Paid":
+      case "Completed":
         return "bg-green-100 text-green-700";
-      case "Partial":
+      case "Upcoming":
         return "bg-yellow-100 text-yellow-700";
-      case "Unpaid":
+      case "Cancelled":
         return "bg-red-100 text-red-700";
-      case "Overdue":
-        return "bg-red-200 text-red-800";
       default:
         return "bg-gray-100 text-gray-700";
     }
@@ -572,345 +766,16 @@ const Invoice = () => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "Paid":
+      case "Completed":
         return <FaCheckCircle className="text-green-500" size={10} />;
-      case "Partial":
+      case "Upcoming":
         return <FaHourglassHalf className="text-yellow-500" size={10} />;
-      case "Unpaid":
+      case "Cancelled":
         return <FaTimesCircle className="text-red-500" size={10} />;
-      case "Overdue":
-        return <FaExclamationCircle className="text-red-600" size={10} />;
       default:
         return null;
     }
   };
-
-  const filteredInvoices = invoices.filter((invoice) => {
-    const s = searchTerm.toLowerCase();
-    const matchesSearch =
-      !s ||
-      (invoice.studentName || "").toLowerCase().includes(s) ||
-      (invoice.studentId || "").toLowerCase().includes(s) ||
-      (invoice.invoiceNumber || "").toLowerCase().includes(s);
-    const matchesStatus =
-      filterStatus === "All" || invoice.status === filterStatus;
-    const matchesMonth = filterMonth === "All" || invoice.month === filterMonth;
-    const matchesYear =
-      filterYear === "All" || invoice.year === parseInt(filterYear);
-    return matchesSearch && matchesStatus && matchesMonth && matchesYear;
-  });
-
-  const uniqueStatuses = ["All", ...new Set(invoices.map((inv) => inv.status))];
-  const uniqueMonths = ["All", ...new Set(invoices.map((inv) => inv.month))];
-  const uniqueYears = [
-    "All",
-    ...new Set(invoices.map((inv) => inv.year.toString())),
-  ];
-
-  const totalAmount = filteredInvoices.reduce(
-    (sum, inv) => sum + (inv.amount || 0),
-    0,
-  );
-  const totalPaid = filteredInvoices.reduce(
-    (sum, inv) => sum + (inv.paidAmount || 0),
-    0,
-  );
-  const totalDue = filteredInvoices.reduce(
-    (sum, inv) => sum + (inv.dueAmount || 0),
-    0,
-  );
-  const paidCount = filteredInvoices.filter(
-    (inv) => inv.status === "Paid",
-  ).length;
-
-  const generateInvoiceNumber = () => {
-    const year = new Date().getFullYear();
-    const count = invoices.length + 1;
-    return `INV-${year}-${String(count).padStart(4, "0")}`;
-  };
-
-  const openGenerateModal = () => {
-    const first = eldersStudents[0];
-    setFormData({
-      studentName: first?.name || "",
-      studentId: first?.studentId || "",
-      class: first?.class || ELDERS_CLASSES[0],
-      batch: first?.batch || "Batch-03",
-      subject: first?.primaryCourse || ELDERS_COURSES[0],
-      month: months[new Date().getMonth()],
-      year: new Date().getFullYear(),
-      amount: first?.courseFee || 5000,
-      paidAmount: 0,
-      issueDate: new Date().toISOString().split("T")[0],
-      dueDate: new Date(new Date().setMonth(new Date().getMonth() + 1))
-        .toISOString()
-        .split("T")[0],
-      items: [
-        {
-          description: `${first?.primaryCourse || "Monthly"} Fee - ${months[new Date().getMonth()]} ${new Date().getFullYear()}`,
-          amount: first?.courseFee || 5000,
-        },
-      ],
-      notes: "",
-    });
-    setShowGenerateModal(true);
-  };
-
-  const handleStudentSelect = (studentId) => {
-    const s = eldersStudents.find((st) => st._id === studentId);
-    if (!s) return;
-    setFormData((prev) => ({
-      ...prev,
-      studentName: s.name,
-      studentId: s.studentId,
-      class: s.class,
-      batch: s.batch,
-      subject: s.primaryCourse || s.course,
-      amount: s.courseFee || prev.amount,
-      items: [
-        {
-          description: `${s.primaryCourse || "Monthly"} Fee - ${prev.month} ${prev.year}`,
-          amount: s.courseFee || prev.amount,
-        },
-      ],
-    }));
-  };
-
-  const openDetailsModal = (invoice) => {
-    setSelectedInvoice(invoice);
-    setShowDetailsModal(true);
-  };
-
-  const openEditModal = (invoice) => {
-    setSelectedInvoice(invoice);
-    setFormData({
-      studentName: invoice.studentName,
-      studentId: invoice.studentId,
-      class: invoice.class,
-      batch: invoice.batch || "",
-      subject: invoice.subject,
-      month: invoice.month,
-      year: invoice.year,
-      amount: invoice.amount,
-      paidAmount: invoice.paidAmount || 0,
-      issueDate: invoice.issueDate,
-      dueDate: invoice.dueDate,
-      items: invoice.items || [
-        { description: "Monthly Tuition Fee", amount: invoice.amount },
-      ],
-      notes: invoice.notes || "",
-    });
-    setShowEditModal(true);
-  };
-
-  const handleGenerateInvoice = (e) => {
-    e.preventDefault();
-
-    if (
-      !formData.studentName ||
-      !formData.class ||
-      !formData.amount ||
-      !formData.month
-    ) {
-      Swal.fire({
-        icon: "warning",
-        title: "Please fill all required fields",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
-
-    const paidAmount = formData.paidAmount || 0;
-    const dueAmount = formData.amount - paidAmount;
-    const status =
-      dueAmount <= 0 ? "Paid" : paidAmount > 0 ? "Partial" : "Unpaid";
-
-    const newInvoice = {
-      id: Date.now(),
-      invoiceNumber: generateInvoiceNumber(),
-      studentName: formData.studentName,
-      studentId: formData.studentId,
-      class: formData.class,
-      batch: formData.batch || "",
-      subject: formData.subject || "N/A",
-      month: formData.month,
-      year: formData.year,
-      amount: Number(formData.amount),
-      paidAmount: paidAmount,
-      dueAmount: dueAmount,
-      status: status,
-      issueDate: formData.issueDate || new Date().toISOString().split("T")[0],
-      dueDate: formData.dueDate,
-      paymentDate:
-        paidAmount > 0 ? new Date().toISOString().split("T")[0] : null,
-      paymentMethod: paidAmount > 0 ? "bKash" : null,
-      transactionId:
-        paidAmount > 0 ? `TXN${Date.now().toString().slice(-6)}` : null,
-      notes: formData.notes || "",
-      items: formData.items || [
-        { description: "Monthly Tuition Fee", amount: formData.amount },
-      ],
-      subtotal: Number(formData.amount),
-      tax: 0,
-      total: Number(formData.amount),
-    };
-
-    setInvoices([...invoices, newInvoice]);
-    setShowGenerateModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "✅ Invoice Generated!",
-      text: newInvoice.invoiceNumber,
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  };
-
-  const handleEditInvoice = (e) => {
-    e.preventDefault();
-
-    if (
-      !formData.studentName ||
-      !formData.class ||
-      !formData.amount ||
-      !formData.month
-    ) {
-      Swal.fire({
-        icon: "warning",
-        title: "Please fill all required fields",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
-
-    const paidAmount = formData.paidAmount || 0;
-    const dueAmount = formData.amount - paidAmount;
-    const status =
-      dueAmount <= 0 ? "Paid" : paidAmount > 0 ? "Partial" : "Unpaid";
-
-    setInvoices(
-      invoices.map((inv) =>
-        inv.id === selectedInvoice.id
-          ? {
-              ...inv,
-              studentName: formData.studentName,
-              studentId: formData.studentId,
-              class: formData.class,
-              batch: formData.batch || "",
-              subject: formData.subject || "N/A",
-              month: formData.month,
-              year: formData.year,
-              amount: Number(formData.amount),
-              paidAmount: paidAmount,
-              dueAmount: dueAmount,
-              status: status,
-              issueDate: formData.issueDate,
-              dueDate: formData.dueDate,
-              paymentDate:
-                paidAmount > 0 ? new Date().toISOString().split("T")[0] : null,
-              paymentMethod: paidAmount > 0 ? "bKash" : null,
-              notes: formData.notes || "",
-              items: formData.items || [
-                { description: "Monthly Tuition Fee", amount: formData.amount },
-              ],
-              subtotal: Number(formData.amount),
-              total: Number(formData.amount),
-            }
-          : inv,
-      ),
-    );
-    setShowEditModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "✅ Updated!",
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  };
-
-  const handleDeleteInvoice = (id) => {
-    Swal.fire({
-      title: "Delete Invoice?",
-      text: "This action cannot be undone!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setInvoices(invoices.filter((inv) => inv.id !== id));
-        Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          timer: 1200,
-          showConfirmButton: false,
-        });
-      }
-    });
-  };
-
-  const handleMarkAsPaid = (invoice) => {
-    Swal.fire({
-      title: "Mark as Paid?",
-      text: `Mark invoice ${invoice.invoiceNumber} as paid?`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#22c55e",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: "Yes, mark as paid!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setInvoices(
-          invoices.map((inv) =>
-            inv.id === invoice.id
-              ? {
-                  ...inv,
-                  status: "Paid",
-                  paidAmount: inv.amount,
-                  dueAmount: 0,
-                  paymentDate: new Date().toISOString().split("T")[0],
-                  paymentMethod: inv.paymentMethod || "bKash",
-                  transactionId:
-                    inv.transactionId ||
-                    `TXN${Date.now().toString().slice(-6)}`,
-                }
-              : inv,
-          ),
-        );
-        Swal.fire({
-          icon: "success",
-          title: "✅ Marked as Paid!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      }
-    });
-  };
-
-  const addItemRow = () => {
-    setFormData({
-      ...formData,
-      items: [...formData.items, { description: "", amount: 0 }],
-    });
-  };
-
-  const removeItemRow = (index) => {
-    if (formData.items.length > 1) {
-      const newItems = formData.items.filter((_, i) => i !== index);
-      setFormData({ ...formData, items: newItems });
-    }
-  };
-
-  const handleItemChange = (index, field, value) => {
-    const newItems = [...formData.items];
-    newItems[index][field] = value;
-    setFormData({ ...formData, items: newItems });
-  };
-
-  const formatCurrency = (amount) => `৳${(amount || 0).toLocaleString()}`;
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
@@ -922,24 +787,318 @@ const Invoice = () => {
     });
   };
 
-  const downloadInvoice = (invoice) => {
+  // ============================================================
+  // ✅ Tabs config
+  // ============================================================
+  const tabs = [
+    {
+      id: "all",
+      label: "All Exams",
+      icon: <FaCalendarCheck size={12} />,
+      color: "text-blue-600",
+      path: "/admin-exam/student-exam",
+    },
+    {
+      id: "grad",
+      label: "Grad",
+      icon: <MdGrade size={14} />,
+      color: "text-green-600",
+      type: EXAM_TYPES.GRAD,
+      path: "/admin-exam/grad",
+    },
+    {
+      id: "class-test",
+      label: "Class Test",
+      icon: <MdQuiz size={14} />,
+      color: "text-blue-600",
+      type: EXAM_TYPES.CLASS_TEST,
+      path: "/admin-exam/class-test",
+    },
+    {
+      id: "mid-term",
+      label: "Mid Term",
+      icon: <MdAssignment size={14} />,
+      color: "text-purple-600",
+      type: EXAM_TYPES.MID_TERM,
+      path: "/admin-exam/mid-term",
+    },
+    {
+      id: "final",
+      label: "Final Exam",
+      icon: <MdVerified size={14} />,
+      color: "text-indigo-600",
+      type: EXAM_TYPES.FINAL_EXAM,
+      path: "/admin-exam/final-exam",
+    },
+    {
+      id: "weekly",
+      label: "Weekly Test",
+      icon: <FaClipboardList size={12} />,
+      color: "text-orange-600",
+      type: EXAM_TYPES.WEEKLY,
+      path: "/admin-exam/student-exam",
+    },
+    {
+      id: "quiz",
+      label: "Quiz",
+      icon: <MdQuiz size={14} />,
+      color: "text-teal-600",
+      type: EXAM_TYPES.QUIZ,
+      path: "/admin-exam/student-exam",
+    },
+  ];
+
+  const currentTab = tabs.find((t) => t.id === activeTab);
+  const currentTabType = currentTab?.type;
+
+  const filteredExams = exams
+    .filter((exam) => !currentTabType || exam.examType === currentTabType)
+    .filter((exam) => {
+      const s = searchTerm.toLowerCase();
+      const matchesSearch =
+        !s ||
+        (exam.studentName || "").toLowerCase().includes(s) ||
+        (exam.studentId || "").toLowerCase().includes(s) ||
+        (exam.examTitle || "").toLowerCase().includes(s) ||
+        (exam.course || "").toLowerCase().includes(s);
+      const matchesStatus =
+        filterStatus === "All" || exam.status === filterStatus;
+      const matchesCourse =
+        filterCourse === "All" || exam.course === filterCourse;
+      const matchesType = filterType === "All" || exam.examType === filterType;
+      return matchesSearch && matchesStatus && matchesCourse && matchesType;
+    });
+
+  const uniqueStatuses = ["All", ...new Set(exams.map((e) => e.status))];
+  const uniqueCourses = ["All", ...new Set(exams.map((e) => e.course))];
+
+  const totalExams = exams.length;
+  const gradCount = exams.filter((e) => e.examType === EXAM_TYPES.GRAD).length;
+  const classTestCount = exams.filter(
+    (e) => e.examType === EXAM_TYPES.CLASS_TEST,
+  ).length;
+  const midTermCount = exams.filter(
+    (e) => e.examType === EXAM_TYPES.MID_TERM,
+  ).length;
+  const finalCount = exams.filter(
+    (e) => e.examType === EXAM_TYPES.FINAL_EXAM,
+  ).length;
+  const upcomingCount = exams.filter((e) => e.status === "Upcoming").length;
+
+  // ============================================================
+  // CRUD handlers
+  // ============================================================
+  const openAddModal = () => {
+    const first = eldersStudents[0];
+    const tabType = currentTabType || EXAM_TYPES.CLASS_TEST;
+    setFormData({
+      examType: tabType,
+      examTitle: `${tabType} - ${new Date().toLocaleDateString()}`,
+      studentName: first?.name || "",
+      studentId: first?.studentId || "",
+      course: first?.primaryCourse || ELDERS_COURSES[0],
+      class: first?.class || ELDERS_CLASSES[0],
+      batch: first?.batch || "Batch-03",
+      teacher: ELDERS_TEACHERS[0],
+      examDate: new Date().toISOString().split("T")[0],
+      totalMarks: 100,
+      obtainedMarks: 0,
+      grade: "-",
+      status: "Upcoming",
+      remarks: "",
+    });
+    setShowAddModal(true);
+  };
+
+  const handleStudentSelect = (studentId) => {
+    const s = eldersStudents.find((st) => st._id === studentId);
+    if (!s) return;
+    setFormData((prev) => ({
+      ...prev,
+      studentName: s.name,
+      studentId: s.studentId,
+      class: s.class,
+      batch: s.batch,
+      course: s.primaryCourse || s.course,
+    }));
+  };
+
+  const openEditModal = (exam) => {
+    setSelectedExam(exam);
+    setFormData({
+      examType: exam.examType,
+      examTitle: exam.examTitle,
+      studentName: exam.studentName,
+      studentId: exam.studentId,
+      course: exam.course,
+      class: exam.class,
+      batch: exam.batch,
+      teacher: exam.teacher,
+      examDate: exam.examDate,
+      totalMarks: exam.totalMarks,
+      obtainedMarks: exam.obtainedMarks,
+      grade: exam.grade,
+      status: exam.status,
+      remarks: exam.remarks || "",
+    });
+    setShowEditModal(true);
+  };
+
+  const openDetailsModal = (exam) => {
+    setSelectedExam(exam);
+    setShowDetailsModal(true);
+  };
+
+  const handleAddExam = (e) => {
+    e.preventDefault();
+
+    if (
+      !formData.examTitle ||
+      !formData.studentName ||
+      !formData.course ||
+      !formData.examDate
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all required fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const grade =
+      formData.status === "Completed"
+        ? calculateGrade(formData.obtainedMarks, formData.totalMarks)
+        : "-";
+
+    const newExam = {
+      id: Date.now(),
+      ...formData,
+      grade,
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+
+    setExams([...exams, newExam]);
+    setShowAddModal(false);
     Swal.fire({
       icon: "success",
-      title: "Downloading",
-      text: `Invoice ${invoice.invoiceNumber} is downloading...`,
+      title: `✅ ${formData.examType} Added!`,
+      text: newExam.examTitle,
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  const sendInvoiceEmail = (invoice) => {
+  const handleEditExam = (e) => {
+    e.preventDefault();
+
+    if (
+      !formData.examTitle ||
+      !formData.studentName ||
+      !formData.course ||
+      !formData.examDate
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all required fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const grade =
+      formData.status === "Completed"
+        ? calculateGrade(formData.obtainedMarks, formData.totalMarks)
+        : "-";
+
+    setExams(
+      exams.map((e) =>
+        e.id === selectedExam.id ? { ...e, ...formData, grade } : e,
+      ),
+    );
+    setShowEditModal(false);
     Swal.fire({
       icon: "success",
-      title: "Email Sent!",
-      text: `Invoice sent to ${invoice.studentName}`,
+      title: "✅ Updated!",
       timer: 1500,
       showConfirmButton: false,
     });
+  };
+
+  const handleDeleteExam = (id) => {
+    Swal.fire({
+      title: "Delete Exam?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setExams(exams.filter((e) => e.id !== id));
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
+      }
+    });
+  };
+
+  const handleMarkCompleted = (exam) => {
+    Swal.fire({
+      title: "Mark as Completed?",
+      html: `
+        <div style="text-align:left;">
+          <p>Enter obtained marks for <strong>${exam.studentName}</strong></p>
+          <input id="swal-marks" class="swal2-input" type="number" placeholder="Obtained marks" min="0" max="${exam.totalMarks}" value="${exam.obtainedMarks || 0}" />
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonColor: "#22c55e",
+      confirmButtonText: "Save",
+      preConfirm: () => {
+        const marks = parseFloat(document.getElementById("swal-marks").value);
+        if (isNaN(marks) || marks < 0 || marks > exam.totalMarks) {
+          Swal.showValidationMessage(
+            `Marks must be between 0 and ${exam.totalMarks}`,
+          );
+          return false;
+        }
+        return marks;
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const obtained = result.value;
+        const grade = calculateGrade(obtained, exam.totalMarks);
+        setExams(
+          exams.map((e) =>
+            e.id === exam.id
+              ? { ...e, obtainedMarks: obtained, grade, status: "Completed" }
+              : e,
+          ),
+        );
+        Swal.fire({
+          icon: "success",
+          title: "✅ Marked Completed!",
+          text: `Grade: ${grade}`,
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    });
+  };
+
+  // ✅ Tab click handle — URL change + tab switch
+  const handleTabClick = (tab) => {
+    setActiveTab(tab.id);
+    if (tab.path && location.pathname !== tab.path) {
+      navigate(tab.path);
+    }
   };
 
   return (
@@ -947,7 +1106,9 @@ const Invoice = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Invoices (Elders)</h1>
+          <h1 className="text-sm font-bold text-gray-800">
+            Student Exam (Elders)
+          </h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100"
@@ -1002,30 +1163,35 @@ const Invoice = () => {
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
+                        className={`transition-transform ${
+                          activeSubMenu === item.id ? "rotate-180" : ""
+                        }`}
                       >
                         <FaArrowRight size={12} />
                       </span>
                     </button>
                     {activeSubMenu === item.id && (
                       <div className="ml-6 space-y-1 mt-1">
-                        {item.subItems.map((sub) => (
-                          <Link
-                            key={sub.id}
-                            to={sub.path}
-                            onClick={() => {
-                              setActiveSubMenu(sub.id);
-                              setIsSidebarOpen(false);
-                            }}
-                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
-                          >
-                            {sub.label}
-                          </Link>
-                        ))}
+                        {item.subItems.map((sub) => {
+                          const isActive = location.pathname === sub.path;
+                          return (
+                            <Link
+                              key={sub.id}
+                              to={sub.path}
+                              onClick={() => {
+                                setActiveSubMenu(item.id);
+                                setIsSidebarOpen(false);
+                              }}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
+                                isActive
+                                  ? "bg-teal-50 text-[#004d4d] font-bold"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
+                              }`}
+                            >
+                              {sub.label}
+                            </Link>
+                          );
+                        })}
                       </div>
                     )}
                   </>
@@ -1079,13 +1245,13 @@ const Invoice = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaFileInvoice className="text-blue-600" /> Invoices —
+                <FaCalendarCheck className="text-purple-600" /> Student Exam —
                 <span className="text-teal-700">Quran For Elders</span>
               </h1>
               <p className="text-xs text-gray-500">
                 {studentsLoading
                   ? "Loading elders students..."
-                  : `${eldersStudents.length} elders student${eldersStudents.length !== 1 ? "s" : ""} • Qaida • Nazera • Najera • Tajweed • Bakarah Hifz`}
+                  : `${eldersStudents.length} elders student${eldersStudents.length !== 1 ? "s" : ""} • ${currentTab?.label || "All Exams"}`}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -1101,10 +1267,10 @@ const Invoice = () => {
                 Refresh
               </button>
               <button
-                onClick={openGenerateModal}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
+                onClick={openAddModal}
+                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
-                <FaPlusCircle size={12} /> Generate Invoice
+                <FaPlusCircle size={12} /> Add {currentTabType || "Exam"}
               </button>
               <button
                 onClick={handleLogout}
@@ -1157,29 +1323,59 @@ const Invoice = () => {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mb-3">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-blue-600">
-                {invoices.length}
+              <p className="text-lg font-bold text-blue-600">{totalExams}</p>
+              <p className="text-[10px] text-gray-500">Total</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-green-600">{gradCount}</p>
+              <p className="text-[10px] text-gray-500">Grad</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-blue-500">
+                {classTestCount}
               </p>
-              <p className="text-[10px] text-gray-500">Total Invoices</p>
+              <p className="text-[10px] text-gray-500">Class Test</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-green-600">
-                {formatCurrency(totalPaid)}
+              <p className="text-lg font-bold text-purple-600">
+                {midTermCount}
               </p>
-              <p className="text-[10px] text-gray-500">Total Collected</p>
+              <p className="text-[10px] text-gray-500">Mid Term</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-red-600">
-                {formatCurrency(totalDue)}
+              <p className="text-lg font-bold text-indigo-600">{finalCount}</p>
+              <p className="text-[10px] text-gray-500">Final</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-yellow-600">
+                {upcomingCount}
               </p>
-              <p className="text-[10px] text-gray-500">Total Due</p>
+              <p className="text-[10px] text-gray-500">Upcoming</p>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-purple-600">{paidCount}</p>
-              <p className="text-[10px] text-gray-500">Paid Invoices</p>
-            </div>
+          </div>
+
+          {/* Tab Navigation */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3 flex gap-1 overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => handleTabClick(tab)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "bg-purple-600 text-white shadow-sm"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                <span
+                  className={activeTab === tab.id ? "text-white" : tab.color}
+                >
+                  {tab.icon}
+                </span>
+                {tab.label}
+              </button>
+            ))}
           </div>
 
           {/* Filters */}
@@ -1189,7 +1385,7 @@ const Invoice = () => {
                 <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search elders invoices..."
+                  placeholder="Search elders exams..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -1208,24 +1404,25 @@ const Invoice = () => {
                   ))}
                 </select>
                 <select
-                  value={filterMonth}
-                  onChange={(e) => setFilterMonth(e.target.value)}
+                  value={filterCourse}
+                  onChange={(e) => setFilterCourse(e.target.value)}
                   className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueMonths.map((m) => (
-                    <option key={m} value={m}>
-                      {m}
+                  {uniqueCourses.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
                     </option>
                   ))}
                 </select>
                 <select
-                  value={filterYear}
-                  onChange={(e) => setFilterYear(e.target.value)}
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
                   className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueYears.map((y) => (
-                    <option key={y} value={y}>
-                      {y}
+                  <option value="All">All Types</option>
+                  {EXAM_TYPE_LIST.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
                     </option>
                   ))}
                 </select>
@@ -1233,9 +1430,9 @@ const Invoice = () => {
             </div>
           </div>
 
-          {/* Table */}
+          {/* Exam Table */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto max-h-[calc(100vh-500px)] overflow-y-auto">
+            <div className="overflow-x-auto max-h-[calc(100vh-600px)] overflow-y-auto">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
@@ -1243,21 +1440,27 @@ const Invoice = () => {
                       #
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Invoice
+                      Type
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                      Exam
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600">
                       Student
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
-                      Class
+                      Course
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
-                      Month/Year
+                      Date
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Amount
+                      Marks
                     </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                      Grade
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
                       Status
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600">
@@ -1266,79 +1469,87 @@ const Invoice = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {filteredInvoices.length > 0 ? (
-                    filteredInvoices.map((invoice, index) => (
-                      <tr key={invoice.id} className="hover:bg-gray-50">
+                  {filteredExams.length > 0 ? (
+                    filteredExams.map((exam, index) => (
+                      <tr key={exam.id} className="hover:bg-gray-50">
                         <td className="px-3 py-2 font-medium text-gray-500">
                           {index + 1}
                         </td>
                         <td className="px-3 py-2">
-                          <div className="font-medium text-blue-600">
-                            {invoice.invoiceNumber}
-                          </div>
-                          <div className="text-[10px] text-gray-400">
-                            {formatDate(invoice.issueDate)}
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-purple-100 text-purple-700 font-bold">
+                            {exam.examType}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="font-medium text-gray-800">
+                            {exam.examTitle}
                           </div>
                         </td>
                         <td className="px-3 py-2">
                           <div className="font-medium text-gray-800">
-                            {invoice.studentName}
+                            {exam.studentName}
                           </div>
                           <div className="text-[10px] text-gray-400">
-                            {invoice.studentId}
+                            {exam.studentId}
                           </div>
                         </td>
                         <td className="px-3 py-2 hidden md:table-cell text-gray-600">
-                          {invoice.class}
+                          {exam.course}
                         </td>
                         <td className="px-3 py-2 hidden lg:table-cell text-gray-600">
-                          {invoice.month} {invoice.year}
+                          {formatDate(exam.examDate)}
                         </td>
-                        <td className="px-3 py-2 font-semibold text-gray-700">
-                          {formatCurrency(invoice.amount)}
+                        <td className="px-3 py-2 text-gray-700">
+                          <span className="font-semibold">
+                            {exam.obtainedMarks || 0}
+                          </span>
+                          <span className="text-gray-400">
+                            {" "}
+                            / {exam.totalMarks || 0}
+                          </span>
                         </td>
-                        <td className="px-3 py-2 hidden sm:table-cell">
+                        <td className="px-3 py-2">
                           <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(invoice.status)}`}
+                            className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${getGradeColor(exam.grade)}`}
                           >
-                            {getStatusIcon(invoice.status)}
-                            {invoice.status}
+                            {exam.grade}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(exam.status)}`}
+                          >
+                            {getStatusIcon(exam.status)}
+                            {exam.status}
                           </span>
                         </td>
                         <td className="px-3 py-2">
                           <div className="flex items-center gap-1">
                             <button
-                              onClick={() => openDetailsModal(invoice)}
+                              onClick={() => openDetailsModal(exam)}
                               className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
                               title="View"
                             >
                               <FaEye size={12} />
                             </button>
-                            {invoice.status !== "Paid" && (
+                            {exam.status === "Upcoming" && (
                               <button
-                                onClick={() => handleMarkAsPaid(invoice)}
+                                onClick={() => handleMarkCompleted(exam)}
                                 className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
-                                title="Mark Paid"
+                                title="Mark Completed"
                               >
                                 <FaCheckCircle size={12} />
                               </button>
                             )}
                             <button
-                              onClick={() => openEditModal(invoice)}
+                              onClick={() => openEditModal(exam)}
                               className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
                               title="Edit"
                             >
                               <FaEdit size={12} />
                             </button>
                             <button
-                              onClick={() => downloadInvoice(invoice)}
-                              className="text-purple-600 hover:text-purple-800 p-1 rounded hover:bg-purple-50"
-                              title="Download"
-                            >
-                              <FaDownload size={12} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteInvoice(invoice.id)}
+                              onClick={() => handleDeleteExam(exam.id)}
                               className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                               title="Delete"
                             >
@@ -1351,13 +1562,13 @@ const Invoice = () => {
                   ) : (
                     <tr>
                       <td
-                        colSpan="8"
+                        colSpan="10"
                         className="px-3 py-8 text-center text-gray-500"
                       >
-                        <FaFileInvoice className="text-4xl text-gray-300 mx-auto mb-2" />
-                        <p>No elders invoices found</p>
+                        <FaCalendarCheck className="text-4xl text-gray-300 mx-auto mb-2" />
+                        <p>No exams found for {currentTab?.label}</p>
                         <p className="text-[10px] text-gray-400 mt-1">
-                          উপরে "Generate Invoice" ক্লিক করে যোগ করুন
+                          উপরে "Add {currentTabType}" ক্লিক করে যোগ করুন
                         </p>
                       </td>
                     </tr>
@@ -1369,25 +1580,62 @@ const Invoice = () => {
         </main>
       </div>
 
-      {/* Generate Modal */}
-      {showGenerateModal && (
+      {/* Add Modal */}
+      {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaFileInvoice className="text-blue-600" /> Generate Elders
-                Invoice
+                <FaPlusCircle className="text-purple-600" /> Add{" "}
+                {formData.examType}
               </h3>
               <button
-                onClick={() => setShowGenerateModal(false)}
+                onClick={() => setShowAddModal(false)}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <FiX size={24} />
               </button>
             </div>
-            <form onSubmit={handleGenerateInvoice} className="p-6 space-y-4">
+            <form onSubmit={handleAddExam} className="p-6 space-y-4">
               <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
                 💡 Student select করলে বাকি information auto-fill হবে
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Exam Type *
+                  </label>
+                  <select
+                    required
+                    value={formData.examType}
+                    onChange={(e) =>
+                      setFormData({ ...formData, examType: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {EXAM_TYPE_LIST.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Exam Title *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.examTitle}
+                    onChange={(e) =>
+                      setFormData({ ...formData, examTitle: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="e.g., Class Test - Week 3"
+                  />
+                </div>
               </div>
 
               <div>
@@ -1442,43 +1690,13 @@ const Invoice = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.class}
-                    onChange={(e) =>
-                      setFormData({ ...formData, class: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Batch
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.batch}
-                    onChange={(e) =>
-                      setFormData({ ...formData, batch: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Course *
                   </label>
                   <select
                     required
-                    value={formData.subject}
+                    value={formData.course}
                     onChange={(e) =>
-                      setFormData({ ...formData, subject: e.target.value })
+                      setFormData({ ...formData, course: e.target.value })
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
@@ -1491,19 +1709,18 @@ const Invoice = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Month *
+                    Class
                   </label>
                   <select
-                    required
-                    value={formData.month}
+                    value={formData.class}
                     onChange={(e) =>
-                      setFormData({ ...formData, month: e.target.value })
+                      setFormData({ ...formData, class: e.target.value })
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {months.map((m) => (
-                      <option key={m} value={m}>
-                        {m}
+                    {ELDERS_CLASSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
@@ -1513,153 +1730,126 @@ const Invoice = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Year *
+                    Batch
                   </label>
                   <select
-                    required
-                    value={formData.year}
+                    value={formData.batch}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        year: parseInt(e.target.value),
-                      })
+                      setFormData({ ...formData, batch: e.target.value })
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {years.map((y) => (
-                      <option key={y} value={y}>
-                        {y}
+                    {ELDERS_BATCHES.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Total Amount (৳) *
+                    Teacher
                   </label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    value={formData.amount}
+                  <select
+                    value={formData.teacher}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        amount: parseFloat(e.target.value) || 0,
-                      })
+                      setFormData({ ...formData, teacher: e.target.value })
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
-                  />
+                  >
+                    {ELDERS_TEACHERS.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Paid Amount (৳)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.paidAmount}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        paidAmount: parseFloat(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Due Date *
+                    Exam Date *
                   </label>
                   <input
                     type="date"
                     required
-                    value={formData.dueDate}
+                    value={formData.examDate}
                     onChange={(e) =>
-                      setFormData({ ...formData, dueDate: e.target.value })
+                      setFormData({ ...formData, examDate: e.target.value })
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Issue Date *
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={formData.issueDate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, issueDate: e.target.value })
-                  }
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Invoice Items
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
                   </label>
-                  <button
-                    type="button"
-                    onClick={addItemRow}
-                    className="text-xs bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded"
+                  <select
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    + Add Item
-                  </button>
+                    {statuses.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                {formData.items.map((item, index) => (
-                  <div key={index} className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      placeholder="Description"
-                      value={item.description}
-                      onChange={(e) =>
-                        handleItemChange(index, "description", e.target.value)
-                      }
-                      className="flex-1 border rounded-lg px-3 py-1 text-sm"
-                    />
+              </div>
+
+              {formData.status === "Completed" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Total Marks *
+                    </label>
                     <input
                       type="number"
-                      placeholder="Amount"
-                      value={item.amount}
+                      min="0"
+                      required
+                      value={formData.totalMarks}
                       onChange={(e) =>
-                        handleItemChange(
-                          index,
-                          "amount",
-                          parseFloat(e.target.value) || 0,
-                        )
+                        setFormData({
+                          ...formData,
+                          totalMarks: parseFloat(e.target.value) || 0,
+                        })
                       }
-                      className="w-32 border rounded-lg px-3 py-1 text-sm"
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
                     />
-                    {formData.items.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeItemRow(index)}
-                        className="text-red-600 hover:text-red-800 p-1"
-                      >
-                        <FaTrash size={14} />
-                      </button>
-                    )}
                   </div>
-                ))}
-              </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Obtained Marks *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      value={formData.obtainedMarks}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          obtainedMarks: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
+                  Remarks
                 </label>
                 <textarea
-                  value={formData.notes}
+                  value={formData.remarks}
                   onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
+                    setFormData({ ...formData, remarks: e.target.value })
                   }
                   rows="2"
                   className="w-full border rounded-lg px-3 py-2 text-sm"
@@ -1670,14 +1860,14 @@ const Invoice = () => {
               <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold"
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-2 rounded-lg font-semibold"
                 >
-                  <FaFileInvoice className="inline mr-2" size={14} /> Generate
-                  Invoice
+                  <FaSave className="inline mr-2" size={14} /> Add{" "}
+                  {formData.examType}
                 </button>
                 <button
                   type="button"
-                  onClick={() => setShowGenerateModal(false)}
+                  onClick={() => setShowAddModal(false)}
                   className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
@@ -1689,12 +1879,12 @@ const Invoice = () => {
       )}
 
       {/* Edit Modal */}
-      {showEditModal && selectedInvoice && (
+      {showEditModal && selectedExam && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaEdit className="text-yellow-600" /> Edit Elders Invoice
+                <FaEdit className="text-yellow-600" /> Edit Exam
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1703,7 +1893,43 @@ const Invoice = () => {
                 <FiX size={24} />
               </button>
             </div>
-            <form onSubmit={handleEditInvoice} className="p-6 space-y-4">
+            <form onSubmit={handleEditExam} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Exam Type *
+                  </label>
+                  <select
+                    required
+                    value={formData.examType}
+                    onChange={(e) =>
+                      setFormData({ ...formData, examType: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {EXAM_TYPE_LIST.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Exam Title *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.examTitle}
+                    onChange={(e) =>
+                      setFormData({ ...formData, examTitle: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1737,43 +1963,13 @@ const Invoice = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.class}
-                    onChange={(e) =>
-                      setFormData({ ...formData, class: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Batch
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.batch}
-                    onChange={(e) =>
-                      setFormData({ ...formData, batch: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Course *
                   </label>
                   <select
                     required
-                    value={formData.subject}
+                    value={formData.course}
                     onChange={(e) =>
-                      setFormData({ ...formData, subject: e.target.value })
+                      setFormData({ ...formData, course: e.target.value })
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
@@ -1786,19 +1982,18 @@ const Invoice = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Month *
+                    Class
                   </label>
                   <select
-                    required
-                    value={formData.month}
+                    value={formData.class}
                     onChange={(e) =>
-                      setFormData({ ...formData, month: e.target.value })
+                      setFormData({ ...formData, class: e.target.value })
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {months.map((m) => (
-                      <option key={m} value={m}>
-                        {m}
+                    {ELDERS_CLASSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
@@ -1808,103 +2003,87 @@ const Invoice = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Year *
-                  </label>
-                  <select
-                    required
-                    value={formData.year}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        year: parseInt(e.target.value),
-                      })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    {years.map((y) => (
-                      <option key={y} value={y}>
-                        {y}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Total Amount (৳) *
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    min="0"
-                    value={formData.amount}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        amount: parseFloat(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Paid Amount (৳)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={formData.paidAmount}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        paidAmount: parseFloat(e.target.value) || 0,
-                      })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Due Date *
+                    Exam Date *
                   </label>
                   <input
                     type="date"
                     required
-                    value={formData.dueDate}
+                    value={formData.examDate}
                     onChange={(e) =>
-                      setFormData({ ...formData, dueDate: e.target.value })
+                      setFormData({ ...formData, examDate: e.target.value })
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {statuses.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
+
+              {formData.status === "Completed" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Total Marks *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      value={formData.totalMarks}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          totalMarks: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Obtained Marks *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      value={formData.obtainedMarks}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          obtainedMarks: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Issue Date *
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={formData.issueDate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, issueDate: e.target.value })
-                  }
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
+                  Remarks
                 </label>
                 <textarea
-                  value={formData.notes}
+                  value={formData.remarks}
                   onChange={(e) =>
-                    setFormData({ ...formData, notes: e.target.value })
+                    setFormData({ ...formData, remarks: e.target.value })
                   }
                   rows="2"
                   className="w-full border rounded-lg px-3 py-2 text-sm"
@@ -1932,12 +2111,12 @@ const Invoice = () => {
       )}
 
       {/* Details Modal */}
-      {showDetailsModal && selectedInvoice && (
+      {showDetailsModal && selectedExam && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaFileInvoice className="text-blue-600" /> Elders Invoice
+                <FaFileAlt className="text-blue-600" /> Exam Details
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
@@ -1949,179 +2128,140 @@ const Invoice = () => {
             <div className="p-6 space-y-4">
               <div className="flex items-center justify-between pb-4 border-b">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-800">
-                    {selectedInvoice.studentName}
-                  </h2>
-                  <p className="text-sm text-gray-500">
-                    {selectedInvoice.studentId}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold text-blue-600">
-                    {selectedInvoice.invoiceNumber}
-                  </p>
-                  <span
-                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedInvoice.status)}`}
-                  >
-                    {getStatusIcon(selectedInvoice.status)}
-                    {selectedInvoice.status}
+                  <span className="inline-block text-[9px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-bold mb-1">
+                    {selectedExam.examType}
                   </span>
+                  <h2 className="text-xl font-bold text-gray-800">
+                    {selectedExam.examTitle}
+                  </h2>
                 </div>
+                <span
+                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedExam.status)}`}
+                >
+                  {getStatusIcon(selectedExam.status)}
+                  {selectedExam.status}
+                </span>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Class</p>
+                  <p className="text-[10px] text-gray-400">Student</p>
                   <p className="text-sm font-semibold">
-                    {selectedInvoice.class}
+                    {selectedExam.studentName}
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Batch</p>
+                  <p className="text-[10px] text-gray-400">Student ID</p>
                   <p className="text-sm font-semibold">
-                    {selectedInvoice.batch || "-"}
+                    {selectedExam.studentId}
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-[10px] text-gray-400">Course</p>
+                  <p className="text-sm font-semibold">{selectedExam.course}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Class</p>
+                  <p className="text-sm font-semibold">{selectedExam.class}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Batch</p>
                   <p className="text-sm font-semibold">
-                    {selectedInvoice.subject}
+                    {selectedExam.batch || "-"}
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Month/Year</p>
+                  <p className="text-[10px] text-gray-400">Teacher</p>
                   <p className="text-sm font-semibold">
-                    {selectedInvoice.month} {selectedInvoice.year}
+                    {selectedExam.teacher}
                   </p>
                 </div>
-              </div>
-
-              <div>
-                <h4 className="font-semibold text-gray-700 text-sm mb-2">
-                  Invoice Items
-                </h4>
-                <div className="bg-gray-50 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-100">
-                      <tr>
-                        <th className="px-3 py-2 text-left">Description</th>
-                        <th className="px-3 py-2 text-right">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-200">
-                      {selectedInvoice.items?.map((item, index) => (
-                        <tr key={index}>
-                          <td className="px-3 py-2">{item.description}</td>
-                          <td className="px-3 py-2 text-right">
-                            {formatCurrency(item.amount)}
-                          </td>
-                        </tr>
-                      ))}
-                      <tr className="font-bold bg-blue-50">
-                        <td className="px-3 py-2">Total</td>
-                        <td className="px-3 py-2 text-right text-blue-600">
-                          {formatCurrency(
-                            selectedInvoice.total || selectedInvoice.amount,
-                          )}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Total</p>
+                  <p className="text-[10px] text-gray-400">Exam Date</p>
+                  <p className="text-sm font-semibold">
+                    {formatDate(selectedExam.examDate)}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Total Marks</p>
+                  <p className="text-sm font-semibold">
+                    {selectedExam.totalMarks}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Obtained Marks</p>
                   <p className="text-sm font-semibold text-blue-600">
-                    {formatCurrency(selectedInvoice.amount)}
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Paid</p>
-                  <p className="text-sm font-semibold text-green-600">
-                    {formatCurrency(selectedInvoice.paidAmount)}
-                  </p>
-                </div>
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Due</p>
-                  <p className="text-sm font-semibold text-red-600">
-                    {formatCurrency(selectedInvoice.dueAmount)}
+                    {selectedExam.obtainedMarks}
                   </p>
                 </div>
               </div>
 
-              {selectedInvoice.paymentDate && (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-[10px] text-gray-400">Payment Date</p>
-                    <p className="text-sm font-semibold">
-                      {formatDate(selectedInvoice.paymentDate)}
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <p className="text-[10px] text-gray-400">Method</p>
-                    <p className="text-sm font-semibold">
-                      {selectedInvoice.paymentMethod || "-"}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {selectedInvoice.transactionId && (
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Transaction ID</p>
-                  <p className="text-sm font-semibold">
-                    {selectedInvoice.transactionId}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gray-50 rounded-lg p-3 text-center">
+                  <p className="text-[10px] text-gray-400">Grade</p>
+                  <p
+                    className={`inline-flex px-4 py-1 rounded-full text-lg font-bold ${getGradeColor(selectedExam.grade)}`}
+                  >
+                    {selectedExam.grade}
                   </p>
                 </div>
-              )}
+                <div className="bg-gray-50 rounded-lg p-3 text-center">
+                  <p className="text-[10px] text-gray-400">Percentage</p>
+                  <p className="text-lg font-bold text-purple-600">
+                    {selectedExam.totalMarks > 0
+                      ? Math.round(
+                          (selectedExam.obtainedMarks /
+                            selectedExam.totalMarks) *
+                            100,
+                        )
+                      : 0}
+                    %
+                  </p>
+                </div>
+              </div>
 
-              {selectedInvoice.notes && (
+              {selectedExam.remarks && (
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Notes</p>
+                  <p className="text-[10px] text-gray-400">Remarks</p>
                   <p className="text-sm text-gray-600 mt-1">
-                    {selectedInvoice.notes}
+                    {selectedExam.remarks}
                   </p>
                 </div>
               )}
 
-              <div className="flex gap-3 pt-4 border-t flex-wrap">
-                {selectedInvoice.status !== "Paid" && (
+              <div className="flex gap-3 pt-4 border-t">
+                {selectedExam.status === "Upcoming" && (
                   <button
                     onClick={() => {
                       setShowDetailsModal(false);
-                      handleMarkAsPaid(selectedInvoice);
+                      handleMarkCompleted(selectedExam);
                     }}
-                    className="flex-1 min-w-[120px] bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                   >
-                    <FaCheckCircle className="inline mr-2" /> Mark as Paid
+                    <FaCheckCircle className="inline mr-2" /> Mark Completed
                   </button>
                 )}
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
-                    openEditModal(selectedInvoice);
+                    openEditModal(selectedExam);
                   }}
-                  className="flex-1 min-w-[120px] bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaEdit className="inline mr-2" /> Edit
                 </button>
                 <button
-                  onClick={() => downloadInvoice(selectedInvoice)}
-                  className="flex-1 min-w-[120px] bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    handleDeleteExam(selectedExam.id);
+                  }}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
-                  <FaDownload className="inline mr-2" /> Download
-                </button>
-                <button
-                  onClick={() => sendInvoiceEmail(selectedInvoice)}
-                  className="flex-1 min-w-[120px] bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
-                >
-                  <FaEnvelopeIcon className="inline mr-2" /> Email
+                  <FaTrash className="inline mr-2" /> Delete
                 </button>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 min-w-[120px] bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>
@@ -2134,4 +2274,4 @@ const Invoice = () => {
   );
 };
 
-export default Invoice;
+export default Student_exam;

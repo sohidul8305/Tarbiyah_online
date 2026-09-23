@@ -9,177 +9,102 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
-  FaClock,
-  FaBook,
-  FaFileAlt,
+  FaCalendarCheck,
   FaChartLine,
   FaUserGraduate,
-  FaUserPlus,
-  FaClipboardList,
-  FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
-  FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
-  FaEdit,
   FaTrash,
   FaSearch,
   FaFilter,
-  FaPlusCircle,
-  FaDownload,
-  FaPrint,
+  FaPlus,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
   FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
-  FaUserEdit,
-  FaUserCircle,
-  FaAddressCard,
-  FaChalkboard,
-  FaCalendarDay,
-  FaSchool as FaSchoolIcon,
-  FaUserTie,
-  FaBookReader,
-  FaStopwatch,
-  FaClipboardCheck,
-  FaExchangeAlt,
-  FaCheckDouble,
-  FaBan,
-  FaCheck,
-  FaTimes,
-  FaQuestion,
-  FaCalendarWeek,
-  FaChartBar,
-  FaFileDownload,
+  FaUserTimes,
+  FaHourglassHalf,
   FaFilePdf,
   FaFileExcel,
-  FaRegClock,
-  FaRegCalendarAlt,
-  FaRegCalendarCheck,
-  FaWhatsapp,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaGlobe as FaGlobeIcon,
-  FaEnvelope as FaEnvelopeIcon,
-  FaPhone as FaPhoneIcon,
-  FaUsers as FaUsersIcon,
-  FaCalendar,
-  FaClock as FaClockIcon2,
-  FaHourglassHalf,
-  FaCheckCircle as FaCheckCircleIcon,
-  FaTimesCircle as FaTimesCircleIcon,
-  FaBookmark,
-  FaListUl,
-  FaChevronRight,
-  FaChevronDown,
-  FaFolderOpen,
-  FaFile,
-  FaFilePdf as FaFilePdfIcon,
-  FaFileWord,
-  FaFilePowerpoint,
-  FaFileImage,
-  FaFileVideo,
-  FaFileAudio,
-  FaFileArchive,
-  FaFileCode,
-  FaFileExcel as FaFileExcelIcon,
-  FaFileAlt as FaFileAltIcon,
-  FaFolder,
-  FaCopy,
-  FaCut,
-  FaPaste,
-  FaShare,
-  FaStar as FaStarIcon,
-  FaRegStar,
-  FaRegFileAlt,
-  FaRegFilePdf,
-  FaRegFileWord,
-  FaRegFileExcel,
-  FaRegFilePowerpoint,
-  FaRegFileImage,
-  FaRegFileVideo,
-  FaRegFileArchive,
-  FaEraser,
-  FaTrashAlt,
-  FaCalendarTimes,
-  FaRedoAlt,
-  FaUndoAlt,
-  FaSync,
-  FaExclamationCircle,
-  FaInfoCircle as FaInfoCircleIcon,
-  FaMoneyCheck,
-  FaMoneyCheckAlt,
-  FaHandHoldingUsd,
-  FaDonate,
-  FaFileInvoice as FaFileInvoiceIcon2,
-  FaFileSignature,
-  FaReceipt as FaReceiptIcon,
-  FaCreditCard as FaCreditCardIcon,
-  FaPrint as FaPrintIcon,
-  FaShareAlt,
-  FaChartPie,
-  FaChartArea,
-  FaPlus,
+  FaPrint,
+  FaStar,
+  FaSyncAlt,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+const API_BASE = "https://api.tarbiyahonline.com";
+
+// ============================================================
+// ✅ ELDERS DEPARTMENT
+// ============================================================
+const ELDERS_TEACHERS = ["Jubayer Ahmad", "Sumaiya Afrin Mim"];
+
+const ELDERS_COURSES = [
+  "Qaida Nuraniyah",
+  "Quran Nazera",
+  "Najera",
+  "Basic Tajweed",
+  "Bakarah Hifz",
+];
+
+const ELDERS_CLASSES = [
+  "Elders Batch A",
+  "Elders Batch B",
+  "Elders Batch C",
+  "Elders Batch D",
+  "Elders Batch E",
+];
+
+const ELDERS_BATCHES = [
+  "Batch-01",
+  "Batch-02",
+  "Batch-03",
+  "Batch-04",
+  "Batch-05",
+  "Batch-06",
+];
+
+const ELDERS_COURSE_KEYWORDS = [
+  "qaida nuraniyah",
+  "qaida nooraniya",
+  "qaida noorani",
+  "qaida nurani",
+  "qaidah nuraniyah",
+  "qaidah nooraniya",
+  "qaidah noorani",
+  "quran nazera",
+  "nazera quran",
+  "quran najera",
+  "najera quran",
+  "bakarah hifz",
+  "bakara hifz",
+  "baqarah hifz",
+  "baqara hifz",
+  "basic tajweed",
+];
+
+const isSingleEldersCourse = (singleCourse) => {
+  const p = String(singleCourse).toLowerCase().trim();
+  if (!p) return false;
+  return ELDERS_COURSE_KEYWORDS.some((c) => {
+    if (p === c) return true;
+    if (p.includes(c)) return true;
+    if (c.includes(p) && p.length >= 8) return true;
+    return false;
+  });
+};
+
+const isEldersCourse = (courseStr) => {
+  if (!courseStr) return false;
+  const parts = String(courseStr)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (parts.length === 0) return false;
+  return parts.every((part) => isSingleEldersCourse(part));
+};
 
 const Report = () => {
   const { user, logOut } = useAuth();
@@ -192,64 +117,61 @@ const Report = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "",
+    department: "Quran for Elders",
     joinDate: "",
   });
 
-  // Report type
+  // ✅ Elders students from API
+  const [eldersStudents, setEldersStudents] = useState([]);
+  const [studentsLoading, setStudentsLoading] = useState(true);
+
   const [reportType, setReportType] = useState("financial");
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedClass, setSelectedClass] = useState("All");
+  const [selectedCourse, setSelectedCourse] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
 
-  // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
-  const [selectedReport, setSelectedReport] = useState(null);
 
-  // Form data for add report
   const [formData, setFormData] = useState({
     reportName: "",
     reportType: "financial",
     month: new Date().getMonth(),
     year: new Date().getFullYear(),
-    class: "All",
+    course: "All",
     status: "All",
     format: "PDF",
     description: "",
   });
 
-  // Custom reports list
-  const [customReports, setCustomReports] = useState([
-    {
-      id: 1,
-      reportName: "Monthly Financial Summary - July 2026",
-      reportType: "financial",
-      month: 6,
-      year: 2026,
-      class: "All",
-      status: "All",
-      format: "PDF",
-      description: "Complete financial summary for July 2026",
-      generatedDate: "2026-07-31",
-      generatedBy: "Admin",
-    },
-    {
-      id: 2,
-      reportName: "Class 8 Performance Report",
-      reportType: "performance",
-      month: 6,
-      year: 2026,
-      class: "Class 8",
-      status: "All",
-      format: "Excel",
-      description: "Performance analysis for Class 8 students",
-      generatedDate: "2026-07-28",
-      generatedBy: "Admin",
-    },
-  ]);
+  // ✅ Custom reports (elders only)
+  const [customReports, setCustomReports] = useState(() => {
+    const saved = localStorage.getItem("eldersCustomReports");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    return [
+      {
+        id: 1,
+        reportName: "Elders Monthly Financial - September 2026",
+        reportType: "financial",
+        month: 8,
+        year: 2026,
+        course: "All",
+        status: "All",
+        format: "PDF",
+        description: "Elders department financial summary",
+        generatedDate: "2026-09-20",
+        generatedBy: "Admin",
+      },
+    ];
+  });
 
-  // Sample data for reports
   const months = [
     "January",
     "February",
@@ -264,89 +186,85 @@ const Report = () => {
     "November",
     "December",
   ];
-  const classes = [
-    "All",
-    "Class 6",
-    "Class 7",
-    "Class 8",
-    "Class 9",
-    "Class 10",
-  ];
+  const years = [2024, 2025, 2026, 2027];
   const statuses = ["All", "Paid", "Partial", "Unpaid"];
   const reportTypes = ["financial", "performance", "teacher"];
   const formats = ["PDF", "Excel", "CSV"];
 
-  // Financial Report Data
+  // ============================================================
+  // ✅ Elders Department Report Data
+  // ============================================================
   const [financialData] = useState({
-    totalRevenue: 125000,
-    totalExpenses: 45000,
-    netProfit: 80000,
-    collectionRate: 85,
+    totalRevenue: 63600,
+    totalExpenses: 25000,
+    netProfit: 38600,
+    collectionRate: 82,
     monthlyData: [
-      { month: "January", collected: 28000, due: 5000 },
-      { month: "February", collected: 25000, due: 4000 },
-      { month: "March", collected: 30000, due: 3000 },
-      { month: "April", collected: 22000, due: 6000 },
-      { month: "May", collected: 20000, due: 7000 },
-      { month: "June", collected: 18000, due: 8000 },
+      { month: "April", collected: 12000, due: 3000 },
+      { month: "May", collected: 11500, due: 2500 },
+      { month: "June", collected: 11000, due: 3000 },
+      { month: "July", collected: 10000, due: 3500 },
+      { month: "August", collected: 9500, due: 4000 },
+      { month: "September", collected: 9600, due: 4500 },
     ],
-    classWiseCollection: [
-      { class: "Class 6", collected: 15000, total: 20000 },
-      { class: "Class 7", collected: 18000, total: 22000 },
-      { class: "Class 8", collected: 25000, total: 30000 },
-      { class: "Class 9", collected: 28000, total: 35000 },
-      { class: "Class 10", collected: 22000, total: 28000 },
+    courseWiseCollection: [
+      { course: "Qaida Nuraniyah", collected: 18000, total: 20000 },
+      { course: "Quran Nazera", collected: 12000, total: 15000 },
+      { course: "Najera", collected: 10000, total: 12000 },
+      { course: "Basic Tajweed", collected: 14000, total: 16000 },
+      { course: "Bakarah Hifz", collected: 9600, total: 12000 },
     ],
     paymentMethods: [
-      { method: "Cash", amount: 45000 },
-      { method: "Bank Transfer", amount: 35000 },
       { method: "bKash", amount: 25000 },
       { method: "Nagad", amount: 20000 },
+      { method: "Bank", amount: 12000 },
+      { method: "Cash", amount: 6600 },
     ],
   });
 
-  // Student Performance Report Data
   const [performanceData] = useState({
-    totalStudents: 150,
-    averageAttendance: 78,
-    averageGrade: 82,
-    passRate: 92,
-    classPerformance: [
-      { class: "Class 6", average: 85, students: 25 },
-      { class: "Class 7", average: 80, students: 30 },
-      { class: "Class 8", average: 78, students: 28 },
-      { class: "Class 9", average: 82, students: 35 },
-      { class: "Class 10", average: 88, students: 32 },
+    totalStudents: 2,
+    averageAttendance: 88,
+    averageGrade: 85,
+    passRate: 100,
+    coursePerformance: [
+      { course: "Qaida Nuraniyah", average: 88, students: 2 },
+      { course: "Quran Nazera", average: 85, students: 0 },
+      { course: "Najera", average: 82, students: 0 },
+      { course: "Basic Tajweed", average: 86, students: 0 },
+      { course: "Bakarah Hifz", average: 84, students: 0 },
     ],
-    subjectPerformance: [
-      { subject: "Tajweed", average: 85 },
-      { subject: "Tafsir", average: 82 },
-      { subject: "Hadith", average: 80 },
-      { subject: "Fiqh", average: 78 },
-      { subject: "Aqeedah", average: 84 },
+    teacherPerformance: [
+      { teacher: "Jubayer Ahmad", average: 88 },
+      { teacher: "Sumaiya Afrin Mim", average: 90 },
     ],
     attendanceData: [
-      { month: "January", attendance: 85 },
-      { month: "February", attendance: 82 },
-      { month: "March", attendance: 80 },
-      { month: "April", attendance: 75 },
-      { month: "May", attendance: 72 },
-      { month: "June", attendance: 70 },
+      { month: "April", attendance: 92 },
+      { month: "May", attendance: 90 },
+      { month: "June", attendance: 88 },
+      { month: "July", attendance: 85 },
+      { month: "August", attendance: 88 },
+      { month: "September", attendance: 87 },
     ],
   });
 
-  // Teacher Performance Report Data
   const [teacherPerformanceData] = useState({
-    totalTeachers: 6,
-    averageRating: 4.6,
-    totalClasses: 45,
+    totalTeachers: 2,
+    averageRating: 4.85,
+    totalClasses: 23,
     teacherRatings: [
-      { name: "Dr. Muhammad Abdullah", rating: 4.8, classes: 8 },
-      { name: "Ustadh Ahmad Ali", rating: 4.9, classes: 7 },
-      { name: "Ustadha Fatima Rahman", rating: 4.7, classes: 6 },
-      { name: "Dr. Omar Farooq", rating: 4.6, classes: 9 },
-      { name: "Ustadh Yusuf Khan", rating: 4.5, classes: 5 },
-      { name: "Ustadh Ibrahim Malik", rating: 4.3, classes: 4 },
+      {
+        name: "Jubayer Ahmad",
+        rating: 4.8,
+        classes: 12,
+        designation: "Senior Teacher",
+      },
+      {
+        name: "Sumaiya Afrin Mim",
+        rating: 4.9,
+        classes: 11,
+        designation: "Junior Teacher",
+      },
     ],
   });
 
@@ -354,22 +272,70 @@ const Report = () => {
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        setAdminInfo(JSON.parse(savedAdmin));
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: "Quran for Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
-  // Save custom reports to localStorage
+  // ============================================================
+  // ✅ Fetch elders students from API
+  // ============================================================
+  const fetchEldersStudents = async () => {
+    try {
+      setStudentsLoading(true);
+      const res = await fetch(`${API_BASE}/api/students/all`);
+      const text = await res.text();
+
+      if (!text.trim().startsWith("<")) {
+        const data = JSON.parse(text);
+        if (data.success && Array.isArray(data.students)) {
+          const all = data.students || [];
+          const elders = all.filter((s) => isEldersCourse(s.course));
+
+          console.log("📥 Total students:", all.length);
+          console.log("✅ Elders students:", elders.length);
+
+          const formatted = elders.map((s) => ({
+            _id: s._id,
+            name: s.name || "",
+            studentId: s.studentId || s._id?.slice(-8) || "N/A",
+            course: s.course || "",
+            class: s.batch || s.class || "Elders Batch A",
+            batch: s.batch || "Batch-03",
+            phone: s.phone || "",
+            email: s.email || "",
+            status: s.status || "Pending",
+          }));
+
+          setEldersStudents(formatted);
+        }
+      }
+    } catch (err) {
+      console.error("❌ Fetch students error:", err);
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem("customReports", JSON.stringify(customReports));
+    fetchEldersStudents();
+  }, []);
+
+  // Save custom reports
+  useEffect(() => {
+    localStorage.setItem("eldersCustomReports", JSON.stringify(customReports));
   }, [customReports]);
 
   const handleLogout = async () => {
@@ -378,7 +344,6 @@ const Report = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -387,28 +352,14 @@ const Report = () => {
       });
       navigate("/admin-login");
     } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
+      console.error(err);
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
   const menuItems = [
     {
       id: "profile",
@@ -431,11 +382,6 @@ const Report = () => {
           id: "today-class",
           path: "/admin-dashboard/today-class",
           label: "Today's Class",
-        },
-        {
-          id: "payment-overview",
-          path: "/admin-dashboard/payment-overview",
-          label: "Payment Overview",
         },
         {
           id: "new-admission",
@@ -564,69 +510,21 @@ const Report = () => {
       path: "/admin-exam",
       icon: <FaCalendarCheck className="text-xl" />,
       label: "Exam",
-      subItems: [
-        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
-        {
-          id: "result-publish",
-          path: "/admin-exam/result",
-          label: "Result Publish",
-        },
-        {
-          id: "certificate-permission",
-          path: "/admin-exam/certificate",
-          label: "Certificate Permission",
-        },
-      ],
     },
     {
       id: "report-analytics",
       path: "/admin-reports",
       icon: <FaChartLine className="text-xl" />,
       label: "Report & Analytics",
-      subItems: [
-        {
-          id: "admission-report",
-          path: "/admin-reports/admission",
-          label: "Admission Report",
-        },
-        {
-          id: "attendance-report",
-          path: "/admin-reports/attendance",
-          label: "Attendance Report",
-        },
-        { id: "income", path: "/admin-reports/income", label: "Income" },
-      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
       icon: <FaDatabase className="text-xl" />,
       label: "CRM Management",
-      subItems: [
-        {
-          id: "data-entry",
-          path: "/admin-crm/data-entry",
-          label: "Data Entry",
-        },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
-      ],
     },
   ];
 
-  // Get report type label
   const getReportTypeLabel = (type) => {
     switch (type) {
       case "financial":
@@ -640,7 +538,6 @@ const Report = () => {
     }
   };
 
-  // Get report type color
   const getReportTypeColor = (type) => {
     switch (type) {
       case "financial":
@@ -654,12 +551,8 @@ const Report = () => {
     }
   };
 
-  // Format currency
-  const formatCurrency = (amount) => {
-    return `৳${amount.toLocaleString()}`;
-  };
+  const formatCurrency = (amount) => `৳${(amount || 0).toLocaleString()}`;
 
-  // Format date
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     const date = new Date(dateStr);
@@ -670,55 +563,50 @@ const Report = () => {
     });
   };
 
-  // Download report
   const downloadReport = (type) => {
     Swal.fire({
       icon: "success",
       title: "Report Downloading",
-      text: `${type} report is being downloaded as PDF.`,
+      text: `${type} being downloaded as PDF.`,
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Export to Excel
   const exportToExcel = () => {
     Swal.fire({
       icon: "success",
       title: "Exporting to Excel",
-      text: "Report is being exported to Excel format.",
+      text: "Elders report being exported.",
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Print report
   const printReport = () => {
     window.print();
   };
 
-  // Get report title
   const getReportTitle = () => {
     switch (reportType) {
       case "financial":
-        return "Financial Report";
+        return "Financial Report — Quran For Elders";
       case "performance":
-        return "Student Performance Report";
+        return "Student Performance Report — Quran For Elders";
       case "teacher":
-        return "Teacher Performance Report";
+        return "Teacher Performance Report — Quran For Elders";
       default:
-        return "Report";
+        return "Elders Report";
     }
   };
 
-  // Open add modal
   const openAddModal = () => {
     setFormData({
       reportName: "",
       reportType: "financial",
       month: new Date().getMonth(),
       year: new Date().getFullYear(),
-      class: "All",
+      course: "All",
       status: "All",
       format: "PDF",
       description: "",
@@ -726,7 +614,6 @@ const Report = () => {
     setShowAddModal(true);
   };
 
-  // Handle add report
   const handleAddReport = (e) => {
     e.preventDefault();
 
@@ -746,7 +633,7 @@ const Report = () => {
       reportType: formData.reportType,
       month: formData.month,
       year: formData.year,
-      class: formData.class || "All",
+      course: formData.course || "All",
       status: formData.status || "All",
       format: formData.format || "PDF",
       description: formData.description || "",
@@ -758,14 +645,13 @@ const Report = () => {
     setShowAddModal(false);
     Swal.fire({
       icon: "success",
-      title: "Report Added!",
-      text: `${formData.reportName} has been added successfully.`,
+      title: "✅ Elders Report Added!",
+      text: formData.reportName,
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle delete report
   const handleDeleteReport = (id) => {
     Swal.fire({
       title: "Delete Report?",
@@ -778,69 +664,101 @@ const Report = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         setCustomReports(customReports.filter((r) => r.id !== id));
-        Swal.fire("Deleted!", "Report has been deleted.", "success");
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
       }
     });
   };
 
-  // Render financial report
-  const renderFinancialReport = () => {
-    return (
-      <div className="space-y-4">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-            <p className="text-lg font-bold text-blue-600">
-              {formatCurrency(financialData.totalRevenue)}
-            </p>
-            <p className="text-[10px] text-gray-500">Total Revenue</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-            <p className="text-lg font-bold text-red-600">
-              {formatCurrency(financialData.totalExpenses)}
-            </p>
-            <p className="text-[10px] text-gray-500">Total Expenses</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-            <p className="text-lg font-bold text-green-600">
-              {formatCurrency(financialData.netProfit)}
-            </p>
-            <p className="text-[10px] text-gray-500">Net Profit</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-            <p className="text-lg font-bold text-purple-600">
-              {financialData.collectionRate}%
-            </p>
-            <p className="text-[10px] text-gray-500">Collection Rate</p>
-          </div>
+  // ============================================================
+  // ✅ Render Financial Report
+  // ============================================================
+  const renderFinancialReport = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+          <p className="text-lg font-bold text-blue-600">
+            {formatCurrency(financialData.totalRevenue)}
+          </p>
+          <p className="text-[10px] text-gray-500">Total Revenue</p>
         </div>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+          <p className="text-lg font-bold text-red-600">
+            {formatCurrency(financialData.totalExpenses)}
+          </p>
+          <p className="text-[10px] text-gray-500">Total Expenses</p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+          <p className="text-lg font-bold text-green-600">
+            {formatCurrency(financialData.netProfit)}
+          </p>
+          <p className="text-[10px] text-gray-500">Net Profit</p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+          <p className="text-lg font-bold text-purple-600">
+            {financialData.collectionRate}%
+          </p>
+          <p className="text-[10px] text-gray-500">Collection Rate</p>
+        </div>
+      </div>
 
-        {/* Monthly Collection Chart */}
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+        <h4 className="font-semibold text-gray-700 text-sm mb-3">
+          Monthly Collection Overview (Elders)
+        </h4>
+        <div className="space-y-3">
+          {financialData.monthlyData.map((item, index) => (
+            <div key={index}>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-gray-600">{item.month}</span>
+                <span className="text-gray-600">
+                  Collected: {formatCurrency(item.collected)} | Due:{" "}
+                  {formatCurrency(item.due)}
+                </span>
+              </div>
+              <div className="flex gap-1 h-4">
+                <div
+                  className="bg-green-500 rounded-l-full h-full"
+                  style={{
+                    width: `${(item.collected / (item.collected + item.due)) * 100}%`,
+                  }}
+                ></div>
+                <div
+                  className="bg-red-500 rounded-r-full h-full"
+                  style={{
+                    width: `${(item.due / (item.collected + item.due)) * 100}%`,
+                  }}
+                ></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
           <h4 className="font-semibold text-gray-700 text-sm mb-3">
-            Monthly Collection Overview
+            Course Wise Collection (Elders)
           </h4>
-          <div className="space-y-3">
-            {financialData.monthlyData.map((item, index) => (
+          <div className="space-y-2">
+            {financialData.courseWiseCollection.map((item, index) => (
               <div key={index}>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-600">{item.month}</span>
+                  <span className="text-gray-600">{item.course}</span>
                   <span className="text-gray-600">
-                    Collected: {formatCurrency(item.collected)} | Due:{" "}
-                    {formatCurrency(item.due)}
+                    {formatCurrency(item.collected)} /{" "}
+                    {formatCurrency(item.total)}
                   </span>
                 </div>
-                <div className="flex gap-1 h-4">
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className="bg-green-500 rounded-l-full h-full"
+                    className="bg-blue-500 h-full rounded-full"
                     style={{
-                      width: `${(item.collected / (item.collected + item.due)) * 100}%`,
-                    }}
-                  ></div>
-                  <div
-                    className="bg-red-500 rounded-r-full h-full"
-                    style={{
-                      width: `${(item.due / (item.collected + item.due)) * 100}%`,
+                      width: `${(item.collected / item.total) * 100}%`,
                     }}
                   ></div>
                 </div>
@@ -849,110 +767,105 @@ const Report = () => {
           </div>
         </div>
 
-        {/* Class Wise Collection */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-            <h4 className="font-semibold text-gray-700 text-sm mb-3">
-              Class Wise Collection
-            </h4>
-            <div className="space-y-2">
-              {financialData.classWiseCollection.map((item, index) => (
-                <div key={index}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-gray-600">{item.class}</span>
-                    <span className="text-gray-600">
-                      {formatCurrency(item.collected)} /{" "}
-                      {formatCurrency(item.total)}
-                    </span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="bg-blue-500 h-full rounded-full"
-                      style={{
-                        width: `${(item.collected / item.total) * 100}%`,
-                      }}
-                    ></div>
-                  </div>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+          <h4 className="font-semibold text-gray-700 text-sm mb-3">
+            Payment Methods
+          </h4>
+          <div className="space-y-2">
+            {financialData.paymentMethods.map((item, index) => (
+              <div key={index}>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-gray-600">{item.method}</span>
+                  <span className="text-gray-600">
+                    {formatCurrency(item.amount)}
+                  </span>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Payment Methods */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-            <h4 className="font-semibold text-gray-700 text-sm mb-3">
-              Payment Methods
-            </h4>
-            <div className="space-y-2">
-              {financialData.paymentMethods.map((item, index) => (
-                <div key={index}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-gray-600">{item.method}</span>
-                    <span className="text-gray-600">
-                      {formatCurrency(item.amount)}
-                    </span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className="bg-purple-500 h-full rounded-full"
-                      style={{
-                        width: `${(item.amount / financialData.totalRevenue) * 100}%`,
-                      }}
-                    ></div>
-                  </div>
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="bg-purple-500 h-full rounded-full"
+                    style={{
+                      width: `${(item.amount / financialData.totalRevenue) * 100}%`,
+                    }}
+                  ></div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
 
-  // Render performance report
-  const renderPerformanceReport = () => {
-    return (
-      <div className="space-y-4">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-            <p className="text-lg font-bold text-blue-600">
-              {performanceData.totalStudents}
-            </p>
-            <p className="text-[10px] text-gray-500">Total Students</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-            <p className="text-lg font-bold text-green-600">
-              {performanceData.averageAttendance}%
-            </p>
-            <p className="text-[10px] text-gray-500">Avg Attendance</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-            <p className="text-lg font-bold text-yellow-600">
-              {performanceData.averageGrade}%
-            </p>
-            <p className="text-[10px] text-gray-500">Avg Grade</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-            <p className="text-lg font-bold text-purple-600">
-              {performanceData.passRate}%
-            </p>
-            <p className="text-[10px] text-gray-500">Pass Rate</p>
-          </div>
+  // ✅ Render Performance Report
+  const renderPerformanceReport = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+          <p className="text-lg font-bold text-blue-600">
+            {eldersStudents.length || performanceData.totalStudents}
+          </p>
+          <p className="text-[10px] text-gray-500">Total Elders Students</p>
         </div>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+          <p className="text-lg font-bold text-green-600">
+            {performanceData.averageAttendance}%
+          </p>
+          <p className="text-[10px] text-gray-500">Avg Attendance</p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+          <p className="text-lg font-bold text-yellow-600">
+            {performanceData.averageGrade}%
+          </p>
+          <p className="text-[10px] text-gray-500">Avg Grade</p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+          <p className="text-lg font-bold text-purple-600">
+            {performanceData.passRate}%
+          </p>
+          <p className="text-[10px] text-gray-500">Pass Rate</p>
+        </div>
+      </div>
 
-        {/* Class Performance */}
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+        <h4 className="font-semibold text-gray-700 text-sm mb-3">
+          Course Performance (Elders)
+        </h4>
+        <div className="space-y-3">
+          {performanceData.coursePerformance.map((item, index) => (
+            <div key={index}>
+              <div className="flex justify-between text-xs mb-1">
+                <span className="text-gray-600">
+                  {item.course} ({item.students} students)
+                </span>
+                <span className="text-gray-600">{item.average}%</span>
+              </div>
+              <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${
+                    item.average >= 85
+                      ? "bg-green-500"
+                      : item.average >= 70
+                        ? "bg-yellow-500"
+                        : "bg-red-500"
+                  }`}
+                  style={{ width: `${item.average}%` }}
+                ></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
           <h4 className="font-semibold text-gray-700 text-sm mb-3">
-            Class Performance
+            Teacher Performance (Elders)
           </h4>
-          <div className="space-y-3">
-            {performanceData.classPerformance.map((item, index) => (
+          <div className="space-y-2">
+            {performanceData.teacherPerformance.map((item, index) => (
               <div key={index}>
                 <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-600">
-                    {item.class} ({item.students} students)
-                  </span>
+                  <span className="text-gray-600">{item.teacher}</span>
                   <span className="text-gray-600">{item.average}%</span>
                 </div>
                 <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -972,138 +885,27 @@ const Report = () => {
           </div>
         </div>
 
-        {/* Subject Performance */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-            <h4 className="font-semibold text-gray-700 text-sm mb-3">
-              Subject Performance
-            </h4>
-            <div className="space-y-2">
-              {performanceData.subjectPerformance.map((item, index) => (
-                <div key={index}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-gray-600">{item.subject}</span>
-                    <span className="text-gray-600">{item.average}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${
-                        item.average >= 85
-                          ? "bg-green-500"
-                          : item.average >= 70
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                      }`}
-                      style={{ width: `${item.average}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Attendance Trend */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-            <h4 className="font-semibold text-gray-700 text-sm mb-3">
-              Attendance Trend
-            </h4>
-            <div className="space-y-2">
-              {performanceData.attendanceData.map((item, index) => (
-                <div key={index}>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span className="text-gray-600">{item.month}</span>
-                    <span className="text-gray-600">{item.attendance}%</span>
-                  </div>
-                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${
-                        item.attendance >= 80
-                          ? "bg-green-500"
-                          : item.attendance >= 70
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                      }`}
-                      style={{ width: `${item.attendance}%` }}
-                    ></div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  // Render teacher performance report
-  const renderTeacherReport = () => {
-    return (
-      <div className="space-y-4">
-        {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-            <p className="text-lg font-bold text-blue-600">
-              {teacherPerformanceData.totalTeachers}
-            </p>
-            <p className="text-[10px] text-gray-500">Total Teachers</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-            <p className="text-lg font-bold text-yellow-600">
-              {teacherPerformanceData.averageRating}
-            </p>
-            <p className="text-[10px] text-gray-500">Avg Rating</p>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-            <p className="text-lg font-bold text-green-600">
-              {teacherPerformanceData.totalClasses}
-            </p>
-            <p className="text-[10px] text-gray-500">Total Classes</p>
-          </div>
-        </div>
-
-        {/* Teacher Ratings */}
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
           <h4 className="font-semibold text-gray-700 text-sm mb-3">
-            Teacher Ratings & Classes
+            Attendance Trend
           </h4>
-          <div className="space-y-3">
-            {teacherPerformanceData.teacherRatings.map((item, index) => (
-              <div
-                key={index}
-                className="border-b border-gray-100 pb-3 last:border-0"
-              >
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm font-medium text-gray-800">
-                      {item.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {item.classes} classes
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="flex">
-                      {[...Array(5)].map((_, i) => (
-                        <FaStar
-                          key={i}
-                          className={
-                            i < Math.floor(item.rating)
-                              ? "text-yellow-400"
-                              : "text-gray-300"
-                          }
-                          size={14}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-sm font-bold text-gray-700">
-                      {item.rating}
-                    </span>
-                  </div>
+          <div className="space-y-2">
+            {performanceData.attendanceData.map((item, index) => (
+              <div key={index}>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-gray-600">{item.month}</span>
+                  <span className="text-gray-600">{item.attendance}%</span>
                 </div>
-                <div className="mt-1 w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className="bg-blue-500 h-full rounded-full"
-                    style={{ width: `${(item.rating / 5) * 100}%` }}
+                    className={`h-full rounded-full ${
+                      item.attendance >= 80
+                        ? "bg-green-500"
+                        : item.attendance >= 70
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
+                    }`}
+                    style={{ width: `${item.attendance}%` }}
                   ></div>
                 </div>
               </div>
@@ -1111,18 +913,93 @@ const Report = () => {
           </div>
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+
+  // ✅ Render Teacher Report
+  const renderTeacherReport = () => (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+          <p className="text-lg font-bold text-blue-600">
+            {teacherPerformanceData.totalTeachers}
+          </p>
+          <p className="text-[10px] text-gray-500">Total Elders Teachers</p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+          <p className="text-lg font-bold text-yellow-600">
+            {teacherPerformanceData.averageRating}
+          </p>
+          <p className="text-[10px] text-gray-500">Avg Rating</p>
+        </div>
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+          <p className="text-lg font-bold text-green-600">
+            {teacherPerformanceData.totalClasses}
+          </p>
+          <p className="text-[10px] text-gray-500">Total Classes</p>
+        </div>
+      </div>
+
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+        <h4 className="font-semibold text-gray-700 text-sm mb-3">
+          Elders Teacher Ratings & Classes
+        </h4>
+        <div className="space-y-3">
+          {teacherPerformanceData.teacherRatings.map((item, index) => (
+            <div
+              key={index}
+              className="border-b border-gray-100 pb-3 last:border-0"
+            >
+              <div className="flex justify-between items-center">
+                <div>
+                  <p className="text-sm font-medium text-gray-800">
+                    {item.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {item.designation || "Teacher"} • {item.classes} classes
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <FaStar
+                        key={i}
+                        className={
+                          i < Math.floor(item.rating)
+                            ? "text-yellow-400"
+                            : "text-gray-300"
+                        }
+                        size={14}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-bold text-gray-700">
+                    {item.rating}
+                  </span>
+                </div>
+              </div>
+              <div className="mt-1 w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="bg-blue-500 h-full rounded-full"
+                  style={{ width: `${(item.rating / 5) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Reports</h1>
+          <h1 className="text-sm font-bold text-gray-800">Reports (Elders)</h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100"
           >
             {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
@@ -1131,14 +1008,8 @@ const Report = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -1158,7 +1029,7 @@ const Report = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -1169,14 +1040,11 @@ const Report = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
@@ -1219,14 +1087,11 @@ const Report = () => {
                     }}
                   >
                     <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -1250,7 +1115,6 @@ const Report = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1259,52 +1123,104 @@ const Report = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaChartLine className="text-blue-600" /> Reports & Analytics
+                <FaChartLine className="text-blue-600" /> Reports —
+                <span className="text-teal-700">Quran For Elders</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Generate and view detailed reports
+                {studentsLoading
+                  ? "Loading elders students..."
+                  : `${eldersStudents.length} elders student${eldersStudents.length !== 1 ? "s" : ""} • Qaida • Nazera • Najera • Tajweed • Bakarah Hifz`}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
+                onClick={fetchEldersStudents}
+                disabled={studentsLoading}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 disabled:opacity-50"
+              >
+                <FaSyncAlt
+                  size={12}
+                  className={studentsLoading ? "animate-spin" : ""}
+                />
+                Refresh
+              </button>
+              <button
                 onClick={openAddModal}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaPlus size={12} /> Add Report
               </button>
               <button
                 onClick={() => downloadReport(getReportTitle())}
-                className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
-                <FaFilePdfIcon size={12} /> PDF
+                <FaFilePdf size={12} /> PDF
               </button>
               <button
                 onClick={exportToExcel}
-                className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
-                <FaFileExcelIcon size={12} /> Excel
+                <FaFileExcel size={12} /> Excel
               </button>
               <button
                 onClick={printReport}
-                className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
-                <FaPrintIcon size={12} /> Print
+                <FaPrint size={12} /> Print
               </button>
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
               >
                 Logout
               </button>
             </div>
+          </div>
+
+          {/* ✅ Elders Students Card */}
+          <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
+            <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
+              <FaUsers size={12} /> Elders Students ({eldersStudents.length})
+            </p>
+            {studentsLoading && eldersStudents.length === 0 ? (
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div>
+                Loading from API...
+              </div>
+            ) : eldersStudents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {eldersStudents.map((s) => (
+                  <div
+                    key={s._id}
+                    className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      {(s.name || "S").charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-gray-800 truncate">
+                        {s.name}
+                      </p>
+                      <p className="text-[10px] text-gray-500 truncate">
+                        {s.studentId} • {s.class}
+                      </p>
+                      <p className="text-[10px] text-teal-600 truncate">
+                        {s.course}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-500 italic">
+                No elders students found.
+              </p>
+            )}
           </div>
 
           {/* Report Type Selector */}
@@ -1346,9 +1262,9 @@ const Report = () => {
 
           {/* Custom Reports List */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-3">
-            <div className="p-3 border-b border-gray-200 flex justify-between items-center">
+            <div className="p-3 border-b flex justify-between items-center">
               <h4 className="font-semibold text-gray-700 text-sm">
-                Custom Reports
+                Elders Custom Reports
               </h4>
               <span className="text-xs text-gray-500">
                 {customReports.length} reports
@@ -1378,12 +1294,9 @@ const Report = () => {
                 <tbody className="divide-y divide-gray-100">
                   {customReports.length > 0 ? (
                     customReports.map((report) => (
-                      <tr
-                        key={report.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
+                      <tr key={report.id} className="hover:bg-gray-50">
                         <td className="px-3 py-2">
-                          <div className="font-medium text-gray-800 truncate max-w-[150px]">
+                          <div className="font-medium text-gray-800 truncate max-w-[200px]">
                             {report.reportName}
                           </div>
                           <div className="text-[10px] text-gray-400">
@@ -1417,11 +1330,9 @@ const Report = () => {
                                       <p><strong>Name:</strong> ${report.reportName}</p>
                                       <p><strong>Type:</strong> ${getReportTypeLabel(report.reportType)}</p>
                                       <p><strong>Month:</strong> ${months[report.month]} ${report.year}</p>
-                                      <p><strong>Class:</strong> ${report.class}</p>
-                                      <p><strong>Status:</strong> ${report.status}</p>
+                                      <p><strong>Course:</strong> ${report.course}</p>
                                       <p><strong>Format:</strong> ${report.format}</p>
-                                      <p><strong>Generated By:</strong> ${report.generatedBy}</p>
-                                      <p><strong>Generated Date:</strong> ${formatDate(report.generatedDate)}</p>
+                                      <p><strong>By:</strong> ${report.generatedBy}</p>
                                       ${report.description ? `<p><strong>Description:</strong> ${report.description}</p>` : ""}
                                     </div>
                                   `,
@@ -1429,15 +1340,13 @@ const Report = () => {
                                   confirmButtonText: "Close",
                                 });
                               }}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
-                              title="View Details"
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
                             >
                               <FaEye size={12} />
                             </button>
                             <button
                               onClick={() => handleDeleteReport(report.id)}
-                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
-                              title="Delete"
+                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                             >
                               <FaTrash size={12} />
                             </button>
@@ -1451,7 +1360,7 @@ const Report = () => {
                         colSpan="5"
                         className="px-3 py-4 text-center text-gray-400 text-sm"
                       >
-                        No custom reports found
+                        No custom reports yet
                       </td>
                     </tr>
                   )}
@@ -1472,7 +1381,7 @@ const Report = () => {
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                className="px-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
               >
                 {months.map((month, index) => (
                   <option key={index} value={index}>
@@ -1483,32 +1392,34 @@ const Report = () => {
               <select
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="px-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
               >
-                <option value={2024}>2024</option>
-                <option value={2025}>2025</option>
-                <option value={2026}>2026</option>
-                <option value={2027}>2027</option>
+                {years.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
               </select>
               <select
-                value={selectedClass}
-                onChange={(e) => setSelectedClass(e.target.value)}
-                className="px-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={selectedCourse}
+                onChange={(e) => setSelectedCourse(e.target.value)}
+                className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
               >
-                {classes.map((cls) => (
-                  <option key={cls} value={cls}>
-                    {cls}
+                <option value="All">All Courses</option>
+                {ELDERS_COURSES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
                   </option>
                 ))}
               </select>
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
               >
-                {statuses.map((status) => (
-                  <option key={status} value={status}>
-                    {status}
+                {statuses.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
                   </option>
                 ))}
               </select>
@@ -1516,12 +1427,12 @@ const Report = () => {
           </div>
 
           {/* Report Content */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 overflow-auto max-h-[calc(100vh-420px)]">
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
             <h3 className="text-lg font-bold text-gray-800 mb-4">
               {getReportTitle()}
             </h3>
             <p className="text-xs text-gray-500 mb-4">
-              {months[selectedMonth]} {selectedYear} | {selectedClass} |{" "}
+              {months[selectedMonth]} {selectedYear} | {selectedCourse} |{" "}
               {selectedStatus}
             </p>
 
@@ -1536,9 +1447,9 @@ const Report = () => {
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlus className="text-blue-600" /> Add Custom Report
+                <FaPlus className="text-blue-600" /> Add Elders Report
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1559,8 +1470,8 @@ const Report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, reportName: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter report name"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="e.g., Monthly Financial - Sept 2026"
                 />
               </div>
 
@@ -1574,7 +1485,7 @@ const Report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, reportType: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 >
                   {reportTypes.map((type) => (
                     <option key={type} value={type}>
@@ -1597,11 +1508,11 @@ const Report = () => {
                         month: parseInt(e.target.value),
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {months.map((month, index) => (
-                      <option key={index} value={index}>
-                        {month}
+                    {months.map((m, i) => (
+                      <option key={i} value={i}>
+                        {m}
                       </option>
                     ))}
                   </select>
@@ -1618,12 +1529,13 @@ const Report = () => {
                         year: parseInt(e.target.value),
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value={2024}>2024</option>
-                    <option value={2025}>2025</option>
-                    <option value={2026}>2026</option>
-                    <option value={2027}>2027</option>
+                    {years.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -1631,18 +1543,19 @@ const Report = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class
+                    Course
                   </label>
                   <select
-                    value={formData.class}
+                    value={formData.course}
                     onChange={(e) =>
-                      setFormData({ ...formData, class: e.target.value })
+                      setFormData({ ...formData, course: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {classes.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
+                    <option value="All">All Courses</option>
+                    {ELDERS_COURSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
@@ -1656,11 +1569,11 @@ const Report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {statuses.map((status) => (
-                      <option key={status} value={status}>
-                        {status}
+                    {statuses.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
                       </option>
                     ))}
                   </select>
@@ -1676,11 +1589,11 @@ const Report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, format: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 >
-                  {formats.map((format) => (
-                    <option key={format} value={format}>
-                      {format}
+                  {formats.map((f) => (
+                    <option key={f} value={f}>
+                      {f}
                     </option>
                   ))}
                 </select>
@@ -1696,22 +1609,22 @@ const Report = () => {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter report description..."
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="Short description..."
                 />
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold"
                 >
                   <FaSave className="inline mr-2" size={14} /> Add Report
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>

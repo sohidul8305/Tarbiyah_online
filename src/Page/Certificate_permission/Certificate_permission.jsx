@@ -9,188 +9,179 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
-  FaClock,
-  FaBook,
-  FaFileAlt,
-  FaChartLine,
-  FaUserGraduate,
-  FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
+  FaChartLine,
   FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
-  FaEdit,
-  FaTrash,
   FaSearch,
-  FaFilter,
-  FaPlusCircle,
-  FaDownload,
-  FaPrint,
+  FaPlus,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
   FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
-  FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
-  FaUserEdit,
-  FaUserCircle,
-  FaAddressCard,
-  FaChalkboard,
-  FaCalendarDay,
-  FaSchool as FaSchoolIcon,
-  FaUserTie,
-  FaBookReader,
-  FaStopwatch,
-  FaClipboardCheck,
-  FaExchangeAlt,
-  FaCheckDouble,
-  FaBan,
-  FaCheck,
-  FaTimes,
-  FaQuestion,
-  FaCalendarWeek,
-  FaChartBar,
-  FaFileDownload,
-  FaFilePdf,
-  FaFileExcel,
-  FaRegClock,
-  FaRegCalendarAlt,
-  FaRegCalendarCheck,
-  FaWhatsapp,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaGlobe as FaGlobeIcon,
-  FaEnvelope as FaEnvelopeIcon,
-  FaPhone as FaPhoneIcon,
-  FaUsers as FaUsersIcon,
-  FaCalendar,
-  FaClock as FaClockIcon2,
   FaHourglassHalf,
-  FaCheckCircle as FaCheckCircleIcon,
-  FaTimesCircle as FaTimesCircleIcon,
-  FaBookmark,
-  FaListUl,
-  FaChevronRight,
-  FaChevronDown,
-  FaFolderOpen,
-  FaFile,
-  FaFilePdf as FaFilePdfIcon,
-  FaFileWord,
-  FaFilePowerpoint,
-  FaFileImage,
-  FaFileVideo,
-  FaFileAudio,
-  FaFileArchive,
-  FaFileCode,
-  FaFileExcel as FaFileExcelIcon,
-  FaFileAlt as FaFileAltIcon,
-  FaFolder,
-  FaCopy,
-  FaCut,
-  FaPaste,
-  FaShare,
-  FaStar as FaStarIcon,
-  FaRegStar,
-  FaRegFileAlt,
-  FaRegFilePdf,
-  FaRegFileWord,
-  FaRegFileExcel,
-  FaRegFilePowerpoint,
-  FaRegFileImage,
-  FaRegFileVideo,
-  FaRegFileArchive,
-  FaEraser,
-  FaTrashAlt,
-  FaCalendarTimes,
-  FaRedoAlt,
-  FaUndoAlt,
-  FaSync,
-  FaExclamationCircle,
-  FaInfoCircle as FaInfoCircleIcon,
-  FaMoneyCheck,
-  FaMoneyCheckAlt,
-  FaHandHoldingUsd,
-  FaDonate,
-  FaFileInvoice as FaFileInvoiceIcon2,
-  FaFileSignature,
-  FaReceipt as FaReceiptIcon,
-  FaCreditCard as FaCreditCardIcon,
-  FaPrint as FaPrintIcon,
-  FaShareAlt,
-  FaChartPie,
-  FaChartArea,
-  FaTasks,
-  FaCheckDouble as FaCheckDoubleIcon,
-  FaPen,
-  FaPencilAlt,
-  FaAward,
-  FaMedal,
-  FaTrophy,
-  FaPlus,
-  FaCertificate as FaCertificateIcon,
-  FaTimes as FaTimesIcon,
-  FaUserCheck as FaUserCheckIcon,
-  FaUserMinus as FaUserMinusIcon,
+  FaCertificate,
+  FaSyncAlt,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+const API_BASE = "https://api.tarbiyahonline.com";
+
+// ============================================================
+// ✅ ELDERS DEPARTMENT
+// ============================================================
+const ELDERS_TEACHERS = ["Jubayer Ahmad", "Sumaiya Afrin Mim"];
+
+const ELDERS_COURSES = [
+  "Qaida Nuraniyah",
+  "Quran Nazera",
+  "Najera",
+  "Basic Tajweed",
+  "Bakarah Hifz",
+];
+
+const ELDERS_CLASSES = [
+  "Elders Batch A",
+  "Elders Batch B",
+  "Elders Batch C",
+  "Elders Batch D",
+  "Elders Batch E",
+];
+
+const ELDERS_BATCHES = [
+  "Batch-01",
+  "Batch-02",
+  "Batch-03",
+  "Batch-04",
+  "Batch-05",
+  "Batch-06",
+];
+
+const ELDERS_COURSE_KEYWORDS = [
+  "qaida nuraniyah",
+  "qaida nooraniya",
+  "qaida noorani",
+  "qaida nurani",
+  "qaidah nuraniyah",
+  "qaidah nooraniya",
+  "qaidah noorani",
+  "quran nazera",
+  "nazera quran",
+  "quran najera",
+  "najera quran",
+  "bakarah hifz",
+  "bakara hifz",
+  "baqarah hifz",
+  "baqara hifz",
+  "basic tajweed",
+];
+
+const isSingleEldersCourse = (singleCourse) => {
+  const p = String(singleCourse).toLowerCase().trim();
+  if (!p) return false;
+  return ELDERS_COURSE_KEYWORDS.some((c) => {
+    if (p === c) return true;
+    if (p.includes(c)) return true;
+    if (c.includes(p) && p.length >= 8) return true;
+    return false;
+  });
+};
+
+const isEldersCourse = (courseStr) => {
+  if (!courseStr) return false;
+  const parts = String(courseStr)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (parts.length === 0) return false;
+  return parts.every((part) => isSingleEldersCourse(part));
+};
+
+const getPrimaryCourse = (courseStr) => {
+  if (!courseStr) return "";
+  const first = String(courseStr).split(",")[0].trim().toLowerCase();
+  if (first.includes("qaida")) return "Qaida Nuraniyah";
+  if (first.includes("najera") || first.includes("nazera")) return "Najera";
+  if (first.includes("tajweed")) return "Basic Tajweed";
+  if (first.includes("bakarah") || first.includes("bakara"))
+    return "Bakarah Hifz";
+  return "Qaida Nuraniyah";
+};
+
+// ✅ Elders students fallback
+const ELDERS_STUDENTS_FALLBACK = [
+  {
+    _id: "ELDERS_STU_001",
+    name: "Omer Faruk",
+    studentId: "TET26FB6001",
+    course: "Qaida Nooraniya, Bakarah Hifz",
+    primaryCourse: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    phone: "",
+    email: "omer@gmail.com",
+    status: "Active",
+  },
+  {
+    _id: "ELDERS_STU_002",
+    name: "Ikramm",
+    studentId: "TET26FB6002",
+    course: "Qaida Nooraniya, Bakarah Hifz",
+    primaryCourse: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    phone: "",
+    email: "ikramm@gmail.com",
+    status: "Active",
+  },
+];
+
+// ✅ Sample certificate requests
+const ELDERS_DEFAULT_REQUESTS = [
+  {
+    id: 1,
+    studentName: "Omer Faruk",
+    studentId: "TET26FB6001",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    course: "Qaida Nuraniyah",
+    teacher: "Jubayer Ahmad",
+    certificateType: "Completion",
+    requestDate: "2026-09-10",
+    status: "Pending",
+    grade: "A+",
+    attendance: 92,
+    examScore: 88,
+    issuedDate: null,
+    certificateNumber: null,
+    notes: "Outstanding performance in Qaida Nuraniyah.",
+    approvedBy: null,
+    approvedDate: null,
+  },
+  {
+    id: 2,
+    studentName: "Ikramm",
+    studentId: "TET26FB6002",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    course: "Qaida Nuraniyah",
+    teacher: "Sumaiya Afrin Mim",
+    certificateType: "Merit",
+    requestDate: "2026-09-12",
+    status: "Approved",
+    grade: "A",
+    attendance: 90,
+    examScore: 85,
+    issuedDate: null,
+    certificateNumber: "CERT-2026-0001",
+    notes: "Excellent progress. Certificate approved.",
+    approvedBy: "Admin",
+    approvedDate: "2026-09-14",
+  },
+];
 
 const Certificate_permission = () => {
   const { user, logOut } = useAuth();
@@ -203,150 +194,49 @@ const Certificate_permission = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "",
+    department: "Quran for Elders",
     joinDate: "",
   });
 
-  // Certificate requests data
-  const [certificateRequests, setCertificateRequests] = useState([
-    {
-      id: 1,
-      studentName: "Ahmed Hasan",
-      studentId: "STU001",
-      class: "Class 8",
-      subject: "Tajweed",
-      teacher: "Dr. Muhammad Abdullah",
-      certificateType: "Completion",
-      requestDate: "2026-07-10",
-      status: "Pending",
-      grade: "A",
-      attendance: 92,
-      examScore: 85,
-      issuedDate: null,
-      certificateNumber: null,
-      notes: "Student has completed the course with excellent performance.",
-      approvedBy: null,
-      approvedDate: null,
-    },
-    {
-      id: 2,
-      studentName: "Fatima Begum",
-      studentId: "STU002",
-      class: "Class 9",
-      subject: "Tafsir",
-      teacher: "Ustadh Ahmad Ali",
-      certificateType: "Merit",
-      requestDate: "2026-07-12",
-      status: "Pending",
-      grade: "A+",
-      attendance: 95,
-      examScore: 92,
-      issuedDate: null,
-      certificateNumber: null,
-      notes: "Outstanding performance - recommended for merit certificate.",
-      approvedBy: null,
-      approvedDate: null,
-    },
-    {
-      id: 3,
-      studentName: "Mohammad Ali",
-      studentId: "STU003",
-      class: "Class 10",
-      subject: "Hadith",
-      teacher: "Ustadha Fatima Rahman",
-      certificateType: "Completion",
-      requestDate: "2026-07-08",
-      status: "Approved",
-      grade: "B",
-      attendance: 78,
-      examScore: 72,
-      issuedDate: null,
-      certificateNumber: "CERT-2026-001",
-      notes: "Certificate issued successfully.",
-      approvedBy: "Admin",
-      approvedDate: "2026-07-14",
-    },
-    {
-      id: 4,
-      studentName: "Aisha Rahman",
-      studentId: "STU004",
-      class: "Class 7",
-      subject: "Fiqh",
-      teacher: "Dr. Omar Farooq",
-      certificateType: "Completion",
-      requestDate: "2026-07-05",
-      status: "Rejected",
-      grade: "D",
-      attendance: 65,
-      examScore: 58,
-      issuedDate: null,
-      certificateNumber: null,
-      notes: "Attendance below requirement (65% < 75%).",
-      approvedBy: "Admin",
-      approvedDate: "2026-07-10",
-    },
-    {
-      id: 5,
-      studentName: "Hasan Mahmud",
-      studentId: "STU007",
-      class: "Class 6",
-      subject: "Tajweed",
-      teacher: "Ustadh Yusuf Khan",
-      certificateType: "Completion",
-      requestDate: "2026-07-14",
-      status: "Pending",
-      grade: "C",
-      attendance: 85,
-      examScore: 70,
-      issuedDate: null,
-      certificateNumber: null,
-      notes: "Waiting for approval.",
-      approvedBy: null,
-      approvedDate: null,
-    },
-    {
-      id: 6,
-      studentName: "Khadija Akhter",
-      studentId: "STU008",
-      class: "Class 9",
-      subject: "Tafsir",
-      teacher: "Ustadh Ahmad Ali",
-      certificateType: "Merit",
-      requestDate: "2026-07-16",
-      status: "Approved",
-      grade: "A+",
-      attendance: 98,
-      examScore: 95,
-      issuedDate: "2026-07-20",
-      certificateNumber: "CERT-2026-002",
-      notes: "Top performer - merit certificate issued.",
-      approvedBy: "Admin",
-      approvedDate: "2026-07-18",
-    },
-  ]);
+  // ✅ Elders students from API
+  const [eldersStudents, setEldersStudents] = useState(
+    ELDERS_STUDENTS_FALLBACK,
+  );
+  const [studentsLoading, setStudentsLoading] = useState(true);
 
-  // State for filters
+  // ✅ Certificate requests
+  const [certificateRequests, setCertificateRequests] = useState(() => {
+    const saved = localStorage.getItem("eldersCertificateRequests");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    return ELDERS_DEFAULT_REQUESTS;
+  });
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterType, setFilterType] = useState("All");
   const [filterClass, setFilterClass] = useState("All");
 
-  // State for modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
-  const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
   const [certificateNumber, setCertificateNumber] = useState("");
 
-  // Form data for add/edit
   const [formData, setFormData] = useState({
     studentName: "",
     studentId: "",
     class: "",
-    subject: "",
+    batch: "",
+    course: "",
     teacher: "",
     certificateType: "Completion",
     requestDate: "",
@@ -356,48 +246,96 @@ const Certificate_permission = () => {
     notes: "",
   });
 
-  // Available options
-  const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
-  const subjects = [
-    "Tajweed",
-    "Tafsir",
-    "Hadith",
-    "Fiqh",
-    "Aqeedah",
-    "Arabic Grammar",
-  ];
-  const teachers = [
-    "Dr. Muhammad Abdullah",
-    "Ustadh Ahmad Ali",
-    "Ustadha Fatima Rahman",
-    "Dr. Omar Farooq",
-    "Ustadh Yusuf Khan",
-    "Ustadh Ibrahim Malik",
-  ];
   const certificateTypes = ["Completion", "Merit", "Honors", "Participation"];
-  const grades = ["A+", "A", "B", "C", "D", "F"];
+  const grades = ["A+", "A", "A-", "B", "C", "D", "F"];
 
   // Load admin info
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        setAdminInfo(JSON.parse(savedAdmin));
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: "Quran for Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
-  // Save certificate requests to localStorage
+  // ============================================================
+  // ✅ Fetch elders students from API
+  // ============================================================
+  const fetchEldersStudents = async () => {
+    try {
+      setStudentsLoading(true);
+      let eldersList = [...ELDERS_STUDENTS_FALLBACK];
+
+      try {
+        const res = await fetch(`${API_BASE}/api/students/all`);
+        const text = await res.text();
+
+        if (!text.trim().startsWith("<")) {
+          const data = JSON.parse(text);
+          if (data.success && Array.isArray(data.students)) {
+            const all = data.students || [];
+            const elders = all.filter((s) => isEldersCourse(s.course));
+
+            console.log("📥 Total students:", all.length);
+            console.log("✅ Elders students:", elders.length);
+
+            elders.forEach((s) => {
+              const formatted = {
+                _id: s._id,
+                name: s.name || "",
+                studentId: s.studentId || s._id?.slice(-8) || "N/A",
+                course: s.course || "",
+                primaryCourse: getPrimaryCourse(s.course),
+                class: s.batch || s.class || "Elders Batch A",
+                batch: s.batch || "Batch-03",
+                phone: s.phone || "",
+                email: s.email || "",
+                status: s.status || "Pending",
+              };
+
+              const exists = eldersList.some(
+                (e) =>
+                  (e.name || "").toLowerCase() ===
+                  (formatted.name || "").toLowerCase(),
+              );
+              if (!exists) eldersList.push(formatted);
+            });
+          }
+        }
+      } catch (apiErr) {
+        console.warn("API fetch skipped:", apiErr.message);
+      }
+
+      console.log("✅ Final elders students:", eldersList.length);
+      setEldersStudents(eldersList);
+    } catch (err) {
+      console.error("❌ Fetch students error:", err);
+      setEldersStudents(ELDERS_STUDENTS_FALLBACK);
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEldersStudents();
+  }, []);
+
+  // Save requests to localStorage
   useEffect(() => {
     localStorage.setItem(
-      "certificateRequests",
+      "eldersCertificateRequests",
       JSON.stringify(certificateRequests),
     );
   }, [certificateRequests]);
@@ -408,7 +346,6 @@ const Certificate_permission = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -417,28 +354,14 @@ const Certificate_permission = () => {
       });
       navigate("/admin-login");
     } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
+      console.error(err);
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
   const menuItems = [
     {
       id: "profile",
@@ -461,11 +384,6 @@ const Certificate_permission = () => {
           id: "today-class",
           path: "/admin-dashboard/today-class",
           label: "Today's Class",
-        },
-        {
-          id: "payment-overview",
-          path: "/admin-dashboard/payment-overview",
-          label: "Payment Overview",
         },
         {
           id: "new-admission",
@@ -606,6 +524,22 @@ const Certificate_permission = () => {
           path: "/admin-exam/certificate",
           label: "Certificate Permission",
         },
+        { id: "grad", path: "/admin-exam/grad", label: "Grad" },
+        {
+          id: "class-test",
+          path: "/admin-exam/class-test",
+          label: "Class Test",
+        },
+        {
+          id: "mid-term",
+          path: "/admin-exam/mid-term",
+          label: "Mid Term Exam",
+        },
+        {
+          id: "final-exam",
+          path: "/admin-exam/final-exam",
+          label: "Final Exam",
+        },
       ],
     },
     {
@@ -613,50 +547,15 @@ const Certificate_permission = () => {
       path: "/admin-reports",
       icon: <FaChartLine className="text-xl" />,
       label: "Report & Analytics",
-      subItems: [
-        {
-          id: "admission-report",
-          path: "/admin-reports/admission",
-          label: "Admission Report",
-        },
-        {
-          id: "attendance-report",
-          path: "/admin-reports/attendance",
-          label: "Attendance Report",
-        },
-        { id: "income", path: "/admin-reports/income", label: "Income" },
-      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
       icon: <FaDatabase className="text-xl" />,
       label: "CRM Management",
-      subItems: [
-        {
-          id: "data-entry",
-          path: "/admin-crm/data-entry",
-          label: "Data Entry",
-        },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
-      ],
     },
   ];
 
-  // Get status badge color
   const getStatusColor = (status) => {
     switch (status) {
       case "Approved":
@@ -672,23 +571,21 @@ const Certificate_permission = () => {
     }
   };
 
-  // Get status icon
   const getStatusIcon = (status) => {
     switch (status) {
       case "Approved":
-        return <FaCheckCircleIcon className="text-green-500" />;
+        return <FaCheckCircle className="text-green-500" size={10} />;
       case "Pending":
-        return <FaHourglassHalf className="text-yellow-500" />;
+        return <FaHourglassHalf className="text-yellow-500" size={10} />;
       case "Rejected":
-        return <FaTimesCircleIcon className="text-red-500" />;
+        return <FaTimesCircle className="text-red-500" size={10} />;
       case "Issued":
-        return <FaCertificateIcon className="text-blue-500" />;
+        return <FaCertificate className="text-blue-500" size={10} />;
       default:
         return null;
     }
   };
 
-  // Get certificate type badge color
   const getTypeColor = (type) => {
     switch (type) {
       case "Completion":
@@ -704,15 +601,33 @@ const Certificate_permission = () => {
     }
   };
 
-  // Filter certificate requests
+  const getGradeColor = (grade) => {
+    switch (grade) {
+      case "A+":
+      case "A":
+        return "bg-green-100 text-green-700";
+      case "A-":
+      case "B":
+        return "bg-blue-100 text-blue-700";
+      case "C":
+        return "bg-yellow-100 text-yellow-700";
+      case "D":
+        return "bg-orange-100 text-orange-700";
+      case "F":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
   const filteredRequests = certificateRequests.filter((request) => {
+    const s = searchTerm.toLowerCase();
     const matchesSearch =
-      request.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.certificateNumber
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      request.subject.toLowerCase().includes(searchTerm.toLowerCase());
+      !s ||
+      (request.studentName || "").toLowerCase().includes(s) ||
+      (request.studentId || "").toLowerCase().includes(s) ||
+      (request.certificateNumber || "").toLowerCase().includes(s) ||
+      (request.course || "").toLowerCase().includes(s);
     const matchesStatus =
       filterStatus === "All" || request.status === filterStatus;
     const matchesType =
@@ -721,7 +636,6 @@ const Certificate_permission = () => {
     return matchesSearch && matchesStatus && matchesType && matchesClass;
   });
 
-  // Get unique values for filters
   const uniqueStatuses = [
     "All",
     ...new Set(certificateRequests.map((r) => r.status)),
@@ -735,14 +649,18 @@ const Certificate_permission = () => {
     ...new Set(certificateRequests.map((r) => r.class)),
   ];
 
-  // Open add modal
+  // ============================================================
+  // Modal handlers
+  // ============================================================
   const openAddModal = () => {
+    const first = eldersStudents[0];
     setFormData({
-      studentName: "",
-      studentId: "",
-      class: "",
-      subject: "",
-      teacher: "",
+      studentName: first?.name || "",
+      studentId: first?.studentId || "",
+      class: first?.class || ELDERS_CLASSES[0],
+      batch: first?.batch || "Batch-03",
+      course: first?.primaryCourse || ELDERS_COURSES[0],
+      teacher: ELDERS_TEACHERS[0],
       certificateType: "Completion",
       requestDate: new Date().toISOString().split("T")[0],
       grade: "",
@@ -753,13 +671,24 @@ const Certificate_permission = () => {
     setShowAddModal(true);
   };
 
-  // Open details modal
+  const handleStudentSelect = (studentId) => {
+    const s = eldersStudents.find((st) => st._id === studentId);
+    if (!s) return;
+    setFormData((prev) => ({
+      ...prev,
+      studentName: s.name,
+      studentId: s.studentId,
+      class: s.class,
+      batch: s.batch,
+      course: s.primaryCourse || s.course,
+    }));
+  };
+
   const openDetailsModal = (request) => {
     setSelectedRequest(request);
     setShowDetailsModal(true);
   };
 
-  // Open approve modal
   const openApproveModal = (request) => {
     setSelectedRequest(request);
     setCertificateNumber(
@@ -768,21 +697,19 @@ const Certificate_permission = () => {
     setShowApproveModal(true);
   };
 
-  // Open reject modal
   const openRejectModal = (request) => {
     setSelectedRequest(request);
     setRejectReason("");
     setShowRejectModal(true);
   };
 
-  // Handle add certificate request
   const handleAddRequest = (e) => {
     e.preventDefault();
 
     if (
       !formData.studentName ||
       !formData.class ||
-      !formData.subject ||
+      !formData.course ||
       !formData.teacher
     ) {
       Swal.fire({
@@ -797,11 +724,10 @@ const Certificate_permission = () => {
     const newRequest = {
       id: Date.now(),
       studentName: formData.studentName,
-      studentId:
-        formData.studentId ||
-        `STU${String(certificateRequests.length + 1).padStart(3, "0")}`,
+      studentId: formData.studentId,
       class: formData.class,
-      subject: formData.subject,
+      batch: formData.batch,
+      course: formData.course,
       teacher: formData.teacher,
       certificateType: formData.certificateType,
       requestDate: formData.requestDate,
@@ -820,14 +746,13 @@ const Certificate_permission = () => {
     setShowAddModal(false);
     Swal.fire({
       icon: "success",
-      title: "Certificate Request Added!",
-      text: `Certificate request for ${formData.studentName} has been added.`,
+      title: "✅ Certificate Request Added!",
+      text: formData.studentName,
       timer: 1500,
       showConfirmButton: false,
     });
   };
 
-  // Handle approve certificate
   const handleApproveCertificate = () => {
     Swal.fire({
       title: "Approve Certificate?",
@@ -845,7 +770,7 @@ const Certificate_permission = () => {
               ? {
                   ...r,
                   status: "Approved",
-                  certificateNumber: certificateNumber,
+                  certificateNumber,
                   approvedBy: adminInfo.name,
                   approvedDate: new Date().toISOString().split("T")[0],
                 }
@@ -855,8 +780,7 @@ const Certificate_permission = () => {
         setShowApproveModal(false);
         Swal.fire({
           icon: "success",
-          title: "Certificate Approved!",
-          text: `Certificate for ${selectedRequest.studentName} has been approved.`,
+          title: "✅ Certificate Approved!",
           timer: 1500,
           showConfirmButton: false,
         });
@@ -864,13 +788,11 @@ const Certificate_permission = () => {
     });
   };
 
-  // Handle reject certificate
   const handleRejectCertificate = () => {
     if (!rejectReason.trim()) {
       Swal.fire({
         icon: "warning",
         title: "Please provide a reason",
-        text: "You must specify a reason for rejection.",
         timer: 1500,
         showConfirmButton: false,
       });
@@ -904,7 +826,6 @@ const Certificate_permission = () => {
         Swal.fire({
           icon: "success",
           title: "Certificate Rejected",
-          text: `Certificate for ${selectedRequest.studentName} has been rejected.`,
           timer: 1500,
           showConfirmButton: false,
         });
@@ -912,7 +833,6 @@ const Certificate_permission = () => {
     });
   };
 
-  // Handle issue certificate (generate and download)
   const handleIssueCertificate = (request) => {
     Swal.fire({
       title: "Issue Certificate?",
@@ -937,8 +857,7 @@ const Certificate_permission = () => {
         );
         Swal.fire({
           icon: "success",
-          title: "Certificate Issued!",
-          text: `Certificate for ${request.studentName} has been generated and downloaded.`,
+          title: "✅ Certificate Issued!",
           timer: 1500,
           showConfirmButton: false,
         });
@@ -946,7 +865,6 @@ const Certificate_permission = () => {
     });
   };
 
-  // Format date
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     const date = new Date(dateStr);
@@ -957,7 +875,6 @@ const Certificate_permission = () => {
     });
   };
 
-  // Calculate stats
   const totalRequests = certificateRequests.length;
   const pendingRequests = certificateRequests.filter(
     (r) => r.status === "Pending",
@@ -975,11 +892,11 @@ const Certificate_permission = () => {
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
           <h1 className="text-sm font-bold text-gray-800">
-            Certificate Permission
+            Certificate Permission (Elders)
           </h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100"
           >
             {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
@@ -988,14 +905,8 @@ const Certificate_permission = () => {
         {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -1015,7 +926,7 @@ const Certificate_permission = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -1026,14 +937,11 @@ const Certificate_permission = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
@@ -1076,14 +984,11 @@ const Certificate_permission = () => {
                     }}
                   >
                     <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -1107,7 +1012,6 @@ const Certificate_permission = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -1116,35 +1020,87 @@ const Certificate_permission = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaCertificateIcon className="text-purple-600" /> Certificate
-                Permission
+                <FaCertificate className="text-purple-600" /> Certificate
+                Permission —
+                <span className="text-teal-700">Quran For Elders</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Manage student certificate requests
+                {studentsLoading
+                  ? "Loading elders students..."
+                  : `${eldersStudents.length} elders student${eldersStudents.length !== 1 ? "s" : ""} • Qaida • Nazera • Najera • Tajweed • Bakarah Hifz`}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
+                onClick={fetchEldersStudents}
+                disabled={studentsLoading}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 disabled:opacity-50"
+              >
+                <FaSyncAlt
+                  size={12}
+                  className={studentsLoading ? "animate-spin" : ""}
+                />
+                Refresh
+              </button>
+              <button
                 onClick={openAddModal}
-                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaPlus size={12} /> Add Request
               </button>
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
               >
                 Logout
               </button>
             </div>
+          </div>
+
+          {/* ✅ Elders Students Card */}
+          <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
+            <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
+              <FaUsers size={12} /> Elders Students ({eldersStudents.length})
+            </p>
+            {studentsLoading && eldersStudents.length === 0 ? (
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div>
+                Loading from API...
+              </div>
+            ) : eldersStudents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {eldersStudents.map((s) => (
+                  <div
+                    key={s._id}
+                    className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      {(s.name || "S").charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-gray-800 truncate">
+                        {s.name}
+                      </p>
+                      <p className="text-[10px] text-gray-500 truncate">
+                        {s.studentId} • {s.class}
+                      </p>
+                      <p className="text-[10px] text-teal-600 truncate">
+                        {s.course}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-500 italic">
+                No elders students found.
+              </p>
+            )}
           </div>
 
           {/* Stats */}
@@ -1180,43 +1136,43 @@ const Certificate_permission = () => {
                 <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search by student name, ID, subject or certificate number..."
+                  placeholder="Search elders certificate requests..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="flex items-center gap-1 flex-wrap">
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {uniqueStatuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type}
+                  {uniqueTypes.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterClass}
                   onChange={(e) => setFilterClass(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueClasses.map((cls) => (
-                    <option key={cls} value={cls}>
-                      {cls}
+                  {uniqueClasses.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
                     </option>
                   ))}
                 </select>
@@ -1224,9 +1180,9 @@ const Certificate_permission = () => {
             </div>
           </div>
 
-          {/* Certificate Requests Table */}
+          {/* Table */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto max-h-[calc(100vh-360px)] overflow-y-auto">
+            <div className="overflow-x-auto max-h-[calc(100vh-540px)] overflow-y-auto">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
@@ -1240,7 +1196,7 @@ const Certificate_permission = () => {
                       Class
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
-                      Subject
+                      Course
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600">
                       Type
@@ -1259,10 +1215,7 @@ const Certificate_permission = () => {
                 <tbody className="divide-y divide-gray-100">
                   {filteredRequests.length > 0 ? (
                     filteredRequests.map((request, index) => (
-                      <tr
-                        key={request.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
+                      <tr key={request.id} className="hover:bg-gray-50">
                         <td className="px-3 py-2 font-medium text-gray-500">
                           {index + 1}
                         </td>
@@ -1278,7 +1231,7 @@ const Certificate_permission = () => {
                           {request.class}
                         </td>
                         <td className="px-3 py-2 hidden lg:table-cell text-gray-600">
-                          {request.subject}
+                          {request.course}
                         </td>
                         <td className="px-3 py-2">
                           <span
@@ -1289,15 +1242,7 @@ const Certificate_permission = () => {
                         </td>
                         <td className="px-3 py-2 hidden sm:table-cell">
                           <span
-                            className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                              request.grade === "A+" || request.grade === "A"
-                                ? "bg-green-100 text-green-700"
-                                : request.grade === "B"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : request.grade === "C"
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-red-100 text-red-700"
-                            }`}
+                            className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${getGradeColor(request.grade)}`}
                           >
                             {request.grade}
                           </span>
@@ -1314,8 +1259,8 @@ const Certificate_permission = () => {
                           <div className="flex items-center gap-1">
                             <button
                               onClick={() => openDetailsModal(request)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition-all"
-                              title="View Details"
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                              title="View"
                             >
                               <FaEye size={12} />
                             </button>
@@ -1323,27 +1268,27 @@ const Certificate_permission = () => {
                               <>
                                 <button
                                   onClick={() => openApproveModal(request)}
-                                  className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
+                                  className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
                                   title="Approve"
                                 >
-                                  <FaCheckCircleIcon size={12} />
+                                  <FaCheckCircle size={12} />
                                 </button>
                                 <button
                                   onClick={() => openRejectModal(request)}
-                                  className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                                  className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                                   title="Reject"
                                 >
-                                  <FaTimesCircleIcon size={12} />
+                                  <FaTimesCircle size={12} />
                                 </button>
                               </>
                             )}
                             {request.status === "Approved" && (
                               <button
                                 onClick={() => handleIssueCertificate(request)}
-                                className="text-purple-600 hover:text-purple-800 p-1 rounded hover:bg-purple-50 transition-all"
-                                title="Issue Certificate"
+                                className="text-purple-600 hover:text-purple-800 p-1 rounded hover:bg-purple-50"
+                                title="Issue"
                               >
-                                <FaCertificateIcon size={12} />
+                                <FaCertificate size={12} />
                               </button>
                             )}
                           </div>
@@ -1356,10 +1301,10 @@ const Certificate_permission = () => {
                         colSpan="8"
                         className="px-3 py-8 text-center text-gray-500"
                       >
-                        <FaCertificateIcon className="text-4xl text-gray-300 mx-auto mb-2" />
-                        <p>No certificate requests found</p>
+                        <FaCertificate className="text-4xl text-gray-300 mx-auto mb-2" />
+                        <p>No elders certificate requests found</p>
                         <p className="text-[10px] text-gray-400 mt-1">
-                          Try adjusting your search or filter criteria
+                          উপরে "Add Request" ক্লিক করে যোগ করুন
                         </p>
                       </td>
                     </tr>
@@ -1371,13 +1316,14 @@ const Certificate_permission = () => {
         </main>
       </div>
 
-      {/* Add Certificate Request Modal */}
+      {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlus className="text-purple-600" /> Add Certificate Request
+                <FaPlus className="text-purple-600" /> Add Elders Certificate
+                Request
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1387,6 +1333,33 @@ const Certificate_permission = () => {
               </button>
             </div>
             <form onSubmit={handleAddRequest} className="p-6 space-y-4">
+              <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
+                💡 Student select করলে বাকি information auto-fill হবে
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Elders Student *
+                </label>
+                <select
+                  required
+                  value={
+                    eldersStudents.find(
+                      (s) => s.studentId === formData.studentId,
+                    )?._id || ""
+                  }
+                  onChange={(e) => handleStudentSelect(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="">Select Student</option>
+                  {eldersStudents.map((s) => (
+                    <option key={s._id} value={s._id}>
+                      {s.name} — {s.course}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1396,11 +1369,8 @@ const Certificate_permission = () => {
                     type="text"
                     required
                     value={formData.studentName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, studentName: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter student name"
+                    readOnly
+                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
                   />
                 </div>
                 <div>
@@ -1410,11 +1380,8 @@ const Certificate_permission = () => {
                   <input
                     type="text"
                     value={formData.studentId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, studentId: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Auto-generated"
+                    readOnly
+                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
                   />
                 </div>
               </div>
@@ -1430,32 +1397,29 @@ const Certificate_permission = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Class</option>
-                    {classes.map((cls) => (
-                      <option key={cls} value={cls}>
-                        {cls}
+                    {ELDERS_CLASSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject *
+                    Batch
                   </label>
                   <select
-                    required
-                    value={formData.subject}
+                    value={formData.batch}
                     onChange={(e) =>
-                      setFormData({ ...formData, subject: e.target.value })
+                      setFormData({ ...formData, batch: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Subject</option>
-                    {subjects.map((subject) => (
-                      <option key={subject} value={subject}>
-                        {subject}
+                    {ELDERS_BATCHES.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
                       </option>
                     ))}
                   </select>
@@ -1463,6 +1427,25 @@ const Certificate_permission = () => {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Course *
+                  </label>
+                  <select
+                    required
+                    value={formData.course}
+                    onChange={(e) =>
+                      setFormData({ ...formData, course: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {ELDERS_COURSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Teacher *
@@ -1473,16 +1456,18 @@ const Certificate_permission = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, teacher: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Teacher</option>
-                    {teachers.map((teacher) => (
-                      <option key={teacher} value={teacher}>
-                        {teacher}
+                    {ELDERS_TEACHERS.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
                       </option>
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Certificate Type *
@@ -1496,7 +1481,7 @@ const Certificate_permission = () => {
                         certificateType: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
                     {certificateTypes.map((type) => (
                       <option key={type} value={type}>
@@ -1505,24 +1490,23 @@ const Certificate_permission = () => {
                     ))}
                   </select>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Request Date *
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={formData.requestDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, requestDate: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Request Date *
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={formData.requestDate}
-                  onChange={(e) =>
-                    setFormData({ ...formData, requestDate: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Grade
@@ -1532,12 +1516,12 @@ const Certificate_permission = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, grade: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Grade</option>
-                    {grades.map((grade) => (
-                      <option key={grade} value={grade}>
-                        {grade}
+                    <option value="">Select</option>
+                    {grades.map((g) => (
+                      <option key={g} value={g}>
+                        {g}
                       </option>
                     ))}
                   </select>
@@ -1557,30 +1541,27 @@ const Certificate_permission = () => {
                         attendance: parseInt(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter attendance"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Exam Score (%)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={formData.examScore}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      examScore: parseInt(e.target.value) || 0,
-                    })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter exam score"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Exam Score (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formData.examScore}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        examScore: parseInt(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
               </div>
 
               <div>
@@ -1593,22 +1574,22 @@ const Certificate_permission = () => {
                     setFormData({ ...formData, notes: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Add notes..."
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="Additional notes..."
                 />
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-2 rounded-lg font-semibold"
                 >
                   <FaSave className="inline mr-2" size={14} /> Add Request
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -1622,10 +1603,10 @@ const Certificate_permission = () => {
       {showDetailsModal && selectedRequest && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaCertificateIcon className="text-purple-600" /> Certificate
-                Request Details
+                <FaCertificate className="text-purple-600" /> Certificate
+                Details
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
@@ -1635,8 +1616,7 @@ const Certificate_permission = () => {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              {/* Header */}
-              <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
+              <div className="flex items-center gap-4 pb-4 border-b">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
                   {selectedRequest.studentName.charAt(0)}
                 </div>
@@ -1662,17 +1642,18 @@ const Certificate_permission = () => {
                   </p>
                   <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
                     <span>📚 {selectedRequest.class}</span>
-                    <span>📖 {selectedRequest.subject}</span>
+                    <span>📖 {selectedRequest.course}</span>
                     <span>👨‍🏫 {selectedRequest.teacher}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Details Grid */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-[10px] text-gray-400">Grade</p>
-                  <p className="text-sm font-semibold">
+                  <p
+                    className={`inline-flex px-2 py-0.5 rounded-full text-sm font-bold ${getGradeColor(selectedRequest.grade)}`}
+                  >
                     {selectedRequest.grade}
                   </p>
                 </div>
@@ -1742,8 +1723,7 @@ const Certificate_permission = () => {
                 </div>
               )}
 
-              {/* Actions */}
-              <div className="flex gap-3 pt-4 border-t border-gray-200 flex-wrap">
+              <div className="flex gap-3 pt-4 border-t flex-wrap">
                 {selectedRequest.status === "Pending" && (
                   <>
                     <button
@@ -1751,18 +1731,18 @@ const Certificate_permission = () => {
                         setShowDetailsModal(false);
                         openApproveModal(selectedRequest);
                       }}
-                      className="flex-1 min-w-[100px] bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                      className="flex-1 min-w-[100px] bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                     >
-                      <FaCheckCircleIcon className="inline mr-2" /> Approve
+                      <FaCheckCircle className="inline mr-2" /> Approve
                     </button>
                     <button
                       onClick={() => {
                         setShowDetailsModal(false);
                         openRejectModal(selectedRequest);
                       }}
-                      className="flex-1 min-w-[100px] bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                      className="flex-1 min-w-[100px] bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                     >
-                      <FaTimesCircleIcon className="inline mr-2" /> Reject
+                      <FaTimesCircle className="inline mr-2" /> Reject
                     </button>
                   </>
                 )}
@@ -1772,15 +1752,14 @@ const Certificate_permission = () => {
                       setShowDetailsModal(false);
                       handleIssueCertificate(selectedRequest);
                     }}
-                    className="flex-1 min-w-[100px] bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                    className="flex-1 min-w-[100px] bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                   >
-                    <FaCertificateIcon className="inline mr-2" /> Issue
-                    Certificate
+                    <FaCertificate className="inline mr-2" /> Issue
                   </button>
                 )}
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 min-w-[100px] bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                  className="flex-1 min-w-[100px] bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>
@@ -1793,62 +1772,59 @@ const Certificate_permission = () => {
       {/* Approve Modal */}
       {showApproveModal && selectedRequest && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-                  <FaCheckCircleIcon className="text-green-600 text-2xl" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-800">
-                    Approve Certificate
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {selectedRequest.studentName}
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-2 text-sm text-gray-600 mb-4">
-                <p>
-                  <strong>Type:</strong> {selectedRequest.certificateType}
-                </p>
-                <p>
-                  <strong>Class:</strong> {selectedRequest.class}
-                </p>
-                <p>
-                  <strong>Subject:</strong> {selectedRequest.subject}
-                </p>
-                <p>
-                  <strong>Grade:</strong> {selectedRequest.grade}
-                </p>
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                <FaCheckCircle className="text-green-600 text-2xl" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Certificate Number *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={certificateNumber}
-                  onChange={(e) => setCertificateNumber(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter certificate number"
-                />
+                <h3 className="text-xl font-bold text-gray-800">
+                  Approve Certificate
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {selectedRequest.studentName}
+                </p>
               </div>
-              <div className="flex gap-3 mt-4">
-                <button
-                  onClick={handleApproveCertificate}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-sm transition-all"
-                >
-                  <FaCheckCircleIcon className="inline mr-2" /> Approve
-                </button>
-                <button
-                  onClick={() => setShowApproveModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
-                >
-                  Cancel
-                </button>
-              </div>
+            </div>
+            <div className="space-y-2 text-sm text-gray-600 mb-4">
+              <p>
+                <strong>Type:</strong> {selectedRequest.certificateType}
+              </p>
+              <p>
+                <strong>Class:</strong> {selectedRequest.class}
+              </p>
+              <p>
+                <strong>Course:</strong> {selectedRequest.course}
+              </p>
+              <p>
+                <strong>Grade:</strong> {selectedRequest.grade}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Certificate Number *
+              </label>
+              <input
+                type="text"
+                required
+                value={certificateNumber}
+                onChange={(e) => setCertificateNumber(e.target.value)}
+                className="w-full border rounded-lg px-3 py-2 text-sm"
+              />
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={handleApproveCertificate}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold text-sm"
+              >
+                <FaCheckCircle className="inline mr-2" /> Approve
+              </button>
+              <button
+                onClick={() => setShowApproveModal(false)}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>
@@ -1857,58 +1833,56 @@ const Certificate_permission = () => {
       {/* Reject Modal */}
       {showRejectModal && selectedRequest && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
-                  <FaTimesCircleIcon className="text-red-600 text-2xl" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-800">
-                    Reject Certificate
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {selectedRequest.studentName}
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-2 text-sm text-gray-600 mb-4">
-                <p>
-                  <strong>Type:</strong> {selectedRequest.certificateType}
-                </p>
-                <p>
-                  <strong>Class:</strong> {selectedRequest.class}
-                </p>
-                <p>
-                  <strong>Subject:</strong> {selectedRequest.subject}
-                </p>
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <FaTimesCircle className="text-red-600 text-2xl" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Rejection Reason *
-                </label>
-                <textarea
-                  value={rejectReason}
-                  onChange={(e) => setRejectReason(e.target.value)}
-                  rows="3"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                  placeholder="Enter the reason for rejection..."
-                />
+                <h3 className="text-xl font-bold text-gray-800">
+                  Reject Certificate
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {selectedRequest.studentName}
+                </p>
               </div>
-              <div className="flex gap-3 mt-4">
-                <button
-                  onClick={handleRejectCertificate}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold text-sm transition-all"
-                >
-                  <FaTimesCircleIcon className="inline mr-2" /> Reject
-                </button>
-                <button
-                  onClick={() => setShowRejectModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
-                >
-                  Cancel
-                </button>
-              </div>
+            </div>
+            <div className="space-y-2 text-sm text-gray-600 mb-4">
+              <p>
+                <strong>Type:</strong> {selectedRequest.certificateType}
+              </p>
+              <p>
+                <strong>Class:</strong> {selectedRequest.class}
+              </p>
+              <p>
+                <strong>Course:</strong> {selectedRequest.course}
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Rejection Reason *
+              </label>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                rows="3"
+                className="w-full border rounded-lg px-3 py-2 text-sm"
+                placeholder="Enter rejection reason..."
+              />
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={handleRejectCertificate}
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold text-sm"
+              >
+                <FaTimesCircle className="inline mr-2" /> Reject
+              </button>
+              <button
+                onClick={() => setShowRejectModal(false)}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

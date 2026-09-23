@@ -1,7 +1,6 @@
-// src/Page/Admin/AdminDashboard.jsx
+// src/Page/Admin/Student_exam.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Navbar from "../../Components/Navbar/Navbar";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -10,244 +9,363 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
   FaCalendarAlt,
+  FaClock,
   FaBook,
-  FaFileAlt,
   FaChartLine,
   FaUserGraduate,
   FaUserPlus,
   FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
   FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock,
   FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
   FaPlusCircle,
-  FaDownload,
-  FaPrint,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
+  FaSave,
+  FaHourglassHalf,
   FaCalendarPlus,
-  FaVideo, // ✅ নতুন যোগ করা হলো
-  FaFilePdf, // ✅ নতুন যোগ করা হলো
+  FaFileAlt,
+  FaAward,
+  FaSyncAlt,
+  FaStar,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
-import Admin_notification from "../Admin-notification/Admin_notification";
 
-const AdminDashboard = () => {
+const API_BASE = "https://api.tarbiyahonline.com";
+
+// ============================================================
+// ✅ ELDERS DEPARTMENT
+// ============================================================
+const ELDERS_TEACHERS = ["Jubayer Ahmad", "Sumaiya Afrin Mim"];
+
+const ELDERS_COURSES = [
+  "Qaida Nuraniyah",
+  "Quran Nazera",
+  "Najera",
+  "Basic Tajweed",
+  "Bakarah Hifz",
+];
+
+const ELDERS_CLASSES = [
+  "Elders Batch A",
+  "Elders Batch B",
+  "Elders Batch C",
+  "Elders Batch D",
+  "Elders Batch E",
+];
+
+const ELDERS_BATCHES = [
+  "Batch-01",
+  "Batch-02",
+  "Batch-03",
+  "Batch-04",
+  "Batch-05",
+  "Batch-06",
+];
+
+const ELDERS_COURSE_KEYWORDS = [
+  "qaida nuraniyah",
+  "qaida nooraniya",
+  "qaida noorani",
+  "qaida nurani",
+  "qaidah nuraniyah",
+  "qaidah nooraniya",
+  "qaidah noorani",
+  "quran nazera",
+  "nazera quran",
+  "quran najera",
+  "najera quran",
+  "bakarah hifz",
+  "bakara hifz",
+  "baqarah hifz",
+  "baqara hifz",
+  "basic tajweed",
+];
+
+const isSingleEldersCourse = (singleCourse) => {
+  const p = String(singleCourse).toLowerCase().trim();
+  if (!p) return false;
+  return ELDERS_COURSE_KEYWORDS.some((c) => {
+    if (p === c) return true;
+    if (p.includes(c)) return true;
+    if (c.includes(p) && p.length >= 8) return true;
+    return false;
+  });
+};
+
+const isEldersCourse = (courseStr) => {
+  if (!courseStr) return false;
+  const parts = String(courseStr)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (parts.length === 0) return false;
+  return parts.every((part) => isSingleEldersCourse(part));
+};
+
+const getPrimaryCourse = (courseStr) => {
+  if (!courseStr) return "";
+  const first = String(courseStr).split(",")[0].trim().toLowerCase();
+  if (first.includes("qaida")) return "Qaida Nuraniyah";
+  if (first.includes("najera") || first.includes("nazera")) return "Najera";
+  if (first.includes("tajweed")) return "Basic Tajweed";
+  if (first.includes("bakarah") || first.includes("bakara"))
+    return "Bakarah Hifz";
+  return "Qaida Nuraniyah";
+};
+
+// ✅ Elders students fallback
+const ELDERS_STUDENTS_FALLBACK = [
+  {
+    _id: "ELDERS_STU_001",
+    name: "Omer Faruk",
+    studentId: "TET26FB6001",
+    course: "Qaida Nooraniya, Bakarah Hifz",
+    primaryCourse: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    phone: "",
+    email: "omer@gmail.com",
+    status: "Active",
+  },
+  {
+    _id: "ELDERS_STU_002",
+    name: "Ikramm",
+    studentId: "TET26FB6002",
+    course: "Qaida Nooraniya, Bakarah Hifz",
+    primaryCourse: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    phone: "",
+    email: "ikramm@gmail.com",
+    status: "Active",
+  },
+];
+
+// ✅ Sample exam records
+const ELDERS_DEFAULT_EXAMS = [
+  {
+    id: 1,
+    examTitle: "Mid Term Exam 2026",
+    examType: "Mid Term",
+    studentName: "Omer Faruk",
+    studentId: "TET26FB6001",
+    course: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    teacher: "Jubayer Ahmad",
+    examDate: "2026-09-15",
+    totalMarks: 100,
+    obtainedMarks: 88,
+    grade: "A+",
+    status: "Completed",
+    remarks: "Excellent progress",
+    createdAt: "2026-09-10",
+  },
+  {
+    id: 2,
+    examTitle: "Weekly Test - Week 3",
+    examType: "Weekly Test",
+    studentName: "Ikramm",
+    studentId: "TET26FB6002",
+    course: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    teacher: "Sumaiya Afrin Mim",
+    examDate: "2026-09-20",
+    totalMarks: 50,
+    obtainedMarks: 42,
+    grade: "A",
+    status: "Completed",
+    remarks: "Good effort",
+    createdAt: "2026-09-18",
+  },
+  {
+    id: 3,
+    examTitle: "Final Exam 2026",
+    examType: "Final",
+    studentName: "Omer Faruk",
+    studentId: "TET26FB6001",
+    course: "Qaida Nuraniyah",
+    class: "Elders Batch A",
+    batch: "Batch-03",
+    teacher: "Jubayer Ahmad",
+    examDate: "2026-12-15",
+    totalMarks: 100,
+    obtainedMarks: 0,
+    grade: "-",
+    status: "Upcoming",
+    remarks: "",
+    createdAt: "2026-09-01",
+  },
+];
+
+const Student_exam = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("dashboard");
-  const [activeSubMenu, setActiveSubMenu] = useState(null);
+  const [activeMenu, setActiveMenu] = useState("exam");
+  const [activeSubMenu, setActiveSubMenu] = useState("student-exam");
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
     phone: "",
     designation: "",
-    department: "",
+    department: "Quran for Elders",
     joinDate: "",
   });
 
-  // Admin Dashboard Stats
-  const [stats, setStats] = useState({
-    totalDepartments: 5,
-    todayClasses: 8,
-    totalStudents: 156,
-    newAdmissions: 12,
-    totalTeachers: 25,
-    totalIncome: 125000,
-    pendingFees: 35000,
-    notifications: 8,
-  });
+  // ✅ Elders students from API
+  const [eldersStudents, setEldersStudents] = useState(
+    ELDERS_STUDENTS_FALLBACK,
+  );
+  const [studentsLoading, setStudentsLoading] = useState(true);
 
-  // ✅ নতুন — localStorage থেকে department-specific stats load করো
-  useEffect(() => {
-    const savedStats = localStorage.getItem("adminStats");
-    if (savedStats) {
+  // ✅ Elders exams
+  const [exams, setExams] = useState(() => {
+    const saved = localStorage.getItem("eldersStudentExams");
+    if (saved) {
       try {
-        const parsed = JSON.parse(savedStats);
-        if (parsed && Object.keys(parsed).length > 0) {
-          setStats((prev) => ({ ...prev, ...parsed }));
-        }
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       } catch (err) {
-        console.error("Failed to parse adminStats:", err);
+        console.error(err);
       }
     }
-  }, []);
+    return ELDERS_DEFAULT_EXAMS;
+  });
 
-  const handleView = (student) => {
-    Swal.fire({
-      title: `📋 Student Details: ${student.name}`,
-      html: `
-      <div style="text-align: left; font-size: 13px; max-height: 450px; overflow-y: auto;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">admin
-          <p><strong>নাম:</strong> ${student.name || "N/A"}</p>
-          <p><strong>ফোন:</strong> ${student.phone || "N/A"}</p>
-          <p><strong>ইমেইল:</strong> ${student.email || "N/A"}</p>
-          <p><strong>কোর্স:</strong> ${student.course || student.class || "N/A"}</p>
-          <p><strong>ইউজারনেম:</strong> ${student.username || "Not assigned"}</p>
-          <p><strong>স্ট্যাটাস:</strong> ${student.status || "Pending"}</p>
-          <p><strong>পিতার নাম:</strong> ${student.fatherName || student.guardianName || "N/A"}</p>
-          <p><strong>মাতার নাম:</strong> ${student.motherName || "N/A"}</p>
-          <p><strong>অভিভাবক:</strong> ${student.guardianName || "N/A"}</p>
-          <p><strong>অভিভাবক ফোন:</strong> ${student.guardianPhone || "N/A"}</p>
-          <p><strong>বর্তমান ঠিকানা:</strong> ${student.presentAddress || student.address || "N/A"}</p>
-          <p><strong>স্থায়ী ঠিকানা:</strong> ${student.permanentAddress || "N/A"}</p>
-          <p><strong>পরিচয়পত্র:</strong> ${student.dobOrNid || "N/A"}</p>
-          <p><strong>পেমেন্ট স্ট্যাটাস:</strong> ${student.paymentStatus || (student.paidAmount ? "Paid" : "Unpaid")}</p>
-          <p><strong>পেমেন্ট মেথড:</strong> ${student.paymentMethod || "N/A"}</p>
-          <p><strong>ট্রানজেকশন আইডি:</strong> ${student.transactionId || "N/A"}</p>
-          <p><strong>ভর্তি তারিখ:</strong> ${student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : "N/A"}</p>
-        </div>
-        <hr style="margin: 10px 0;">
-        <p style="font-size: 11px; color: #666;">রেজিস্ট্রেশন: ${student.createdAt ? new Date(student.createdAt).toLocaleString() : "N/A"}</p>
-      </div>
-    `,
-      confirmButtonColor: "#3b82f6",
-      confirmButtonText: "Close",
-      width: 650,
-    });
-  };
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("All");
+  const [filterCourse, setFilterCourse] = useState("All");
+  const [filterType, setFilterType] = useState("All");
 
-  // Students Data
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      name: "Ahmed Hasan",
-      class: "Class 8",
-      roll: "01",
-      status: "Active",
-      admissionDate: "2026-01-15",
-      parentContact: "+880 1712 345678",
-    },
-    {
-      id: 2,
-      name: "Fatima Begum",
-      class: "Class 9",
-      roll: "02",
-      status: "Active",
-      admissionDate: "2026-02-01",
-      parentContact: "+880 1723 456789",
-    },
-    {
-      id: 3,
-      name: "Mohammad Ali",
-      class: "Class 10",
-      roll: "05",
-      status: "Pending",
-      admissionDate: "2026-07-20",
-      parentContact: "+880 1734 567890",
-    },
-    {
-      id: 4,
-      name: "Aisha Rahman",
-      class: "Class 7",
-      roll: "06",
-      status: "Active",
-      admissionDate: "2026-03-01",
-      parentContact: "+880 1745 678901",
-    },
-  ]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [selectedExam, setSelectedExam] = useState(null);
 
-  // Teachers Data
-  const [teachers, setTeachers] = useState([
-    {
-      id: 1,
-      name: "Ustadh Ahmad",
-      subject: "Tajweed",
-      class: "Class 8",
-      status: "Active",
-      joinDate: "2024-01-15",
-      attendance: 92,
-    },
-    {
-      id: 2,
-      name: "Ustadh Muhammad",
-      subject: "Tafsir",
-      class: "Class 9",
-      status: "Active",
-      joinDate: "2024-02-01",
-      attendance: 85,
-    },
-    {
-      id: 3,
-      name: "Ustadh Abdullah",
-      subject: "Hadith",
-      class: "Class 10",
-      status: "Active",
-      joinDate: "2024-03-10",
-      attendance: 78,
-    },
-  ]);
+  const [formData, setFormData] = useState({
+    examTitle: "",
+    examType: "Weekly Test",
+    studentName: "",
+    studentId: "",
+    course: "",
+    class: "",
+    batch: "",
+    teacher: "",
+    examDate: "",
+    totalMarks: 100,
+    obtainedMarks: 0,
+    grade: "-",
+    status: "Upcoming",
+    remarks: "",
+  });
 
-  // Notifications
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      message: "New student admission request from Ahmed Hasan",
-      time: "2 hours ago",
-      read: false,
-    },
-    {
-      id: 2,
-      message: "Monthly fee pending for Class 8 students",
-      time: "5 hours ago",
-      read: false,
-    },
-    {
-      id: 3,
-      message: "Teacher attendance report generated",
-      time: "1 day ago",
-      read: true,
-    },
-  ]);
+  const examTypes = [
+    "Weekly Test",
+    "Monthly Test",
+    "Mid Term",
+    "Final",
+    "Quiz",
+  ];
+  const statuses = ["Upcoming", "Completed", "Cancelled"];
 
   // Load admin info
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        setAdminInfo(JSON.parse(savedAdmin));
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: "Quran for Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
+
+  // ============================================================
+  // ✅ Fetch elders students from API
+  // ============================================================
+  const fetchEldersStudents = async () => {
+    try {
+      setStudentsLoading(true);
+      let eldersList = [...ELDERS_STUDENTS_FALLBACK];
+
+      try {
+        const res = await fetch(`${API_BASE}/api/students/all`);
+        const text = await res.text();
+
+        if (!text.trim().startsWith("<")) {
+          const data = JSON.parse(text);
+          if (data.success && Array.isArray(data.students)) {
+            const all = data.students || [];
+            const elders = all.filter((s) => isEldersCourse(s.course));
+
+            console.log("📥 Total students:", all.length);
+            console.log("✅ Elders students:", elders.length);
+
+            elders.forEach((s) => {
+              const formatted = {
+                _id: s._id,
+                name: s.name || "",
+                studentId: s.studentId || s._id?.slice(-8) || "N/A",
+                course: s.course || "",
+                primaryCourse: getPrimaryCourse(s.course),
+                class: s.batch || s.class || "Elders Batch A",
+                batch: s.batch || "Batch-03",
+                phone: s.phone || "",
+                email: s.email || "",
+                status: s.status || "Pending",
+              };
+
+              const exists = eldersList.some(
+                (e) =>
+                  (e.name || "").toLowerCase() ===
+                  (formatted.name || "").toLowerCase(),
+              );
+              if (!exists) eldersList.push(formatted);
+            });
+          }
+        }
+      } catch (apiErr) {
+        console.warn("API fetch skipped:", apiErr.message);
+      }
+
+      console.log("✅ Final elders students:", eldersList.length);
+      setEldersStudents(eldersList);
+    } catch (err) {
+      console.error("❌ Fetch students error:", err);
+      setEldersStudents(ELDERS_STUDENTS_FALLBACK);
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEldersStudents();
+  }, []);
+
+  // Save exams to localStorage
+  useEffect(() => {
+    localStorage.setItem("eldersStudentExams", JSON.stringify(exams));
+  }, [exams]);
 
   const handleLogout = async () => {
     try {
@@ -255,8 +373,6 @@ const AdminDashboard = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-      localStorage.removeItem("adminStats"); // ✅ নতুন line
-
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -265,40 +381,20 @@ const AdminDashboard = () => {
       });
       navigate("/admin-login");
     } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
+      console.error(err);
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items with all links
   const menuItems = [
     {
       id: "profile",
       path: "/admin-profile",
       icon: <FaUser className="text-xl" />,
       label: "Profile",
-    },
-    {
-      id: "notification",
-      icon: <FaBell className="text-xl" />,
-      path: "/admin-notification",
-      label: "Notification",
     },
     {
       id: "dashboard",
@@ -315,16 +411,6 @@ const AdminDashboard = () => {
           id: "today-class",
           path: "/admin-dashboard/today-class",
           label: "Today's Class",
-        },
-        {
-          id: "basic-tazweed payment overview",
-          path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed Payment Overview",
-        },
-        {
-          id: "najera-payment overview",
-          path: "/admin-dashboard/najera-batch",
-          label: "Najera payment Overview",
         },
         {
           id: "new-admission",
@@ -360,20 +446,9 @@ const AdminDashboard = () => {
           label: "Student Profile",
         },
         {
-          id: "permission-permission",
-          path: "/admin-students/permission",
+          id: "admission-permission",
+          path: "/admin-students/admission",
           label: "Admission Permission",
-        },
-        // ✅ নতুন যোগ করা হলো
-        {
-          id: "basic-tazweed-student",
-          path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed payment overview",
-        },
-        {
-          id: "najera-batch-student",
-          path: "/admin-dashboard/najera-batch",
-          label: "Najera Batch payment overview ",
         },
       ],
     },
@@ -435,7 +510,7 @@ const AdminDashboard = () => {
     },
     {
       id: "absence-student",
-      path: "/student-absence",
+      path: "/admin-absence",
       icon: <FaUserTimes className="text-xl" />,
       label: "Absence Student Community",
     },
@@ -467,6 +542,11 @@ const AdminDashboard = () => {
       subItems: [
         { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
         {
+          id: "student-exam",
+          path: "/admin-exam/student-exam",
+          label: "Student Exam",
+        },
+        {
           id: "result-publish",
           path: "/admin-exam/result",
           label: "Result Publish",
@@ -483,109 +563,297 @@ const AdminDashboard = () => {
       path: "/admin-reports",
       icon: <FaChartLine className="text-xl" />,
       label: "Report & Analytics",
-      subItems: [
-        {
-          id: "admission-report",
-          path: "/admin-reports/admission",
-          label: "Admission Report",
-        },
-        {
-          id: "attendance-report",
-          path: "/admin-reports/attendance",
-          label: "Attendance Report",
-        },
-        { id: "income", path: "/admin-reports/income", label: "Income" },
-      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
       icon: <FaDatabase className="text-xl" />,
       label: "CRM Management",
-      subItems: [
-        {
-          id: "data-entry",
-          path: "/admin-crm/data-entry",
-          label: "Data Entry",
-        },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
-      ],
     },
   ];
 
-  // Render Dashboard Content
-  const renderContent = () => {
-    switch (activeMenu) {
-      case "dashboard":
-        return <DashboardContent stats={stats} notifications={notifications} />;
-      case "notification":
-        return <Admin_notification />; // notification কেস আলাদা
-      case "student-management":
-        return <StudentManagementContent students={students} />;
-      case "teacher-management":
-        return <TeacherManagementContent teachers={teachers} />;
-      case "batch-course":
-        return <BatchCourseContent />;
-      case "absence-student":
-        return <AbsenceStudentContent />;
-      case "finance":
-        return <FinanceContent />;
-      case "exam":
-        return <ExamContent />;
-      case "report-analytics":
-        return <ReportAnalyticsContent />;
-      case "crm-management":
-        return <CRMContent />;
-      case "salary":
-        return <SalaryContent />;
+  // Grade calculation
+  const calculateGrade = (obtained, total) => {
+    if (!total || total === 0) return "-";
+    const pct = (obtained / total) * 100;
+    if (pct >= 90) return "A+";
+    if (pct >= 80) return "A";
+    if (pct >= 70) return "A-";
+    if (pct >= 60) return "B";
+    if (pct >= 50) return "C";
+    if (pct >= 40) return "D";
+    return "F";
+  };
+
+  const getGradeColor = (grade) => {
+    switch (grade) {
+      case "A+":
+        return "bg-green-100 text-green-700";
+      case "A":
+        return "bg-green-100 text-green-700";
+      case "A-":
+        return "bg-blue-100 text-blue-700";
+      case "B":
+        return "bg-blue-100 text-blue-700";
+      case "C":
+        return "bg-yellow-100 text-yellow-700";
+      case "D":
+        return "bg-orange-100 text-orange-700";
+      case "F":
+        return "bg-red-100 text-red-700";
       default:
-        return <DashboardContent stats={stats} notifications={notifications} />;
+        return "bg-gray-100 text-gray-700";
     }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Completed":
+        return "bg-green-100 text-green-700";
+      case "Upcoming":
+        return "bg-yellow-100 text-yellow-700";
+      case "Cancelled":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case "Completed":
+        return <FaCheckCircle className="text-green-500" size={10} />;
+      case "Upcoming":
+        return <FaHourglassHalf className="text-yellow-500" size={10} />;
+      case "Cancelled":
+        return <FaTimesCircle className="text-red-500" size={10} />;
+      default:
+        return null;
+    }
+  };
+
+  // Filter exams
+  const filteredExams = exams.filter((exam) => {
+    const s = searchTerm.toLowerCase();
+    const matchesSearch =
+      !s ||
+      (exam.studentName || "").toLowerCase().includes(s) ||
+      (exam.studentId || "").toLowerCase().includes(s) ||
+      (exam.examTitle || "").toLowerCase().includes(s) ||
+      (exam.course || "").toLowerCase().includes(s);
+    const matchesStatus =
+      filterStatus === "All" || exam.status === filterStatus;
+    const matchesCourse =
+      filterCourse === "All" || exam.course === filterCourse;
+    const matchesType = filterType === "All" || exam.examType === filterType;
+    return matchesSearch && matchesStatus && matchesCourse && matchesType;
+  });
+
+  const uniqueStatuses = ["All", ...new Set(exams.map((e) => e.status))];
+  const uniqueCourses = ["All", ...new Set(exams.map((e) => e.course))];
+  const uniqueTypes = ["All", ...new Set(exams.map((e) => e.examType))];
+
+  // Stats
+  const totalExams = exams.length;
+  const completedExams = exams.filter((e) => e.status === "Completed").length;
+  const upcomingExams = exams.filter((e) => e.status === "Upcoming").length;
+  const cancelledExams = exams.filter((e) => e.status === "Cancelled").length;
+
+  // Open add modal
+  const openAddModal = () => {
+    const first = eldersStudents[0];
+    setFormData({
+      examTitle: "",
+      examType: "Weekly Test",
+      studentName: first?.name || "",
+      studentId: first?.studentId || "",
+      course: first?.primaryCourse || ELDERS_COURSES[0],
+      class: first?.class || ELDERS_CLASSES[0],
+      batch: first?.batch || "Batch-03",
+      teacher: ELDERS_TEACHERS[0],
+      examDate: new Date().toISOString().split("T")[0],
+      totalMarks: 100,
+      obtainedMarks: 0,
+      grade: "-",
+      status: "Upcoming",
+      remarks: "",
+    });
+    setShowAddModal(true);
+  };
+
+  const handleStudentSelect = (studentId) => {
+    const s = eldersStudents.find((st) => st._id === studentId);
+    if (!s) return;
+    setFormData((prev) => ({
+      ...prev,
+      studentName: s.name,
+      studentId: s.studentId,
+      class: s.class,
+      batch: s.batch,
+      course: s.primaryCourse || s.course,
+    }));
+  };
+
+  const openEditModal = (exam) => {
+    setSelectedExam(exam);
+    setFormData({
+      examTitle: exam.examTitle,
+      examType: exam.examType,
+      studentName: exam.studentName,
+      studentId: exam.studentId,
+      course: exam.course,
+      class: exam.class,
+      batch: exam.batch,
+      teacher: exam.teacher,
+      examDate: exam.examDate,
+      totalMarks: exam.totalMarks,
+      obtainedMarks: exam.obtainedMarks,
+      grade: exam.grade,
+      status: exam.status,
+      remarks: exam.remarks || "",
+    });
+    setShowEditModal(true);
+  };
+
+  const openDetailsModal = (exam) => {
+    setSelectedExam(exam);
+    setShowDetailsModal(true);
+  };
+
+  const handleAddExam = (e) => {
+    e.preventDefault();
+
+    if (
+      !formData.examTitle ||
+      !formData.studentName ||
+      !formData.course ||
+      !formData.examDate
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all required fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const grade =
+      formData.status === "Completed"
+        ? calculateGrade(formData.obtainedMarks, formData.totalMarks)
+        : "-";
+
+    const newExam = {
+      id: Date.now(),
+      ...formData,
+      grade,
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+
+    setExams([...exams, newExam]);
+    setShowAddModal(false);
+    Swal.fire({
+      icon: "success",
+      title: "✅ Exam Added!",
+      text: newExam.examTitle,
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  const handleEditExam = (e) => {
+    e.preventDefault();
+
+    if (
+      !formData.examTitle ||
+      !formData.studentName ||
+      !formData.course ||
+      !formData.examDate
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all required fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const grade =
+      formData.status === "Completed"
+        ? calculateGrade(formData.obtainedMarks, formData.totalMarks)
+        : "-";
+
+    setExams(
+      exams.map((e) =>
+        e.id === selectedExam.id ? { ...e, ...formData, grade } : e,
+      ),
+    );
+    setShowEditModal(false);
+    Swal.fire({
+      icon: "success",
+      title: "✅ Updated!",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  const handleDeleteExam = (id) => {
+    Swal.fire({
+      title: "Delete Exam?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setExams(exams.filter((e) => e.id !== id));
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
+      }
+    });
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-      <Navbar />
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Admin Dashboard</h1>
+          <h1 className="text-sm font-bold text-gray-800">
+            Student Exam (Elders)
+          </h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100"
           >
             {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
         </div>
 
-        {/* Sidebar - No Scroll */}
+        {/* Sidebar */}
         <aside
           className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
+            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
-          {/* Sidebar Header */}
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -602,8 +870,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Navigation Menu - No Scroll */}
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -614,14 +881,11 @@ const AdminDashboard = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
@@ -640,10 +904,14 @@ const AdminDashboard = () => {
                             key={sub.id}
                             to={sub.path}
                             onClick={() => {
-                              setActiveSubMenu(item.id);
+                              setActiveSubMenu(sub.id);
                               setIsSidebarOpen(false);
                             }}
-                            className="block w-full text-left px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-gray-50 hover:text-[#004d4d] transition-all"
+                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
+                              activeSubMenu === sub.id
+                                ? "bg-teal-50 text-[#004d4d] font-bold"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
+                            }`}
                           >
                             {sub.label}
                           </Link>
@@ -660,14 +928,11 @@ const AdminDashboard = () => {
                     }}
                   >
                     <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -677,7 +942,6 @@ const AdminDashboard = () => {
               </div>
             ))}
 
-            {/* Logout Button */}
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -688,11 +952,10 @@ const AdminDashboard = () => {
           </nav>
 
           <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>©Tarbiyah Online Madrasha</p>
+            <p>© 2026 Pipilika Soft</p>
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -700,934 +963,1012 @@ const AdminDashboard = () => {
           />
         )}
 
-        {/* Main Content - Full Screen */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        {/* Main Content */}
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <MdDashboard className="text-teal-600" /> Admin Dashboard
+                <FaCalendarCheck className="text-purple-600" /> Student Exam —
+                <span className="text-teal-700">Quran For Elders</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Welcome back, {adminInfo.name}!
+                {studentsLoading
+                  ? "Loading elders students..."
+                  : `${eldersStudents.length} elders student${eldersStudents.length !== 1 ? "s" : ""} • Qaida • Nazera • Najera • Tajweed • Bakarah Hifz`}
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                onClick={fetchEldersStudents}
+                disabled={studentsLoading}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 disabled:opacity-50"
+              >
+                <FaSyncAlt
+                  size={12}
+                  className={studentsLoading ? "animate-spin" : ""}
+                />
+                Refresh
+              </button>
+              <button
+                onClick={openAddModal}
+                className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
+              >
+                <FaPlusCircle size={12} /> Add Exam
+              </button>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
               >
                 Logout
               </button>
             </div>
           </div>
 
-          {/* Content - Full Screen */}
-          <div className="h-[calc(100vh-170px)] overflow-hidden">
-            {renderContent()}
-          </div>
-        </main>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
-// 1. DASHBOARD CONTENT
-// ==========================================
-const DashboardContent = ({ stats, notifications }) => {
-  const dashboardStats = [
-    {
-      label: (
-        <Link
-          to="/admin-dashboard/department"
-          className="hover:text-teal-600 text-[10px]"
-        >
-          Department
-        </Link>
-      ),
-      value: stats.totalDepartments,
-      icon: <FaHome className="text-blue-500" />,
-      color: "bg-blue-50",
-    },
-    {
-      label: (
-        <Link
-          to="/admin-dashboard/today-class"
-          className="hover:text-teal-600 text-[10px]"
-        >
-          Today's Class
-        </Link>
-      ),
-      value: stats.todayClasses,
-      icon: <FaCalendarAlt className="text-purple-500" />,
-      color: "bg-purple-50",
-    },
-    {
-      label: (
-        <Link
-          to="/admin-dashboard/basic-tazweed"
-          className="hover:text-teal-600 text-[10px]"
-        >
-          Basic Tazweed Payment Overview
-        </Link>
-      ),
-      value: `৳${stats.totalIncome.toLocaleString()}`,
-      icon: <FaMoneyBillWave className="text-green-500" />,
-      color: "bg-green-50",
-    },
-    {
-      label: (
-        <Link
-          to="/admin-dashboard/najera-batch"
-          className="hover:text-teal-600 text-[10px]"
-        >
-          Najera Batch Payment Overview
-        </Link>
-      ),
-      value: `৳${stats.totalIncome.toLocaleString()}`,
-      icon: <FaMoneyBillWave className="text-green-500" />,
-      color: "bg-green-50",
-    },
-    {
-      label: (
-        <Link
-          to="/admin-dashboard/new-admission"
-          className="hover:text-teal-600 text-[10px]"
-        >
-          New Admission
-        </Link>
-      ),
-      value: stats.newAdmissions,
-      icon: <FaUserPlus className="text-orange-500" />,
-      color: "bg-orange-50",
-    },
-    {
-      label: (
-        <Link
-          to="/admin-dashboard/notification"
-          className="hover:text-teal-600 text-[10px]"
-        >
-          Notification
-        </Link>
-      ),
-      value: stats.notifications,
-      icon: <FaBell className="text-red-500" />,
-      color: "bg-red-50",
-    },
-  ];
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 flex-shrink-0">
-        {dashboardStats.map((stat, index) => (
-          <div
-            key={index}
-            className={`${stat.color} p-3 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all`}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-xl">{stat.icon}</span>
-              <span className="text-lg font-bold text-gray-800">
-                {stat.value}
-              </span>
-            </div>
-            <p className="text-[10px] text-gray-600 mt-1 font-medium">
-              {stat.label}
+          {/* ✅ Elders Students Card */}
+          <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
+            <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
+              <FaUsers size={12} /> Elders Students ({eldersStudents.length})
             </p>
-          </div>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 flex-shrink-0">
-        <h3 className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2">
-          <span className="text-teal-600">⚡</span> Quick Actions
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-          {[
-            {
-              label: "Add Student",
-              icon: "👨‍🎓",
-              color: "bg-blue-50",
-              link: "/admin-students/add",
-            },
-            {
-              label: "Add Teacher",
-              icon: "👨‍🏫",
-              color: "bg-green-50",
-              link: "/admin-teachers/assign",
-            },
-            {
-              label: "Create Class",
-              icon: "📚",
-              color: "bg-purple-50",
-              link: "/admin-batch-course/course-make",
-            },
-            {
-              label: "Fee Collection",
-              icon: "💰",
-              color: "bg-yellow-50",
-              link: "/admin-finance/admin-fee",
-            },
-            {
-              label: "Generate Report",
-              icon: "📊",
-              color: "bg-red-50",
-              link: "/admin-reports/admission",
-            },
-          ].map((action, index) => (
-            <Link
-              key={index}
-              to={action.link}
-              className={`${action.color} p-2 rounded-lg border border-gray-200 hover:shadow-md transition-all text-center`}
-            >
-              <div className="text-xl">{action.icon}</div>
-              <p className="text-[10px] font-medium text-gray-700 mt-0.5">
-                {action.label}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent Activity & Notifications - Full Height */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1 min-h-0">
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 flex flex-col overflow-hidden">
-          <h3 className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2 flex-shrink-0">
-            <span className="text-blue-600">🔄</span> Recent Activity
-          </h3>
-          <div className="flex-1 overflow-hidden">
-            <div className="space-y-2">
-              {[
-                {
-                  action: "New student admitted",
-                  detail: "Ahmed Hasan - Class 8",
-                  time: "2 hours ago",
-                },
-                {
-                  action: "Fee payment received",
-                  detail: "Class 9 - 5 students",
-                  time: "4 hours ago",
-                },
-                {
-                  action: "Teacher assigned",
-                  detail: "Ustadh Abdullah - Class 10",
-                  time: "Yesterday",
-                },
-                {
-                  action: "Exam result published",
-                  detail: "Mid Term 2026",
-                  time: "Yesterday",
-                },
-              ].map((activity, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0"
-                >
-                  <div>
-                    <p className="text-xs font-medium text-gray-800">
-                      {activity.action}
-                    </p>
-                    <p className="text-[10px] text-gray-500">
-                      {activity.detail}
-                    </p>
-                  </div>
-                  <span className="text-[10px] text-gray-400">
-                    {activity.time}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 flex flex-col overflow-hidden">
-          <h3 className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2 flex-shrink-0">
-            <FaBell className="text-yellow-600" /> Notifications
-          </h3>
-          <div className="flex-1 overflow-hidden">
-            {notifications.length > 0 ? (
-              <div className="space-y-2">
-                {notifications.slice(0, 4).map((notif) => (
+            {studentsLoading && eldersStudents.length === 0 ? (
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div>
+                Loading from API...
+              </div>
+            ) : eldersStudents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {eldersStudents.map((s) => (
                   <div
-                    key={notif.id}
-                    className={`flex items-start gap-2 p-2 rounded-lg ${!notif.read ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                    key={s._id}
+                    className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
                   >
-                    <div
-                      className={`w-1.5 h-1.5 rounded-full mt-1 ${!notif.read ? "bg-blue-500" : "bg-gray-300"}`}
-                    ></div>
-                    <div className="flex-1">
-                      <p className="text-xs text-gray-700">{notif.message}</p>
-                      <p className="text-[10px] text-gray-400">{notif.time}</p>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      {(s.name || "S").charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-gray-800 truncate">
+                        {s.name}
+                      </p>
+                      <p className="text-[10px] text-gray-500 truncate">
+                        {s.studentId} • {s.class}
+                      </p>
+                      <p className="text-[10px] text-teal-600 truncate">
+                        {s.course}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-gray-500">No notifications</p>
+              <p className="text-xs text-gray-500 italic">
+                No elders students found.
+              </p>
             )}
           </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
-// ==========================================
-// 2. STUDENT MANAGEMENT CONTENT
-// ==========================================
-const StudentManagementContent = () => {
-  const [students, setStudents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filter, setFilter] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [refreshKey, setRefreshKey] = useState(0);
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-blue-600">{totalExams}</p>
+              <p className="text-[10px] text-gray-500">Total Exams</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-green-600">
+                {completedExams}
+              </p>
+              <p className="text-[10px] text-gray-500">Completed</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-yellow-600">
+                {upcomingExams}
+              </p>
+              <p className="text-[10px] text-gray-500">Upcoming</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-red-600">{cancelledExams}</p>
+              <p className="text-[10px] text-gray-500">Cancelled</p>
+            </div>
+          </div>
 
-  // ✅ Available Courses
-  const [availableCourses, setAvailableCourses] = useState([]);
-
-  // ✅ Approve Modal State
-  const [showApproveModal, setShowApproveModal] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-
-  useEffect(() => {
-    fetchStudents();
-  }, [refreshKey]);
-
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch(
-          "https://api.tarbiyahonline.com/api/courses/teacher/all",
-        );
-        const data = await response.json();
-        if (data.success) {
-          setAvailableCourses(data.courses || []);
-        }
-      } catch (err) {
-        console.error("❌ Error fetching courses:", err);
-      }
-    };
-    fetchCourses();
-  }, []);
-
-  const fetchStudents = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await fetch(
-        "https://api.tarbiyahonline.com/api/students/all",
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
-
-      if (response.status === 404) {
-        setError(
-          "API endpoint not found! Please check if server is running on port 5000",
-        );
-        return;
-      }
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        const studentList = data.students || [];
-        setStudents(studentList);
-        if (studentList.length === 0) {
-          setError("No students found. Please add a student.");
-        }
-      } else {
-        setError(data.message || "Failed to fetch students");
-      }
-    } catch (error) {
-      console.error("❌ Error fetching students:", error);
-      setError(`Error: ${error.message}. Please check if server is running.`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleApproveStudent = async () => {
-    try {
-      if (
-        !selectedStudent.username ||
-        !selectedStudent.password ||
-        !selectedStudent.roll
-      ) {
-        Swal.fire({
-          icon: "warning",
-          title: "Information Missing!",
-          text: "Please provide username, password and roll number.",
-        });
-        return;
-      }
-
-      const response = await fetch(
-        `https://api.tarbiyahonline.com/api/students/approve/${selectedStudent._id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: selectedStudent.username,
-            password: selectedStudent.password,
-            roll: selectedStudent.roll,
-            enrolledCourses: selectedStudent.enrolledCourses || [],
-          }),
-        },
-      );
-
-      const data = await response.json();
-      if (data.success) {
-        const updatedStudents = students.map((s) =>
-          s._id === selectedStudent._id
-            ? {
-                ...s,
-                status: "Active",
-                username: selectedStudent.username,
-                roll: selectedStudent.roll,
-                enrolledCourses: selectedStudent.enrolledCourses || [],
-              }
-            : s,
-        );
-        setStudents(updatedStudents);
-        setShowApproveModal(false);
-        setSelectedStudent(null);
-        Swal.fire({
-          icon: "success",
-          title: "✅ Student Approved!",
-          html: `
-            <div style="text-align: left;">
-              <p><strong>Student:</strong> ${selectedStudent.name}</p>
-              <p><strong>Class:</strong> ${selectedStudent.class}</p>
-              <p><strong>Roll:</strong> ${selectedStudent.roll}</p>
-              <hr style="margin: 10px 0;">
-              <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
-                <p style="font-weight: bold; color: #004d4d; margin-bottom: 5px;">🔑 Login Credentials:</p>
-                <p><strong>Username:</strong> <span style="color: #004d4d;">${selectedStudent.username}</span></p>
-                <p><strong>Password:</strong> <span style="color: #004d4d;">${selectedStudent.password}</span></p>
-                <p style="margin-top: 8px;"><strong>Courses Assigned:</strong> <span style="color: #004d4d;">${(selectedStudent.enrolledCourses || []).length}</span></p>
+          {/* Filters */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
+            <div className="flex flex-col md:flex-row gap-2">
+              <div className="flex-1 relative">
+                <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
+                <input
+                  type="text"
+                  placeholder="Search elders exams..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex items-center gap-1 flex-wrap">
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
+                >
+                  {uniqueStatuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={filterCourse}
+                  onChange={(e) => setFilterCourse(e.target.value)}
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
+                >
+                  {uniqueCourses.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
+                >
+                  {uniqueTypes.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
-          `,
-          confirmButtonColor: "#004d4d",
-          confirmButtonText: "OK",
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Failed!",
-          text: data.message || "Could not approve student.",
-        });
-      }
-    } catch (error) {
-      console.error("❌ Error approving student:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Failed!",
-        text: "Could not approve student. Please try again.",
-      });
-    }
-  };
+          </div>
 
-  const handleDelete = async (id, name) => {
-    const result = await Swal.fire({
-      title: `Delete ${name}?`,
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-    });
-
-    if (result.isConfirmed) {
-      try {
-        const response = await fetch(
-          `https://api.tarbiyahonline.com/api/students/delete/${id}`,
-          {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-          },
-        );
-        const data = await response.json();
-        if (data.success) {
-          setStudents(students.filter((s) => s._id !== id));
-          Swal.fire({
-            icon: "success",
-            title: "Deleted!",
-            text: "Student has been deleted.",
-            timer: 1500,
-            showConfirmButton: false,
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Failed!",
-            text: data.message || "Could not delete student.",
-          });
-        }
-      } catch (error) {
-        console.error("❌ Error deleting student:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Failed!",
-          text: "Could not delete student.",
-        });
-      }
-    }
-  };
-
-  const handleToggleCourse = (courseId) => {
-    const currentList = selectedStudent.enrolledCourses || [];
-    const updated = currentList.includes(courseId)
-      ? currentList.filter((id) => id !== courseId)
-      : [...currentList, courseId];
-    setSelectedStudent({ ...selectedStudent, enrolledCourses: updated });
-  };
-
-  const filteredStudents = students
-    .filter((s) => {
-      if (filter === "all") return true;
-      if (filter === "pending") return s.status === "Pending";
-      if (filter === "active") return s.status === "Active";
-      if (filter === "inactive") return s.status === "Inactive";
-      return true;
-    })
-    .filter((s) => {
-      if (!searchTerm) return true;
-      const term = searchTerm.toLowerCase();
-      return (
-        s.name?.toLowerCase().includes(term) ||
-        s.phone?.includes(term) ||
-        s.email?.toLowerCase().includes(term) ||
-        s.username?.toLowerCase().includes(term) ||
-        s.roll?.toLowerCase().includes(term) ||
-        s.class?.toLowerCase().includes(term)
-      );
-    });
-
-  const pendingCount = students.filter((s) => s.status === "Pending").length;
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-sm text-gray-500 mt-3">Loading students...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      {/* Header */}
-      <div className="flex justify-between items-center flex-shrink-0 flex-wrap gap-2">
-        <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-          <FaUsers className="text-blue-600" /> Student Management
-          <span className="text-xs font-normal text-gray-500">
-            (Total: {students.length})
-          </span>
-          {pendingCount > 0 && (
-            <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-lg text-xs font-bold animate-pulse flex items-center gap-1">
-              <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
-              {pendingCount} Pending
-            </span>
-          )}
-        </h2>
-        <div className="flex items-center gap-2 flex-wrap">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="px-2 py-1 border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 w-28"
-          />
-          <select
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="px-2 py-1 border rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="all">All</option>
-            <option value="pending">Pending</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-          <button
-            onClick={() => setRefreshKey((prev) => prev + 1)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1"
-          >
-            🔄 Refresh
-          </button>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
-        <div className="overflow-x-auto h-full">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Name & Contact
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Class
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Username
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Roll
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filteredStudents.map((student) => (
-                <tr
-                  key={student._id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-3 py-2">
-                    <p className="text-xs font-medium text-gray-800">
-                      {student.name}
-                    </p>
-                    <p className="text-[10px] text-gray-500">
-                      📱 {student.phone}
-                    </p>
-                    {student.email && (
-                      <p className="text-[10px] text-gray-400">
-                        ✉️ {student.email}
-                      </p>
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {student.class}
-                  </td>
-                  <td className="px-3 py-2 text-xs font-mono">
-                    {student.username ? (
-                      <span className="text-blue-600 font-semibold">
-                        {student.username}
-                      </span>
-                    ) : (
-                      <span className="text-gray-400 text-[10px]">
-                        Not assigned
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {student.roll || (
-                      <span className="text-gray-400 text-[10px]">N/A</span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${
-                        student.status === "Active"
-                          ? "bg-green-100 text-green-700"
-                          : student.status === "Pending"
-                            ? "bg-yellow-100 text-yellow-700 animate-pulse"
-                            : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {student.status || "Pending"}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => {
-                          setSelectedStudent({
-                            ...student,
-                            username: student.username || "",
-                            password: "",
-                            roll: student.roll || "",
-                            enrolledCourses: student.enrolledCourses || [],
-                          });
-                          setShowApproveModal(true);
-                        }}
-                        className="text-blue-600 hover:text-blue-800 p-1 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="View / Approve"
+          {/* Exam Table */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto max-h-[calc(100vh-540px)] overflow-y-auto">
+              <table className="w-full text-xs">
+                <thead className="bg-gray-50 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                      #
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                      Exam
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                      Student
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
+                      Course
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
+                      Date
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                      Marks
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                      Grade
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                      Status
+                    </th>
+                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredExams.length > 0 ? (
+                    filteredExams.map((exam, index) => (
+                      <tr key={exam.id} className="hover:bg-gray-50">
+                        <td className="px-3 py-2 font-medium text-gray-500">
+                          {index + 1}
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="font-medium text-gray-800">
+                            {exam.examTitle}
+                          </div>
+                          <div className="text-[10px] text-gray-400">
+                            {exam.examType}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="font-medium text-gray-800">
+                            {exam.studentName}
+                          </div>
+                          <div className="text-[10px] text-gray-400">
+                            {exam.studentId}
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 hidden md:table-cell text-gray-600">
+                          {exam.course}
+                        </td>
+                        <td className="px-3 py-2 hidden lg:table-cell text-gray-600">
+                          {formatDate(exam.examDate)}
+                        </td>
+                        <td className="px-3 py-2 text-gray-700">
+                          <span className="font-semibold">
+                            {exam.obtainedMarks || 0}
+                          </span>
+                          <span className="text-gray-400">
+                            {" "}
+                            / {exam.totalMarks || 0}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${getGradeColor(exam.grade)}`}
+                          >
+                            {exam.grade}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(exam.status)}`}
+                          >
+                            {getStatusIcon(exam.status)}
+                            {exam.status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => openDetailsModal(exam)}
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                              title="View"
+                            >
+                              <FaEye size={12} />
+                            </button>
+                            <button
+                              onClick={() => openEditModal(exam)}
+                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
+                              title="Edit"
+                            >
+                              <FaEdit size={12} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteExam(exam.id)}
+                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                              title="Delete"
+                            >
+                              <FaTrash size={12} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="9"
+                        className="px-3 py-8 text-center text-gray-500"
                       >
-                        <FaEye size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(student._id, student.name)}
-                        className="text-red-600 hover:text-red-800 p-1 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Delete"
-                      >
-                        <FaTrash size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* ✅ নতুন — Material / Grad & Exams এবং Module Content */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 flex-shrink-0">
-        {/* Left Card: Material / Grad & Exams */}
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-          <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-            <MdAssignment className="text-teal-600" /> Material / Grad & Exams
-          </h3>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-              <span className="text-xs text-gray-700">Grad</span>
-              <span className="text-xs font-bold px-2 py-0.5 rounded bg-green-100 text-green-700">
-                A+
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-              <span className="text-xs text-gray-700">Class Test</span>
-              <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">
-                85/100
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-              <span className="text-xs text-gray-700">Mid Term Exam</span>
-              <span className="text-xs font-bold px-2 py-0.5 rounded bg-yellow-100 text-yellow-700">
-                42/50
-              </span>
-            </div>
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-              <span className="text-xs text-gray-700">Final Exam</span>
-              <span className="text-xs font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-600">
-                Pending
-              </span>
+                        <FaCalendarCheck className="text-4xl text-gray-300 mx-auto mb-2" />
+                        <p>No elders exams found</p>
+                        <p className="text-[10px] text-gray-400 mt-1">
+                          উপরে "Add Exam" ক্লিক করে যোগ করুন
+                        </p>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
-
-        {/* Right Card: Module Content */}
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-          <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-            <FaBookOpen className="text-teal-600" /> Module Content
-          </h3>
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-              <FaVideo className="text-red-500" size={14} />
-              <span className="text-xs text-gray-700">
-                Video Recording (লেকচার ভিডিও)
-              </span>
-            </div>
-            <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-              <FaFilePdf className="text-blue-500" size={14} />
-              <span className="text-xs text-gray-700">
-                PDF Notes (নোট ও রিসোর্স)
-              </span>
-            </div>
-            <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-              <FaCheckCircle className="text-green-500" size={14} />
-              <span className="text-xs text-gray-700">
-                Quiz (কুইজ ও মূল্যায়ন)
-              </span>
-            </div>
-          </div>
-        </div>
+        </main>
       </div>
 
-      {/* ✅ Approve Modal */}
-      {showApproveModal && selectedStudent && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4 border-b pb-3">
-              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <FaCheckCircle className="text-green-600" /> Student Details
+      {/* Add Exam Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaPlusCircle className="text-purple-600" /> Add Elders Exam
               </h3>
               <button
-                onClick={() => {
-                  setShowApproveModal(false);
-                  setSelectedStudent(null);
-                }}
-                className="text-gray-400 hover:text-gray-600 text-xl font-bold"
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-gray-600"
               >
-                ✕
+                <FiX size={24} />
               </button>
             </div>
+            <form onSubmit={handleAddExam} className="p-6 space-y-4">
+              <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
+                💡 Student select করলে বাকি information auto-fill হবে
+              </div>
 
-            <div className="bg-gray-50 p-4 rounded-lg mb-4 space-y-1">
-              <p>
-                <strong>Name:</strong> {selectedStudent.name}
-              </p>
-              <p>
-                <strong>Email:</strong> {selectedStudent.email || "N/A"}
-              </p>
-              <p>
-                <strong>Phone:</strong> {selectedStudent.phone || "N/A"}
-              </p>
-              <p>
-                <strong>Class:</strong> {selectedStudent.class || "N/A"}
-              </p>
-              <p>
-                <strong>Guardian:</strong>{" "}
-                {selectedStudent.guardianName ||
-                  selectedStudent.fatherName ||
-                  "N/A"}
-              </p>
-              <p>
-                <strong>Address:</strong>{" "}
-                {selectedStudent.presentAddress ||
-                  selectedStudent.address ||
-                  "N/A"}
-              </p>
-              <p>
-                <strong>NID:</strong> {selectedStudent.dobOrNid || "N/A"}
-              </p>
-              <p>
-                <strong>Status:</strong>{" "}
-                <span className="text-yellow-600 font-semibold">
-                  {selectedStudent.status || "Pending"}
-                </span>
-              </p>
-              <p>
-                <strong>Registration:</strong>{" "}
-                {selectedStudent.createdAt
-                  ? new Date(selectedStudent.createdAt).toLocaleString()
-                  : "N/A"}
-              </p>
-            </div>
-
-            <div className="space-y-3 border-t pt-3">
-              <h4 className="text-sm font-bold text-gray-700">
-                🔑 Set Login Credentials
-              </h4>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Roll Number <span className="text-red-500">*</span>
+                  Select Elders Student *
                 </label>
-                <input
-                  type="text"
-                  value={selectedStudent.roll}
-                  onChange={(e) =>
-                    setSelectedStudent({
-                      ...selectedStudent,
-                      roll: e.target.value,
-                    })
+                <select
+                  required
+                  value={
+                    eldersStudents.find(
+                      (s) => s.studentId === formData.studentId,
+                    )?._id || ""
                   }
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="e.g., 01"
-                />
+                  onChange={(e) => handleStudentSelect(e.target.value)}
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="">Select Student</option>
+                  {eldersStudents.map((s) => (
+                    <option key={s._id} value={s._id}>
+                      {s.name} — {s.course}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Username <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={selectedStudent.username}
-                  onChange={(e) =>
-                    setSelectedStudent({
-                      ...selectedStudent,
-                      username: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Enter username"
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  💡 This will be used for student login
-                </p>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={selectedStudent.password}
-                  onChange={(e) =>
-                    setSelectedStudent({
-                      ...selectedStudent,
-                      password: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Enter password"
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  💡 Default password: <strong>student123S@</strong>
-                </p>
-              </div>
-            </div>
 
-            <div className="space-y-2 border-t pt-3 mt-3">
-              <h4 className="text-sm font-bold text-gray-700 flex items-center justify-between">
-                <span>📚 Assign Courses</span>
-                <span className="text-xs font-normal text-gray-500">
-                  {(selectedStudent.enrolledCourses || []).length} selected
-                </span>
-              </h4>
-              {availableCourses.length === 0 ? (
-                <p className="text-xs text-gray-400 italic">
-                  No courses available. Create courses from Batch & Course menu.
-                </p>
-              ) : (
-                <div className="border rounded-lg p-3 max-h-40 overflow-y-auto space-y-1.5 bg-gray-50">
-                  {availableCourses.map((course) => {
-                    const isChecked = (
-                      selectedStudent.enrolledCourses || []
-                    ).includes(course._id);
-                    return (
-                      <label
-                        key={course._id}
-                        className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-all ${isChecked ? "bg-teal-50 border border-teal-200" : "hover:bg-white border border-transparent"}`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => handleToggleCourse(course._id)}
-                          className="mt-0.5 h-4 w-4 text-[#004d4d] focus:ring-[#004d4d] border-gray-300 rounded cursor-pointer"
-                        />
-                        <div className="flex-1">
-                          <p className="text-xs font-semibold text-gray-800">
-                            {course.code}
-                          </p>
-                          <p className="text-[10px] text-gray-600">
-                            {course.title}
-                          </p>
-                        </div>
-                      </label>
-                    );
-                  })}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Exam Title *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.examTitle}
+                    onChange={(e) =>
+                      setFormData({ ...formData, examTitle: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="e.g., Mid Term Exam 2026"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Exam Type *
+                  </label>
+                  <select
+                    required
+                    value={formData.examType}
+                    onChange={(e) =>
+                      setFormData({ ...formData, examType: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {examTypes.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Student Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.studentName}
+                    readOnly
+                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Student ID
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.studentId}
+                    readOnly
+                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Course *
+                  </label>
+                  <select
+                    required
+                    value={formData.course}
+                    onChange={(e) =>
+                      setFormData({ ...formData, course: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {ELDERS_COURSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Class
+                  </label>
+                  <select
+                    value={formData.class}
+                    onChange={(e) =>
+                      setFormData({ ...formData, class: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {ELDERS_CLASSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Batch
+                  </label>
+                  <select
+                    value={formData.batch}
+                    onChange={(e) =>
+                      setFormData({ ...formData, batch: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {ELDERS_BATCHES.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Teacher
+                  </label>
+                  <select
+                    value={formData.teacher}
+                    onChange={(e) =>
+                      setFormData({ ...formData, teacher: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {ELDERS_TEACHERS.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Exam Date *
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={formData.examDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, examDate: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {statuses.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {formData.status === "Completed" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Total Marks *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      value={formData.totalMarks}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          totalMarks: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Obtained Marks *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      value={formData.obtainedMarks}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          obtainedMarks: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
                 </div>
               )}
-            </div>
 
-            <div className="flex justify-end gap-2 mt-4 pt-3 border-t">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Remarks
+                </label>
+                <textarea
+                  value={formData.remarks}
+                  onChange={(e) =>
+                    setFormData({ ...formData, remarks: e.target.value })
+                  }
+                  rows="2"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="Additional notes..."
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t">
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white py-2 rounded-lg font-semibold"
+                >
+                  <FaSave className="inline mr-2" size={14} /> Add Exam
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Exam Modal */}
+      {showEditModal && selectedExam && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaEdit className="text-yellow-600" /> Edit Elders Exam
+              </h3>
               <button
-                onClick={() => {
-                  setShowApproveModal(false);
-                  setSelectedStudent(null);
-                }}
-                className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded-lg font-medium"
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-400 hover:text-gray-600"
               >
-                Close
+                <FiX size={24} />
               </button>
+            </div>
+            <form onSubmit={handleEditExam} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Exam Title *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.examTitle}
+                    onChange={(e) =>
+                      setFormData({ ...formData, examTitle: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Exam Type *
+                  </label>
+                  <select
+                    required
+                    value={formData.examType}
+                    onChange={(e) =>
+                      setFormData({ ...formData, examType: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {examTypes.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Student Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.studentName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, studentName: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Student ID
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.studentId}
+                    onChange={(e) =>
+                      setFormData({ ...formData, studentId: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Course *
+                  </label>
+                  <select
+                    required
+                    value={formData.course}
+                    onChange={(e) =>
+                      setFormData({ ...formData, course: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {ELDERS_COURSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Class
+                  </label>
+                  <select
+                    value={formData.class}
+                    onChange={(e) =>
+                      setFormData({ ...formData, class: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {ELDERS_CLASSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Batch
+                  </label>
+                  <select
+                    value={formData.batch}
+                    onChange={(e) =>
+                      setFormData({ ...formData, batch: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {ELDERS_BATCHES.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Teacher
+                  </label>
+                  <select
+                    value={formData.teacher}
+                    onChange={(e) =>
+                      setFormData({ ...formData, teacher: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {ELDERS_TEACHERS.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Exam Date *
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={formData.examDate}
+                    onChange={(e) =>
+                      setFormData({ ...formData, examDate: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {statuses.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {formData.status === "Completed" && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Total Marks *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      value={formData.totalMarks}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          totalMarks: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Obtained Marks *
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      required
+                      value={formData.obtainedMarks}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          obtainedMarks: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Remarks
+                </label>
+                <textarea
+                  value={formData.remarks}
+                  onChange={(e) =>
+                    setFormData({ ...formData, remarks: e.target.value })
+                  }
+                  rows="2"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t">
+                <button
+                  type="submit"
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold"
+                >
+                  <FaSave className="inline mr-2" size={14} /> Update
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Details Modal */}
+      {showDetailsModal && selectedExam && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaFileAlt className="text-blue-600" /> Elders Exam Details
+              </h3>
               <button
-                onClick={handleApproveStudent}
-                className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all flex items-center gap-2 font-medium"
+                onClick={() => setShowDetailsModal(false)}
+                className="text-gray-400 hover:text-gray-600"
               >
-                <FaCheckCircle size={14} /> Approve & Activate
+                <FiX size={24} />
               </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="flex items-center justify-between pb-4 border-b">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-800">
+                    {selectedExam.examTitle}
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    {selectedExam.examType}
+                  </p>
+                </div>
+                <span
+                  className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedExam.status)}`}
+                >
+                  {getStatusIcon(selectedExam.status)}
+                  {selectedExam.status}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Student</p>
+                  <p className="text-sm font-semibold">
+                    {selectedExam.studentName}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Student ID</p>
+                  <p className="text-sm font-semibold">
+                    {selectedExam.studentId}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Course</p>
+                  <p className="text-sm font-semibold">{selectedExam.course}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Class</p>
+                  <p className="text-sm font-semibold">{selectedExam.class}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Batch</p>
+                  <p className="text-sm font-semibold">
+                    {selectedExam.batch || "-"}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Teacher</p>
+                  <p className="text-sm font-semibold">
+                    {selectedExam.teacher}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Exam Date</p>
+                  <p className="text-sm font-semibold">
+                    {formatDate(selectedExam.examDate)}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Total Marks</p>
+                  <p className="text-sm font-semibold">
+                    {selectedExam.totalMarks}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Obtained Marks</p>
+                  <p className="text-sm font-semibold text-blue-600">
+                    {selectedExam.obtainedMarks}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gray-50 rounded-lg p-3 text-center">
+                  <p className="text-[10px] text-gray-400">Grade</p>
+                  <p
+                    className={`inline-flex px-4 py-1 rounded-full text-lg font-bold ${getGradeColor(selectedExam.grade)}`}
+                  >
+                    {selectedExam.grade}
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3 text-center">
+                  <p className="text-[10px] text-gray-400">Percentage</p>
+                  <p className="text-lg font-bold text-purple-600">
+                    {selectedExam.totalMarks > 0
+                      ? Math.round(
+                          (selectedExam.obtainedMarks /
+                            selectedExam.totalMarks) *
+                            100,
+                        )
+                      : 0}
+                    %
+                  </p>
+                </div>
+              </div>
+
+              {selectedExam.remarks && (
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Remarks</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {selectedExam.remarks}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4 border-t">
+                <button
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    openEditModal(selectedExam);
+                  }}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                >
+                  <FaEdit className="inline mr-2" /> Edit
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    handleDeleteExam(selectedExam.id);
+                  }}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                >
+                  <FaTrash className="inline mr-2" /> Delete
+                </button>
+                <button
+                  onClick={() => setShowDetailsModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1636,1496 +1977,4 @@ const StudentManagementContent = () => {
   );
 };
 
-// ==========================================
-// 3. TEACHER MANAGEMENT CONTENT (✅ MODIFIED)
-// ==========================================
-const TeacherManagementContent = ({ teachers }) => {
-  const [activeTab, setActiveTab] = useState("overview");
-
-  const tabs = [
-    {
-      id: "overview",
-      label: "Teacher Overview",
-      icon: <FaEye size={14} />,
-    },
-    {
-      id: "assign",
-      label: "Teacher Assign",
-      icon: <FaPlusCircle size={14} />,
-    },
-    {
-      id: "schedule",
-      label: "Class Schedule",
-      icon: <FaCalendarAlt size={14} />,
-    },
-    {
-      id: "attendance",
-      label: "Teacher Attendance",
-      icon: <FaClipboardList size={14} />,
-    },
-  ];
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      {/* Header */}
-      <div className="flex justify-between items-center flex-shrink-0">
-        <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-          <FaChalkboardTeacher className="text-green-600" /> Teacher Management
-        </h2>
-        <Link
-          to="/admin-teachers/assign"
-          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
-        >
-          <FaPlusCircle size={12} /> Add Teacher
-        </Link>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-lg flex-shrink-0 overflow-x-auto">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
-              activeTab === tab.id
-                ? "bg-white text-green-600 shadow-sm"
-                : "text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            {tab.icon}
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content Area */}
-      <div className="flex-1 overflow-hidden flex flex-col space-y-3">
-        {/* Main Table Area */}
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
-          {activeTab === "overview" && (
-            <div className="overflow-x-auto h-full">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-                  <tr>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Name
-                    </th>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Subject
-                    </th>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Class
-                    </th>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Attendance
-                    </th>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Status
-                    </th>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {teachers.map((teacher) => (
-                    <tr
-                      key={teacher.id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-3 py-2">
-                        <div>
-                          <p className="text-xs font-medium text-gray-800">
-                            {teacher.name}
-                          </p>
-                          <p className="text-[10px] text-gray-500">
-                            Joined: {teacher.joinDate}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="px-3 py-2 text-xs text-gray-600">
-                        {teacher.subject}
-                      </td>
-                      <td className="px-3 py-2 text-xs text-gray-600">
-                        {teacher.class}
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-1">
-                          <span
-                            className={`text-xs font-bold ${teacher.attendance >= 80 ? "text-green-600" : teacher.attendance >= 60 ? "text-yellow-600" : "text-red-600"}`}
-                          >
-                            {teacher.attendance}%
-                          </span>
-                          <div className="w-12 h-1 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${teacher.attendance >= 80 ? "bg-green-500" : teacher.attendance >= 60 ? "bg-yellow-500" : "bg-red-500"}`}
-                              style={{ width: `${teacher.attendance}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-3 py-2">
-                        <span
-                          className={`text-[8px] px-1.5 py-0.5 rounded-full ${teacher.status === "Active" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                        >
-                          {teacher.status}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-1">
-                          <Link
-                            to="/admin-teachers/overview"
-                            className="text-blue-600 hover:text-blue-800 p-0.5"
-                            title="View"
-                          >
-                            <FaEye size={12} />
-                          </Link>
-                          <Link
-                            to="/admin-teachers/assign"
-                            className="text-green-600 hover:text-green-800 p-0.5"
-                            title="Edit"
-                          >
-                            <FaEdit size={12} />
-                          </Link>
-                          <button
-                            className="text-red-600 hover:text-red-800 p-0.5"
-                            title="Delete"
-                          >
-                            <FaTrash size={12} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {activeTab === "assign" && (
-            <div className="h-full flex items-center justify-center p-6 text-center">
-              <div>
-                <FaChalkboardTeacher className="text-4xl text-gray-300 mx-auto mb-3" />
-                <p className="text-sm font-medium text-gray-600">
-                  Teacher Assignment Interface
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Assign subjects and classes to teachers here.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "schedule" && (
-            <div className="h-full flex items-center justify-center p-6 text-center">
-              <div>
-                <FaCalendarAlt className="text-4xl text-gray-300 mx-auto mb-3" />
-                <p className="text-sm font-medium text-gray-600">
-                  Class Schedule Interface
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Create and manage the class routine here.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "attendance" && (
-            <div className="h-full flex items-center justify-center p-6 text-center">
-              <div>
-                <FaClipboardList className="text-4xl text-gray-300 mx-auto mb-3" />
-                <p className="text-sm font-medium text-gray-600">
-                  Teacher Attendance Interface
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  Track and manage teacher attendance here.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ✅ Material / Grad & Exams এবং Module Content Cards (Image Fields) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-shrink-0">
-          {/* Left Card: Material / Grad & Exams */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-            <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-              <MdAssignment className="text-teal-600" /> Material / Grad & Exams
-            </h3>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                <span className="text-xs text-gray-700">Grad</span>
-                <span className="text-xs font-bold px-2 py-0.5 rounded bg-green-100 text-green-700">
-                  A+
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                <span className="text-xs text-gray-700">Class Test</span>
-                <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">
-                  85/100
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                <span className="text-xs text-gray-700">Mid Term Exam</span>
-                <span className="text-xs font-bold px-2 py-0.5 rounded bg-yellow-100 text-yellow-700">
-                  42/50
-                </span>
-              </div>
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                <span className="text-xs text-gray-700">Final Exam</span>
-                <span className="text-xs font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-600">
-                  Pending
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Card: Module Content */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-            <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-              <FaBookOpen className="text-teal-600" /> Module Content
-            </h3>
-            <div className="space-y-2">
-              <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                <FaVideo className="text-red-500" size={14} />
-                <span className="text-xs text-gray-700">
-                  Video Recording (লেকচার ভিডিও)
-                </span>
-              </div>
-              <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                <FaFilePdf className="text-blue-500" size={14} />
-                <span className="text-xs text-gray-700">
-                  PDF Notes (নোট ও রিসোর্স)
-                </span>
-              </div>
-              <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                <FaCheckCircle className="text-green-500" size={14} />
-                <span className="text-xs text-gray-700">
-                  Quiz (কুইজ ও মূল্যায়ন)
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
-// 4. BATCH & COURSE CONTENT
-// ==========================================
-const BatchCourseContent = () => {
-  const [activeTab, setActiveTab] = useState("batch-make");
-
-  const tabs = [
-    {
-      id: "batch-make",
-      label: "Batch Make",
-      icon: <FaLayerGroup size={14} />,
-      path: "/admin-batch-course/batch-make",
-    },
-    {
-      id: "course-make",
-      label: "Course Make",
-      icon: <FaBookOpen size={14} />,
-      path: "/admin-batch-course/course-make",
-    },
-    {
-      id: "syllabus",
-      label: "Syllabus",
-      icon: <FaListAlt size={14} />,
-      path: "/admin-batch-course/syllabus",
-    },
-    {
-      id: "clear-routine",
-      label: "Clear Routine",
-      icon: <FaRoute size={14} />,
-      path: "/admin-batch-course/clear-routine",
-    },
-  ];
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <div className="flex justify-between items-center flex-shrink-0">
-        <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-          <FaLayerGroup className="text-indigo-600" /> Batch & Course
-        </h2>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-lg flex-shrink-0 overflow-x-auto">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.id}
-            to={tab.path}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeTab === tab.id
-                ? "bg-white text-indigo-600 shadow-sm"
-                : "text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            {tab.icon}
-            {tab.label}
-          </Link>
-        ))}
-      </div>
-
-      {/* Tab Content */}
-      <div className="flex-1 overflow-hidden">
-        {activeTab === "batch-make" && <BatchMakeContent />}
-        {activeTab === "course-make" && <CourseMakeContent />}
-        {activeTab === "syllabus" && <SyllabusContent />}
-        {activeTab === "clear-routine" && <ClearRoutineContent />}
-      </div>
-    </div>
-  );
-};
-
-// Batch Make Content
-const BatchMakeContent = () => {
-  const [batches] = useState([
-    {
-      id: 1,
-      name: "Batch 2026-A",
-      course: "Tajweed",
-      students: 30,
-      status: "Active",
-      startDate: "2026-01-15",
-    },
-    {
-      id: 2,
-      name: "Batch 2026-B",
-      course: "Tafsir",
-      students: 25,
-      status: "Active",
-      startDate: "2026-02-01",
-    },
-    {
-      id: 3,
-      name: "Batch 2026-C",
-      course: "Hadith",
-      students: 28,
-      status: "Upcoming",
-      startDate: "2026-03-10",
-    },
-  ]);
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <div className="flex justify-between items-center flex-shrink-0">
-        <h3 className="text-sm font-semibold text-gray-800">Batch List</h3>
-        <Link
-          to="/admin-batch-course/batch-make"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
-        >
-          <FaPlusCircle size={12} /> Create Batch
-        </Link>
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
-        <div className="overflow-x-auto h-full">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Batch Name
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Course
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Students
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {batches.map((batch) => (
-                <tr
-                  key={batch.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-3 py-2 text-xs font-medium text-gray-800">
-                    {batch.name}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {batch.course}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {batch.students}
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${batch.status === "Active" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                    >
-                      {batch.status}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-1">
-                      <Link
-                        to="/admin-batch-course/batch-make"
-                        className="text-blue-600 hover:text-blue-800 p-0.5"
-                        title="View"
-                      >
-                        <FaEye size={12} />
-                      </Link>
-                      <Link
-                        to="/admin-batch-course/batch-make"
-                        className="text-green-600 hover:text-green-800 p-0.5"
-                        title="Edit"
-                      >
-                        <FaEdit size={12} />
-                      </Link>
-                      <button
-                        className="text-red-600 hover:text-red-800 p-0.5"
-                        title="Delete"
-                      >
-                        <FaTrash size={12} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Course Make Content
-const CourseMakeContent = () => {
-  const [courses] = useState([
-    {
-      id: 1,
-      name: "Tajweed - Beginner",
-      code: "TAJ-101",
-      duration: "3 months",
-      students: 30,
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Tafsir - Quranic Studies",
-      code: "TAF-201",
-      duration: "4 months",
-      students: 25,
-      status: "Active",
-    },
-    {
-      id: 3,
-      name: "Hadith - Sahih Bukhari",
-      code: "HAD-301",
-      duration: "6 months",
-      students: 28,
-      status: "Active",
-    },
-  ]);
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <div className="flex justify-between items-center flex-shrink-0">
-        <h3 className="text-sm font-semibold text-gray-800">Course List</h3>
-        <Link
-          to="/admin-batch-course/course-make"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
-        >
-          <FaPlusCircle size={12} /> Create Course
-        </Link>
-      </div>
-
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
-        <div className="overflow-x-auto h-full">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Course Name
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Code
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Duration
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Students
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {courses.map((course) => (
-                <tr
-                  key={course.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-3 py-2 text-xs font-medium text-gray-800">
-                    {course.name}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {course.code}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {course.duration}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {course.students}
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${course.status === "Active" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                    >
-                      {course.status}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-1">
-                      <Link
-                        to="/admin-batch-course/course-make"
-                        className="text-blue-600 hover:text-blue-800 p-0.5"
-                        title="View"
-                      >
-                        <FaEye size={12} />
-                      </Link>
-                      <Link
-                        to="/admin-batch-course/course-make"
-                        className="text-green-600 hover:text-green-800 p-0.5"
-                        title="Edit"
-                      >
-                        <FaEdit size={12} />
-                      </Link>
-                      <button
-                        className="text-red-600 hover:text-red-800 p-0.5"
-                        title="Delete"
-                      >
-                        <FaTrash size={12} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Syllabus Content
-const SyllabusContent = () => {
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <div className="flex justify-between items-center flex-shrink-0">
-        <h3 className="text-sm font-semibold text-gray-800">
-          Syllabus Management
-        </h3>
-        <Link
-          to="/admin-batch-course/syllabus"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
-        >
-          <FaPlusCircle size={12} /> Add Syllabus
-        </Link>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center flex-1 flex items-center justify-center">
-        <div>
-          <FaBookOpen className="text-6xl text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">
-            Syllabus management feature coming soon
-          </p>
-          <p className="text-gray-400 text-xs mt-1">
-            Add and manage course syllabi here
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Clear Routine Content
-const ClearRoutineContent = () => {
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <div className="flex justify-between items-center flex-shrink-0">
-        <h3 className="text-sm font-semibold text-gray-800">Clear Routine</h3>
-        <Link
-          to="/admin-batch-course/clear-routine"
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
-        >
-          <FaPlusCircle size={12} /> Create Routine
-        </Link>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center flex-1 flex items-center justify-center">
-        <div>
-          <FaRoute className="text-6xl text-gray-300 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">
-            Routine management feature coming soon
-          </p>
-          <p className="text-gray-400 text-xs mt-1">
-            Create and manage class routines here
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
-// 5. ABSENCE STUDENT CONTENT
-// ==========================================
-const AbsenceStudentContent = () => {
-  const [absentStudents] = useState([
-    {
-      id: 1,
-      name: "Mohammad Ali",
-      class: "Class 10",
-      date: "2026-07-25",
-      reason: "Sick",
-      status: "Absent",
-    },
-    {
-      id: 2,
-      name: "Abdullah Karim",
-      class: "Class 9",
-      date: "2026-07-25",
-      reason: "Family Event",
-      status: "Leave",
-    },
-    {
-      id: 3,
-      name: "Maryam Akter",
-      class: "Class 8",
-      date: "2026-07-25",
-      reason: "Not Reported",
-      status: "Absent",
-    },
-  ]);
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <h2 className="text-base font-bold text-gray-800 flex items-center gap-2 flex-shrink-0">
-        <FaUserTimes className="text-red-600" /> Absence Student Community
-      </h2>
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
-        <div className="overflow-x-auto h-full">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Name
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Class
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Date
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Reason
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {absentStudents.map((student) => (
-                <tr
-                  key={student.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-3 py-2 text-xs font-medium text-gray-800">
-                    {student.name}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {student.class}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {student.date}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {student.reason}
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${student.status === "Absent" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"}`}
-                    >
-                      {student.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
-// 6. FINANCE CONTENT
-// ==========================================
-const FinanceContent = () => {
-  const [invoices] = useState([
-    {
-      id: 1,
-      student: "Ahmed Hasan",
-      class: "Class 8",
-      amount: 5000,
-      status: "Paid",
-      date: "2026-07-01",
-    },
-    {
-      id: 2,
-      student: "Fatima Begum",
-      class: "Class 9",
-      amount: 5000,
-      status: "Pending",
-      date: "2026-07-01",
-    },
-    {
-      id: 3,
-      student: "Mohammad Ali",
-      class: "Class 10",
-      amount: 5000,
-      status: "Paid",
-      date: "2026-07-01",
-    },
-  ]);
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <div className="flex justify-between items-center flex-shrink-0">
-        <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-          <FaMoneyBillWave className="text-green-600" /> Finance
-        </h2>
-        <Link
-          to="/admin-finance/invoice"
-          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
-        >
-          <FaPlusCircle size={12} /> Generate Invoice
-        </Link>
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 flex-shrink-0">
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-          <p className="text-xl font-bold text-green-600">৳125,000</p>
-          <p className="text-[10px] text-gray-500">Total Income</p>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-          <p className="text-xl font-bold text-yellow-600">৳35,000</p>
-          <p className="text-[10px] text-gray-500">Pending Fees</p>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-          <p className="text-xl font-bold text-blue-600">৳90,000</p>
-          <p className="text-[10px] text-gray-500">Collected</p>
-        </div>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
-        <div className="overflow-x-auto h-full">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Student
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Class
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Amount
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {invoices.map((invoice) => (
-                <tr
-                  key={invoice.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-3 py-2 text-xs font-medium text-gray-800">
-                    {invoice.student}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {invoice.class}
-                  </td>
-                  <td className="px-3 py-2 text-xs font-semibold text-gray-800">
-                    ৳{invoice.amount}
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${invoice.status === "Paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                    >
-                      {invoice.status}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <Link
-                      to="/admin-finance/invoice"
-                      className="text-blue-600 hover:text-blue-800 p-0.5"
-                      title="View Invoice"
-                    >
-                      <FaFileInvoice size={12} />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
-// 7. EXAM CONTENT
-// ==========================================
-const ExamContent = () => {
-  const [activeTab, setActiveTab] = useState("exam-make");
-
-  const tabs = [
-    {
-      id: "exam-make",
-      label: "Exam Make",
-      icon: <FaCalendarPlus size={14} />,
-      path: "/admin-exam/make",
-    },
-    {
-      id: "result-publish",
-      label: "Result Publish",
-      icon: <FaFileAlt size={14} />,
-      path: "/admin-exam/result",
-    },
-    {
-      id: "certificate-permission",
-      label: "Certificate Permission",
-      icon: <FaCertificate size={14} />,
-      path: "/admin-exam/certificate",
-    },
-  ];
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <div className="flex justify-between items-center flex-shrink-0">
-        <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-          <FaCalendarCheck className="text-purple-600" /> Exam Management
-        </h2>
-      </div>
-      <div className="flex gap-1 bg-gray-100 p-1 rounded-lg flex-shrink-0 overflow-x-auto">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.id}
-            to={tab.path}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              activeTab === tab.id
-                ? "bg-white text-purple-600 shadow-sm"
-                : "text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            {tab.icon}
-            {tab.label}
-          </Link>
-        ))}
-      </div>
-      <div className="flex-1 overflow-hidden">
-        {activeTab === "exam-make" && <ExamMakeContent />}
-        {activeTab === "result-publish" && <ResultPublishContent />}
-        {activeTab === "certificate-permission" && (
-          <CertificatePermissionContent />
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Exam Make Content
-const ExamMakeContent = () => {
-  const [exams] = useState([
-    {
-      id: 1,
-      title: "Mid Term Exam 2026",
-      class: "Class 8",
-      subject: "Tajweed",
-      date: "2026-06-15",
-      status: "Upcoming",
-    },
-    {
-      id: 2,
-      title: "Weekly Test - Week 3",
-      class: "Class 9",
-      subject: "Tafsir",
-      date: "2026-07-10",
-      status: "Completed",
-    },
-    {
-      id: 3,
-      title: "Final Exam 2026",
-      class: "Class 10",
-      subject: "Hadith",
-      date: "2026-07-20",
-      status: "Upcoming",
-    },
-  ]);
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <div className="flex justify-between items-center flex-shrink-0">
-        <h3 className="text-sm font-semibold text-gray-800">Exam List</h3>
-        <Link
-          to="/admin-exam/make"
-          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
-        >
-          <FaPlusCircle size={12} /> Create Exam
-        </Link>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
-        <div className="overflow-x-auto h-full">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Exam Title
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Class
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Subject
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Date
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {exams.map((exam) => (
-                <tr
-                  key={exam.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-3 py-2 text-xs font-medium text-gray-800">
-                    {exam.title}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {exam.class}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {exam.subject}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {exam.date}
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${exam.status === "Upcoming" ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"}`}
-                    >
-                      {exam.status}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-1">
-                      <Link
-                        to="/admin-exam/make"
-                        className="text-blue-600 hover:text-blue-800 p-0.5"
-                        title="View"
-                      >
-                        <FaEye size={12} />
-                      </Link>
-                      <Link
-                        to="/admin-exam/make"
-                        className="text-green-600 hover:text-green-800 p-0.5"
-                        title="Edit"
-                      >
-                        <FaEdit size={12} />
-                      </Link>
-                      <button
-                        className="text-red-600 hover:text-red-800 p-0.5"
-                        title="Delete"
-                      >
-                        <FaTrash size={12} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Result Publish Content
-const ResultPublishContent = () => {
-  const [results] = useState([
-    {
-      id: 1,
-      exam: "Mid Term Exam 2026",
-      class: "Class 8",
-      published: "2026-06-20",
-      status: "Published",
-    },
-    {
-      id: 2,
-      exam: "Weekly Test - Week 3",
-      class: "Class 9",
-      published: "2026-07-12",
-      status: "Published",
-    },
-    {
-      id: 3,
-      exam: "Final Exam 2026",
-      class: "Class 10",
-      published: "-",
-      status: "Pending",
-    },
-  ]);
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <div className="flex justify-between items-center flex-shrink-0">
-        <h3 className="text-sm font-semibold text-gray-800">Result List</h3>
-        <Link
-          to="/admin-exam/result"
-          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
-        >
-          <FaPlusCircle size={12} /> Publish Result
-        </Link>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
-        <div className="overflow-x-auto h-full">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Exam
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Class
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Published Date
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {results.map((result) => (
-                <tr
-                  key={result.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-3 py-2 text-xs font-medium text-gray-800">
-                    {result.exam}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {result.class}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {result.published}
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${result.status === "Published" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                    >
-                      {result.status}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-1">
-                      <Link
-                        to="/admin-exam/result"
-                        className="text-blue-600 hover:text-blue-800 p-0.5"
-                        title="View"
-                      >
-                        <FaEye size={12} />
-                      </Link>
-                      <Link
-                        to="/admin-exam/result"
-                        className="text-green-600 hover:text-green-800 p-0.5"
-                        title="Edit"
-                      >
-                        <FaEdit size={12} />
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Certificate Permission Content
-const CertificatePermissionContent = () => {
-  const [certificates] = useState([
-    {
-      id: 1,
-      student: "Ahmed Hasan",
-      course: "Tajweed",
-      issueDate: "2026-06-30",
-      status: "Issued",
-    },
-    {
-      id: 2,
-      student: "Fatima Begum",
-      course: "Tafsir",
-      issueDate: "2026-06-30",
-      status: "Pending",
-    },
-    {
-      id: 3,
-      student: "Mohammad Ali",
-      course: "Hadith",
-      issueDate: "-",
-      status: "Pending",
-    },
-  ]);
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <div className="flex justify-between items-center flex-shrink-0">
-        <h3 className="text-sm font-semibold text-gray-800">
-          Certificate Permission
-        </h3>
-        <Link
-          to="/admin-exam/certificate"
-          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
-        >
-          <FaPlusCircle size={12} /> Issue Certificate
-        </Link>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
-        <div className="overflow-x-auto h-full">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Student
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Course
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Issue Date
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {certificates.map((cert) => (
-                <tr
-                  key={cert.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-3 py-2 text-xs font-medium text-gray-800">
-                    {cert.student}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {cert.course}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {cert.issueDate}
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${cert.status === "Issued" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                    >
-                      {cert.status}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-1">
-                      <Link
-                        to="/admin-exam/certificate"
-                        className="text-blue-600 hover:text-blue-800 p-0.5"
-                        title="View"
-                      >
-                        <FaEye size={12} />
-                      </Link>
-                      <Link
-                        to="/admin-exam/certificate"
-                        className="text-green-600 hover:text-green-800 p-0.5"
-                        title="Edit"
-                      >
-                        <FaEdit size={12} />
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
-// 8. REPORT & ANALYTICS CONTENT
-// ==========================================
-const ReportAnalyticsContent = () => {
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <h2 className="text-base font-bold text-gray-800 flex items-center gap-2 flex-shrink-0">
-        <FaChartLine className="text-purple-600" /> Report & Analytics
-      </h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 flex-shrink-0">
-        {[
-          {
-            label: "Admission Report",
-            icon: <FaUserPlus className="text-blue-500" />,
-            color: "bg-blue-50",
-            path: "/admin-reports/admission",
-          },
-          {
-            label: "Attendance Report",
-            icon: <FaClipboardList className="text-green-500" />,
-            color: "bg-green-50",
-            path: "/admin-reports/attendance",
-          },
-          {
-            label: "Income Report",
-            icon: <FaMoneyBillWave className="text-yellow-500" />,
-            color: "bg-yellow-50",
-            path: "/admin-reports/income",
-          },
-        ].map((report, index) => (
-          <Link
-            key={index}
-            to={report.path}
-            className={`${report.color} p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all text-center`}
-          >
-            <div className="text-2xl">{report.icon}</div>
-            <p className="text-xs font-medium text-gray-700 mt-1">
-              {report.label}
-            </p>
-            <p className="text-[10px] text-gray-500 mt-0.5">
-              Click to generate
-            </p>
-          </Link>
-        ))}
-      </div>
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 text-center flex-1 flex items-center justify-center">
-        <p className="text-sm text-gray-500">
-          Select a report type to view detailed analytics
-        </p>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
-// 9. CRM CONTENT
-// ==========================================
-const CRMContent = () => {
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <h2 className="text-base font-bold text-gray-800 flex items-center gap-2 flex-shrink-0">
-        <FaDatabase className="text-teal-600" /> CRM Management
-      </h2>
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 flex-1">
-        <h3 className="text-sm font-semibold text-gray-800 mb-3">Data Entry</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <Link
-            to="/admin-crm/data-entry"
-            className="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg border border-blue-200 text-center transition-all"
-          >
-            <FaUserGraduate className="text-2xl text-blue-500 mx-auto" />
-            <p className="text-xs font-medium text-gray-700 mt-1">
-              Student Data
-            </p>
-          </Link>
-          <Link
-            to="/admin-crm/data-entry"
-            className="bg-green-50 hover:bg-green-100 p-4 rounded-lg border border-green-200 text-center transition-all"
-          >
-            <FaChalkboardTeacher className="text-2xl text-green-500 mx-auto" />
-            <p className="text-xs font-medium text-gray-700 mt-1">
-              Teacher Data
-            </p>
-          </Link>
-          <Link
-            to="/admin-crm/data-entry"
-            className="bg-purple-50 hover:bg-purple-100 p-4 rounded-lg border border-purple-200 text-center transition-all"
-          >
-            <FaBook className="text-2xl text-purple-500 mx-auto" />
-            <p className="text-xs font-medium text-gray-700 mt-1">
-              Course Data
-            </p>
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
-// 10. SALARY CONTENT
-// ==========================================
-const SalaryContent = () => {
-  const [salaryHistory] = useState([
-    {
-      id: 1,
-      teacher: "Ustadh Ahmad",
-      month: "June 2026",
-      amount: 45000,
-      status: "Paid",
-      date: "2026-06-30",
-    },
-    {
-      id: 2,
-      teacher: "Ustadh Muhammad",
-      month: "June 2026",
-      amount: 40000,
-      status: "Pending",
-      date: "2026-06-30",
-    },
-    {
-      id: 3,
-      teacher: "Ustadh Abdullah",
-      month: "June 2026",
-      amount: 42000,
-      status: "Paid",
-      date: "2026-06-30",
-    },
-  ]);
-
-  const totalSalary = salaryHistory.reduce((sum, item) => sum + item.amount, 0);
-  const dueSalary = salaryHistory
-    .filter((item) => item.status === "Pending")
-    .reduce((sum, item) => sum + item.amount, 0);
-
-  return (
-    <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      <h2 className="text-base font-bold text-gray-800 flex items-center gap-2 flex-shrink-0">
-        <FaMoneyBillWave className="text-green-600" /> Salary
-      </h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 flex-shrink-0">
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-          <p className="text-xl font-bold text-blue-600">
-            ৳{totalSalary.toLocaleString()}
-          </p>
-          <p className="text-[10px] text-gray-500">Total Salary</p>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-          <p className="text-xl font-bold text-green-600">
-            ৳{(totalSalary - dueSalary).toLocaleString()}
-          </p>
-          <p className="text-[10px] text-gray-500">Paid Salary</p>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-          <p className="text-xl font-bold text-red-600">
-            ৳{dueSalary.toLocaleString()}
-          </p>
-          <p className="text-[10px] text-gray-500">Due Salary</p>
-        </div>
-      </div>
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
-        <div className="overflow-x-auto h-full">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Teacher
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Month
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Amount
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {salaryHistory.map((item) => (
-                <tr
-                  key={item.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-3 py-2 text-xs font-medium text-gray-800">
-                    {item.teacher}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {item.month}
-                  </td>
-                  <td className="px-3 py-2 text-xs font-semibold text-gray-800">
-                    ৳{item.amount}
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${item.status === "Paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                    >
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <Link
-                      to="/admin-salary/total"
-                      className="text-blue-600 hover:text-blue-800 p-0.5"
-                      title="View"
-                    >
-                      <FaEye size={12} />
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default AdminDashboard;
+export default Student_exam;
