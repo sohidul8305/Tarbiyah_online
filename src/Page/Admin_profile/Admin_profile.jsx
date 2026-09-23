@@ -31,27 +31,16 @@ import {
 import { MdDashboard, MdVerified } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-// ✅ ImgBB API Key — .env file থেকে আসবে, না থাকলে fallback
+// ✅ ImgBB API Key
 const IMAGEBB_API_KEY =
   import.meta.env.VITE_IMAGEBB_API_KEY || "8bf6838d246dba2d2f07c95a50b28938";
 
-// ✅ Debug — console এ দেখাবে
-console.log(
-  "🔑 ImgBB API Key Status:",
-  IMAGEBB_API_KEY ? "✅ Set" : "❌ Missing",
-);
+// ✅ Image-এর জন্য আলাদা localStorage key
+const ADMIN_IMAGE_KEY = "adminProfileImage";
 
-// ✅ ImgBB Upload Function
+// ✅ ImgBB Upload
 const uploadToImgBB = async (file) => {
   console.log("🚀 Starting ImgBB upload...");
-  console.log(
-    "📁 File:",
-    file?.name,
-    "| Size:",
-    file?.size,
-    "| Type:",
-    file?.type,
-  );
 
   if (!IMAGEBB_API_KEY) {
     throw new Error("ImgBB API key missing!");
@@ -63,8 +52,8 @@ const uploadToImgBB = async (file) => {
     throw new Error("Please select a valid image file.");
   }
 
-  if (file.size > 2 * 1024 * 1024) {
-    throw new Error("Image size must be less than 2MB.");
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error("Image size must be less than 5MB.");
   }
 
   const formData = new FormData();
@@ -78,16 +67,19 @@ const uploadToImgBB = async (file) => {
     },
   );
 
-  console.log("📡 Response status:", response.status);
-
   const data = await response.json();
-  console.log("📦 ImgBB response:", data);
 
   if (!data.success) {
     throw new Error(data.error?.message || "ImgBB upload failed");
   }
 
-  const imageUrl = data.data.display_url || data.data.url;
+  // ✅ সবসময় direct URL নিবো
+  const imageUrl = data.data.url || data.data.display_url;
+
+  if (!imageUrl) {
+    throw new Error("ImgBB didn't return a valid URL");
+  }
+
   console.log("✅ Image URL:", imageUrl);
   return imageUrl;
 };
@@ -100,6 +92,7 @@ const Admin_profile = () => {
   const [activeSubMenu, setActiveSubMenu] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageLoadError, setImageLoadError] = useState(false);
   const fileInputRef = useRef(null);
 
   const [adminInfo, setAdminInfo] = useState({
@@ -117,20 +110,27 @@ const Admin_profile = () => {
 
   const [editData, setEditData] = useState({});
 
-  // Load admin info
+  // ============================================================
+  // ✅ Load admin info — merge saved image from separate key
+  // ============================================================
   useEffect(() => {
+    // ✅ ১. localStorage থেকে adminInfo
     const savedAdmin = localStorage.getItem("adminInfo");
+    // ✅ ২. localStorage থেকে saved image (separate key)
+    const savedImage = localStorage.getItem(ADMIN_IMAGE_KEY) || "";
+
+    let admin;
     if (savedAdmin) {
       try {
-        const admin = JSON.parse(savedAdmin);
-        setAdminInfo(admin);
-        setEditData(admin);
-        console.log("📥 Loaded adminInfo:", admin);
+        admin = JSON.parse(savedAdmin);
       } catch (err) {
         console.error("Failed to parse adminInfo:", err);
+        admin = null;
       }
-    } else {
-      const defaultAdmin = {
+    }
+
+    if (!admin) {
+      admin = {
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "+880 1700 123456",
@@ -142,9 +142,21 @@ const Admin_profile = () => {
         website: "https://tarabiyahonline.com",
         profileImage: "",
       };
-      setAdminInfo(defaultAdmin);
-      setEditData(defaultAdmin);
     }
+
+    // ✅ Merge: separate key > adminInfo.profileImage
+    const merged = {
+      ...admin,
+      profileImage: savedImage || admin.profileImage || "",
+    };
+
+    console.log(
+      "📥 Loaded admin with image:",
+      merged.profileImage ? "✅" : "❌",
+    );
+
+    setAdminInfo(merged);
+    setEditData(merged);
   }, [user]);
 
   const toggleSubMenu = (menu) => {
@@ -160,7 +172,7 @@ const Admin_profile = () => {
       await logOut();
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminEmail");
-      // ✅ adminInfo এবং adminStats remove করবেন না — image preserve থাকবে
+      // ✅ adminInfo এবং adminProfileImage remove করবেন না
 
       await Swal.fire({
         icon: "success",
@@ -207,12 +219,12 @@ const Admin_profile = () => {
           label: "Today's Class",
         },
         {
-          id: "basic-tazweed payment overview",
+          id: "basic-tazweed",
           path: "/admin-dashboard/basic-tazweed",
           label: "Basic Tazweed Payment Overview",
         },
         {
-          id: "najera-payment overview",
+          id: "najera-batch",
           path: "/admin-dashboard/najera-batch",
           label: "Najera Payment Overview",
         },
@@ -405,12 +417,24 @@ const Admin_profile = () => {
     },
   ];
 
+  // ✅ Save — image সহ সব data
   const handleEditToggle = () => {
     if (isEditing) {
       // ✅ Save
-      setAdminInfo(editData);
-      localStorage.setItem("adminInfo", JSON.stringify(editData));
-      console.log("💾 Saved adminInfo:", editData);
+      const dataToSave = { ...editData };
+
+      setAdminInfo(dataToSave);
+      localStorage.setItem("adminInfo", JSON.stringify(dataToSave));
+
+      // ✅ Image আলাদা key তেও save (login/refresh এ preserve হবে)
+      if (dataToSave.profileImage) {
+        localStorage.setItem(ADMIN_IMAGE_KEY, dataToSave.profileImage);
+      } else {
+        localStorage.removeItem(ADMIN_IMAGE_KEY);
+      }
+
+      console.log("💾 Saved adminInfo with image:", dataToSave.profileImage);
+
       Swal.fire({
         icon: "success",
         title: "Profile Updated!",
@@ -448,7 +472,6 @@ const Admin_profile = () => {
 
     console.log("📷 File selected:", file.name);
 
-    // Type check
     if (!file.type.startsWith("image/")) {
       Swal.fire({
         icon: "error",
@@ -459,20 +482,19 @@ const Admin_profile = () => {
       return;
     }
 
-    // Size check
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) {
       Swal.fire({
         icon: "warning",
         title: "File Too Large",
-        text: "Image size must be less than 2MB.",
+        text: "Image size must be less than 5MB.",
       });
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
     setIsUploadingImage(true);
+    setImageLoadError(false);
 
-    // Loading popup
     Swal.fire({
       title: "Uploading image...",
       text: "Please wait",
@@ -485,14 +507,23 @@ const Admin_profile = () => {
     try {
       const imageUrl = await uploadToImgBB(file);
 
-      // ✅ editData এ save
+      // ✅ ১. editData তে save
       setEditData((prev) => ({ ...prev, profileImage: imageUrl }));
+
+      // ✅ ২. সাথে সাথে adminInfo তেও save (instant preview)
+      setAdminInfo((prev) => ({ ...prev, profileImage: imageUrl }));
+
+      // ✅ ৩. সাথে সাথে localStorage এর separate key তে save
+      // (login/refresh এ preserve হবে)
+      localStorage.setItem(ADMIN_IMAGE_KEY, imageUrl);
+
+      console.log("✅ Image saved to localStorage + state");
 
       Swal.fire({
         icon: "success",
         title: "Image Uploaded!",
         html: `
-          <p>Click <strong>Save</strong> to apply changes.</p>
+          <p>Click <strong>Save</strong> to update other fields (optional).</p>
           <img src="${imageUrl}" style="max-width: 150px; max-height: 150px; border-radius: 8px; margin-top: 10px; border: 2px solid #004d4d;" />
         `,
         confirmButtonColor: "#004d4d",
@@ -506,7 +537,7 @@ const Admin_profile = () => {
         html: `
           <p><strong>Error:</strong> ${error.message}</p>
           <p style="font-size: 12px; color: #666; margin-top: 8px;">
-            Check ImgBB API key, internet connection, and file size (max 2MB).
+            Check ImgBB API key, internet connection, and file size.
           </p>
         `,
         confirmButtonColor: "#004d4d",
@@ -518,8 +549,11 @@ const Admin_profile = () => {
   };
 
   const handleRemoveImage = () => {
-    setEditData({ ...editData, profileImage: "" });
+    setEditData((prev) => ({ ...prev, profileImage: "" }));
+    setAdminInfo((prev) => ({ ...prev, profileImage: "" }));
+    localStorage.removeItem(ADMIN_IMAGE_KEY);
     if (fileInputRef.current) fileInputRef.current.value = "";
+
     Swal.fire({
       icon: "success",
       title: "Image Removed",
@@ -528,6 +562,11 @@ const Admin_profile = () => {
       showConfirmButton: false,
     });
   };
+
+  // ✅ Image source থেকে যেই URL pick করি
+  const currentImageUrl = isEditing
+    ? editData.profileImage
+    : adminInfo.profileImage;
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -560,11 +599,12 @@ const Admin_profile = () => {
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
-                {adminInfo.profileImage ? (
+                {adminInfo.profileImage && !imageLoadError ? (
                   <img
                     src={adminInfo.profileImage}
                     alt="admin"
                     className="w-full h-full object-cover"
+                    onError={() => setImageLoadError(true)}
                   />
                 ) : (
                   <span className="text-xl font-bold">
@@ -581,7 +621,7 @@ const Admin_profile = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -592,21 +632,20 @@ const Admin_profile = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
+                        className={`transition-transform ${
+                          activeSubMenu === item.id ? "rotate-180" : ""
+                        }`}
                       >
                         <FaArrowRight size={12} />
                       </span>
@@ -638,14 +677,11 @@ const Admin_profile = () => {
                     }}
                   >
                     <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -676,7 +712,7 @@ const Admin_profile = () => {
           />
         )}
 
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
@@ -692,305 +728,314 @@ const Admin_profile = () => {
               </span>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
               >
                 Logout
               </button>
             </div>
           </div>
 
-          <div className="overflow-hidden h-[calc(100vh-170px)]">
-            <div className="space-y-3 h-full overflow-hidden">
-              {/* Profile Header */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] h-20 md:h-24 relative">
+          <div className="space-y-3">
+            {/* Profile Header */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] h-20 md:h-24 relative">
+                <button
+                  onClick={handleEditToggle}
+                  disabled={isUploadingImage}
+                  className={`absolute top-2 right-2 ${
+                    isEditing
+                      ? "bg-green-500 hover:bg-green-600"
+                      : "bg-white/20 hover:bg-white/30"
+                  } text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm disabled:opacity-50`}
+                >
+                  {isEditing ? <FaSave size={12} /> : <FaEdit size={12} />}
+                  {isEditing ? "Save" : "Edit"}
+                </button>
+                {isEditing && (
                   <button
-                    onClick={handleEditToggle}
+                    onClick={handleCancelEdit}
                     disabled={isUploadingImage}
-                    className={`absolute top-2 right-2 ${
-                      isEditing
-                        ? "bg-green-500 hover:bg-green-600"
-                        : "bg-white/20 hover:bg-white/30"
-                    } text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm disabled:opacity-50`}
+                    className="absolute top-2 right-20 bg-red-500/80 hover:bg-red-600 text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm disabled:opacity-50"
                   >
-                    {isEditing ? <FaSave size={12} /> : <FaEdit size={12} />}
-                    {isEditing ? "Save" : "Edit"}
+                    <FaTimes size={12} /> Cancel
                   </button>
+                )}
+              </div>
+
+              <div className="px-4 pb-4 relative flex flex-col md:flex-row items-center md:items-end gap-4 -mt-10 md:-mt-8">
+                <div className="relative">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-white p-1 shadow-lg border-4 border-white flex items-center justify-center text-3xl bg-teal-50 overflow-hidden">
+                    {currentImageUrl && !imageLoadError ? (
+                      <img
+                        key={currentImageUrl}
+                        src={currentImageUrl}
+                        alt="profile"
+                        className="w-full h-full object-cover rounded-lg"
+                        onError={() => {
+                          console.error(
+                            "❌ Image failed to load:",
+                            currentImageUrl,
+                          );
+                          setImageLoadError(true);
+                        }}
+                        onLoad={() => setImageLoadError(false)}
+                      />
+                    ) : (
+                      <span className="text-teal-700 font-bold">
+                        {adminInfo.name?.charAt(0) || "A"}
+                      </span>
+                    )}
+                  </div>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+
                   {isEditing && (
-                    <button
-                      onClick={handleCancelEdit}
-                      disabled={isUploadingImage}
-                      className="absolute top-2 right-20 bg-red-500/80 hover:bg-red-600 text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm disabled:opacity-50"
-                    >
-                      <FaTimes size={12} /> Cancel
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleImageClick}
+                        disabled={isUploadingImage}
+                        title="Upload Image"
+                        className="absolute bottom-0 right-0 bg-teal-600 text-white p-1.5 rounded-full border-2 border-white hover:bg-teal-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isUploadingImage ? (
+                          <FaSpinner size={12} className="animate-spin" />
+                        ) : (
+                          <FaCamera size={12} />
+                        )}
+                      </button>
+
+                      {editData.profileImage && !isUploadingImage && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          title="Remove Image"
+                          className="absolute -top-1 -right-1 bg-red-500 text-white p-1 rounded-full border-2 border-white hover:bg-red-600 transition-all shadow-md"
+                        >
+                          <FaTimes size={10} />
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
 
-                <div className="px-4 pb-4 relative flex flex-col md:flex-row items-center md:items-end gap-4 -mt-10 md:-mt-8">
-                  <div className="relative">
-                    <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl bg-white p-1 shadow-lg border-4 border-white flex items-center justify-center text-3xl bg-teal-50 overflow-hidden">
-                      {(
-                        isEditing
-                          ? editData.profileImage
-                          : adminInfo.profileImage
-                      ) ? (
-                        <img
-                          src={
-                            isEditing
-                              ? editData.profileImage
-                              : adminInfo.profileImage
-                          }
-                          alt="profile"
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                      ) : (
-                        <span>{adminInfo.name?.charAt(0) || "A"}</span>
-                      )}
-                    </div>
-
+                <div className="text-center md:text-left flex-grow">
+                  {isEditing ? (
                     <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
+                      type="text"
+                      name="name"
+                      value={editData.name || ""}
+                      onChange={handleInputChange}
+                      className="text-lg md:text-xl font-bold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg px-2 py-0.5 w-full max-w-xs"
                     />
+                  ) : (
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-1.5">
+                      <h1 className="text-lg md:text-xl font-bold text-gray-800">
+                        {adminInfo.name}
+                      </h1>
+                      <MdVerified className="text-blue-500 text-base" />
+                    </div>
+                  )}
 
-                    {isEditing && (
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="designation"
+                      value={editData.designation || ""}
+                      onChange={handleInputChange}
+                      className="text-teal-600 font-medium text-xs md:text-sm bg-gray-50 border border-gray-300 rounded-lg px-2 py-0.5 w-full max-w-xs mt-0.5"
+                    />
+                  ) : (
+                    <p className="text-teal-600 font-medium text-xs md:text-sm">
+                      {adminInfo.designation}
+                    </p>
+                  )}
+
+                  <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-1 text-xs text-gray-500">
+                    {isEditing ? (
                       <>
-                        <button
-                          type="button"
-                          onClick={handleImageClick}
-                          disabled={isUploadingImage}
-                          title="Upload Image"
-                          className="absolute bottom-0 right-0 bg-teal-600 text-white p-1.5 rounded-full border-2 border-white hover:bg-teal-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                          {isUploadingImage ? (
-                            <FaSpinner size={12} className="animate-spin" />
-                          ) : (
-                            <FaCamera size={12} />
-                          )}
-                        </button>
-
-                        {editData.profileImage && !isUploadingImage && (
-                          <button
-                            type="button"
-                            onClick={handleRemoveImage}
-                            title="Remove Image"
-                            className="absolute -top-1 -right-1 bg-red-500 text-white p-1 rounded-full border-2 border-white hover:bg-red-600 transition-all shadow-md"
-                          >
-                            <FaTimes size={10} />
-                          </button>
-                        )}
+                        <div className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full">
+                          <FaEnvelope className="text-teal-600" size={12} />
+                          <input
+                            type="email"
+                            name="email"
+                            value={editData.email || ""}
+                            onChange={handleInputChange}
+                            className="bg-transparent border-none text-xs focus:outline-none w-32"
+                          />
+                        </div>
+                        <div className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full">
+                          <FaPhoneAlt className="text-teal-600" size={12} />
+                          <input
+                            type="text"
+                            name="phone"
+                            value={editData.phone || ""}
+                            onChange={handleInputChange}
+                            className="bg-transparent border-none text-xs focus:outline-none w-28"
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <span className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full">
+                          <FaEnvelope className="text-teal-600" size={12} />{" "}
+                          {adminInfo.email}
+                        </span>
+                        <span className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full">
+                          <FaPhoneAlt className="text-teal-600" size={12} />{" "}
+                          {adminInfo.phone}
+                        </span>
+                        <span className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full">
+                          <FaCalendarAlt className="text-teal-600" size={12} />{" "}
+                          Joined: {adminInfo.joinDate}
+                        </span>
                       </>
                     )}
                   </div>
+                </div>
+              </div>
+            </div>
 
-                  <div className="text-center md:text-left flex-grow">
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="name"
-                        value={editData.name}
-                        onChange={handleInputChange}
-                        className="text-lg md:text-xl font-bold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg px-2 py-0.5 w-full max-w-xs"
-                      />
-                    ) : (
-                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-1.5">
-                        <h1 className="text-lg md:text-xl font-bold text-gray-800">
-                          {adminInfo.name}
-                        </h1>
-                        <MdVerified className="text-blue-500 text-base" />
-                      </div>
-                    )}
+            {/* Two Columns */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+              <div className="lg:col-span-1 space-y-3">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
+                  <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
+                    <span className="text-teal-600">📝</span> Bio
+                  </h3>
+                  {isEditing ? (
+                    <textarea
+                      name="bio"
+                      value={editData.bio || ""}
+                      onChange={handleInputChange}
+                      rows="4"
+                      className="w-full text-gray-600 text-xs leading-relaxed bg-gray-50 border border-gray-300 rounded-lg px-2 py-1"
+                    />
+                  ) : (
+                    <p className="text-gray-600 text-xs leading-relaxed">
+                      {adminInfo.bio}
+                    </p>
+                  )}
+                </div>
 
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="designation"
-                        value={editData.designation}
-                        onChange={handleInputChange}
-                        className="text-teal-600 font-medium text-xs md:text-sm bg-gray-50 border border-gray-300 rounded-lg px-2 py-0.5 w-full max-w-xs mt-0.5"
-                      />
-                    ) : (
-                      <p className="text-teal-600 font-medium text-xs md:text-sm">
-                        {adminInfo.designation}
-                      </p>
-                    )}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
+                  <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
+                    <FaBuilding className="text-teal-600" size={14} />{" "}
+                    Department
+                  </h3>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="department"
+                      value={editData.department || ""}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-2 py-1 text-xs"
+                    />
+                  ) : (
+                    <p className="text-gray-700 text-xs font-medium">
+                      {adminInfo.department}
+                    </p>
+                  )}
+                </div>
 
-                    <div className="flex flex-wrap justify-center md:justify-start gap-2 mt-1 text-xs text-gray-500">
-                      {isEditing ? (
-                        <>
-                          <div className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full">
-                            <FaEnvelope className="text-teal-600" size={12} />
-                            <input
-                              type="email"
-                              name="email"
-                              value={editData.email}
-                              onChange={handleInputChange}
-                              className="bg-transparent border-none text-xs focus:outline-none w-32"
-                            />
-                          </div>
-                          <div className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full">
-                            <FaPhoneAlt className="text-teal-600" size={12} />
-                            <input
-                              type="text"
-                              name="phone"
-                              value={editData.phone}
-                              onChange={handleInputChange}
-                              className="bg-transparent border-none text-xs focus:outline-none w-28"
-                            />
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <span className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full">
-                            <FaEnvelope className="text-teal-600" size={12} />{" "}
-                            {adminInfo.email}
-                          </span>
-                          <span className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full">
-                            <FaPhoneAlt className="text-teal-600" size={12} />{" "}
-                            {adminInfo.phone}
-                          </span>
-                          <span className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full">
-                            <FaCalendarAlt
-                              className="text-teal-600"
-                              size={12}
-                            />{" "}
-                            Joined: {adminInfo.joinDate}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
+                  <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
+                    <FaMapMarkerAlt className="text-teal-600" size={14} />{" "}
+                    Address
+                  </h3>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="address"
+                      value={editData.address || ""}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-2 py-1 text-xs"
+                    />
+                  ) : (
+                    <p className="text-gray-600 text-xs">{adminInfo.address}</p>
+                  )}
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
+                  <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
+                    <FaGlobe className="text-teal-600" size={14} /> Website
+                  </h3>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      name="website"
+                      value={editData.website || ""}
+                      onChange={handleInputChange}
+                      className="w-full border border-gray-300 rounded-lg px-2 py-1 text-xs"
+                    />
+                  ) : (
+                    <a
+                      href={adminInfo.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-teal-600 hover:text-teal-800 text-xs font-medium"
+                    >
+                      {adminInfo.website}
+                    </a>
+                  )}
                 </div>
               </div>
 
-              {/* Two Columns */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-[calc(100vh-270px)] overflow-hidden">
-                <div className="lg:col-span-1 space-y-3 overflow-hidden">
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
-                    <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
-                      <span className="text-teal-600">📝</span> Bio
-                    </h3>
-                    {isEditing ? (
-                      <textarea
-                        name="bio"
-                        value={editData.bio}
-                        onChange={handleInputChange}
-                        rows="4"
-                        className="w-full text-gray-600 text-xs leading-relaxed bg-gray-50 border border-gray-300 rounded-lg px-2 py-1 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      />
-                    ) : (
-                      <p className="text-gray-600 text-xs leading-relaxed">
-                        {adminInfo.bio}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
-                    <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
-                      <FaBuilding className="text-teal-600" size={14} />{" "}
-                      Department
-                    </h3>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="department"
-                        value={editData.department}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      />
-                    ) : (
-                      <p className="text-gray-700 text-xs font-medium">
-                        {adminInfo.department}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
-                    <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
-                      <FaMapMarkerAlt className="text-teal-600" size={14} />{" "}
-                      Address
-                    </h3>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="address"
-                        value={editData.address}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      />
-                    ) : (
-                      <p className="text-gray-600 text-xs">
-                        {adminInfo.address}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
-                    <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
-                      <FaGlobe className="text-teal-600" size={14} /> Website
-                    </h3>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="website"
-                        value={editData.website}
-                        onChange={handleInputChange}
-                        className="w-full border border-gray-300 rounded-lg px-2 py-1 text-xs focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                      />
-                    ) : (
-                      <a
-                        href={adminInfo.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-teal-600 hover:text-teal-800 text-xs font-medium"
+              <div className="lg:col-span-2 space-y-3">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
+                  <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
+                    <FaUserCog className="text-teal-600" size={14} /> Quick
+                    Actions
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
+                    {[
+                      { label: "Edit Profile", icon: "✏️", color: "blue" },
+                      { label: "Change Password", icon: "🔒", color: "red" },
+                      { label: "Settings", icon: "⚙️", color: "gray" },
+                      { label: "Support", icon: "💬", color: "green" },
+                    ].map((item, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          if (item.label === "Edit Profile") {
+                            handleEditToggle();
+                          } else {
+                            Swal.fire({
+                              icon: "info",
+                              title: item.label,
+                              text: "This feature is coming soon!",
+                              confirmButtonColor: "#004d4d",
+                            });
+                          }
+                        }}
+                        className="bg-gray-50 hover:bg-gray-100 p-2 rounded-lg border border-gray-200 text-center transition-all"
                       >
-                        {adminInfo.website}
-                      </a>
-                    )}
+                        <div className="text-base">{item.icon}</div>
+                        <p className="text-[10px] font-medium text-gray-700 mt-0.5">
+                          {item.label}
+                        </p>
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                <div className="lg:col-span-2 space-y-3 overflow-hidden">
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
-                    <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
-                      <FaUserCog className="text-teal-600" size={14} /> Quick
-                      Actions
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
-                      {[
-                        { label: "Edit Profile", icon: "✏️", color: "blue" },
-                        { label: "Change Password", icon: "🔒", color: "red" },
-                        { label: "Settings", icon: "⚙️", color: "gray" },
-                        { label: "Support", icon: "💬", color: "green" },
-                      ].map((item, index) => (
-                        <button
-                          key={index}
-                          onClick={() => {
-                            if (item.label === "Edit Profile") {
-                              handleEditToggle();
-                            } else {
-                              Swal.fire({
-                                icon: "info",
-                                title: item.label,
-                                text: "This feature is coming soon!",
-                                confirmButtonColor: "#004d4d",
-                              });
-                            }
-                          }}
-                          className={`bg-${item.color}-50 hover:bg-${item.color}-100 p-2 rounded-lg border border-${item.color}-100 text-center transition-all`}
-                        >
-                          <div className="text-base">{item.icon}</div>
-                          <p className="text-[10px] font-medium text-gray-700 mt-0.5">
-                            {item.label}
-                          </p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                {/* ✅ Debug Info — Development এর জন্য */}
+                <div className="bg-yellow-50 rounded-xl border border-yellow-200 p-3">
+                  <h3 className="text-xs font-bold text-yellow-800 mb-1">
+                    🔧 Debug Info
+                  </h3>
+                  <p className="text-[10px] text-yellow-700 break-all">
+                    <strong>Image URL:</strong> {currentImageUrl || "(empty)"}
+                  </p>
+                  <p className="text-[10px] text-yellow-700 mt-1">
+                    <strong>Storage Key:</strong> {ADMIN_IMAGE_KEY}
+                  </p>
                 </div>
               </div>
             </div>
