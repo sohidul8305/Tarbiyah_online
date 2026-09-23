@@ -10,8 +10,6 @@ import {
   FaMoneyBillWave,
   FaSignOutAlt,
   FaBell,
-  FaCalendarAlt,
-  FaBook,
   FaChartLine,
   FaUserTimes,
   FaDatabase,
@@ -21,12 +19,62 @@ import {
   FaArrowRight,
   FaLayerGroup,
   FaCalendarCheck,
-  FaCheckCircle,
+  FaUserPlus,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
+
+// ============================================================
+// ✅ ELDERS COURSE CHECK
+// শুধু এই ৪টি course এর student notification এ আসবে:
+// Qaida Nuraniyah, Quran Nazera, Bakarah Hifz, Basic Tajweed (Level-1)
+// ============================================================
+const ELDERS_COURSES = [
+  "qaida nuraniyah",
+  "qaida nooraniya",
+  "qaida noorani",
+  "qaida nurani",
+  "qaidah nuraniyah",
+  "qaidah nooraniya",
+  "qaidah noorani",
+  "quran nazera",
+  "nazera quran",
+  "quran najera",
+  "najera quran",
+  "bakarah hifz",
+  "bakara hifz",
+  "baqarah hifz",
+  "baqara hifz",
+  "basic tajweed (level-1)",
+  "basic tajweed (level 1)",
+  "basic tajweed level-1",
+  "basic tajweed level 1",
+  "basic tajweed",
+];
+
+const isSingleEldersCourse = (singleCourse) => {
+  const p = String(singleCourse).toLowerCase().trim();
+  if (!p) return false;
+
+  return ELDERS_COURSES.some((c) => {
+    if (p === c) return true;
+    if (p.includes(c)) return true;
+    if (c.includes(p) && p.length >= 8) return true;
+    return false;
+  });
+};
+
+const isEldersCourse = (courseStr) => {
+  if (!courseStr) return false;
+  const parts = String(courseStr)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (parts.length === 0) return false;
+  return parts.every((part) => isSingleEldersCourse(part));
+};
 
 const Admin_notification = () => {
   const { user, logOut } = useAuth();
@@ -34,9 +82,11 @@ const Admin_notification = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("notification");
   const [activeSubMenu, setActiveSubMenu] = useState(null);
-  const [tickets, setTickets] = useState([]);
+
+  const [admissions, setAdmissions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all");
+
+  const [readFilter, setReadFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
   const [adminInfo, setAdminInfo] = useState({
@@ -48,11 +98,17 @@ const Admin_notification = () => {
     joinDate: "",
   });
 
+  // ============================================================
   // Load admin info
+  // ============================================================
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        setAdminInfo(JSON.parse(savedAdmin));
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
@@ -65,25 +121,81 @@ const Admin_notification = () => {
     }
   }, [user]);
 
-  const fetchTickets = async () => {
+  // ============================================================
+  // ✅ Fetch only Elders course admission students
+  // ============================================================
+  const fetchAdmissions = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE}/support/tickets`);
-      const data = await response.json();
-      if (data.success) setTickets(data.tickets);
+      const res = await fetch(`${API_BASE}/students/all`);
+      const data = await res.json();
+
+      if (data.success) {
+        const all = data.students || [];
+
+        // শুধু pure elders course এর student
+        const elders = all.filter((s) => isEldersCourse(s.course));
+
+        console.log("📥 Total students:", all.length);
+        console.log("✅ Elders filtered:", elders.length);
+        elders.forEach((s) => console.log("   →", s.name, "|", s.course));
+
+        const notifs = elders.map((s) => ({
+          _id: s._id,
+          name: s.name || "",
+          phone: s.phone || "",
+          email: s.email || "",
+          course: s.course || "",
+          fatherName: s.fatherName || "",
+          motherName: s.motherName || "",
+          guardianName: s.guardianName || s.fatherName || "",
+          guardianPhone: s.guardianPhone || "",
+          presentAddress: s.presentAddress || s.address || "",
+          permanentAddress: s.permanentAddress || "",
+          dobOrNid: s.dobOrNid || "",
+          age: s.age || "",
+          gender: s.gender || "",
+          occupation: s.occupation || "",
+          maritalStatus: s.maritalStatus || "",
+          paidAmount: s.paidAmount || 0,
+          paymentStatus: s.paymentStatus || "Unpaid",
+          paymentMethod: s.paymentMethod || "",
+          transactionId: s.transactionId || "",
+          rawStatus: s.status || "Pending",
+          createdAt: s.createdAt || "",
+          admissionDate: s.admissionDate || "",
+          uiStatus:
+            s.status === "Active"
+              ? "Approved"
+              : s.status === "Inactive"
+                ? "Rejected"
+                : "Pending",
+          isRead: s.status === "Active" || s.status === "Inactive",
+        }));
+
+        // নতুন আগে
+        notifs.sort(
+          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
+        );
+
+        setAdmissions(notifs);
+      }
     } catch (error) {
-      console.error("Error fetching tickets:", error);
+      console.error("Error fetching admissions:", error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchTickets();
-    const interval = setInterval(fetchTickets, 30000);
+    fetchAdmissions();
+    const interval = setInterval(fetchAdmissions, 30000);
     return () => clearInterval(interval);
   }, []);
 
+  // ============================================================
+  // Logout
+  // ============================================================
   const handleLogout = async () => {
     try {
       await logOut();
@@ -105,82 +217,80 @@ const Admin_notification = () => {
   const toggleSubMenu = (menu) =>
     setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  const markAsRead = async (id) => {
-    await fetch(`${API_BASE}/support/ticket/${id}/read`, { method: "PUT" });
-    setTickets(tickets.map((t) => (t._id === id ? { ...t, isRead: true } : t)));
-  };
-
-  const deleteTicket = async (id) => {
-    const result = await Swal.fire({
-      title: "Delete this ticket?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    });
-    if (result.isConfirmed) {
-      await fetch(`${API_BASE}/support/ticket/${id}`, { method: "DELETE" });
-      setTickets(tickets.filter((t) => t._id !== id));
-    }
-  };
-
-  const viewTicket = (ticket) => {
+  // ============================================================
+  // View Admission Modal
+  // ============================================================
+  const viewAdmission = (adm) => {
     Swal.fire({
-      title: `📋 Support Ticket: ${ticket.subject}`,
+      title: `🎓 Admission: ${adm.name}`,
       html: `
         <div style="text-align: left; font-size: 13px; max-height: 500px; overflow-y: auto;">
-          <p><strong>নাম:</strong> ${ticket.name}</p>
-          <p><strong>ফোন:</strong> ${ticket.phone}</p>
-          <p><strong>ইমেইল:</strong> ${ticket.email}</p>
-          <p><strong>ডিপার্টমেন্ট:</strong> ${ticket.department}</p>
-          <hr>
-          <p><strong>সমস্যা বিবরণ:</strong></p>
-          <p style="background: #f3f4f6; padding: 10px; border-radius: 8px;">${ticket.problemDetails}</p>
-          <hr>
-          <div style="margin-top: 15px;">
-             <p><strong>📝 আপনার রিপ্লাই লিখুন:</strong></p>
-             <textarea id="swal-reply-input" class="swal2-textarea" placeholder="এখানে রিপ্লাই লিখুন..."></textarea>
+          <div style="background:#e6f7f9; padding:12px; border-radius:8px; border-left:4px solid #00ADD2; margin-bottom:10px;">
+            <p style="margin:0;"><strong>🎓 Course:</strong> ${adm.course}</p>
+            <p style="margin:5px 0 0 0;"><strong>📌 Status:</strong> 
+              <span style="color:${
+                adm.uiStatus === "Approved"
+                  ? "#16a34a"
+                  : adm.uiStatus === "Rejected"
+                    ? "#dc2626"
+                    : "#eab308"
+              }; font-weight:bold;">${adm.uiStatus}</span>
+            </p>
           </div>
+          <p><strong>👤 নাম:</strong> ${adm.name}</p>
+          <p><strong>📞 ফোন:</strong> ${adm.phone}</p>
+          <p><strong>✉️ ইমেইল:</strong> ${adm.email || "N/A"}</p>
+          <p><strong>👨 পিতা:</strong> ${adm.fatherName || "N/A"}</p>
+          <p><strong>👩 মাতা:</strong> ${adm.motherName || "N/A"}</p>
+          <p><strong>👨 অভিভাবক:</strong> ${adm.guardianName || "N/A"}</p>
+          <p><strong>📱 অভিভাবক ফোন:</strong> ${adm.guardianPhone || "N/A"}</p>
+          <p><strong>🎂 বয়স:</strong> ${adm.age || "N/A"}</p>
+          <p><strong>⚧ লিঙ্গ:</strong> ${adm.gender || "N/A"}</p>
+          <p><strong>🏠 ঠিকানা:</strong> ${adm.presentAddress || "N/A"}</p>
+          <hr>
+          <h4 style="color:#004d4d; margin-bottom:5px;">💳 Payment Info</h4>
+          <p><strong>Status:</strong> ${adm.paymentStatus}</p>
+          <p><strong>Paid:</strong> ৳${Number(adm.paidAmount || 0).toLocaleString()}</p>
+          <p><strong>Method:</strong> ${adm.paymentMethod || "N/A"}</p>
+          <p><strong>Transaction ID:</strong> ${adm.transactionId || "N/A"}</p>
+          <hr>
+          <p style="font-size:11px; color:#666;">
+            📅 Applied: ${
+              adm.createdAt ? new Date(adm.createdAt).toLocaleString() : "N/A"
+            }
+          </p>
         </div>
       `,
       width: 700,
       showCancelButton: true,
-      confirmButtonText: "রিপ্লাই পাঠান",
+      showConfirmButton: adm.uiStatus === "Pending",
+      confirmButtonText: "✅ Approve Student",
+      confirmButtonColor: "#16a34a",
       cancelButtonText: "বন্ধ করুন",
       preConfirm: async () => {
-        const replyMessage = document.getElementById("swal-reply-input").value;
-        if (!replyMessage.trim()) {
-          Swal.showValidationMessage("রিপ্লাই লিখুন");
-          return false;
-        }
         try {
-          const response = await fetch(
-            `${API_BASE}/support/ticket/${ticket._id}/reply`,
+          const res = await fetch(
+            `${API_BASE}/admin-students/update/${adm._id}`,
             {
-              method: "POST",
+              method: "PUT",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ message: replyMessage }),
+              body: JSON.stringify({ status: "Active" }),
             },
           );
-          const data = await response.json();
+          const data = await res.json();
           if (data.success) {
-            setTickets((prev) =>
-              prev.map((t) =>
-                t._id === ticket._id
-                  ? {
-                      ...t,
-                      status: "In Progress",
-                      replies: data.ticket.replies,
-                    }
-                  : t,
+            setAdmissions((prev) =>
+              prev.map((n) =>
+                n._id === adm._id
+                  ? { ...n, uiStatus: "Approved", isRead: true }
+                  : n,
               ),
             );
             return true;
-          } else {
-            Swal.showValidationMessage(data.message || "রিপ্লাই যায়নি!");
-            return false;
           }
-        } catch (error) {
+          Swal.showValidationMessage(data.message || "Approve failed");
+          return false;
+        } catch (err) {
           Swal.showValidationMessage("সার্ভার এরর!");
           return false;
         }
@@ -189,13 +299,49 @@ const Admin_notification = () => {
       if (result.isConfirmed)
         Swal.fire({
           icon: "success",
-          title: "রিপ্লাই পাঠানো হয়েছে!",
+          title: "✅ Student Approved!",
           timer: 1500,
           showConfirmButton: false,
         });
     });
   };
 
+  // ============================================================
+  // Delete Admission (student record)
+  // ============================================================
+  const deleteAdmission = async (id, name) => {
+    const result = await Swal.fire({
+      title: `Delete ${name}?`,
+      text: "This will permanently delete the student record!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(`${API_BASE}/admin-students/delete/${id}`, {
+          method: "DELETE",
+        });
+        const data = await res.json();
+        if (data.success) {
+          setAdmissions((prev) => prev.filter((n) => n._id !== id));
+          Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            timer: 1200,
+            showConfirmButton: false,
+          });
+        }
+      } catch (err) {
+        Swal.fire({ icon: "error", title: "Error", text: err.message });
+      }
+    }
+  };
+
+  // ============================================================
+  // Sidebar Menu
+  // ============================================================
   const menuItems = [
     {
       id: "profile",
@@ -225,12 +371,12 @@ const Admin_notification = () => {
           label: "Today's Class",
         },
         {
-          id: "basic-tazweed payment overview",
+          id: "basic-tazweed",
           path: "/admin-dashboard/basic-tazweed",
           label: "Basic Tazweed Payment Overview",
         },
         {
-          id: "najera-payment overview",
+          id: "najera-batch",
           path: "/admin-dashboard/najera-batch",
           label: "Najera Payment Overview",
         },
@@ -407,36 +553,45 @@ const Admin_notification = () => {
         },
       ],
     },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
-      ],
-    },
   ];
 
-  const filteredTickets = tickets
-    .filter((t) =>
-      filter === "all" ? true : filter === "unread" ? !t.isRead : t.isRead,
+  // ============================================================
+  // Filters
+  // ============================================================
+  const filteredAdmissions = admissions
+    .filter((a) =>
+      readFilter === "all"
+        ? true
+        : readFilter === "unread"
+          ? !a.isRead
+          : a.isRead,
     )
-    .filter((t) => (statusFilter === "all" ? true : t.status === statusFilter));
+    .filter((a) =>
+      statusFilter === "all" ? true : a.uiStatus === statusFilter,
+    );
 
-  const unreadCount = tickets.filter((t) => !t.isRead).length;
+  const unreadCount = admissions.filter((a) => !a.isRead).length;
+  const pendingCount = admissions.filter(
+    (a) => a.uiStatus === "Pending",
+  ).length;
+  const approvedCount = admissions.filter(
+    (a) => a.uiStatus === "Approved",
+  ).length;
+  const rejectedCount = admissions.filter(
+    (a) => a.uiStatus === "Rejected",
+  ).length;
 
+  // ============================================================
+  // Render
+  // ============================================================
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Notifications</h1>
+          <h1 className="text-sm font-bold text-gray-800">
+            Admission Notifications
+          </h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -447,12 +602,9 @@ const Admin_notification = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm transition-all duration-300 ease-in-out
-            h-full overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-all duration-300 ease-in-out h-full overflow-hidden flex-shrink-0 ${
+            isSidebarOpen ? "left-0" : "-left-72 md:left-0"
+          }`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -478,7 +630,7 @@ const Admin_notification = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -500,7 +652,9 @@ const Admin_notification = () => {
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
+                        className={`transition-transform ${
+                          activeSubMenu === item.id ? "rotate-180" : ""
+                        }`}
                       >
                         <FaArrowRight size={12} />
                       </span>
@@ -525,7 +679,7 @@ const Admin_notification = () => {
                   </>
                 ) : (
                   <Link
-                    to={item.path}
+                    to={item.path || "#"}
                     onClick={() => {
                       setActiveMenu(item.id);
                       setIsSidebarOpen(false);
@@ -567,16 +721,18 @@ const Admin_notification = () => {
           />
         )}
 
-        {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        {/* Main */}
+        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden flex flex-col">
           {/* Top Bar */}
-          <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 flex-shrink-0">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaBell className="text-yellow-600" /> Support Notifications
+                <FaUserPlus className="text-teal-600" /> Admission Notifications
+                — Quran for Elders
               </h1>
               <p className="text-xs text-gray-500">
-                Manage student support tickets
+                Qaida Nuraniyah • Quran Nazera • Bakarah Hifz • Basic Tajweed
+                (Level-1)
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -592,156 +748,202 @@ const Admin_notification = () => {
             </div>
           </div>
 
-          {/* Header with Stats */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 mb-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaBell className="text-yellow-600" /> Support Tickets
-                {unreadCount > 0 && (
-                  <span className="bg-red-500 text-white text-[10px] px-2 py-1 rounded-full animate-pulse">
-                    {unreadCount} New
-                  </span>
-                )}
-              </h2>
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 flex-shrink-0">
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-blue-600">
+                {admissions.length}
+              </p>
+              <p className="text-[10px] text-gray-500">Total</p>
             </div>
-            <div className="flex gap-2 flex-wrap">
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-yellow-600">
+                {pendingCount}
+              </p>
+              <p className="text-[10px] text-gray-500">Pending</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-green-600">
+                {approvedCount}
+              </p>
+              <p className="text-[10px] text-gray-500">Approved</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-red-600">{rejectedCount}</p>
+              <p className="text-[10px] text-gray-500">Rejected</p>
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 mb-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold text-gray-700">Filter:</span>
               <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                className="px-2 py-1 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500"
+                value={readFilter}
+                onChange={(e) => setReadFilter(e.target.value)}
+                className="px-2 py-1 border rounded-lg text-xs"
               >
-                <option value="all">All Tickets</option>
+                <option value="all">All</option>
                 <option value="unread">Unread ({unreadCount})</option>
                 <option value="read">Read</option>
               </select>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-2 py-1 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500"
+                className="px-2 py-1 border rounded-lg text-xs"
               >
                 <option value="all">All Status</option>
                 <option value="Pending">Pending</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Resolved">Resolved</option>
-                <option value="Closed">Closed</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
               </select>
-              <button
-                onClick={fetchTickets}
-                disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 disabled:opacity-50"
-              >
-                <FaSync size={12} className={loading ? "animate-spin" : ""} />{" "}
-                Refresh
-              </button>
             </div>
+            <button
+              onClick={fetchAdmissions}
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 disabled:opacity-50"
+            >
+              <FaSync size={12} className={loading ? "animate-spin" : ""} />{" "}
+              Refresh
+            </button>
           </div>
 
           {/* Table */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden h-[calc(100vh-250px)]">
+          <div className="flex-1 overflow-hidden">
             {loading ? (
-              <div className="flex items-center justify-center h-full">
+              <div className="bg-white border border-gray-200 rounded-xl h-full flex items-center justify-center">
                 <div className="text-center">
                   <FaSync
                     size={32}
                     className="animate-spin text-blue-600 mx-auto mb-3"
                   />
-                  <p className="text-sm text-gray-500">Loading tickets...</p>
-                </div>
-              </div>
-            ) : filteredTickets.length === 0 ? (
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <FaBell className="text-5xl text-gray-300 mx-auto mb-3" />
-                  <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                    No Tickets Found
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Try adjusting your search criteria
-                  </p>
+                  <p className="text-sm text-gray-500">Loading admissions...</p>
                 </div>
               </div>
             ) : (
-              <div className="overflow-auto h-full">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-                    <tr>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Student
-                      </th>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Department
-                      </th>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Subject
-                      </th>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Status
-                      </th>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {filteredTickets.map((ticket) => (
-                      <tr
-                        key={ticket._id}
-                        className={`hover:bg-gray-50 transition-colors ${!ticket.isRead ? "bg-blue-50/30" : ""}`}
-                      >
-                        <td className="px-3 py-2">
-                          <p className="text-xs font-medium text-gray-800">
-                            {ticket.name}
-                          </p>
-                          <p className="text-[10px] text-gray-500">
-                            {ticket.phone}
-                          </p>
-                        </td>
-                        <td className="px-3 py-2 text-xs text-gray-600">
-                          {ticket.department}
-                        </td>
-                        <td className="px-3 py-2 text-xs text-gray-600">
-                          {ticket.subject}
-                        </td>
-                        <td className="px-3 py-2">
-                          <span
-                            className={`text-[8px] px-1.5 py-0.5 rounded-full ${
-                              ticket.status === "Pending"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : ticket.status === "In Progress"
-                                  ? "bg-blue-100 text-blue-700"
-                                  : ticket.status === "Resolved"
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-gray-100 text-gray-700"
-                            }`}
-                          >
-                            {ticket.status}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => {
-                                viewTicket(ticket);
-                                if (!ticket.isRead) markAsRead(ticket._id);
-                              }}
-                              className="text-blue-600 hover:bg-blue-50 p-1 rounded"
-                              title="View/Reply"
-                            >
-                              <FaEye size={14} />
-                            </button>
-                            <button
-                              onClick={() => deleteTicket(ticket._id)}
-                              className="text-red-600 hover:bg-red-50 p-1 rounded"
-                              title="Delete"
-                            >
-                              <FaTrash size={14} />
-                            </button>
-                          </div>
-                        </td>
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden h-full">
+                <div className="overflow-auto h-full">
+                  <table className="w-full">
+                    <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Student
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Course
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Date
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Payment
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Status
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Actions
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {filteredAdmissions.map((adm) => (
+                        <tr
+                          key={adm._id}
+                          className={`hover:bg-gray-50 transition-colors ${
+                            !adm.isRead ? "bg-teal-50/40" : ""
+                          }`}
+                        >
+                          <td className="px-3 py-2">
+                            <p className="text-xs font-medium text-gray-800">
+                              {adm.name}
+                              {!adm.isRead && (
+                                <span className="ml-1 inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse align-middle"></span>
+                              )}
+                            </p>
+                            <p className="text-[10px] text-gray-500">
+                              {adm.email || adm.phone}
+                            </p>
+                          </td>
+                          <td className="px-3 py-2">
+                            <p className="text-xs text-gray-700 max-w-[250px]">
+                              {adm.course}
+                            </p>
+                          </td>
+                          <td className="px-3 py-2 text-xs text-gray-600">
+                            {adm.createdAt
+                              ? new Date(adm.createdAt)
+                                  .toISOString()
+                                  .split("T")[0]
+                              : "N/A"}
+                          </td>
+                          <td className="px-3 py-2">
+                            <span
+                              className={`text-[8px] px-1.5 py-0.5 rounded-full ${
+                                adm.paymentStatus === "Paid"
+                                  ? "bg-green-100 text-green-700"
+                                  : adm.paymentStatus === "Partial"
+                                    ? "bg-yellow-100 text-yellow-700"
+                                    : "bg-red-100 text-red-700"
+                              }`}
+                            >
+                              {adm.paymentStatus}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2">
+                            <span
+                              className={`text-[8px] px-1.5 py-0.5 rounded-full ${
+                                adm.uiStatus === "Approved"
+                                  ? "bg-green-100 text-green-700"
+                                  : adm.uiStatus === "Rejected"
+                                    ? "bg-red-100 text-red-700"
+                                    : "bg-yellow-100 text-yellow-700 animate-pulse"
+                              }`}
+                            >
+                              {adm.uiStatus}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => viewAdmission(adm)}
+                                className="text-teal-600 hover:bg-teal-50 p-1 rounded"
+                                title="View / Approve"
+                              >
+                                <FaEye size={14} />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  deleteAdmission(adm._id, adm.name)
+                                }
+                                className="text-red-600 hover:bg-red-50 p-1 rounded"
+                                title="Delete"
+                              >
+                                <FaTrash size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+
+                      {filteredAdmissions.length === 0 && (
+                        <tr>
+                          <td colSpan="6" className="p-10 text-center">
+                            <FaUserPlus className="text-5xl text-gray-300 mx-auto mb-3" />
+                            <h3 className="text-base font-bold text-gray-800 mb-0.5">
+                              No Admission Notifications
+                            </h3>
+                            <p className="text-xs text-gray-500">
+                              Qaida Nuraniyah, Quran Nazera, Bakarah Hifz, Basic
+                              Tajweed (Level-1) — এই ৪টি কোর্সে এখনো কোনো নতুন
+                              ভর্তি হয়নি।
+                            </p>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>

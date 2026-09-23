@@ -9,147 +9,232 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
-  FaClock,
-  FaBook,
-  FaFileAlt,
+  FaCalendarCheck,
   FaChartLine,
   FaUserGraduate,
   FaUserPlus,
-  FaClipboardList,
-  FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
   FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
   FaEye,
-  FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
-  FaPlusCircle,
-  FaDownload,
-  FaPrint,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
-  FaVideo,
-  FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
   FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
+  FaClock as FaClockIcon,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+// ============================================================
+// ✅ ELDERS DEPARTMENT — শুধু এই ৪টি course এর student দেখাবে
+// ============================================================
+const ELDERS_COURSES = [
+  // 1️⃣ Qaida Nuraniyah (all spelling variations)
+  "qaida nuraniyah",
+  "qaida nooraniya",
+  "qaida noorani",
+  "qaida nurani",
+  "qaidah nuraniyah",
+  "qaidah nooraniya",
+  "qaidah noorani",
+
+  // 2️⃣ Quran Nazera
+  "quran nazera",
+  "nazera quran",
+  "quran najera",
+  "najera quran",
+
+  // 3️⃣ Bakarah Hifz
+  "bakarah hifz",
+  "bakara hifz",
+  "baqarah hifz",
+  "baqara hifz",
+
+  // 4️⃣ Basic Tajweed (Level-1)
+  "basic tajweed (level-1)",
+  "basic tajweed (level 1)",
+  "basic tajweed level-1",
+  "basic tajweed level 1",
+  "basic tajweed",
+];
+
+// একটা single course string elders কিনা check করে
+const isSingleEldersCourse = (singleCourse) => {
+  const p = String(singleCourse).toLowerCase().trim();
+  if (!p) return false;
+
+  return ELDERS_COURSES.some((c) => {
+    // exact match
+    if (p === c) return true;
+    // p এর ভিতরে c আছে (যেমন "basic tajweed (level-1)" এ "basic tajweed")
+    if (p.includes(c)) return true;
+    // c এর ভিতরে p আছে কিন্তু p অনেক ছোট না (ভুলে match এড়াতে)
+    if (c.includes(p) && p.length >= 8) return true;
+    return false;
+  });
+};
+
+// ✅ Main check: student এর course field এ থাকা **প্রতিটা** course
+// elders course হতে হবে। একটাও বাইরের course থাকলে FALSE।
+const isEldersCourse = (courseStr) => {
+  if (!courseStr) return false;
+
+  const parts = String(courseStr)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return false;
+
+  // ⭐ প্রতিটা course elders হতে হবে
+  return parts.every((part) => isSingleEldersCourse(part));
+};
+
+// Backend status → UI status mapping
+const mapStatus = (s) => {
+  if (!s) return "Pending";
+  if (s === "Active") return "Approved";
+  if (s === "Inactive") return "Rejected";
+  if (s === "Approved" || s === "Rejected" || s === "Pending") return s;
+  return "Pending";
+};
 
 const New_admission = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("dashboard");
-  const [activeSubMenu, setActiveSubMenu] = useState(null);
+  const [activeSubMenu, setActiveSubMenu] = useState("dashboard");
+  const [loading, setLoading] = useState(true);
+
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
     phone: "",
     designation: "",
-    department: "",
+    department: "Quran for Elders",
     joinDate: "",
   });
 
   const [admissions, setAdmissions] = useState([]);
-
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
-  const [filterClass, setFilterClass] = useState("All");
-  const [filterSubject, setFilterSubject] = useState("All");
+  const [filterCourse, setFilterCourse] = useState("All");
   const [filterPayment, setFilterPayment] = useState("All");
-  const [showAddModal, setShowAddModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedAdmission, setSelectedAdmission] = useState(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    fatherName: "",
-    motherName: "",
-    class: "",
-    subject: "",
-    phone: "",
-    email: "",
-    address: "",
-    dob: "",
-    gender: "Male",
-    previousSchool: "",
-    guardianContact: "",
-    status: "Pending",
-    paymentStatus: "Unpaid",
-    documents: "",
-  });
 
+  // ============================================================
   // Load admin info
+  // ============================================================
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        setAdminInfo(JSON.parse(savedAdmin));
+      } catch (err) {
+        console.error("adminInfo parse error:", err);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: "Quran for Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
+  // ============================================================
+  // Fetch Students from API → filter only Elders courses
+  // ============================================================
+  const fetchAdmissions = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(
+        "https://api.tarbiyahonline.com/api/students/all",
+      );
+      const data = await res.json();
+
+      if (data.success) {
+        const all = data.students || [];
+
+        // ✅ শুধু pure elders course এর student filter
+        const elders = all
+          .filter((s) => isEldersCourse(s.course))
+          .map((s) => ({
+            id: s._id,
+            _id: s._id,
+            name: s.name || "",
+            fatherName: s.fatherName || s.guardianName || "",
+            motherName: s.motherName || "",
+            course: s.course || "",
+            subject: s.course || "",
+            class: s.course || "",
+            phone: s.phone || "",
+            email: s.email || "",
+            address: s.presentAddress || s.address || "",
+            permanentAddress: s.permanentAddress || "",
+            dobOrNid: s.dobOrNid || "",
+            age: s.age || "",
+            gender: s.gender || "",
+            occupation: s.occupation || "",
+            maritalStatus: s.maritalStatus || "",
+            previousSchool: s.previousSchool || "",
+            guardianName: s.guardianName || s.fatherName || "",
+            guardianPhone: s.guardianPhone || s.phone || "",
+            status: mapStatus(s.status),
+            paymentStatus: s.paymentStatus || "Unpaid",
+            paidAmount: s.paidAmount || 0,
+            paymentMethod: s.paymentMethod || "",
+            paymentType: s.paymentType || "",
+            transactionId: s.transactionId || "",
+            paymentRemarks: s.paymentRemarks || "",
+            username: s.username || "",
+            roll: s.roll || "",
+            date: s.admissionDate
+              ? String(s.admissionDate).split("T")[0]
+              : s.createdAt
+                ? String(s.createdAt).split("T")[0]
+                : "",
+            createdAt: s.createdAt || "",
+            raw: s,
+          }));
+
+        setAdmissions(elders);
+      } else {
+        console.error("Failed to load students:", data.message);
+      }
+    } catch (err) {
+      console.error("❌ Fetch error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Server Error",
+        text: "Could not load admissions. Please try again.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAdmissions();
+  }, []);
+
+  // ============================================================
+  // Logout
+  // ============================================================
   const handleLogout = async () => {
     try {
       await logOut();
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -159,27 +244,16 @@ const New_admission = () => {
       navigate("/admin-login");
     } catch (err) {
       console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
+  // ============================================================
+  // Sidebar Menu
+  // ============================================================
   const menuItems = [
     {
       id: "profile",
@@ -204,19 +278,19 @@ const New_admission = () => {
           label: "Today's Class",
         },
         {
-          id: "basic-tazweed payment overview",
+          id: "basic-tazweed",
           path: "/admin-dashboard/basic-tazweed",
           label: "Basic Tazweed Payment Overview",
         },
         {
-          id: "najera-payment overview",
+          id: "najera-batch",
           path: "/admin-dashboard/najera-batch",
           label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
-          label: "New Admission",
+          label: "New Admission (Elders)",
         },
         {
           id: "notification",
@@ -258,56 +332,12 @@ const New_admission = () => {
       path: "/admin-teachers",
       icon: <FaChalkboardTeacher className="text-xl" />,
       label: "Teacher Management",
-      subItems: [
-        {
-          id: "teacher-assign",
-          path: "/admin-teachers/assign",
-          label: "Teacher Assign",
-        },
-        {
-          id: "class-schedule",
-          path: "/admin-teachers/schedule",
-          label: "Class Schedule",
-        },
-        {
-          id: "teacher-attendance",
-          path: "/admin-teachers/attendance",
-          label: "Teacher Attendance",
-        },
-        {
-          id: "teacher-overview",
-          path: "/admin-teachers/overview",
-          label: "Teacher Overview",
-        },
-      ],
     },
     {
       id: "batch-course",
       path: "/admin-batch-course",
       icon: <FaLayerGroup className="text-xl" />,
       label: "Batch & Course",
-      subItems: [
-        {
-          id: "batch-make",
-          path: "/admin-batch-course/batch-make",
-          label: "Batch Make",
-        },
-        {
-          id: "course-make",
-          path: "/admin-batch-course/course-make",
-          label: "Course Make",
-        },
-        {
-          id: "syllabus",
-          path: "/admin-batch-course/syllabus",
-          label: "Syllabus",
-        },
-        {
-          id: "clear-routine",
-          path: "/admin-batch-course/clear-routine",
-          label: "Clear Routine",
-        },
-      ],
     },
     {
       id: "absence-student",
@@ -320,122 +350,66 @@ const New_admission = () => {
       path: "/admin-finance",
       icon: <FaMoneyBillWave className="text-xl" />,
       label: "Finance",
-      subItems: [
-        {
-          id: "admin-on-fee",
-          path: "/admin-finance/admin-fee",
-          label: "Admin on Fee",
-        },
-        {
-          id: "monthly-fee",
-          path: "/admin-finance/monthly-fee",
-          label: "Monthly Fee",
-        },
-        { id: "invoice", path: "/admin-finance/invoice", label: "Invoice" },
-        { id: "report", path: "/admin-finance/report", label: "Report" },
-      ],
     },
     {
       id: "exam",
       path: "/admin-exam",
       icon: <FaCalendarCheck className="text-xl" />,
       label: "Exam",
-      subItems: [
-        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
-        {
-          id: "result-publish",
-          path: "/admin-exam/result",
-          label: "Result Publish",
-        },
-        {
-          id: "certificate-permission",
-          path: "/admin-exam/certificate",
-          label: "Certificate Permission",
-        },
-      ],
     },
     {
       id: "report-analytics",
       path: "/admin-reports",
       icon: <FaChartLine className="text-xl" />,
       label: "Report & Analytics",
-      subItems: [
-        {
-          id: "admission-report",
-          path: "/admin-reports/admission",
-          label: "Admission Report",
-        },
-        {
-          id: "attendance-report",
-          path: "/admin-reports/attendance",
-          label: "Attendance Report",
-        },
-        { id: "income", path: "/admin-reports/income", label: "Income" },
-      ],
     },
     {
       id: "crm-management",
       path: "/admin-crm",
       icon: <FaDatabase className="text-xl" />,
       label: "CRM Management",
-      subItems: [
-        {
-          id: "data-entry",
-          path: "/admin-crm/data-entry",
-          label: "Data Entry",
-        },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
-      ],
     },
   ];
 
-  // Handle search and filter
-  const filteredAdmissions = admissions.filter((admission) => {
+  // ============================================================
+  // Filtering
+  // ============================================================
+  const filteredAdmissions = admissions.filter((a) => {
+    const term = searchTerm.toLowerCase().trim();
     const matchesSearch =
-      admission.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      admission.fatherName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      admission.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      admission.phone.includes(searchTerm);
-    const matchesStatus =
-      filterStatus === "All" || admission.status === filterStatus;
-    const matchesClass =
-      filterClass === "All" || admission.class === filterClass;
-    const matchesSubject =
-      filterSubject === "All" || admission.subject === filterSubject;
+      !term ||
+      a.name.toLowerCase().includes(term) ||
+      a.fatherName.toLowerCase().includes(term) ||
+      a.guardianName.toLowerCase().includes(term) ||
+      a.email.toLowerCase().includes(term) ||
+      a.phone.includes(searchTerm);
+
+    const matchesStatus = filterStatus === "All" || a.status === filterStatus;
+    const matchesCourse =
+      filterCourse === "All" ||
+      a.course.toLowerCase().includes(filterCourse.toLowerCase());
     const matchesPayment =
-      filterPayment === "All" || admission.paymentStatus === filterPayment;
-    return (
-      matchesSearch &&
-      matchesStatus &&
-      matchesClass &&
-      matchesSubject &&
-      matchesPayment
-    );
+      filterPayment === "All" || a.paymentStatus === filterPayment;
+
+    return matchesSearch && matchesStatus && matchesCourse && matchesPayment;
   });
 
-  // Get unique values for filters
-  const uniqueClasses = ["All", ...new Set(admissions.map((a) => a.class))];
-  const uniqueSubjects = ["All", ...new Set(admissions.map((a) => a.subject))];
-  const uniqueStatuses = ["All", ...new Set(admissions.map((a) => a.status))];
+  const uniqueCourses = [
+    "All",
+    ...new Set(admissions.map((a) => a.course).filter(Boolean)),
+  ];
+  const uniqueStatuses = [
+    "All",
+    ...new Set(admissions.map((a) => a.status).filter(Boolean)),
+  ];
   const uniquePayments = [
     "All",
-    ...new Set(admissions.map((a) => a.paymentStatus)),
+    ...new Set(admissions.map((a) => a.paymentStatus).filter(Boolean)),
   ];
 
-  // Get status badge color
+  // ============================================================
+  // Badge helpers
+  // ============================================================
   const getStatusColor = (status) => {
     switch (status) {
       case "Approved":
@@ -449,7 +423,6 @@ const New_admission = () => {
     }
   };
 
-  // Get payment badge color
   const getPaymentColor = (status) => {
     switch (status) {
       case "Paid":
@@ -463,118 +436,106 @@ const New_admission = () => {
     }
   };
 
-  // Get status icon
   const getStatusIcon = (status) => {
     switch (status) {
       case "Approved":
-        return <FaCheckCircle className="text-green-500" size={12} />;
+        return <FaCheckCircle className="text-green-500" size={10} />;
       case "Pending":
-        return <FaClockIcon className="text-yellow-500" size={12} />;
+        return <FaClockIcon className="text-yellow-500" size={10} />;
       case "Rejected":
-        return <FaTimesCircle className="text-red-500" size={12} />;
+        return <FaTimesCircle className="text-red-500" size={10} />;
       default:
-        return <FaInfoCircle className="text-gray-500" size={12} />;
+        return <FaInfoCircle className="text-gray-500" size={10} />;
     }
   };
 
-  // Handle add admission
-  const handleAddAdmission = (e) => {
-    e.preventDefault();
-    if (
-      !formData.name ||
-      !formData.fatherName ||
-      !formData.class ||
-      !formData.subject
-    ) {
-      Swal.fire({
-        icon: "warning",
-        title: "Please fill all required fields",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
-
-    const newAdmission = {
-      id: Date.now(),
-      ...formData,
-      date: new Date().toISOString().split("T")[0],
-      documents: formData.documents
-        ? formData.documents.split(",").map((d) => d.trim())
-        : [],
-    };
-
-    setAdmissions([newAdmission, ...admissions]);
-    setShowAddModal(false);
-    resetForm();
-    Swal.fire({
-      icon: "success",
-      title: "Admission Request Submitted!",
-      text: "New admission request has been submitted successfully.",
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  };
-
-  // Handle approve admission
-  const handleApprove = (id) => {
-    Swal.fire({
+  // ============================================================
+  // Approve / Reject / Delete → API calls
+  // ============================================================
+  const handleApprove = async (id) => {
+    const result = await Swal.fire({
       title: "Approve Admission?",
-      text: "Are you sure you want to approve this admission?",
+      text: "Student will be marked as Active in the system.",
       icon: "question",
       showCancelButton: true,
       confirmButtonColor: "#22c55e",
       cancelButtonColor: "#ef4444",
       confirmButtonText: "Yes, Approve!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setAdmissions(
-          admissions.map((a) =>
-            a.id === id ? { ...a, status: "Approved" } : a,
-          ),
+    });
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch(
+        `https://api.tarbiyahonline.com/api/admin-students/update/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "Active" }),
+        },
+      );
+      const data = await res.json();
+      if (data.success) {
+        setAdmissions((prev) =>
+          prev.map((a) => (a.id === id ? { ...a, status: "Approved" } : a)),
         );
         Swal.fire({
           icon: "success",
-          title: "Admission Approved!",
-          text: "The admission has been approved successfully.",
+          title: "Approved!",
+          text: "Student has been approved.",
           timer: 1500,
           showConfirmButton: false,
         });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Could not approve.",
+        });
       }
-    });
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Error", text: err.message });
+    }
   };
 
-  // Handle reject admission
-  const handleReject = (id) => {
-    Swal.fire({
+  const handleReject = async (id) => {
+    const result = await Swal.fire({
       title: "Reject Admission?",
-      text: "Are you sure you want to reject this admission?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#ef4444",
       cancelButtonColor: "#22c55e",
       confirmButtonText: "Yes, Reject!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setAdmissions(
-          admissions.map((a) =>
-            a.id === id ? { ...a, status: "Rejected" } : a,
-          ),
+    });
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch(
+        `https://api.tarbiyahonline.com/api/admin-students/update/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "Inactive" }),
+        },
+      );
+      const data = await res.json();
+      if (data.success) {
+        setAdmissions((prev) =>
+          prev.map((a) => (a.id === id ? { ...a, status: "Rejected" } : a)),
         );
         Swal.fire({
           icon: "success",
-          title: "Admission Rejected!",
-          text: "The admission has been rejected.",
+          title: "Rejected!",
           timer: 1500,
           showConfirmButton: false,
         });
       }
-    });
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Error", text: err.message });
+    }
   };
 
-  // Handle delete admission
-  const handleDelete = (id) => {
-    Swal.fire({
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
       title: "Delete Admission?",
       text: "This action cannot be undone!",
       icon: "warning",
@@ -582,56 +543,48 @@ const New_admission = () => {
       confirmButtonColor: "#ef4444",
       cancelButtonColor: "#22c55e",
       confirmButtonText: "Yes, Delete!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setAdmissions(admissions.filter((a) => a.id !== id));
+    });
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch(
+        `https://api.tarbiyahonline.com/api/admin-students/delete/${id}`,
+        { method: "DELETE" },
+      );
+      const data = await res.json();
+      if (data.success) {
+        setAdmissions((prev) => prev.filter((a) => a.id !== id));
         Swal.fire({
           icon: "success",
           title: "Deleted!",
-          text: "The admission has been deleted.",
           timer: 1500,
           showConfirmButton: false,
         });
       }
-    });
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Error", text: err.message });
+    }
   };
 
-  // Open details modal
   const openDetailsModal = (admission) => {
     setSelectedAdmission(admission);
     setShowDetailsModal(true);
   };
 
-  // Reset form
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      fatherName: "",
-      motherName: "",
-      class: "",
-      subject: "",
-      phone: "",
-      email: "",
-      address: "",
-      dob: "",
-      gender: "Male",
-      previousSchool: "",
-      guardianContact: "",
-      status: "Pending",
-      paymentStatus: "Unpaid",
-      documents: "",
-    });
-  };
-
+  // ============================================================
+  // Render
+  // ============================================================
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">New Admissions</h1>
+          <h1 className="text-sm font-bold text-gray-800">
+            New Admission — Quran for Elders
+          </h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100"
           >
             {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
@@ -639,17 +592,9 @@ const New_admission = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0 ${
+            isSidebarOpen ? "left-0" : "-left-72 md:left-0"
+          }`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -667,7 +612,7 @@ const New_admission = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -678,21 +623,20 @@ const New_admission = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
+                        className={`transition-transform ${
+                          activeSubMenu === item.id ? "rotate-180" : ""
+                        }`}
                       >
                         <FaArrowRight size={12} />
                       </span>
@@ -724,14 +668,11 @@ const New_admission = () => {
                     }}
                   >
                     <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -755,7 +696,6 @@ const New_admission = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -764,15 +704,17 @@ const New_admission = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-y-auto">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-blue-600" /> New Admissions
+                <FaUserPlus className="text-blue-600" /> New Admission —
+                <span className="text-teal-700">Quran for Elders</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Manage new student admission requests
+                Qaida Nuraniyah • Quran Nazera • Bakarah Hifz • Basic Tajweed
+                (Level-1)
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -780,8 +722,14 @@ const New_admission = () => {
                 {adminInfo.name}
               </span>
               <button
+                onClick={fetchAdmissions}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
+              >
+                🔄 Refresh
+              </button>
+              <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
               >
                 Logout
               </button>
@@ -820,10 +768,10 @@ const New_admission = () => {
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
             <div className="flex flex-col md:flex-row gap-2">
               <div className="flex-1 relative">
-                <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search admissions..."
+                  placeholder="Search by name / phone / email..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -833,485 +781,179 @@ const New_admission = () => {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueStatuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
+                  {uniqueStatuses.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
                     </option>
                   ))}
                 </select>
                 <select
-                  value={filterClass}
-                  onChange={(e) => setFilterClass(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  value={filterCourse}
+                  onChange={(e) => setFilterCourse(e.target.value)}
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg max-w-[180px]"
                 >
-                  {uniqueClasses.map((cls) => (
-                    <option key={cls} value={cls}>
-                      {cls}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={filterSubject}
-                  onChange={(e) => setFilterSubject(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {uniqueSubjects.map((sub) => (
-                    <option key={sub} value={sub}>
-                      {sub}
+                  {uniqueCourses.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
                     </option>
                   ))}
                 </select>
                 <select
                   value={filterPayment}
                   onChange={(e) => setFilterPayment(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniquePayments.map((payment) => (
-                    <option key={payment} value={payment}>
-                      {payment}
+                  {uniquePayments.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
                     </option>
                   ))}
                 </select>
-                <button
-                  onClick={() => {
-                    resetForm();
-                    setShowAddModal(true);
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded-lg font-semibold text-[10px] flex items-center gap-0.5 transition-all"
-                >
-                  <FaPlusCircle size={12} /> Add
-                </button>
               </div>
             </div>
           </div>
 
-          {/* Admissions Table */}
+          {/* Table */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-                  <tr>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Student
-                    </th>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Father
-                    </th>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Class
-                    </th>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Date
-                    </th>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Status
-                    </th>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Payment
-                    </th>
-                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredAdmissions.slice(0, 10).map((admission) => (
-                    <tr
-                      key={admission.id}
-                      className="hover:bg-gray-50 transition-colors"
-                    >
-                      <td className="px-3 py-2">
-                        <div>
+            {loading ? (
+              <div className="p-10 text-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-xs text-gray-500 mt-3">
+                  Loading admissions...
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        Student
+                      </th>
+                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        Guardian
+                      </th>
+                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        Course
+                      </th>
+                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        Date
+                      </th>
+                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        Status
+                      </th>
+                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        Payment
+                      </th>
+                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filteredAdmissions.map((a) => (
+                      <tr
+                        key={a.id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-3 py-2">
                           <p className="text-xs font-medium text-gray-800">
-                            {admission.name}
+                            {a.name}
                           </p>
                           <p className="text-[10px] text-gray-500">
-                            {admission.email}
+                            {a.email || a.phone}
                           </p>
-                        </div>
-                      </td>
-                      <td className="px-3 py-2 text-xs text-gray-600">
-                        {admission.fatherName}
-                      </td>
-                      <td className="px-3 py-2 text-xs text-gray-600">
-                        {admission.class}
-                      </td>
-                      <td className="px-3 py-2 text-xs text-gray-600">
-                        {admission.date}
-                      </td>
-                      <td className="px-3 py-2">
-                        <span
-                          className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(admission.status)}`}
-                        >
-                          {getStatusIcon(admission.status)} {admission.status}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2">
-                        <span
-                          className={`text-[8px] px-1.5 py-0.5 rounded-full ${getPaymentColor(admission.paymentStatus)}`}
-                        >
-                          {admission.paymentStatus}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2">
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => openDetailsModal(admission)}
-                            className="text-blue-600 hover:text-blue-800 p-0.5"
-                            title="View Details"
+                        </td>
+                        <td className="px-3 py-2 text-xs text-gray-600">
+                          {a.fatherName || "N/A"}
+                        </td>
+                        <td className="px-3 py-2 text-xs text-gray-600 max-w-[220px]">
+                          {a.course}
+                        </td>
+                        <td className="px-3 py-2 text-xs text-gray-600">
+                          {a.date || "N/A"}
+                        </td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`text-[8px] px-1.5 py-0.5 rounded-full inline-flex items-center gap-1 ${getStatusColor(
+                              a.status,
+                            )}`}
                           >
-                            <FaEye size={12} />
-                          </button>
-                          {admission.status === "Pending" && (
-                            <>
-                              <button
-                                onClick={() => handleApprove(admission.id)}
-                                className="text-green-600 hover:text-green-800 p-0.5"
-                                title="Approve"
-                              >
-                                <FaCheckCircle size={12} />
-                              </button>
-                              <button
-                                onClick={() => handleReject(admission.id)}
-                                className="text-red-600 hover:text-red-800 p-0.5"
-                                title="Reject"
-                              >
-                                <FaTimesCircle size={12} />
-                              </button>
-                            </>
-                          )}
-                          <button
-                            onClick={() => handleDelete(admission.id)}
-                            className="text-red-600 hover:text-red-800 p-0.5"
-                            title="Delete"
+                            {getStatusIcon(a.status)} {a.status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <span
+                            className={`text-[8px] px-1.5 py-0.5 rounded-full ${getPaymentColor(
+                              a.paymentStatus,
+                            )}`}
                           >
-                            <FaTrash size={12} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                            {a.paymentStatus}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => openDetailsModal(a)}
+                              className="text-blue-600 hover:text-blue-800 p-0.5"
+                              title="View Details"
+                            >
+                              <FaEye size={12} />
+                            </button>
+                            {a.status === "Pending" && (
+                              <>
+                                <button
+                                  onClick={() => handleApprove(a.id)}
+                                  className="text-green-600 hover:text-green-800 p-0.5"
+                                  title="Approve"
+                                >
+                                  <FaCheckCircle size={12} />
+                                </button>
+                                <button
+                                  onClick={() => handleReject(a.id)}
+                                  className="text-red-600 hover:text-red-800 p-0.5"
+                                  title="Reject"
+                                >
+                                  <FaTimesCircle size={12} />
+                                </button>
+                              </>
+                            )}
+                            <button
+                              onClick={() => handleDelete(a.id)}
+                              className="text-red-600 hover:text-red-800 p-0.5"
+                              title="Delete"
+                            >
+                              <FaTrash size={12} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
           {/* No Results */}
-          {filteredAdmissions.length === 0 && (
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center">
+          {!loading && filteredAdmissions.length === 0 && (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
               <FaUserPlus className="text-5xl text-gray-300 mx-auto mb-3" />
               <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                No Admissions Found
+                No Elders Course Admissions
               </h3>
               <p className="text-xs text-gray-500">
-                Try adjusting your search or filter criteria
+                Qaida Nuraniyah, Quran Nazera, Bakarah Hifz, Basic Tajweed
+                (Level-1) — এই ৪টি কোর্সে এখনো কোনো নতুন ভর্তি হয়নি।
               </p>
             </div>
           )}
         </main>
       </div>
 
-      {/* Add Admission Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-blue-600" /> New Admission Request
-              </h3>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <FiX size={24} />
-              </button>
-            </div>
-            <form onSubmit={handleAddAdmission} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Student Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Student name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Father's Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.fatherName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, fatherName: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Father's name"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mother's Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.motherName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, motherName: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Mother's name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
-                  </label>
-                  <select
-                    required
-                    value={formData.class}
-                    onChange={(e) =>
-                      setFormData({ ...formData, class: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Class</option>
-                    <option value="Class 6">Class 6</option>
-                    <option value="Class 7">Class 7</option>
-                    <option value="Class 8">Class 8</option>
-                    <option value="Class 9">Class 9</option>
-                    <option value="Class 10">Class 10</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject *
-                  </label>
-                  <select
-                    required
-                    value={formData.subject}
-                    onChange={(e) =>
-                      setFormData({ ...formData, subject: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Select Subject</option>
-                    <option value="Tajweed">Tajweed</option>
-                    <option value="Tafsir">Tafsir</option>
-                    <option value="Hadith">Hadith</option>
-                    <option value="Fiqh">Fiqh</option>
-                    <option value="Aqeedah">Aqeedah</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Date of Birth
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.dob}
-                    onChange={(e) =>
-                      setFormData({ ...formData, dob: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Phone number"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Email address"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Gender
-                  </label>
-                  <select
-                    value={formData.gender}
-                    onChange={(e) =>
-                      setFormData({ ...formData, gender: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Guardian Contact
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.guardianContact}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        guardianContact: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Guardian contact number"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
-                </label>
-                <textarea
-                  value={formData.address}
-                  onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
-                  }
-                  rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Current address"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Previous School
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.previousSchool}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        previousSchool: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Previous school name"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Documents (comma separated)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.documents}
-                    onChange={(e) =>
-                      setFormData({ ...formData, documents: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="e.g., Birth Certificate, Report Card"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Status
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) =>
-                      setFormData({ ...formData, status: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Approved">Approved</option>
-                    <option value="Rejected">Rejected</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Payment Status
-                  </label>
-                  <select
-                    value={formData.paymentStatus}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        paymentStatus: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="Unpaid">Unpaid</option>
-                    <option value="Partial">Partial</option>
-                    <option value="Paid">Paid</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
-                <button
-                  type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold transition-all"
-                >
-                  <FaUserPlus className="inline mr-2" size={14} /> Submit
-                  Admission
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Admission Details Modal */}
+      {/* Details Modal */}
       {showDetailsModal && selectedAdmission && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
@@ -1328,19 +970,22 @@ const New_admission = () => {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column */}
                 <div className="space-y-4">
                   <div>
                     <h2 className="text-2xl font-bold text-gray-800">
                       {selectedAdmission.name}
                     </h2>
                     <p className="text-sm text-gray-500">
-                      {selectedAdmission.class} • {selectedAdmission.subject}
+                      {selectedAdmission.course}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Status</p>
                     <span
-                      className={`text-sm px-2 py-1 rounded-full ${getStatusColor(selectedAdmission.status)}`}
+                      className={`text-sm px-2 py-1 rounded-full inline-flex items-center gap-1 ${getStatusColor(
+                        selectedAdmission.status,
+                      )}`}
                     >
                       {getStatusIcon(selectedAdmission.status)}{" "}
                       {selectedAdmission.status}
@@ -1350,7 +995,7 @@ const New_admission = () => {
                     <div>
                       <p className="text-xs text-gray-500">Father</p>
                       <p className="font-semibold text-sm">
-                        {selectedAdmission.fatherName}
+                        {selectedAdmission.fatherName || "N/A"}
                       </p>
                     </div>
                     <div>
@@ -1361,49 +1006,76 @@ const New_admission = () => {
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Date of Birth</p>
-                    <p className="font-semibold">{selectedAdmission.dob}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Gender</p>
-                    <p className="font-semibold">{selectedAdmission.gender}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Previous School</p>
+                    <p className="text-xs text-gray-500">
+                      NID / Birth Reg / DOB
+                    </p>
                     <p className="font-semibold">
-                      {selectedAdmission.previousSchool || "N/A"}
+                      {selectedAdmission.dobOrNid || "N/A"}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-xs text-gray-500">Gender</p>
+                      <p className="font-semibold">
+                        {selectedAdmission.gender || "N/A"}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Age</p>
+                      <p className="font-semibold">
+                        {selectedAdmission.age || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Occupation</p>
+                    <p className="font-semibold">
+                      {selectedAdmission.occupation || "N/A"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Marital Status</p>
+                    <p className="font-semibold">
+                      {selectedAdmission.maritalStatus || "N/A"}
                     </p>
                   </div>
                 </div>
 
+                {/* Right Column */}
                 <div className="space-y-4">
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-semibold text-gray-800 mb-3">
                       Contact Information
                     </h4>
                     <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between gap-2">
                         <span className="text-gray-500">Phone</span>
-                        <span className="font-semibold">
+                        <span className="font-semibold text-right">
                           {selectedAdmission.phone}
                         </span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between gap-2">
                         <span className="text-gray-500">Email</span>
-                        <span className="font-semibold">
-                          {selectedAdmission.email}
+                        <span className="font-semibold text-right break-all">
+                          {selectedAdmission.email || "N/A"}
                         </span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between gap-2">
                         <span className="text-gray-500">Guardian Contact</span>
-                        <span className="font-semibold">
-                          {selectedAdmission.guardianContact}
+                        <span className="font-semibold text-right">
+                          {selectedAdmission.guardianPhone || "N/A"}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Address</span>
-                        <span className="font-semibold">
-                          {selectedAdmission.address}
+                      <div className="flex justify-between gap-2">
+                        <span className="text-gray-500">Present Address</span>
+                        <span className="font-semibold text-right max-w-[60%]">
+                          {selectedAdmission.address || "N/A"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <span className="text-gray-500">Permanent Address</span>
+                        <span className="font-semibold text-right max-w-[60%]">
+                          {selectedAdmission.permanentAddress || "N/A"}
                         </span>
                       </div>
                     </div>
@@ -1411,33 +1083,50 @@ const New_admission = () => {
 
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-semibold text-gray-800 mb-3">
-                      Payment & Documents
+                      Payment Details
                     </h4>
                     <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
+                      <div className="flex justify-between gap-2">
                         <span className="text-gray-500">Payment Status</span>
                         <span
-                          className={`font-semibold ${getPaymentColor(selectedAdmission.paymentStatus)}`}
+                          className={`font-semibold px-2 rounded-full text-xs ${getPaymentColor(
+                            selectedAdmission.paymentStatus,
+                          )}`}
                         >
                           {selectedAdmission.paymentStatus}
                         </span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Documents</span>
+                      <div className="flex justify-between gap-2">
+                        <span className="text-gray-500">Amount Paid</span>
                         <span className="font-semibold">
-                          {selectedAdmission.documents?.join(", ") || "None"}
+                          ৳
+                          {Number(
+                            selectedAdmission.paidAmount || 0,
+                          ).toLocaleString()}
                         </span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between gap-2">
+                        <span className="text-gray-500">Method</span>
+                        <span className="font-semibold">
+                          {selectedAdmission.paymentMethod || "N/A"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <span className="text-gray-500">Transaction ID</span>
+                        <span className="font-semibold text-xs text-right break-all">
+                          {selectedAdmission.transactionId || "N/A"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-2">
                         <span className="text-gray-500">Applied Date</span>
                         <span className="font-semibold">
-                          {selectedAdmission.date}
+                          {selectedAdmission.date || "N/A"}
                         </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap">
                     {selectedAdmission.status === "Pending" && (
                       <>
                         <button
@@ -1445,7 +1134,7 @@ const New_admission = () => {
                             handleApprove(selectedAdmission.id);
                             setShowDetailsModal(false);
                           }}
-                          className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                          className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                         >
                           <FaCheckCircle className="inline mr-2" /> Approve
                         </button>
@@ -1454,7 +1143,7 @@ const New_admission = () => {
                             handleReject(selectedAdmission.id);
                             setShowDetailsModal(false);
                           }}
-                          className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                          className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                         >
                           <FaTimesCircle className="inline mr-2" /> Reject
                         </button>
@@ -1462,7 +1151,7 @@ const New_admission = () => {
                     )}
                     <button
                       onClick={() => setShowDetailsModal(false)}
-                      className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm transition-all"
+                      className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
                     >
                       Close
                     </button>

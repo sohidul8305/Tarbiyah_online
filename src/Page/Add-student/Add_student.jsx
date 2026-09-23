@@ -11,7 +11,6 @@ import {
   FaSignOutAlt,
   FaChartLine,
   FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
   FaDatabase,
   FaListAlt,
@@ -29,7 +28,76 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-const API_BASE = "http://api.tarbiyahonline.com";
+const API_BASE = "https://api.tarbiyahonline.com";
+
+// ============================================================
+// ✅ ELDERS DEPARTMENT — শুধু এই ৪টি course এর student দেখাবে
+// English + Bengali দুই version-ই support করে
+// ============================================================
+const ELDERS_COURSES = [
+  // ✅ English (Admission_now form থেকে আসে)
+  "qaida nuraniyah",
+  "qaida nooraniya",
+  "qaida noorani",
+  "qaida nurani",
+  "qaidah nuraniyah",
+  "qaidah nooraniya",
+  "qaidah noorani",
+  "quran nazera",
+  "nazera quran",
+  "quran najera",
+  "najera quran",
+  "bakarah hifz",
+  "bakara hifz",
+  "baqarah hifz",
+  "baqara hifz",
+  "basic tajweed (level-1)",
+  "basic tajweed (level 1)",
+  "basic tajweed level-1",
+  "basic tajweed level 1",
+  "basic tajweed",
+
+  // ✅ Bengali (Admin manually add করলে এই নামে save হয়)
+  "কায়দা নুরানী",
+  "কায়দা নূরানী",
+  "কায়দায়ে নূরানিয়্যাহ",
+  "কায়দায়ে নূরানীয়াহ",
+  "কুরআন নাজেরা",
+  "নাজেরা",
+  "বেসিক তাজউইদ (লেভেল–১)",
+  "বেসিক তাজউইদ (লেভেল-১)",
+  "বেসিক তাজউইদ",
+  "বাকারাহ হিফজ",
+  "বাকারা হিফজ",
+];
+
+// একটা single course string elders কিনা check
+const isSingleEldersCourse = (singleCourse) => {
+  const p = String(singleCourse).toLowerCase().trim();
+  if (!p) return false;
+
+  return ELDERS_COURSES.some((c) => {
+    const cl = c.toLowerCase();
+    if (p === cl) return true;
+    if (p.includes(cl)) return true;
+    if (cl.includes(p) && p.length >= 5) return true;
+    return false;
+  });
+};
+
+// ✅ Main check: student এর course list এর **প্রতিটা** course elders হতে হবে
+const isEldersCourse = (courseStr) => {
+  if (!courseStr) return false;
+
+  const parts = String(courseStr)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return false;
+
+  return parts.every((part) => isSingleEldersCourse(part));
+};
 
 const Add_student = () => {
   const { user, logOut } = useAuth();
@@ -55,7 +123,6 @@ const Add_student = () => {
 
   // ✅ Initial Form Data
   const initialFormData = {
-    // Personal
     name: "",
     email: "",
     phone: "",
@@ -79,8 +146,6 @@ const Add_student = () => {
     paymentStatus: "Unpaid",
     admissionDate: "",
     photo: null,
-
-    // ✅ Image Fields
     studentId: "",
     country: "BD",
     batch: "",
@@ -116,38 +181,27 @@ const Add_student = () => {
   const [showStudentList, setShowStudentList] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
+  // ✅ Elders course list only
   const coursesList = [
-    "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
-    "আলিমিয়াহ ফর কিডস",
-    "আলিমিয়াহ প্রোগ্রাম",
     "কায়দা নুরানী",
-    "নাজেরা",
-    "হিফজুল কুরআন",
-    "হিফজ রিভিশন",
-    "ওয়ান টু ওয়ান",
     "কায়দায়ে নূরানিয়্যাহ",
     "কুরআন নাজেরা",
+    "নাজেরা",
+    "বাকারাহ হিফজ",
     "বেসিক তাজউইদ (লেভেল–১)",
-    "অ্যাডভান্সড তাজউইদ",
+    "Qaida Nuraniyah",
+    "Quran Nazera",
+    "Bakarah Hifz",
+    "Basic Tajweed (Level-1)",
   ];
   const subjectList = [
     "Tajweed",
-    "Tafsir",
-    "Hadith",
-    "Fiqh",
-    "Aqeedah",
-    "Arabic Grammar",
-    "Arabic Literature",
     "Quran Memorization",
+    "Qaida",
+    "Nazera",
+    "Hifz",
   ];
   const bloodGroupList = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-  const religionList = [
-    "Islam",
-    "Hinduism",
-    "Christianity",
-    "Buddhism",
-    "Other",
-  ];
   const genderList = ["Male", "Female", "Other"];
   const statusList = ["Active", "Pending", "Inactive"];
   const paymentStatusList = ["Paid", "Partial", "Unpaid"];
@@ -156,7 +210,8 @@ const Add_student = () => {
     "Najera Batch-02",
     "Basic Tazweed",
     "Najera",
-    "Hifz Batch",
+    "Qaida Nurani Batch",
+    "Bakarah Hifz Batch",
   ];
 
   // Load admin info
@@ -170,7 +225,7 @@ const Add_student = () => {
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: "Quran for Elders",
         joinDate: "January 2024",
       });
     }
@@ -190,7 +245,16 @@ const Add_student = () => {
       const data = await response.json();
 
       if (data.success) {
-        setStudents(data.students || []);
+        const all = data.students || [];
+
+        // ✅ শুধু elders course এর student filter
+        const elders = all.filter((s) => isEldersCourse(s.course));
+
+        console.log("📥 Total students:", all.length);
+        console.log("✅ Elders filtered:", elders.length);
+        elders.forEach((s) => console.log("   →", s.name, "|", s.course));
+
+        setStudents(elders);
       } else {
         setError(data.message || "Failed to fetch");
         setStudents([]);
@@ -204,7 +268,7 @@ const Add_student = () => {
     }
   };
 
-  // ✅ Approve student
+  // Approve student
   const handleApproveStudent = async () => {
     if (!selectedStudent) return;
 
@@ -265,11 +329,10 @@ const Add_student = () => {
     }
   };
 
-  // ✅ Register student
+  // Register student
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
     if (formData.password && formData.password !== formData.confirmPassword) {
       Swal.fire({
         icon: "error",
@@ -293,6 +356,16 @@ const Add_student = () => {
         icon: "warning",
         title: "Required Fields!",
         text: "Name, Phone, Course আবশ্যক।",
+      });
+      return;
+    }
+
+    // ✅ Check: elders course কিনা
+    if (!isEldersCourse(formData.course)) {
+      Swal.fire({
+        icon: "warning",
+        title: "শুধু Elders Course!",
+        text: "এই পেজ থেকে শুধু Qaida Nuraniyah, Quran Nazera, Bakarah Hifz, Basic Tajweed (Level-1) course এর student add করা যাবে।",
       });
       return;
     }
@@ -421,7 +494,7 @@ const Add_student = () => {
     }
   };
 
-  // ✅ View Details
+  // View Details
   const handleView = async (student) => {
     try {
       const response = await fetch(
@@ -689,7 +762,7 @@ const Add_student = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold">Add Student</h1>
+          <h1 className="text-sm font-bold">Add Student (Elders)</h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100"
@@ -797,10 +870,12 @@ const Add_student = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border mb-3 flex flex-col sm:flex-row justify-between gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-blue-600" /> Add Student
+                <FaUserPlus className="text-blue-600" /> Add Student —
+                <span className="text-teal-700">Quran for Elders</span>
               </h1>
               <p className="text-xs text-gray-500">
-                {students.length} students registered
+                {students.length} elders course students (Qaida Nuraniyah •
+                Quran Nazera • Bakarah Hifz • Basic Tajweed Level-1)
               </p>
             </div>
             <button
@@ -1025,7 +1100,7 @@ const Add_student = () => {
                             colSpan="12"
                             className="px-4 py-8 text-center text-gray-500 text-sm"
                           >
-                            {error || "No students found"}
+                            {error || "No elders course students found"}
                           </td>
                         </tr>
                       )}
@@ -1038,7 +1113,7 @@ const Add_student = () => {
             // ============ ADD FORM ============
             <div className="bg-white border rounded-xl shadow-sm p-4 overflow-y-auto h-[calc(100vh-240px)]">
               <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <FaUserPlus className="text-blue-600" /> New Student
+                <FaUserPlus className="text-blue-600" /> New Elders Student
                 Registration
               </h2>
 
@@ -1211,12 +1286,12 @@ const Add_student = () => {
                 {/* Academic */}
                 <div className="bg-green-50 p-3 rounded-lg">
                   <h3 className="text-sm font-bold text-green-700 mb-2">
-                    📚 Academic
+                    📚 Academic (Elders Courses only)
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Course *
+                        Course * (Elders only)
                       </label>
                       <select
                         name="course"
@@ -1340,13 +1415,12 @@ const Add_student = () => {
                   </div>
                 </div>
 
-                {/* ================= PAYMENT & BATCH ================= */}
+                {/* Payment & Batch */}
                 <div className="bg-teal-50 p-3 rounded-lg">
                   <h3 className="text-sm font-bold text-teal-700 mb-2">
                     💰 Payment & Batch Information
                   </h3>
 
-                  {/* Row 1: Scholarship, Course Fee, Paid, Due */}
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
                     <div>
                       <label className="block text-sm font-medium mb-1">
@@ -1402,7 +1476,6 @@ const Add_student = () => {
                     </div>
                   </div>
 
-                  {/* Row 2: Transaction ID + July-August */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                     <div>
                       <label className="block text-sm font-medium mb-1">
@@ -1432,7 +1505,6 @@ const Add_student = () => {
                     </div>
                   </div>
 
-                  {/* Monthly Payments */}
                   {[
                     { key: "sept", label: "September" },
                     { key: "oct", label: "October" },
@@ -1513,7 +1585,6 @@ const Add_student = () => {
                     );
                   })}
 
-                  {/* Comments */}
                   <div>
                     <label className="block text-sm font-medium mb-1">
                       Comments

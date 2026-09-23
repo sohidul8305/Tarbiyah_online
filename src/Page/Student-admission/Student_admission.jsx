@@ -9,24 +9,18 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
   FaChartLine,
-  FaUserGraduate,
   FaUserPlus,
   FaCalendarCheck,
   FaIdCard,
   FaUserTimes,
   FaDatabase,
   FaEye,
-  FaTrash,
   FaSearch,
-  FaPlusCircle,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
   FaLayerGroup,
-  FaStar,
   FaHourglassHalf,
   FaCheckDouble,
   FaBan,
@@ -36,6 +30,71 @@ import {
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+// ============================================================
+// ✅ ELDERS DEPARTMENT — শুধু এই ৪টি course এর student দেখাবে
+// English + Bengali দুই version support করে
+// ============================================================
+const ELDERS_COURSES = [
+  // English
+  "qaida nuraniyah",
+  "qaida nooraniya",
+  "qaida noorani",
+  "qaida nurani",
+  "qaidah nuraniyah",
+  "qaidah nooraniya",
+  "qaidah noorani",
+  "quran nazera",
+  "nazera quran",
+  "quran najera",
+  "najera quran",
+  "bakarah hifz",
+  "bakara hifz",
+  "baqarah hifz",
+  "baqara hifz",
+  "basic tajweed (level-1)",
+  "basic tajweed (level 1)",
+  "basic tajweed level-1",
+  "basic tajweed level 1",
+  "basic tajweed",
+  // Bengali
+  "কায়দা নুরানী",
+  "কায়দা নূরানী",
+  "কায়দায়ে নূরানিয়্যাহ",
+  "কায়দায়ে নূরানীয়াহ",
+  "কুরআন নাজেরা",
+  "নাজেরা",
+  "বেসিক তাজউইদ (লেভেল–১)",
+  "বেসিক তাজউইদ (লেভেল-১)",
+  "বেসিক তাজউইদ",
+  "বাকারাহ হিফজ",
+  "বাকারা হিফজ",
+];
+
+const isSingleEldersCourse = (singleCourse) => {
+  const p = String(singleCourse).toLowerCase().trim();
+  if (!p) return false;
+
+  return ELDERS_COURSES.some((c) => {
+    const cl = c.toLowerCase();
+    if (p === cl) return true;
+    if (p.includes(cl)) return true;
+    if (cl.includes(p) && p.length >= 5) return true;
+    return false;
+  });
+};
+
+const isEldersCourse = (courseStr) => {
+  if (!courseStr) return false;
+
+  const parts = String(courseStr)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return false;
+  return parts.every((part) => isSingleEldersCourse(part));
+};
 
 const Student_admission = () => {
   const { user, logOut } = useAuth();
@@ -52,7 +111,6 @@ const Student_admission = () => {
     joinDate: "",
   });
 
-  // ✅ Dynamic admission requests
   const [admissionRequests, setAdmissionRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
@@ -67,24 +125,28 @@ const Student_admission = () => {
   const [rejectionReason, setRejectionReason] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // ✅ Load admin info
+  // Load admin info
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        setAdminInfo(JSON.parse(savedAdmin));
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: "Quran for Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
-  // ✅ Fetch students from API
+  // Fetch admissions
   useEffect(() => {
     fetchAdmissions();
   }, []);
@@ -94,21 +156,26 @@ const Student_admission = () => {
       setLoading(true);
       setFetchError(null);
 
-      console.log("📡 Fetching students...");
       const res = await fetch(
         "https://api.tarbiyahonline.com/api/students/all",
       );
       const data = await res.json();
-      console.log("📥 Response:", data);
 
       if (data.success) {
-        const formatted = (data.students || []).map((s, idx) => {
-          // Calculate priority based on payment
+        const all = data.students || [];
+
+        // ✅ শুধু pure elders course এর student
+        const elders = all.filter((s) => isEldersCourse(s.course));
+
+        console.log("📥 Total students:", all.length);
+        console.log("✅ Elders filtered:", elders.length);
+        elders.forEach((s) => console.log("   →", s.name, "|", s.course));
+
+        const formatted = elders.map((s) => {
           let priority = "Medium";
           if (s.paymentStatus === "Paid") priority = "High";
           else if (s.paymentStatus === "Unpaid") priority = "Low";
 
-          // Map DB status → display status
           let displayStatus = "Pending";
           if (s.status === "Active") displayStatus = "Approved";
           else if (s.status === "Rejected") displayStatus = "Rejected";
@@ -143,7 +210,6 @@ const Student_admission = () => {
               ? new Date(s.approvedAt).toISOString().split("T")[0]
               : null,
             rejectionReason: s.rejectionReason || null,
-            // Keep for approve
             username: s.username || "",
             enrolledCourses: s.enrolledCourses || [],
             paidAmount: s.paidAmount || 0,
@@ -155,7 +221,6 @@ const Student_admission = () => {
         });
 
         setAdmissionRequests(formatted);
-        console.log(`✅ Loaded ${formatted.length} admission requests`);
       } else {
         setFetchError(data.message || "Failed to load students");
       }
@@ -195,7 +260,7 @@ const Student_admission = () => {
   const toggleSubMenu = (menu) =>
     setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  // Sidebar Menu Items
+  // Sidebar Menu
   const menuItems = [
     {
       id: "profile",
@@ -220,12 +285,12 @@ const Student_admission = () => {
           label: "Today's Class",
         },
         {
-          id: "basic-tazweed payment overview",
+          id: "basic-tazweed",
           path: "/admin-dashboard/basic-tazweed",
           label: "Basic Tazweed Payment Overview",
         },
         {
-          id: "najera-payment overview",
+          id: "najera-batch",
           path: "/admin-dashboard/najera-batch",
           label: "Najera Payment Overview",
         },
@@ -496,7 +561,16 @@ const Student_admission = () => {
     setShowDetailsModal(true);
   };
 
-  // ✅ Approve — backend API call
+  // Generate username
+  const generateUsername = (request) => {
+    const base = (request.email || request.phone || "student")
+      .split("@")[0]
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "");
+    return base + Math.floor(100 + Math.random() * 900);
+  };
+
+  // Approve
   const handleApprove = async (request) => {
     const confirm = await Swal.fire({
       title: "Approve Admission?",
@@ -587,22 +661,12 @@ const Student_admission = () => {
     }
   };
 
-  // ✅ Generate username from student data
-  const generateUsername = (request) => {
-    const base = (request.email || request.phone || "student")
-      .split("@")[0]
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "");
-    return base + Math.floor(100 + Math.random() * 900);
-  };
-
   const handleReject = (request) => {
     setSelectedRequest(request);
     setRejectionReason("");
     setShowRejectModal(true);
   };
 
-  // ✅ Reject — backend delete or update
   const confirmRejection = async () => {
     if (!rejectionReason.trim()) {
       Swal.fire({
@@ -617,7 +681,6 @@ const Student_admission = () => {
     setIsProcessing(true);
 
     try {
-      // Update status to rejected using DELETE (removes from DB)
       const res = await fetch(
         `https://api.tarbiyahonline.com/api/students/delete/${selectedRequest.id}`,
         { method: "DELETE" },
@@ -668,7 +731,7 @@ const Student_admission = () => {
     }
   };
 
-  // ✅ Bulk approve — one by one
+  // Bulk approve
   const handleBulkApprove = async () => {
     const pendingRequests = admissionRequests.filter(
       (r) => r.status === "Pending",
@@ -725,7 +788,6 @@ const Student_admission = () => {
       }
     }
 
-    // Refresh from server
     await fetchAdmissions();
 
     setIsProcessing(false);
@@ -755,7 +817,7 @@ const Student_admission = () => {
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
           <h1 className="text-sm font-bold text-gray-800">
-            Admission Permission
+            Admission Permission (Elders)
           </h1>
           <button
             onClick={toggleSidebar}
@@ -789,7 +851,7 @@ const Student_admission = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -892,10 +954,12 @@ const Student_admission = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-blue-600" /> Admission Permission
+                <FaUserPlus className="text-blue-600" /> Admission Permission —
+                <span className="text-teal-700">Quran for Elders</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Review and manage student admission requests
+                Qaida Nuraniyah • Quran Nazera • Bakarah Hifz • Basic Tajweed
+                (Level-1)
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -928,7 +992,7 @@ const Student_admission = () => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
             <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-blue-600">{totalRequests}</p>
-              <p className="text-[10px] text-gray-500">Total Requests</p>
+              <p className="text-[10px] text-gray-500">Total Elders</p>
             </div>
             <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-yellow-600">
@@ -957,7 +1021,7 @@ const Student_admission = () => {
                 <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search..."
+                  placeholder="Search elders students..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border rounded-lg"
@@ -1001,12 +1065,12 @@ const Student_admission = () => {
             </div>
           </div>
 
-          {/* Loading / Error / Table */}
+          {/* Table */}
           {loading ? (
             <div className="bg-white border rounded-xl shadow-sm p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
               <p className="text-sm text-gray-500 mt-3">
-                Loading admission requests...
+                Loading elders admission requests...
               </p>
             </div>
           ) : fetchError ? (
@@ -1138,10 +1202,10 @@ const Student_admission = () => {
                           className="px-3 py-8 text-center text-gray-500"
                         >
                           <FaUserPlus className="text-4xl text-gray-300 mx-auto mb-2" />
-                          <p>No admission requests found</p>
+                          <p>No elders admission requests found</p>
                           <p className="text-[10px] text-gray-400 mt-1">
                             {admissionRequests.length === 0
-                              ? "Students will appear here after registering"
+                              ? "Qaida Nuraniyah, Quran Nazera, Bakarah Hifz, Basic Tajweed (Level-1) — এই ৪টি কোর্সে এখনো কোনো student নেই।"
                               : "Try adjusting your search or filter"}
                           </p>
                         </td>

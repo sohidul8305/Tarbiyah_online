@@ -50,6 +50,8 @@ import {
   FaBookOpen,
   FaRoute,
   FaCalendarPlus,
+  FaVideo, // ✅ নতুন যোগ করা হলো
+  FaFilePdf, // ✅ নতুন যোগ করা হলো
 } from "react-icons/fa";
 import {
   MdDashboard,
@@ -974,6 +976,10 @@ const DashboardContent = ({ stats, notifications }) => {
     </div>
   );
 };
+
+// ==========================================
+// 2. STUDENT MANAGEMENT CONTENT
+// ==========================================
 const StudentManagementContent = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -982,7 +988,7 @@ const StudentManagementContent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // ✅ নতুন — Available Courses (backend থেকে আসবে)
+  // ✅ Available Courses
   const [availableCourses, setAvailableCourses] = useState([]);
 
   // ✅ Approve Modal State
@@ -993,7 +999,6 @@ const StudentManagementContent = () => {
     fetchStudents();
   }, [refreshKey]);
 
-  // ✅ নতুন — Available Courses লোড করা
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -1014,16 +1019,12 @@ const StudentManagementContent = () => {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-
       setError(null);
-
       const response = await fetch(
         "https://api.tarbiyahonline.com/api/students/all",
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         },
       );
 
@@ -1033,13 +1034,11 @@ const StudentManagementContent = () => {
         );
         return;
       }
-
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-
       if (data.success) {
         const studentList = data.students || [];
         setStudents(studentList);
@@ -1057,7 +1056,6 @@ const StudentManagementContent = () => {
     }
   };
 
-  // ✅ Approve Student Function (এখন enrolledCourses সহ)
   const handleApproveStudent = async () => {
     try {
       if (
@@ -1077,21 +1075,17 @@ const StudentManagementContent = () => {
         `https://api.tarbiyahonline.com/api/students/approve/${selectedStudent._id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             username: selectedStudent.username,
             password: selectedStudent.password,
             roll: selectedStudent.roll,
-            // ✅ নতুন — কোর্স আইডি অ্যারে
             enrolledCourses: selectedStudent.enrolledCourses || [],
           }),
         },
       );
 
       const data = await response.json();
-
       if (data.success) {
         const updatedStudents = students.map((s) =>
           s._id === selectedStudent._id
@@ -1107,7 +1101,6 @@ const StudentManagementContent = () => {
         setStudents(updatedStudents);
         setShowApproveModal(false);
         setSelectedStudent(null);
-
         Swal.fire({
           icon: "success",
           title: "✅ Student Approved!",
@@ -1145,7 +1138,6 @@ const StudentManagementContent = () => {
     }
   };
 
-  // ✅ Delete Student
   const handleDelete = async (id, name) => {
     const result = await Swal.fire({
       title: `Delete ${name}?`,
@@ -1163,14 +1155,10 @@ const StudentManagementContent = () => {
           `https://api.tarbiyahonline.com/api/students/delete/${id}`,
           {
             method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
           },
         );
-
         const data = await response.json();
-
         if (data.success) {
           setStudents(students.filter((s) => s._id !== id));
           Swal.fire({
@@ -1198,20 +1186,14 @@ const StudentManagementContent = () => {
     }
   };
 
-  // ✅ নতুন — Course check/uncheck handler
   const handleToggleCourse = (courseId) => {
     const currentList = selectedStudent.enrolledCourses || [];
     const updated = currentList.includes(courseId)
       ? currentList.filter((id) => id !== courseId)
       : [...currentList, courseId];
-
-    setSelectedStudent({
-      ...selectedStudent,
-      enrolledCourses: updated,
-    });
+    setSelectedStudent({ ...selectedStudent, enrolledCourses: updated });
   };
 
-  // Filter students
   const filteredStudents = students
     .filter((s) => {
       if (filter === "all") return true;
@@ -1400,11 +1382,73 @@ const StudentManagementContent = () => {
         </div>
       </div>
 
+      {/* ✅ নতুন — Material / Grad & Exams এবং Module Content */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 flex-shrink-0">
+        {/* Left Card: Material / Grad & Exams */}
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+          <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+            <MdAssignment className="text-teal-600" /> Material / Grad & Exams
+          </h3>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+              <span className="text-xs text-gray-700">Grad</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded bg-green-100 text-green-700">
+                A+
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+              <span className="text-xs text-gray-700">Class Test</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                85/100
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+              <span className="text-xs text-gray-700">Mid Term Exam</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded bg-yellow-100 text-yellow-700">
+                42/50
+              </span>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+              <span className="text-xs text-gray-700">Final Exam</span>
+              <span className="text-xs font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-600">
+                Pending
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Card: Module Content */}
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+          <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+            <FaBookOpen className="text-teal-600" /> Module Content
+          </h3>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+              <FaVideo className="text-red-500" size={14} />
+              <span className="text-xs text-gray-700">
+                Video Recording (লেকচার ভিডিও)
+              </span>
+            </div>
+            <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+              <FaFilePdf className="text-blue-500" size={14} />
+              <span className="text-xs text-gray-700">
+                PDF Notes (নোট ও রিসোর্স)
+              </span>
+            </div>
+            <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+              <FaCheckCircle className="text-green-500" size={14} />
+              <span className="text-xs text-gray-700">
+                Quiz (কুইজ ও মূল্যায়ন)
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ✅ Approve Modal */}
       {showApproveModal && selectedStudent && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
             <div className="flex justify-between items-center mb-4 border-b pb-3">
               <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                 <FaCheckCircle className="text-green-600" /> Student Details
@@ -1420,7 +1464,6 @@ const StudentManagementContent = () => {
               </button>
             </div>
 
-            {/* Student Information Display */}
             <div className="bg-gray-50 p-4 rounded-lg mb-4 space-y-1">
               <p>
                 <strong>Name:</strong> {selectedStudent.name}
@@ -1463,12 +1506,10 @@ const StudentManagementContent = () => {
               </p>
             </div>
 
-            {/* Set Login Credentials */}
             <div className="space-y-3 border-t pt-3">
               <h4 className="text-sm font-bold text-gray-700">
                 🔑 Set Login Credentials
               </h4>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Roll Number <span className="text-red-500">*</span>
@@ -1486,7 +1527,6 @@ const StudentManagementContent = () => {
                   placeholder="e.g., 01"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Username <span className="text-red-500">*</span>
@@ -1507,7 +1547,6 @@ const StudentManagementContent = () => {
                   💡 This will be used for student login
                 </p>
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password <span className="text-red-500">*</span>
@@ -1530,7 +1569,6 @@ const StudentManagementContent = () => {
               </div>
             </div>
 
-            {/* ✅ নতুন — Course Selection UI */}
             <div className="space-y-2 border-t pt-3 mt-3">
               <h4 className="text-sm font-bold text-gray-700 flex items-center justify-between">
                 <span>📚 Assign Courses</span>
@@ -1538,7 +1576,6 @@ const StudentManagementContent = () => {
                   {(selectedStudent.enrolledCourses || []).length} selected
                 </span>
               </h4>
-
               {availableCourses.length === 0 ? (
                 <p className="text-xs text-gray-400 italic">
                   No courses available. Create courses from Batch & Course menu.
@@ -1552,11 +1589,7 @@ const StudentManagementContent = () => {
                     return (
                       <label
                         key={course._id}
-                        className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-all ${
-                          isChecked
-                            ? "bg-teal-50 border border-teal-200"
-                            : "hover:bg-white border border-transparent"
-                        }`}
+                        className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition-all ${isChecked ? "bg-teal-50 border border-teal-200" : "hover:bg-white border border-transparent"}`}
                       >
                         <input
                           type="checkbox"
@@ -1579,7 +1612,6 @@ const StudentManagementContent = () => {
               )}
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end gap-2 mt-4 pt-3 border-t">
               <button
                 onClick={() => {
@@ -1603,12 +1635,39 @@ const StudentManagementContent = () => {
     </div>
   );
 };
+
 // ==========================================
-// 3. TEACHER MANAGEMENT CONTENT
+// 3. TEACHER MANAGEMENT CONTENT (✅ MODIFIED)
 // ==========================================
 const TeacherManagementContent = ({ teachers }) => {
+  const [activeTab, setActiveTab] = useState("overview");
+
+  const tabs = [
+    {
+      id: "overview",
+      label: "Teacher Overview",
+      icon: <FaEye size={14} />,
+    },
+    {
+      id: "assign",
+      label: "Teacher Assign",
+      icon: <FaPlusCircle size={14} />,
+    },
+    {
+      id: "schedule",
+      label: "Class Schedule",
+      icon: <FaCalendarAlt size={14} />,
+    },
+    {
+      id: "attendance",
+      label: "Teacher Attendance",
+      icon: <FaClipboardList size={14} />,
+    },
+  ];
+
   return (
     <div className="h-full flex flex-col space-y-3 overflow-hidden">
+      {/* Header */}
       <div className="flex justify-between items-center flex-shrink-0">
         <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
           <FaChalkboardTeacher className="text-green-600" /> Teacher Management
@@ -1621,103 +1680,232 @@ const TeacherManagementContent = ({ teachers }) => {
         </Link>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
-        <div className="overflow-x-auto h-full">
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-              <tr>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Name
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Subject
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Class
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Attendance
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {teachers.map((teacher) => (
-                <tr
-                  key={teacher.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-3 py-2">
-                    <div>
-                      <p className="text-xs font-medium text-gray-800">
-                        {teacher.name}
-                      </p>
-                      <p className="text-[10px] text-gray-500">
-                        Joined: {teacher.joinDate}
-                      </p>
-                    </div>
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {teacher.subject}
-                  </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {teacher.class}
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-1">
-                      <span
-                        className={`text-xs font-bold ${teacher.attendance >= 80 ? "text-green-600" : teacher.attendance >= 60 ? "text-yellow-600" : "text-red-600"}`}
-                      >
-                        {teacher.attendance}%
-                      </span>
-                      <div className="w-12 h-1 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${teacher.attendance >= 80 ? "bg-green-500" : teacher.attendance >= 60 ? "bg-yellow-500" : "bg-red-500"}`}
-                          style={{ width: `${teacher.attendance}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-3 py-2">
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${teacher.status === "Active" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+      {/* Tab Navigation */}
+      <div className="flex gap-1 bg-gray-100 p-1 rounded-lg flex-shrink-0 overflow-x-auto">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+              activeTab === tab.id
+                ? "bg-white text-green-600 shadow-sm"
+                : "text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content Area */}
+      <div className="flex-1 overflow-hidden flex flex-col space-y-3">
+        {/* Main Table Area */}
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
+          {activeTab === "overview" && (
+            <div className="overflow-x-auto h-full">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                      Name
+                    </th>
+                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                      Subject
+                    </th>
+                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                      Class
+                    </th>
+                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                      Attendance
+                    </th>
+                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                      Status
+                    </th>
+                    <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {teachers.map((teacher) => (
+                    <tr
+                      key={teacher.id}
+                      className="hover:bg-gray-50 transition-colors"
                     >
-                      {teacher.status}
-                    </span>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-1">
-                      <Link
-                        to="/admin-teachers/overview"
-                        className="text-blue-600 hover:text-blue-800 p-0.5"
-                        title="View"
-                      >
-                        <FaEye size={12} />
-                      </Link>
-                      <Link
-                        to="/admin-teachers/assign"
-                        className="text-green-600 hover:text-green-800 p-0.5"
-                        title="Edit"
-                      >
-                        <FaEdit size={12} />
-                      </Link>
-                      <button
-                        className="text-red-600 hover:text-red-800 p-0.5"
-                        title="Delete"
-                      >
-                        <FaTrash size={12} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      <td className="px-3 py-2">
+                        <div>
+                          <p className="text-xs font-medium text-gray-800">
+                            {teacher.name}
+                          </p>
+                          <p className="text-[10px] text-gray-500">
+                            Joined: {teacher.joinDate}
+                          </p>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2 text-xs text-gray-600">
+                        {teacher.subject}
+                      </td>
+                      <td className="px-3 py-2 text-xs text-gray-600">
+                        {teacher.class}
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-1">
+                          <span
+                            className={`text-xs font-bold ${teacher.attendance >= 80 ? "text-green-600" : teacher.attendance >= 60 ? "text-yellow-600" : "text-red-600"}`}
+                          >
+                            {teacher.attendance}%
+                          </span>
+                          <div className="w-12 h-1 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${teacher.attendance >= 80 ? "bg-green-500" : teacher.attendance >= 60 ? "bg-yellow-500" : "bg-red-500"}`}
+                              style={{ width: `${teacher.attendance}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-3 py-2">
+                        <span
+                          className={`text-[8px] px-1.5 py-0.5 rounded-full ${teacher.status === "Active" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+                        >
+                          {teacher.status}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-1">
+                          <Link
+                            to="/admin-teachers/overview"
+                            className="text-blue-600 hover:text-blue-800 p-0.5"
+                            title="View"
+                          >
+                            <FaEye size={12} />
+                          </Link>
+                          <Link
+                            to="/admin-teachers/assign"
+                            className="text-green-600 hover:text-green-800 p-0.5"
+                            title="Edit"
+                          >
+                            <FaEdit size={12} />
+                          </Link>
+                          <button
+                            className="text-red-600 hover:text-red-800 p-0.5"
+                            title="Delete"
+                          >
+                            <FaTrash size={12} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {activeTab === "assign" && (
+            <div className="h-full flex items-center justify-center p-6 text-center">
+              <div>
+                <FaChalkboardTeacher className="text-4xl text-gray-300 mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-600">
+                  Teacher Assignment Interface
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Assign subjects and classes to teachers here.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "schedule" && (
+            <div className="h-full flex items-center justify-center p-6 text-center">
+              <div>
+                <FaCalendarAlt className="text-4xl text-gray-300 mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-600">
+                  Class Schedule Interface
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Create and manage the class routine here.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "attendance" && (
+            <div className="h-full flex items-center justify-center p-6 text-center">
+              <div>
+                <FaClipboardList className="text-4xl text-gray-300 mx-auto mb-3" />
+                <p className="text-sm font-medium text-gray-600">
+                  Teacher Attendance Interface
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Track and manage teacher attendance here.
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ✅ Material / Grad & Exams এবং Module Content Cards (Image Fields) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-shrink-0">
+          {/* Left Card: Material / Grad & Exams */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+            <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <MdAssignment className="text-teal-600" /> Material / Grad & Exams
+            </h3>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                <span className="text-xs text-gray-700">Grad</span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded bg-green-100 text-green-700">
+                  A+
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                <span className="text-xs text-gray-700">Class Test</span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700">
+                  85/100
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                <span className="text-xs text-gray-700">Mid Term Exam</span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded bg-yellow-100 text-yellow-700">
+                  42/50
+                </span>
+              </div>
+              <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                <span className="text-xs text-gray-700">Final Exam</span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded bg-gray-200 text-gray-600">
+                  Pending
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Card: Module Content */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+            <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <FaBookOpen className="text-teal-600" /> Module Content
+            </h3>
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                <FaVideo className="text-red-500" size={14} />
+                <span className="text-xs text-gray-700">
+                  Video Recording (লেকচার ভিডিও)
+                </span>
+              </div>
+              <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                <FaFilePdf className="text-blue-500" size={14} />
+                <span className="text-xs text-gray-700">
+                  PDF Notes (নোট ও রিসোর্স)
+                </span>
+              </div>
+              <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                <FaCheckCircle className="text-green-500" size={14} />
+                <span className="text-xs text-gray-700">
+                  Quiz (কুইজ ও মূল্যায়ন)
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

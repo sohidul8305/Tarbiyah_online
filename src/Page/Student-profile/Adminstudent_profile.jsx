@@ -12,36 +12,22 @@ import {
   FaSignOutAlt,
   FaBell,
   FaCalendarAlt,
-  FaClock,
   FaBook,
   FaFileAlt,
   FaChartLine,
   FaUserGraduate,
   FaUserPlus,
-  FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
   FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
   FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
   FaPlusCircle,
-  FaDownload,
   FaCheckCircle,
   FaArrowRight,
-  FaHome,
   FaLayerGroup,
-  FaBookOpen,
-  FaRoute,
   FaStar,
   FaSave,
   FaUserEdit,
@@ -53,12 +39,77 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
+// ============================================================
+// ✅ ELDERS DEPARTMENT — শুধু এই ৪টি course এর student দেখাবে
+// English + Bengali দুই version support করে
+// ============================================================
+const ELDERS_COURSES = [
+  // English
+  "qaida nuraniyah",
+  "qaida nooraniya",
+  "qaida noorani",
+  "qaida nurani",
+  "qaidah nuraniyah",
+  "qaidah nooraniya",
+  "qaidah noorani",
+  "quran nazera",
+  "nazera quran",
+  "quran najera",
+  "najera quran",
+  "bakarah hifz",
+  "bakara hifz",
+  "baqarah hifz",
+  "baqara hifz",
+  "basic tajweed (level-1)",
+  "basic tajweed (level 1)",
+  "basic tajweed level-1",
+  "basic tajweed level 1",
+  "basic tajweed",
+  // Bengali
+  "কায়দা নুরানী",
+  "কায়দা নূরানী",
+  "কায়দায়ে নূরানিয়্যাহ",
+  "কায়দায়ে নূরানীয়াহ",
+  "কুরআন নাজেরা",
+  "নাজেরা",
+  "বেসিক তাজউইদ (লেভেল–১)",
+  "বেসিক তাজউইদ (লেভেল-১)",
+  "বেসিক তাজউইদ",
+  "বাকারাহ হিফজ",
+  "বাকারা হিফজ",
+];
+
+const isSingleEldersCourse = (singleCourse) => {
+  const p = String(singleCourse).toLowerCase().trim();
+  if (!p) return false;
+
+  return ELDERS_COURSES.some((c) => {
+    const cl = c.toLowerCase();
+    if (p === cl) return true;
+    if (p.includes(cl)) return true;
+    if (cl.includes(p) && p.length >= 5) return true;
+    return false;
+  });
+};
+
+const isEldersCourse = (courseStr) => {
+  if (!courseStr) return false;
+
+  const parts = String(courseStr)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (parts.length === 0) return false;
+  return parts.every((part) => isSingleEldersCourse(part));
+};
+
 const Adminstudent_profile = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("dashboard");
-  const [activeSubMenu, setActiveSubMenu] = useState(null);
+  const [activeMenu, setActiveMenu] = useState("student-management");
+  const [activeSubMenu, setActiveSubMenu] = useState("student-profile");
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -68,7 +119,6 @@ const Adminstudent_profile = () => {
     joinDate: "",
   });
 
-  // ✅ Dynamic students state
   const [students, setStudents] = useState([]);
   const [loadingStudents, setLoadingStudents] = useState(true);
   const [studentsError, setStudentsError] = useState(null);
@@ -80,7 +130,7 @@ const Adminstudent_profile = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     fatherName: "",
@@ -107,27 +157,30 @@ const Adminstudent_profile = () => {
     exam: 0,
     progress: 0,
     performance: "Pending",
-    photo: null,
   });
 
-  // ✅ Load admin info
+  // Load admin info
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        setAdminInfo(JSON.parse(savedAdmin));
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: "Quran for Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
-  // ✅ Fetch students from backend
+  // Fetch students
   useEffect(() => {
     fetchStudents();
   }, []);
@@ -137,19 +190,22 @@ const Adminstudent_profile = () => {
       setLoadingStudents(true);
       setStudentsError(null);
 
-      console.log("📡 Fetching students from /api/students/all");
-
       const res = await fetch(
         "https://api.tarbiyahonline.com/api/students/all",
       );
       const data = await res.json();
 
-      console.log("📥 Students response:", data);
-
       if (data.success) {
-        // ✅ MongoDB students → frontend format
-        const formatted = (data.students || []).map((s) => {
-          // Auto-calculate progress if missing
+        const all = data.students || [];
+
+        // ✅ শুধু pure elders course এর student
+        const elders = all.filter((s) => isEldersCourse(s.course));
+
+        console.log("📥 Total students:", all.length);
+        console.log("✅ Elders filtered:", elders.length);
+        elders.forEach((s) => console.log("   →", s.name, "|", s.course));
+
+        const formatted = elders.map((s) => {
           const attendance = s.attendance || 0;
           const assignments = s.assignments || 0;
           const quiz = s.quiz || 0;
@@ -172,7 +228,7 @@ const Adminstudent_profile = () => {
             name: s.name || "Unknown",
             fatherName: s.fatherName || s.guardianName || "",
             motherName: s.motherName || "",
-            class: s.class || s.course || "N/A",
+            class: s.course || s.class || "N/A",
             subject: s.subject || s.course || "N/A",
             roll: s.roll || "N/A",
             phone: s.phone || "",
@@ -207,7 +263,6 @@ const Adminstudent_profile = () => {
         });
 
         setStudents(formatted);
-        console.log(`✅ Loaded ${formatted.length} students from DB`);
       } else {
         setStudentsError(data.message || "Failed to load students");
       }
@@ -244,7 +299,6 @@ const Adminstudent_profile = () => {
   };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-
   const toggleSubMenu = (menu) => {
     setActiveSubMenu(activeSubMenu === menu ? null : menu);
   };
@@ -472,7 +526,7 @@ const Adminstudent_profile = () => {
     },
   ];
 
-  // Handle search and filter
+  // Filter
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
       (student.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -568,46 +622,12 @@ const Adminstudent_profile = () => {
       exam: student.exam || 0,
       progress: student.progress || 0,
       performance: student.performance || "Pending",
-      photo: null,
     });
     setShowEditModal(true);
   };
 
-  const openAddModal = () => {
-    setFormData({
-      name: "",
-      fatherName: "",
-      motherName: "",
-      class: "",
-      subject: "",
-      roll: "",
-      phone: "",
-      email: "",
-      address: "",
-      dob: "",
-      gender: "Male",
-      bloodGroup: "A+",
-      religion: "Islam",
-      nationality: "Bangladeshi",
-      previousSchool: "",
-      guardianContact: "",
-      status: "Active",
-      paymentStatus: "Unpaid",
-      batch: "",
-      attendance: 0,
-      assignments: 0,
-      quiz: 0,
-      exam: 0,
-      progress: 0,
-      performance: "Pending",
-      photo: null,
-    });
-    setShowAddModal(true);
-  };
-
   const calculateProgress = (attendance, assignments, quiz, exam) => {
-    const total = (attendance + assignments + quiz + exam) / 4;
-    return Math.round(total);
+    return Math.round((attendance + assignments + quiz + exam) / 4);
   };
 
   const determinePerformance = (progress) => {
@@ -615,78 +635,6 @@ const Adminstudent_profile = () => {
     if (progress >= 70) return "Good";
     if (progress >= 50) return "Average";
     return "Poor";
-  };
-
-  const handleAddStudent = (e) => {
-    e.preventDefault();
-    if (
-      !formData.name ||
-      !formData.fatherName ||
-      !formData.class ||
-      !formData.phone
-    ) {
-      Swal.fire({
-        icon: "warning",
-        title: "Please fill all required fields",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
-
-    const attendance = Math.min(
-      100,
-      Math.max(0, Number(formData.attendance) || 0),
-    );
-    const assignments = Math.min(
-      100,
-      Math.max(0, Number(formData.assignments) || 0),
-    );
-    const quiz = Math.min(100, Math.max(0, Number(formData.quiz) || 0));
-    const exam = Math.min(100, Math.max(0, Number(formData.exam) || 0));
-    const progress = calculateProgress(attendance, assignments, quiz, exam);
-    const performance = determinePerformance(progress);
-
-    const newStudent = {
-      id: Date.now(),
-      name: formData.name,
-      fatherName: formData.fatherName,
-      motherName: formData.motherName || "",
-      class: formData.class,
-      subject: formData.subject,
-      roll: formData.roll || "N/A",
-      phone: formData.phone,
-      email: formData.email || "",
-      address: formData.address || "",
-      dob: formData.dob || "",
-      gender: formData.gender,
-      bloodGroup: formData.bloodGroup,
-      religion: formData.religion,
-      nationality: formData.nationality,
-      previousSchool: formData.previousSchool || "",
-      guardianContact: formData.guardianContact || "",
-      status: formData.status,
-      paymentStatus: formData.paymentStatus,
-      admissionDate: new Date().toISOString().split("T")[0],
-      batch: formData.batch || "Not Assigned",
-      attendance,
-      assignments,
-      quiz,
-      exam,
-      progress,
-      performance,
-      photo: null,
-    };
-
-    setStudents([...students, newStudent]);
-    setShowAddModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "Student Added!",
-      text: `${formData.name} added.`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
   };
 
   const handleEditStudent = (e) => {
@@ -797,7 +745,9 @@ const Adminstudent_profile = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Student Profile</h1>
+          <h1 className="text-sm font-bold text-gray-800">
+            Student Profile (Elders)
+          </h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -834,7 +784,7 @@ const Adminstudent_profile = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -935,10 +885,12 @@ const Adminstudent_profile = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaUserGraduate className="text-blue-600" /> Student Profiles
+                <FaUserGraduate className="text-blue-600" /> Student Profiles —
+                <span className="text-teal-700">Quran for Elders</span>
               </h1>
               <p className="text-xs text-gray-500">
-                View and manage student profiles
+                Qaida Nuraniyah • Quran Nazera • Bakarah Hifz • Basic Tajweed
+                (Level-1)
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -949,12 +901,12 @@ const Adminstudent_profile = () => {
               >
                 <FaSyncAlt size={12} /> Refresh
               </button>
-              <button
-                onClick={openAddModal}
+              <Link
+                to="/admin-students/add"
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
               >
                 <FaPlusCircle size={12} /> Add Student
-              </button>
+              </Link>
               <span className="text-xs font-semibold text-gray-700 hidden sm:block">
                 {adminInfo.name}
               </span>
@@ -972,7 +924,7 @@ const Adminstudent_profile = () => {
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
               <p className="text-sm text-gray-500 mt-3">
-                Loading students from database...
+                Loading elders students...
               </p>
             </div>
           ) : studentsError ? (
@@ -994,7 +946,7 @@ const Adminstudent_profile = () => {
                   <p className="text-lg font-bold text-blue-600">
                     {students.length}
                   </p>
-                  <p className="text-[10px] text-gray-500">Total Students</p>
+                  <p className="text-[10px] text-gray-500">Total Elders</p>
                 </div>
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
                   <p className="text-lg font-bold text-green-600">
@@ -1026,7 +978,7 @@ const Adminstudent_profile = () => {
                     <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
                     <input
                       type="text"
-                      placeholder="Search students..."
+                      placeholder="Search elders students..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1036,7 +988,7 @@ const Adminstudent_profile = () => {
                     <select
                       value={filterClass}
                       onChange={(e) => setFilterClass(e.target.value)}
-                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
+                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg max-w-[180px]"
                     >
                       {uniqueClasses.map((cls) => (
                         <option key={cls} value={cls}>
@@ -1095,9 +1047,9 @@ const Adminstudent_profile = () => {
                             {student.name}
                           </h3>
                           <p className="text-[10px] text-gray-500 truncate">
-                            {student.class} • {student.subject}
+                            {student.class}
                           </p>
-                          <div className="flex items-center gap-1 mt-0.5">
+                          <div className="flex items-center gap-1 mt-0.5 flex-wrap">
                             <span
                               className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(student.status)}`}
                             >
@@ -1117,21 +1069,19 @@ const Adminstudent_profile = () => {
                           <p className="text-[10px] font-bold text-green-600">
                             {student.attendance}%
                           </p>
-                          <p className="text-[8px] text-gray-500">Attendance</p>
+                          <p className="text-[8px] text-gray-500">Attend</p>
                         </div>
                         <div className="bg-gray-50 rounded-lg p-1">
                           <p className="text-[10px] font-bold text-blue-600">
                             {student.assignments}%
                           </p>
-                          <p className="text-[8px] text-gray-500">
-                            Assignments
-                          </p>
+                          <p className="text-[8px] text-gray-500">Assign</p>
                         </div>
                         <div className="bg-gray-50 rounded-lg p-1">
                           <p className="text-[10px] font-bold text-purple-600">
                             {student.exam}%
                           </p>
-                          <p className="text-[8px] text-gray-500">Exams</p>
+                          <p className="text-[8px] text-gray-500">Exam</p>
                         </div>
                       </div>
 
@@ -1179,7 +1129,7 @@ const Adminstudent_profile = () => {
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
                   <FaUserGraduate className="text-5xl text-gray-300 mx-auto mb-3" />
                   <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                    No Matching Students
+                    No Matching Elders Students
                   </h3>
                   <p className="text-xs text-gray-500">
                     Try adjusting filters or search
@@ -1191,10 +1141,11 @@ const Adminstudent_profile = () => {
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
                   <FaUserGraduate className="text-5xl text-gray-300 mx-auto mb-3" />
                   <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                    No Students in Database
+                    No Elders Course Students
                   </h3>
                   <p className="text-xs text-gray-500">
-                    Students will appear here after admission
+                    Qaida Nuraniyah, Quran Nazera, Bakarah Hifz, Basic Tajweed
+                    (Level-1) — এই ৪টি কোর্সে এখনো কোনো student নেই।
                   </p>
                 </div>
               )}
@@ -1202,133 +1153,6 @@ const Adminstudent_profile = () => {
           )}
         </main>
       </div>
-
-      {/* Add Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-green-600" /> Add New Student
-              </h3>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <FiX size={24} />
-              </button>
-            </div>
-            <form onSubmit={handleAddStudent} className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Student Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Father's Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.fatherName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, fatherName: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.class}
-                    onChange={(e) =>
-                      setFormData({ ...formData, class: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.subject}
-                    onChange={(e) =>
-                      setFormData({ ...formData, subject: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
-                <button
-                  type="submit"
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold"
-                >
-                  <FaUserPlus className="inline mr-2" size={14} /> Add Student
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Details Modal */}
       {showDetailsModal && selectedStudent && (
@@ -1367,7 +1191,7 @@ const Adminstudent_profile = () => {
                     </span>
                   </div>
                   <p className="text-sm text-gray-500">
-                    {selectedStudent.class} • {selectedStudent.subject}
+                    {selectedStudent.class}
                   </p>
                   <div className="flex flex-wrap gap-3 mt-2 text-sm text-gray-500 justify-center md:justify-start">
                     <span>📧 {selectedStudent.email || "N/A"}</span>
@@ -1375,7 +1199,7 @@ const Adminstudent_profile = () => {
                     <span>🎯 Roll: {selectedStudent.roll}</span>
                     <span>📚 Batch: {selectedStudent.batch}</span>
                   </div>
-                  <div className="mt-2">
+                  <div className="mt-2 flex justify-center md:justify-start">
                     {renderStars(selectedStudent.performance)}
                   </div>
                 </div>
@@ -1440,7 +1264,7 @@ const Adminstudent_profile = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Address</span>
-                      <span className="font-semibold">
+                      <span className="font-semibold text-right max-w-[60%]">
                         {selectedStudent.address || "N/A"}
                       </span>
                     </div>
@@ -1460,7 +1284,7 @@ const Adminstudent_profile = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Courses</span>
-                      <span className="font-semibold text-xs">
+                      <span className="font-semibold text-xs text-right max-w-[60%]">
                         {selectedStudent.course || "N/A"}
                       </span>
                     </div>
@@ -1589,11 +1413,10 @@ const Adminstudent_profile = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
+                    Class / Course
                   </label>
                   <input
                     type="text"
-                    required
                     value={formData.class}
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
