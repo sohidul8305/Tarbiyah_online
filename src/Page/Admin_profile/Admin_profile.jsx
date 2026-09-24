@@ -130,6 +130,7 @@ const Admin_profile = () => {
         email: user?.email || "admin@tarabiyah.com",
         phone: "+880 1700 123456",
         designation: "Administrator",
+
         department: "Administration",
         joinDate: "January 2024",
         bio: "Experienced administrator with a passion for education and Islamic studies.",
@@ -139,7 +140,6 @@ const Admin_profile = () => {
       };
     }
 
-    // ✅ Merge: separate key > adminInfo.profileImage
     const merged = {
       ...admin,
       profileImage: savedImage || admin.profileImage || "",

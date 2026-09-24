@@ -229,6 +229,10 @@ export const router = createBrowserRouter([
         path: "/enroll/quida/english-version",
         element: <Enroll_quida_english_version />,
       },
+      {
+        path: "/academicampus",
+        element: <Academicampus></Academicampus>,
+      },
     ],
   },
 
@@ -539,10 +543,7 @@ export const router = createBrowserRouter([
     path: "/campus",
     element: <Campus></Campus>,
   },
-  {
-    path: "/academicampus",
-    element: <Academicampus></Academicampus>,
-  },
+
   {
     path: "/campus-dashboard",
     element: <Campus_dashboard></Campus_dashboard>,
