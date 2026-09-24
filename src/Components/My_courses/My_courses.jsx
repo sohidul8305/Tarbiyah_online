@@ -34,32 +34,14 @@ const My_courses = () => {
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [playingVideo, setPlayingVideo] = useState(null);
 
-  // ✅ Course Image Map
-  const getCourseImage = (course) => {
-    if (course.image && course.image.trim() !== "") return course.image;
-    const title = (course.title || course.name || "").toLowerCase();
-    if (
-      title.includes("alimiyah") ||
-      title.includes("alimiya") ||
-      title.includes("alim")
-    )
-      return "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png";
-    if (
-      title.includes("hifz") ||
-      title.includes("tahfiz") ||
-      title.includes("revision")
-    )
-      return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
-    if (title.includes("qaida") || title.includes("noorani"))
-      return "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
-    if (title.includes("nazera") || title.includes("nazira"))
-      return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
-    if (title.includes("tajweed") || title.includes("tajwid"))
-      return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
-    if (title.includes("elder"))
-      return "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
-    return "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
-  };
+  // ✅ PDF & Quiz states
+  const [coursePdfs, setCoursePdfs] = useState([]);
+  const [courseQuizzes, setCourseQuizzes] = useState([]);
+  const [loadingResources, setLoadingResources] = useState(false);
+
+  // ✅ Grade states
+  const [courseGrade, setCourseGrade] = useState(null);
+  const [loadingGrade, setLoadingGrade] = useState(false);
 
   const t = {
     homeTab: "Home",
@@ -67,6 +49,9 @@ const My_courses = () => {
     myCoursesTab: "My courses",
   };
 
+  // ==================================================
+  // ✅ 1. Fetch My Courses
+  // ==================================================
   useEffect(() => {
     let isMounted = true;
 
@@ -126,8 +111,9 @@ const My_courses = () => {
     };
   }, [navigate]);
 
-  // ✅ Fetch videos when a course is selected
-  // ✅ Fetch videos when a course is selected
+  // ==================================================
+  // ✅ 2. Fetch Videos when course selected
+  // ==================================================
   useEffect(() => {
     if (!selectedCourse) {
       setCourseVideos([]);
@@ -141,7 +127,6 @@ const My_courses = () => {
         setLoadingVideos(true);
         setCourseVideos([]);
 
-        // Try title first, then code
         const searchNames = [
           selectedCourse.title,
           selectedCourse.name,
@@ -151,10 +136,11 @@ const My_courses = () => {
         console.log("🔍 [CourseVideos] Will try:", searchNames);
 
         let foundVideos = [];
-        let successData = null;
 
         for (const name of searchNames) {
-          const url = `${API_BASE}/api/batches/course-videos/${encodeURIComponent(name)}`;
+          const url = `${API_BASE}/api/batches/course-videos/${encodeURIComponent(
+            name,
+          )}`;
           console.log("📡 Fetching:", url);
 
           try {
@@ -165,7 +151,6 @@ const My_courses = () => {
             );
             if (data.success && data.videos?.length > 0) {
               foundVideos = data.videos;
-              successData = data;
               break;
             }
           } catch (e) {
@@ -174,15 +159,8 @@ const My_courses = () => {
         }
 
         if (!isMounted) return;
-
-        if (foundVideos.length > 0) {
-          setCourseVideos(foundVideos);
-          console.log("✅ [CourseVideos] Loaded", foundVideos.length, "videos");
-          console.log("🔍 Debug:", successData?.debug);
-        } else {
-          console.log("❌ [CourseVideos] No videos found");
-          setCourseVideos([]);
-        }
+        setCourseVideos(foundVideos);
+        console.log("✅ [CourseVideos] Loaded", foundVideos.length, "videos");
       } catch (err) {
         console.error("❌ [CourseVideos]", err);
       } finally {
@@ -197,13 +175,123 @@ const My_courses = () => {
     };
   }, [selectedCourse]);
 
+  // ==================================================
+  // ✅ 3. Fetch PDFs + Quizzes when course selected
+  // ==================================================
+  useEffect(() => {
+    if (!selectedCourse) {
+      setCoursePdfs([]);
+      setCourseQuizzes([]);
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchResources = async () => {
+      try {
+        setLoadingResources(true);
+        setCoursePdfs([]);
+        setCourseQuizzes([]);
+
+        const courseId = selectedCourse._id || selectedCourse.id;
+        if (!courseId) {
+          setLoadingResources(false);
+          return;
+        }
+
+        const url = `${API_BASE}/api/course-resources/course/${courseId}`;
+        console.log("📡 [Resources] Fetching:", url);
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!isMounted) return;
+
+        if (data.success) {
+          setCoursePdfs(data.pdfs || []);
+          setCourseQuizzes(data.quizzes || []);
+          console.log(
+            "✅ [Resources] PDFs:",
+            data.pdfsCount,
+            "Quizzes:",
+            data.quizzesCount,
+          );
+        }
+      } catch (err) {
+        console.error("❌ [Resources]", err);
+      } finally {
+        if (isMounted) setLoadingResources(false);
+      }
+    };
+
+    fetchResources();
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCourse]);
+
+  // ==================================================
+  // ✅ 4. Fetch Grade when course selected
+  // ==================================================
+  useEffect(() => {
+    if (!selectedCourse || !student) {
+      setCourseGrade(null);
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchGrade = async () => {
+      try {
+        setLoadingGrade(true);
+        setCourseGrade(null);
+
+        const studentId = student._id || student.id;
+        const courseId = selectedCourse._id || selectedCourse.id;
+
+        if (!studentId || !courseId) {
+          setLoadingGrade(false);
+          return;
+        }
+
+        const url = `${API_BASE}/api/grades/student/${studentId}/course/${courseId}`;
+        console.log("📡 [Grade] Fetching:", url);
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!isMounted) return;
+
+        if (data.success && data.grade) {
+          setCourseGrade(data.grade);
+          console.log("✅ [Grade] Loaded:", data.grade);
+        } else {
+          console.log("ℹ️ [Grade] No grade published yet");
+          setCourseGrade(null);
+        }
+      } catch (err) {
+        console.error("❌ [Grade]", err);
+      } finally {
+        if (isMounted) setLoadingGrade(false);
+      }
+    };
+
+    fetchGrade();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCourse, student]);
+
+  // ==================================================
+  // ✅ Helpers
+  // ==================================================
   const filteredCourses = courses.filter(
     (course) =>
       (course.code || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
       (course.title || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  // ✅ Convert YouTube / Drive URL to embeddable URL
   const getEmbedUrl = (url) => {
     if (!url) return "";
     if (url.includes("youtube.com/watch?v=")) {
@@ -375,58 +463,87 @@ const My_courses = () => {
                 </h2>
                 <pre className="text-xs text-gray-600 font-sans whitespace-pre-line">
                   {selectedCourse.syllabus ||
-                    `Duration: ${selectedCourse.duration || "N/A"}\nSchedule: ${selectedCourse.schedule || "N/A"}`}
+                    `Duration: ${selectedCourse.duration || "N/A"}\nSchedule: ${
+                      selectedCourse.schedule || "N/A"
+                    }`}
                 </pre>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Grades */}
+              {/* ==================== Grades ==================== */}
               <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-3">
                 <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                   <FaAward className="text-[#004d4d]" /> Material / Grad & Exams
                 </h2>
                 <ul className="space-y-2">
-                  <li className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs">
-                    <span className="font-medium text-gray-700">Grad</span>
-                    <span className="font-bold text-teal-700 bg-teal-100 px-2 py-0.5 rounded">
-                      A+
-                    </span>
-                  </li>
-                  <li className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs">
-                    <span className="font-medium text-gray-700">
-                      Class Test
-                    </span>
-                    <span className="font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
-                      85/100
-                    </span>
-                  </li>
-                  <li className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs">
-                    <span className="font-medium text-gray-700">
-                      Mid Term Exam
-                    </span>
-                    <span className="font-bold text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded">
-                      42/50
-                    </span>
-                  </li>
-                  <li className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs">
-                    <span className="font-medium text-gray-700">
-                      Final Exam
-                    </span>
-                    <span className="font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded">
-                      Pending
-                    </span>
-                  </li>
+                  {loadingGrade ? (
+                    <li className="flex items-center justify-center p-3 text-xs text-gray-500">
+                      <FaSpinner className="animate-spin text-teal-500 mr-2" />
+                      Grade লোড হচ্ছে...
+                    </li>
+                  ) : courseGrade ? (
+                    <>
+                      <li className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs">
+                        <span className="font-medium text-gray-700">Grad</span>
+                        <span className="font-bold text-teal-700 bg-teal-100 px-2 py-0.5 rounded">
+                          {courseGrade.grad || "N/A"}
+                        </span>
+                      </li>
+                      <li className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs">
+                        <span className="font-medium text-gray-700">
+                          Class Test
+                        </span>
+                        <span className="font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
+                          {courseGrade.classTest || "N/A"}
+                        </span>
+                      </li>
+                      <li className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs">
+                        <span className="font-medium text-gray-700">
+                          Mid Term Exam
+                        </span>
+                        <span className="font-bold text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded">
+                          {courseGrade.midTerm || "N/A"}
+                        </span>
+                      </li>
+                      <li className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs">
+                        <span className="font-medium text-gray-700">
+                          Final Exam
+                        </span>
+                        <span
+                          className={`font-bold px-2 py-0.5 rounded ${
+                            courseGrade.finalExam === "Pending"
+                              ? "text-gray-600 bg-gray-200"
+                              : "text-teal-700 bg-teal-100"
+                          }`}
+                        >
+                          {courseGrade.finalExam || "Pending"}
+                        </span>
+                      </li>
+                      {courseGrade.remarks && (
+                        <li className="p-2 bg-yellow-50 rounded border border-yellow-100 text-[10px] text-gray-700 italic">
+                          💬 {courseGrade.remarks}
+                        </li>
+                      )}
+                    </>
+                  ) : (
+                    <li className="flex flex-col items-center justify-center p-3 text-center">
+                      <FaAward className="text-2xl text-gray-300 mb-1" />
+                      <p className="text-[10px] text-gray-500">
+                        এখনো grade publish করা হয়নি
+                      </p>
+                    </li>
+                  )}
                 </ul>
               </div>
 
-              {/* ✅ Module Content with REAL VIDEOS */}
+              {/* ==================== Module Content ==================== */}
               <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-3">
                 <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                   <FaBookOpen className="text-[#004d4d]" /> Module Content
                 </h2>
 
-                {/* Video Recording section */}
+                {/* ---------- Video Recording ---------- */}
                 <div className="border border-gray-100 rounded-lg overflow-hidden">
                   <div className="flex items-center gap-2.5 p-2.5 bg-gray-50 border-b border-gray-100 text-xs">
                     <FaVideo className="text-red-500 text-sm" />
@@ -437,8 +554,6 @@ const My_courses = () => {
                       {loadingVideos ? "..." : courseVideos.length}
                     </span>
                   </div>
-
-                  {/* Video list */}
                   <div className="p-2 space-y-1.5 max-h-56 overflow-y-auto bg-white">
                     {loadingVideos ? (
                       <div className="text-center py-3">
@@ -484,20 +599,114 @@ const My_courses = () => {
                   </div>
                 </div>
 
-                {/* PDF notes */}
-                <div className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
-                  <FaFilePdf className="text-blue-500 text-sm" />
-                  <span className="font-medium text-gray-700">
-                    PDF Notes (নোট ও রিসোর্স)
-                  </span>
+                {/* ---------- PDF Notes ---------- */}
+                <div className="border border-gray-100 rounded-lg overflow-hidden">
+                  <div className="flex items-center gap-2.5 p-2.5 bg-gray-50 border-b border-gray-100 text-xs">
+                    <FaFilePdf className="text-blue-500 text-sm" />
+                    <span className="font-semibold text-gray-700 flex-1">
+                      PDF Notes (নোট ও রিসোর্স)
+                    </span>
+                    <span className="text-[10px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full">
+                      {loadingResources ? "..." : coursePdfs.length}
+                    </span>
+                  </div>
+                  <div className="p-2 space-y-1.5 max-h-40 overflow-y-auto bg-white">
+                    {loadingResources ? (
+                      <div className="text-center py-3">
+                        <FaSpinner className="animate-spin text-blue-500 mx-auto text-sm" />
+                        <p className="text-[10px] text-gray-500 mt-1">
+                          লোড হচ্ছে...
+                        </p>
+                      </div>
+                    ) : coursePdfs.length > 0 ? (
+                      coursePdfs.map((pdf) => (
+                        <a
+                          key={pdf._id}
+                          href={pdf.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="w-full flex items-center gap-2 p-2 bg-gray-50 hover:bg-blue-50 rounded border border-gray-100 transition-all group"
+                        >
+                          <div className="w-6 h-6 rounded bg-blue-100 group-hover:bg-blue-500 flex items-center justify-center flex-shrink-0 transition-colors">
+                            <FaFilePdf className="text-blue-500 group-hover:text-white text-[10px]" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-semibold text-gray-800 truncate">
+                              {pdf.title}
+                            </p>
+                            {pdf.description && (
+                              <p className="text-[9px] text-gray-500 truncate">
+                                {pdf.description}
+                              </p>
+                            )}
+                          </div>
+                          <FaExternalLinkAlt className="text-gray-400 group-hover:text-blue-500 text-[9px] flex-shrink-0" />
+                        </a>
+                      ))
+                    ) : (
+                      <div className="text-center py-3">
+                        <FaFilePdf className="text-2xl text-gray-300 mx-auto mb-1" />
+                        <p className="text-[10px] text-gray-500">
+                          এখনো কোনো PDF যোগ করা হয়নি
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                {/* Quiz */}
-                <div className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
-                  <FaQuestionCircle className="text-green-500 text-sm" />
-                  <span className="font-medium text-gray-700">
-                    Quiz (কুইজ ও মূল্যায়ন)
-                  </span>
+                {/* ---------- Quiz ---------- */}
+                <div className="border border-gray-100 rounded-lg overflow-hidden">
+                  <div className="flex items-center gap-2.5 p-2.5 bg-gray-50 border-b border-gray-100 text-xs">
+                    <FaQuestionCircle className="text-green-500 text-sm" />
+                    <span className="font-semibold text-gray-700 flex-1">
+                      Quiz (কুইজ ও মূল্যায়ন)
+                    </span>
+                    <span className="text-[10px] bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">
+                      {loadingResources ? "..." : courseQuizzes.length}
+                    </span>
+                  </div>
+                  <div className="p-2 space-y-1.5 max-h-40 overflow-y-auto bg-white">
+                    {loadingResources ? (
+                      <div className="text-center py-3">
+                        <FaSpinner className="animate-spin text-green-500 mx-auto text-sm" />
+                        <p className="text-[10px] text-gray-500 mt-1">
+                          লোড হচ্ছে...
+                        </p>
+                      </div>
+                    ) : courseQuizzes.length > 0 ? (
+                      courseQuizzes.map((quiz) => (
+                        <a
+                          key={quiz._id}
+                          href={quiz.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="w-full flex items-center gap-2 p-2 bg-gray-50 hover:bg-green-50 rounded border border-gray-100 transition-all group"
+                        >
+                          <div className="w-6 h-6 rounded bg-green-100 group-hover:bg-green-500 flex items-center justify-center flex-shrink-0 transition-colors">
+                            <FaQuestionCircle className="text-green-500 group-hover:text-white text-[10px]" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-semibold text-gray-800 truncate">
+                              {quiz.title}
+                            </p>
+                            {quiz.description && (
+                              <p className="text-[9px] text-gray-500 truncate">
+                                {quiz.description}
+                              </p>
+                            )}
+                          </div>
+                          <FaExternalLinkAlt className="text-gray-400 group-hover:text-green-500 text-[9px] flex-shrink-0" />
+                        </a>
+                      ))
+                    ) : (
+                      <div className="text-center py-3">
+                        <FaQuestionCircle className="text-2xl text-gray-300 mx-auto mb-1" />
+                        <p className="text-[10px] text-gray-500">
+                          এখনো কোনো Quiz যোগ করা হয়নি
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -599,11 +808,10 @@ const My_courses = () => {
         )}
       </div>
 
-      {/* ✅ Video Player Modal */}
+      {/* ==================== Video Player Modal ==================== */}
       {showVideoPlayer && playingVideo && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
-            {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <div className="flex items-center gap-2 min-w-0 flex-1">
                 <FaVideo className="text-red-500 flex-shrink-0" />
@@ -641,7 +849,6 @@ const My_courses = () => {
               </div>
             </div>
 
-            {/* Video iframe */}
             <div className="flex-1 bg-black">
               <div
                 className="relative w-full"
@@ -658,7 +865,6 @@ const My_courses = () => {
               </div>
             </div>
 
-            {/* Footer info */}
             <div className="p-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-600">
               <p>
                 💡 <strong>Tip:</strong> ভিডিওটি অন্য tab এ খুলতে উপরের ↗️ icon

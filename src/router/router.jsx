@@ -175,6 +175,7 @@ import Academicampus from "../Components/Academicampus/Academicampus";
 import BasicTazweed from "../Page/Admin/BasicTazweed";
 import NajeraBatch from "../Page/Admin/NajeraBatch";
 import Student_exam from "../Page/Student_exam/Student_exam";
+import Admin_exam_grad from "../Page/Admin_exam_grad/Admin_exam_grad";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -466,7 +467,8 @@ export const router = createBrowserRouter([
   { path: "/admin-salary/total", element: <Total_salary /> },
   { path: "/admin-salary/due", element: <Due_salary /> },
   { path: "/admin-absence", element: <Student_absence /> },
-  { path: "campus", element: <Campus /> },
+  { path: "/campus", element: <Campus /> },
+  { path: "/admin-exam/grad", element: <Admin_exam_grad /> },
 
   {
     path: "/admin-dashboard/notification",

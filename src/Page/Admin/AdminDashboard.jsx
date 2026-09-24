@@ -529,7 +529,8 @@ const AdminDashboard = () => {
       case "dashboard":
         return <DashboardContent stats={stats} notifications={notifications} />;
       case "notification":
-        return <Admin_notification />; // notification কেস আলাদা
+        return <Admin_notification />;
+
       case "student-management":
         return <StudentManagementContent students={students} />;
       case "teacher-management":
@@ -2390,14 +2391,6 @@ const ExamMakeContent = () => {
       date: "2026-07-10",
       status: "Completed",
     },
-    {
-      id: 3,
-      title: "Final Exam 2026",
-      class: "Class 10",
-      subject: "Hadith",
-      date: "2026-07-20",
-      status: "Upcoming",
-    },
   ]);
 
   return (
@@ -2511,13 +2504,6 @@ const ResultPublishContent = () => {
       class: "Class 9",
       published: "2026-07-12",
       status: "Published",
-    },
-    {
-      id: 3,
-      exam: "Final Exam 2026",
-      class: "Class 10",
-      published: "-",
-      status: "Pending",
     },
   ]);
 
