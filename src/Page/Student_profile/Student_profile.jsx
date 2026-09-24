@@ -26,6 +26,7 @@ const StudentProfile = () => {
   const { user } = useAuth();
   const location = useLocation();
   const [isEditing, setIsEditing] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({
     name: "",

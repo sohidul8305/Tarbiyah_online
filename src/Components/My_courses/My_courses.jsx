@@ -11,7 +11,13 @@ import {
   FaAward,
   FaBookOpen,
   FaSpinner,
+  FaPlay,
+  FaExternalLinkAlt,
+  FaTimes,
 } from "react-icons/fa";
+
+// ✅ API Base URL — deploy হলে "https://api.tarbiyahonline.com" করুন
+const API_BASE = "http://localhost:5010";
 
 const My_courses = () => {
   const navigate = useNavigate();
@@ -22,42 +28,39 @@ const My_courses = () => {
   const [error, setError] = useState(null);
   const [student, setStudent] = useState(null);
 
+  // ✅ Video states
+  const [courseVideos, setCourseVideos] = useState([]);
+  const [loadingVideos, setLoadingVideos] = useState(false);
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false);
+  const [playingVideo, setPlayingVideo] = useState(null);
+
   // ✅ Course Image Map
   const getCourseImage = (course) => {
     if (course.image && course.image.trim() !== "") return course.image;
-
     const title = (course.title || course.name || "").toLowerCase();
-
     if (
       title.includes("alimiyah") ||
       title.includes("alimiya") ||
       title.includes("alim")
-    ) {
+    )
       return "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png";
-    }
     if (
       title.includes("hifz") ||
       title.includes("tahfiz") ||
       title.includes("revision")
-    ) {
+    )
       return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
-    }
-    if (title.includes("qaida") || title.includes("noorani")) {
+    if (title.includes("qaida") || title.includes("noorani"))
       return "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
-    }
-    if (title.includes("nazera") || title.includes("nazira")) {
+    if (title.includes("nazera") || title.includes("nazira"))
       return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
-    }
-    if (title.includes("tajweed") || title.includes("tajwid")) {
+    if (title.includes("tajweed") || title.includes("tajwid"))
       return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
-    }
-    if (title.includes("elder")) {
+    if (title.includes("elder"))
       return "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
-    }
-
     return "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
   };
-  const activeTab = "my-courses";
+
   const t = {
     homeTab: "Home",
     dashboardTab: "Dashboard",
@@ -90,7 +93,7 @@ const My_courses = () => {
           return;
         }
 
-        const apiUrl = `https://api.tarbiyahonline.com/api/students/my-courses/${studentId}`;
+        const apiUrl = `${API_BASE}/api/students/my-courses/${studentId}`;
         console.log("📡 [MyCourses] Fetching:", apiUrl);
 
         const response = await fetch(apiUrl);
@@ -118,11 +121,81 @@ const My_courses = () => {
     };
 
     fetchMyCourses();
-
     return () => {
       isMounted = false;
     };
   }, [navigate]);
+
+  // ✅ Fetch videos when a course is selected
+  // ✅ Fetch videos when a course is selected
+  useEffect(() => {
+    if (!selectedCourse) {
+      setCourseVideos([]);
+      return;
+    }
+
+    let isMounted = true;
+
+    const fetchCourseVideos = async () => {
+      try {
+        setLoadingVideos(true);
+        setCourseVideos([]);
+
+        // Try title first, then code
+        const searchNames = [
+          selectedCourse.title,
+          selectedCourse.name,
+          selectedCourse.code,
+        ].filter(Boolean);
+
+        console.log("🔍 [CourseVideos] Will try:", searchNames);
+
+        let foundVideos = [];
+        let successData = null;
+
+        for (const name of searchNames) {
+          const url = `${API_BASE}/api/batches/course-videos/${encodeURIComponent(name)}`;
+          console.log("📡 Fetching:", url);
+
+          try {
+            const res = await fetch(url);
+            const data = await res.json();
+            console.log(
+              `   → matched ${data.matchedBatches}, videos ${data.total}`,
+            );
+            if (data.success && data.videos?.length > 0) {
+              foundVideos = data.videos;
+              successData = data;
+              break;
+            }
+          } catch (e) {
+            console.warn("   ⚠️ fetch failed for", name, e.message);
+          }
+        }
+
+        if (!isMounted) return;
+
+        if (foundVideos.length > 0) {
+          setCourseVideos(foundVideos);
+          console.log("✅ [CourseVideos] Loaded", foundVideos.length, "videos");
+          console.log("🔍 Debug:", successData?.debug);
+        } else {
+          console.log("❌ [CourseVideos] No videos found");
+          setCourseVideos([]);
+        }
+      } catch (err) {
+        console.error("❌ [CourseVideos]", err);
+      } finally {
+        if (isMounted) setLoadingVideos(false);
+      }
+    };
+
+    fetchCourseVideos();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedCourse]);
 
   const filteredCourses = courses.filter(
     (course) =>
@@ -130,6 +203,25 @@ const My_courses = () => {
       (course.title || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
+  // ✅ Convert YouTube / Drive URL to embeddable URL
+  const getEmbedUrl = (url) => {
+    if (!url) return "";
+    if (url.includes("youtube.com/watch?v=")) {
+      const id = url.split("v=")[1]?.split("&")[0];
+      return `https://www.youtube.com/embed/${id}`;
+    }
+    if (url.includes("youtu.be/")) {
+      const id = url.split("youtu.be/")[1]?.split("?")[0];
+      return `https://www.youtube.com/embed/${id}`;
+    }
+    if (url.includes("drive.google.com/file/d/")) {
+      const id = url.split("/d/")[1]?.split("/")[0];
+      return `https://drive.google.com/file/d/${id}/preview`;
+    }
+    return url;
+  };
+
+  // ---------- Loading state ----------
   if (loading) {
     return (
       <div className="bg-gray-50 min-h-screen font-sans">
@@ -163,6 +255,7 @@ const My_courses = () => {
     );
   }
 
+  // ---------- Error state ----------
   if (error) {
     return (
       <div className="bg-gray-50 min-h-screen font-sans">
@@ -206,6 +299,7 @@ const My_courses = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans text-gray-800">
+      {/* Top nav */}
       <div className="bg-white border-b border-gray-200 px-6 md:px-16 flex items-center space-x-8 shadow-sm">
         <Link
           to="/campus"
@@ -287,6 +381,7 @@ const My_courses = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Grades */}
               <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-3">
                 <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                   <FaAward className="text-[#004d4d]" /> Material / Grad & Exams
@@ -325,30 +420,85 @@ const My_courses = () => {
                 </ul>
               </div>
 
+              {/* ✅ Module Content with REAL VIDEOS */}
               <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-3">
                 <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                   <FaBookOpen className="text-[#004d4d]" /> Module Content
                 </h2>
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
+
+                {/* Video Recording section */}
+                <div className="border border-gray-100 rounded-lg overflow-hidden">
+                  <div className="flex items-center gap-2.5 p-2.5 bg-gray-50 border-b border-gray-100 text-xs">
                     <FaVideo className="text-red-500 text-sm" />
-                    <span className="font-medium text-gray-700">
+                    <span className="font-semibold text-gray-700 flex-1">
                       Video Recording (লেকচার ভিডিও)
                     </span>
-                  </li>
-                  <li className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
-                    <FaFilePdf className="text-blue-500 text-sm" />
-                    <span className="font-medium text-gray-700">
-                      PDF Notes (নোট ও রিসোর্স)
+                    <span className="text-[10px] bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded-full">
+                      {loadingVideos ? "..." : courseVideos.length}
                     </span>
-                  </li>
-                  <li className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
-                    <FaQuestionCircle className="text-green-500 text-sm" />
-                    <span className="font-medium text-gray-700">
-                      Quiz (কুইজ ও মূল্যায়ন)
-                    </span>
-                  </li>
-                </ul>
+                  </div>
+
+                  {/* Video list */}
+                  <div className="p-2 space-y-1.5 max-h-56 overflow-y-auto bg-white">
+                    {loadingVideos ? (
+                      <div className="text-center py-3">
+                        <FaSpinner className="animate-spin text-indigo-500 mx-auto text-sm" />
+                        <p className="text-[10px] text-gray-500 mt-1">
+                          ভিডিও লোড হচ্ছে...
+                        </p>
+                      </div>
+                    ) : courseVideos.length > 0 ? (
+                      courseVideos.map((video, i) => (
+                        <button
+                          key={i}
+                          onClick={() => {
+                            setPlayingVideo(video);
+                            setShowVideoPlayer(true);
+                          }}
+                          className="w-full flex items-center gap-2 p-2 bg-gray-50 hover:bg-red-50 rounded border border-gray-100 text-left transition-all group"
+                        >
+                          <div className="w-6 h-6 rounded bg-red-100 group-hover:bg-red-500 flex items-center justify-center flex-shrink-0 transition-colors">
+                            <FaPlay className="text-red-500 group-hover:text-white text-[8px] ml-0.5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[11px] font-semibold text-gray-800 truncate">
+                              {video.title}
+                            </p>
+                            {video.batchName && (
+                              <p className="text-[9px] text-gray-500 truncate">
+                                {video.batchName}{" "}
+                                {video.teacher && `• ${video.teacher}`}
+                              </p>
+                            )}
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="text-center py-3">
+                        <FaVideo className="text-2xl text-gray-300 mx-auto mb-1" />
+                        <p className="text-[10px] text-gray-500">
+                          এখনো কোনো ভিডিও যোগ করা হয়নি
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* PDF notes */}
+                <div className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
+                  <FaFilePdf className="text-blue-500 text-sm" />
+                  <span className="font-medium text-gray-700">
+                    PDF Notes (নোট ও রিসোর্স)
+                  </span>
+                </div>
+
+                {/* Quiz */}
+                <div className="flex items-center gap-2.5 p-2 bg-gray-50 rounded border border-gray-100 text-xs hover:bg-teal-50 cursor-pointer">
+                  <FaQuestionCircle className="text-green-500 text-sm" />
+                  <span className="font-medium text-gray-700">
+                    Quiz (কুইজ ও মূল্যায়ন)
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -448,6 +598,76 @@ const My_courses = () => {
           </>
         )}
       </div>
+
+      {/* ✅ Video Player Modal */}
+      {showVideoPlayer && playingVideo && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <FaVideo className="text-red-500 flex-shrink-0" />
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-gray-800 truncate">
+                    {playingVideo.title}
+                  </h3>
+                  {playingVideo.batchName && (
+                    <p className="text-[10px] text-gray-500 truncate">
+                      {playingVideo.batchName}
+                      {playingVideo.teacher && ` • ${playingVideo.teacher}`}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <a
+                  href={playingVideo.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50"
+                  title="Open in new tab"
+                >
+                  <FaExternalLinkAlt size={14} />
+                </a>
+                <button
+                  onClick={() => {
+                    setShowVideoPlayer(false);
+                    setPlayingVideo(null);
+                  }}
+                  className="text-gray-500 hover:text-gray-800 p-2 rounded hover:bg-gray-100"
+                >
+                  <FaTimes size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Video iframe */}
+            <div className="flex-1 bg-black">
+              <div
+                className="relative w-full"
+                style={{ paddingBottom: "56.25%" }}
+              >
+                <iframe
+                  src={getEmbedUrl(playingVideo.url)}
+                  title={playingVideo.title}
+                  className="absolute top-0 left-0 w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allowFullScreen
+                />
+              </div>
+            </div>
+
+            {/* Footer info */}
+            <div className="p-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-600">
+              <p>
+                💡 <strong>Tip:</strong> ভিডিওটি অন্য tab এ খুলতে উপরের ↗️ icon
+                এ ক্লিক করুন
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

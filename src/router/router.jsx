@@ -206,7 +206,7 @@ export const router = createBrowserRouter([
       { path: "course/alemiah", element: <Alemiah /> },
       { path: "course/kids", element: <Kids /> },
       { path: "course/quran", element: <Quran /> },
-      { path: "campus", element: <Campus /> },
+
       { path: "class-routine", element: <Class_routine /> },
       { path: "notice-board", element: <Notice_board /> },
       { path: "support", element: <Support /> },
@@ -466,6 +466,7 @@ export const router = createBrowserRouter([
   { path: "/admin-salary/total", element: <Total_salary /> },
   { path: "/admin-salary/due", element: <Due_salary /> },
   { path: "/admin-absence", element: <Student_absence /> },
+  { path: "campus", element: <Campus /> },
 
   {
     path: "/admin-dashboard/notification",
@@ -646,19 +647,11 @@ export const router = createBrowserRouter([
   // Department dashboard
   {
     path: "/admin-dashboard/basic-tazweed",
-    element: (
-      <PrivateRoute role="admin">
-        <BasicTazweed />
-      </PrivateRoute>
-    ),
+    element: <BasicTazweed />,
   },
   {
     path: "/admin-dashboard/najera-batch",
-    element: (
-      <PrivateRoute role="admin">
-        <NajeraBatch />
-      </PrivateRoute>
-    ),
+    element: <NajeraBatch />,
   },
   // ==========================================
   // ৭. সাব-ড্যাশবোর্ড পেজ (Teacher)

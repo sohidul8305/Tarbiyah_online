@@ -1,4 +1,3 @@
-// src/Page/Admin/Student_batch.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
@@ -9,92 +8,38 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
   FaClock,
-  FaBook,
-  FaFileAlt,
   FaChartLine,
-  FaUserGraduate,
-  FaUserPlus,
-  FaClipboardList,
-  FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
   FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock as FaClockIcon,
-  FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
   FaPlusCircle,
-  FaDownload,
-  FaPrint,
-  FaCheckCircle,
-  FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
-  FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
-  FaBuilding,
-  FaUniversity,
-  FaGraduationCap,
-  FaGlobe,
   FaVideo,
   FaLink,
-  FaWallet,
-  FaCreditCard,
-  FaHistory,
-  FaFileInvoice as FaFileInvoiceIcon,
-  FaReceipt,
-  FaEnvelope,
-  FaPaperPlane,
-  FaExclamationTriangle,
-  FaInfoCircle,
-  FaThumbsUp,
-  FaStar,
-  FaComment,
-  FaUserTag,
-  FaPhoneAlt,
-  FaMapMarkerAlt,
-  FaBirthdayCake,
-  FaTransgender,
-  FaSave,
-  FaUndo,
-  FaUpload,
-  FaCamera,
   FaUsersCog as FaUsersCogIcon,
-  FaUserCheck,
-  FaUserMinus,
-  FaToggleOn,
-  FaToggleOff,
+  FaCheckCircle,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+const API_URL = "http://localhost:5010";
+
+// ✅ Fixed Course List
+const COURSE_OPTIONS = [
+  "Qaida Nuraniyah",
+  "Quran Nazera",
+  "Bakarah Hifz",
+  "Basic Tajweed (Level-1)",
+];
 
 const Student_batch = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [activeSubMenu, setActiveSubMenu] = useState(null);
@@ -107,105 +52,32 @@ const Student_batch = () => {
     joinDate: "",
   });
 
-  const [batches, setBatches] = useState([
-    {
-      id: 1,
-      name: "Batch 06",
-      course: "Tajweed",
-      class: "Class 8",
-      students: 30,
-      status: "Active",
-      startDate: "2026-01-15",
-      endDate: "2026-04-15",
-      schedule: "Mon, Wed 09:00 AM",
-      teacher: "Ustadh Ahmad",
-      room: "Room 101",
-      description: "Beginner level Tajweed course",
-    },
-  ]);
-
-  const [allStudents] = useState([
-    {
-      id: 1,
-      name: "Ahmed Hasan",
-      class: "Class 8",
-      batch: "Batch 2026-A",
-      status: "Active",
-    },
-    {
-      id: 2,
-      name: "Fatima Begum",
-      class: "Class 9",
-      batch: "Batch 2026-B",
-      status: "Active",
-    },
-    {
-      id: 3,
-      name: "Mohammad Ali",
-      class: "Class 10",
-      batch: "Batch 2026-C",
-      status: "Active",
-    },
-    {
-      id: 4,
-      name: "Aisha Rahman",
-      class: "Class 7",
-      batch: "Batch 2026-D",
-      status: "Pending",
-    },
-    {
-      id: 5,
-      name: "Abdullah Karim",
-      class: "Class 6",
-      batch: "Batch 2026-E",
-      status: "Active",
-    },
-    {
-      id: 6,
-      name: "Maryam Akter",
-      class: "Class 8",
-      batch: "Batch 2026-A",
-      status: "Active",
-    },
-    {
-      id: 7,
-      name: "Yusuf Khan",
-      class: "Class 7",
-      batch: "-",
-      status: "Pending",
-    },
-    {
-      id: 8,
-      name: "Zainab Islam",
-      class: "Class 6",
-      batch: "-",
-      status: "Pending",
-    },
-  ]);
+  const [batches, setBatches] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
-  const [filterClass, setFilterClass] = useState("All");
+  const [filterCourse, setFilterCourse] = useState("All");
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState(null);
-  const [selectedStudent, setSelectedStudent] = useState(null);
-  const [viewMode, setViewMode] = useState("grid");
+
   const [formData, setFormData] = useState({
     name: "",
     course: "",
-    class: "",
     students: "",
-    startDate: "",
-    endDate: "",
     schedule: "",
     teacher: "",
-    room: "",
+    videoUrl: "",
     description: "",
     status: "Active",
   });
+
+  // ✅ Video management states
+  const [showVideoForm, setShowVideoForm] = useState(false);
+  const [newVideo, setNewVideo] = useState({ title: "", url: "" });
+  const [savingVideo, setSavingVideo] = useState(false);
 
   // Load admin info
   useEffect(() => {
@@ -223,6 +95,35 @@ const Student_batch = () => {
       });
     }
   }, [user]);
+
+  // ✅ Fetch batches from API
+  const fetchBatches = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_URL}/api/batches/all`);
+      const data = await res.json();
+      if (data.success) {
+        setBatches(data.batches || []);
+      } else {
+        setBatches([]);
+      }
+    } catch (error) {
+      console.error("❌ Fetch batches error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Failed to load batches",
+        text: "Server connection error. Is backend running on port 5010?",
+        timer: 2200,
+        showConfirmButton: false,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBatches();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -248,16 +149,9 @@ const Student_batch = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
-
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
   };
 
   // Sidebar Menu Items
@@ -285,12 +179,12 @@ const Student_batch = () => {
           label: "Today's Class",
         },
         {
-          id: "basic-tazweed payment overview",
+          id: "basic-tazweed",
           path: "/admin-dashboard/basic-tazweed",
           label: "Basic Tazweed Payment Overview",
         },
         {
-          id: "najera-payment overview",
+          id: "najera-batch",
           path: "/admin-dashboard/najera-batch",
           label: "Najera Payment Overview",
         },
@@ -417,25 +311,6 @@ const Student_batch = () => {
       ],
     },
     {
-      id: "exam",
-      path: "/admin-exam",
-      icon: <FaCalendarCheck className="text-xl" />,
-      label: "Exam",
-      subItems: [
-        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
-        {
-          id: "result-publish",
-          path: "/admin-exam/result",
-          label: "Result Publish",
-        },
-        {
-          id: "certificate-permission",
-          path: "/admin-exam/certificate",
-          label: "Certificate Permission",
-        },
-      ],
-    },
-    {
       id: "report-analytics",
       path: "/admin-reports",
       icon: <FaChartLine className="text-xl" />,
@@ -467,39 +342,26 @@ const Student_batch = () => {
         },
       ],
     },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
-      ],
-    },
   ];
 
-  // Handle search and filter
+  // Filter batches
   const filteredBatches = batches.filter((batch) => {
     const matchesSearch =
-      batch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      batch.course.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      batch.class.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      batch.teacher.toLowerCase().includes(searchTerm.toLowerCase());
+      (batch.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (batch.course || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (batch.teacher || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       filterStatus === "All" || batch.status === filterStatus;
-    const matchesClass = filterClass === "All" || batch.class === filterClass;
-    return matchesSearch && matchesStatus && matchesClass;
+    const matchesCourse =
+      filterCourse === "All" || batch.course === filterCourse;
+    return matchesSearch && matchesStatus && matchesCourse;
   });
 
-  // Get unique classes for filter
-  const uniqueClasses = ["All", ...new Set(batches.map((b) => b.class))];
+  const uniqueCourses = [
+    "All",
+    ...new Set(batches.map((b) => b.course).filter(Boolean)),
+  ];
 
-  // Get status badge color
   const getStatusColor = (status) => {
     switch (status) {
       case "Active":
@@ -515,188 +377,275 @@ const Student_batch = () => {
     }
   };
 
-  // Handle add batch
-  const handleAddBatch = (e) => {
+  // ✅ Add Batch
+  const handleAddBatch = async (e) => {
     e.preventDefault();
-    if (
-      !formData.name ||
-      !formData.course ||
-      !formData.class ||
-      !formData.startDate
-    ) {
+    if (!formData.name || !formData.course) {
       Swal.fire({
         icon: "warning",
-        title: "Please fill all required fields",
+        title: "Batch Name এবং Course আবশ্যক!",
         timer: 1500,
         showConfirmButton: false,
       });
       return;
     }
 
-    const newBatch = {
-      id: Date.now(),
-      ...formData,
-      students: parseInt(formData.students) || 0,
-    };
+    try {
+      const res = await fetch(`${API_URL}/api/batches/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
 
-    setBatches([newBatch, ...batches]);
-    setShowAddModal(false);
-    resetForm();
-    Swal.fire({
-      icon: "success",
-      title: "Batch Created!",
-      text: "New batch has been created successfully.",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+      if (data.success) {
+        await fetchBatches();
+        setShowAddModal(false);
+        resetForm();
+        Swal.fire({
+          icon: "success",
+          title: "Batch Created!",
+          text: "New batch saved to database.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Something went wrong",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        icon: "error",
+        title: "Server Error",
+        text: error.message,
+      });
+    }
   };
 
-  // Handle edit batch
-  const handleEditBatch = (e) => {
+  // ✅ Edit Batch
+  const handleEditBatch = async (e) => {
     e.preventDefault();
-    if (
-      !formData.name ||
-      !formData.course ||
-      !formData.class ||
-      !formData.startDate
-    ) {
+    if (!formData.name || !formData.course) {
       Swal.fire({
         icon: "warning",
-        title: "Please fill all required fields",
+        title: "Batch Name এবং Course আবশ্যক!",
         timer: 1500,
         showConfirmButton: false,
       });
       return;
     }
 
-    setBatches(
-      batches.map((b) =>
-        b.id === selectedBatch.id
-          ? {
-              ...b,
-              ...formData,
-              students: parseInt(formData.students) || b.students,
-            }
-          : b,
-      ),
-    );
-    setShowEditModal(false);
-    resetForm();
-    Swal.fire({
-      icon: "success",
-      title: "Batch Updated!",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    try {
+      const res = await fetch(
+        `${API_URL}/api/batches/update/${selectedBatch._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        },
+      );
+      const data = await res.json();
+
+      if (data.success) {
+        await fetchBatches();
+        setShowEditModal(false);
+        resetForm();
+        Swal.fire({
+          icon: "success",
+          title: "Batch Updated!",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Something went wrong",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        icon: "error",
+        title: "Server Error",
+        text: error.message,
+      });
+    }
   };
 
-  // Handle delete batch
+  // ✅ Delete Batch
   const handleDeleteBatch = (id) => {
     Swal.fire({
       title: "Delete Batch?",
-      text: "This action cannot be undone! All associated students will be unassigned.",
+      text: "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setBatches(batches.filter((b) => b.id !== id));
-        Swal.fire("Deleted!", "Batch has been deleted.", "success");
+        try {
+          const res = await fetch(`${API_URL}/api/batches/delete/${id}`, {
+            method: "DELETE",
+          });
+          const data = await res.json();
+          if (data.success) {
+            await fetchBatches();
+            Swal.fire("Deleted!", "Batch has been deleted.", "success");
+          } else {
+            Swal.fire("Failed!", data.message || "Error", "error");
+          }
+        } catch (error) {
+          Swal.fire("Error!", error.message, "error");
+        }
       }
     });
   };
 
-  // Open edit modal
-  const openEditModal = (batch) => {
-    setSelectedBatch(batch);
-    setFormData({
-      name: batch.name,
-      course: batch.course,
-      class: batch.class,
-      students: batch.students,
-      startDate: batch.startDate,
-      endDate: batch.endDate || "",
-      schedule: batch.schedule || "",
-      teacher: batch.teacher || "",
-      room: batch.room || "",
-      description: batch.description || "",
-      status: batch.status,
-    });
-    setShowEditModal(true);
-  };
-
-  // Open details modal
-  const openDetailsModal = (batch) => {
-    setSelectedBatch(batch);
-    setShowDetailsModal(true);
-  };
-
-  // Open assign students modal
-  const openAssignModal = (batch) => {
-    setSelectedBatch(batch);
-    setShowAssignModal(true);
-  };
-
-  // Reset form
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      course: "",
-      class: "",
-      students: "",
-      startDate: "",
-      endDate: "",
-      schedule: "",
-      teacher: "",
-      room: "",
-      description: "",
-      status: "Active",
-    });
-    setSelectedBatch(null);
-  };
-
-  // Assign student to batch
-  const assignStudentToBatch = (studentId) => {
-    const student = allStudents.find((s) => s.id === studentId);
-    if (student) {
+  // ✅ Add Video to batch
+  const handleAddVideo = async () => {
+    if (!newVideo.title.trim() || !newVideo.url.trim()) {
       Swal.fire({
-        icon: "success",
-        title: "Student Assigned!",
-        text: `${student.name} has been assigned to ${selectedBatch.name}`,
+        icon: "warning",
+        title: "Title এবং URL আবশ্যক!",
         timer: 1500,
         showConfirmButton: false,
       });
-      setShowAssignModal(false);
+      return;
+    }
+
+    setSavingVideo(true);
+    try {
+      const updatedVideos = [
+        ...(selectedBatch.videos || []),
+        {
+          title: newVideo.title.trim(),
+          url: newVideo.url.trim(),
+          addedAt: new Date().toISOString(),
+        },
+      ];
+
+      const res = await fetch(
+        `${API_URL}/api/batches/update/${selectedBatch._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ videos: updatedVideos }),
+        },
+      );
+      const data = await res.json();
+
+      if (data.success) {
+        setSelectedBatch({ ...selectedBatch, videos: updatedVideos });
+        setNewVideo({ title: "", url: "" });
+        setShowVideoForm(false);
+        await fetchBatches();
+        Swal.fire({
+          icon: "success",
+          title: "✅ Video Added!",
+          timer: 1000,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Something went wrong",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error!", error.message, "error");
+    } finally {
+      setSavingVideo(false);
     }
   };
 
-  // Unassign student from batch
-  const unassignStudent = (studentId) => {
+  // ✅ Delete Video
+  const handleDeleteVideo = (index) => {
     Swal.fire({
-      title: "Unassign Student?",
-      text: "This student will be removed from the batch.",
+      title: "Delete Video?",
+      text: "This video will be removed from this batch.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, unassign!",
-    }).then((result) => {
+      confirmButtonText: "Yes, delete!",
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        Swal.fire({
-          icon: "success",
-          title: "Student Unassigned!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
+        try {
+          const updatedVideos = (selectedBatch.videos || []).filter(
+            (_, i) => i !== index,
+          );
+
+          const res = await fetch(
+            `${API_URL}/api/batches/update/${selectedBatch._id}`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ videos: updatedVideos }),
+            },
+          );
+          const data = await res.json();
+
+          if (data.success) {
+            setSelectedBatch({ ...selectedBatch, videos: updatedVideos });
+            await fetchBatches();
+            Swal.fire({
+              icon: "success",
+              title: "Deleted!",
+              timer: 1000,
+              showConfirmButton: false,
+            });
+          } else {
+            Swal.fire("Failed!", data.message || "Error", "error");
+          }
+        } catch (error) {
+          Swal.fire("Error!", error.message, "error");
+        }
       }
     });
   };
 
-  // Get batch students
-  const getBatchStudents = (batchName) => {
-    return allStudents.filter((s) => s.batch === batchName);
+  const openEditModal = (batch) => {
+    setSelectedBatch(batch);
+    setFormData({
+      name: batch.name || "",
+      course: batch.course || "",
+      students: batch.students || "",
+      schedule: batch.schedule || "",
+      teacher: batch.teacher || "",
+      videoUrl: batch.videoUrl || "",
+      description: batch.description || "",
+      status: batch.status || "Active",
+    });
+    setShowEditModal(true);
+  };
+
+  const openDetailsModal = (batch) => {
+    setSelectedBatch(batch);
+    setShowVideoForm(false);
+    setNewVideo({ title: "", url: "" });
+    setShowDetailsModal(true);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      course: "",
+      students: "",
+      schedule: "",
+      teacher: "",
+      videoUrl: "",
+      description: "",
+      status: "Active",
+    });
+    setSelectedBatch(null);
   };
 
   return (
@@ -743,7 +692,7 @@ const Student_batch = () => {
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -752,7 +701,6 @@ const Student_batch = () => {
                       onClick={() => {
                         setActiveMenu(item.id);
                         toggleSubMenu(item.id);
-                        setIsSidebarOpen(false);
                       }}
                       className={`
                         w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
@@ -768,7 +716,9 @@ const Student_batch = () => {
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
+                        className={`transition-transform ${
+                          activeSubMenu === item.id ? "rotate-180" : ""
+                        }`}
                       >
                         <FaArrowRight size={12} />
                       </span>
@@ -779,10 +729,7 @@ const Student_batch = () => {
                           <Link
                             key={sub.id}
                             to={sub.path}
-                            onClick={() => {
-                              setActiveSubMenu(item.id);
-                              setIsSidebarOpen(false);
-                            }}
+                            onClick={() => setIsSidebarOpen(false)}
                             className="block w-full text-left px-3 py-1.5 rounded-lg text-xs text-gray-600 hover:bg-gray-50 hover:text-[#004d4d] transition-all"
                           >
                             {sub.label}
@@ -831,7 +778,7 @@ const Student_batch = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
+        {/* Overlay */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -840,7 +787,7 @@ const Student_batch = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-y-auto pt-16 md:pt-6">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
@@ -886,7 +833,7 @@ const Student_batch = () => {
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-blue-600">
-                {batches.reduce((sum, b) => sum + b.students, 0)}
+                {batches.reduce((sum, b) => sum + (b.students || 0), 0)}
               </p>
               <p className="text-[10px] text-gray-500">Total Students</p>
             </div>
@@ -909,7 +856,7 @@ const Student_batch = () => {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
                   <option value="All">Status</option>
                   <option value="Active">Active</option>
@@ -918,13 +865,13 @@ const Student_batch = () => {
                   <option value="Cancelled">Cancelled</option>
                 </select>
                 <select
-                  value={filterClass}
-                  onChange={(e) => setFilterClass(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  value={filterCourse}
+                  onChange={(e) => setFilterCourse(e.target.value)}
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
-                  {uniqueClasses.map((cls) => (
-                    <option key={cls} value={cls}>
-                      {cls}
+                  {uniqueCourses.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
                     </option>
                   ))}
                 </select>
@@ -942,124 +889,115 @@ const Student_batch = () => {
           </div>
 
           {/* Batch Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-hidden">
-            {filteredBatches.slice(0, 6).map((batch) => (
-              <div
-                key={batch.id}
-                className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden"
-              >
+          {loading ? (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center">
+              <p className="text-xs text-gray-500">Loading batches...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {filteredBatches.map((batch) => (
                 <div
-                  className={`h-1 ${
-                    batch.status === "Active"
-                      ? "bg-green-500"
-                      : batch.status === "Upcoming"
-                        ? "bg-yellow-500"
-                        : batch.status === "Completed"
-                          ? "bg-blue-500"
-                          : "bg-red-500"
-                  }`}
-                ></div>
-                <div className="p-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-800 text-xs mb-0.5">
-                        {batch.name}
-                      </h3>
-                      <p className="text-[10px] text-gray-500">
-                        {batch.course}
-                      </p>
+                  key={batch._id}
+                  className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden"
+                >
+                  <div
+                    className={`h-1 ${
+                      batch.status === "Active"
+                        ? "bg-green-500"
+                        : batch.status === "Upcoming"
+                          ? "bg-yellow-500"
+                          : batch.status === "Completed"
+                            ? "bg-blue-500"
+                            : "bg-red-500"
+                    }`}
+                  ></div>
+                  <div className="p-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-800 text-xs mb-0.5">
+                          {batch.name}
+                        </h3>
+                        <p className="text-[10px] text-gray-500">
+                          {batch.course}
+                        </p>
+                      </div>
+                      <span
+                        className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(
+                          batch.status,
+                        )}`}
+                      >
+                        {batch.status}
+                      </span>
                     </div>
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(batch.status)}`}
-                    >
-                      {batch.status}
-                    </span>
-                  </div>
 
-                  <div className="mt-1.5 space-y-0.5 text-[10px]">
-                    <p className="text-gray-600 flex items-center gap-1">
-                      <FaChalkboardTeacher
-                        className="text-gray-400"
-                        size={10}
-                      />{" "}
-                      {batch.class}
-                    </p>
-                    <p className="text-gray-600 flex items-center gap-1">
-                      <FaUsers className="text-gray-400" size={10} />{" "}
-                      {batch.students} Students
-                    </p>
-                    <p className="text-gray-600 flex items-center gap-1">
-                      <FaCalendarAlt className="text-gray-400" size={10} />{" "}
-                      {batch.startDate} - {batch.endDate || "Ongoing"}
-                    </p>
-                    <p className="text-gray-600 flex items-center gap-1">
-                      <FaClockIcon className="text-gray-400" size={10} />{" "}
-                      {batch.schedule || "N/A"}
-                    </p>
-                  </div>
+                    <div className="mt-1.5 space-y-0.5 text-[10px]">
+                      <p className="text-gray-600 flex items-center gap-1">
+                        <FaUsers className="text-gray-400" size={10} />{" "}
+                        {batch.students} Students
+                      </p>
+                      <p className="text-gray-600 flex items-center gap-1">
+                        <FaClock className="text-gray-400" size={10} />{" "}
+                        {batch.schedule || "N/A"}
+                      </p>
+                      {(batch.videos || []).length > 0 && (
+                        <p className="text-blue-600 flex items-center gap-1">
+                          <FaVideo size={10} /> {batch.videos.length} Video
+                          {batch.videos.length > 1 ? "s" : ""}
+                        </p>
+                      )}
+                    </div>
 
-                  {/* Teacher & Room */}
-                  <div className="mt-1.5 flex items-center gap-2 text-[10px] text-gray-500 border-t border-gray-100 pt-1.5">
-                    <span className="flex items-center gap-0.5">
-                      <FaChalkboardTeacher size={10} />{" "}
-                      {batch.teacher || "Not Assigned"}
-                    </span>
-                    <span className="flex items-center gap-0.5">
-                      <FaBuilding size={10} /> {batch.room || "N/A"}
-                    </span>
-                  </div>
+                    <div className="mt-1.5 flex items-center gap-2 text-[10px] text-gray-500 border-t border-gray-100 pt-1.5">
+                      <span className="flex items-center gap-0.5">
+                        <FaChalkboardTeacher size={10} />{" "}
+                        {batch.teacher || "Not Assigned"}
+                      </span>
+                    </div>
 
-                  {/* Actions */}
-                  <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100">
-                    <button
-                      onClick={() => openDetailsModal(batch)}
-                      className="text-indigo-600 hover:text-indigo-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-indigo-200 hover:bg-indigo-50 transition-all"
-                    >
-                      View Details
-                    </button>
-                    <button
-                      onClick={() => openAssignModal(batch)}
-                      className="text-purple-600 hover:text-purple-800 text-[10px] font-medium py-1 px-2 rounded border border-purple-200 hover:bg-purple-50 transition-all"
-                      title="Assign Students"
-                    >
-                      <FaUserPlus size={12} />
-                    </button>
-                    <button
-                      onClick={() => openEditModal(batch)}
-                      className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
-                      title="Edit"
-                    >
-                      <FaEdit size={12} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteBatch(batch.id)}
-                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
-                      title="Delete"
-                    >
-                      <FaTrash size={12} />
-                    </button>
+                    <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100">
+                      <button
+                        onClick={() => openDetailsModal(batch)}
+                        className="text-indigo-600 hover:text-indigo-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-indigo-200 hover:bg-indigo-50 transition-all"
+                      >
+                        View Details
+                      </button>
+                      <button
+                        onClick={() => openEditModal(batch)}
+                        className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
+                        title="Edit"
+                      >
+                        <FaEdit size={12} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteBatch(batch._id)}
+                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                        title="Delete"
+                      >
+                        <FaTrash size={12} />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           {/* No Results */}
-          {filteredBatches.length === 0 && (
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center">
+          {!loading && filteredBatches.length === 0 && (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
               <FaUsersCogIcon className="text-5xl text-gray-300 mx-auto mb-3" />
               <h3 className="text-base font-bold text-gray-800 mb-0.5">
                 No Batches Found
               </h3>
               <p className="text-xs text-gray-500">
-                Try adjusting your search or filter criteria
+                Try adjusting your search or create a new batch
               </p>
             </div>
           )}
         </main>
       </div>
 
-      {/* Add Batch Modal */}
+      {/* ==================== Add Batch Modal ==================== */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -1104,36 +1042,16 @@ const Student_batch = () => {
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   >
                     <option value="">Select Course</option>
-                    <option value="Tajweed">Tajweed</option>
-                    <option value="Tafsir">Tafsir</option>
-                    <option value="Hadith">Hadith</option>
-                    <option value="Fiqh">Fiqh</option>
-                    <option value="Aqeedah">Aqeedah</option>
+                    {COURSE_OPTIONS.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
-                  </label>
-                  <select
-                    required
-                    value={formData.class}
-                    onChange={(e) =>
-                      setFormData({ ...formData, class: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  >
-                    <option value="">Select Class</option>
-                    <option value="Class 6">Class 6</option>
-                    <option value="Class 7">Class 7</option>
-                    <option value="Class 8">Class 8</option>
-                    <option value="Class 9">Class 9</option>
-                    <option value="Class 10">Class 10</option>
-                  </select>
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Students
@@ -1148,39 +1066,6 @@ const Student_batch = () => {
                     placeholder="30"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start Date *
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.startDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, startDate: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.endDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, endDate: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Schedule
@@ -1195,6 +1080,9 @@ const Student_batch = () => {
                     placeholder="e.g., Mon, Wed 09:00 AM"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Teacher
@@ -1207,23 +1095,6 @@ const Student_batch = () => {
                     }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Teacher name"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Room
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.room}
-                    onChange={(e) =>
-                      setFormData({ ...formData, room: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Room number"
                   />
                 </div>
                 <div>
@@ -1243,6 +1114,26 @@ const Student_batch = () => {
                     <option value="Cancelled">Cancelled</option>
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                  <FaVideo className="text-red-500" /> Primary Video URL
+                  (optional)
+                </label>
+                <input
+                  type="url"
+                  value={formData.videoUrl}
+                  onChange={(e) =>
+                    setFormData({ ...formData, videoUrl: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="https://youtube.com/..."
+                />
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Extra videos (Class 1, 2, 3...) "View Details" থেকে যোগ করতে
+                  পারবেন
+                </p>
               </div>
 
               <div>
@@ -1280,7 +1171,7 @@ const Student_batch = () => {
         </div>
       )}
 
-      {/* Edit Batch Modal */}
+      {/* ==================== Edit Batch Modal ==================== */}
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -1296,7 +1187,6 @@ const Student_batch = () => {
               </button>
             </div>
             <form onSubmit={handleEditBatch} className="p-6 space-y-4">
-              {/* Same fields as Add Modal */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1309,8 +1199,7 @@ const Student_batch = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, name: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="e.g., Batch 2026-A"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
                 <div>
@@ -1323,39 +1212,19 @@ const Student_batch = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, course: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   >
                     <option value="">Select Course</option>
-                    <option value="Tajweed">Tajweed</option>
-                    <option value="Tafsir">Tafsir</option>
-                    <option value="Hadith">Hadith</option>
-                    <option value="Fiqh">Fiqh</option>
-                    <option value="Aqeedah">Aqeedah</option>
+                    {COURSE_OPTIONS.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
-                  </label>
-                  <select
-                    required
-                    value={formData.class}
-                    onChange={(e) =>
-                      setFormData({ ...formData, class: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  >
-                    <option value="">Select Class</option>
-                    <option value="Class 6">Class 6</option>
-                    <option value="Class 7">Class 7</option>
-                    <option value="Class 8">Class 8</option>
-                    <option value="Class 9">Class 9</option>
-                    <option value="Class 10">Class 10</option>
-                  </select>
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Students
@@ -1366,43 +1235,9 @@ const Student_batch = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, students: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="30"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Start Date *
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={formData.startDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, startDate: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.endDate}
-                    onChange={(e) =>
-                      setFormData({ ...formData, endDate: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Schedule
@@ -1413,10 +1248,12 @@ const Student_batch = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, schedule: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="e.g., Mon, Wed 09:00 AM"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Teacher
@@ -1427,25 +1264,7 @@ const Student_batch = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, teacher: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Teacher name"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Room
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.room}
-                    onChange={(e) =>
-                      setFormData({ ...formData, room: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Room number"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   />
                 </div>
                 <div>
@@ -1457,7 +1276,7 @@ const Student_batch = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   >
                     <option value="Active">Active</option>
                     <option value="Upcoming">Upcoming</option>
@@ -1465,6 +1284,21 @@ const Student_batch = () => {
                     <option value="Cancelled">Cancelled</option>
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                  <FaVideo className="text-red-500" /> Primary Video URL
+                </label>
+                <input
+                  type="url"
+                  value={formData.videoUrl}
+                  onChange={(e) =>
+                    setFormData({ ...formData, videoUrl: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  placeholder="https://..."
+                />
               </div>
 
               <div>
@@ -1477,22 +1311,21 @@ const Student_batch = () => {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  placeholder="Enter batch description"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
                 />
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold"
                 >
                   Update Batch
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold transition-all"
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
                 >
                   Cancel
                 </button>
@@ -1502,10 +1335,10 @@ const Student_batch = () => {
         </div>
       )}
 
-      {/* Batch Details Modal */}
+      {/* ==================== Batch Details Modal (with Videos) ==================== */}
       {showDetailsModal && selectedBatch && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <FaUsersCogIcon className="text-indigo-600" /> Batch Details
@@ -1517,222 +1350,185 @@ const Student_batch = () => {
                 <FiX size={24} />
               </button>
             </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-800">
-                      {selectedBatch.name}
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                      {selectedBatch.course} • {selectedBatch.class}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Status</p>
-                    <span
-                      className={`text-sm px-2 py-1 rounded-full ${getStatusColor(selectedBatch.status)}`}
-                    >
-                      {selectedBatch.status}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Teacher</p>
-                    <p className="font-semibold">
-                      {selectedBatch.teacher || "Not Assigned"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Schedule</p>
-                    <p className="font-semibold">
-                      {selectedBatch.schedule || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Room</p>
-                    <p className="font-semibold">
-                      {selectedBatch.room || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Date Range</p>
-                    <p className="font-semibold">
-                      {selectedBatch.startDate} -{" "}
-                      {selectedBatch.endDate || "Ongoing"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Description</p>
-                    <p className="text-gray-700">
-                      {selectedBatch.description || "No description provided"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-800 mb-3">
-                      Batch Stats
-                    </h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Total Students</span>
-                        <span className="font-semibold">
-                          {selectedBatch.students}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Course</span>
-                        <span className="font-semibold">
-                          {selectedBatch.course}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-500">Class</span>
-                        <span className="font-semibold">
-                          {selectedBatch.class}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-800 mb-2">
-                      Students in Batch
-                    </h4>
-                    <div className="space-y-1 max-h-32 overflow-y-auto">
-                      {getBatchStudents(selectedBatch.name).length > 0 ? (
-                        getBatchStudents(selectedBatch.name).map((s) => (
-                          <div
-                            key={s.id}
-                            className="flex items-center justify-between text-xs py-1 border-b border-gray-100 last:border-0"
-                          >
-                            <span className="text-gray-700">{s.name}</span>
-                            <span
-                              className={`text-[8px] px-1.5 py-0.5 rounded-full ${s.status === "Active" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                            >
-                              {s.status}
-                            </span>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-xs text-gray-500 text-center py-2">
-                          No students assigned
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => {
-                        setShowDetailsModal(false);
-                        openAssignModal(selectedBatch);
-                      }}
-                      className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
-                    >
-                      <FaUserPlus className="inline mr-2" /> Assign Students
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowDetailsModal(false);
-                        openEditModal(selectedBatch);
-                      }}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all"
-                    >
-                      <FaEdit />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Assign Students Modal */}
-      {showAssignModal && selectedBatch && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-purple-600" /> Assign Students -{" "}
-                {selectedBatch.name}
-              </h3>
-              <button
-                onClick={() => setShowAssignModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <FiX size={24} />
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="bg-purple-50 rounded-lg p-3 mb-4">
-                <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Batch:</span>{" "}
+            <div className="p-6 space-y-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">
                   {selectedBatch.name}
-                </p>
-                <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Course:</span>{" "}
-                  {selectedBatch.course}
-                </p>
-                <p className="text-sm text-gray-700">
-                  <span className="font-semibold">Current Students:</span>{" "}
-                  {selectedBatch.students}
-                </p>
+                </h2>
+                <p className="text-sm text-gray-500">{selectedBatch.course}</p>
               </div>
 
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-gray-800">
-                  Available Students
-                </h4>
-                {allStudents
-                  .filter(
-                    (s) => s.batch !== selectedBatch.name || s.batch === "-",
-                  )
-                  .map((student) => (
-                    <div
-                      key={student.id}
-                      className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-all"
-                    >
-                      <div>
-                        <p className="font-medium text-gray-800 text-sm">
-                          {student.name}
-                        </p>
-                        <p className="text-xs text-gray-500">{student.class}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-[8px] px-1.5 py-0.5 rounded-full ${student.batch === selectedBatch.name ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"}`}
-                        >
-                          {student.batch === selectedBatch.name
-                            ? "Assigned"
-                            : student.batch || "Not Assigned"}
-                        </span>
-                        {student.batch === selectedBatch.name ? (
-                          <button
-                            onClick={() => unassignStudent(student.id)}
-                            className="text-red-600 hover:text-red-800 text-xs font-medium"
-                          >
-                            Unassign
-                          </button>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-gray-500">Status</p>
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(
+                      selectedBatch.status,
+                    )}`}
+                  >
+                    {selectedBatch.status}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Students</p>
+                  <p className="font-semibold text-sm">
+                    {selectedBatch.students}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Teacher</p>
+                  <p className="font-semibold text-sm">
+                    {selectedBatch.teacher || "Not Assigned"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Schedule</p>
+                  <p className="font-semibold text-sm">
+                    {selectedBatch.schedule || "N/A"}
+                  </p>
+                </div>
+              </div>
+
+              {/* ✅ Videos Section */}
+              <div className="bg-gray-50 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-semibold text-gray-700 flex items-center gap-1">
+                    <FaVideo className="text-red-500" /> Class Videos (
+                    {(selectedBatch.videos || []).length})
+                  </p>
+                  <button
+                    onClick={() => setShowVideoForm(!showVideoForm)}
+                    className="text-indigo-600 hover:text-indigo-800 text-[10px] font-semibold flex items-center gap-1 bg-white border border-indigo-200 px-2 py-1 rounded-lg transition-all"
+                  >
+                    <FaPlusCircle size={10} /> Add Video
+                  </button>
+                </div>
+
+                {/* Add new video form */}
+                {showVideoForm && (
+                  <div className="bg-white border border-indigo-200 rounded-lg p-3 mb-3 space-y-2">
+                    <input
+                      type="text"
+                      placeholder="Title (e.g., Class 1, Introduction...)"
+                      value={newVideo.title}
+                      onChange={(e) =>
+                        setNewVideo({ ...newVideo, title: e.target.value })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                    <input
+                      type="url"
+                      placeholder="https://youtube.com/... or https://drive.google.com/..."
+                      value={newVideo.url}
+                      onChange={(e) =>
+                        setNewVideo({ ...newVideo, url: e.target.value })
+                      }
+                      className="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        type="button"
+                        onClick={handleAddVideo}
+                        disabled={savingVideo}
+                        className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-xs py-1.5 rounded-lg font-semibold transition-all flex items-center justify-center gap-1"
+                      >
+                        {savingVideo ? (
+                          "Saving..."
                         ) : (
-                          <button
-                            onClick={() => assignStudentToBatch(student.id)}
-                            className="text-purple-600 hover:text-purple-800 text-xs font-medium"
-                          >
-                            Assign
-                          </button>
+                          <>
+                            <FaCheckCircle size={11} /> Save Video
+                          </>
                         )}
-                      </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowVideoForm(false);
+                          setNewVideo({ title: "", url: "" });
+                        }}
+                        className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs py-1.5 rounded-lg font-semibold transition-all"
+                      >
+                        Cancel
+                      </button>
                     </div>
-                  ))}
+                  </div>
+                )}
+
+                {/* Videos list */}
+                <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                  {(selectedBatch.videos || []).length > 0 ? (
+                    (selectedBatch.videos || []).map((v, i) => (
+                      <div
+                        key={i}
+                        className="flex items-center justify-between bg-white border border-gray-200 rounded-lg p-2 hover:shadow-sm transition-all"
+                      >
+                        <a
+                          href={v.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex-1 text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1.5 truncate"
+                        >
+                          <FaVideo
+                            size={11}
+                            className="text-red-500 flex-shrink-0"
+                          />
+                          {v.title || `Video ${i + 1}`}
+                        </a>
+                        <button
+                          onClick={() => handleDeleteVideo(i)}
+                          className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-all flex-shrink-0"
+                          title="Delete"
+                        >
+                          <FaTrash size={11} />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-[10px] text-gray-400 text-center py-2 italic">
+                      No videos added yet. Click "Add Video" to upload class
+                      videos.
+                    </p>
+                  )}
+                </div>
+
+                {/* Primary video */}
+                {selectedBatch.videoUrl && (
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <p className="text-[10px] text-gray-500 mb-1">
+                      Primary Video
+                    </p>
+                    <a
+                      href={selectedBatch.videoUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1.5"
+                    >
+                      <FaLink size={11} /> Open Primary Video
+                    </a>
+                  </div>
+                )}
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200 mt-4">
+              <div>
+                <p className="text-xs text-gray-500">Description</p>
+                <p className="text-gray-700 text-sm">
+                  {selectedBatch.description || "No description provided"}
+                </p>
+              </div>
+
+              <div className="flex gap-2 pt-4 border-t border-gray-200">
                 <button
-                  onClick={() => setShowAssignModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
+                  onClick={() => {
+                    setShowDetailsModal(false);
+                    openEditModal(selectedBatch);
+                  }}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                >
+                  <FaEdit className="inline mr-2" /> Edit Batch
+                </button>
+                <button
+                  onClick={() => setShowDetailsModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>
