@@ -32,14 +32,14 @@ import {
 import { MdDashboard, MdVerified } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
+const API_BASE = "http://localhost:5010";
+
 // ✅ ImgBB API Key
 const IMAGEBB_API_KEY =
   import.meta.env.VITE_IMAGEBB_API_KEY || "8bf6838d246dba2d2f07c95a50b28938";
 
-// ✅ Image-এর জন্য আলাদা localStorage key
+// ✅ localStorage keys (cache only)
 const ADMIN_IMAGE_KEY = "adminProfileImage";
-
-// ✅ Default fallback image
 const DEFAULT_PROFILE_IMAGE = adminImg;
 
 // ✅ ImgBB Upload
@@ -81,6 +81,9 @@ const uploadToImgBB = async (file) => {
   return imageUrl;
 };
 
+// ==================================================
+// ✅ MAIN COMPONENT
+// ==================================================
 const Admin_profile = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
@@ -89,7 +92,10 @@ const Admin_profile = () => {
   const [activeSubMenu, setActiveSubMenu] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [imageLoadError, setImageLoadError] = useState(false);
+  const [backendConnected, setBackendConnected] = useState(true);
   const fileInputRef = useRef(null);
 
   const [adminInfo, setAdminInfo] = useState({
@@ -108,51 +114,95 @@ const Admin_profile = () => {
   const [editData, setEditData] = useState({});
 
   // ============================================================
-  // ✅ Load admin info — merge saved image from separate key
+  // ✅ Load admin info: Backend first, fallback to localStorage
   // ============================================================
   useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminInfo");
-    const savedImage = localStorage.getItem(ADMIN_IMAGE_KEY) || "";
+    const loadProfile = async () => {
+      setIsLoading(true);
 
-    let admin = null;
-    if (savedAdmin) {
-      try {
-        admin = JSON.parse(savedAdmin);
-      } catch (err) {
-        console.error("Failed to parse adminInfo:", err);
-        admin = null;
+      // Get email from localStorage (source of truth for identity)
+      const savedAdmin = localStorage.getItem("adminInfo");
+      const savedImage = localStorage.getItem(ADMIN_IMAGE_KEY) || "";
+
+      let localAdmin = null;
+      if (savedAdmin) {
+        try {
+          localAdmin = JSON.parse(savedAdmin);
+        } catch (err) {
+          console.error("Failed to parse adminInfo:", err);
+        }
       }
-    }
 
-    if (!admin) {
-      admin = {
+      // Determine email
+      const email =
+        localAdmin?.email ||
+        user?.email ||
+        localStorage.getItem("adminEmail") ||
+        "admin@tarabiyah.com";
+
+      // ✅ Try backend first
+      try {
+        const res = await fetch(
+          `${API_BASE}/api/admin-profile/${encodeURIComponent(email)}`,
+        );
+        const data = await res.json();
+
+        if (data.success && data.profile) {
+          console.log("✅ Loaded profile from backend:", data.profile);
+
+          const merged = {
+            ...data.profile,
+            email,
+            profileImage: data.profile.profileImage || savedImage || "",
+          };
+
+          setAdminInfo(merged);
+          setEditData(merged);
+
+          // Sync to localStorage as cache
+          localStorage.setItem("adminInfo", JSON.stringify(merged));
+          if (merged.profileImage) {
+            localStorage.setItem(ADMIN_IMAGE_KEY, merged.profileImage);
+          }
+
+          setBackendConnected(true);
+          setIsLoading(false);
+          return;
+        }
+
+        // Profile not in backend → use local data, then auto-create in backend
+        console.log("ℹ️ No backend profile, using local data");
+        setBackendConnected(true);
+      } catch (err) {
+        console.warn("⚠️ Backend not reachable:", err.message);
+        setBackendConnected(false);
+      }
+
+      // Fallback: local data
+      const fallback = localAdmin || {
         name: user?.displayName || "Admin",
-        email: user?.email || "admin@tarabiyah.com",
+        email,
         phone: "+880 1700 123456",
         designation: "Administrator",
-
         department: "Administration",
         joinDate: "January 2024",
         bio: "Experienced administrator with a passion for education and Islamic studies.",
         address: "40/1, Safe Garden, Mohammadpur - 1207, Dhaka",
         website: "https://tarabiyahonline.com",
-        profileImage: "",
+        profileImage: savedImage || "",
       };
-    }
 
-    const merged = {
-      ...admin,
-      profileImage: savedImage || admin.profileImage || "",
+      const merged = {
+        ...fallback,
+        profileImage: savedImage || fallback.profileImage || "",
+      };
+
+      setAdminInfo(merged);
+      setEditData(merged);
+      setIsLoading(false);
     };
 
-    console.log(
-      "📥 Loaded admin image:",
-      merged.profileImage ? "✅" : "❌ (using fallback)",
-    );
-
-    setAdminInfo(merged);
-    setEditData(merged);
-    setImageLoadError(false);
+    loadProfile();
   }, [user]);
 
   // ✅ Reset image error when URL changes
@@ -173,7 +223,7 @@ const Admin_profile = () => {
       await logOut();
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminEmail");
-      // ✅ adminInfo & adminProfileImage preserve থাকবে
+      // ✅ adminInfo & adminProfileImage preserve থাকে
 
       await Swal.fire({
         icon: "success",
@@ -194,6 +244,9 @@ const Admin_profile = () => {
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
+  // ==================================================
+  // ✅ SIDEBAR MENU ITEMS
+  // ==================================================
   const menuItems = [
     {
       id: "profile",
@@ -416,32 +469,80 @@ const Admin_profile = () => {
     },
   ];
 
-  // ✅ Save
-  const handleEditToggle = () => {
-    if (isEditing) {
-      const dataToSave = { ...editData };
-      setAdminInfo(dataToSave);
-      localStorage.setItem("adminInfo", JSON.stringify(dataToSave));
-
-      if (dataToSave.profileImage) {
-        localStorage.setItem(ADMIN_IMAGE_KEY, dataToSave.profileImage);
-      } else {
-        localStorage.removeItem(ADMIN_IMAGE_KEY);
-      }
-
-      console.log("💾 Saved image:", dataToSave.profileImage || "(none)");
-
-      Swal.fire({
-        icon: "success",
-        title: "Profile Updated!",
-        text: "Your profile has been updated successfully.",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-    } else {
+  // ==================================================
+  // ✅ SAVE PROFILE (Backend + localStorage)
+  // ==================================================
+  const handleEditToggle = async () => {
+    if (!isEditing) {
+      // Enter edit mode
       setEditData({ ...adminInfo });
+      setIsEditing(true);
+      return;
     }
-    setIsEditing(!isEditing);
+
+    // Save mode
+    setIsSaving(true);
+
+    const dataToSave = {
+      ...editData,
+      email: adminInfo.email || editData.email,
+    };
+
+    // ✅ Local cache first (instant feedback)
+    localStorage.setItem("adminInfo", JSON.stringify(dataToSave));
+    if (dataToSave.profileImage) {
+      localStorage.setItem(ADMIN_IMAGE_KEY, dataToSave.profileImage);
+    } else {
+      localStorage.removeItem(ADMIN_IMAGE_KEY);
+    }
+    setAdminInfo(dataToSave);
+
+    // ✅ Send to backend
+    try {
+      const res = await fetch(`${API_BASE}/api/admin-profile/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dataToSave),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        console.log("✅ Saved to backend:", data.profile);
+        setBackendConnected(true);
+
+        // Re-sync from backend response
+        if (data.profile) {
+          setAdminInfo(data.profile);
+          setEditData(data.profile);
+          localStorage.setItem("adminInfo", JSON.stringify(data.profile));
+        }
+
+        Swal.fire({
+          icon: "success",
+          title: data.updated ? "Profile Updated!" : "Profile Created!",
+          text: "Your profile has been saved successfully.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "warning",
+          title: "Saved Locally",
+          text: data.message || "Backend save failed. Data saved in browser.",
+        });
+      }
+    } catch (err) {
+      console.warn("⚠️ Backend save failed:", err.message);
+      setBackendConnected(false);
+      Swal.fire({
+        icon: "warning",
+        title: "Saved Locally",
+        text: "Could not reach server. Profile saved in browser only.",
+      });
+    } finally {
+      setIsSaving(false);
+      setIsEditing(false);
+    }
   };
 
   const handleCancelEdit = () => {
@@ -540,10 +641,80 @@ const Admin_profile = () => {
     });
   };
 
+  // ==================================================
+  // ✅ DELETE PROFILE
+  // ==================================================
+  const handleDeleteProfile = async () => {
+    const email = adminInfo.email;
+    if (!email) return;
+
+    const result = await Swal.fire({
+      title: "Delete Profile?",
+      html: `<p>Are you sure you want to delete the profile for</p><p><strong>${email}</strong>?</p><p style="color: #d33; font-size: 12px; margin-top: 8px;">This action cannot be undone.</p>`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/admin-profile/delete/${encodeURIComponent(email)}`,
+        { method: "DELETE" },
+      );
+      const data = await res.json();
+
+      if (data.success) {
+        localStorage.removeItem("adminInfo");
+        localStorage.removeItem(ADMIN_IMAGE_KEY);
+
+        await Swal.fire({
+          icon: "success",
+          title: "Profile Deleted",
+          text: "Your profile has been deleted. Logging out...",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        navigate("/admin-login");
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Could not delete profile",
+        });
+      }
+    } catch (err) {
+      console.error("❌ Delete error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Server Error",
+        text: err.message,
+      });
+    }
+  };
+
+  // ==================================================
+  // ✅ LOADING STATE
+  // ==================================================
+  if (isLoading) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <FaSpinner className="animate-spin text-4xl text-[#004d4d] mx-auto" />
+          <p className="text-sm text-gray-600 mt-3">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
-        {/* ✅ Mobile Floating Menu Button (Navbar এর বদলে) */}
+        {/* Mobile Floating Menu Button */}
         <button
           onClick={toggleSidebar}
           className="md:hidden fixed top-4 left-4 z-50 bg-[#004d4d] text-white p-3 rounded-full shadow-lg hover:bg-[#006666] transition-all"
@@ -552,7 +723,7 @@ const Admin_profile = () => {
           {isSidebarOpen ? <FiX size={20} /> : <FiMenu size={20} />}
         </button>
 
-        {/* Sidebar */}
+        {/* ==================== Sidebar ==================== */}
         <aside
           className={`
             fixed md:relative z-50
@@ -564,7 +735,7 @@ const Admin_profile = () => {
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
-          {/* Sidebar Header (profile summary) */}
+          {/* Sidebar Header */}
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
@@ -593,7 +764,7 @@ const Admin_profile = () => {
             </div>
           </div>
 
-          {/* Sidebar Nav */}
+          {/* Nav */}
           <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-120px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
@@ -662,7 +833,6 @@ const Admin_profile = () => {
               </div>
             ))}
 
-            {/* Logout Button */}
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -673,7 +843,7 @@ const Admin_profile = () => {
           </nav>
         </aside>
 
-        {/* Mobile overlay */}
+        {/* Overlay */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -681,33 +851,61 @@ const Admin_profile = () => {
           />
         )}
 
-        {/* Main Content */}
+        {/* ==================== Main Content ==================== */}
         <main className="flex-1 p-4 md:p-6 pt-20 md:pt-6 w-full overflow-auto">
-          <div className="space-y-3">
+          <div className="space-y-3 max-w-6xl mx-auto">
+            {/* Backend status alert */}
+            {!backendConnected && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 flex items-start gap-2">
+                <span className="text-yellow-600 text-lg">⚠️</span>
+                <div className="flex-1">
+                  <p className="text-xs font-bold text-yellow-800">
+                    Backend Not Connected
+                  </p>
+                  <p className="text-[11px] text-yellow-700 mt-0.5">
+                    Server running on port 5010? Data will save locally only.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Profile Header Card */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] h-20 md:h-24 relative">
-                <button
-                  onClick={handleEditToggle}
-                  disabled={isUploadingImage}
-                  className={`absolute top-2 right-2 ${
-                    isEditing
-                      ? "bg-green-500 hover:bg-green-600"
-                      : "bg-white/20 hover:bg-white/30"
-                  } text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm disabled:opacity-50`}
-                >
-                  {isEditing ? <FaSave size={12} /> : <FaEdit size={12} />}
-                  {isEditing ? "Save" : "Edit"}
-                </button>
-                {isEditing && (
+                <div className="absolute top-2 right-2 flex gap-2">
+                  {isEditing && (
+                    <button
+                      onClick={handleCancelEdit}
+                      disabled={isUploadingImage || isSaving}
+                      className="bg-red-500/90 hover:bg-red-600 text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm disabled:opacity-50"
+                    >
+                      <FaTimes size={12} /> Cancel
+                    </button>
+                  )}
                   <button
-                    onClick={handleCancelEdit}
-                    disabled={isUploadingImage}
-                    className="absolute top-2 right-20 bg-red-500/80 hover:bg-red-600 text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm disabled:opacity-50"
+                    onClick={handleEditToggle}
+                    disabled={isUploadingImage || isSaving}
+                    className={`${
+                      isEditing
+                        ? "bg-green-500 hover:bg-green-600"
+                        : "bg-white/20 hover:bg-white/30"
+                    } text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm disabled:opacity-50`}
                   >
-                    <FaTimes size={12} /> Cancel
+                    {isSaving ? (
+                      <>
+                        <FaSpinner size={12} className="animate-spin" /> Saving
+                      </>
+                    ) : isEditing ? (
+                      <>
+                        <FaSave size={12} /> Save
+                      </>
+                    ) : (
+                      <>
+                        <FaEdit size={12} /> Edit
+                      </>
+                    )}
                   </button>
-                )}
+                </div>
               </div>
 
               <div className="px-4 pb-4 relative flex flex-col md:flex-row items-center md:items-end gap-4 -mt-10 md:-mt-8">
@@ -750,7 +948,7 @@ const Admin_profile = () => {
                         onClick={handleImageClick}
                         disabled={isUploadingImage}
                         title="Upload Image"
-                        className="absolute bottom-0 right-0 bg-teal-600 text-white p-1.5 rounded-full border-2 border-white hover:bg-teal-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="absolute bottom-0 right-0 bg-teal-600 text-white p-1.5 rounded-full border-2 border-white hover:bg-teal-700 transition-all shadow-md disabled:opacity-50"
                       >
                         {isUploadingImage ? (
                           <FaSpinner size={12} className="animate-spin" />
@@ -773,7 +971,7 @@ const Admin_profile = () => {
                   )}
                 </div>
 
-                {/* Name & Designation */}
+                {/* Info */}
                 <div className="text-center md:text-left flex-grow">
                   {isEditing ? (
                     <input
@@ -868,7 +1066,7 @@ const Admin_profile = () => {
                     />
                   ) : (
                     <p className="text-gray-600 text-xs leading-relaxed">
-                      {adminInfo.bio}
+                      {adminInfo.bio || "No bio added yet."}
                     </p>
                   )}
                 </div>
@@ -888,7 +1086,7 @@ const Admin_profile = () => {
                     />
                   ) : (
                     <p className="text-gray-700 text-xs font-medium">
-                      {adminInfo.department}
+                      {adminInfo.department || "N/A"}
                     </p>
                   )}
                 </div>
@@ -907,7 +1105,9 @@ const Admin_profile = () => {
                       className="w-full border border-gray-300 rounded-lg px-2 py-1 text-xs"
                     />
                   ) : (
-                    <p className="text-gray-600 text-xs">{adminInfo.address}</p>
+                    <p className="text-gray-600 text-xs">
+                      {adminInfo.address || "N/A"}
+                    </p>
                   )}
                 </div>
 
@@ -923,15 +1123,17 @@ const Admin_profile = () => {
                       onChange={handleInputChange}
                       className="w-full border border-gray-300 rounded-lg px-2 py-1 text-xs"
                     />
-                  ) : (
+                  ) : adminInfo.website ? (
                     <a
                       href={adminInfo.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-teal-600 hover:text-teal-800 text-xs font-medium"
+                      className="text-teal-600 hover:text-teal-800 text-xs font-medium break-all"
                     >
                       {adminInfo.website}
                     </a>
+                  ) : (
+                    <p className="text-gray-500 text-xs">N/A</p>
                   )}
                 </div>
               </div>
@@ -943,52 +1145,63 @@ const Admin_profile = () => {
                     Actions
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
-                    {[
-                      { label: "Edit Profile", icon: "✏️" },
-                      { label: "Change Password", icon: "🔒" },
-                      { label: "Settings", icon: "⚙️" },
-                      { label: "Support", icon: "💬" },
-                    ].map((item, index) => (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          if (item.label === "Edit Profile") {
-                            handleEditToggle();
-                          } else {
-                            Swal.fire({
-                              icon: "info",
-                              title: item.label,
-                              text: "This feature is coming soon!",
-                              confirmButtonColor: "#004d4d",
-                            });
-                          }
-                        }}
-                        className="bg-gray-50 hover:bg-gray-100 p-2 rounded-lg border border-gray-200 text-center transition-all"
-                      >
-                        <div className="text-base">{item.icon}</div>
-                        <p className="text-[10px] font-medium text-gray-700 mt-0.5">
-                          {item.label}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                    <button
+                      onClick={() => {
+                        if (!isEditing) handleEditToggle();
+                      }}
+                      disabled={isEditing}
+                      className="bg-gray-50 hover:bg-gray-100 p-2 rounded-lg border border-gray-200 text-center transition-all disabled:opacity-50"
+                    >
+                      <div className="text-base">✏️</div>
+                      <p className="text-[10px] font-medium text-gray-700 mt-0.5">
+                        Edit Profile
+                      </p>
+                    </button>
 
-                {/* Debug Info */}
-                <div className="bg-yellow-50 rounded-xl border border-yellow-200 p-3">
-                  <h3 className="text-xs font-bold text-yellow-800 mb-1">
-                    🔧 Debug Info
-                  </h3>
-                  <p className="text-[10px] text-yellow-700 break-all">
-                    <strong>Image URL:</strong>{" "}
-                    {currentImageUrl || "(using default)"}
-                  </p>
-                  <p className="text-[10px] text-yellow-700 mt-1">
-                    <strong>Storage Key:</strong> {ADMIN_IMAGE_KEY}
-                  </p>
-                  <p className="text-[10px] text-yellow-700 mt-1">
-                    <strong>Load Error:</strong> {imageLoadError ? "Yes" : "No"}
-                  </p>
+                    <button
+                      onClick={() => {
+                        Swal.fire({
+                          icon: "info",
+                          title: "Change Password",
+                          text: "This feature is coming soon!",
+                          confirmButtonColor: "#004d4d",
+                        });
+                      }}
+                      className="bg-gray-50 hover:bg-gray-100 p-2 rounded-lg border border-gray-200 text-center transition-all"
+                    >
+                      <div className="text-base">🔒</div>
+                      <p className="text-[10px] font-medium text-gray-700 mt-0.5">
+                        Change Password
+                      </p>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        Swal.fire({
+                          icon: "info",
+                          title: "Settings",
+                          text: "This feature is coming soon!",
+                          confirmButtonColor: "#004d4d",
+                        });
+                      }}
+                      className="bg-gray-50 hover:bg-gray-100 p-2 rounded-lg border border-gray-200 text-center transition-all"
+                    >
+                      <div className="text-base">⚙️</div>
+                      <p className="text-[10px] font-medium text-gray-700 mt-0.5">
+                        Settings
+                      </p>
+                    </button>
+
+                    <button
+                      onClick={handleDeleteProfile}
+                      className="bg-red-50 hover:bg-red-100 p-2 rounded-lg border border-red-200 text-center transition-all"
+                    >
+                      <div className="text-base">🗑️</div>
+                      <p className="text-[10px] font-medium text-red-700 mt-0.5">
+                        Delete Profile
+                      </p>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

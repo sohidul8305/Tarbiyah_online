@@ -112,64 +112,77 @@ const My_courses = () => {
   }, [navigate]);
 
   // ==================================================
-  // ✅ 2. Fetch Videos when course selected
+  // ✅ 3. Fetch PDFs + Quizzes when course selected
   // ==================================================
   useEffect(() => {
     if (!selectedCourse) {
-      setCourseVideos([]);
+      setCoursePdfs([]);
+      setCourseQuizzes([]);
       return;
     }
 
     let isMounted = true;
 
-    const fetchCourseVideos = async () => {
+    const fetchResources = async () => {
       try {
-        setLoadingVideos(true);
-        setCourseVideos([]);
+        setLoadingResources(true);
+        setCoursePdfs([]);
+        setCourseQuizzes([]);
 
-        const searchNames = [
+        // ✅ Try multiple identifiers: ID → Title → Code
+        const identifiers = [
+          selectedCourse._id,
+          selectedCourse.id,
           selectedCourse.title,
           selectedCourse.name,
           selectedCourse.code,
         ].filter(Boolean);
 
-        console.log("🔍 [CourseVideos] Will try:", searchNames);
+        console.log("🔍 [Resources] Will try:", identifiers);
 
-        let foundVideos = [];
+        let foundPdfs = [];
+        let foundQuizzes = [];
 
-        for (const name of searchNames) {
-          const url = `${API_BASE}/api/batches/course-videos/${encodeURIComponent(
-            name,
-          )}`;
+        for (const identifier of identifiers) {
+          const url = `${API_BASE}/api/course-resources/course/${encodeURIComponent(identifier)}`;
           console.log("📡 Fetching:", url);
 
           try {
             const res = await fetch(url);
             const data = await res.json();
+
             console.log(
-              `   → matched ${data.matchedBatches}, videos ${data.total}`,
+              `   → matched ${data.matched}, pdfs ${data.pdfsCount}, quizzes ${data.quizzesCount}`,
             );
-            if (data.success && data.videos?.length > 0) {
-              foundVideos = data.videos;
+
+            if (data.success && (data.pdfsCount > 0 || data.quizzesCount > 0)) {
+              foundPdfs = data.pdfs || [];
+              foundQuizzes = data.quizzes || [];
               break;
             }
           } catch (e) {
-            console.warn("   ⚠️ fetch failed for", name, e.message);
+            console.warn("   ⚠️ fetch failed for", identifier, e.message);
           }
         }
 
         if (!isMounted) return;
-        setCourseVideos(foundVideos);
-        console.log("✅ [CourseVideos] Loaded", foundVideos.length, "videos");
+
+        setCoursePdfs(foundPdfs);
+        setCourseQuizzes(foundQuizzes);
+        console.log(
+          "✅ [Resources] FINAL → PDFs:",
+          foundPdfs.length,
+          "Quizzes:",
+          foundQuizzes.length,
+        );
       } catch (err) {
-        console.error("❌ [CourseVideos]", err);
+        console.error("❌ [Resources]", err);
       } finally {
-        if (isMounted) setLoadingVideos(false);
+        if (isMounted) setLoadingResources(false);
       }
     };
 
-    fetchCourseVideos();
-
+    fetchResources();
     return () => {
       isMounted = false;
     };
