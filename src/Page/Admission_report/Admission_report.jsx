@@ -30,9 +30,13 @@ import {
   FaFileExcel as FaFileExcelIcon,
   FaPrint as FaPrintIcon,
   FaChartLine as FaChartLineIcon,
+  FaSpinner,
+  FaBuilding,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+const API_BASE = "http://localhost:5010";
 
 const Admission_report = () => {
   const { user, logOut } = useAuth();
@@ -51,10 +55,15 @@ const Admission_report = () => {
   });
 
   // Filters
-  const [selectedYear, setSelectedYear] = useState(2026);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState("All");
   const [selectedClass, setSelectedClass] = useState("All");
   const [selectedStatus, setSelectedStatus] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // ✅ Department filter
+  const [selectedDepartment, setSelectedDepartment] = useState("All");
+  const [departments, setDepartments] = useState([]);
 
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
@@ -77,146 +86,27 @@ const Admission_report = () => {
     notes: "",
   });
 
-  const [admissionData, setAdmissionData] = useState({
-    totalApplications: 156,
-    approvedApplications: 98,
-    pendingApplications: 32,
-    rejectedApplications: 26,
-    totalStudents: 142,
-    newStudents: 35,
-    conversionRate: 63,
+  // ✅ Dynamic states
+  const [isLoading, setIsLoading] = useState(true);
+  const [backendConnected, setBackendConnected] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [admissionRecords, setAdmissionRecords] = useState([]);
+  const [reportData, setReportData] = useState({
+    stats: {
+      totalApplications: 0,
+      approvedApplications: 0,
+      pendingApplications: 0,
+      rejectedApplications: 0,
+      totalStudents: 0,
+      newStudents: 0,
+      conversionRate: 0,
+    },
+    monthlyData: [],
+    classWiseData: [],
+    genderData: [],
+    subjectWiseData: [],
   });
-
-  const [admissionRecords, setAdmissionRecords] = useState([
-    {
-      id: 1,
-      studentName: "Ahmed Hasan",
-      studentId: "STU001",
-      class: "Class 8",
-      subject: "Tajweed",
-      applicationDate: "2026-07-15",
-      status: "Approved",
-      parentName: "Abdul Hasan",
-      parentPhone: "+880 1712 345678",
-      email: "ahmed@example.com",
-      address: "Mohammadpur, Dhaka",
-      previousSchool: "Mohammadpur High School",
-      notes: "Excellent academic record",
-    },
-    {
-      id: 2,
-      studentName: "Fatima Begum",
-      studentId: "STU002",
-      class: "Class 9",
-      subject: "Tafsir",
-      applicationDate: "2026-07-12",
-      status: "Approved",
-      parentName: "Mohammad Ali",
-      parentPhone: "+880 1723 456789",
-      email: "fatima@example.com",
-      address: "Mirpur, Dhaka",
-      previousSchool: "Mirpur Girls School",
-      notes: "",
-    },
-    {
-      id: 3,
-      studentName: "Mohammad Ali",
-      studentId: "STU003",
-      class: "Class 10",
-      subject: "Hadith",
-      applicationDate: "2026-07-20",
-      status: "Pending",
-      parentName: "Karim Ali",
-      parentPhone: "+880 1734 567890",
-      email: "ali@example.com",
-      address: "Uttara, Dhaka",
-      previousSchool: "Uttara High School",
-      notes: "Waiting for documents",
-    },
-    {
-      id: 4,
-      studentName: "Aisha Rahman",
-      studentId: "STU004",
-      class: "Class 7",
-      subject: "Fiqh",
-      applicationDate: "2026-07-08",
-      status: "Rejected",
-      parentName: "Rahman Khan",
-      parentPhone: "+880 1745 678901",
-      email: "aisha@example.com",
-      address: "Gulshan, Dhaka",
-      previousSchool: "Gulshan Model School",
-      notes: "Incomplete application",
-    },
-    {
-      id: 5,
-      studentName: "Rahim Uddin",
-      studentId: "STU005",
-      class: "Class 8",
-      subject: "Tajweed",
-      applicationDate: "2026-07-18",
-      status: "Pending",
-      parentName: "Abdur Rahim",
-      parentPhone: "+880 1756 789012",
-      email: "rahim@example.com",
-      address: "Dhanmondi, Dhaka",
-      previousSchool: "Dhanmondi School",
-      notes: "",
-    },
-    {
-      id: 6,
-      studentName: "Sadia Afrin",
-      studentId: "STU006",
-      class: "Class 10",
-      subject: "Hadith",
-      applicationDate: "2026-07-22",
-      status: "Approved",
-      parentName: "Rafiqul Islam",
-      parentPhone: "+880 1767 890123",
-      email: "sadia@example.com",
-      address: "Baridhara, Dhaka",
-      previousSchool: "Baridhara School",
-      notes: "Scholarship candidate",
-    },
-  ]);
-
-  const monthlyData = [
-    { month: "January", applications: 25, approved: 18, rejected: 7 },
-    { month: "February", applications: 20, approved: 14, rejected: 6 },
-    { month: "March", applications: 28, approved: 20, rejected: 8 },
-    { month: "April", applications: 15, approved: 10, rejected: 5 },
-    { month: "May", applications: 18, approved: 12, rejected: 6 },
-    { month: "June", applications: 22, approved: 15, rejected: 7 },
-    { month: "July", applications: 28, approved: 18, rejected: 10 },
-    { month: "August", applications: 0, approved: 0, rejected: 0 },
-    { month: "September", applications: 0, approved: 0, rejected: 0 },
-    { month: "October", applications: 0, approved: 0, rejected: 0 },
-    { month: "November", applications: 0, approved: 0, rejected: 0 },
-    { month: "December", applications: 0, approved: 0, rejected: 0 },
-  ];
-
-  const classWiseData = [
-    { class: "Class 6", applications: 25, approved: 18, enrolled: 15 },
-    { class: "Class 7", applications: 30, approved: 22, enrolled: 19 },
-    { class: "Class 8", applications: 28, approved: 20, enrolled: 17 },
-    { class: "Class 9", applications: 35, approved: 25, enrolled: 22 },
-    { class: "Class 10", applications: 38, approved: 28, enrolled: 25 },
-  ];
-
-  const genderData = [
-    { gender: "Male", count: 85 },
-    { gender: "Female", count: 57 },
-    { gender: "Other", count: 0 },
-  ];
-
-  const subjectWiseData = [
-    { subject: "Tajweed", count: 35 },
-    { subject: "Tafsir", count: 28 },
-    { subject: "Hadith", count: 22 },
-    { subject: "Fiqh", count: 30 },
-    { subject: "Aqeedah", count: 15 },
-    { subject: "Arabic Grammar", count: 12 },
-  ];
 
   const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
   const subjects = [
@@ -244,7 +134,7 @@ const Admission_report = () => {
   ];
 
   // ============================================================
-  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
+  // ✅ Sidebar Menu Items
   // ============================================================
   const menuItems = [
     {
@@ -483,7 +373,6 @@ const Admission_report = () => {
 
   const { menu: activeMenu, sub: activeSubMenu } = getActiveFromPath();
 
-  // Auto-expand parent of active submenu
   useEffect(() => {
     if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
   }, [activeMenu, activeSubMenu]);
@@ -503,10 +392,74 @@ const Admission_report = () => {
       });
   }, [user]);
 
-  // Save to localStorage
+  // ============================================================
+  // ✅ Fetch departments list
+  // ============================================================
+  const fetchDepartments = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/departments/all`);
+      const data = await res.json();
+      if (data.success) {
+        setDepartments(data.departments || []);
+        console.log("✅ [Departments] Loaded:", data.departments?.length);
+      }
+    } catch (err) {
+      console.error("❌ Departments fetch error:", err);
+    }
+  };
+
+  // ============================================================
+  // ✅ Fetch admission data from backend (with department filter)
+  // ============================================================
+  const fetchAdmissionData = async () => {
+    try {
+      setIsLoading(true);
+      const deptParam =
+        selectedDepartment && selectedDepartment !== "All"
+          ? `?department=${encodeURIComponent(selectedDepartment)}`
+          : "";
+      const res = await fetch(
+        `${API_BASE}/api/admission-report/all${deptParam}`,
+      );
+      const data = await res.json();
+
+      if (data.success) {
+        console.log(
+          "✅ [Admission] Loaded:",
+          data.records?.length,
+          "records | Dept:",
+          selectedDepartment,
+        );
+        setAdmissionRecords(data.records || []);
+        setReportData({
+          stats: data.stats || {},
+          monthlyData: data.monthlyData || [],
+          classWiseData: data.classWiseData || [],
+          genderData: data.genderData || [],
+          subjectWiseData: data.subjectWiseData || [],
+        });
+        setBackendConnected(true);
+      } else {
+        console.error("❌ Failed:", data.message);
+        setBackendConnected(false);
+      }
+    } catch (err) {
+      console.error("❌ Fetch error:", err);
+      setBackendConnected(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ✅ Load departments on mount
   useEffect(() => {
-    localStorage.setItem("admissionRecords", JSON.stringify(admissionRecords));
-  }, [admissionRecords]);
+    fetchDepartments();
+  }, []);
+
+  // ✅ Re-fetch when department changes
+  useEffect(() => {
+    fetchAdmissionData();
+  }, [selectedDepartment]);
 
   const handleLogout = async () => {
     try {
@@ -560,7 +513,6 @@ const Admission_report = () => {
     }
   };
 
-  const formatCurrency = (amount) => `৳${amount.toLocaleString()}`;
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     return new Date(dateStr).toLocaleDateString("en-US", {
@@ -578,6 +530,7 @@ const Admission_report = () => {
       timer: 1500,
       showConfirmButton: false,
     });
+
   const exportToExcel = () =>
     Swal.fire({
       icon: "success",
@@ -586,13 +539,13 @@ const Admission_report = () => {
       timer: 1500,
       showConfirmButton: false,
     });
+
   const printReport = () => window.print();
 
   const getFilteredMonthlyData = () => {
-    if (selectedMonth === "All") return monthlyData;
-    return monthlyData.filter(
-      (_, index) => index === months.indexOf(selectedMonth),
-    );
+    const md = reportData.monthlyData || [];
+    if (selectedMonth === "All") return md;
+    return md.filter((item) => item.month === selectedMonth);
   };
 
   const generateStudentId = () =>
@@ -640,7 +593,8 @@ const Admission_report = () => {
     setShowDetailsModal(true);
   };
 
-  const handleAddAdmission = (e) => {
+  // ✅ ADD
+  const handleAddAdmission = async (e) => {
     e.preventDefault();
     if (
       !formData.studentName ||
@@ -656,55 +610,56 @@ const Admission_report = () => {
       });
       return;
     }
-    const newRecord = {
-      id: Date.now(),
-      studentName: formData.studentName,
-      studentId: formData.studentId || generateStudentId(),
-      class: formData.class,
-      subject: formData.subject,
-      applicationDate: formData.applicationDate,
-      status: formData.status,
-      parentName: formData.parentName || "",
-      parentPhone: formData.parentPhone || "",
-      email: formData.email || "",
-      address: formData.address || "",
-      previousSchool: formData.previousSchool || "",
-      notes: formData.notes || "",
-    };
-    setAdmissionRecords([...admissionRecords, newRecord]);
-    const totalApps = admissionData.totalApplications + 1;
-    const pendingApps =
-      formData.status === "Pending"
-        ? admissionData.pendingApplications + 1
-        : admissionData.pendingApplications;
-    const approvedApps =
-      formData.status === "Approved"
-        ? admissionData.approvedApplications + 1
-        : admissionData.approvedApplications;
-    const rejectedApps =
-      formData.status === "Rejected"
-        ? admissionData.rejectedApplications + 1
-        : admissionData.rejectedApplications;
-    const conversionRate = Math.round((approvedApps / totalApps) * 100);
-    setAdmissionData({
-      ...admissionData,
-      totalApplications: totalApps,
-      pendingApplications: pendingApps,
-      approvedApplications: approvedApps,
-      rejectedApplications: rejectedApps,
-      conversionRate: conversionRate || 0,
-    });
-    setShowAddModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "Admission Added!",
-      text: `${formData.studentName} has been added to admission records.`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
+
+    setSaving(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/admin-students/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.studentName,
+          phone: formData.parentPhone || "0000000000",
+          email: formData.email || "",
+          course: formData.subject,
+          admissionDate: formData.applicationDate,
+          status: formData.status === "Approved" ? "Active" : "Pending",
+          guardianName: formData.parentName,
+          guardianPhone: formData.parentPhone,
+          presentAddress: formData.address,
+          previousSchool: formData.previousSchool,
+          comments: formData.notes,
+          studentId: formData.studentId,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        await fetchAdmissionData();
+        await fetchDepartments();
+        setShowAddModal(false);
+        Swal.fire({
+          icon: "success",
+          title: "Admission Added!",
+          text: `${formData.studentName} has been added.`,
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Something went wrong",
+        });
+      }
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleEditAdmission = (e) => {
+  // ✅ EDIT
+  const handleEditAdmission = async (e) => {
     e.preventDefault();
     if (
       !formData.studentName ||
@@ -720,62 +675,62 @@ const Admission_report = () => {
       });
       return;
     }
-    setAdmissionRecords(
-      admissionRecords.map((record) =>
-        record.id === selectedAdmission.id
-          ? {
-              ...record,
-              studentName: formData.studentName,
-              studentId: formData.studentId,
-              class: formData.class,
-              subject: formData.subject,
-              applicationDate: formData.applicationDate,
-              status: formData.status,
-              parentName: formData.parentName || "",
-              parentPhone: formData.parentPhone || "",
-              email: formData.email || "",
-              address: formData.address || "",
-              previousSchool: formData.previousSchool || "",
-              notes: formData.notes || "",
-            }
-          : record,
-      ),
-    );
-    const oldStatus = selectedAdmission.status;
-    const newStatus = formData.status;
-    if (oldStatus !== newStatus) {
-      let pendingApps = admissionData.pendingApplications;
-      let approvedApps = admissionData.approvedApplications;
-      let rejectedApps = admissionData.rejectedApplications;
-      if (oldStatus === "Pending") pendingApps--;
-      else if (oldStatus === "Approved") approvedApps--;
-      else if (oldStatus === "Rejected") rejectedApps--;
-      if (newStatus === "Pending") pendingApps++;
-      else if (newStatus === "Approved") approvedApps++;
-      else if (newStatus === "Rejected") rejectedApps++;
-      const conversionRate = Math.round(
-        (approvedApps / admissionData.totalApplications) * 100,
+
+    setSaving(true);
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/admin-students/update/${selectedAdmission._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: formData.studentName,
+            course: formData.subject,
+            class: formData.class,
+            admissionDate: formData.applicationDate,
+            status:
+              formData.status === "Approved"
+                ? "Active"
+                : formData.status === "Rejected"
+                  ? "Rejected"
+                  : "Pending",
+            guardianName: formData.parentName,
+            guardianPhone: formData.parentPhone,
+            email: formData.email,
+            presentAddress: formData.address,
+            previousSchool: formData.previousSchool,
+            comments: formData.notes,
+          }),
+        },
       );
-      setAdmissionData({
-        ...admissionData,
-        pendingApplications: pendingApps,
-        approvedApplications: approvedApps,
-        rejectedApplications: rejectedApps,
-        conversionRate: conversionRate || 0,
-      });
+      const data = await res.json();
+
+      if (data.success) {
+        await fetchAdmissionData();
+        setShowEditModal(false);
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Something went wrong",
+        });
+      }
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
     }
-    setShowEditModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "Admission Updated!",
-      text: "Admission record has been updated successfully.",
-      timer: 1500,
-      showConfirmButton: false,
-    });
   };
 
-  const handleDeleteAdmission = (id) => {
-    Swal.fire({
+  // ✅ DELETE
+  const handleDeleteAdmission = async (id) => {
+    const result = await Swal.fire({
       title: "Delete Admission Record?",
       text: "This action cannot be undone!",
       icon: "warning",
@@ -783,72 +738,68 @@ const Admission_report = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const deleted = admissionRecords.find((r) => r.id === id);
-        setAdmissionRecords(admissionRecords.filter((r) => r.id !== id));
-        const totalApps = admissionData.totalApplications - 1;
-        let pendingApps = admissionData.pendingApplications;
-        let approvedApps = admissionData.approvedApplications;
-        let rejectedApps = admissionData.rejectedApplications;
-        if (deleted.status === "Pending") pendingApps--;
-        else if (deleted.status === "Approved") approvedApps--;
-        else if (deleted.status === "Rejected") rejectedApps--;
-        const conversionRate =
-          totalApps > 0 ? Math.round((approvedApps / totalApps) * 100) : 0;
-        setAdmissionData({
-          ...admissionData,
-          totalApplications: totalApps,
-          pendingApplications: pendingApps,
-          approvedApplications: approvedApps,
-          rejectedApplications: rejectedApps,
-          conversionRate: conversionRate || 0,
-        });
-        Swal.fire("Deleted!", "Admission record has been deleted.", "success");
-      }
     });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/admin-students/delete/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        await fetchAdmissionData();
+        Swal.fire("Deleted!", "Admission record has been deleted.", "success");
+      } else {
+        Swal.fire("Failed!", data.message || "Error", "error");
+      }
+    } catch (err) {
+      Swal.fire("Error!", err.message, "error");
+    }
   };
 
-  const handleApproveAdmission = (id) => {
-    Swal.fire({
+  // ✅ APPROVE
+  const handleApproveAdmission = async (id) => {
+    const result = await Swal.fire({
       title: "Approve Admission?",
-      text: "This will approve the admission request.",
+      text: "This will approve the student's admission.",
       icon: "question",
       showCancelButton: true,
       confirmButtonColor: "#22c55e",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, approve!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setAdmissionRecords(
-          admissionRecords.map((r) =>
-            r.id === id ? { ...r, status: "Approved" } : r,
-          ),
-        );
-        const pendingApps = admissionData.pendingApplications - 1;
-        const approvedApps = admissionData.approvedApplications + 1;
-        const conversionRate = Math.round(
-          (approvedApps / admissionData.totalApplications) * 100,
-        );
-        setAdmissionData({
-          ...admissionData,
-          pendingApplications: pendingApps,
-          approvedApplications: approvedApps,
-          conversionRate: conversionRate || 0,
-        });
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/admission-report/status/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Active" }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        await fetchAdmissionData();
         Swal.fire({
           icon: "success",
-          title: "Admission Approved!",
-          text: "Admission request has been approved.",
+          title: "Approved!",
           timer: 1500,
           showConfirmButton: false,
         });
+      } else {
+        Swal.fire("Failed!", data.message || "Error", "error");
       }
-    });
+    } catch (err) {
+      Swal.fire("Error!", err.message, "error");
+    }
   };
 
-  const handleRejectAdmission = (id) => {
-    Swal.fire({
+  // ✅ REJECT
+  const handleRejectAdmission = async (id) => {
+    const result = await Swal.fire({
       title: "Reject Admission?",
       text: "This will reject the admission request.",
       icon: "warning",
@@ -856,30 +807,45 @@ const Admission_report = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, reject!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setAdmissionRecords(
-          admissionRecords.map((r) =>
-            r.id === id ? { ...r, status: "Rejected" } : r,
-          ),
-        );
-        const pendingApps = admissionData.pendingApplications - 1;
-        const rejectedApps = admissionData.rejectedApplications + 1;
-        setAdmissionData({
-          ...admissionData,
-          pendingApplications: pendingApps,
-          rejectedApplications: rejectedApps,
-        });
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/admission-report/status/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Rejected" }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        await fetchAdmissionData();
         Swal.fire({
           icon: "success",
-          title: "Admission Rejected",
-          text: "Admission request has been rejected.",
+          title: "Rejected",
           timer: 1500,
           showConfirmButton: false,
         });
+      } else {
+        Swal.fire("Failed!", data.message || "Error", "error");
       }
-    });
+    } catch (err) {
+      Swal.fire("Error!", err.message, "error");
+    }
   };
+
+  // ✅ Filtered records (client-side search/filter on top of backend filter)
+  const filteredRecords = admissionRecords.filter((r) => {
+    const matchStatus = selectedStatus === "All" || r.status === selectedStatus;
+    const matchClass = selectedClass === "All" || r.class === selectedClass;
+    const matchSearch =
+      !searchTerm ||
+      (r.studentName || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (r.studentId || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (r.course || "").toLowerCase().includes(searchTerm.toLowerCase());
+    return matchStatus && matchClass && matchSearch;
+  });
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -943,7 +909,9 @@ const Admission_report = () => {
                           <span>{item.label}</span>
                         </div>
                         <span
-                          className={`transition-transform ${expandedMenu === item.id ? "rotate-90" : ""}`}
+                          className={`transition-transform ${
+                            expandedMenu === item.id ? "rotate-90" : ""
+                          }`}
                         >
                           <FaArrowRight size={12} />
                         </span>
@@ -1010,7 +978,7 @@ const Admission_report = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto pt-16 md:pt-6">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
@@ -1046,9 +1014,18 @@ const Admission_report = () => {
               >
                 <FaPrintIcon size={12} /> Print
               </button>
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
+              <button
+                onClick={fetchAdmissionData}
+                disabled={isLoading}
+                className="bg-teal-500 hover:bg-teal-600 disabled:bg-teal-300 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+              >
+                {isLoading ? (
+                  <FaSpinner size={12} className="animate-spin" />
+                ) : (
+                  "🔄"
+                )}{" "}
+                Refresh
+              </button>
               <button
                 onClick={handleLogout}
                 className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
@@ -1058,368 +1035,508 @@ const Admission_report = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-              <p className="text-lg font-bold text-blue-600">
-                {admissionData.totalApplications}
-              </p>
-              <p className="text-[10px] text-gray-500">Total Applications</p>
+          {/* Backend Warning */}
+          {!backendConnected && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-3 flex items-start gap-2">
+              <span className="text-yellow-600 text-lg">⚠️</span>
+              <div className="flex-1">
+                <p className="text-xs font-bold text-yellow-800">
+                  Backend Not Connected
+                </p>
+                <p className="text-[11px] text-yellow-700 mt-0.5">
+                  Server running on port 5010? Click "Refresh" after starting
+                  backend.
+                </p>
+              </div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-              <p className="text-lg font-bold text-green-600">
-                {admissionData.approvedApplications}
-              </p>
-              <p className="text-[10px] text-gray-500">Approved</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-              <p className="text-lg font-bold text-yellow-600">
-                {admissionData.pendingApplications}
-              </p>
-              <p className="text-[10px] text-gray-500">Pending</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
-              <p className="text-lg font-bold text-purple-600">
-                {admissionData.conversionRate}%
-              </p>
-              <p className="text-[10px] text-gray-500">Conversion Rate</p>
-            </div>
-          </div>
+          )}
 
-          {/* Filters */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
-            <div className="flex flex-wrap gap-2">
+          {/* ✅ Department Filter Banner */}
+          <div className="bg-gradient-to-r from-teal-50 to-blue-50 border border-teal-200 rounded-xl p-3 mb-3">
+            <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
-                <FaFilter className="text-gray-400 text-xs" />
-                <span className="text-xs text-gray-600 font-medium">
-                  Filters:
+                <FaBuilding className="text-teal-600 text-lg" />
+                <span className="text-xs font-bold text-teal-800">
+                  Department / Course Filter:
                 </span>
               </div>
               <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
+                value={selectedDepartment}
+                onChange={(e) => setSelectedDepartment(e.target.value)}
+                className="px-3 py-1.5 text-xs border-2 border-teal-400 rounded-lg bg-white font-semibold text-teal-700 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
-                <option value={2024}>2024</option>
-                <option value={2025}>2025</option>
-                <option value={2026}>2026</option>
-                <option value={2027}>2027</option>
-              </select>
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
-              >
-                <option value="All">All Months</option>
-                {months.map((month) => (
-                  <option key={month} value={month}>
-                    {month}
+                <option value="All">
+                  🏫 All Departments ({admissionRecords.length} shown)
+                </option>
+                {departments.map((dept) => (
+                  <option key={dept} value={dept}>
+                    📚 {dept}
                   </option>
                 ))}
               </select>
-              <select
-                value={selectedClass}
-                onChange={(e) => setSelectedClass(e.target.value)}
-                className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
-              >
-                <option value="All">All Classes</option>
-                {classes.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
-              >
-                <option value="All">All Status</option>
-                {statuses.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Monthly Chart */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-3">
-            <h4 className="font-semibold text-gray-700 text-sm mb-3">
-              Monthly Admission Trends
-            </h4>
-            <div className="space-y-3">
-              {getFilteredMonthlyData().map((item, index) => {
-                if (
-                  item.applications === 0 &&
-                  item.approved === 0 &&
-                  item.rejected === 0
-                )
-                  return null;
-                return (
-                  <div key={index}>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-gray-600">{item.month}</span>
-                      <span className="text-gray-600">
-                        Apps: {item.applications} | Approved: {item.approved} |
-                        Rejected: {item.rejected}
-                      </span>
-                    </div>
-                    <div className="flex gap-1 h-5">
-                      <div
-                        className="bg-blue-500 rounded-l-full h-full"
-                        style={{ width: `${(item.applications / 40) * 100}%` }}
-                      ></div>
-                      <div
-                        className="bg-green-500 h-full"
-                        style={{ width: `${(item.approved / 40) * 100}%` }}
-                      ></div>
-                      <div
-                        className="bg-red-500 rounded-r-full h-full"
-                        style={{ width: `${(item.rejected / 40) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex gap-4 mt-3 text-xs">
-              <span className="flex items-center gap-1">
-                <span className="w-3 h-3 bg-blue-500 rounded"></span>{" "}
-                Applications
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-3 h-3 bg-green-500 rounded"></span> Approved
-              </span>
-              <span className="flex items-center gap-1">
-                <span className="w-3 h-3 bg-red-500 rounded"></span> Rejected
-              </span>
-            </div>
-          </div>
-
-          {/* Class Wise and Gender Wise */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-              <h4 className="font-semibold text-gray-700 text-sm mb-3">
-                Class Wise Admission
-              </h4>
-              <div className="space-y-2">
-                {classWiseData.map((item, index) => (
-                  <div key={index}>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-gray-600">{item.class}</span>
-                      <span className="text-gray-600">
-                        {item.enrolled}/{item.applications} enrolled
-                      </span>
-                    </div>
-                    <div className="flex gap-1 h-3">
-                      <div
-                        className="bg-blue-500 rounded-l-full h-full"
-                        style={{ width: `${(item.applications / 40) * 100}%` }}
-                      ></div>
-                      <div
-                        className="bg-green-500 h-full"
-                        style={{ width: `${(item.approved / 40) * 100}%` }}
-                      ></div>
-                      <div
-                        className="bg-purple-500 rounded-r-full h-full"
-                        style={{ width: `${(item.enrolled / 40) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-              <h4 className="font-semibold text-gray-700 text-sm mb-3">
-                Gender Distribution
-              </h4>
-              <div className="space-y-2">
-                {genderData.map((item, index) => (
-                  <div key={index}>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-gray-600">{item.gender}</span>
-                      <span className="text-gray-600">
-                        {item.count} students
-                      </span>
-                    </div>
-                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${item.gender === "Male" ? "bg-blue-500" : item.gender === "Female" ? "bg-pink-500" : "bg-purple-500"}`}
-                        style={{ width: `${(item.count / 85) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Subject Wise */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-3">
-            <h4 className="font-semibold text-gray-700 text-sm mb-3">
-              Subject Wise Enrollment
-            </h4>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {subjectWiseData.map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-50 rounded-lg p-3 text-center"
+              {selectedDepartment !== "All" && (
+                <button
+                  onClick={() => setSelectedDepartment("All")}
+                  className="text-xs text-teal-700 hover:text-teal-900 underline font-semibold"
                 >
+                  ✕ Clear Filter
+                </button>
+              )}
+              <span className="text-[10px] text-teal-600 ml-auto">
+                Showing {admissionRecords.length} student
+                {admissionRecords.length !== 1 ? "s" : ""}
+                {selectedDepartment !== "All"
+                  ? ` in "${selectedDepartment}"`
+                  : " in all departments"}
+              </span>
+            </div>
+          </div>
+
+          {/* Loading */}
+          {isLoading ? (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-16 text-center">
+              <FaSpinner className="animate-spin text-4xl text-teal-600 mx-auto" />
+              <p className="text-sm text-gray-500 mt-3">
+                Loading admission data...
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Stats Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
                   <p className="text-lg font-bold text-blue-600">
-                    {item.count}
+                    {reportData.stats.totalApplications || 0}
                   </p>
-                  <p className="text-[10px] text-gray-500">{item.subject}</p>
-                  <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mt-1">
-                    <div
-                      className="bg-blue-500 h-full rounded-full"
-                      style={{ width: `${(item.count / 35) * 100}%` }}
-                    ></div>
+                  <p className="text-[10px] text-gray-500">
+                    Total Applications
+                  </p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+                  <p className="text-lg font-bold text-green-600">
+                    {reportData.stats.approvedApplications || 0}
+                  </p>
+                  <p className="text-[10px] text-gray-500">Approved</p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+                  <p className="text-lg font-bold text-yellow-600">
+                    {reportData.stats.pendingApplications || 0}
+                  </p>
+                  <p className="text-[10px] text-gray-500">Pending</p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
+                  <p className="text-lg font-bold text-purple-600">
+                    {reportData.stats.conversionRate || 0}%
+                  </p>
+                  <p className="text-[10px] text-gray-500">Conversion Rate</p>
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
+                <div className="flex flex-wrap gap-2 items-center">
+                  <div className="flex items-center gap-2">
+                    <FaFilter className="text-gray-400 text-xs" />
+                    <span className="text-xs text-gray-600 font-medium">
+                      Filters:
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search student..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="px-2 py-1 text-xs border border-gray-300 rounded-lg w-40"
+                  />
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(e.target.value)}
+                    className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
+                  >
+                    <option value="All">All Months</option>
+                    {months.map((month) => (
+                      <option key={month} value={month}>
+                        {month}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={selectedClass}
+                    onChange={(e) => setSelectedClass(e.target.value)}
+                    className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
+                  >
+                    <option value="All">All Classes</option>
+                    {classes.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={selectedStatus}
+                    onChange={(e) => setSelectedStatus(e.target.value)}
+                    className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
+                  >
+                    <option value="All">All Status</option>
+                    {statuses.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Monthly Chart */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-3">
+                <h4 className="font-semibold text-gray-700 text-sm mb-3">
+                  Monthly Admission Trends
+                </h4>
+                {getFilteredMonthlyData().length === 0 ? (
+                  <p className="text-xs text-gray-400 text-center py-4">
+                    No monthly data available
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    {getFilteredMonthlyData().map((item, index) => {
+                      const maxVal = Math.max(
+                        ...getFilteredMonthlyData().map((d) => d.applications),
+                        1,
+                      );
+                      return (
+                        <div key={index}>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-gray-600">
+                              {item.month} {item.year}
+                            </span>
+                            <span className="text-gray-600">
+                              Apps: {item.applications} | Approved:{" "}
+                              {item.approved} | Rejected: {item.rejected}
+                            </span>
+                          </div>
+                          <div className="flex gap-1 h-5">
+                            <div
+                              className="bg-blue-500 rounded-l-full h-full"
+                              style={{
+                                width: `${(item.applications / maxVal) * 100}%`,
+                              }}
+                            ></div>
+                            <div
+                              className="bg-green-500 h-full"
+                              style={{
+                                width: `${(item.approved / maxVal) * 100}%`,
+                              }}
+                            ></div>
+                            <div
+                              className="bg-red-500 rounded-r-full h-full"
+                              style={{
+                                width: `${(item.rejected / maxVal) * 100}%`,
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                <div className="flex gap-4 mt-3 text-xs">
+                  <span className="flex items-center gap-1">
+                    <span className="w-3 h-3 bg-blue-500 rounded"></span>{" "}
+                    Applications
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-3 h-3 bg-green-500 rounded"></span>{" "}
+                    Approved
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-3 h-3 bg-red-500 rounded"></span>{" "}
+                    Rejected
+                  </span>
+                </div>
+              </div>
+
+              {/* Class Wise and Gender Wise */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+                  <h4 className="font-semibold text-gray-700 text-sm mb-3">
+                    Course Wise Admission
+                  </h4>
+                  {reportData.classWiseData.length === 0 ? (
+                    <p className="text-xs text-gray-400 text-center py-4">
+                      No class data available
+                    </p>
+                  ) : (
+                    <div className="space-y-2">
+                      {reportData.classWiseData.map((item, index) => {
+                        const maxVal = Math.max(
+                          ...reportData.classWiseData.map(
+                            (d) => d.applications,
+                          ),
+                          1,
+                        );
+                        return (
+                          <div key={index}>
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="text-gray-600 truncate max-w-[150px]">
+                                {item.class}
+                              </span>
+                              <span className="text-gray-600">
+                                {item.enrolled}/{item.applications} enrolled
+                              </span>
+                            </div>
+                            <div className="flex gap-1 h-3">
+                              <div
+                                className="bg-blue-500 rounded-l-full h-full"
+                                style={{
+                                  width: `${
+                                    (item.applications / maxVal) * 100
+                                  }%`,
+                                }}
+                              ></div>
+                              <div
+                                className="bg-green-500 h-full"
+                                style={{
+                                  width: `${(item.approved / maxVal) * 100}%`,
+                                }}
+                              ></div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+                  <h4 className="font-semibold text-gray-700 text-sm mb-3">
+                    Gender Distribution
+                  </h4>
+                  <div className="space-y-2">
+                    {reportData.genderData.map((item, index) => {
+                      const totalGender = reportData.genderData.reduce(
+                        (s, g) => s + g.count,
+                        0,
+                      );
+                      const percent =
+                        totalGender > 0
+                          ? Math.round((item.count / totalGender) * 100)
+                          : 0;
+                      return (
+                        <div key={index}>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-gray-600">{item.gender}</span>
+                            <span className="text-gray-600">
+                              {item.count} ({percent}%)
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${
+                                item.gender === "Male"
+                                  ? "bg-blue-500"
+                                  : item.gender === "Female"
+                                    ? "bg-pink-500"
+                                    : "bg-purple-500"
+                              }`}
+                              style={{ width: `${percent}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Admission Records Table */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between p-3 border-b border-gray-200">
-              <h4 className="font-semibold text-gray-700 text-sm">
-                Admission Records ({admissionRecords.length})
-              </h4>
-            </div>
-            <div className="overflow-x-auto max-h-60 overflow-y-auto">
-              <table className="w-full text-xs">
-                <thead className="bg-gray-50 sticky top-0 z-10">
-                  <tr>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      #
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Student
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
-                      Class
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
-                      Subject
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
-                      Date
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Status
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {admissionRecords.length > 0 ? (
-                    admissionRecords.map((record, index) => (
-                      <tr
-                        key={record.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-3 py-2 font-medium text-gray-500">
-                          {index + 1}
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="font-medium text-gray-800">
-                            {record.studentName}
+              {/* Subject Wise */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-3">
+                <h4 className="font-semibold text-gray-700 text-sm mb-3">
+                  Course / Subject Wise Enrollment
+                </h4>
+                {reportData.subjectWiseData.length === 0 ? (
+                  <p className="text-xs text-gray-400 text-center py-4">
+                    No subject data available
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {reportData.subjectWiseData.map((item, index) => {
+                      const maxVal = Math.max(
+                        ...reportData.subjectWiseData.map((d) => d.count),
+                        1,
+                      );
+                      return (
+                        <div
+                          key={index}
+                          className="bg-gray-50 rounded-lg p-3 text-center"
+                        >
+                          <p className="text-lg font-bold text-blue-600">
+                            {item.count}
+                          </p>
+                          <p className="text-[10px] text-gray-500 truncate">
+                            {item.subject}
+                          </p>
+                          <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden mt-1">
+                            <div
+                              className="bg-blue-500 h-full rounded-full"
+                              style={{
+                                width: `${(item.count / maxVal) * 100}%`,
+                              }}
+                            ></div>
                           </div>
-                          <div className="text-[10px] text-gray-400">
-                            {record.studentId}
-                          </div>
-                        </td>
-                        <td className="px-3 py-2 hidden md:table-cell text-gray-600">
-                          {record.class}
-                        </td>
-                        <td className="px-3 py-2 hidden lg:table-cell text-gray-600">
-                          {record.subject}
-                        </td>
-                        <td className="px-3 py-2 hidden sm:table-cell text-gray-600">
-                          {formatDate(record.applicationDate)}
-                        </td>
-                        <td className="px-3 py-2">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(record.status)}`}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Admission Records Table */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between p-3 border-b border-gray-200">
+                  <h4 className="font-semibold text-gray-700 text-sm">
+                    Admission Records ({filteredRecords.length})
+                    {selectedDepartment !== "All" && (
+                      <span className="ml-2 text-[10px] font-normal text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full">
+                        Filtered: {selectedDepartment}
+                      </span>
+                    )}
+                  </h4>
+                </div>
+                <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-50 sticky top-0 z-10">
+                      <tr>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                          #
+                        </th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                          Student
+                        </th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
+                          Course
+                        </th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
+                          Date
+                        </th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                          Status
+                        </th>
+                        <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {filteredRecords.length > 0 ? (
+                        filteredRecords.map((record, index) => (
+                          <tr
+                            key={record._id}
+                            className="hover:bg-gray-50 transition-colors"
                           >
-                            {getStatusIcon(record.status)}
-                            {record.status}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => openDetailsModal(record)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
-                              title="View Details"
-                            >
-                              <FaEye size={12} />
-                            </button>
-                            {record.status === "Pending" && (
-                              <>
+                            <td className="px-3 py-2 font-medium text-gray-500">
+                              {index + 1}
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="font-medium text-gray-800">
+                                {record.studentName}
+                              </div>
+                              <div className="text-[10px] text-gray-400">
+                                {record.studentId}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2 hidden md:table-cell text-gray-600 truncate max-w-[160px]">
+                              {record.course || record.class}
+                            </td>
+                            <td className="px-3 py-2 hidden sm:table-cell text-gray-600">
+                              {formatDate(record.applicationDate)}
+                            </td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(
+                                  record.status,
+                                )}`}
+                              >
+                                {getStatusIcon(record.status)}
+                                {record.status}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="flex items-center gap-1">
                                 <button
-                                  onClick={() =>
-                                    handleApproveAdmission(record.id)
-                                  }
-                                  className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
-                                  title="Approve"
+                                  onClick={() => openDetailsModal(record)}
+                                  className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                                  title="View Details"
                                 >
-                                  <FaCheckCircleIcon size={12} />
+                                  <FaEye size={12} />
+                                </button>
+                                {record.status === "Pending" && (
+                                  <>
+                                    <button
+                                      onClick={() =>
+                                        handleApproveAdmission(record._id)
+                                      }
+                                      className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
+                                      title="Approve"
+                                    >
+                                      <FaCheckCircleIcon size={12} />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleRejectAdmission(record._id)
+                                      }
+                                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                                      title="Reject"
+                                    >
+                                      <FaTimesCircleIcon size={12} />
+                                    </button>
+                                  </>
+                                )}
+                                <button
+                                  onClick={() => openEditModal(record)}
+                                  className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
+                                  title="Edit"
+                                >
+                                  <FaEdit size={12} />
                                 </button>
                                 <button
                                   onClick={() =>
-                                    handleRejectAdmission(record.id)
+                                    handleDeleteAdmission(record._id)
                                   }
                                   className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-                                  title="Reject"
+                                  title="Delete"
                                 >
-                                  <FaTimesCircleIcon size={12} />
+                                  <FaTrash size={12} />
                                 </button>
-                              </>
-                            )}
-                            <button
-                              onClick={() => openEditModal(record)}
-                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
-                              title="Edit"
-                            >
-                              <FaEdit size={12} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteAdmission(record.id)}
-                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-                              title="Delete"
-                            >
-                              <FaTrash size={12} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="7"
-                        className="px-3 py-8 text-center text-gray-500"
-                      >
-                        <FaUserPlus className="text-4xl text-gray-300 mx-auto mb-2" />
-                        <p>No admission records found</p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan="6"
+                            className="px-3 py-8 text-center text-gray-500"
+                          >
+                            <FaUserPlus className="text-4xl text-gray-300 mx-auto mb-2" />
+                            <p>No admission records found</p>
+                            <p className="text-[10px] text-gray-400 mt-1">
+                              {selectedDepartment !== "All"
+                                ? `No students in "${selectedDepartment}"`
+                                : "Try adjusting your filters"}
+                            </p>
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
         </main>
       </div>
 
-      {/* Add Admission Modal */}
+      {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
@@ -1477,7 +1594,7 @@ const Admission_report = () => {
                     }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Class</option>
+                    <option value="">Select</option>
                     {classes.map((c) => (
                       <option key={c} value={c}>
                         {c}
@@ -1497,7 +1614,7 @@ const Admission_report = () => {
                     }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Subject</option>
+                    <option value="">Select</option>
                     {subjects.map((s) => (
                       <option key={s} value={s}>
                         {s}
@@ -1603,7 +1720,10 @@ const Admission_report = () => {
                   type="text"
                   value={formData.previousSchool}
                   onChange={(e) =>
-                    setFormData({ ...formData, previousSchool: e.target.value })
+                    setFormData({
+                      ...formData,
+                      previousSchool: e.target.value,
+                    })
                   }
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
@@ -1624,9 +1744,18 @@ const Admission_report = () => {
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold"
+                  disabled={saving}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Add Admission
+                  {saving ? (
+                    <>
+                      <FaSpinner className="animate-spin" /> Saving...
+                    </>
+                  ) : (
+                    <>
+                      <FaSave size={14} /> Add Admission
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -1641,13 +1770,13 @@ const Admission_report = () => {
         </div>
       )}
 
-      {/* Edit Admission Modal */}
+      {/* Edit Modal */}
       {showEditModal && selectedAdmission && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaEdit className="text-yellow-600" /> Edit Admission Record
+                <FaEdit className="text-yellow-600" /> Edit Admission
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1823,7 +1952,10 @@ const Admission_report = () => {
                   type="text"
                   value={formData.previousSchool}
                   onChange={(e) =>
-                    setFormData({ ...formData, previousSchool: e.target.value })
+                    setFormData({
+                      ...formData,
+                      previousSchool: e.target.value,
+                    })
                   }
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 />
@@ -1844,9 +1976,18 @@ const Admission_report = () => {
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold"
+                  disabled={saving}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Update
+                  {saving ? (
+                    <>
+                      <FaSpinner className="animate-spin" /> Updating...
+                    </>
+                  ) : (
+                    <>
+                      <FaSave size={14} /> Update
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -1864,7 +2005,7 @@ const Admission_report = () => {
       {/* Details Modal */}
       {showDetailsModal && selectedAdmission && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <FaInfoCircle className="text-blue-600" /> Admission Details
@@ -1879,7 +2020,7 @@ const Admission_report = () => {
             <div className="p-6 space-y-4">
               <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-teal-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-                  {selectedAdmission.studentName.charAt(0)}
+                  {selectedAdmission.studentName?.charAt(0) || "?"}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -1887,7 +2028,9 @@ const Admission_report = () => {
                       {selectedAdmission.studentName}
                     </h2>
                     <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedAdmission.status)}`}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                        selectedAdmission.status,
+                      )}`}
                     >
                       {getStatusIcon(selectedAdmission.status)}
                       {selectedAdmission.status}
@@ -1898,7 +2041,7 @@ const Admission_report = () => {
                   </p>
                   <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
                     <span>📚 {selectedAdmission.class}</span>
-                    <span>📖 {selectedAdmission.subject}</span>
+                    <span>📖 {selectedAdmission.course}</span>
                     <span>
                       📅 {formatDate(selectedAdmission.applicationDate)}
                     </span>
@@ -1926,9 +2069,9 @@ const Admission_report = () => {
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Previous School</p>
+                  <p className="text-[10px] text-gray-400">Gender</p>
                   <p className="text-sm font-semibold">
-                    {selectedAdmission.previousSchool || "N/A"}
+                    {selectedAdmission.gender || "N/A"}
                   </p>
                 </div>
                 {selectedAdmission.address && (
@@ -1936,6 +2079,14 @@ const Admission_report = () => {
                     <p className="text-[10px] text-gray-400">Address</p>
                     <p className="text-sm font-semibold">
                       {selectedAdmission.address}
+                    </p>
+                  </div>
+                )}
+                {selectedAdmission.previousSchool && (
+                  <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                    <p className="text-[10px] text-gray-400">Previous School</p>
+                    <p className="text-sm font-semibold">
+                      {selectedAdmission.previousSchool}
                     </p>
                   </div>
                 )}
@@ -1955,7 +2106,7 @@ const Admission_report = () => {
                     <button
                       onClick={() => {
                         setShowDetailsModal(false);
-                        handleApproveAdmission(selectedAdmission.id);
+                        handleApproveAdmission(selectedAdmission._id);
                       }}
                       className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                     >
@@ -1964,7 +2115,7 @@ const Admission_report = () => {
                     <button
                       onClick={() => {
                         setShowDetailsModal(false);
-                        handleRejectAdmission(selectedAdmission.id);
+                        handleRejectAdmission(selectedAdmission._id);
                       }}
                       className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                     >

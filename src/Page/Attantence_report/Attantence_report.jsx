@@ -29,9 +29,14 @@ import {
   FaTimesCircle as FaTimesCircleIcon,
   FaFilePdf as FaFilePdfIcon,
   FaFileExcel as FaFileExcelIcon,
+  FaSpinner,
+  FaBuilding,
+  FaUserCheck,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+const API_BASE = "http://localhost:5010";
 
 const Attantence_report = () => {
   const { user, logOut } = useAuth();
@@ -49,127 +54,29 @@ const Attantence_report = () => {
     joinDate: "",
   });
 
-  // Attendance records
-  const [attendanceRecords, setAttendanceRecords] = useState([
-    {
-      id: 1,
-      studentName: "Ahmed Hasan",
-      studentId: "STU001",
-      class: "Class 8",
-      subject: "Tajweed",
-      date: "2026-07-20",
-      status: "Present",
-      checkIn: "09:00 AM",
-      checkOut: "04:00 PM",
-      teacher: "Dr. Muhammad Abdullah",
-      note: "",
-    },
-    {
-      id: 2,
-      studentName: "Fatima Begum",
-      studentId: "STU002",
-      class: "Class 9",
-      subject: "Tafsir",
-      date: "2026-07-20",
-      status: "Present",
-      checkIn: "08:45 AM",
-      checkOut: "03:50 PM",
-      teacher: "Ustadh Ahmad Ali",
-      note: "",
-    },
-    {
-      id: 3,
-      studentName: "Mohammad Ali",
-      studentId: "STU003",
-      class: "Class 10",
-      subject: "Hadith",
-      date: "2026-07-20",
-      status: "Absent",
-      checkIn: null,
-      checkOut: null,
-      teacher: "Ustadha Fatima Rahman",
-      note: "Sick leave",
-    },
-    {
-      id: 4,
-      studentName: "Aisha Rahman",
-      studentId: "STU004",
-      class: "Class 7",
-      subject: "Fiqh",
-      date: "2026-07-20",
-      status: "Late",
-      checkIn: "09:30 AM",
-      checkOut: "04:00 PM",
-      teacher: "Dr. Omar Farooq",
-      note: "Arrived 30 minutes late",
-    },
-    {
-      id: 5,
-      studentName: "Hasan Mahmud",
-      studentId: "STU007",
-      class: "Class 6",
-      subject: "Tajweed",
-      date: "2026-07-20",
-      status: "Present",
-      checkIn: "08:50 AM",
-      checkOut: "03:55 PM",
-      teacher: "Ustadh Yusuf Khan",
-      note: "",
-    },
-    {
-      id: 6,
-      studentName: "Khadija Akhter",
-      studentId: "STU008",
-      class: "Class 9",
-      subject: "Tafsir",
-      date: "2026-07-19",
-      status: "Present",
-      checkIn: "09:00 AM",
-      checkOut: "04:00 PM",
-      teacher: "Ustadh Ahmad Ali",
-      note: "",
-    },
-    {
-      id: 7,
-      studentName: "Abdullah Al Mamun",
-      studentId: "STU009",
-      class: "Class 10",
-      subject: "Hadith",
-      date: "2026-07-19",
-      status: "Absent",
-      checkIn: null,
-      checkOut: null,
-      teacher: "Ustadha Fatima Rahman",
-      note: "Family emergency",
-    },
-    {
-      id: 8,
-      studentName: "Ayesha Khatun",
-      studentId: "STU010",
-      class: "Class 7",
-      subject: "Fiqh",
-      date: "2026-07-19",
-      status: "Present",
-      checkIn: "08:55 AM",
-      checkOut: "04:00 PM",
-      teacher: "Dr. Omar Farooq",
-      note: "",
-    },
-  ]);
+  // ✅ Dynamic states
+  const [attendanceRecords, setAttendanceRecords] = useState([]);
+  const [allStudents, setAllStudents] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [backendConnected, setBackendConnected] = useState(true);
+
+  const [stats, setStats] = useState({
+    totalRecords: 0,
+    presentToday: 0,
+    absentToday: 0,
+    lateToday: 0,
+    leaveToday: 0,
+    overallAttendance: 0,
+  });
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDate, setFilterDate] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterClass, setFilterClass] = useState("All");
   const [filterSubject, setFilterSubject] = useState("All");
-
-  const [stats, setStats] = useState({
-    totalStudents: 150,
-    presentToday: 45,
-    absentToday: 12,
-    lateToday: 5,
-    overallAttendance: 78,
-  });
+  const [filterDepartment, setFilterDepartment] = useState("All");
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -181,7 +88,7 @@ const Attantence_report = () => {
     studentId: "",
     class: "",
     subject: "",
-    date: "",
+    date: new Date().toISOString().split("T")[0],
     status: "Present",
     checkIn: "",
     checkOut: "",
@@ -209,7 +116,7 @@ const Attantence_report = () => {
   const statuses = ["Present", "Absent", "Late", "Leave"];
 
   // ============================================================
-  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
+  // Sidebar Menu Items
   // ============================================================
   const menuItems = [
     {
@@ -433,7 +340,6 @@ const Attantence_report = () => {
     },
   ];
 
-  // ✅ URL থেকে active auto-detect
   const getActiveFromPath = () => {
     const currentPath = location.pathname;
     for (const item of menuItems) {
@@ -448,7 +354,6 @@ const Attantence_report = () => {
 
   const { menu: activeMenu, sub: activeSubMenu } = getActiveFromPath();
 
-  // Auto-expand parent of active submenu
   useEffect(() => {
     if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
   }, [activeMenu, activeSubMenu]);
@@ -468,13 +373,63 @@ const Attantence_report = () => {
       });
   }, [user]);
 
-  // Save to localStorage
+  // ============================================================
+  // ✅ Fetch Attendance records from backend
+  // ============================================================
+  const fetchAttendance = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch(`${API_BASE}/api/attendance-report/all`);
+      const data = await res.json();
+
+      if (data.success) {
+        console.log("✅ [Attendance] Loaded:", data.records?.length);
+        setAttendanceRecords(data.records || []);
+        setStats(data.stats || {});
+        setBackendConnected(true);
+      } else {
+        setBackendConnected(false);
+      }
+    } catch (err) {
+      console.error("❌ Fetch error:", err);
+      setBackendConnected(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // ✅ Fetch Students (for dropdown auto-fill)
+  const fetchStudents = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/students/all`);
+      const data = await res.json();
+      if (data.success) {
+        setAllStudents(data.students || []);
+        console.log("✅ [Students] Loaded:", data.students?.length);
+      }
+    } catch (err) {
+      console.error("❌ Students fetch error:", err);
+    }
+  };
+
+  // ✅ Fetch Departments
+  const fetchDepartments = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/departments/all`);
+      const data = await res.json();
+      if (data.success) {
+        setDepartments(data.departments || []);
+      }
+    } catch (err) {
+      console.error("❌ Departments fetch error:", err);
+    }
+  };
+
   useEffect(() => {
-    localStorage.setItem(
-      "attendanceRecords",
-      JSON.stringify(attendanceRecords),
-    );
-  }, [attendanceRecords]);
+    fetchStudents();
+    fetchDepartments();
+    fetchAttendance();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -532,68 +487,76 @@ const Attantence_report = () => {
     }
   };
 
+  // ✅ Client-side filters on top of backend data
   const filteredRecords = attendanceRecords.filter((record) => {
     const matchesSearch =
-      record.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.studentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.subject.toLowerCase().includes(searchTerm.toLowerCase());
+      (record.studentName || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (record.studentId || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (record.subject || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       filterStatus === "All" || record.status === filterStatus;
     const matchesClass = filterClass === "All" || record.class === filterClass;
     const matchesSubject =
       filterSubject === "All" || record.subject === filterSubject;
     const matchesDate = !filterDate || record.date === filterDate;
+    const matchesDept =
+      filterDepartment === "All" ||
+      (record.subject || "")
+        .toLowerCase()
+        .includes(filterDepartment.toLowerCase());
     return (
       matchesSearch &&
       matchesStatus &&
       matchesClass &&
       matchesSubject &&
-      matchesDate
+      matchesDate &&
+      matchesDept
     );
   });
 
   const uniqueStatuses = [
     "All",
-    ...new Set(attendanceRecords.map((r) => r.status)),
+    ...new Set(attendanceRecords.map((r) => r.status).filter(Boolean)),
   ];
   const uniqueClasses = [
     "All",
-    ...new Set(attendanceRecords.map((r) => r.class)),
+    ...new Set(attendanceRecords.map((r) => r.class).filter(Boolean)),
   ];
   const uniqueSubjects = [
     "All",
-    ...new Set(attendanceRecords.map((r) => r.subject)),
+    ...new Set(attendanceRecords.map((r) => r.subject).filter(Boolean)),
   ];
 
-  const calculateStats = () => {
-    const today = new Date().toISOString().split("T")[0];
-    const todayRecords = attendanceRecords.filter((r) => r.date === today);
-    const presentToday = todayRecords.filter(
-      (r) => r.status === "Present",
-    ).length;
-    const absentToday = todayRecords.filter(
-      (r) => r.status === "Absent",
-    ).length;
-    const lateToday = todayRecords.filter((r) => r.status === "Late").length;
-    const totalPresent = attendanceRecords.filter(
-      (r) => r.status === "Present",
-    ).length;
-    const totalRecords = attendanceRecords.length;
-    const overallAttendance =
-      totalRecords > 0 ? Math.round((totalPresent / totalRecords) * 100) : 0;
-
-    setStats({
-      totalStudents: attendanceRecords.length,
-      presentToday,
-      absentToday,
-      lateToday,
-      overallAttendance,
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
-  useEffect(() => {
-    calculateStats();
-  }, [attendanceRecords]);
+  const downloadReport = () =>
+    Swal.fire({
+      icon: "success",
+      title: "Report Downloading",
+      text: "Attendance report is being downloaded as PDF.",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+
+  const exportToExcel = () =>
+    Swal.fire({
+      icon: "success",
+      title: "Exporting to Excel",
+      text: "Attendance report is being exported to Excel format.",
+      timer: 1500,
+      showConfirmButton: false,
+    });
 
   const openAddModal = () => {
     setFormData({
@@ -615,14 +578,14 @@ const Attantence_report = () => {
     setSelectedRecord(record);
     setFormData({
       studentName: record.studentName,
-      studentId: record.studentId,
+      studentId: record.studentId || "",
       class: record.class,
       subject: record.subject,
       date: record.date,
       status: record.status,
       checkIn: record.checkIn || "",
       checkOut: record.checkOut || "",
-      teacher: record.teacher,
+      teacher: record.teacher || "",
       note: record.note || "",
     });
     setShowEditModal(true);
@@ -633,103 +596,129 @@ const Attantence_report = () => {
     setShowDetailsModal(true);
   };
 
-  const handleAddAttendance = (e) => {
-    e.preventDefault();
-    if (
-      !formData.studentName ||
-      !formData.class ||
-      !formData.subject ||
-      !formData.date
-    ) {
-      Swal.fire({
-        icon: "warning",
-        title: "Please fill all required fields",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
-    const newRecord = {
-      id: Date.now(),
-      studentName: formData.studentName,
-      studentId:
-        formData.studentId ||
-        `STU${String(attendanceRecords.length + 1).padStart(3, "0")}`,
-      class: formData.class,
-      subject: formData.subject,
-      date: formData.date,
-      status: formData.status,
-      checkIn:
-        formData.status !== "Absent" ? formData.checkIn || "09:00 AM" : null,
-      checkOut:
-        formData.status !== "Absent" ? formData.checkOut || "04:00 PM" : null,
-      teacher: formData.teacher || "Admin",
-      note: formData.note || "",
-    };
-    setAttendanceRecords([...attendanceRecords, newRecord]);
-    setShowAddModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "Attendance Added!",
-      text: `Attendance for ${formData.studentName} has been recorded.`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  };
-
-  const handleEditAttendance = (e) => {
-    e.preventDefault();
-    if (
-      !formData.studentName ||
-      !formData.class ||
-      !formData.subject ||
-      !formData.date
-    ) {
-      Swal.fire({
-        icon: "warning",
-        title: "Please fill all required fields",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
-    setAttendanceRecords(
-      attendanceRecords.map((record) =>
-        record.id === selectedRecord.id
-          ? {
-              ...record,
-              studentName: formData.studentName,
-              studentId: formData.studentId,
-              class: formData.class,
-              subject: formData.subject,
-              date: formData.date,
-              status: formData.status,
-              checkIn:
-                formData.status !== "Absent"
-                  ? formData.checkIn || "09:00 AM"
-                  : null,
-              checkOut:
-                formData.status !== "Absent"
-                  ? formData.checkOut || "04:00 PM"
-                  : null,
-              teacher: formData.teacher || "Admin",
-              note: formData.note || "",
-            }
-          : record,
-      ),
+  // ✅ Auto-fill when student selected
+  const handleStudentSelect = (studentId) => {
+    const st = allStudents.find(
+      (s) => String(s._id || s.id) === String(studentId),
     );
-    setShowEditModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "Attendance Updated!",
-      text: "Attendance record has been updated successfully.",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    if (st) {
+      setFormData({
+        ...formData,
+        studentName: st.name || "",
+        studentId: st.studentId || st.username || st.roll || "",
+        class: st.class || st.course || "",
+        subject: st.course || "",
+      });
+    }
   };
 
-  const handleDeleteAttendance = (id) => {
-    Swal.fire({
+  // ✅ ADD — backend এ save
+  const handleAddAttendance = async (e) => {
+    e.preventDefault();
+    if (
+      !formData.studentName ||
+      !formData.class ||
+      !formData.subject ||
+      !formData.date
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all required fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/attendance-report/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        await fetchAttendance();
+        setShowAddModal(false);
+        Swal.fire({
+          icon: "success",
+          title: "Attendance Added!",
+          text: `Attendance for ${formData.studentName} has been recorded.`,
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Something went wrong",
+        });
+      }
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ✅ EDIT
+  const handleEditAttendance = async (e) => {
+    e.preventDefault();
+    if (
+      !formData.studentName ||
+      !formData.class ||
+      !formData.subject ||
+      !formData.date
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Please fill all required fields",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/attendance-report/update/${selectedRecord._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        },
+      );
+      const data = await res.json();
+
+      if (data.success) {
+        await fetchAttendance();
+        setShowEditModal(false);
+        Swal.fire({
+          icon: "success",
+          title: "Updated!",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Something went wrong",
+        });
+      }
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // ✅ DELETE
+  const handleDeleteAttendance = async (id) => {
+    const result = await Swal.fire({
       title: "Delete Attendance?",
       text: "This action cannot be undone!",
       icon: "warning",
@@ -737,39 +726,24 @@ const Attantence_report = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setAttendanceRecords(attendanceRecords.filter((r) => r.id !== id));
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/attendance-report/delete/${id}`,
+        { method: "DELETE" },
+      );
+      const data = await res.json();
+      if (data.success) {
+        await fetchAttendance();
         Swal.fire("Deleted!", "Attendance record has been deleted.", "success");
       }
-    });
+    } catch (err) {
+      Swal.fire("Error!", err.message, "error");
+    }
   };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return "-";
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const downloadReport = () =>
-    Swal.fire({
-      icon: "success",
-      title: "Report Downloading",
-      text: "Attendance report is being downloaded as PDF.",
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  const exportToExcel = () =>
-    Swal.fire({
-      icon: "success",
-      title: "Exporting to Excel",
-      text: "Attendance report is being exported to Excel format.",
-      timer: 1500,
-      showConfirmButton: false,
-    });
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -813,7 +787,6 @@ const Attantence_report = () => {
           <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => {
               const isParentActive = activeMenu === item.id;
-
               return (
                 <div key={item.id}>
                   {item.subItems ? (
@@ -834,7 +807,9 @@ const Attantence_report = () => {
                           <span>{item.label}</span>
                         </div>
                         <span
-                          className={`transition-transform ${expandedMenu === item.id ? "rotate-90" : ""}`}
+                          className={`transition-transform ${
+                            expandedMenu === item.id ? "rotate-90" : ""
+                          }`}
                         >
                           <FaArrowRight size={12} />
                         </span>
@@ -901,7 +876,7 @@ const Attantence_report = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto pt-16 md:pt-6">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
@@ -931,9 +906,18 @@ const Attantence_report = () => {
               >
                 <FaFileExcelIcon size={12} /> Excel
               </button>
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
+              <button
+                onClick={fetchAttendance}
+                disabled={isLoading}
+                className="bg-teal-500 hover:bg-teal-600 disabled:bg-teal-300 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+              >
+                {isLoading ? (
+                  <FaSpinner size={12} className="animate-spin" />
+                ) : (
+                  "🔄"
+                )}{" "}
+                Refresh
+              </button>
               <button
                 onClick={handleLogout}
                 className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
@@ -943,31 +927,53 @@ const Attantence_report = () => {
             </div>
           </div>
 
+          {/* Backend Warning */}
+          {!backendConnected && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-3 flex items-start gap-2">
+              <span className="text-yellow-600 text-lg">⚠️</span>
+              <div className="flex-1">
+                <p className="text-xs font-bold text-yellow-800">
+                  Backend Not Connected
+                </p>
+                <p className="text-[11px] text-yellow-700 mt-0.5">
+                  Server running on port 5010? Click "Refresh" after starting
+                  backend.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-blue-600">
-                {stats.totalStudents}
+                {stats.totalRecords || 0}
               </p>
               <p className="text-[10px] text-gray-500">Total Records</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-green-600">
-                {stats.presentToday}
+                {stats.presentToday || 0}
               </p>
               <p className="text-[10px] text-gray-500">Present Today</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-red-600">
-                {stats.absentToday}
+                {stats.absentToday || 0}
               </p>
               <p className="text-[10px] text-gray-500">Absent Today</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-purple-600">
-                {stats.overallAttendance}%
+              <p className="text-lg font-bold text-yellow-600">
+                {stats.lateToday || 0}
               </p>
-              <p className="text-[10px] text-gray-500">Overall Attendance</p>
+              <p className="text-[10px] text-gray-500">Late Today</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-purple-600">
+                {stats.overallAttendance || 0}%
+              </p>
+              <p className="text-[10px] text-gray-500">Overall</p>
             </div>
           </div>
 
@@ -1024,135 +1030,161 @@ const Attantence_report = () => {
                     </option>
                   ))}
                 </select>
+                {/* ✅ Department filter */}
+                <select
+                  value={filterDepartment}
+                  onChange={(e) => setFilterDepartment(e.target.value)}
+                  className="px-1.5 py-1 text-xs border-2 border-teal-300 rounded-lg bg-teal-50 font-semibold text-teal-700"
+                >
+                  <option value="All">🏫 All Departments</option>
+                  {departments.map((d) => (
+                    <option key={d} value={d}>
+                      📚 {d}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
 
-          {/* Table */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto max-h-[calc(100vh-380px)] overflow-y-auto">
-              <table className="w-full text-xs">
-                <thead className="bg-gray-50 sticky top-0 z-10">
-                  <tr>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      #
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Student
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
-                      Class
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
-                      Subject
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
-                      Date
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Status
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
-                      Check In
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredRecords.length > 0 ? (
-                    filteredRecords.map((record, index) => (
-                      <tr
-                        key={record.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-3 py-2 font-medium text-gray-500">
-                          {index + 1}
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="font-medium text-gray-800">
-                            {record.studentName}
-                          </div>
-                          <div className="text-[10px] text-gray-400">
-                            {record.studentId}
-                          </div>
-                        </td>
-                        <td className="px-3 py-2 hidden md:table-cell text-gray-600">
-                          {record.class}
-                        </td>
-                        <td className="px-3 py-2 hidden lg:table-cell text-gray-600">
-                          {record.subject}
-                        </td>
-                        <td className="px-3 py-2 hidden sm:table-cell text-gray-600">
-                          {formatDate(record.date)}
-                        </td>
-                        <td className="px-3 py-2">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(record.status)}`}
-                          >
-                            {getStatusIcon(record.status)}
-                            {record.status}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2 hidden sm:table-cell text-gray-600">
-                          {record.checkIn || "-"}
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => openDetailsModal(record)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
-                              title="View Details"
+          {/* Loading */}
+          {isLoading ? (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-16 text-center">
+              <FaSpinner className="animate-spin text-4xl text-teal-600 mx-auto" />
+              <p className="text-sm text-gray-500 mt-3">
+                Loading attendance...
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="overflow-x-auto max-h-[calc(100vh-420px)] overflow-y-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 sticky top-0 z-10">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                        #
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                        Student
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
+                        Class
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
+                        Subject
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
+                        Date
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                        Status
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
+                        Check In
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filteredRecords.length > 0 ? (
+                      filteredRecords.map((record, index) => (
+                        <tr
+                          key={record._id || record.id}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="px-3 py-2 font-medium text-gray-500">
+                            {index + 1}
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="font-medium text-gray-800">
+                              {record.studentName}
+                            </div>
+                            <div className="text-[10px] text-gray-400">
+                              {record.studentId}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2 hidden md:table-cell text-gray-600">
+                            {record.class}
+                          </td>
+                          <td className="px-3 py-2 hidden lg:table-cell text-gray-600">
+                            {record.subject}
+                          </td>
+                          <td className="px-3 py-2 hidden sm:table-cell text-gray-600">
+                            {formatDate(record.date)}
+                          </td>
+                          <td className="px-3 py-2">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(
+                                record.status,
+                              )}`}
                             >
-                              <FaEye size={12} />
-                            </button>
-                            <button
-                              onClick={() => openEditModal(record)}
-                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
-                              title="Edit"
-                            >
-                              <FaEdit size={12} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteAttendance(record.id)}
-                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-                              title="Delete"
-                            >
-                              <FaTrash size={12} />
-                            </button>
-                          </div>
+                              {getStatusIcon(record.status)}
+                              {record.status}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 hidden sm:table-cell text-gray-600">
+                            {record.checkIn || "-"}
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => openDetailsModal(record)}
+                                className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                                title="View"
+                              >
+                                <FaEye size={12} />
+                              </button>
+                              <button
+                                onClick={() => openEditModal(record)}
+                                className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
+                                title="Edit"
+                              >
+                                <FaEdit size={12} />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDeleteAttendance(record._id)
+                                }
+                                className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                                title="Delete"
+                              >
+                                <FaTrash size={12} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan="8"
+                          className="px-3 py-8 text-center text-gray-500"
+                        >
+                          <FaClipboardCheck className="text-4xl text-gray-300 mx-auto mb-2" />
+                          <p>No attendance records found</p>
+                          <p className="text-[10px] text-gray-400 mt-1">
+                            Click "Add Attendance" to record the first entry
+                          </p>
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="8"
-                        className="px-3 py-8 text-center text-gray-500"
-                      >
-                        <FaClipboardCheck className="text-4xl text-gray-300 mx-auto mb-2" />
-                        <p>No attendance records found</p>
-                        <p className="text-[10px] text-gray-400 mt-1">
-                          Try adjusting your search or filter criteria
-                        </p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
         </main>
       </div>
 
-      {/* Add Attendance Modal */}
+      {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlus className="text-green-600" /> Add Attendance Record
+                <FaPlus className="text-green-600" /> Add Attendance
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1162,6 +1194,30 @@ const Attantence_report = () => {
               </button>
             </div>
             <form onSubmit={handleAddAttendance} className="p-6 space-y-4">
+              {/* Student dropdown — auto-fill */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Student (auto-fill)
+                </label>
+                <select
+                  value=""
+                  onChange={(e) => handleStudentSelect(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-teal-50"
+                >
+                  <option value="">
+                    -- Choose from registered students --
+                  </option>
+                  {allStudents.map((s) => (
+                    <option key={s._id || s.id} value={s._id || s.id}>
+                      {s.name} {s.phone ? `(${s.phone})` : ""}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Or manually fill below
+                </p>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Student Name *
@@ -1174,7 +1230,6 @@ const Attantence_report = () => {
                     setFormData({ ...formData, studentName: e.target.value })
                   }
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  placeholder="Enter student name"
                 />
               </div>
               <div>
@@ -1188,7 +1243,6 @@ const Attantence_report = () => {
                     setFormData({ ...formData, studentId: e.target.value })
                   }
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  placeholder="Enter student ID"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -1204,7 +1258,7 @@ const Attantence_report = () => {
                     }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Class</option>
+                    <option value="">Select</option>
                     {classes.map((c) => (
                       <option key={c} value={c}>
                         {c}
@@ -1224,8 +1278,8 @@ const Attantence_report = () => {
                     }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Subject</option>
-                    {subjects.map((s) => (
+                    <option value="">Select</option>
+                    {[...new Set([...subjects, ...departments])].map((s) => (
                       <option key={s} value={s}>
                         {s}
                       </option>
@@ -1330,15 +1384,23 @@ const Attantence_report = () => {
                   }
                   rows="2"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  placeholder="Add note..."
                 />
               </div>
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 rounded-lg font-semibold"
+                  disabled={saving}
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:opacity-50 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Add Attendance
+                  {saving ? (
+                    <>
+                      <FaSpinner className="animate-spin" /> Saving...
+                    </>
+                  ) : (
+                    <>
+                      <FaSave size={14} /> Add Attendance
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -1353,13 +1415,13 @@ const Attantence_report = () => {
         </div>
       )}
 
-      {/* Edit Attendance Modal */}
+      {/* Edit Modal */}
       {showEditModal && selectedRecord && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaEdit className="text-yellow-600" /> Edit Attendance Record
+                <FaEdit className="text-yellow-600" /> Edit Attendance
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1428,7 +1490,7 @@ const Attantence_report = () => {
                     }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {subjects.map((s) => (
+                    {[...new Set([...subjects, ...departments])].map((s) => (
                       <option key={s} value={s}>
                         {s}
                       </option>
@@ -1535,9 +1597,18 @@ const Attantence_report = () => {
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold"
+                  disabled={saving}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Update
+                  {saving ? (
+                    <>
+                      <FaSpinner className="animate-spin" /> Updating...
+                    </>
+                  ) : (
+                    <>
+                      <FaSave size={14} /> Update
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -1570,7 +1641,7 @@ const Attantence_report = () => {
             <div className="p-6 space-y-4">
               <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-teal-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
-                  {selectedRecord.studentName.charAt(0)}
+                  {selectedRecord.studentName?.charAt(0) || "?"}
                 </div>
                 <div className="flex-1">
                   <h2 className="text-lg font-bold text-gray-800">
@@ -1580,7 +1651,9 @@ const Attantence_report = () => {
                     {selectedRecord.studentId}
                   </p>
                   <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedRecord.status)}`}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                      selectedRecord.status,
+                    )}`}
                   >
                     {getStatusIcon(selectedRecord.status)}
                     {selectedRecord.status}
@@ -1650,7 +1723,7 @@ const Attantence_report = () => {
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
-                    handleDeleteAttendance(selectedRecord.id);
+                    handleDeleteAttendance(selectedRecord._id);
                   }}
                   className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
