@@ -43,7 +43,7 @@ import {
 import { MdDashboard, MdOutlineQuiz } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-const API_URL = "http://localhost:5010";
+const API_URL = "https://api.tarbiyahonline.com";
 
 const COURSE_OPTIONS = [
   "Qaida Nuraniyah",
