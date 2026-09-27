@@ -383,6 +383,7 @@ const Teacher_assign = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
+
         {
           id: "today-class",
           path: "/admin-dashboard/today-class",
@@ -424,7 +425,7 @@ const Teacher_assign = () => {
         {
           id: "batch-manual",
           path: "/admin-students/batch",
-          label: "Batch Maintain",
+          label: "Batch Create and  Maintain",
         },
         {
           id: "student-profile",
@@ -459,47 +460,9 @@ const Teacher_assign = () => {
           path: "/admin-teachers/attendance",
           label: "Teacher Attendance",
         },
-        {
-          id: "teacher-overview",
-          path: "/admin-teachers/overview",
-          label: "Teacher Overview",
-        },
       ],
     },
-    {
-      id: "batch-course",
-      path: "/admin-batch-course",
-      icon: <FaLayerGroup className="text-xl" />,
-      label: "Batch & Course",
-      subItems: [
-        {
-          id: "batch-make",
-          path: "/admin-batch-course/batch-make",
-          label: "Batch Make",
-        },
-        {
-          id: "course-make",
-          path: "/admin-batch-course/course-make",
-          label: "Course Make",
-        },
-        {
-          id: "syllabus",
-          path: "/admin-batch-course/syllabus",
-          label: "Syllabus",
-        },
-        {
-          id: "clear-routine",
-          path: "/admin-batch-course/clear-routine",
-          label: "Clear Routine",
-        },
-      ],
-    },
-    {
-      id: "absence-student",
-      path: "/admin-absence",
-      icon: <FaUserTimes className="text-xl" />,
-      label: "Absence Student Community",
-    },
+
     {
       id: "finance",
       path: "/admin-finance",
@@ -520,41 +483,7 @@ const Teacher_assign = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-    {
-      id: "exam",
-      path: "/admin-exam",
-      icon: <FaCalendarCheck className="text-xl" />,
-      label: "Exam",
-      subItems: [
-        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
-        {
-          id: "result-publish",
-          path: "/admin-exam/result",
-          label: "Result Publish",
-        },
-        {
-          id: "certificate-permission",
-          path: "/admin-exam/certificate",
-          label: "Certificate Permission",
-        },
-        { id: "grad", path: "/admin-exam/grad", label: "Grad" },
-        {
-          id: "class-test",
-          path: "/admin-exam/class-test",
-          label: "Class Test",
-        },
-        {
-          id: "mid-term",
-          path: "/admin-exam/mid-term",
-          label: "Mid Term Exam",
-        },
-        {
-          id: "final-exam",
-          path: "/admin-exam/final-exam",
-          label: "Final Exam",
-        },
-      ],
-    },
+
     {
       id: "report-analytics",
       path: "/admin-reports",

@@ -173,6 +173,7 @@ const Student_batch = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
+
         {
           id: "today-class",
           path: "/admin-dashboard/today-class",
@@ -214,7 +215,7 @@ const Student_batch = () => {
         {
           id: "batch-manual",
           path: "/admin-students/batch",
-          label: "Batch Maintain",
+          label: "Batch Create and  Maintain",
         },
         {
           id: "student-profile",
@@ -249,47 +250,9 @@ const Student_batch = () => {
           path: "/admin-teachers/attendance",
           label: "Teacher Attendance",
         },
-        {
-          id: "teacher-overview",
-          path: "/admin-teachers/overview",
-          label: "Teacher Overview",
-        },
       ],
     },
-    {
-      id: "batch-course",
-      path: "/admin-batch-course",
-      icon: <FaLayerGroup className="text-xl" />,
-      label: "Batch & Course",
-      subItems: [
-        {
-          id: "batch-make",
-          path: "/admin-batch-course/batch-make",
-          label: "Batch Make",
-        },
-        {
-          id: "course-make",
-          path: "/admin-batch-course/course-make",
-          label: "Course Make",
-        },
-        {
-          id: "syllabus",
-          path: "/admin-batch-course/syllabus",
-          label: "Syllabus",
-        },
-        {
-          id: "clear-routine",
-          path: "/admin-batch-course/clear-routine",
-          label: "Clear Routine",
-        },
-      ],
-    },
-    {
-      id: "absence-student",
-      path: "/admin-absence",
-      icon: <FaUserTimes className="text-xl" />,
-      label: "Absence Student Community",
-    },
+
     {
       id: "finance",
       path: "/admin-finance",
@@ -310,6 +273,7 @@ const Student_batch = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
+
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -340,6 +304,20 @@ const Student_batch = () => {
           path: "/admin-crm/data-entry",
           label: "Data Entry",
         },
+      ],
+    },
+    {
+      id: "salary",
+      path: "/admin-salary",
+      icon: <FaMoneyBillWave className="text-xl" />,
+      label: "Salary",
+      subItems: [
+        {
+          id: "total-salary",
+          path: "/admin-salary/total",
+          label: "Total Salary",
+        },
+        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
       ],
     },
   ];

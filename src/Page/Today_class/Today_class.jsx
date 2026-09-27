@@ -474,18 +474,19 @@ const Today_class = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
+
         {
           id: "today-class",
           path: "/admin-dashboard/today-class",
           label: "Today's Class",
         },
         {
-          id: "basic-tazweed payment overview",
+          id: "basic-tazweed",
           path: "/admin-dashboard/basic-tazweed",
           label: "Basic Tazweed Payment Overview",
         },
         {
-          id: "najera-payment overview",
+          id: "najera-batch",
           path: "/admin-dashboard/najera-batch",
           label: "Najera Payment Overview",
         },
@@ -515,7 +516,7 @@ const Today_class = () => {
         {
           id: "batch-manual",
           path: "/admin-students/batch",
-          label: "Batch Maintain",
+          label: "Batch Create and  Maintain",
         },
         {
           id: "student-profile",
@@ -550,47 +551,9 @@ const Today_class = () => {
           path: "/admin-teachers/attendance",
           label: "Teacher Attendance",
         },
-        {
-          id: "teacher-overview",
-          path: "/admin-teachers/overview",
-          label: "Teacher Overview",
-        },
       ],
     },
-    {
-      id: "batch-course",
-      path: "/admin-batch-course",
-      icon: <FaLayerGroup className="text-xl" />,
-      label: "Batch & Course",
-      subItems: [
-        {
-          id: "batch-make",
-          path: "/admin-batch-course/batch-make",
-          label: "Batch Make",
-        },
-        {
-          id: "course-make",
-          path: "/admin-batch-course/course-make",
-          label: "Course Make",
-        },
-        {
-          id: "syllabus",
-          path: "/admin-batch-course/syllabus",
-          label: "Syllabus",
-        },
-        {
-          id: "clear-routine",
-          path: "/admin-batch-course/clear-routine",
-          label: "Clear Routine",
-        },
-      ],
-    },
-    {
-      id: "absence-student",
-      path: "/admin-absence",
-      icon: <FaUserTimes className="text-xl" />,
-      label: "Absence Student Community",
-    },
+
     {
       id: "finance",
       path: "/admin-finance",
@@ -611,25 +574,7 @@ const Today_class = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-    {
-      id: "exam",
-      path: "/admin-exam",
-      icon: <FaCalendarAlt className="text-xl" />,
-      label: "Exam",
-      subItems: [
-        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
-        {
-          id: "result-publish",
-          path: "/admin-exam/result",
-          label: "Result Publish",
-        },
-        {
-          id: "certificate-permission",
-          path: "/admin-exam/certificate",
-          label: "Certificate Permission",
-        },
-      ],
-    },
+
     {
       id: "report-analytics",
       path: "/admin-reports",
