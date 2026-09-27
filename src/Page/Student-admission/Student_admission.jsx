@@ -31,70 +31,7 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-// ============================================================
-// ✅ ELDERS DEPARTMENT — শুধু এই ৪টি course এর student দেখাবে
-// English + Bengali দুই version support করে
-// ============================================================
-const ELDERS_COURSES = [
-  // English
-  "qaida nuraniyah",
-  "qaida nooraniya",
-  "qaida noorani",
-  "qaida nurani",
-  "qaidah nuraniyah",
-  "qaidah nooraniya",
-  "qaidah noorani",
-  "quran nazera",
-  "nazera quran",
-  "quran najera",
-  "najera quran",
-  "bakarah hifz",
-  "bakara hifz",
-  "baqarah hifz",
-  "baqara hifz",
-  "basic tajweed (level-1)",
-  "basic tajweed (level 1)",
-  "basic tajweed level-1",
-  "basic tajweed level 1",
-  "basic tajweed",
-  // Bengali
-  "কায়দা নুরানী",
-  "কায়দা নূরানী",
-  "কায়দায়ে নূরানিয়্যাহ",
-  "কায়দায়ে নূরানীয়াহ",
-  "কুরআন নাজেরা",
-  "নাজেরা",
-  "বেসিক তাজউইদ (লেভেল–১)",
-  "বেসিক তাজউইদ (লেভেল-১)",
-  "বেসিক তাজউইদ",
-  "বাকারাহ হিফজ",
-  "বাকারা হিফজ",
-];
-
-const isSingleEldersCourse = (singleCourse) => {
-  const p = String(singleCourse).toLowerCase().trim();
-  if (!p) return false;
-
-  return ELDERS_COURSES.some((c) => {
-    const cl = c.toLowerCase();
-    if (p === cl) return true;
-    if (p.includes(cl)) return true;
-    if (cl.includes(p) && p.length >= 5) return true;
-    return false;
-  });
-};
-
-const isEldersCourse = (courseStr) => {
-  if (!courseStr) return false;
-
-  const parts = String(courseStr)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  if (parts.length === 0) return false;
-  return parts.every((part) => isSingleEldersCourse(part));
-};
+const API_BASE = "https://api.tarbiyahonline.com/api";
 
 const Student_admission = () => {
   const { user, logOut } = useAuth();
@@ -114,10 +51,11 @@ const Student_admission = () => {
   const [admissionRequests, setAdmissionRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [sourceFilter, setSourceFilter] = useState("All");
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
-  const [filterClass, setFilterClass] = useState("All");
+  const [filterCourse, setFilterCourse] = useState("All");
   const [filterPriority, setFilterPriority] = useState("All");
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -140,7 +78,7 @@ const Student_admission = () => {
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Quran for Elders",
+        department: "Administration",
         joinDate: "January 2024",
       });
     }
@@ -151,79 +89,248 @@ const Student_admission = () => {
     fetchAdmissions();
   }, []);
 
+  // ============================================================
+  // ✅ Fetch from 3 API endpoints & combine
+  // ============================================================
   const fetchAdmissions = async () => {
     try {
       setLoading(true);
       setFetchError(null);
 
-      const res = await fetch(
-        "https://api.tarbiyahonline.com/api/students/all",
-      );
-      const data = await res.json();
+      // ✅ ৩টি endpoint একসাথে fetch
+      const [studentsRes, tazweedRes, najeraRes] = await Promise.allSettled([
+        fetch(`${API_BASE}/students/all`),
+        fetch(`${API_BASE}/basic-tazweed/all`),
+        fetch(`${API_BASE}/najera-batch/all`),
+      ]);
 
-      if (data.success) {
-        const all = data.students || [];
+      // ---------- 1) Admission Form Students ----------
+      let admissionStudents = [];
+      if (studentsRes.status === "fulfilled") {
+        try {
+          const d = await studentsRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            admissionStudents = d.students.map((s) => {
+              let priority = "Medium";
+              if (s.paymentStatus === "Paid") priority = "High";
+              else if (s.paymentStatus === "Unpaid") priority = "Low";
 
-        // ✅ শুধু pure elders course এর student
-        const elders = all.filter((s) => isEldersCourse(s.course));
+              let displayStatus = "Pending";
+              if (s.status === "Active") displayStatus = "Approved";
+              else if (s.status === "Rejected") displayStatus = "Rejected";
+              else if (s.status === "Inactive") displayStatus = "Rejected";
 
-        console.log("📥 Total students:", all.length);
-        console.log("✅ Elders filtered:", elders.length);
-        elders.forEach((s) => console.log("   →", s.name, "|", s.course));
-
-        const formatted = elders.map((s) => {
-          let priority = "Medium";
-          if (s.paymentStatus === "Paid") priority = "High";
-          else if (s.paymentStatus === "Unpaid") priority = "Low";
-
-          let displayStatus = "Pending";
-          if (s.status === "Active") displayStatus = "Approved";
-          else if (s.status === "Rejected") displayStatus = "Rejected";
-          else if (s.status === "Inactive") displayStatus = "Rejected";
-
-          return {
-            id: s._id,
-            _id: s._id,
-            studentName: s.name || "Unknown",
-            fatherName: s.fatherName || s.guardianName || "N/A",
-            motherName: s.motherName || "N/A",
-            class: s.course || s.class || "N/A",
-            subject: s.course || "N/A",
-            phone: s.phone || "",
-            email: s.email || "",
-            address: s.presentAddress || s.permanentAddress || "N/A",
-            dob: s.dobOrNid || "",
-            gender: s.gender || "N/A",
-            previousSchool: s.previousSchool || "N/A",
-            admissionDate: s.admissionDate
-              ? new Date(s.admissionDate).toISOString().split("T")[0]
-              : "N/A",
-            status: displayStatus,
-            paymentStatus: s.paymentStatus || "Unpaid",
-            priority: priority,
-            notes: s.paymentRemarks || "No additional notes",
-            appliedDate: s.createdAt
-              ? new Date(s.createdAt).toISOString().split("T")[0]
-              : "N/A",
-            reviewedBy: s.approvedBy || null,
-            reviewedDate: s.approvedAt
-              ? new Date(s.approvedAt).toISOString().split("T")[0]
-              : null,
-            rejectionReason: s.rejectionReason || null,
-            username: s.username || "",
-            enrolledCourses: s.enrolledCourses || [],
-            paidAmount: s.paidAmount || 0,
-            paymentMethod: s.paymentMethod || "",
-            transactionId: s.transactionId || "",
-            guardianPhone: s.guardianPhone || "",
-            _raw: s,
-          };
-        });
-
-        setAdmissionRequests(formatted);
-      } else {
-        setFetchError(data.message || "Failed to load students");
+              return {
+                id: s._id,
+                _id: s._id,
+                source: "Admission",
+                sourceLabel: "Admission Form",
+                studentName: s.name || "Unknown",
+                fatherName: s.fatherName || s.guardianName || "N/A",
+                motherName: s.motherName || "N/A",
+                class: s.course || s.class || "N/A",
+                subject: s.course || "N/A",
+                phone: s.phone || "",
+                email: s.email || "",
+                address: s.presentAddress || s.permanentAddress || "N/A",
+                dob: s.dobOrNid || "",
+                gender: s.gender || "N/A",
+                country: s.country || "BD",
+                studentId: s.studentId || "",
+                previousSchool: s.previousSchool || "N/A",
+                admissionDate: s.admissionDate
+                  ? new Date(s.admissionDate).toISOString().split("T")[0]
+                  : "N/A",
+                status: displayStatus,
+                rawStatus: s.status || "Pending",
+                paymentStatus: s.paymentStatus || "Unpaid",
+                priority: priority,
+                notes: s.paymentRemarks || "No additional notes",
+                appliedDate: s.createdAt
+                  ? new Date(s.createdAt).toISOString().split("T")[0]
+                  : "N/A",
+                reviewedBy: s.approvedBy || null,
+                reviewedDate: s.approvedAt
+                  ? new Date(s.approvedAt).toISOString().split("T")[0]
+                  : null,
+                rejectionReason: s.rejectionReason || null,
+                username: s.username || "",
+                enrolledCourses: s.enrolledCourses || [],
+                paidAmount: s.paidAmount || 0,
+                courseFee: s.courseFee || 0,
+                dueAmount: s.dueAmount || 0,
+                scholarshipAmount: s.scholarshipAmount || 0,
+                paymentMethod: s.paymentMethod || "",
+                transactionId: s.transactionId || "",
+                guardianPhone: s.guardianPhone || "",
+                _raw: s,
+              };
+            });
+          }
+        } catch (e) {
+          console.error("Admission parse error:", e);
+        }
       }
+
+      // ---------- 2) Basic Tazweed Students ----------
+      let tazweedStudents = [];
+      if (tazweedRes.status === "fulfilled") {
+        try {
+          const d = await tazweedRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            tazweedStudents = d.students.map((s) => {
+              const paid = Number(s.paidAmount) || 0;
+              const due = Number(s.dueAmount) || 0;
+              const isPaid = due === 0 && paid > 0;
+
+              let priority = "Medium";
+              if (isPaid) priority = "High";
+              else if (paid === 0) priority = "Low";
+
+              return {
+                id: s._id,
+                _id: s._id,
+                source: "Tazweed",
+                sourceLabel: "Basic Tazweed",
+                studentName: s.name || "Unknown",
+                fatherName: "N/A",
+                motherName: "N/A",
+                class: "Basic Tajweed (Level-1)",
+                subject: "Basic Tajweed",
+                phone: s.phone || "",
+                email: "",
+                address: "N/A",
+                dob: "",
+                gender: "N/A",
+                country: s.country || "BD",
+                studentId: s.studentId || "",
+                previousSchool: "N/A",
+                admissionDate: s.createdAt
+                  ? new Date(s.createdAt).toISOString().split("T")[0]
+                  : "N/A",
+                // ✅ Tazweed সব Already Active
+                status: "Approved",
+                rawStatus: "Active",
+                paymentStatus: isPaid
+                  ? "Paid"
+                  : paid > 0
+                    ? "Partial"
+                    : "Unpaid",
+                priority: priority,
+                notes: s.comments || "No additional notes",
+                appliedDate: s.createdAt
+                  ? new Date(s.createdAt).toISOString().split("T")[0]
+                  : "N/A",
+                reviewedBy: null,
+                reviewedDate: null,
+                rejectionReason: null,
+                username: "",
+                enrolledCourses: [],
+                paidAmount: paid,
+                courseFee: Number(s.courseFee) || 0,
+                dueAmount: due,
+                scholarshipAmount: Number(s.scholarshipAmount) || 0,
+                paymentMethod: "",
+                transactionId: s.transactionId || "",
+                guardianPhone: s.phone || "",
+                _raw: s,
+              };
+            });
+          }
+        } catch (e) {
+          console.error("Tazweed parse error:", e);
+        }
+      }
+
+      // ---------- 3) Najera Batch Students ----------
+      let najeraStudents = [];
+      if (najeraRes.status === "fulfilled") {
+        try {
+          const d = await najeraRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            najeraStudents = d.students.map((s) => {
+              const paid = Number(s.paidAmount) || 0;
+              const due = Number(s.dueAmount) || 0;
+              const isPaid = due === 0 && paid > 0;
+
+              let priority = "Medium";
+              if (isPaid) priority = "High";
+              else if (paid === 0) priority = "Low";
+
+              return {
+                id: s._id,
+                _id: s._id,
+                source: "Najera",
+                sourceLabel: "Najera Batch",
+                studentName: s.name || "Unknown",
+                fatherName: "N/A",
+                motherName: "N/A",
+                class: "Quran Nazera",
+                subject: "Quran Nazera",
+                phone: s.phone || "",
+                email: "",
+                address: "N/A",
+                dob: "",
+                gender: "N/A",
+                country: s.country || "BD",
+                studentId: s.studentId || "",
+                previousSchool: "N/A",
+                admissionDate: s.createdAt
+                  ? new Date(s.createdAt).toISOString().split("T")[0]
+                  : "N/A",
+                status: "Approved",
+                rawStatus: "Active",
+                paymentStatus: isPaid
+                  ? "Paid"
+                  : paid > 0
+                    ? "Partial"
+                    : "Unpaid",
+                priority: priority,
+                notes: s.comments || "No additional notes",
+                appliedDate: s.createdAt
+                  ? new Date(s.createdAt).toISOString().split("T")[0]
+                  : "N/A",
+                reviewedBy: null,
+                reviewedDate: null,
+                rejectionReason: null,
+                username: "",
+                enrolledCourses: [],
+                paidAmount: paid,
+                courseFee: Number(s.courseFee) || 0,
+                dueAmount: due,
+                scholarshipAmount: Number(s.scholarshipAmount) || 0,
+                paymentMethod: "",
+                transactionId: s.transactionId || "",
+                guardianPhone: s.phone || "",
+                _raw: s,
+              };
+            });
+          }
+        } catch (e) {
+          console.error("Najera parse error:", e);
+        }
+      }
+
+      // ✅ Combine and sort (newest first)
+      const combined = [
+        ...admissionStudents,
+        ...tazweedStudents,
+        ...najeraStudents,
+      ].sort((a, b) => {
+        const da = new Date(a._raw?.createdAt || 0).getTime();
+        const db = new Date(b._raw?.createdAt || 0).getTime();
+        return db - da;
+      });
+
+      console.log("════════════════════════════════");
+      console.log(`✅ Loaded admission requests:`);
+      console.log(`   - Admission: ${admissionStudents.length}`);
+      console.log(`   - Tazweed: ${tazweedStudents.length}`);
+      console.log(`   - Najera: ${najeraStudents.length}`);
+      console.log(`   - Total: ${combined.length}`);
+      console.log("════════════════════════════════");
+
+      setAdmissionRequests(combined);
     } catch (err) {
       console.error("❌ Fetch error:", err);
       setFetchError("সার্ভারে সংযোগ করা যায়নি!");
@@ -433,6 +540,22 @@ const Student_admission = () => {
           path: "/admin-exam/certificate",
           label: "Certificate Permission",
         },
+        { id: "grad", path: "/admin-exam/grad", label: "Grad" },
+        {
+          id: "class-test",
+          path: "/admin-exam/class-test",
+          label: "Class Test",
+        },
+        {
+          id: "mid-term",
+          path: "/admin-exam/mid-term",
+          label: "Mid Term Exam",
+        },
+        {
+          id: "final-exam",
+          path: "/admin-exam/final-exam",
+          label: "Final Exam",
+        },
       ],
     },
     {
@@ -483,28 +606,38 @@ const Student_admission = () => {
     },
   ];
 
+  // ============================================================
   // Filter
-  const filteredRequests = admissionRequests.filter((request) => {
-    const matchesSearch =
-      (request.studentName || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      (request.fatherName || "")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      (request.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (request.phone || "").includes(searchTerm);
+  // ============================================================
+  const filteredRequests = admissionRequests
+    .filter((r) => (sourceFilter === "All" ? true : r.source === sourceFilter))
+    .filter((request) => {
+      const matchesSearch =
+        (request.studentName || "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        (request.fatherName || "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        (request.email || "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        (request.studentId || "")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        (request.phone || "").includes(searchTerm);
 
-    const matchesStatus =
-      filterStatus === "All" || request.status === filterStatus;
-    const matchesClass = filterClass === "All" || request.class === filterClass;
-    const matchesPriority =
-      filterPriority === "All" || request.priority === filterPriority;
+      const matchesStatus =
+        filterStatus === "All" || request.status === filterStatus;
+      const matchesCourse =
+        filterCourse === "All" || request.class === filterCourse;
+      const matchesPriority =
+        filterPriority === "All" || request.priority === filterPriority;
 
-    return matchesSearch && matchesStatus && matchesClass && matchesPriority;
-  });
+      return matchesSearch && matchesStatus && matchesCourse && matchesPriority;
+    });
 
-  const uniqueClasses = [
+  const uniqueCourses = [
     "All",
     ...new Set(admissionRequests.map((r) => r.class).filter(Boolean)),
   ];
@@ -516,6 +649,14 @@ const Student_admission = () => {
     "All",
     ...new Set(admissionRequests.map((r) => r.priority).filter(Boolean)),
   ];
+
+  // Source counts
+  const sourceCounts = {
+    All: admissionRequests.length,
+    Admission: admissionRequests.filter((r) => r.source === "Admission").length,
+    Tazweed: admissionRequests.filter((r) => r.source === "Tazweed").length,
+    Najera: admissionRequests.filter((r) => r.source === "Najera").length,
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -551,6 +692,19 @@ const Student_admission = () => {
         return "bg-yellow-100 text-yellow-700";
       case "Low":
         return "bg-green-100 text-green-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const getSourceBadge = (source) => {
+    switch (source) {
+      case "Admission":
+        return "bg-blue-100 text-blue-700";
+      case "Tazweed":
+        return "bg-green-100 text-green-700";
+      case "Najera":
+        return "bg-purple-100 text-purple-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
@@ -598,19 +752,16 @@ const Student_admission = () => {
       const password = "student123S@";
       const roll = "R" + Date.now().toString().slice(-4);
 
-      const res = await fetch(
-        `https://api.tarbiyahonline.com/api/students/approve/${request.id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username,
-            password,
-            roll,
-            enrolledCourses: request.enrolledCourses || [],
-          }),
-        },
-      );
+      const res = await fetch(`${API_BASE}/students/approve/${request.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username,
+          password,
+          roll,
+          enrolledCourses: request.enrolledCourses || [],
+        }),
+      });
 
       const data = await res.json();
 
@@ -681,10 +832,23 @@ const Student_admission = () => {
     setIsProcessing(true);
 
     try {
-      const res = await fetch(
-        `https://api.tarbiyahonline.com/api/students/delete/${selectedRequest.id}`,
-        { method: "DELETE" },
-      );
+      // ✅ Source অনুযায়ী সঠিক endpoint
+      let rejectUrl = `${API_BASE}/admin-students/update/${selectedRequest.id}`;
+      let body = { status: "Inactive", rejectionReason };
+
+      if (selectedRequest.source === "Tazweed") {
+        rejectUrl = `${API_BASE}/basic-tazweed/update/${selectedRequest.id}`;
+        body = { comments: rejectionReason };
+      } else if (selectedRequest.source === "Najera") {
+        rejectUrl = `${API_BASE}/najera-batch/update/${selectedRequest.id}`;
+        body = { comments: rejectionReason };
+      }
+
+      const res = await fetch(rejectUrl, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
       const data = await res.json();
 
       if (data.success) {
@@ -731,15 +895,16 @@ const Student_admission = () => {
     }
   };
 
-  // Bulk approve
+  // Bulk approve (only for Admission Form source)
   const handleBulkApprove = async () => {
     const pendingRequests = admissionRequests.filter(
-      (r) => r.status === "Pending",
+      (r) => r.status === "Pending" && r.source === "Admission",
     );
     if (pendingRequests.length === 0) {
       Swal.fire({
         icon: "info",
         title: "No Pending Requests",
+        text: "Admission Form থেকে কোনো pending request নেই।",
         timer: 1500,
         showConfirmButton: false,
       });
@@ -768,19 +933,16 @@ const Student_admission = () => {
         const password = "student123S@";
         const roll = "R" + Date.now().toString().slice(-4) + successCount;
 
-        const res = await fetch(
-          `https://api.tarbiyahonline.com/api/students/approve/${req.id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              username,
-              password,
-              roll,
-              enrolledCourses: req.enrolledCourses || [],
-            }),
-          },
-        );
+        const res = await fetch(`${API_BASE}/students/approve/${req.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username,
+            password,
+            roll,
+            enrolledCourses: req.enrolledCourses || [],
+          }),
+        });
         const data = await res.json();
         if (data.success) successCount++;
       } catch (err) {
@@ -817,7 +979,7 @@ const Student_admission = () => {
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
           <h1 className="text-sm font-bold text-gray-800">
-            Admission Permission (Elders)
+            Admission Permission
           </h1>
           <button
             onClick={toggleSidebar}
@@ -955,19 +1117,23 @@ const Student_admission = () => {
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaUserPlus className="text-blue-600" /> Admission Permission —
-                <span className="text-teal-700">Quran for Elders</span>
+                <span className="text-teal-700">All Sources</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Qaida Nuraniyah • Quran Nazera • Bakarah Hifz • Basic Tajweed
-                (Level-1)
+                Admission Form + Basic Tazweed + Najera Batch
               </p>
             </div>
             <div className="flex items-center gap-2">
               <button
                 onClick={fetchAdmissions}
-                className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
+                disabled={loading}
+                className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 disabled:opacity-50"
               >
-                <FaSyncAlt size={12} /> Refresh
+                <FaSyncAlt
+                  size={12}
+                  className={loading ? "animate-spin" : ""}
+                />{" "}
+                Refresh
               </button>
               <button
                 onClick={handleBulkApprove}
@@ -988,11 +1154,50 @@ const Student_admission = () => {
             </div>
           </div>
 
+          {/* Source Tabs */}
+          <div className="bg-white border rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto">
+            {[
+              { id: "All", label: "All Students", color: "blue" },
+              { id: "Admission", label: "Admission Form", color: "blue" },
+              { id: "Tazweed", label: "Basic Tazweed", color: "green" },
+              { id: "Najera", label: "Najera Batch", color: "purple" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setSourceFilter(tab.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                  sourceFilter === tab.id
+                    ? tab.color === "blue"
+                      ? "bg-blue-50 text-blue-700 shadow-sm"
+                      : tab.color === "green"
+                        ? "bg-green-50 text-green-700 shadow-sm"
+                        : "bg-purple-50 text-purple-700 shadow-sm"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {tab.label}
+                <span
+                  className={`text-[10px] px-1.5 rounded-full ${
+                    sourceFilter === tab.id
+                      ? "bg-white text-gray-700"
+                      : "bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  {sourceCounts[tab.id]}
+                </span>
+              </button>
+            ))}
+          </div>
+
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
             <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-blue-600">{totalRequests}</p>
-              <p className="text-[10px] text-gray-500">Total Elders</p>
+              <p className="text-lg font-bold text-blue-600">
+                {sourceCounts[sourceFilter]}
+              </p>
+              <p className="text-[10px] text-gray-500">
+                {sourceFilter === "All" ? "Total" : sourceFilter}
+              </p>
             </div>
             <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-yellow-600">
@@ -1021,7 +1226,7 @@ const Student_admission = () => {
                 <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search elders students..."
+                  placeholder="Search students by name/email/phone/studentId..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border rounded-lg"
@@ -1040,11 +1245,11 @@ const Student_admission = () => {
                   ))}
                 </select>
                 <select
-                  value={filterClass}
-                  onChange={(e) => setFilterClass(e.target.value)}
-                  className="px-1.5 py-1 text-xs border rounded-lg max-w-[150px]"
+                  value={filterCourse}
+                  onChange={(e) => setFilterCourse(e.target.value)}
+                  className="px-1.5 py-1 text-xs border rounded-lg max-w-[180px]"
                 >
-                  {uniqueClasses.map((c) => (
+                  {uniqueCourses.map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>
@@ -1070,7 +1275,7 @@ const Student_admission = () => {
             <div className="bg-white border rounded-xl shadow-sm p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
               <p className="text-sm text-gray-500 mt-3">
-                Loading elders admission requests...
+                Loading admission requests...
               </p>
             </div>
           ) : fetchError ? (
@@ -1086,7 +1291,7 @@ const Student_admission = () => {
             </div>
           ) : (
             <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
-              <div className="overflow-x-auto max-h-[calc(100vh-400px)] overflow-y-auto">
+              <div className="overflow-x-auto max-h-[calc(100vh-450px)] overflow-y-auto">
                 <table className="w-full text-xs">
                   <thead className="bg-gray-50 sticky top-0 z-10">
                     <tr>
@@ -1095,6 +1300,9 @@ const Student_admission = () => {
                       </th>
                       <th className="px-3 py-2 text-left font-semibold text-gray-600">
                         Student
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                        Source
                       </th>
                       <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
                         Father
@@ -1127,9 +1335,23 @@ const Student_admission = () => {
                             <div className="font-medium text-gray-800">
                               {request.studentName}
                             </div>
+                            {request.studentId && (
+                              <div className="text-[10px] text-blue-600 font-mono">
+                                ID: {request.studentId}
+                              </div>
+                            )}
                             <div className="text-[10px] text-gray-400">
-                              {request.email}
+                              {request.email || request.phone}
                             </div>
+                          </td>
+                          <td className="px-3 py-2">
+                            <span
+                              className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-semibold ${getSourceBadge(
+                                request.source,
+                              )}`}
+                            >
+                              {request.sourceLabel}
+                            </span>
                           </td>
                           <td className="px-3 py-2 hidden md:table-cell">
                             <div className="text-gray-700">
@@ -1149,7 +1371,9 @@ const Student_admission = () => {
                           </td>
                           <td className="px-3 py-2">
                             <span
-                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(request.status)}`}
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(
+                                request.status,
+                              )}`}
                             >
                               {getStatusIcon(request.status)}
                               {request.status}
@@ -1157,7 +1381,9 @@ const Student_admission = () => {
                           </td>
                           <td className="px-3 py-2 hidden sm:table-cell">
                             <span
-                              className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${getPriorityColor(request.priority)}`}
+                              className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${getPriorityColor(
+                                request.priority,
+                              )}`}
                             >
                               {request.priority}
                             </span>
@@ -1171,26 +1397,27 @@ const Student_admission = () => {
                               >
                                 <FaEye size={14} />
                               </button>
-                              {request.status === "Pending" && (
-                                <>
-                                  <button
-                                    onClick={() => handleApprove(request)}
-                                    disabled={isProcessing}
-                                    className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 disabled:opacity-50"
-                                    title="Approve"
-                                  >
-                                    <FaCheckCircle size={14} />
-                                  </button>
-                                  <button
-                                    onClick={() => handleReject(request)}
-                                    disabled={isProcessing}
-                                    className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 disabled:opacity-50"
-                                    title="Reject"
-                                  >
-                                    <FaTimesCircle size={14} />
-                                  </button>
-                                </>
-                              )}
+                              {request.source === "Admission" &&
+                                request.status === "Pending" && (
+                                  <>
+                                    <button
+                                      onClick={() => handleApprove(request)}
+                                      disabled={isProcessing}
+                                      className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 disabled:opacity-50"
+                                      title="Approve"
+                                    >
+                                      <FaCheckCircle size={14} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleReject(request)}
+                                      disabled={isProcessing}
+                                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 disabled:opacity-50"
+                                      title="Reject"
+                                    >
+                                      <FaTimesCircle size={14} />
+                                    </button>
+                                  </>
+                                )}
                             </div>
                           </td>
                         </tr>
@@ -1198,14 +1425,14 @@ const Student_admission = () => {
                     ) : (
                       <tr>
                         <td
-                          colSpan="8"
+                          colSpan="9"
                           className="px-3 py-8 text-center text-gray-500"
                         >
                           <FaUserPlus className="text-4xl text-gray-300 mx-auto mb-2" />
-                          <p>No elders admission requests found</p>
+                          <p>No admission requests found</p>
                           <p className="text-[10px] text-gray-400 mt-1">
                             {admissionRequests.length === 0
-                              ? "Qaida Nuraniyah, Quran Nazera, Bakarah Hifz, Basic Tajweed (Level-1) — এই ৪টি কোর্সে এখনো কোনো student নেই।"
+                              ? "Admission Form, Basic Tazweed বা Najera Batch থেকে student add করুন।"
                               : "Try adjusting your search or filter"}
                           </p>
                         </td>
@@ -1245,22 +1472,31 @@ const Student_admission = () => {
                       {selectedRequest.studentName}
                     </h2>
                     <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedRequest.status)}`}
+                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${getSourceBadge(
+                        selectedRequest.source,
+                      )}`}
+                    >
+                      {selectedRequest.sourceLabel}
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
+                        selectedRequest.status,
+                      )}`}
                     >
                       {getStatusIcon(selectedRequest.status)}
                       {selectedRequest.status}
-                    </span>
-                    <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(selectedRequest.priority)}`}
-                    >
-                      {selectedRequest.priority} Priority
                     </span>
                   </div>
                   <p className="text-sm text-gray-500">
                     {selectedRequest.class}
                   </p>
                   <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
-                    <span>📧 {selectedRequest.email}</span>
+                    {selectedRequest.studentId && (
+                      <span>🆔 {selectedRequest.studentId}</span>
+                    )}
+                    {selectedRequest.email && (
+                      <span>📧 {selectedRequest.email}</span>
+                    )}
                     <span>📱 {selectedRequest.phone}</span>
                     <span>📅 Applied: {selectedRequest.appliedDate}</span>
                   </div>
@@ -1292,15 +1528,15 @@ const Student_admission = () => {
                       </span>
                     </div>
                     <div className="flex justify-between border-b pb-1">
-                      <span className="text-gray-500">NID / DOB</span>
+                      <span className="text-gray-500">Country</span>
                       <span className="font-medium">
-                        {selectedRequest.dob || "N/A"}
+                        {selectedRequest.country || "BD"}
                       </span>
                     </div>
                     <div className="flex justify-between border-b pb-1">
-                      <span className="text-gray-500">Address</span>
-                      <span className="font-medium text-xs">
-                        {selectedRequest.address}
+                      <span className="text-gray-500">NID / DOB</span>
+                      <span className="font-medium">
+                        {selectedRequest.dob || "N/A"}
                       </span>
                     </div>
                   </div>
@@ -1308,20 +1544,33 @@ const Student_admission = () => {
 
                 <div>
                   <h4 className="font-semibold text-gray-700 text-sm mb-2 flex items-center gap-2">
-                    <FaSchoolIcon className="text-green-500" /> Admission
-                    Details
+                    <FaSchoolIcon className="text-green-500" /> Payment Details
                   </h4>
                   <div className="space-y-1.5 text-sm">
                     <div className="flex justify-between border-b pb-1">
-                      <span className="text-gray-500">Applied Date</span>
+                      <span className="text-gray-500">Course Fee</span>
                       <span className="font-medium">
-                        {selectedRequest.appliedDate}
+                        ৳{selectedRequest.courseFee?.toLocaleString() || 0}
                       </span>
                     </div>
                     <div className="flex justify-between border-b pb-1">
-                      <span className="text-gray-500">Admission Date</span>
-                      <span className="font-medium">
-                        {selectedRequest.admissionDate}
+                      <span className="text-gray-500">Scholarship</span>
+                      <span className="font-medium text-blue-600">
+                        ৳
+                        {selectedRequest.scholarshipAmount?.toLocaleString() ||
+                          0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between border-b pb-1">
+                      <span className="text-gray-500">Paid</span>
+                      <span className="font-medium text-green-600">
+                        ৳{selectedRequest.paidAmount?.toLocaleString() || 0}
+                      </span>
+                    </div>
+                    <div className="flex justify-between border-b pb-1">
+                      <span className="text-gray-500">Due</span>
+                      <span className="font-medium text-red-600">
+                        ৳{selectedRequest.dueAmount?.toLocaleString() || 0}
                       </span>
                     </div>
                     <div className="flex justify-between border-b pb-1">
@@ -1333,49 +1582,11 @@ const Student_admission = () => {
                       </span>
                     </div>
                     <div className="flex justify-between border-b pb-1">
-                      <span className="text-gray-500">Payment Method</span>
-                      <span className="font-medium">
-                        {selectedRequest.paymentMethod || "N/A"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-b pb-1">
                       <span className="text-gray-500">Transaction ID</span>
                       <span className="font-medium text-xs">
                         {selectedRequest.transactionId || "N/A"}
                       </span>
                     </div>
-                    <div className="flex justify-between border-b pb-1">
-                      <span className="text-gray-500">Paid Amount</span>
-                      <span className="font-medium">
-                        ৳{selectedRequest.paidAmount || 0}
-                      </span>
-                    </div>
-                    {selectedRequest.reviewedBy && (
-                      <>
-                        <div className="flex justify-between border-b pb-1">
-                          <span className="text-gray-500">Reviewed By</span>
-                          <span className="font-medium">
-                            {selectedRequest.reviewedBy}
-                          </span>
-                        </div>
-                        <div className="flex justify-between border-b pb-1">
-                          <span className="text-gray-500">Reviewed Date</span>
-                          <span className="font-medium">
-                            {selectedRequest.reviewedDate}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                    {selectedRequest.rejectionReason && (
-                      <div className="mt-2 p-2 bg-red-50 rounded-lg border border-red-200">
-                        <p className="text-xs text-red-600 font-medium">
-                          Rejection Reason:
-                        </p>
-                        <p className="text-sm text-red-700">
-                          {selectedRequest.rejectionReason}
-                        </p>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -1393,30 +1604,31 @@ const Student_admission = () => {
                 )}
 
               <div className="flex gap-3 pt-4 border-t">
-                {selectedRequest.status === "Pending" && (
-                  <>
-                    <button
-                      onClick={() => {
-                        setShowDetailsModal(false);
-                        handleApprove(selectedRequest);
-                      }}
-                      disabled={isProcessing}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm disabled:opacity-50"
-                    >
-                      <FaCheckCircle className="inline mr-2" /> Approve
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowDetailsModal(false);
-                        handleReject(selectedRequest);
-                      }}
-                      disabled={isProcessing}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm disabled:opacity-50"
-                    >
-                      <FaTimesCircle className="inline mr-2" /> Reject
-                    </button>
-                  </>
-                )}
+                {selectedRequest.source === "Admission" &&
+                  selectedRequest.status === "Pending" && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setShowDetailsModal(false);
+                          handleApprove(selectedRequest);
+                        }}
+                        disabled={isProcessing}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm disabled:opacity-50"
+                      >
+                        <FaCheckCircle className="inline mr-2" /> Approve
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDetailsModal(false);
+                          handleReject(selectedRequest);
+                        }}
+                        disabled={isProcessing}
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm disabled:opacity-50"
+                      >
+                        <FaTimesCircle className="inline mr-2" /> Reject
+                      </button>
+                    </>
+                  )}
                 <button
                   onClick={() => setShowDetailsModal(false)}
                   className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"

@@ -973,6 +973,9 @@ const DashboardContent = ({ stats, notifications }) => {
     </div>
   );
 };
+// ==========================================
+// 2. STUDENT MANAGEMENT CONTENT (Fixed)
+// ==========================================
 const StudentManagementContent = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -980,19 +983,24 @@ const StudentManagementContent = () => {
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
-
-  // ✅ নতুন — Available Courses (backend থেকে আসবে)
   const [availableCourses, setAvailableCourses] = useState([]);
 
   // ✅ Approve Modal State
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
+  // ✅ Auto-generate Student ID helper
+  const generateStudentId = () => {
+    const year = new Date().getFullYear().toString().slice(-2);
+    const random = Math.floor(10000 + Math.random() * 90000);
+    return `TAR${year}${random}`; // যেমন: TAR2648213
+  };
+
   useEffect(() => {
     fetchStudents();
   }, [refreshKey]);
 
-  // ✅ নতুন — Available Courses লোড করা
+  // ✅ Available Courses লোড
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -1013,23 +1021,18 @@ const StudentManagementContent = () => {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-
       setError(null);
 
       const response = await fetch(
         "https://api.tarbiyahonline.com/api/students/all",
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         },
       );
 
       if (response.status === 404) {
-        setError(
-          "API endpoint not found! Please check if server is running on port 5000",
-        );
+        setError("API endpoint not found!");
         return;
       }
 
@@ -1050,24 +1053,30 @@ const StudentManagementContent = () => {
       }
     } catch (error) {
       console.error("❌ Error fetching students:", error);
-      setError(`Error: ${error.message}. Please check if server is running.`);
+      setError(`Error: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Approve Student Function (এখন enrolledCourses সহ)
+  // ✅ Approve Student Function (Student ID সহ)
   const handleApproveStudent = async () => {
     try {
-      if (
-        !selectedStudent.username ||
-        !selectedStudent.password ||
-        !selectedStudent.roll
-      ) {
+      // Validation
+      if (!selectedStudent.studentId || !selectedStudent.studentId.trim()) {
         Swal.fire({
           icon: "warning",
-          title: "Information Missing!",
-          text: "Please provide username, password and roll number.",
+          title: "Student ID আবশ্যক!",
+          text: "অনুগ্রহ করে একটি Student ID দিন।",
+        });
+        return;
+      }
+
+      if (!selectedStudent.password || !selectedStudent.password.trim()) {
+        Swal.fire({
+          icon: "warning",
+          title: "Password আবশ্যক!",
+          text: "অনুগ্রহ করে একটি password দিন।",
         });
         return;
       }
@@ -1076,14 +1085,11 @@ const StudentManagementContent = () => {
         `https://api.tarbiyahonline.com/api/students/approve/${selectedStudent._id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            username: selectedStudent.username,
-            password: selectedStudent.password,
-            roll: selectedStudent.roll,
-            // ✅ নতুন — কোর্স আইডি অ্যারে
+            studentId: selectedStudent.studentId.trim(),
+            password: selectedStudent.password.trim(),
+            roll: selectedStudent.roll || "",
             enrolledCourses: selectedStudent.enrolledCourses || [],
           }),
         },
@@ -1097,7 +1103,7 @@ const StudentManagementContent = () => {
             ? {
                 ...s,
                 status: "Active",
-                username: selectedStudent.username,
+                studentId: selectedStudent.studentId.trim(),
                 roll: selectedStudent.roll,
                 enrolledCourses: selectedStudent.enrolledCourses || [],
               }
@@ -1105,28 +1111,34 @@ const StudentManagementContent = () => {
         );
         setStudents(updatedStudents);
         setShowApproveModal(false);
-        setSelectedStudent(null);
 
         Swal.fire({
           icon: "success",
           title: "✅ Student Approved!",
           html: `
             <div style="text-align: left;">
-              <p><strong>Student:</strong> ${selectedStudent.name}</p>
+              <p><strong>Name:</strong> ${selectedStudent.name}</p>
               <p><strong>Class:</strong> ${selectedStudent.class}</p>
-              <p><strong>Roll:</strong> ${selectedStudent.roll}</p>
               <hr style="margin: 10px 0;">
               <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
-                <p style="font-weight: bold; color: #004d4d; margin-bottom: 5px;">🔑 Login Credentials:</p>
-                <p><strong>Username:</strong> <span style="color: #004d4d;">${selectedStudent.username}</span></p>
-                <p><strong>Password:</strong> <span style="color: #004d4d;">${selectedStudent.password}</span></p>
-                <p style="margin-top: 8px;"><strong>Courses Assigned:</strong> <span style="color: #004d4d;">${(selectedStudent.enrolledCourses || []).length}</span></p>
+                <p style="font-weight: bold; color: #004d4d; margin-bottom: 8px;">🔑 Student Login Credentials:</p>
+                <p style="font-size: 15px;"><strong>Student ID:</strong> 
+                  <span style="color: #004d4d; font-size: 18px; letter-spacing: 1px; font-family: monospace;">${selectedStudent.studentId}</span>
+                </p>
+                <p><strong>Password:</strong> 
+                  <span style="color: #004d4d;">${selectedStudent.password}</span>
+                </p>
+                <p style="margin-top: 8px; font-size: 12px; color: #666;">
+                  📌 এই তথ্য স্টুডেন্টকে দিন — সে এটা দিয়ে লগইন করবে।
+                </p>
               </div>
             </div>
           `,
           confirmButtonColor: "#004d4d",
           confirmButtonText: "OK",
         });
+
+        setSelectedStudent(null);
       } else {
         Swal.fire({
           icon: "error",
@@ -1162,9 +1174,7 @@ const StudentManagementContent = () => {
           `https://api.tarbiyahonline.com/api/students/delete/${id}`,
           {
             method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
           },
         );
 
@@ -1197,7 +1207,7 @@ const StudentManagementContent = () => {
     }
   };
 
-  // ✅ নতুন — Course check/uncheck handler
+  // ✅ Course toggle
   const handleToggleCourse = (courseId) => {
     const currentList = selectedStudent.enrolledCourses || [];
     const updated = currentList.includes(courseId)
@@ -1226,6 +1236,7 @@ const StudentManagementContent = () => {
         s.name?.toLowerCase().includes(term) ||
         s.phone?.includes(term) ||
         s.email?.toLowerCase().includes(term) ||
+        s.studentId?.toLowerCase().includes(term) ||
         s.username?.toLowerCase().includes(term) ||
         s.roll?.toLowerCase().includes(term) ||
         s.class?.toLowerCase().includes(term)
@@ -1298,10 +1309,10 @@ const StudentManagementContent = () => {
                   Name & Contact
                 </th>
                 <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Class
+                  Student ID
                 </th>
                 <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                  Username
+                  Class
                 </th>
                 <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                   Roll
@@ -1333,19 +1344,19 @@ const StudentManagementContent = () => {
                       </p>
                     )}
                   </td>
-                  <td className="px-3 py-2 text-xs text-gray-600">
-                    {student.class}
-                  </td>
                   <td className="px-3 py-2 text-xs font-mono">
-                    {student.username ? (
-                      <span className="text-blue-600 font-semibold">
-                        {student.username}
+                    {student.studentId ? (
+                      <span className="text-blue-600 font-semibold bg-blue-50 px-1.5 py-0.5 rounded">
+                        {student.studentId}
                       </span>
                     ) : (
                       <span className="text-gray-400 text-[10px]">
                         Not assigned
                       </span>
                     )}
+                  </td>
+                  <td className="px-3 py-2 text-xs text-gray-600">
+                    {student.class || student.course || "N/A"}
                   </td>
                   <td className="px-3 py-2 text-xs text-gray-600">
                     {student.roll || (
@@ -1371,8 +1382,8 @@ const StudentManagementContent = () => {
                         onClick={() => {
                           setSelectedStudent({
                             ...student,
-                            username: student.username || "",
-                            password: "",
+                            studentId: student.studentId || generateStudentId(),
+                            password: student.password || "student123S@",
                             roll: student.roll || "",
                             enrolledCourses: student.enrolledCourses || [],
                           });
@@ -1399,7 +1410,7 @@ const StudentManagementContent = () => {
         </div>
       </div>
 
-      {/* ✅ Approve Modal */}
+      {/* ✅ Approve Modal — Student ID Field সহ */}
       {showApproveModal && selectedStudent && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
@@ -1420,7 +1431,7 @@ const StudentManagementContent = () => {
             </div>
 
             {/* Student Information Display */}
-            <div className="bg-gray-50 p-4 rounded-lg mb-4 space-y-1">
+            <div className="bg-gray-50 p-4 rounded-lg mb-4 space-y-1 text-xs">
               <p>
                 <strong>Name:</strong> {selectedStudent.name}
               </p>
@@ -1431,7 +1442,8 @@ const StudentManagementContent = () => {
                 <strong>Phone:</strong> {selectedStudent.phone || "N/A"}
               </p>
               <p>
-                <strong>Class:</strong> {selectedStudent.class || "N/A"}
+                <strong>Class:</strong>{" "}
+                {selectedStudent.class || selectedStudent.course || "N/A"}
               </p>
               <p>
                 <strong>Guardian:</strong>{" "}
@@ -1454,12 +1466,6 @@ const StudentManagementContent = () => {
                   {selectedStudent.status || "Pending"}
                 </span>
               </p>
-              <p>
-                <strong>Registration:</strong>{" "}
-                {selectedStudent.createdAt
-                  ? new Date(selectedStudent.createdAt).toLocaleString()
-                  : "N/A"}
-              </p>
             </div>
 
             {/* Set Login Credentials */}
@@ -1468,13 +1474,53 @@ const StudentManagementContent = () => {
                 🔑 Set Login Credentials
               </h4>
 
+              {/* ✅ Student ID Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Roll Number <span className="text-red-500">*</span>
+                  Student ID <span className="text-red-500">*</span>
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={selectedStudent.studentId || ""}
+                    onChange={(e) =>
+                      setSelectedStudent({
+                        ...selectedStudent,
+                        studentId: e.target.value,
+                      })
+                    }
+                    className="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 font-mono"
+                    placeholder="e.g., TAR2648213"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelectedStudent({
+                        ...selectedStudent,
+                        studentId: generateStudentId(),
+                      })
+                    }
+                    className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg transition-all whitespace-nowrap"
+                    title="Auto-generate Student ID"
+                  >
+                    🎲 Auto
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  💡 এই ID দিয়েই স্টুডেন্ট লগইন করবে। ম্যানুয়ালি লিখুন বা 🎲
+                  Auto ক্লিক করুন।
+                </p>
+              </div>
+
+              {/* Roll Number (Optional) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Roll Number{" "}
+                  <span className="text-gray-400 text-xs">(Optional)</span>
                 </label>
                 <input
                   type="text"
-                  value={selectedStudent.roll}
+                  value={selectedStudent.roll || ""}
                   onChange={(e) =>
                     setSelectedStudent({
                       ...selectedStudent,
@@ -1486,34 +1532,14 @@ const StudentManagementContent = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Username <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={selectedStudent.username}
-                  onChange={(e) =>
-                    setSelectedStudent({
-                      ...selectedStudent,
-                      username: e.target.value,
-                    })
-                  }
-                  className="w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  placeholder="Enter username"
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  💡 This will be used for student login
-                </p>
-              </div>
-
+              {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
-                  value={selectedStudent.password}
+                  value={selectedStudent.password || ""}
                   onChange={(e) =>
                     setSelectedStudent({
                       ...selectedStudent,
@@ -1524,12 +1550,13 @@ const StudentManagementContent = () => {
                   placeholder="Enter password"
                 />
                 <p className="text-xs text-gray-400 mt-1">
-                  💡 Default password: <strong>student123S@</strong>
+                  💡 Default password: <strong>student123S@</strong> — চাইলে
+                  পরিবর্তন করুন।
                 </p>
               </div>
             </div>
 
-            {/* ✅ নতুন — Course Selection UI */}
+            {/* Course Selection */}
             <div className="space-y-2 border-t pt-3 mt-3">
               <h4 className="text-sm font-bold text-gray-700 flex items-center justify-between">
                 <span>📚 Assign Courses</span>

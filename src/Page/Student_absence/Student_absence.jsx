@@ -1,5 +1,5 @@
 // src/Page/Admin/Student_absence.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
@@ -28,127 +28,13 @@ import {
   FaSave,
   FaInfoCircle,
   FaSyncAlt,
+  FaBook,
+  FaBookOpen,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-const API_BASE = "https://api.tarbiyahonline.com";
-
-// ============================================================
-// ✅ ২ জন ELDERS STUDENT — hardcoded fallback (সবসময় দেখাবে)
-// ============================================================
-const ELDERS_STUDENTS_FALLBACK = [
-  {
-    _id: "ELDERS_STU_001",
-    name: "Omer Faruk",
-    studentId: "TET26FB6001",
-    course: "Qaida Nooraniya, Bakarah Hifz",
-    primaryCourse: "Qaida Nuraniyah",
-    class: "Elders Batch A",
-    batch: "Batch-03",
-    phone: "",
-    email: "omer@gmail.com",
-    status: "Active",
-  },
-  {
-    _id: "ELDERS_STU_002",
-    name: "Ikramm",
-    studentId: "TET26FB6002",
-    course: "Qaida Nooraniya, Bakarah Hifz",
-    primaryCourse: "Qaida Nuraniyah",
-    class: "Elders Batch A",
-    batch: "Batch-03",
-    phone: "",
-    email: "ikramm@gmail.com",
-    status: "Active",
-  },
-];
-
-// ============================================================
-// ✅ ELDERS — Elders course check
-// ============================================================
-const ELDERS_COURSES = [
-  "qaida nuraniyah",
-  "qaida nooraniya",
-  "qaida noorani",
-  "qaida nurani",
-  "qaidah nuraniyah",
-  "qaidah nooraniya",
-  "qaidah noorani",
-  "quran nazera",
-  "nazera quran",
-  "quran najera",
-  "najera quran",
-  "bakarah hifz",
-  "bakara hifz",
-  "baqarah hifz",
-  "baqara hifz",
-  "basic tajweed (level-1)",
-  "basic tajweed (level 1)",
-  "basic tajweed level-1",
-  "basic tajweed level 1",
-  "basic tajweed",
-];
-
-const isSingleEldersCourse = (singleCourse) => {
-  const p = String(singleCourse).toLowerCase().trim();
-  if (!p) return false;
-  return ELDERS_COURSES.some((c) => {
-    if (p === c) return true;
-    if (p.includes(c)) return true;
-    if (c.includes(p) && p.length >= 8) return true;
-    return false;
-  });
-};
-
-const isEldersCourse = (courseStr) => {
-  if (!courseStr) return false;
-  const parts = String(courseStr)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (parts.length === 0) return false;
-  return parts.every((part) => isSingleEldersCourse(part));
-};
-
-// ✅ Map course string to primary course name
-const getPrimaryCourse = (courseStr) => {
-  if (!courseStr) return "";
-  const first = String(courseStr).split(",")[0].trim();
-  if (first.toLowerCase().includes("qaida")) return "Qaida Nuraniyah";
-  if (
-    first.toLowerCase().includes("nazera") ||
-    first.toLowerCase().includes("najera")
-  )
-    return "Najera";
-  if (first.toLowerCase().includes("nazera")) return "Quran Nazera";
-  if (first.toLowerCase().includes("tajweed")) return "Basic Tajweed";
-  if (
-    first.toLowerCase().includes("bakarah") ||
-    first.toLowerCase().includes("bakara")
-  )
-    return "Bakarah Hifz";
-  return first;
-};
-
-const ELDERS_TEACHERS = ["Jubayer Ahmad", "Sumaiya Afrin Mim"];
-
-const ELDERS_CLASSES = [
-  "Elders Batch A",
-  "Elders Batch B",
-  "Elders Batch C",
-  "Elders Batch D",
-  "Elders Batch E",
-];
-
-const ELDERS_BATCHES = [
-  "Batch-01",
-  "Batch-02",
-  "Batch-03",
-  "Batch-04",
-  "Batch-05",
-  "Batch-06",
-];
+const API_BASE = "https://api.tarbiyahonline.com/api";
 
 const Student_absence = () => {
   const { user, logOut } = useAuth();
@@ -161,18 +47,16 @@ const Student_absence = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "Quran for Elders",
+    department: "Administration",
     joinDate: "",
   });
 
-  // ✅ Start with fallback 2 students
-  const [eldersStudents, setEldersStudents] = useState(
-    ELDERS_STUDENTS_FALLBACK,
-  );
+  const [allStudents, setAllStudents] = useState([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
+  const [sourceFilter, setSourceFilter] = useState("All");
 
   const [absenceRecords, setAbsenceRecords] = useState(() => {
-    const saved = localStorage.getItem("eldersAbsenceRecords");
+    const saved = localStorage.getItem("allAbsenceRecords");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -186,8 +70,7 @@ const Student_absence = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
-  const [filterClass, setFilterClass] = useState("All");
-  const [filterSubject, setFilterSubject] = useState("All");
+  const [filterCourse, setFilterCourse] = useState("All");
   const [filterDate, setFilterDate] = useState("");
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -212,6 +95,13 @@ const Student_absence = () => {
 
   const statuses = ["Absent", "Late", "Leave"];
   const notifiedByOptions = ["Parent", "Student", "Teacher", "Other"];
+  const TEACHERS = [
+    "Jubayer Ahmad",
+    "Sumaiya Afrin Mim",
+    "Ustadh Ahmad",
+    "Ustadh Muhammad",
+    "Ustadh Abdullah",
+  ];
 
   // Load admin info
   useEffect(() => {
@@ -228,88 +118,144 @@ const Student_absence = () => {
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Quran for Elders",
+        department: "Administration",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
   // ============================================================
-  // ✅ Fetch elders students — hardcoded 2 + API merge
+  // ✅ Fetch from 3 APIs — all students (up to 50)
   // ============================================================
-  const fetchEldersStudents = async () => {
+  const fetchAllStudents = async () => {
     try {
       setStudentsLoading(true);
 
-      // Start with hardcoded fallback (2 students)
-      let eldersList = [...ELDERS_STUDENTS_FALLBACK];
+      const [studentsRes, tazweedRes, najeraRes] = await Promise.allSettled([
+        fetch(`${API_BASE}/students/all`),
+        fetch(`${API_BASE}/basic-tazweed/all`),
+        fetch(`${API_BASE}/najera-batch/all`),
+      ]);
 
-      try {
-        const res = await fetch(`${API_BASE}/api/students/all`);
-        const text = await res.text();
-
-        // HTML response হলে skip
-        if (!text.trim().startsWith("<")) {
-          const data = JSON.parse(text);
-
-          if (data.success && Array.isArray(data.students)) {
-            const all = data.students || [];
-            const elders = all.filter((s) => isEldersCourse(s.course));
-
-            console.log("📥 Total students from API:", all.length);
-            console.log("✅ Elders students from API:", elders.length);
-
-            elders.forEach((s) => {
-              console.log("   →", s.name, "|", s.course);
-              const formatted = {
-                _id: s._id,
-                name: s.name || "",
-                studentId: s.studentId || s._id?.slice(-8) || "N/A",
-                course: s.course || "",
-                primaryCourse: getPrimaryCourse(s.course),
-                class: s.batch || s.class || "Elders Batch A",
-                batch: s.batch || "Batch-03",
-                phone: s.phone || "",
-                email: s.email || "",
-                status: s.status || "Pending",
-              };
-
-              // Merge without duplicates
-              const exists = eldersList.some(
-                (e) =>
-                  (e.name || "").toLowerCase() ===
-                  (formatted.name || "").toLowerCase(),
-              );
-              if (!exists) eldersList.push(formatted);
-            });
+      // ---------- 1) Admission Form ----------
+      let admissionList = [];
+      if (studentsRes.status === "fulfilled") {
+        try {
+          const d = await studentsRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            admissionList = d.students.map((s) => ({
+              _id: s._id,
+              source: "Admission",
+              sourceLabel: "Admission Form",
+              name: s.name || "",
+              studentId: s.studentId || s._id?.slice(-8) || "N/A",
+              course: s.course || "",
+              primaryCourse: s.course
+                ? String(s.course).split(",")[0].trim()
+                : "",
+              class: s.batch || s.class || "General",
+              batch: s.batch || "",
+              phone: s.phone || "",
+              email: s.email || "",
+              country: s.country || "BD",
+              status: s.status || "Pending",
+            }));
           }
+        } catch (e) {
+          console.error("Admission parse error:", e);
         }
-      } catch (apiErr) {
-        console.warn("API fetch skipped, using fallback:", apiErr.message);
       }
 
-      console.log("✅ Final elders students:", eldersList.length);
-      eldersList.forEach((s) => console.log("   →", s.name));
+      // ---------- 2) Basic Tazweed ----------
+      let tazweedList = [];
+      if (tazweedRes.status === "fulfilled") {
+        try {
+          const d = await tazweedRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            tazweedList = d.students.map((s) => ({
+              _id: s._id,
+              source: "Tazweed",
+              sourceLabel: "Basic Tazweed",
+              name: s.name || "",
+              studentId: s.studentId || "N/A",
+              course: "Basic Tajweed (Level-1)",
+              primaryCourse: "Basic Tajweed",
+              class: "Basic Tazweed 6th Batch",
+              batch: "Basic Tazweed 6th Batch",
+              phone: s.phone || "",
+              email: "",
+              country: s.country || "BD",
+              status:
+                Number(s.dueAmount) === 0 && Number(s.paidAmount) > 0
+                  ? "Active"
+                  : "Pending",
+            }));
+          }
+        } catch (e) {
+          console.error("Tazweed parse error:", e);
+        }
+      }
 
-      setEldersStudents(eldersList);
+      // ---------- 3) Najera Batch ----------
+      let najeraList = [];
+      if (najeraRes.status === "fulfilled") {
+        try {
+          const d = await najeraRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            najeraList = d.students.map((s) => ({
+              _id: s._id,
+              source: "Najera",
+              sourceLabel: "Najera Batch",
+              name: s.name || "",
+              studentId: s.studentId || "N/A",
+              course: "Quran Nazera",
+              primaryCourse: "Quran Nazera",
+              class: "Najera Batch-02",
+              batch: "Najera Batch-02",
+              phone: s.phone || "",
+              email: "",
+              country: s.country || "BD",
+              status:
+                Number(s.dueAmount) === 0 && Number(s.paidAmount) > 0
+                  ? "Active"
+                  : "Pending",
+            }));
+          }
+        } catch (e) {
+          console.error("Najera parse error:", e);
+        }
+      }
+
+      // ✅ Combine all — take first 50
+      const combined = [...admissionList, ...tazweedList, ...najeraList].slice(
+        0,
+        50,
+      );
+
+      console.log("════════════════════════════════");
+      console.log("✅ Loaded students for absence:");
+      console.log(`   - Admission: ${admissionList.length}`);
+      console.log(`   - Tazweed: ${tazweedList.length}`);
+      console.log(`   - Najera: ${najeraList.length}`);
+      console.log(`   - Total (first 50): ${combined.length}`);
+      console.log("════════════════════════════════");
+
+      setAllStudents(combined);
     } catch (err) {
       console.error("❌ Fetch students error:", err);
-      setEldersStudents(ELDERS_STUDENTS_FALLBACK);
+      setAllStudents([]);
     } finally {
       setStudentsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchEldersStudents();
+    fetchAllStudents();
   }, []);
 
   // Save to localStorage
   useEffect(() => {
-    localStorage.setItem(
-      "eldersAbsenceRecords",
-      JSON.stringify(absenceRecords),
-    );
+    localStorage.setItem("allAbsenceRecords", JSON.stringify(absenceRecords));
   }, [absenceRecords]);
 
   const handleLogout = async () => {
@@ -598,6 +544,19 @@ const Student_absence = () => {
     }
   };
 
+  const getSourceBadge = (source) => {
+    switch (source) {
+      case "Admission":
+        return "bg-blue-100 text-blue-700";
+      case "Tazweed":
+        return "bg-green-100 text-green-700";
+      case "Najera":
+        return "bg-purple-100 text-purple-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
   const getNotifiedBadge = (notified) => {
     return notified ? (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700">
@@ -610,6 +569,19 @@ const Student_absence = () => {
     );
   };
 
+  // ✅ Students filtered by source
+  const filteredStudents = useMemo(() => {
+    if (sourceFilter === "All") return allStudents;
+    return allStudents.filter((s) => s.source === sourceFilter);
+  }, [allStudents, sourceFilter]);
+
+  const sourceCounts = {
+    All: allStudents.length,
+    Admission: allStudents.filter((s) => s.source === "Admission").length,
+    Tazweed: allStudents.filter((s) => s.source === "Tazweed").length,
+    Najera: allStudents.filter((s) => s.source === "Najera").length,
+  };
+
   const filteredRecords = absenceRecords.filter((record) => {
     const s = searchTerm.toLowerCase();
     const matchesSearch =
@@ -620,25 +592,17 @@ const Student_absence = () => {
       (record.teacher || "").toLowerCase().includes(s);
     const matchesStatus =
       filterStatus === "All" || record.status === filterStatus;
-    const matchesClass = filterClass === "All" || record.class === filterClass;
-    const matchesSubject =
-      filterSubject === "All" || record.subject === filterSubject;
+    const matchesCourse =
+      filterCourse === "All" || record.subject === filterCourse;
     const matchesDate = !filterDate || record.date === filterDate;
-    return (
-      matchesSearch &&
-      matchesStatus &&
-      matchesClass &&
-      matchesSubject &&
-      matchesDate
-    );
+    return matchesSearch && matchesStatus && matchesCourse && matchesDate;
   });
 
   const uniqueStatuses = [
     "All",
     ...new Set(absenceRecords.map((r) => r.status)),
   ];
-  const uniqueClasses = ["All", ...new Set(absenceRecords.map((r) => r.class))];
-  const uniqueSubjects = [
+  const uniqueCourses = [
     "All",
     ...new Set(absenceRecords.map((r) => r.subject)),
   ];
@@ -654,22 +618,22 @@ const Student_absence = () => {
   };
 
   // ============================================================
-  // ✅ Open Add Modal — pre-fill from first elders student
+  // ✅ Open Add Modal — pre-fill from first student
   // ============================================================
   const openAddModal = () => {
-    const first = eldersStudents[0];
+    const first = filteredStudents[0];
     setFormData({
       studentName: first?.name || "",
       studentId: first?.studentId || "",
-      class: first?.class || ELDERS_CLASSES[0],
-      batch: first?.batch || "Batch-03",
-      subject: first?.primaryCourse || "Qaida Nuraniyah",
+      class: first?.class || "",
+      batch: first?.batch || "",
+      subject: first?.primaryCourse || first?.course || "",
       date: new Date().toISOString().split("T")[0],
       status: "Absent",
       reason: "",
       notified: false,
       notifiedBy: "",
-      teacher: ELDERS_TEACHERS[0],
+      teacher: TEACHERS[0],
       notes: "",
     });
     setShowAddModal(true);
@@ -677,7 +641,7 @@ const Student_absence = () => {
 
   // ✅ Auto-fill when student selected
   const handleStudentSelect = (studentId) => {
-    const s = eldersStudents.find((st) => st._id === studentId);
+    const s = allStudents.find((st) => st._id === studentId);
     if (!s) return;
     setFormData((prev) => ({
       ...prev,
@@ -742,7 +706,7 @@ const Student_absence = () => {
     setShowAddModal(false);
     Swal.fire({
       icon: "success",
-      title: "✅ Elders Absence Record Added!",
+      title: "✅ Absence Record Added!",
       text: formData.studentName,
       timer: 1500,
       showConfirmButton: false,
@@ -822,9 +786,7 @@ const Student_absence = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">
-            Student Absence (Elders)
-          </h1>
+          <h1 className="text-sm font-bold text-gray-800">Student Absence</h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100"
@@ -958,18 +920,18 @@ const Student_absence = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaUserTimes className="text-red-600" /> Student Absence —
-                <span className="text-teal-700">Quran For Elders</span>
+                <FaUserTimes className="text-red-600" /> Student Absence
+                Community
               </h1>
               <p className="text-xs text-gray-500">
                 {studentsLoading
-                  ? "Loading elders students..."
-                  : `${eldersStudents.length} elders student${eldersStudents.length !== 1 ? "s" : ""} • Jubayer Ahmad • Sumaiya Afrin Mim`}
+                  ? "Loading students..."
+                  : `${allStudents.length} students loaded (Admission + Tazweed + Najera)`}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
-                onClick={fetchEldersStudents}
+                onClick={fetchAllStudents}
                 disabled={studentsLoading}
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 disabled:opacity-50"
               >
@@ -994,43 +956,76 @@ const Student_absence = () => {
             </div>
           </div>
 
-          {/* ✅ Elders Students Card — 2 জন সবসময় দেখাবে */}
+          {/* ✅ Students Summary Card */}
           <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
-            <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
-              <FaUsers size={12} /> Elders Students ({eldersStudents.length})
-            </p>
-            {studentsLoading && eldersStudents.length === 0 ? (
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div>
-                Loading from API...
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
+              <p className="text-xs font-bold text-teal-800 flex items-center gap-1">
+                <FaUsers size={12} /> Total Students ({allStudents.length})
+              </p>
+              {/* Source Tabs */}
+              <div className="flex gap-1 overflow-x-auto">
+                {[
+                  { id: "All", label: "All", color: "blue" },
+                  { id: "Admission", label: "Admission", color: "blue" },
+                  { id: "Tazweed", label: "Tazweed", color: "green" },
+                  { id: "Najera", label: "Najera", color: "purple" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSourceFilter(tab.id)}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-semibold whitespace-nowrap transition-all ${
+                      sourceFilter === tab.id
+                        ? tab.color === "blue"
+                          ? "bg-blue-600 text-white"
+                          : tab.color === "green"
+                            ? "bg-green-600 text-white"
+                            : "bg-purple-600 text-white"
+                        : "bg-white text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    {tab.label}
+                    <span className="text-[9px] px-1 bg-white/30 rounded-full">
+                      {sourceCounts[tab.id]}
+                    </span>
+                  </button>
+                ))}
               </div>
-            ) : eldersStudents.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {eldersStudents.map((s) => (
+            </div>
+
+            {studentsLoading ? (
+              <div className="flex items-center gap-2 text-xs text-gray-500 py-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div>
+                Loading students from API...
+              </div>
+            ) : filteredStudents.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
+                {filteredStudents.map((s) => (
                   <div
                     key={s._id}
-                    className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
+                    className="bg-white border border-teal-100 rounded-lg p-2 flex items-center gap-2"
                   >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
                       {(s.name || "S").charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-800 truncate">
+                      <p className="text-[11px] font-bold text-gray-800 truncate">
                         {s.name}
                       </p>
-                      <p className="text-[10px] text-gray-500 truncate">
+                      <p className="text-[9px] text-gray-500 truncate">
                         {s.studentId}
                       </p>
-                      <p className="text-[10px] text-teal-600 truncate">
-                        {s.course}
-                      </p>
+                      <span
+                        className={`text-[8px] px-1 rounded-full font-semibold ${getSourceBadge(s.source)}`}
+                      >
+                        {s.sourceLabel}
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-gray-500 italic">
-                No elders students found.
+              <p className="text-xs text-gray-500 italic py-2">
+                No students found for "{sourceFilter}".
               </p>
             )}
           </div>
@@ -1068,7 +1063,7 @@ const Student_absence = () => {
                 <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search elders students..."
+                  placeholder="Search absence records..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -1093,22 +1088,11 @@ const Student_absence = () => {
                   ))}
                 </select>
                 <select
-                  value={filterClass}
-                  onChange={(e) => setFilterClass(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
+                  value={filterCourse}
+                  onChange={(e) => setFilterCourse(e.target.value)}
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg max-w-[150px]"
                 >
-                  {uniqueClasses.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={filterSubject}
-                  onChange={(e) => setFilterSubject(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
-                >
-                  {uniqueSubjects.map((s) => (
+                  {uniqueCourses.map((s) => (
                     <option key={s} value={s}>
                       {s}
                     </option>
@@ -1118,9 +1102,9 @@ const Student_absence = () => {
             </div>
           </div>
 
-          {/* Table */}
+          {/* Absence Records Table */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto max-h-[calc(100vh-500px)] overflow-y-auto">
+            <div className="overflow-x-auto max-h-[calc(100vh-600px)] overflow-y-auto">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
@@ -1131,9 +1115,6 @@ const Student_absence = () => {
                       Student
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
-                      Class
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
                       Course
                     </th>
                     <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
@@ -1169,9 +1150,6 @@ const Student_absence = () => {
                           </div>
                         </td>
                         <td className="px-3 py-2 hidden md:table-cell text-gray-600">
-                          {record.class}
-                        </td>
-                        <td className="px-3 py-2 hidden lg:table-cell text-gray-600">
                           {record.subject}
                         </td>
                         <td className="px-3 py-2 hidden lg:table-cell text-gray-600">
@@ -1221,11 +1199,11 @@ const Student_absence = () => {
                   ) : (
                     <tr>
                       <td
-                        colSpan="9"
+                        colSpan="8"
                         className="px-3 py-8 text-center text-gray-500"
                       >
                         <FaUserTimes className="text-4xl text-gray-300 mx-auto mb-2" />
-                        <p>No elders absence records yet</p>
+                        <p>No absence records yet</p>
                         <p className="text-[10px] text-gray-400 mt-1">
                           উপরে "Add Absence" ক্লিক করে একটি record যোগ করুন
                         </p>
@@ -1239,13 +1217,15 @@ const Student_absence = () => {
         </main>
       </div>
 
-      {/* Add Modal */}
+      {/* ============================================================
+          Add Modal — dropdown with all students
+          ============================================================ */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlus className="text-red-600" /> Add Elders Absence
+                <FaPlus className="text-red-600" /> Add Absence Record
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1257,23 +1237,23 @@ const Student_absence = () => {
             <form onSubmit={handleAddAbsence} className="p-6 space-y-4">
               <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
                 💡 Dropdown থেকে student select করলে বাকি information auto-fill
-                হবে
+                হবে ({filteredStudents.length} students)
               </div>
 
               {/* ✅ Student dropdown */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Elders Student *
+                  Select Student * ({filteredStudents.length})
                 </label>
-                {eldersStudents.length === 0 ? (
+                {filteredStudents.length === 0 ? (
                   <p className="text-xs text-red-500">
-                    কোনো elders student পাওয়া যায়নি
+                    কোনো student পাওয়া যায়নি ({sourceFilter})
                   </p>
                 ) : (
                   <select
                     required
                     value={
-                      eldersStudents.find(
+                      filteredStudents.find(
                         (s) => s.studentId === formData.studentId,
                       )?._id || ""
                     }
@@ -1281,9 +1261,9 @@ const Student_absence = () => {
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="">Select Student</option>
-                    {eldersStudents.map((s) => (
+                    {filteredStudents.map((s) => (
                       <option key={s._id} value={s._id}>
-                        {s.name} — {s.course}
+                        [{s.sourceLabel}] {s.name} — {s.studentId}
                       </option>
                     ))}
                   </select>
@@ -1327,7 +1307,9 @@ const Student_absence = () => {
                   <input
                     type="text"
                     value={formData.subject}
-                    readOnly
+                    onChange={(e) =>
+                      setFormData({ ...formData, subject: e.target.value })
+                    }
                     className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
                   />
                 </div>
@@ -1481,7 +1463,7 @@ const Student_absence = () => {
                   }
                   className="w-full border rounded-lg px-3 py-2 text-sm"
                 >
-                  {ELDERS_TEACHERS.map((t) => (
+                  {TEACHERS.map((t) => (
                     <option key={t} value={t}>
                       {t}
                     </option>
@@ -1530,7 +1512,7 @@ const Student_absence = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaEdit className="text-yellow-600" /> Edit Elders Absence
+                <FaEdit className="text-yellow-600" /> Edit Absence Record
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1573,46 +1555,6 @@ const Student_absence = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
-                  </label>
-                  <select
-                    required
-                    value={formData.class}
-                    onChange={(e) =>
-                      setFormData({ ...formData, class: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    {ELDERS_CLASSES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Batch
-                  </label>
-                  <select
-                    value={formData.batch}
-                    onChange={(e) =>
-                      setFormData({ ...formData, batch: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    {ELDERS_BATCHES.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Course *
                   </label>
                   <input
@@ -1621,6 +1563,36 @@ const Student_absence = () => {
                     value={formData.subject}
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Batch
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.batch}
+                    onChange={(e) =>
+                      setFormData({ ...formData, batch: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Class *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.class}
+                    onChange={(e) =>
+                      setFormData({ ...formData, class: e.target.value })
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
@@ -1744,7 +1716,7 @@ const Student_absence = () => {
                   }
                   className="w-full border rounded-lg px-3 py-2 text-sm"
                 >
-                  {ELDERS_TEACHERS.map((t) => (
+                  {TEACHERS.map((t) => (
                     <option key={t} value={t}>
                       {t}
                     </option>

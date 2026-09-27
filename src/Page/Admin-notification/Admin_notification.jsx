@@ -20,61 +20,13 @@ import {
   FaLayerGroup,
   FaCalendarCheck,
   FaUserPlus,
+  FaBook,
+  FaBookOpen,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
-
-// ============================================================
-// ✅ ELDERS COURSE CHECK
-// শুধু এই ৪টি course এর student notification এ আসবে:
-// Qaida Nuraniyah, Quran Nazera, Bakarah Hifz, Basic Tajweed (Level-1)
-// ============================================================
-const ELDERS_COURSES = [
-  "qaida nuraniyah",
-  "qaida nooraniya",
-  "qaida noorani",
-  "qaida nurani",
-  "qaidah nuraniyah",
-  "qaidah nooraniya",
-  "qaidah noorani",
-  "quran nazera",
-  "nazera quran",
-  "quran najera",
-  "najera quran",
-  "bakarah hifz",
-  "bakara hifz",
-  "baqarah hifz",
-  "baqara hifz",
-  "basic tajweed (level-1)",
-  "basic tajweed (level 1)",
-  "basic tajweed level-1",
-  "basic tajweed level 1",
-  "basic tajweed",
-];
-
-const isSingleEldersCourse = (singleCourse) => {
-  const p = String(singleCourse).toLowerCase().trim();
-  if (!p) return false;
-
-  return ELDERS_COURSES.some((c) => {
-    if (p === c) return true;
-    if (p.includes(c)) return true;
-    if (c.includes(p) && p.length >= 8) return true;
-    return false;
-  });
-};
-
-const isEldersCourse = (courseStr) => {
-  if (!courseStr) return false;
-  const parts = String(courseStr)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (parts.length === 0) return false;
-  return parts.every((part) => isSingleEldersCourse(part));
-};
 
 const Admin_notification = () => {
   const { user, logOut } = useAuth();
@@ -85,6 +37,7 @@ const Admin_notification = () => {
 
   const [admissions, setAdmissions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [sourceFilter, setSourceFilter] = useState("All"); // All | Tazweed | Najera
 
   const [readFilter, setReadFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -122,64 +75,137 @@ const Admin_notification = () => {
   }, [user]);
 
   // ============================================================
-  // ✅ Fetch only Elders course admission students
+  // ✅ Fetch only Tazweed + Najera students
   // ============================================================
   const fetchAdmissions = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_BASE}/students/all`);
-      const data = await res.json();
 
-      if (data.success) {
-        const all = data.students || [];
+      // ✅ ২টি endpoint একসাথে fetch
+      const [tazweedRes, najeraRes] = await Promise.allSettled([
+        fetch(`${API_BASE}/basic-tazweed/all`),
+        fetch(`${API_BASE}/najera-batch/all`),
+      ]);
 
-        // শুধু pure elders course এর student
-        const elders = all.filter((s) => isEldersCourse(s.course));
-
-        console.log("📥 Total students:", all.length);
-        console.log("✅ Elders filtered:", elders.length);
-        elders.forEach((s) => console.log("   →", s.name, "|", s.course));
-
-        const notifs = elders.map((s) => ({
-          _id: s._id,
-          name: s.name || "",
-          phone: s.phone || "",
-          email: s.email || "",
-          course: s.course || "",
-          fatherName: s.fatherName || "",
-          motherName: s.motherName || "",
-          guardianName: s.guardianName || s.fatherName || "",
-          guardianPhone: s.guardianPhone || "",
-          presentAddress: s.presentAddress || s.address || "",
-          permanentAddress: s.permanentAddress || "",
-          dobOrNid: s.dobOrNid || "",
-          age: s.age || "",
-          gender: s.gender || "",
-          occupation: s.occupation || "",
-          maritalStatus: s.maritalStatus || "",
-          paidAmount: s.paidAmount || 0,
-          paymentStatus: s.paymentStatus || "Unpaid",
-          paymentMethod: s.paymentMethod || "",
-          transactionId: s.transactionId || "",
-          rawStatus: s.status || "Pending",
-          createdAt: s.createdAt || "",
-          admissionDate: s.admissionDate || "",
-          uiStatus:
-            s.status === "Active"
-              ? "Approved"
-              : s.status === "Inactive"
-                ? "Rejected"
-                : "Pending",
-          isRead: s.status === "Active" || s.status === "Inactive",
-        }));
-
-        // নতুন আগে
-        notifs.sort(
-          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0),
-        );
-
-        setAdmissions(notifs);
+      // ---------- 1) Basic Tazweed Students ----------
+      let tazweedStudents = [];
+      if (tazweedRes.status === "fulfilled") {
+        try {
+          const d = await tazweedRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            tazweedStudents = d.students.map((s) => ({
+              _id: s._id,
+              source: "Tazweed",
+              sourceLabel: "Basic Tazweed",
+              name: s.name || "",
+              phone: s.phone || "",
+              email: "",
+              course: "Basic Tajweed (Level-1)",
+              fatherName: "",
+              motherName: "",
+              guardianName: "",
+              guardianPhone: s.phone || "",
+              presentAddress: "",
+              permanentAddress: "",
+              dobOrNid: "",
+              age: "",
+              gender: "",
+              occupation: "",
+              maritalStatus: "",
+              studentId: s.studentId || "",
+              country: s.country || "BD",
+              paidAmount: s.paidAmount || 0,
+              dueAmount: s.dueAmount || 0,
+              courseFee: s.courseFee || 0,
+              scholarshipAmount: s.scholarshipAmount || 0,
+              paymentStatus:
+                Number(s.dueAmount) === 0
+                  ? "Paid"
+                  : Number(s.paidAmount) > 0
+                    ? "Partial"
+                    : "Unpaid",
+              paymentMethod: "",
+              transactionId: s.transactionId || "",
+              comments: s.comments || "",
+              rawStatus: "Active",
+              createdAt: s.createdAt || "",
+              admissionDate: "",
+              uiStatus: "Approved",
+              isRead: true,
+            }));
+          }
+        } catch (e) {
+          console.error("Tazweed parse error:", e);
+        }
       }
+
+      // ---------- 2) Najera Batch Students ----------
+      let najeraStudents = [];
+      if (najeraRes.status === "fulfilled") {
+        try {
+          const d = await najeraRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            najeraStudents = d.students.map((s) => ({
+              _id: s._id,
+              source: "Najera",
+              sourceLabel: "Najera Batch",
+              name: s.name || "",
+              phone: s.phone || "",
+              email: "",
+              course: "Quran Nazera",
+              fatherName: "",
+              motherName: "",
+              guardianName: "",
+              guardianPhone: s.phone || "",
+              presentAddress: "",
+              permanentAddress: "",
+              dobOrNid: "",
+              age: "",
+              gender: "",
+              occupation: "",
+              maritalStatus: "",
+              studentId: s.studentId || "",
+              country: s.country || "BD",
+              paidAmount: s.paidAmount || 0,
+              dueAmount: s.dueAmount || 0,
+              courseFee: s.courseFee || 0,
+              scholarshipAmount: s.scholarshipAmount || 0,
+              paymentStatus:
+                Number(s.dueAmount) === 0
+                  ? "Paid"
+                  : Number(s.paidAmount) > 0
+                    ? "Partial"
+                    : "Unpaid",
+              paymentMethod: "",
+              transactionId: s.transactionId || "",
+              comments: s.comments || "",
+              rawStatus: "Active",
+              createdAt: s.createdAt || "",
+              admissionDate: "",
+              uiStatus: "Approved",
+              isRead: true,
+            }));
+          }
+        } catch (e) {
+          console.error("Najera parse error:", e);
+        }
+      }
+
+      // ✅ Combine and sort
+      const combined = [...tazweedStudents, ...najeraStudents].sort((a, b) => {
+        const da = new Date(a.createdAt || 0).getTime();
+        const db = new Date(b.createdAt || 0).getTime();
+        return db - da;
+      });
+
+      console.log("════════════════════════════════");
+      console.log(`✅ Loaded notifications:`);
+      console.log(`   - Tazweed: ${tazweedStudents.length}`);
+      console.log(`   - Najera: ${najeraStudents.length}`);
+      console.log(`   - Total: ${combined.length}`);
+      console.log("════════════════════════════════");
+
+      setAdmissions(combined);
     } catch (error) {
       console.error("Error fetching admissions:", error);
     } finally {
@@ -218,44 +244,52 @@ const Admin_notification = () => {
     setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
   // ============================================================
-  // View Admission Modal
+  // View Student Modal
   // ============================================================
   const viewAdmission = (adm) => {
     Swal.fire({
-      title: `🎓 Admission: ${adm.name}`,
+      title: `🎓 ${adm.name}`,
       html: `
         <div style="text-align: left; font-size: 13px; max-height: 500px; overflow-y: auto;">
           <div style="background:#e6f7f9; padding:12px; border-radius:8px; border-left:4px solid #00ADD2; margin-bottom:10px;">
-            <p style="margin:0;"><strong>🎓 Course:</strong> ${adm.course}</p>
+            <p style="margin:0;"><strong>📌 Source:</strong> ${adm.sourceLabel}</p>
+            <p style="margin:5px 0 0 0;"><strong>🎓 Course:</strong> ${adm.course}</p>
+            ${
+              adm.studentId
+                ? `<p style="margin:5px 0 0 0;"><strong>🆔 Student ID:</strong> <span style="font-family:monospace;">${adm.studentId}</span></p>`
+                : ""
+            }
+            ${
+              adm.country
+                ? `<p style="margin:5px 0 0 0;"><strong>🌍 Country:</strong> ${adm.country}</p>`
+                : ""
+            }
             <p style="margin:5px 0 0 0;"><strong>📌 Status:</strong> 
-              <span style="color:${
-                adm.uiStatus === "Approved"
-                  ? "#16a34a"
-                  : adm.uiStatus === "Rejected"
-                    ? "#dc2626"
-                    : "#eab308"
-              }; font-weight:bold;">${adm.uiStatus}</span>
+              <span style="color:#16a34a; font-weight:bold;">${adm.uiStatus}</span>
             </p>
           </div>
           <p><strong>👤 নাম:</strong> ${adm.name}</p>
           <p><strong>📞 ফোন:</strong> ${adm.phone}</p>
-          <p><strong>✉️ ইমেইল:</strong> ${adm.email || "N/A"}</p>
-          <p><strong>👨 পিতা:</strong> ${adm.fatherName || "N/A"}</p>
-          <p><strong>👩 মাতা:</strong> ${adm.motherName || "N/A"}</p>
-          <p><strong>👨 অভিভাবক:</strong> ${adm.guardianName || "N/A"}</p>
-          <p><strong>📱 অভিভাবক ফোন:</strong> ${adm.guardianPhone || "N/A"}</p>
-          <p><strong>🎂 বয়স:</strong> ${adm.age || "N/A"}</p>
-          <p><strong>⚧ লিঙ্গ:</strong> ${adm.gender || "N/A"}</p>
-          <p><strong>🏠 ঠিকানা:</strong> ${adm.presentAddress || "N/A"}</p>
           <hr>
           <h4 style="color:#004d4d; margin-bottom:5px;">💳 Payment Info</h4>
-          <p><strong>Status:</strong> ${adm.paymentStatus}</p>
+          <p><strong>Payment Status:</strong> ${adm.paymentStatus}</p>
+          <p><strong>Course Fee:</strong> ৳${Number(adm.courseFee || 0).toLocaleString()}</p>
+          <p><strong>Scholarship:</strong> ৳${Number(adm.scholarshipAmount || 0).toLocaleString()}</p>
           <p><strong>Paid:</strong> ৳${Number(adm.paidAmount || 0).toLocaleString()}</p>
-          <p><strong>Method:</strong> ${adm.paymentMethod || "N/A"}</p>
-          <p><strong>Transaction ID:</strong> ${adm.transactionId || "N/A"}</p>
+          <p><strong>Due:</strong> <span style="color:#dc2626;">৳${Number(adm.dueAmount || 0).toLocaleString()}</span></p>
+          ${
+            adm.transactionId
+              ? `<p><strong>Transaction ID:</strong> ${adm.transactionId}</p>`
+              : ""
+          }
+          ${
+            adm.comments
+              ? `<hr><h4 style="color:#004d4d; margin-bottom:5px;">💬 Comments</h4><p>${adm.comments}</p>`
+              : ""
+          }
           <hr>
           <p style="font-size:11px; color:#666;">
-            📅 Applied: ${
+            📅 Added: ${
               adm.createdAt ? new Date(adm.createdAt).toLocaleString() : "N/A"
             }
           </p>
@@ -263,53 +297,15 @@ const Admin_notification = () => {
       `,
       width: 700,
       showCancelButton: true,
-      showConfirmButton: adm.uiStatus === "Pending",
-      confirmButtonText: "✅ Approve Student",
-      confirmButtonColor: "#16a34a",
+      showConfirmButton: false,
       cancelButtonText: "বন্ধ করুন",
-      preConfirm: async () => {
-        try {
-          const res = await fetch(
-            `${API_BASE}/admin-students/update/${adm._id}`,
-            {
-              method: "PUT",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ status: "Active" }),
-            },
-          );
-          const data = await res.json();
-          if (data.success) {
-            setAdmissions((prev) =>
-              prev.map((n) =>
-                n._id === adm._id
-                  ? { ...n, uiStatus: "Approved", isRead: true }
-                  : n,
-              ),
-            );
-            return true;
-          }
-          Swal.showValidationMessage(data.message || "Approve failed");
-          return false;
-        } catch (err) {
-          Swal.showValidationMessage("সার্ভার এরর!");
-          return false;
-        }
-      },
-    }).then((result) => {
-      if (result.isConfirmed)
-        Swal.fire({
-          icon: "success",
-          title: "✅ Student Approved!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
     });
   };
 
   // ============================================================
-  // Delete Admission (student record)
+  // Delete Student — Source অনুযায়ী
   // ============================================================
-  const deleteAdmission = async (id, name) => {
+  const deleteAdmission = async (id, name, source) => {
     const result = await Swal.fire({
       title: `Delete ${name}?`,
       text: "This will permanently delete the student record!",
@@ -318,24 +314,32 @@ const Admin_notification = () => {
       confirmButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!",
     });
-    if (result.isConfirmed) {
-      try {
-        const res = await fetch(`${API_BASE}/admin-students/delete/${id}`, {
-          method: "DELETE",
+    if (!result.isConfirmed) return;
+
+    // ✅ Source অনুযায়ী সঠিক endpoint
+    let deleteUrl = `${API_BASE}/admin-students/delete/${id}`;
+    if (source === "Tazweed") {
+      deleteUrl = `${API_BASE}/basic-tazweed/delete/${id}`;
+    } else if (source === "Najera") {
+      deleteUrl = `${API_BASE}/najera-batch/delete/${id}`;
+    }
+
+    try {
+      const res = await fetch(deleteUrl, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setAdmissions((prev) => prev.filter((n) => n._id !== id));
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          timer: 1200,
+          showConfirmButton: false,
         });
-        const data = await res.json();
-        if (data.success) {
-          setAdmissions((prev) => prev.filter((n) => n._id !== id));
-          Swal.fire({
-            icon: "success",
-            title: "Deleted!",
-            timer: 1200,
-            showConfirmButton: false,
-          });
-        }
-      } catch (err) {
-        Swal.fire({ icon: "error", title: "Error", text: err.message });
+      } else {
+        Swal.fire({ icon: "error", title: "Failed!", text: data.message });
       }
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Error", text: err.message });
     }
   };
 
@@ -584,6 +588,7 @@ const Admin_notification = () => {
   // Filters
   // ============================================================
   const filteredAdmissions = admissions
+    .filter((a) => (sourceFilter === "All" ? true : a.source === sourceFilter))
     .filter((a) =>
       readFilter === "all"
         ? true
@@ -595,16 +600,35 @@ const Admin_notification = () => {
       statusFilter === "all" ? true : a.uiStatus === statusFilter,
     );
 
-  const unreadCount = admissions.filter((a) => !a.isRead).length;
-  const pendingCount = admissions.filter(
-    (a) => a.uiStatus === "Pending",
-  ).length;
   const approvedCount = admissions.filter(
     (a) => a.uiStatus === "Approved",
   ).length;
-  const rejectedCount = admissions.filter(
-    (a) => a.uiStatus === "Rejected",
-  ).length;
+  const totalPaid = admissions.reduce(
+    (sum, a) => sum + (Number(a.paidAmount) || 0),
+    0,
+  );
+  const totalDue = admissions.reduce(
+    (sum, a) => sum + (Number(a.dueAmount) || 0),
+    0,
+  );
+
+  // Source counts
+  const sourceCounts = {
+    All: admissions.length,
+    Tazweed: admissions.filter((a) => a.source === "Tazweed").length,
+    Najera: admissions.filter((a) => a.source === "Najera").length,
+  };
+
+  const getSourceBadge = (source) => {
+    switch (source) {
+      case "Tazweed":
+        return "bg-green-100 text-green-700";
+      case "Najera":
+        return "bg-purple-100 text-purple-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
 
   // ============================================================
   // Render
@@ -614,9 +638,7 @@ const Admin_notification = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">
-            Admission Notifications
-          </h1>
+          <h1 className="text-sm font-bold text-gray-800">Notifications</h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -752,18 +774,24 @@ const Admin_notification = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 flex-shrink-0">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-teal-600" /> Admission Notifications
-                — Quran for Elders
+                <FaBell className="text-teal-600" /> All Notifications
               </h1>
               <p className="text-xs text-gray-500">
-                Qaida Nuraniyah • Quran Nazera • Bakarah Hifz • Basic Tajweed
-                (Level-1)
+                Basic Tazweed + Najera Batch — সব Student
               </p>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-gray-700 hidden sm:block">
                 {adminInfo.name}
               </span>
+              <button
+                onClick={fetchAdmissions}
+                disabled={loading}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
+              >
+                <FaSync size={10} className={loading ? "animate-spin" : ""} />{" "}
+                Refresh
+              </button>
               <button
                 onClick={handleLogout}
                 className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
@@ -773,29 +801,65 @@ const Admin_notification = () => {
             </div>
           </div>
 
+          {/* ✅ Source Tabs */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto flex-shrink-0">
+            {[
+              { id: "All", label: "All Students", color: "blue" },
+              { id: "Tazweed", label: "Basic Tazweed", color: "green" },
+              { id: "Najera", label: "Najera Batch", color: "purple" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setSourceFilter(tab.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                  sourceFilter === tab.id
+                    ? tab.color === "blue"
+                      ? "bg-blue-50 text-blue-700 shadow-sm"
+                      : tab.color === "green"
+                        ? "bg-green-50 text-green-700 shadow-sm"
+                        : "bg-purple-50 text-purple-700 shadow-sm"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {tab.label}
+                <span
+                  className={`text-[10px] px-1.5 rounded-full ${
+                    sourceFilter === tab.id
+                      ? "bg-white text-gray-700"
+                      : "bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  {sourceCounts[tab.id]}
+                </span>
+              </button>
+            ))}
+          </div>
+
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 flex-shrink-0">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-blue-600">
-                {admissions.length}
+                {sourceCounts[sourceFilter]}
               </p>
-              <p className="text-[10px] text-gray-500">Total</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-yellow-600">
-                {pendingCount}
+              <p className="text-[10px] text-gray-500">
+                {sourceFilter === "All" ? "Total" : sourceFilter}
               </p>
-              <p className="text-[10px] text-gray-500">Pending</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-green-600">
-                {approvedCount}
+                ৳{totalPaid.toLocaleString()}
               </p>
-              <p className="text-[10px] text-gray-500">Approved</p>
+              <p className="text-[10px] text-gray-500">Total Paid</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-red-600">{rejectedCount}</p>
-              <p className="text-[10px] text-gray-500">Rejected</p>
+              <p className="text-lg font-bold text-red-600">
+                ৳{totalDue.toLocaleString()}
+              </p>
+              <p className="text-[10px] text-gray-500">Total Due</p>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-teal-600">{approvedCount}</p>
+              <p className="text-[10px] text-gray-500">Active</p>
             </div>
           </div>
 
@@ -804,33 +868,16 @@ const Admin_notification = () => {
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-bold text-gray-700">Filter:</span>
               <select
-                value={readFilter}
-                onChange={(e) => setReadFilter(e.target.value)}
-                className="px-2 py-1 border rounded-lg text-xs"
-              >
-                <option value="all">All</option>
-                <option value="unread">Unread ({unreadCount})</option>
-                <option value="read">Read</option>
-              </select>
-              <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="px-2 py-1 border rounded-lg text-xs"
               >
                 <option value="all">All Status</option>
-                <option value="Pending">Pending</option>
                 <option value="Approved">Approved</option>
+                <option value="Pending">Pending</option>
                 <option value="Rejected">Rejected</option>
               </select>
             </div>
-            <button
-              onClick={fetchAdmissions}
-              disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 disabled:opacity-50"
-            >
-              <FaSync size={12} className={loading ? "animate-spin" : ""} />{" "}
-              Refresh
-            </button>
           </div>
 
           {/* Table */}
@@ -842,7 +889,9 @@ const Admin_notification = () => {
                     size={32}
                     className="animate-spin text-blue-600 mx-auto mb-3"
                   />
-                  <p className="text-sm text-gray-500">Loading admissions...</p>
+                  <p className="text-sm text-gray-500">
+                    Loading notifications...
+                  </p>
                 </div>
               </div>
             ) : (
@@ -855,18 +904,24 @@ const Admin_notification = () => {
                           Student
                         </th>
                         <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Source
+                        </th>
+                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Course
                         </th>
                         <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Date
+                          Country
                         </th>
                         <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Payment
                         </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Status
+                        <th className="px-3 py-2 text-right text-[10px] font-bold text-gray-600 uppercase">
+                          Paid
                         </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        <th className="px-3 py-2 text-right text-[10px] font-bold text-gray-600 uppercase">
+                          Due
+                        </th>
+                        <th className="px-3 py-2 text-center text-[10px] font-bold text-gray-600 uppercase">
                           Actions
                         </th>
                       </tr>
@@ -875,32 +930,39 @@ const Admin_notification = () => {
                       {filteredAdmissions.map((adm) => (
                         <tr
                           key={adm._id}
-                          className={`hover:bg-gray-50 transition-colors ${
-                            !adm.isRead ? "bg-teal-50/40" : ""
-                          }`}
+                          className="hover:bg-gray-50 transition-colors"
                         >
                           <td className="px-3 py-2">
                             <p className="text-xs font-medium text-gray-800">
                               {adm.name}
-                              {!adm.isRead && (
-                                <span className="ml-1 inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse align-middle"></span>
-                              )}
                             </p>
                             <p className="text-[10px] text-gray-500">
-                              {adm.email || adm.phone}
+                              {adm.phone}
                             </p>
+                            {adm.studentId && (
+                              <p className="text-[9px] text-blue-600 font-mono">
+                                ID: {adm.studentId}
+                              </p>
+                            )}
                           </td>
                           <td className="px-3 py-2">
-                            <p className="text-xs text-gray-700 max-w-[250px]">
+                            <span
+                              className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${getSourceBadge(
+                                adm.source,
+                              )}`}
+                            >
+                              {adm.sourceLabel}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2">
+                            <p className="text-xs text-gray-700 max-w-[180px]">
                               {adm.course}
                             </p>
                           </td>
-                          <td className="px-3 py-2 text-xs text-gray-600">
-                            {adm.createdAt
-                              ? new Date(adm.createdAt)
-                                  .toISOString()
-                                  .split("T")[0]
-                              : "N/A"}
+                          <td className="px-3 py-2">
+                            <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-full">
+                              {adm.country || "BD"}
+                            </span>
                           </td>
                           <td className="px-3 py-2">
                             <span
@@ -915,31 +977,30 @@ const Admin_notification = () => {
                               {adm.paymentStatus}
                             </span>
                           </td>
-                          <td className="px-3 py-2">
-                            <span
-                              className={`text-[8px] px-1.5 py-0.5 rounded-full ${
-                                adm.uiStatus === "Approved"
-                                  ? "bg-green-100 text-green-700"
-                                  : adm.uiStatus === "Rejected"
-                                    ? "bg-red-100 text-red-700"
-                                    : "bg-yellow-100 text-yellow-700 animate-pulse"
-                              }`}
-                            >
-                              {adm.uiStatus}
-                            </span>
+                          <td className="px-3 py-2 text-right text-xs font-semibold text-green-600">
+                            ৳{Number(adm.paidAmount || 0).toLocaleString()}
+                          </td>
+                          <td
+                            className={`px-3 py-2 text-right text-xs font-semibold ${
+                              Number(adm.dueAmount) > 0
+                                ? "text-red-600"
+                                : "text-gray-500"
+                            }`}
+                          >
+                            ৳{Number(adm.dueAmount || 0).toLocaleString()}
                           </td>
                           <td className="px-3 py-2">
-                            <div className="flex gap-1">
+                            <div className="flex gap-1 justify-center">
                               <button
                                 onClick={() => viewAdmission(adm)}
                                 className="text-teal-600 hover:bg-teal-50 p-1 rounded"
-                                title="View / Approve"
+                                title="View"
                               >
                                 <FaEye size={14} />
                               </button>
                               <button
                                 onClick={() =>
-                                  deleteAdmission(adm._id, adm.name)
+                                  deleteAdmission(adm._id, adm.name, adm.source)
                                 }
                                 className="text-red-600 hover:bg-red-50 p-1 rounded"
                                 title="Delete"
@@ -953,15 +1014,15 @@ const Admin_notification = () => {
 
                       {filteredAdmissions.length === 0 && (
                         <tr>
-                          <td colSpan="6" className="p-10 text-center">
-                            <FaUserPlus className="text-5xl text-gray-300 mx-auto mb-3" />
+                          <td colSpan="8" className="p-10 text-center">
+                            <FaBell className="text-5xl text-gray-300 mx-auto mb-3" />
                             <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                              No Admission Notifications
+                              No Students Found
                             </h3>
                             <p className="text-xs text-gray-500">
-                              Qaida Nuraniyah, Quran Nazera, Bakarah Hifz, Basic
-                              Tajweed (Level-1) — এই ৪টি কোর্সে এখনো কোনো নতুন
-                              ভর্তি হয়নি।
+                              {admissions.length === 0
+                                ? "Basic Tazweed বা Najera Batch থেকে student add করুন।"
+                                : "আপনার filter এর সাথে কোনো match নেই।"}
                             </p>
                           </td>
                         </tr>

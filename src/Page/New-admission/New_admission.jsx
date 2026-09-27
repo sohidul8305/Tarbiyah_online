@@ -24,82 +24,31 @@ import {
   FaLayerGroup,
   FaInfoCircle,
   FaClock as FaClockIcon,
+  FaSync,
+  FaBook,
+  FaBookOpen,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
+const API_BASE = "https://api.tarbiyahonline.com/api";
+
 // ============================================================
-// ✅ ELDERS DEPARTMENT — শুধু এই ৪টি course এর student দেখাবে
+// ✅ Backend status → UI status mapping
 // ============================================================
-const ELDERS_COURSES = [
-  // 1️⃣ Qaida Nuraniyah (all spelling variations)
-  "qaida nuraniyah",
-  "qaida nooraniya",
-  "qaida noorani",
-  "qaida nurani",
-  "qaidah nuraniyah",
-  "qaidah nooraniya",
-  "qaidah noorani",
-
-  // 2️⃣ Quran Nazera
-  "quran nazera",
-  "nazera quran",
-  "quran najera",
-  "najera quran",
-
-  // 3️⃣ Bakarah Hifz
-  "bakarah hifz",
-  "bakara hifz",
-  "baqarah hifz",
-  "baqara hifz",
-
-  // 4️⃣ Basic Tajweed (Level-1)
-  "basic tajweed (level-1)",
-  "basic tajweed (level 1)",
-  "basic tajweed level-1",
-  "basic tajweed level 1",
-  "basic tajweed",
-];
-
-// একটা single course string elders কিনা check করে
-const isSingleEldersCourse = (singleCourse) => {
-  const p = String(singleCourse).toLowerCase().trim();
-  if (!p) return false;
-
-  return ELDERS_COURSES.some((c) => {
-    // exact match
-    if (p === c) return true;
-    // p এর ভিতরে c আছে (যেমন "basic tajweed (level-1)" এ "basic tajweed")
-    if (p.includes(c)) return true;
-    // c এর ভিতরে p আছে কিন্তু p অনেক ছোট না (ভুলে match এড়াতে)
-    if (c.includes(p) && p.length >= 8) return true;
-    return false;
-  });
-};
-
-// ✅ Main check: student এর course field এ থাকা **প্রতিটা** course
-// elders course হতে হবে। একটাও বাইরের course থাকলে FALSE।
-const isEldersCourse = (courseStr) => {
-  if (!courseStr) return false;
-
-  const parts = String(courseStr)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  if (parts.length === 0) return false;
-
-  // ⭐ প্রতিটা course elders হতে হবে
-  return parts.every((part) => isSingleEldersCourse(part));
-};
-
-// Backend status → UI status mapping
 const mapStatus = (s) => {
   if (!s) return "Pending";
   if (s === "Active") return "Approved";
   if (s === "Inactive") return "Rejected";
   if (s === "Approved" || s === "Rejected" || s === "Pending") return s;
   return "Pending";
+};
+
+// ✅ Student ID generator
+const generateStudentId = (prefix = "TAR") => {
+  const year = new Date().getFullYear().toString().slice(-2);
+  const random = Math.floor(10000 + Math.random() * 90000);
+  return `${prefix}${year}${random}`;
 };
 
 const New_admission = () => {
@@ -109,20 +58,20 @@ const New_admission = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [activeSubMenu, setActiveSubMenu] = useState("dashboard");
   const [loading, setLoading] = useState(true);
+  const [sourceFilter, setSourceFilter] = useState("Tazweed"); // Default to Tazweed
 
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
     phone: "",
     designation: "",
-    department: "Quran for Elders",
+    department: "Administration",
     joinDate: "",
   });
 
   const [admissions, setAdmissions] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
-  const [filterCourse, setFilterCourse] = useState("All");
   const [filterPayment, setFilterPayment] = useState("All");
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedAdmission, setSelectedAdmission] = useState(null);
@@ -144,72 +93,160 @@ const New_admission = () => {
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Quran for Elders",
+        department: "Administration",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
   // ============================================================
-  // Fetch Students from API → filter only Elders courses
+  // ✅ Fetch students from 2 API endpoints (Tazweed & Najera)
   // ============================================================
   const fetchAdmissions = async () => {
     try {
       setLoading(true);
-      const res = await fetch(
-        "https://api.tarbiyahonline.com/api/students/all",
-      );
-      const data = await res.json();
 
-      if (data.success) {
-        const all = data.students || [];
+      // ✅ ২টি endpoint fetch
+      const [tazweedRes, najeraRes] = await Promise.allSettled([
+        fetch(`${API_BASE}/basic-tazweed/all`),
+        fetch(`${API_BASE}/najera-batch/all`),
+      ]);
 
-        // ✅ শুধু pure elders course এর student filter
-        const elders = all
-          .filter((s) => isEldersCourse(s.course))
-          .map((s) => ({
-            id: s._id,
-            _id: s._id,
-            name: s.name || "",
-            fatherName: s.fatherName || s.guardianName || "",
-            motherName: s.motherName || "",
-            course: s.course || "",
-            subject: s.course || "",
-            class: s.course || "",
-            phone: s.phone || "",
-            email: s.email || "",
-            address: s.presentAddress || s.address || "",
-            permanentAddress: s.permanentAddress || "",
-            dobOrNid: s.dobOrNid || "",
-            age: s.age || "",
-            gender: s.gender || "",
-            occupation: s.occupation || "",
-            maritalStatus: s.maritalStatus || "",
-            previousSchool: s.previousSchool || "",
-            guardianName: s.guardianName || s.fatherName || "",
-            guardianPhone: s.guardianPhone || s.phone || "",
-            status: mapStatus(s.status),
-            paymentStatus: s.paymentStatus || "Unpaid",
-            paidAmount: s.paidAmount || 0,
-            paymentMethod: s.paymentMethod || "",
-            paymentType: s.paymentType || "",
-            transactionId: s.transactionId || "",
-            paymentRemarks: s.paymentRemarks || "",
-            username: s.username || "",
-            roll: s.roll || "",
-            date: s.admissionDate
-              ? String(s.admissionDate).split("T")[0]
-              : s.createdAt
-                ? String(s.createdAt).split("T")[0]
-                : "",
-            createdAt: s.createdAt || "",
-            raw: s,
-          }));
-
-        setAdmissions(elders);
-      } else {
-        console.error("Failed to load students:", data.message);
+      // ---------- 1) Basic Tazweed Students ----------
+      let tazweedStudents = [];
+      if (tazweedRes.status === "fulfilled") {
+        try {
+          const d = await tazweedRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            tazweedStudents = d.students.map((s) => ({
+              id: s._id,
+              _id: s._id,
+              source: "Tazweed",
+              sourceLabel: "Basic Tazweed",
+              name: s.name || "",
+              fatherName: "",
+              motherName: "",
+              course: "Basic Tajweed (Level-1)",
+              subject: "Basic Tajweed (Level-1)",
+              class: "Basic Tajweed (Level-1)",
+              phone: s.phone || "",
+              email: "",
+              address: "",
+              permanentAddress: "",
+              dobOrNid: "",
+              age: "",
+              gender: "",
+              occupation: "",
+              maritalStatus: "",
+              guardianName: "",
+              guardianPhone: s.phone || "",
+              status:
+                Number(s.dueAmount) === 0 && Number(s.paidAmount) > 0
+                  ? "Approved"
+                  : "Pending",
+              rawStatus: "Pending",
+              paymentStatus:
+                Number(s.dueAmount) === 0
+                  ? "Paid"
+                  : Number(s.paidAmount) > 0
+                    ? "Partial"
+                    : "Unpaid",
+              paidAmount: s.paidAmount || 0,
+              paymentMethod: "",
+              paymentType: "",
+              transactionId: s.transactionId || "",
+              paymentRemarks: s.comments || "",
+              studentId: s.studentId || "",
+              username: "",
+              roll: "",
+              batch: "Basic Tazweed 6th Batch",
+              country: s.country || "BD",
+              date: s.createdAt ? String(s.createdAt).split("T")[0] : "",
+              createdAt: s.createdAt || "",
+              dueAmount: s.dueAmount || 0,
+              courseFee: s.courseFee || 0,
+              scholarshipAmount: s.scholarshipAmount || 0,
+              raw: s,
+            }));
+          }
+        } catch (e) {
+          console.error("Tazweed parse error:", e);
+        }
       }
+
+      // ---------- 2) Najera Batch Students ----------
+      let najeraStudents = [];
+      if (najeraRes.status === "fulfilled") {
+        try {
+          const d = await najeraRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            najeraStudents = d.students.map((s) => ({
+              id: s._id,
+              _id: s._id,
+              source: "Najera",
+              sourceLabel: "Najera Batch",
+              name: s.name || "",
+              fatherName: "",
+              motherName: "",
+              course: "Quran Nazera",
+              subject: "Quran Nazera",
+              class: "Quran Nazera",
+              phone: s.phone || "",
+              email: "",
+              address: "",
+              permanentAddress: "",
+              dobOrNid: "",
+              age: "",
+              gender: "",
+              occupation: "",
+              maritalStatus: "",
+              guardianName: "",
+              guardianPhone: s.phone || "",
+              status:
+                Number(s.dueAmount) === 0 && Number(s.paidAmount) > 0
+                  ? "Approved"
+                  : "Pending",
+              rawStatus: "Pending",
+              paymentStatus:
+                Number(s.dueAmount) === 0
+                  ? "Paid"
+                  : Number(s.paidAmount) > 0
+                    ? "Partial"
+                    : "Unpaid",
+              paidAmount: s.paidAmount || 0,
+              paymentMethod: "",
+              paymentType: "",
+              transactionId: s.transactionId || "",
+              paymentRemarks: s.comments || "",
+              studentId: s.studentId || "",
+              username: "",
+              roll: "",
+              batch: "Najera Batch-02",
+              country: s.country || "BD",
+              date: s.createdAt ? String(s.createdAt).split("T")[0] : "",
+              createdAt: s.createdAt || "",
+              dueAmount: s.dueAmount || 0,
+              courseFee: s.courseFee || 0,
+              scholarshipAmount: s.scholarshipAmount || 0,
+              raw: s,
+            }));
+          }
+        } catch (e) {
+          console.error("Najera parse error:", e);
+        }
+      }
+
+      // ✅ Combine and sort
+      const combined = [...tazweedStudents, ...najeraStudents].sort((a, b) => {
+        const da = new Date(a.createdAt || 0).getTime();
+        const db = new Date(b.createdAt || 0).getTime();
+        return db - da;
+      });
+
+      setAdmissions(combined);
+      console.log(
+        `✅ Loaded: ${tazweedStudents.length} tazweed + ${najeraStudents.length} najera = ${combined.length} total`,
+      );
     } catch (err) {
       console.error("❌ Fetch error:", err);
       Swal.fire({
@@ -252,7 +289,7 @@ const New_admission = () => {
     setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
   // ============================================================
-  // Sidebar Menu
+  // Sidebar Menu (No Change)
   // ============================================================
   const menuItems = [
     {
@@ -493,9 +530,12 @@ const New_admission = () => {
   ];
 
   // ============================================================
-  // Filtering
+  // ✅ Filtering (source + search + status + payment)
   // ============================================================
   const filteredAdmissions = admissions.filter((a) => {
+    // Source filter
+    if (sourceFilter !== "All" && a.source !== sourceFilter) return false;
+
     const term = searchTerm.toLowerCase().trim();
     const matchesSearch =
       !term ||
@@ -503,22 +543,16 @@ const New_admission = () => {
       a.fatherName.toLowerCase().includes(term) ||
       a.guardianName.toLowerCase().includes(term) ||
       a.email.toLowerCase().includes(term) ||
+      a.studentId.toLowerCase().includes(term) ||
       a.phone.includes(searchTerm);
 
     const matchesStatus = filterStatus === "All" || a.status === filterStatus;
-    const matchesCourse =
-      filterCourse === "All" ||
-      a.course.toLowerCase().includes(filterCourse.toLowerCase());
     const matchesPayment =
       filterPayment === "All" || a.paymentStatus === filterPayment;
 
-    return matchesSearch && matchesStatus && matchesCourse && matchesPayment;
+    return matchesSearch && matchesStatus && matchesPayment;
   });
 
-  const uniqueCourses = [
-    "All",
-    ...new Set(admissions.map((a) => a.course).filter(Boolean)),
-  ];
   const uniqueStatuses = [
     "All",
     ...new Set(admissions.map((a) => a.status).filter(Boolean)),
@@ -527,6 +561,13 @@ const New_admission = () => {
     "All",
     ...new Set(admissions.map((a) => a.paymentStatus).filter(Boolean)),
   ];
+
+  // Source counts
+  const sourceCounts = {
+    All: admissions.length,
+    Tazweed: admissions.filter((a) => a.source === "Tazweed").length,
+    Najera: admissions.filter((a) => a.source === "Najera").length,
+  };
 
   // ============================================================
   // Badge helpers
@@ -557,6 +598,17 @@ const New_admission = () => {
     }
   };
 
+  const getSourceBadge = (source) => {
+    switch (source) {
+      case "Tazweed":
+        return "bg-green-100 text-green-700";
+      case "Najera":
+        return "bg-purple-100 text-purple-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case "Approved":
@@ -571,40 +623,82 @@ const New_admission = () => {
   };
 
   // ============================================================
-  // Approve / Reject / Delete → API calls
+  // ✅ Approve — শুধু Tazweed/Najera source এর জন্য
   // ============================================================
   const handleApprove = async (id) => {
+    const student = admissions.find((a) => a.id === id);
+    if (!student) return;
+
     const result = await Swal.fire({
       title: "Approve Admission?",
-      text: "Student will be marked as Active in the system.",
+      html: `
+        <div style="text-align: left; font-size: 14px;">
+          <p><strong>Student:</strong> ${student.name}</p>
+          <p><strong>Phone:</strong> ${student.phone}</p>
+          <p><strong>Course:</strong> ${student.course}</p>
+          <hr style="margin: 8px 0;">
+          <label style="display:block; font-weight:bold; color:#004d4d; margin-bottom:4px;">Student ID *</label>
+          <input id="swal-studentId" class="swal2-input" style="margin:0; width:100%; font-family:monospace;" value="${student.studentId || generateStudentId()}" />
+          <label style="display:block; font-weight:bold; color:#004d4d; margin:10px 0 4px 0;">Password *</label>
+          <input id="swal-password" class="swal2-input" style="margin:0; width:100%;" value="student123S@" />
+        </div>
+      `,
       icon: "question",
       showCancelButton: true,
       confirmButtonColor: "#22c55e",
       cancelButtonColor: "#ef4444",
       confirmButtonText: "Yes, Approve!",
+      preConfirm: () => {
+        const studentId = document
+          .getElementById("swal-studentId")
+          .value.trim();
+        const password = document.getElementById("swal-password").value.trim();
+        if (!studentId) {
+          Swal.showValidationMessage("Student ID আবশ্যক!");
+          return false;
+        }
+        if (!password) {
+          Swal.showValidationMessage("Password আবশ্যক!");
+          return false;
+        }
+        return { studentId, password };
+      },
     });
+
     if (!result.isConfirmed) return;
 
+    const { studentId, password } = result.value;
+
     try {
-      const res = await fetch(
-        `https://api.tarbiyahonline.com/api/admin-students/update/${id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "Active" }),
-        },
-      );
+      const res = await fetch(`${API_BASE}/students/approve/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId, password }),
+      });
       const data = await res.json();
+
       if (data.success) {
         setAdmissions((prev) =>
-          prev.map((a) => (a.id === id ? { ...a, status: "Approved" } : a)),
+          prev.map((a) =>
+            a.id === id ? { ...a, status: "Approved", studentId } : a,
+          ),
         );
+
         Swal.fire({
           icon: "success",
-          title: "Approved!",
-          text: "Student has been approved.",
-          timer: 1500,
-          showConfirmButton: false,
+          title: "✅ Approved!",
+          html: `
+            <div style="text-align: left;">
+              <p><strong>Name:</strong> ${student.name}</p>
+              <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac; margin-top: 10px;">
+                <p style="font-weight: bold; color: #004d4d; margin-bottom: 6px;">🔑 Login Credentials:</p>
+                <p><strong>Student ID:</strong> <span style="color:#004d4d; font-family:monospace; font-size:16px;">${studentId}</span></p>
+                <p><strong>Password:</strong> <span style="color:#004d4d;">${password}</span></p>
+                <p style="margin-top: 8px; font-size: 11px; color: #666;">📌 এই তথ্য স্টুডেন্টকে জানান।</p>
+              </div>
+            </div>
+          `,
+          confirmButtonColor: "#004d4d",
         });
       } else {
         Swal.fire({
@@ -619,6 +713,9 @@ const New_admission = () => {
   };
 
   const handleReject = async (id) => {
+    const student = admissions.find((a) => a.id === id);
+    if (!student) return;
+
     const result = await Swal.fire({
       title: "Reject Admission?",
       icon: "warning",
@@ -630,14 +727,11 @@ const New_admission = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await fetch(
-        `https://api.tarbiyahonline.com/api/admin-students/update/${id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "Inactive" }),
-        },
-      );
+      const res = await fetch(`${API_BASE}/admin-students/update/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Inactive" }),
+      });
       const data = await res.json();
       if (data.success) {
         setAdmissions((prev) =>
@@ -656,8 +750,11 @@ const New_admission = () => {
   };
 
   const handleDelete = async (id) => {
+    const student = admissions.find((a) => a.id === id);
+    if (!student) return;
+
     const result = await Swal.fire({
-      title: "Delete Admission?",
+      title: "Delete Student?",
       text: "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
@@ -667,11 +764,16 @@ const New_admission = () => {
     });
     if (!result.isConfirmed) return;
 
+    // ✅ Source অনুযায়ী সঠিক delete endpoint call
+    let deleteUrl = `${API_BASE}/admin-students/delete/${id}`;
+    if (student.source === "Tazweed") {
+      deleteUrl = `${API_BASE}/basic-tazweed/delete/${id}`;
+    } else if (student.source === "Najera") {
+      deleteUrl = `${API_BASE}/najera-batch/delete/${id}`;
+    }
+
     try {
-      const res = await fetch(
-        `https://api.tarbiyahonline.com/api/admin-students/delete/${id}`,
-        { method: "DELETE" },
-      );
+      const res = await fetch(deleteUrl, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
         setAdmissions((prev) => prev.filter((a) => a.id !== id));
@@ -700,9 +802,7 @@ const New_admission = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">
-            New Admission — Quran for Elders
-          </h1>
+          <h1 className="text-sm font-bold text-gray-800">New Admission</h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100"
@@ -831,11 +931,10 @@ const New_admission = () => {
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaUserPlus className="text-blue-600" /> New Admission —
-                <span className="text-teal-700">Quran for Elders</span>
+                <span className="text-teal-700">Tazweed & Najera</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Qaida Nuraniyah • Quran Nazera • Bakarah Hifz • Basic Tajweed
-                (Level-1)
+                Basic Tazweed এবং Najera Batch এর সব স্টুডেন্ট
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -844,9 +943,11 @@ const New_admission = () => {
               </span>
               <button
                 onClick={fetchAdmissions}
-                className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
+                disabled={loading}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 disabled:opacity-50"
               >
-                🔄 Refresh
+                <FaSync size={10} className={loading ? "animate-spin" : ""} />{" "}
+                Refresh
               </button>
               <button
                 onClick={handleLogout}
@@ -857,29 +958,74 @@ const New_admission = () => {
             </div>
           </div>
 
+          {/* Source Tabs */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto">
+            {[
+              { id: "All", label: "All Students", color: "blue" },
+              { id: "Tazweed", label: "Basic Tazweed", color: "green" },
+              { id: "Najera", label: "Najera Batch", color: "purple" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setSourceFilter(tab.id)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                  sourceFilter === tab.id
+                    ? tab.color === "blue"
+                      ? "bg-blue-50 text-blue-700 shadow-sm"
+                      : tab.color === "green"
+                        ? "bg-green-50 text-green-700 shadow-sm"
+                        : "bg-purple-50 text-purple-700 shadow-sm"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {tab.label}
+                <span
+                  className={`text-[10px] px-1.5 rounded-full ${
+                    sourceFilter === tab.id
+                      ? "bg-white text-gray-700"
+                      : "bg-gray-200 text-gray-600"
+                  }`}
+                >
+                  {sourceCounts[tab.id]}
+                </span>
+              </button>
+            ))}
+          </div>
+
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-blue-600">
-                {admissions.length}
+                {sourceCounts[sourceFilter]}
               </p>
-              <p className="text-[10px] text-gray-500">Total</p>
+              <p className="text-[10px] text-gray-500">
+                {sourceFilter === "All" ? "Total" : sourceFilter}
+              </p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-yellow-600">
-                {admissions.filter((a) => a.status === "Pending").length}
+                {
+                  filteredAdmissions.filter((a) => a.status === "Pending")
+                    .length
+                }
               </p>
               <p className="text-[10px] text-gray-500">Pending</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-green-600">
-                {admissions.filter((a) => a.status === "Approved").length}
+                {
+                  filteredAdmissions.filter((a) => a.status === "Approved")
+                    .length
+                }
               </p>
               <p className="text-[10px] text-gray-500">Approved</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-red-600">
-                {admissions.filter((a) => a.status === "Rejected").length}
+                {
+                  filteredAdmissions.filter((a) => a.status === "Rejected")
+                    .length
+                }
               </p>
               <p className="text-[10px] text-gray-500">Rejected</p>
             </div>
@@ -892,7 +1038,7 @@ const New_admission = () => {
                 <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search by name / phone / email..."
+                  placeholder="Search by name / phone / email / student ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -907,17 +1053,6 @@ const New_admission = () => {
                   {uniqueStatuses.map((s) => (
                     <option key={s} value={s}>
                       {s}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={filterCourse}
-                  onChange={(e) => setFilterCourse(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg max-w-[180px]"
-                >
-                  {uniqueCourses.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
                     </option>
                   ))}
                 </select>
@@ -942,7 +1077,7 @@ const New_admission = () => {
               <div className="p-10 text-center">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
                 <p className="text-xs text-gray-500 mt-3">
-                  Loading admissions...
+                  Loading all students...
                 </p>
               </div>
             ) : (
@@ -954,7 +1089,10 @@ const New_admission = () => {
                         Student
                       </th>
                       <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Guardian
+                        Student ID
+                      </th>
+                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                        Source
                       </th>
                       <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                         Course
@@ -987,11 +1125,28 @@ const New_admission = () => {
                             {a.email || a.phone}
                           </p>
                         </td>
-                        <td className="px-3 py-2 text-xs text-gray-600">
-                          {a.fatherName || "N/A"}
+                        <td className="px-3 py-2">
+                          {a.studentId ? (
+                            <span className="text-[10px] font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                              {a.studentId}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-gray-400 italic">
+                              Not assigned
+                            </span>
+                          )}
                         </td>
-                        <td className="px-3 py-2 text-xs text-gray-600 max-w-[220px]">
-                          {a.course}
+                        <td className="px-3 py-2">
+                          <span
+                            className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${getSourceBadge(
+                              a.source,
+                            )}`}
+                          >
+                            {a.sourceLabel}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-xs text-gray-600 max-w-[200px]">
+                          {a.course || "N/A"}
                         </td>
                         <td className="px-3 py-2 text-xs text-gray-600">
                           {a.date || "N/A"}
@@ -1063,11 +1218,12 @@ const New_admission = () => {
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
               <FaUserPlus className="text-5xl text-gray-300 mx-auto mb-3" />
               <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                No Elders Course Admissions
+                No Students Found
               </h3>
               <p className="text-xs text-gray-500">
-                Qaida Nuraniyah, Quran Nazera, Bakarah Hifz, Basic Tajweed
-                (Level-1) — এই ৪টি কোর্সে এখনো কোনো নতুন ভর্তি হয়নি।
+                {admissions.length === 0
+                  ? "Basic Tazweed বা Najera Batch থেকে student add করুন।"
+                  : "আপনার search/filter এর সাথে কোনো student match করেনি।"}
               </p>
             </div>
           )}
@@ -1100,6 +1256,20 @@ const New_admission = () => {
                     <p className="text-sm text-gray-500">
                       {selectedAdmission.course}
                     </p>
+                    <div className="flex gap-2 mt-2 flex-wrap">
+                      <span
+                        className={`text-[10px] px-2 py-1 rounded-full font-semibold ${getSourceBadge(
+                          selectedAdmission.source,
+                        )}`}
+                      >
+                        {selectedAdmission.sourceLabel}
+                      </span>
+                      {selectedAdmission.studentId && (
+                        <span className="text-xs font-mono text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                          ID: {selectedAdmission.studentId}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500">Status</p>
@@ -1142,22 +1312,16 @@ const New_admission = () => {
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500">Age</p>
+                      <p className="text-xs text-gray-500">Country</p>
                       <p className="font-semibold">
-                        {selectedAdmission.age || "N/A"}
+                        {selectedAdmission.country || "N/A"}
                       </p>
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Occupation</p>
+                    <p className="text-xs text-gray-500">Batch</p>
                     <p className="font-semibold">
-                      {selectedAdmission.occupation || "N/A"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Marital Status</p>
-                    <p className="font-semibold">
-                      {selectedAdmission.maritalStatus || "N/A"}
+                      {selectedAdmission.batch || "N/A"}
                     </p>
                   </div>
                 </div>
@@ -1182,21 +1346,15 @@ const New_admission = () => {
                         </span>
                       </div>
                       <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Guardian Contact</span>
+                        <span className="text-gray-500">Guardian Phone</span>
                         <span className="font-semibold text-right">
                           {selectedAdmission.guardianPhone || "N/A"}
                         </span>
                       </div>
                       <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Present Address</span>
+                        <span className="text-gray-500">Address</span>
                         <span className="font-semibold text-right max-w-[60%]">
                           {selectedAdmission.address || "N/A"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Permanent Address</span>
-                        <span className="font-semibold text-right max-w-[60%]">
-                          {selectedAdmission.permanentAddress || "N/A"}
                         </span>
                       </div>
                     </div>
@@ -1226,6 +1384,17 @@ const New_admission = () => {
                           ).toLocaleString()}
                         </span>
                       </div>
+                      {selectedAdmission.dueAmount !== undefined && (
+                        <div className="flex justify-between gap-2">
+                          <span className="text-gray-500">Due Amount</span>
+                          <span className="font-semibold text-red-600">
+                            ৳
+                            {Number(
+                              selectedAdmission.dueAmount || 0,
+                            ).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex justify-between gap-2">
                         <span className="text-gray-500">Method</span>
                         <span className="font-semibold">

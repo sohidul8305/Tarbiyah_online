@@ -1,4 +1,4 @@
-// StudentLogin.jsx
+// src/Page/Student/StudentLogin.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -6,8 +6,8 @@ import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Navbar/Footer/Footer";
 
 const StudentLogin = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [studentId, setStudentId] = useState("");
+  const [password, setPassword] = useState("student123S@"); // Default password
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ const StudentLogin = () => {
     setLoading(true);
 
     try {
-      console.log("📤 Login Request:", { username, password });
+      console.log("📤 Login Request:", { studentId, password });
 
       const response = await fetch(
         "https://api.tarbiyahonline.com/api/students/login",
@@ -27,7 +27,7 @@ const StudentLogin = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            username: username.trim(),
+            studentId: studentId.trim(),
             password: password.trim(),
           }),
         },
@@ -41,8 +41,10 @@ const StudentLogin = () => {
       if (data.success) {
         const { user } = data;
 
+        // ✅ LocalStorage এ সব তথ্য save
         localStorage.setItem("isStudentLoggedIn", "true");
-        localStorage.setItem("studentUsername", user.username);
+        localStorage.setItem("studentId", user.studentId || studentId.trim());
+        localStorage.setItem("studentUsername", user.username || "");
         localStorage.setItem("studentInfo", JSON.stringify(user));
         localStorage.setItem("studentEmail", user.email || "");
         localStorage.setItem("studentToken", data.token || "student_token");
@@ -60,7 +62,7 @@ const StudentLogin = () => {
         Swal.fire({
           icon: "error",
           title: "Login Failed",
-          text: data.message || "ভুল ইউজারনেম বা পাসওয়ার্ড!",
+          text: data.message || "ভুল স্টুডেন্ট আইডি বা পাসওয়ার্ড!",
           confirmButtonColor: "#004d4d",
         });
       }
@@ -96,9 +98,10 @@ const StudentLogin = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* ✅ Student ID Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Username <span className="text-red-500">*</span>
+                Student ID <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-3.5 text-gray-400">
@@ -112,24 +115,25 @@ const StudentLogin = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth="2"
-                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      d="M10 6H5a2 2 0 00-2 2v10a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.418.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
                     />
                   </svg>
                 </span>
                 <input
                   type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d] focus:border-transparent transition-all text-sm sm:text-base"
-                  placeholder="Enter your username"
+                  value={studentId}
+                  onChange={(e) => setStudentId(e.target.value)}
+                  className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d] focus:border-transparent transition-all text-sm sm:text-base font-mono"
+                  placeholder="যেমন: TAR2648213"
                   required
                 />
               </div>
               <p className="text-xs text-gray-400 mt-1">
-                💡 আপনার অ্যাডমিন দ্বারা প্রদত্ত ইউজারনেম ব্যবহার করুন
+                💡 অ্যাডমিন/ভর্তি ফরমে প্রদত্ত Student ID ব্যবহার করুন
               </p>
             </div>
 
+            {/* ✅ Password Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password <span className="text-red-500">*</span>
@@ -200,6 +204,9 @@ const StudentLogin = () => {
                   )}
                 </button>
               </div>
+              <p className="text-xs text-gray-400 mt-1">
+                💡 ডিফল্ট পাসওয়ার্ড: <strong>student123S@</strong>
+              </p>
             </div>
 
             <button

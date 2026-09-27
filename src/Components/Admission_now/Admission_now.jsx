@@ -425,34 +425,43 @@ const Admission_now = () => {
       console.log("📥 Response:", data);
 
       if (data.success) {
+        // ✅ Response থেকে studentId নিন
+        const generatedStudentId =
+          data.student?.studentId || "Admin approve করলে পাবেন";
+
         Swal.fire({
           icon: "success",
           title: "🎉 Admission Completed!",
           html: `
-          <div style="text-align: left;">
-            <p><strong>Name:</strong> ${formData.name}</p>
-            <p><strong>Phone:</strong> ${formData.phoneNumber}</p>
-            <p><strong>Email:</strong> ${formData.email}</p>
-            <p><strong>Course:</strong> ${selectedCourseNames.join(", ") || "N/A"}</p>
-            <p><strong>Payment Method:</strong> ${formData.paymentMethod || "N/A"}</p>
-            <p><strong>Transaction ID:</strong> ${formData.transactionId || "N/A"}</p>
-            <p><strong>Payment Status:</strong> ${paymentStatus}</p>
-            <hr style="margin: 10px 0;">
-            <p style="color: #004d4d; font-weight: bold;">
-              ✅ Your application has been submitted!<br/>
-              You can login after admin approval.
-            </p>
-            <p style="font-size: 12px; color: #666; margin-top: 5px;">
-              Username: <strong>${formData.email}</strong><br/>
-              Password: <strong>student123S@</strong>
-            </p>
-          </div>
-        `,
+      <div style="text-align: left;">
+        <p><strong>Name:</strong> ${formData.name}</p>
+        <p><strong>Phone:</strong> ${formData.phoneNumber}</p>
+        <p><strong>Email:</strong> ${formData.email}</p>
+        <p><strong>Course:</strong> ${selectedCourseNames.join(", ") || "N/A"}</p>
+        <p><strong>Payment Method:</strong> ${formData.paymentMethod || "N/A"}</p>
+        <p><strong>Transaction ID:</strong> ${formData.transactionId || "N/A"}</p>
+        <p><strong>Payment Status:</strong> ${paymentStatus}</p>
+        <hr style="margin: 10px 0;">
+        <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
+          <p style="font-weight: bold; color: #004d4d; margin-bottom: 8px;">🔑 Your Login Credentials:</p>
+          <p style="font-size: 15px;"><strong>Student ID:</strong> 
+            <span style="color: #004d4d; font-size: 18px; letter-spacing: 1px; font-family: monospace;">${generatedStudentId}</span>
+          </p>
+          <p><strong>Password:</strong> 
+            <span style="color: #004d4d;">student123S@</span>
+          </p>
+          <p style="font-size: 12px; color: #666; margin-top: 8px;">
+            ⚠️ Admin approve করার পর আপনি এই Student ID দিয়ে লগইন করতে পারবেন।
+          </p>
+        </div>
+      </div>
+    `,
           confirmButtonColor: "#004d4d",
           confirmButtonText: "OK",
+          width: 550,
         });
 
-        // Reset form
+        // Reset form (আগের মতোই)
         setFormData({
           name: "",
           nationalId: "",

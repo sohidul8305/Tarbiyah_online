@@ -79,7 +79,6 @@ const BasicTazweed = () => {
     paymentMethodNov: "---",
     paymentDateNov: "---",
     transactionIdNov: "---",
-    // ✅ নতুন fields
     december: 0,
     paymentMethodDec: "---",
     paymentDateDec: "---",
@@ -526,7 +525,9 @@ const BasicTazweed = () => {
     return matchesSearch;
   });
 
-  // Stats
+  // ============================================================
+  // ✅ Stats — Najera এর মতো
+  // ============================================================
   const totalIncome = students.reduce(
     (sum, s) => sum + (Number(s.paidAmount) || 0),
     0,
@@ -568,7 +569,7 @@ const BasicTazweed = () => {
     }
   };
 
-  // ✅ Reusable form fields — December + Comments সহ
+  // ✅ Reusable form fields
   const renderFormFields = (data, onChange) => (
     <div className="space-y-4">
       {/* Basic Info */}
@@ -712,7 +713,7 @@ const BasicTazweed = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-2">
           <div>
             <label className="block text-[10px] font-semibold text-gray-700 mb-0.5">
-              July-August (Admission)
+              (Monthly Admission)
             </label>
             <input
               type="number"
@@ -882,7 +883,7 @@ const BasicTazweed = () => {
           </div>
         </div>
 
-        {/* ✅ December — নতুন যোগ করা */}
+        {/* December */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div>
             <label className="block text-[10px] font-semibold text-gray-700 mb-0.5">
@@ -935,7 +936,7 @@ const BasicTazweed = () => {
         </div>
       </div>
 
-      {/* ✅ Comments — নতুন যোগ করা */}
+      {/* Comments */}
       <div>
         <h4 className="text-xs font-bold text-gray-700 mb-2 pb-1 border-b">
           💬 Comments
@@ -1099,7 +1100,7 @@ const BasicTazweed = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaBook className="text-green-600" /> Basic Tazweed 6th Bacth —
+                <FaBook className="text-green-600" /> Basic Tazweed 6th Batch —
                 Payment Overview
               </h1>
               <p className="text-xs text-gray-500">
@@ -1131,7 +1132,9 @@ const BasicTazweed = () => {
             </div>
           </div>
 
-          {/* Stats */}
+          {/* ============================================================ */}
+          {/* ✅ STATS — Total Students, Collected, Due, Scholarship, Fees */}
+          {/* ============================================================ */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
               <p className="text-xl font-bold text-purple-600">
@@ -1224,11 +1227,9 @@ const BasicTazweed = () => {
                     <th className="px-2 py-2 text-right font-bold text-gray-600 uppercase">
                       Nov
                     </th>
-                    {/* ✅ নতুন December column */}
                     <th className="px-2 py-2 text-right font-bold text-gray-600 uppercase">
                       Dec
                     </th>
-                    {/* ✅ নতুন Comments column */}
                     <th className="px-2 py-2 text-left font-bold text-gray-600 uppercase">
                       Comments
                     </th>
@@ -1286,11 +1287,9 @@ const BasicTazweed = () => {
                       <td className="px-2 py-1.5 text-right text-gray-600">
                         ৳{(student.november || 0).toLocaleString()}
                       </td>
-                      {/* ✅ নতুন December cell */}
                       <td className="px-2 py-1.5 text-right text-gray-600">
                         ৳{(student.december || 0).toLocaleString()}
                       </td>
-                      {/* ✅ নতুন Comments cell */}
                       <td className="px-2 py-1.5 text-[9px] text-gray-500 truncate max-w-[120px]">
                         {student.comments || "-"}
                       </td>
@@ -1365,7 +1364,7 @@ const BasicTazweed = () => {
         </main>
       </div>
 
-      {/* ✅ Add Modal */}
+      {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
@@ -1405,7 +1404,7 @@ const BasicTazweed = () => {
         </div>
       )}
 
-      {/* ✅ Edit Modal */}
+      {/* Edit Modal */}
       {showEditModal && editingStudent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
@@ -1444,7 +1443,7 @@ const BasicTazweed = () => {
         </div>
       )}
 
-      {/* ✅ View Modal */}
+      {/* View Modal */}
       {showViewModal && selectedStudent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -1497,12 +1496,10 @@ const BasicTazweed = () => {
                 <div className="bg-blue-50 p-2 rounded">
                   <b>November:</b> ৳{selectedStudent.november}
                 </div>
-                {/* ✅ নতুন December */}
                 <div className="bg-purple-50 p-2 rounded">
                   <b>December:</b> ৳{selectedStudent.december || 0}
                 </div>
               </div>
-              {/* ✅ নতুন Comments */}
               {selectedStudent.comments && (
                 <div className="bg-yellow-50 p-3 rounded border border-yellow-200">
                   <b className="text-xs">💬 Comments:</b>

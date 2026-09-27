@@ -24,81 +24,15 @@ import {
   FaSave,
   FaUndo,
   FaLayerGroup,
+  FaUserTimes,
+  FaSync,
+  FaBook,
+  FaBookOpen,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
-import { FaUserTimes } from "react-icons/fa";
 
-const API_BASE = "https://api.tarbiyahonline.com";
-
-// ============================================================
-// ✅ ELDERS DEPARTMENT — শুধু এই ৪টি course এর student দেখাবে
-// English + Bengali দুই version-ই support করে
-// ============================================================
-const ELDERS_COURSES = [
-  // ✅ English (Admission_now form থেকে আসে)
-  "qaida nuraniyah",
-  "qaida nooraniya",
-  "qaida noorani",
-  "qaida nurani",
-  "qaidah nuraniyah",
-  "qaidah nooraniya",
-  "qaidah noorani",
-  "quran nazera",
-  "nazera quran",
-  "quran najera",
-  "najera quran",
-  "bakarah hifz",
-  "bakara hifz",
-  "baqarah hifz",
-  "baqara hifz",
-  "basic tajweed (level-1)",
-  "basic tajweed (level 1)",
-  "basic tajweed level-1",
-  "basic tajweed level 1",
-  "basic tajweed",
-
-  // ✅ Bengali (Admin manually add করলে এই নামে save হয়)
-  "কায়দা নুরানী",
-  "কায়দা নূরানী",
-  "কায়দায়ে নূরানিয়্যাহ",
-  "কায়দায়ে নূরানীয়াহ",
-  "কুরআন নাজেরা",
-  "নাজেরা",
-  "বেসিক তাজউইদ (লেভেল–১)",
-  "বেসিক তাজউইদ (লেভেল-১)",
-  "বেসিক তাজউইদ",
-  "বাকারাহ হিফজ",
-  "বাকারা হিফজ",
-];
-
-// একটা single course string elders কিনা check
-const isSingleEldersCourse = (singleCourse) => {
-  const p = String(singleCourse).toLowerCase().trim();
-  if (!p) return false;
-
-  return ELDERS_COURSES.some((c) => {
-    const cl = c.toLowerCase();
-    if (p === cl) return true;
-    if (p.includes(cl)) return true;
-    if (cl.includes(p) && p.length >= 5) return true;
-    return false;
-  });
-};
-
-// ✅ Main check: student এর course list এর **প্রতিটা** course elders হতে হবে
-const isEldersCourse = (courseStr) => {
-  if (!courseStr) return false;
-
-  const parts = String(courseStr)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
-  if (parts.length === 0) return false;
-
-  return parts.every((part) => isSingleEldersCourse(part));
-};
+const API_BASE = "https://api.tarbiyahonline.com/api";
 
 const Add_student = () => {
   const { user, logOut } = useAuth();
@@ -118,6 +52,7 @@ const Add_student = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sourceFilter, setSourceFilter] = useState("All");
 
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -182,8 +117,9 @@ const Add_student = () => {
   const [showStudentList, setShowStudentList] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  // ✅ Elders course list only
+  // ✅ সব Course list (Elders + Admission)
   const coursesList = [
+    // Elders Courses
     "কায়দা নুরানী",
     "কায়দায়ে নূরানিয়্যাহ",
     "কুরআন নাজেরা",
@@ -194,14 +130,31 @@ const Add_student = () => {
     "Quran Nazera",
     "Bakarah Hifz",
     "Basic Tajweed (Level-1)",
+    // Admission Courses
+    "Diploma in Islamic Studies",
+    "Alimiyah for Kids (Bangla Medium)",
+    "Alimiyah for Kids (English Medium)",
+    "Alimiyah Program (Bangla Version)",
+    "Alimiyah Program (English Version)",
+    "Nazera Quran (Bangladeshi)",
+    "Nazera Quran (Expatriate)",
+    "Hifzul Quran",
+    "Hifz Revision (One to One)",
+    "One-to-One Program",
   ];
+
   const subjectList = [
     "Tajweed",
     "Quran Memorization",
     "Qaida",
     "Nazera",
     "Hifz",
+    "Tafsir",
+    "Hadith",
+    "Fiqh",
+    "Aqeedah",
   ];
+
   const bloodGroupList = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
   const genderList = ["Male", "Female", "Other"];
   const statusList = ["Active", "Pending", "Inactive"];
@@ -226,7 +179,7 @@ const Add_student = () => {
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Quran for Elders",
+        department: "Administration",
         joinDate: "January 2024",
       });
     }
@@ -234,32 +187,159 @@ const Add_student = () => {
 
   // Fetch students
   useEffect(() => {
-    fetchStudentsFromAPI();
+    fetchAllStudents();
   }, [refreshKey]);
 
-  const fetchStudentsFromAPI = async () => {
+  // ============================================================
+  // ✅ Fetch from 3 API endpoints & combine
+  // ============================================================
+  const fetchAllStudents = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`${API_BASE}/api/students/all`);
-      const data = await response.json();
+      // ✅ ৩টি endpoint একসাথে fetch
+      const [studentsRes, tazweedRes, najeraRes] = await Promise.allSettled([
+        fetch(`${API_BASE}/students/all`),
+        fetch(`${API_BASE}/basic-tazweed/all`),
+        fetch(`${API_BASE}/najera-batch/all`),
+      ]);
 
-      if (data.success) {
-        const all = data.students || [];
-
-        // ✅ শুধু elders course এর student filter
-        const elders = all.filter((s) => isEldersCourse(s.course));
-
-        console.log("📥 Total students:", all.length);
-        console.log("✅ Elders filtered:", elders.length);
-        elders.forEach((s) => console.log("   →", s.name, "|", s.course));
-
-        setStudents(elders);
-      } else {
-        setError(data.message || "Failed to fetch");
-        setStudents([]);
+      // ---------- 1) Admission Form Students ----------
+      let admissionStudents = [];
+      if (studentsRes.status === "fulfilled") {
+        try {
+          const d = await studentsRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            admissionStudents = d.students.map((s) => ({
+              _id: s._id,
+              source: "Admission",
+              sourceLabel: "Admission Form",
+              name: s.name || "",
+              phone: s.phone || "",
+              email: s.email || "",
+              course: s.course || "",
+              batch: s.batch || "",
+              country: s.country || "BD",
+              studentId: s.studentId || "",
+              status: s.status || "Pending",
+              paymentStatus: s.paymentStatus || "Unpaid",
+              scholarshipAmount: s.scholarshipAmount || 0,
+              courseFee: s.courseFee || 0,
+              paidAmount: s.paidAmount || 0,
+              dueAmount: s.dueAmount || 0,
+              transactionId: s.transactionId || "",
+              createdAt: s.createdAt || "",
+              raw: s,
+            }));
+          }
+        } catch (e) {
+          console.error("Admission parse error:", e);
+        }
       }
+
+      // ---------- 2) Basic Tazweed Students ----------
+      let tazweedStudents = [];
+      if (tazweedRes.status === "fulfilled") {
+        try {
+          const d = await tazweedRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            tazweedStudents = d.students.map((s) => ({
+              _id: s._id,
+              source: "Tazweed",
+              sourceLabel: "Basic Tazweed",
+              name: s.name || "",
+              phone: s.phone || "",
+              email: "",
+              course: "Basic Tajweed (Level-1)",
+              batch: "Basic Tazweed 6th Batch",
+              country: s.country || "BD",
+              studentId: s.studentId || "",
+              status:
+                Number(s.dueAmount) === 0 && Number(s.paidAmount) > 0
+                  ? "Active"
+                  : "Pending",
+              paymentStatus:
+                Number(s.dueAmount) === 0
+                  ? "Paid"
+                  : Number(s.paidAmount) > 0
+                    ? "Partial"
+                    : "Unpaid",
+              scholarshipAmount: s.scholarshipAmount || 0,
+              courseFee: s.courseFee || 0,
+              paidAmount: s.paidAmount || 0,
+              dueAmount: s.dueAmount || 0,
+              transactionId: s.transactionId || "",
+              createdAt: s.createdAt || "",
+              raw: s,
+            }));
+          }
+        } catch (e) {
+          console.error("Tazweed parse error:", e);
+        }
+      }
+
+      // ---------- 3) Najera Batch Students ----------
+      let najeraStudents = [];
+      if (najeraRes.status === "fulfilled") {
+        try {
+          const d = await najeraRes.value.json();
+          if (d.success && Array.isArray(d.students)) {
+            najeraStudents = d.students.map((s) => ({
+              _id: s._id,
+              source: "Najera",
+              sourceLabel: "Najera Batch",
+              name: s.name || "",
+              phone: s.phone || "",
+              email: "",
+              course: "Quran Nazera",
+              batch: "Najera Batch-02",
+              country: s.country || "BD",
+              studentId: s.studentId || "",
+              status:
+                Number(s.dueAmount) === 0 && Number(s.paidAmount) > 0
+                  ? "Active"
+                  : "Pending",
+              paymentStatus:
+                Number(s.dueAmount) === 0
+                  ? "Paid"
+                  : Number(s.paidAmount) > 0
+                    ? "Partial"
+                    : "Unpaid",
+              scholarshipAmount: s.scholarshipAmount || 0,
+              courseFee: s.courseFee || 0,
+              paidAmount: s.paidAmount || 0,
+              dueAmount: s.dueAmount || 0,
+              transactionId: s.transactionId || "",
+              createdAt: s.createdAt || "",
+              raw: s,
+            }));
+          }
+        } catch (e) {
+          console.error("Najera parse error:", e);
+        }
+      }
+
+      // ✅ Combine
+      const combined = [
+        ...admissionStudents,
+        ...tazweedStudents,
+        ...najeraStudents,
+      ].sort((a, b) => {
+        const da = new Date(a.createdAt || 0).getTime();
+        const db = new Date(b.createdAt || 0).getTime();
+        return db - da;
+      });
+
+      console.log("════════════════════════════════");
+      console.log(`✅ Loaded all students:`);
+      console.log(`   - Admission: ${admissionStudents.length}`);
+      console.log(`   - Tazweed: ${tazweedStudents.length}`);
+      console.log(`   - Najera: ${najeraStudents.length}`);
+      console.log(`   - Total: ${combined.length}`);
+      console.log("════════════════════════════════");
+
+      setStudents(combined);
     } catch (err) {
       console.error("❌ Fetch Error:", err);
       setError(`Error: ${err.message}`);
@@ -290,7 +370,7 @@ const Add_student = () => {
       });
 
       const response = await fetch(
-        `${API_BASE}/api/students/approve/${selectedStudent._id}`,
+        `${API_BASE}/students/approve/${selectedStudent._id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -361,28 +441,15 @@ const Add_student = () => {
       return;
     }
 
-    // ✅ Check: elders course কিনা
-    if (!isEldersCourse(formData.course)) {
-      Swal.fire({
-        icon: "warning",
-        title: "শুধু Elders Course!",
-        text: "এই পেজ থেকে শুধু Qaida Nuraniyah, Quran Nazera, Bakarah Hifz, Basic Tajweed (Level-1) course এর student add করা যাবে।",
-      });
-      return;
-    }
-
     try {
-      const response = await fetch(
-        `${API_BASE}/api/students/register/student`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...formData,
-            password: formData.password || "default123",
-          }),
-        },
-      );
+      const response = await fetch(`${API_BASE}/students/register/student`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          password: formData.password || "default123",
+        }),
+      });
 
       const data = await response.json();
 
@@ -460,7 +527,8 @@ const Add_student = () => {
     setShowStudentList(true);
   };
 
-  const handleDelete = async (id, name) => {
+  // ✅ Source অনুযায়ী Delete
+  const handleDelete = async (id, name, source) => {
     const result = await Swal.fire({
       title: `Delete ${name}?`,
       text: "You won't be able to revert this!",
@@ -471,153 +539,172 @@ const Add_student = () => {
       confirmButtonText: "Yes, delete it!",
     });
 
-    if (result.isConfirmed) {
-      try {
-        const response = await fetch(`${API_BASE}/api/students/delete/${id}`, {
-          method: "DELETE",
-        });
-        const data = await response.json();
+    if (!result.isConfirmed) return;
 
-        if (data.success) {
-          Swal.fire({
-            icon: "success",
-            title: "Deleted!",
-            timer: 1500,
-            showConfirmButton: false,
-          });
-          setRefreshKey((p) => p + 1);
-        } else {
-          Swal.fire({ icon: "error", title: "Failed!", text: data.message });
-        }
-      } catch (err) {
-        console.error(err);
+    // ✅ Source অনুযায়ী সঠিক endpoint
+    let deleteUrl = `${API_BASE}/admin-students/delete/${id}`;
+    if (source === "Tazweed") {
+      deleteUrl = `${API_BASE}/basic-tazweed/delete/${id}`;
+    } else if (source === "Najera") {
+      deleteUrl = `${API_BASE}/najera-batch/delete/${id}`;
+    }
+
+    try {
+      const response = await fetch(deleteUrl, { method: "DELETE" });
+      const data = await response.json();
+
+      if (data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        setRefreshKey((p) => p + 1);
+      } else {
+        Swal.fire({ icon: "error", title: "Failed!", text: data.message });
       }
+    } catch (err) {
+      console.error(err);
     }
   };
 
   // View Details
-  const handleView = async (student) => {
-    try {
-      const response = await fetch(
-        `${API_BASE}/api/students/details/${student._id}`,
-      );
-
-      let full = student;
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) full = data.student;
-      }
-
-      Swal.fire({
-        title: `📋 ${full.name}`,
-        html: `
-          <div style="text-align:left; font-size:13px; max-height:500px; overflow-y:auto;">
-            <div style="background:#f0fdfa; padding:10px; border-radius:8px; border:1px solid #99f6e4; margin-bottom:8px;">
-              <p style="font-weight:bold; color:#0f766e; margin-bottom:6px;">👤 Personal</p>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
-                <p><strong>Student ID:</strong> ${full.studentId || "N/A"}</p>
-                <p><strong>Name:</strong> ${full.name || "N/A"}</p>
-                <p><strong>Phone:</strong> ${full.phone || "N/A"}</p>
-                <p><strong>Email:</strong> ${full.email || "N/A"}</p>
-                <p><strong>Country:</strong> ${full.country || "N/A"}</p>
-                <p><strong>Course:</strong> ${full.course || "N/A"}</p>
-                <p><strong>Batch:</strong> ${full.batch || "N/A"}</p>
-                <p><strong>Status:</strong> ${full.status || "Pending"}</p>
-              </div>
-            </div>
-
-            <div style="background:#fef3c7; padding:10px; border-radius:8px; border:1px solid #fcd34d; margin-bottom:8px;">
-              <p style="font-weight:bold; color:#92400e; margin-bottom:6px;">💰 Payment Info</p>
-              <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
-                <p><strong>Scholarship:</strong> ${full.scholarshipAmount || 0}</p>
-                <p><strong>Course Fee:</strong> ${full.courseFee || 0}</p>
-                <p><strong>Paid:</strong> ${full.paidAmount || 0}</p>
-                <p><strong>Due:</strong> <span style="color:red;font-weight:bold;">${full.dueAmount || 0}</span></p>
-                <p><strong>Transaction ID:</strong> ${full.transactionId || "---"}</p>
-                <p><strong>July-August:</strong> ${full.julyAugust || 0}</p>
-              </div>
-            </div>
-
-            <div style="background:#dbeafe; padding:10px; border-radius:8px; border:1px solid #93c5fd; margin-bottom:8px;">
-              <p style="font-weight:bold; color:#1e40af; margin-bottom:6px;">📅 Monthly Payments</p>
-              <table style="width:100%; font-size:11px; border-collapse:collapse;">
-                <tr style="background:#93c5fd;">
-                  <th style="padding:4px;text-align:left;">Month</th>
-                  <th style="padding:4px;text-align:left;">Amount</th>
-                  <th style="padding:4px;text-align:left;">Method</th>
-                  <th style="padding:4px;text-align:left;">Date</th>
-                  <th style="padding:4px;text-align:left;">TXN ID</th>
-                </tr>
-                <tr>
-                  <td style="padding:4px;">Sept</td>
-                  <td style="padding:4px;">${full.september || 0}</td>
-                  <td style="padding:4px;">${full.paymentMethodSept || "---"}</td>
-                  <td style="padding:4px;">${full.paymentDateSept || "---"}</td>
-                  <td style="padding:4px;">${full.transactionIdSept || "---"}</td>
-                </tr>
-                <tr style="background:#eff6ff;">
-                  <td style="padding:4px;">Oct</td>
-                  <td style="padding:4px;">${full.october || 0}</td>
-                  <td style="padding:4px;">${full.paymentMethodOct || "---"}</td>
-                  <td style="padding:4px;">${full.paymentDateOct || "---"}</td>
-                  <td style="padding:4px;">${full.transactionIdOct || "---"}</td>
-                </tr>
-                <tr>
-                  <td style="padding:4px;">Nov</td>
-                  <td style="padding:4px;">${full.november || 0}</td>
-                  <td style="padding:4px;">${full.paymentMethodNov || "---"}</td>
-                  <td style="padding:4px;">${full.paymentDateNov || "---"}</td>
-                  <td style="padding:4px;">${full.transactionIdNov || "---"}</td>
-                </tr>
-                <tr style="background:#eff6ff;">
-                  <td style="padding:4px;">Dec</td>
-                  <td style="padding:4px;">${full.december || 0}</td>
-                  <td style="padding:4px;">${full.paymentMethodDec || "---"}</td>
-                  <td style="padding:4px;">${full.paymentDateDec || "---"}</td>
-                  <td style="padding:4px;">${full.transactionIdDec || "---"}</td>
-                </tr>
-              </table>
-              <p style="margin-top:6px;"><strong>Comments:</strong> ${full.comments || "N/A"}</p>
-            </div>
-
-            ${
-              full.username && full.password
-                ? `<div style="background:#f0fdf4; padding:10px; border-radius:8px; border:2px solid #86efac;">
-                    <p style="font-weight:bold; color:#004d4d;">🔑 Login</p>
-                    <p><strong>Username:</strong> ${full.username}</p>
-                    <p><strong>Password:</strong> ${full.password}</p>
-                  </div>`
-                : ""
-            }
+  const handleView = (student) => {
+    const s = student.raw || student;
+    Swal.fire({
+      title: `📋 ${student.name}`,
+      html: `
+        <div style="text-align:left; font-size:13px; max-height:500px; overflow-y:auto;">
+          <div style="background:#e6f7f9; padding:10px; border-radius:8px; border-left:4px solid #00ADD2; margin-bottom:8px;">
+            <p style="margin:0;"><strong>📌 Source:</strong> ${student.sourceLabel}</p>
+            <p style="margin:5px 0 0 0;"><strong>🆔 Student ID:</strong> ${s.studentId || "N/A"}</p>
+            <p style="margin:5px 0 0 0;"><strong>👤 Name:</strong> ${s.name || "N/A"}</p>
+            <p style="margin:5px 0 0 0;"><strong>📞 Phone:</strong> ${s.phone || "N/A"}</p>
+            <p style="margin:5px 0 0 0;"><strong>🎓 Course:</strong> ${s.course || "N/A"}</p>
+            <p style="margin:5px 0 0 0;"><strong>📦 Batch:</strong> ${s.batch || "N/A"}</p>
+            <p style="margin:5px 0 0 0;"><strong>🌍 Country:</strong> ${s.country || "N/A"}</p>
+            <p style="margin:5px 0 0 0;"><strong>📌 Status:</strong> ${s.status || "Pending"}</p>
           </div>
-        `,
-        confirmButtonColor: "#3b82f6",
-        confirmButtonText: "Close",
-        width: 720,
-      });
-    } catch (err) {
-      console.error(err);
-      Swal.fire({ icon: "error", title: "Error", text: err.message });
-    }
+
+          <div style="background:#fef3c7; padding:10px; border-radius:8px; border:1px solid #fcd34d; margin-bottom:8px;">
+            <p style="font-weight:bold; color:#92400e; margin-bottom:6px;">💰 Payment Info</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px;">
+              <p><strong>Scholarship:</strong> ৳${s.scholarshipAmount || 0}</p>
+              <p><strong>Course Fee:</strong> ৳${s.courseFee || 0}</p>
+              <p><strong>Paid:</strong> ৳${s.paidAmount || 0}</p>
+              <p><strong>Due:</strong> <span style="color:red;font-weight:bold;">৳${s.dueAmount || 0}</span></p>
+              <p><strong>Transaction ID:</strong> ${s.transactionId || "---"}</p>
+            </div>
+          </div>
+
+          ${
+            student.source === "Admission"
+              ? `
+              <div style="background:#dbeafe; padding:10px; border-radius:8px; border:1px solid #93c5fd; margin-bottom:8px;">
+                <p style="font-weight:bold; color:#1e40af; margin-bottom:6px;">📅 Monthly Payments</p>
+                <table style="width:100%; font-size:11px; border-collapse:collapse;">
+                  <tr style="background:#93c5fd;">
+                    <th style="padding:4px;text-align:left;">Month</th>
+                    <th style="padding:4px;text-align:left;">Amount</th>
+                    <th style="padding:4px;text-align:left;">Method</th>
+                    <th style="padding:4px;text-align:left;">Date</th>
+                    <th style="padding:4px;text-align:left;">TXN</th>
+                  </tr>
+                  <tr>
+                    <td style="padding:4px;">Sep</td>
+                    <td style="padding:4px;">৳${s.september || 0}</td>
+                    <td style="padding:4px;">${s.paymentMethodSept || "---"}</td>
+                    <td style="padding:4px;">${s.paymentDateSept || "---"}</td>
+                    <td style="padding:4px;">${s.transactionIdSept || "---"}</td>
+                  </tr>
+                  <tr style="background:#eff6ff;">
+                    <td style="padding:4px;">Oct</td>
+                    <td style="padding:4px;">৳${s.october || 0}</td>
+                    <td style="padding:4px;">${s.paymentMethodOct || "---"}</td>
+                    <td style="padding:4px;">${s.paymentDateOct || "---"}</td>
+                    <td style="padding:4px;">${s.transactionIdOct || "---"}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding:4px;">Nov</td>
+                    <td style="padding:4px;">৳${s.november || 0}</td>
+                    <td style="padding:4px;">${s.paymentMethodNov || "---"}</td>
+                    <td style="padding:4px;">${s.paymentDateNov || "---"}</td>
+                    <td style="padding:4px;">${s.transactionIdNov || "---"}</td>
+                  </tr>
+                  <tr style="background:#eff6ff;">
+                    <td style="padding:4px;">Dec</td>
+                    <td style="padding:4px;">৳${s.december || 0}</td>
+                    <td style="padding:4px;">${s.paymentMethodDec || "---"}</td>
+                    <td style="padding:4px;">${s.paymentDateDec || "---"}</td>
+                    <td style="padding:4px;">${s.transactionIdDec || "---"}</td>
+                  </tr>
+                </table>
+              </div>
+            `
+              : `
+              <div style="background:#dbeafe; padding:10px; border-radius:8px; border:1px solid #93c5fd; margin-bottom:8px;">
+                <p style="font-weight:bold; color:#1e40af; margin-bottom:6px;">📅 Monthly Payments</p>
+                <p><strong>Jul-Aug:</strong> ৳${s.julyAugust || 0}</p>
+                <p><strong>September:</strong> ৳${s.september || 0} (${s.paymentMethodSept || "---"})</p>
+                <p><strong>October:</strong> ৳${s.october || 0} (${s.paymentMethodOct || "---"})</p>
+                <p><strong>November:</strong> ৳${s.november || 0} (${s.paymentMethodNov || "---"})</p>
+                <p><strong>December:</strong> ৳${s.december || 0} (${s.paymentMethodDec || "---"})</p>
+              </div>
+            `
+          }
+
+          ${
+            s.comments
+              ? `<div style="background:#f0fdf4; padding:10px; border-radius:8px; border:1px solid #86efac; margin-bottom:8px;">
+                  <p><strong>💬 Comments:</strong> ${s.comments}</p>
+                </div>`
+              : ""
+          }
+
+          ${
+            s.username && s.password
+              ? `<div style="background:#f0fdf4; padding:10px; border-radius:8px; border:2px solid #86efac;">
+                  <p style="font-weight:bold; color:#004d4d;">🔑 Login</p>
+                  <p><strong>Username:</strong> ${s.username}</p>
+                  <p><strong>Password:</strong> ${s.password}</p>
+                </div>`
+              : ""
+          }
+        </div>
+      `,
+      confirmButtonColor: "#3b82f6",
+      confirmButtonText: "Close",
+      width: 720,
+    });
   };
 
   // Filter
-  const filteredStudents = students.filter((s) => {
-    const matchesSearch =
-      s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.phone?.includes(searchTerm) ||
-      s.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.course?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCourse = filterCourse === "All" || s.course === filterCourse;
-    const matchesStatus = filterStatus === "All" || s.status === filterStatus;
-    return matchesSearch && matchesCourse && matchesStatus;
-  });
+  const filteredStudents = students
+    .filter((s) => (sourceFilter === "All" ? true : s.source === sourceFilter))
+    .filter((s) => {
+      const matchesSearch =
+        s.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.phone?.includes(searchTerm) ||
+        s.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.studentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        s.course?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCourse = filterCourse === "All" || s.course === filterCourse;
+      const matchesStatus = filterStatus === "All" || s.status === filterStatus;
+      return matchesSearch && matchesCourse && matchesStatus;
+    });
 
   const uniqueCourses = [
     "All",
     ...new Set(students.map((s) => s.course).filter(Boolean)),
   ];
+
+  const sourceCounts = {
+    All: students.length,
+    Admission: students.filter((s) => s.source === "Admission").length,
+    Tazweed: students.filter((s) => s.source === "Tazweed").length,
+    Najera: students.filter((s) => s.source === "Najera").length,
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -627,6 +714,19 @@ const Add_student = () => {
         return "bg-yellow-100 text-yellow-700";
       case "Inactive":
         return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const getSourceBadge = (source) => {
+    switch (source) {
+      case "Admission":
+        return "bg-blue-100 text-blue-700";
+      case "Tazweed":
+        return "bg-green-100 text-green-700";
+      case "Najera":
+        return "bg-purple-100 text-purple-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
@@ -869,12 +969,13 @@ const Add_student = () => {
       ],
     },
   ];
+
   if (loading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="text-sm text-gray-500 mt-3">Loading...</p>
+          <p className="text-sm text-gray-500 mt-3">Loading all students...</p>
         </div>
       </div>
     );
@@ -885,7 +986,7 @@ const Add_student = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold">Add Student (Elders)</h1>
+          <h1 className="text-sm font-bold">Add Student</h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100"
@@ -993,20 +1094,30 @@ const Add_student = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border mb-3 flex flex-col sm:flex-row justify-between gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-blue-600" /> Add Student —
-                <span className="text-teal-700">Quran for Elders</span>
+                <FaUserPlus className="text-blue-600" /> Student Management —
+                <span className="text-teal-700">All Sources</span>
               </h1>
               <p className="text-xs text-gray-500">
-                {students.length} elders course students (Qaida Nuraniyah •
-                Quran Nazera • Bakarah Hifz • Basic Tajweed Level-1)
+                Admission Form + Basic Tazweed + Najera Batch ({students.length}{" "}
+                total)
               </p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setRefreshKey((p) => p + 1)}
+                disabled={loading}
+                className="bg-blue-500 hover:bg-blue-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 disabled:opacity-50"
+              >
+                <FaSync size={10} className={loading ? "animate-spin" : ""} />{" "}
+                Refresh
+              </button>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
+              >
+                Logout
+              </button>
+            </div>
           </div>
 
           {/* Toggle */}
@@ -1030,6 +1141,41 @@ const Add_student = () => {
           {showStudentList ? (
             // ============ LIST VIEW ============
             <div className="space-y-3 overflow-hidden h-[calc(100vh-240px)]">
+              {/* Source Tabs */}
+              <div className="bg-white border rounded-xl shadow-sm p-1.5 flex gap-1 overflow-x-auto">
+                {[
+                  { id: "All", label: "All Students", color: "blue" },
+                  { id: "Admission", label: "Admission Form", color: "blue" },
+                  { id: "Tazweed", label: "Basic Tazweed", color: "green" },
+                  { id: "Najera", label: "Najera Batch", color: "purple" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSourceFilter(tab.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                      sourceFilter === tab.id
+                        ? tab.color === "blue"
+                          ? "bg-blue-50 text-blue-700 shadow-sm"
+                          : tab.color === "green"
+                            ? "bg-green-50 text-green-700 shadow-sm"
+                            : "bg-purple-50 text-purple-700 shadow-sm"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    {tab.label}
+                    <span
+                      className={`text-[10px] px-1.5 rounded-full ${
+                        sourceFilter === tab.id
+                          ? "bg-white text-gray-700"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      {sourceCounts[tab.id]}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
               {/* Filters */}
               <div className="bg-white border rounded-xl shadow-sm p-2">
                 <div className="flex flex-col md:flex-row gap-2">
@@ -1047,7 +1193,7 @@ const Add_student = () => {
                     <select
                       value={filterCourse}
                       onChange={(e) => setFilterCourse(e.target.value)}
-                      className="px-1.5 py-1 text-xs border rounded-lg"
+                      className="px-1.5 py-1 text-xs border rounded-lg max-w-[200px]"
                     >
                       {uniqueCourses.map((c) => (
                         <option key={c} value={c}>
@@ -1065,19 +1211,13 @@ const Add_student = () => {
                       <option value="Pending">Pending</option>
                       <option value="Inactive">Inactive</option>
                     </select>
-                    <button
-                      onClick={() => setRefreshKey((p) => p + 1)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold"
-                    >
-                      🔄 Refresh
-                    </button>
                   </div>
                 </div>
               </div>
 
               {/* Table */}
               <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
-                <div className="overflow-auto max-h-[calc(100vh-340px)]">
+                <div className="overflow-auto max-h-[calc(100vh-360px)]">
                   <table className="w-full">
                     <thead className="bg-gray-50 border-b sticky top-0 z-10">
                       <tr>
@@ -1091,13 +1231,13 @@ const Add_student = () => {
                           Name & Contact
                         </th>
                         <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                          Source
+                        </th>
+                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Country
                         </th>
                         <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Course / Batch
-                        </th>
-                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Scholarship
                         </th>
                         <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Course Fee
@@ -1107,9 +1247,6 @@ const Add_student = () => {
                         </th>
                         <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Due
-                        </th>
-                        <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          TXN ID
                         </th>
                         <th className="px-2 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                           Status
@@ -1140,8 +1277,19 @@ const Add_student = () => {
                                 </p>
                               )}
                             </td>
-                            <td className="px-2 py-2 text-xs">
-                              {s.country || "N/A"}
+                            <td className="px-2 py-2">
+                              <span
+                                className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${getSourceBadge(
+                                  s.source,
+                                )}`}
+                              >
+                                {s.sourceLabel}
+                              </span>
+                            </td>
+                            <td className="px-2 py-2">
+                              <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-full">
+                                {s.country || "N/A"}
+                              </span>
                             </td>
                             <td className="px-2 py-2 text-xs">
                               <p>{s.course || "N/A"}</p>
@@ -1151,14 +1299,11 @@ const Add_student = () => {
                                 </p>
                               )}
                             </td>
-                            <td className="px-2 py-2 text-xs">
-                              {s.scholarshipAmount || 0}
-                            </td>
-                            <td className="px-2 py-2 text-xs">
-                              {s.courseFee || 0}
+                            <td className="px-2 py-2 text-xs text-gray-600">
+                              ৳{(s.courseFee || 0).toLocaleString()}
                             </td>
                             <td className="px-2 py-2 text-xs text-green-600 font-semibold">
-                              {s.paidAmount || 0}
+                              ৳{(s.paidAmount || 0).toLocaleString()}
                             </td>
                             <td className="px-2 py-2 text-xs">
                               <span
@@ -1168,11 +1313,8 @@ const Add_student = () => {
                                     : "bg-green-100 text-green-700"
                                 }`}
                               >
-                                {s.dueAmount || 0}
+                                ৳{(s.dueAmount || 0).toLocaleString()}
                               </span>
-                            </td>
-                            <td className="px-2 py-2 text-xs">
-                              {s.transactionId || "---"}
                             </td>
                             <td className="px-2 py-2">
                               <span
@@ -1190,24 +1332,27 @@ const Add_student = () => {
                                 >
                                   <FaEye size={12} />
                                 </button>
-                                {s.status === "Pending" && (
-                                  <button
-                                    onClick={() => {
-                                      setSelectedStudent({
-                                        ...s,
-                                        username: "",
-                                        password: "student123S@",
-                                      });
-                                      setShowApproveModal(true);
-                                    }}
-                                    className="text-green-600 hover:text-green-800 p-0.5"
-                                    title="Approve"
-                                  >
-                                    <FaCheckCircle size={12} />
-                                  </button>
-                                )}
+                                {s.source === "Admission" &&
+                                  s.status === "Pending" && (
+                                    <button
+                                      onClick={() => {
+                                        setSelectedStudent({
+                                          ...s,
+                                          username: "",
+                                          password: "student123S@",
+                                        });
+                                        setShowApproveModal(true);
+                                      }}
+                                      className="text-green-600 hover:text-green-800 p-0.5"
+                                      title="Approve"
+                                    >
+                                      <FaCheckCircle size={12} />
+                                    </button>
+                                  )}
                                 <button
-                                  onClick={() => handleDelete(s._id, s.name)}
+                                  onClick={() =>
+                                    handleDelete(s._id, s.name, s.source)
+                                  }
                                   className="text-red-600 hover:text-red-800 p-0.5"
                                   title="Delete"
                                 >
@@ -1220,10 +1365,10 @@ const Add_student = () => {
                       ) : (
                         <tr>
                           <td
-                            colSpan="12"
+                            colSpan="11"
                             className="px-4 py-8 text-center text-gray-500 text-sm"
                           >
-                            {error || "No elders course students found"}
+                            {error || "No students found"}
                           </td>
                         </tr>
                       )}
@@ -1236,7 +1381,7 @@ const Add_student = () => {
             // ============ ADD FORM ============
             <div className="bg-white border rounded-xl shadow-sm p-4 overflow-y-auto h-[calc(100vh-240px)]">
               <h2 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <FaUserPlus className="text-blue-600" /> New Elders Student
+                <FaUserPlus className="text-blue-600" /> New Student
                 Registration
               </h2>
 
@@ -1409,12 +1554,12 @@ const Add_student = () => {
                 {/* Academic */}
                 <div className="bg-green-50 p-3 rounded-lg">
                   <h3 className="text-sm font-bold text-green-700 mb-2">
-                    📚 Academic (Elders Courses only)
+                    📚 Academic Information
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Course * (Elders only)
+                        Course *
                       </label>
                       <select
                         name="course"
@@ -1538,16 +1683,16 @@ const Add_student = () => {
                   </div>
                 </div>
 
-                {/* Payment & Batch */}
+                {/* Payment */}
                 <div className="bg-teal-50 p-3 rounded-lg">
                   <h3 className="text-sm font-bold text-teal-700 mb-2">
-                    💰 Payment & Batch Information
+                    💰 Payment Information
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Scholarship Amount
+                        Scholarship
                       </label>
                       <input
                         type="number"
@@ -1593,7 +1738,7 @@ const Add_student = () => {
                         name="dueAmount"
                         value={formData.dueAmount}
                         onChange={handleInputChange}
-                        placeholder="Auto (leave blank)"
+                        placeholder="Auto"
                         className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
@@ -1602,20 +1747,20 @@ const Add_student = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        Transaction ID (Admission)
+                        Transaction ID
                       </label>
                       <input
                         type="text"
                         name="transactionId"
                         value={formData.transactionId}
                         onChange={handleInputChange}
-                        placeholder="DGD9CFHU69"
+                        placeholder="TXN ID"
                         className="w-full border rounded-lg px-3 py-2 text-sm"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-medium mb-1">
-                        July-August (Admission)
+                        July-August
                       </label>
                       <input
                         type="number"
@@ -1661,7 +1806,7 @@ const Add_student = () => {
                           </div>
                           <div>
                             <label className="block text-xs font-medium mb-1">
-                              Payment Method
+                              Method
                             </label>
                             <select
                               name={`paymentMethod${capKey}`}
@@ -1692,7 +1837,7 @@ const Add_student = () => {
                           </div>
                           <div>
                             <label className="block text-xs font-medium mb-1">
-                              Transaction ID
+                              TXN ID
                             </label>
                             <input
                               type="text"
