@@ -1132,7 +1132,7 @@ const Teacher_assign = () => {
           </nav>
 
           <div className="p-4 text-xs text-gray-400 border-t">
-            <p>© 2026 Pipilika Soft</p>
+            <p>Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 

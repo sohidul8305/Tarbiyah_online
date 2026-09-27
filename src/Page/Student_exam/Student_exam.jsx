@@ -1228,7 +1228,7 @@ const Student_exam = () => {
           </nav>
 
           <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>© 2026 Pipilika Soft</p>
+            <p>Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 

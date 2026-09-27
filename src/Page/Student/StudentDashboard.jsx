@@ -234,7 +234,7 @@ const StudentDashboard = () => {
           </nav>
 
           <div className="absolute bottom-0 left-0 right-0 p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>© 2026 Pipilika Soft</p>
+            <p>Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 
