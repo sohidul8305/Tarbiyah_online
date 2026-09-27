@@ -205,39 +205,6 @@ const Add_student = () => {
         fetch(`${API_BASE}/najera-batch/all`),
       ]);
 
-      // ---------- 1) Admission Form Students ----------
-      let admissionStudents = [];
-      if (studentsRes.status === "fulfilled") {
-        try {
-          const d = await studentsRes.value.json();
-          if (d.success && Array.isArray(d.students)) {
-            admissionStudents = d.students.map((s) => ({
-              _id: s._id,
-              source: "Admission",
-              sourceLabel: "Admission Form",
-              name: s.name || "",
-              phone: s.phone || "",
-              email: s.email || "",
-              course: s.course || "",
-              batch: s.batch || "",
-              country: s.country || "BD",
-              studentId: s.studentId || "",
-              status: s.status || "Pending",
-              paymentStatus: s.paymentStatus || "Unpaid",
-              scholarshipAmount: s.scholarshipAmount || 0,
-              courseFee: s.courseFee || 0,
-              paidAmount: s.paidAmount || 0,
-              dueAmount: s.dueAmount || 0,
-              transactionId: s.transactionId || "",
-              createdAt: s.createdAt || "",
-              raw: s,
-            }));
-          }
-        } catch (e) {
-          console.error("Admission parse error:", e);
-        }
-      }
-
       // ---------- 2) Basic Tazweed Students ----------
       let tazweedStudents = [];
       if (tazweedRes.status === "fulfilled") {
@@ -757,16 +724,6 @@ const Add_student = () => {
           label: "Today's Class",
         },
         {
-          id: "basic-tazweed",
-          path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed Payment Overview",
-        },
-        {
-          id: "najera-batch",
-          path: "/admin-dashboard/najera-batch",
-          label: "Najera Payment Overview",
-        },
-        {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
           label: "New Admission",
@@ -784,11 +741,6 @@ const Add_student = () => {
       icon: <FaUsers className="text-xl" />,
       label: "Student Management",
       subItems: [
-        {
-          id: "student-add",
-          path: "/admin-students/add",
-          label: "Student Add",
-        },
         {
           id: "batch-manual",
           path: "/admin-students/batch",
@@ -881,20 +833,6 @@ const Add_student = () => {
           path: "/admin-crm/data-entry",
           label: "Data Entry",
         },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
       ],
     },
   ];
@@ -1027,8 +965,7 @@ const Add_student = () => {
                 <span className="text-teal-700">All Sources</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Admission Form + Basic Tazweed + Najera Batch ({students.length}{" "}
-                total)
+                Basic Tazweed + Najera Batch ({students.length} total)
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -1074,7 +1011,6 @@ const Add_student = () => {
               <div className="bg-white border rounded-xl shadow-sm p-1.5 flex gap-1 overflow-x-auto">
                 {[
                   { id: "All", label: "All Students", color: "blue" },
-                  { id: "Admission", label: "Admission Form", color: "blue" },
                   { id: "Tazweed", label: "Basic Tazweed", color: "green" },
                   { id: "Najera", label: "Najera Batch", color: "purple" },
                 ].map((tab) => (

@@ -332,11 +332,6 @@ const Student_absence = () => {
       label: "Student Management",
       subItems: [
         {
-          id: "student-add",
-          path: "/admin-students/add",
-          label: "Student Add",
-        },
-        {
           id: "batch-manual",
           path: "/admin-students/batch",
           label: "Batch Maintain",

@@ -11,19 +11,14 @@ import {
   FaSignOutAlt,
   FaChartLine,
   FaUserPlus,
-  FaCalendarCheck,
   FaIdCard,
-  FaUserTimes,
   FaDatabase,
   FaEye,
   FaSearch,
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaLayerGroup,
   FaHourglassHalf,
-  FaCheckDouble,
-  FaBan,
   FaSchool as FaSchoolIcon,
   FaInfoCircle,
   FaSyncAlt,
@@ -59,8 +54,6 @@ const Student_admission = () => {
   const [filterPriority, setFilterPriority] = useState("All");
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showRejectModal, setShowRejectModal] = useState(false);
-  const [rejectionReason, setRejectionReason] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Load admin info
@@ -90,89 +83,20 @@ const Student_admission = () => {
   }, []);
 
   // ============================================================
-  // ✅ Fetch from 3 API endpoints & combine
+  // ✅ Fetch from 2 API endpoints (Tazweed + Najera) & combine
   // ============================================================
   const fetchAdmissions = async () => {
     try {
       setLoading(true);
       setFetchError(null);
 
-      // ✅ ৩টি endpoint একসাথে fetch
-      const [studentsRes, tazweedRes, najeraRes] = await Promise.allSettled([
-        fetch(`${API_BASE}/students/all`),
+      // ✅ ২টি endpoint একসাথে fetch (Admission Form বাদ)
+      const [tazweedRes, najeraRes] = await Promise.allSettled([
         fetch(`${API_BASE}/basic-tazweed/all`),
         fetch(`${API_BASE}/najera-batch/all`),
       ]);
 
-      // ---------- 1) Admission Form Students ----------
-      let admissionStudents = [];
-      if (studentsRes.status === "fulfilled") {
-        try {
-          const d = await studentsRes.value.json();
-          if (d.success && Array.isArray(d.students)) {
-            admissionStudents = d.students.map((s) => {
-              let priority = "Medium";
-              if (s.paymentStatus === "Paid") priority = "High";
-              else if (s.paymentStatus === "Unpaid") priority = "Low";
-
-              let displayStatus = "Pending";
-              if (s.status === "Active") displayStatus = "Approved";
-              else if (s.status === "Rejected") displayStatus = "Rejected";
-              else if (s.status === "Inactive") displayStatus = "Rejected";
-
-              return {
-                id: s._id,
-                _id: s._id,
-                source: "Admission",
-                sourceLabel: "Admission Form",
-                studentName: s.name || "Unknown",
-                fatherName: s.fatherName || s.guardianName || "N/A",
-                motherName: s.motherName || "N/A",
-                class: s.course || s.class || "N/A",
-                subject: s.course || "N/A",
-                phone: s.phone || "",
-                email: s.email || "",
-                address: s.presentAddress || s.permanentAddress || "N/A",
-                dob: s.dobOrNid || "",
-                gender: s.gender || "N/A",
-                country: s.country || "BD",
-                studentId: s.studentId || "",
-                previousSchool: s.previousSchool || "N/A",
-                admissionDate: s.admissionDate
-                  ? new Date(s.admissionDate).toISOString().split("T")[0]
-                  : "N/A",
-                status: displayStatus,
-                rawStatus: s.status || "Pending",
-                paymentStatus: s.paymentStatus || "Unpaid",
-                priority: priority,
-                notes: s.paymentRemarks || "No additional notes",
-                appliedDate: s.createdAt
-                  ? new Date(s.createdAt).toISOString().split("T")[0]
-                  : "N/A",
-                reviewedBy: s.approvedBy || null,
-                reviewedDate: s.approvedAt
-                  ? new Date(s.approvedAt).toISOString().split("T")[0]
-                  : null,
-                rejectionReason: s.rejectionReason || null,
-                username: s.username || "",
-                enrolledCourses: s.enrolledCourses || [],
-                paidAmount: s.paidAmount || 0,
-                courseFee: s.courseFee || 0,
-                dueAmount: s.dueAmount || 0,
-                scholarshipAmount: s.scholarshipAmount || 0,
-                paymentMethod: s.paymentMethod || "",
-                transactionId: s.transactionId || "",
-                guardianPhone: s.guardianPhone || "",
-                _raw: s,
-              };
-            });
-          }
-        } catch (e) {
-          console.error("Admission parse error:", e);
-        }
-      }
-
-      // ---------- 2) Basic Tazweed Students ----------
+      // ---------- 1) Basic Tazweed Students ----------
       let tazweedStudents = [];
       if (tazweedRes.status === "fulfilled") {
         try {
@@ -208,7 +132,6 @@ const Student_admission = () => {
                 admissionDate: s.createdAt
                   ? new Date(s.createdAt).toISOString().split("T")[0]
                   : "N/A",
-                // ✅ Tazweed সব Already Active
                 status: "Approved",
                 rawStatus: "Active",
                 paymentStatus: isPaid
@@ -242,7 +165,7 @@ const Student_admission = () => {
         }
       }
 
-      // ---------- 3) Najera Batch Students ----------
+      // ---------- 2) Najera Batch Students ----------
       let najeraStudents = [];
       if (najeraRes.status === "fulfilled") {
         try {
@@ -312,11 +235,7 @@ const Student_admission = () => {
       }
 
       // ✅ Combine and sort (newest first)
-      const combined = [
-        ...admissionStudents,
-        ...tazweedStudents,
-        ...najeraStudents,
-      ].sort((a, b) => {
+      const combined = [...tazweedStudents, ...najeraStudents].sort((a, b) => {
         const da = new Date(a._raw?.createdAt || 0).getTime();
         const db = new Date(b._raw?.createdAt || 0).getTime();
         return db - da;
@@ -324,7 +243,6 @@ const Student_admission = () => {
 
       console.log("════════════════════════════════");
       console.log(`✅ Loaded admission requests:`);
-      console.log(`   - Admission: ${admissionStudents.length}`);
       console.log(`   - Tazweed: ${tazweedStudents.length}`);
       console.log(`   - Najera: ${najeraStudents.length}`);
       console.log(`   - Total: ${combined.length}`);
@@ -386,21 +304,10 @@ const Student_admission = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "today-class",
           path: "/admin-dashboard/today-class",
           label: "Today's Class",
-        },
-        {
-          id: "basic-tazweed",
-          path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed Payment Overview",
-        },
-        {
-          id: "najera-batch",
-          path: "/admin-dashboard/najera-batch",
-          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -420,11 +327,6 @@ const Student_admission = () => {
       icon: <FaUsers className="text-xl" />,
       label: "Student Management",
       subItems: [
-        {
-          id: "student-add",
-          path: "/admin-students/add",
-          label: "Student Add",
-        },
         {
           id: "batch-manual",
           path: "/admin-students/batch",
@@ -465,7 +367,6 @@ const Student_admission = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -486,7 +387,6 @@ const Student_admission = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -517,20 +417,6 @@ const Student_admission = () => {
           path: "/admin-crm/data-entry",
           label: "Data Entry",
         },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
       ],
     },
   ];
@@ -579,10 +465,9 @@ const Student_admission = () => {
     ...new Set(admissionRequests.map((r) => r.priority).filter(Boolean)),
   ];
 
-  // Source counts
+  // Source counts (Admission বাদ)
   const sourceCounts = {
     All: admissionRequests.length,
-    Admission: admissionRequests.filter((r) => r.source === "Admission").length,
     Tazweed: admissionRequests.filter((r) => r.source === "Tazweed").length,
     Najera: admissionRequests.filter((r) => r.source === "Najera").length,
   };
@@ -628,8 +513,6 @@ const Student_admission = () => {
 
   const getSourceBadge = (source) => {
     switch (source) {
-      case "Admission":
-        return "bg-blue-100 text-blue-700";
       case "Tazweed":
         return "bg-green-100 text-green-700";
       case "Najera":
@@ -644,249 +527,13 @@ const Student_admission = () => {
     setShowDetailsModal(true);
   };
 
-  // Generate username
-  const generateUsername = (request) => {
-    const base = (request.email || request.phone || "student")
-      .split("@")[0]
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "");
-    return base + Math.floor(100 + Math.random() * 900);
-  };
-
-  // Approve
-  const handleApprove = async (request) => {
-    const confirm = await Swal.fire({
-      title: "Approve Admission?",
-      html: `
-        <p>Are you sure you want to approve <strong>${request.studentName}</strong>'s admission?</p>
-        <div style="text-align: left; background: #f0fdf4; padding: 12px; border-radius: 8px; margin-top: 10px;">
-          <p style="font-size: 12px; margin: 0 0 5px 0;"><strong>Login Credentials will be auto-generated:</strong></p>
-          <p style="font-size: 12px; margin: 0;">Username: <strong>${generateUsername(request)}</strong></p>
-          <p style="font-size: 12px; margin: 0;">Password: <strong>student123S@</strong></p>
-        </div>
-      `,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#22c55e",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: "Yes, Approve!",
-    });
-
-    if (!confirm.isConfirmed) return;
-
-    setIsProcessing(true);
-
-    try {
-      const username = generateUsername(request);
-      const password = "student123S@";
-      const roll = "R" + Date.now().toString().slice(-4);
-
-      const res = await fetch(`${API_BASE}/students/approve/${request.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username,
-          password,
-          roll,
-          enrolledCourses: request.enrolledCourses || [],
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        setAdmissionRequests(
-          admissionRequests.map((r) =>
-            r.id === request.id
-              ? {
-                  ...r,
-                  status: "Approved",
-                  reviewedBy: adminInfo.name,
-                  reviewedDate: new Date().toISOString().split("T")[0],
-                  username,
-                }
-              : r,
-          ),
-        );
-
-        Swal.fire({
-          icon: "success",
-          title: "✅ Admission Approved!",
-          html: `
-            <div style="text-align: left;">
-              <p><strong>Student:</strong> ${request.studentName}</p>
-              <p><strong>Username:</strong> ${username}</p>
-              <p><strong>Password:</strong> ${password}</p>
-              <p style="color: #004d4d; font-size: 12px; margin-top: 8px;">✅ Student can now login to Campus</p>
-            </div>
-          `,
-          confirmButtonColor: "#004d4d",
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Failed!",
-          text: data.message || "Could not approve admission.",
-        });
-      }
-    } catch (err) {
-      console.error("❌ Approve error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Server Error!",
-        text: "Could not connect to server.",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleReject = (request) => {
-    setSelectedRequest(request);
-    setRejectionReason("");
-    setShowRejectModal(true);
-  };
-
-  const confirmRejection = async () => {
-    if (!rejectionReason.trim()) {
-      Swal.fire({
-        icon: "warning",
-        title: "Please provide a reason",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
-
-    setIsProcessing(true);
-
-    try {
-      // ✅ Source অনুযায়ী সঠিক endpoint
-      let rejectUrl = `${API_BASE}/admin-students/update/${selectedRequest.id}`;
-      let body = { status: "Inactive", rejectionReason };
-
-      if (selectedRequest.source === "Tazweed") {
-        rejectUrl = `${API_BASE}/basic-tazweed/update/${selectedRequest.id}`;
-        body = { comments: rejectionReason };
-      } else if (selectedRequest.source === "Najera") {
-        rejectUrl = `${API_BASE}/najera-batch/update/${selectedRequest.id}`;
-        body = { comments: rejectionReason };
-      }
-
-      const res = await fetch(rejectUrl, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        setAdmissionRequests(
-          admissionRequests.map((r) =>
-            r.id === selectedRequest.id
-              ? {
-                  ...r,
-                  status: "Rejected",
-                  reviewedBy: adminInfo.name,
-                  reviewedDate: new Date().toISOString().split("T")[0],
-                  rejectionReason,
-                }
-              : r,
-          ),
-        );
-
-        setShowRejectModal(false);
-        setRejectionReason("");
-
-        Swal.fire({
-          icon: "success",
-          title: "Admission Rejected",
-          text: `${selectedRequest.studentName}'s admission has been rejected.`,
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Failed!",
-          text: data.message || "Could not reject.",
-        });
-      }
-    } catch (err) {
-      console.error("❌ Reject error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Server Error!",
-        text: "Could not connect to server.",
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // Bulk approve (only for Admission Form source)
+  // Bulk approve (Admission Form বাদ, তাই এখন শুধুই রিপোর্ট দেখাবে)
   const handleBulkApprove = async () => {
-    const pendingRequests = admissionRequests.filter(
-      (r) => r.status === "Pending" && r.source === "Admission",
-    );
-    if (pendingRequests.length === 0) {
-      Swal.fire({
-        icon: "info",
-        title: "No Pending Requests",
-        text: "Admission Form থেকে কোনো pending request নেই।",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      return;
-    }
-
-    const confirm = await Swal.fire({
-      title: "Approve All Pending?",
-      text: `This will approve ${pendingRequests.length} pending admission requests.`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#22c55e",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: "Yes, Approve All!",
-    });
-
-    if (!confirm.isConfirmed) return;
-
-    setIsProcessing(true);
-
-    let successCount = 0;
-
-    for (const req of pendingRequests) {
-      try {
-        const username = generateUsername(req);
-        const password = "student123S@";
-        const roll = "R" + Date.now().toString().slice(-4) + successCount;
-
-        const res = await fetch(`${API_BASE}/students/approve/${req.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username,
-            password,
-            roll,
-            enrolledCourses: req.enrolledCourses || [],
-          }),
-        });
-        const data = await res.json();
-        if (data.success) successCount++;
-      } catch (err) {
-        console.error("Bulk approve error for", req.studentName, err);
-      }
-    }
-
-    await fetchAdmissions();
-
-    setIsProcessing(false);
     Swal.fire({
-      icon: "success",
-      title: "Bulk Approve Done!",
-      text: `${successCount} of ${pendingRequests.length} approved successfully.`,
-      timer: 2000,
+      icon: "info",
+      title: "No Pending Requests",
+      text: "Tazweed ও Najera Batch এর সব স্টুডেন্ট সর্বদা Approved থাকে।",
+      timer: 1800,
       showConfirmButton: false,
     });
   };
@@ -1045,11 +692,11 @@ const Student_admission = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-blue-600" /> Admission Permission —
+                <FaUserPlus className="text-blue-600" /> Student List —
                 <span className="text-teal-700">All Sources</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Admission Form + Basic Tazweed + Najera Batch
+                Basic Tazweed + Najera Batch ({admissionRequests.length} total)
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -1064,13 +711,6 @@ const Student_admission = () => {
                 />{" "}
                 Refresh
               </button>
-              <button
-                onClick={handleBulkApprove}
-                disabled={isProcessing}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 disabled:opacity-50"
-              >
-                <FaCheckDouble size={12} /> Approve All Pending
-              </button>
               <span className="text-xs font-semibold text-gray-700 hidden sm:block">
                 {adminInfo.name}
               </span>
@@ -1083,11 +723,10 @@ const Student_admission = () => {
             </div>
           </div>
 
-          {/* Source Tabs */}
+          {/* Source Tabs — Admission Form বাদ */}
           <div className="bg-white border rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto">
             {[
               { id: "All", label: "All Students", color: "blue" },
-              { id: "Admission", label: "Admission Form", color: "blue" },
               { id: "Tazweed", label: "Basic Tazweed", color: "green" },
               { id: "Najera", label: "Najera Batch", color: "purple" },
             ].map((tab) => (
@@ -1155,7 +794,7 @@ const Student_admission = () => {
                 <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search students by name/email/phone/studentId..."
+                  placeholder="Search students by name/phone/studentId..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border rounded-lg"
@@ -1326,27 +965,6 @@ const Student_admission = () => {
                               >
                                 <FaEye size={14} />
                               </button>
-                              {request.source === "Admission" &&
-                                request.status === "Pending" && (
-                                  <>
-                                    <button
-                                      onClick={() => handleApprove(request)}
-                                      disabled={isProcessing}
-                                      className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 disabled:opacity-50"
-                                      title="Approve"
-                                    >
-                                      <FaCheckCircle size={14} />
-                                    </button>
-                                    <button
-                                      onClick={() => handleReject(request)}
-                                      disabled={isProcessing}
-                                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 disabled:opacity-50"
-                                      title="Reject"
-                                    >
-                                      <FaTimesCircle size={14} />
-                                    </button>
-                                  </>
-                                )}
                             </div>
                           </td>
                         </tr>
@@ -1358,10 +976,10 @@ const Student_admission = () => {
                           className="px-3 py-8 text-center text-gray-500"
                         >
                           <FaUserPlus className="text-4xl text-gray-300 mx-auto mb-2" />
-                          <p>No admission requests found</p>
+                          <p>No students found</p>
                           <p className="text-[10px] text-gray-400 mt-1">
                             {admissionRequests.length === 0
-                              ? "Admission Form, Basic Tazweed বা Najera Batch থেকে student add করুন।"
+                              ? "Basic Tazweed বা Najera Batch থেকে student add করুন।"
                               : "Try adjusting your search or filter"}
                           </p>
                         </td>
@@ -1381,7 +999,7 @@ const Student_admission = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaIdCard className="text-blue-600" /> Admission Request
+                <FaIdCard className="text-blue-600" /> Student Details
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
@@ -1533,31 +1151,6 @@ const Student_admission = () => {
                 )}
 
               <div className="flex gap-3 pt-4 border-t">
-                {selectedRequest.source === "Admission" &&
-                  selectedRequest.status === "Pending" && (
-                    <>
-                      <button
-                        onClick={() => {
-                          setShowDetailsModal(false);
-                          handleApprove(selectedRequest);
-                        }}
-                        disabled={isProcessing}
-                        className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm disabled:opacity-50"
-                      >
-                        <FaCheckCircle className="inline mr-2" /> Approve
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowDetailsModal(false);
-                          handleReject(selectedRequest);
-                        }}
-                        disabled={isProcessing}
-                        className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm disabled:opacity-50"
-                      >
-                        <FaTimesCircle className="inline mr-2" /> Reject
-                      </button>
-                    </>
-                  )}
                 <button
                   onClick={() => setShowDetailsModal(false)}
                   className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
@@ -1565,52 +1158,6 @@ const Student_admission = () => {
                   Close
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Reject Modal */}
-      {showRejectModal && selectedRequest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-2">
-              <FaBan className="text-red-600" /> Reject Admission
-            </h3>
-            <p className="text-sm text-gray-600 mb-4">
-              You are about to reject{" "}
-              <strong>{selectedRequest.studentName}</strong>'s admission. Please
-              provide a reason.
-            </p>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Rejection Reason *
-              </label>
-              <textarea
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                rows="3"
-                className="w-full border rounded-lg px-3 py-2 text-sm"
-                placeholder="Enter the reason..."
-              />
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={confirmRejection}
-                disabled={isProcessing || !rejectionReason.trim()}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-semibold text-sm disabled:opacity-50"
-              >
-                <FaBan className="inline mr-2" /> Confirm
-              </button>
-              <button
-                onClick={() => {
-                  setShowRejectModal(false);
-                  setRejectionReason("");
-                }}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
-              >
-                Cancel
-              </button>
             </div>
           </div>
         </div>

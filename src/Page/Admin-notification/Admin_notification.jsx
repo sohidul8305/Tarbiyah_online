@@ -371,16 +371,6 @@ const Admin_notification = () => {
           label: "Today's Class",
         },
         {
-          id: "basic-tazweed",
-          path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed Payment Overview",
-        },
-        {
-          id: "najera-batch",
-          path: "/admin-dashboard/najera-batch",
-          label: "Najera Payment Overview",
-        },
-        {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
           label: "New Admission",
@@ -398,11 +388,6 @@ const Admin_notification = () => {
       icon: <FaUsers className="text-xl" />,
       label: "Student Management",
       subItems: [
-        {
-          id: "student-add",
-          path: "/admin-students/add",
-          label: "Student Add",
-        },
         {
           id: "batch-manual",
           path: "/admin-students/batch",
@@ -495,20 +480,6 @@ const Admin_notification = () => {
           path: "/admin-crm/data-entry",
           label: "Data Entry",
         },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
       ],
     },
   ];

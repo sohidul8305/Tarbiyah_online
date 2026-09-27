@@ -292,12 +292,6 @@ const AdminDashboard = () => {
       label: "Profile",
     },
     {
-      id: "notification",
-      icon: <FaBell className="text-xl" />,
-      path: "/admin-notification",
-      label: "Notification",
-    },
-    {
       id: "dashboard",
       path: "/admin-dashboard",
       icon: <MdDashboard className="text-xl" />,
@@ -314,14 +308,14 @@ const AdminDashboard = () => {
           label: "Today's Class",
         },
         {
-          id: "basic-tazweed payment overview",
+          id: "basic-tazweed",
           path: "/admin-dashboard/basic-tazweed",
           label: "Basic Tazweed Payment Overview",
         },
         {
-          id: "najera-payment overview",
+          id: "najera-batch",
           path: "/admin-dashboard/najera-batch",
-          label: "Najera payment Overview",
+          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -342,14 +336,9 @@ const AdminDashboard = () => {
       label: "Student Management",
       subItems: [
         {
-          id: "student-add",
-          path: "/admin-students/add",
-          label: "Student Add",
-        },
-        {
           id: "batch-manual",
           path: "/admin-students/batch",
-          label: "Batch Maintain",
+          label: "Batch Create and  Maintain",
         },
         {
           id: "student-profile",
@@ -357,20 +346,9 @@ const AdminDashboard = () => {
           label: "Student Profile",
         },
         {
-          id: "permission-permission",
-          path: "/admin-students/permission",
+          id: "admission-permission",
+          path: "/admin-students/admission",
           label: "Admission Permission",
-        },
-        // ✅ নতুন যোগ করা হলো
-        {
-          id: "basic-tazweed-student",
-          path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed payment overview",
-        },
-        {
-          id: "najera-batch-student",
-          path: "/admin-dashboard/najera-batch",
-          label: "Najera Batch payment overview ",
         },
       ],
     },
@@ -395,46 +373,7 @@ const AdminDashboard = () => {
           path: "/admin-teachers/attendance",
           label: "Teacher Attendance",
         },
-        {
-          id: "teacher-overview",
-          path: "/admin-teachers/overview",
-          label: "Teacher Overview",
-        },
       ],
-    },
-    {
-      id: "batch-course",
-      path: "/admin-batch-course",
-      icon: <FaLayerGroup className="text-xl" />,
-      label: "Batch & Course",
-      subItems: [
-        {
-          id: "batch-make",
-          path: "/admin-batch-course/batch-make",
-          label: "Batch Make",
-        },
-        {
-          id: "course-make",
-          path: "/admin-batch-course/course-make",
-          label: "Course Make",
-        },
-        {
-          id: "syllabus",
-          path: "/admin-batch-course/syllabus",
-          label: "Syllabus",
-        },
-        {
-          id: "clear-routine",
-          path: "/admin-batch-course/clear-routine",
-          label: "Clear Routine",
-        },
-      ],
-    },
-    {
-      id: "absence-student",
-      path: "/student-absence",
-      icon: <FaUserTimes className="text-xl" />,
-      label: "Absence Student Community",
     },
     {
       id: "finance",
@@ -454,25 +393,6 @@ const AdminDashboard = () => {
         },
         { id: "invoice", path: "/admin-finance/invoice", label: "Invoice" },
         { id: "report", path: "/admin-finance/report", label: "Report" },
-      ],
-    },
-    {
-      id: "exam",
-      path: "/admin-exam",
-      icon: <FaCalendarCheck className="text-xl" />,
-      label: "Exam",
-      subItems: [
-        { id: "exam-make", path: "/admin-exam/make", label: "Exam Make" },
-        {
-          id: "result-publish",
-          path: "/admin-exam/result",
-          label: "Result Publish",
-        },
-        {
-          id: "certificate-permission",
-          path: "/admin-exam/certificate",
-          label: "Certificate Permission",
-        },
       ],
     },
     {
@@ -505,20 +425,6 @@ const AdminDashboard = () => {
           path: "/admin-crm/data-entry",
           label: "Data Entry",
         },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
       ],
     },
   ];
@@ -762,32 +668,6 @@ const DashboardContent = ({ stats, notifications }) => {
       value: stats.todayClasses,
       icon: <FaCalendarAlt className="text-purple-500" />,
       color: "bg-purple-50",
-    },
-    {
-      label: (
-        <Link
-          to="/admin-dashboard/basic-tazweed"
-          className="hover:text-teal-600 text-[10px]"
-        >
-          Basic Tazweed Payment Overview
-        </Link>
-      ),
-      value: `৳${stats.totalIncome.toLocaleString()}`,
-      icon: <FaMoneyBillWave className="text-green-500" />,
-      color: "bg-green-50",
-    },
-    {
-      label: (
-        <Link
-          to="/admin-dashboard/najera-batch"
-          className="hover:text-teal-600 text-[10px]"
-        >
-          Najera Batch Payment Overview
-        </Link>
-      ),
-      value: `৳${stats.totalIncome.toLocaleString()}`,
-      icon: <FaMoneyBillWave className="text-green-500" />,
-      color: "bg-green-50",
     },
     {
       label: (

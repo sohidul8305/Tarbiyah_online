@@ -123,99 +123,20 @@ const Adminstudent_profile = () => {
   }, []);
 
   // ============================================================
-  // ✅ Fetch from 3 API endpoints & combine
+  // ✅ Fetch from 2 API endpoints (Tazweed + Najera) & combine
   // ============================================================
   const fetchStudents = async () => {
     try {
       setLoadingStudents(true);
       setStudentsError(null);
 
-      // ✅ ৩টি endpoint একসাথে fetch
-      const [studentsRes, tazweedRes, najeraRes] = await Promise.allSettled([
-        fetch(`${API_BASE}/students/all`),
+      // ✅ ২টি endpoint একসাথে fetch (Admission Form বাদ)
+      const [tazweedRes, najeraRes] = await Promise.allSettled([
         fetch(`${API_BASE}/basic-tazweed/all`),
         fetch(`${API_BASE}/najera-batch/all`),
       ]);
 
-      // ---------- 1) Admission Form Students ----------
-      let admissionStudents = [];
-      if (studentsRes.status === "fulfilled") {
-        try {
-          const d = await studentsRes.value.json();
-          if (d.success && Array.isArray(d.students)) {
-            admissionStudents = d.students.map((s) => {
-              const attendance = s.attendance || 0;
-              const assignments = s.assignments || 0;
-              const quiz = s.quiz || 0;
-              const exam = s.exam || 0;
-              const progress =
-                s.progress ||
-                Math.round((attendance + assignments + quiz + exam) / 4);
-
-              let performance = s.performance;
-              if (!performance || performance === "Pending") {
-                if (progress >= 85) performance = "Excellent";
-                else if (progress >= 70) performance = "Good";
-                else if (progress >= 50) performance = "Average";
-                else performance = "Pending";
-              }
-
-              return {
-                id: s._id,
-                _id: s._id,
-                source: "Admission",
-                sourceLabel: "Admission Form",
-                name: s.name || "Unknown",
-                fatherName: s.fatherName || s.guardianName || "",
-                motherName: s.motherName || "",
-                class: s.course || s.class || "N/A",
-                subject: s.subject || s.course || "N/A",
-                roll: s.roll || "N/A",
-                phone: s.phone || "",
-                email: s.email || "",
-                address: s.presentAddress || s.permanentAddress || "",
-                dob: s.dobOrNid || s.dateOfBirth || "",
-                gender: s.gender || "Male",
-                bloodGroup: s.bloodGroup || "N/A",
-                religion: s.religion || "Islam",
-                nationality: s.nationality || "Bangladeshi",
-                previousSchool: s.previousSchool || "",
-                guardianContact: s.guardianPhone || "",
-                status: s.status || "Pending",
-                paymentStatus: s.paymentStatus || "Unpaid",
-                admissionDate: s.admissionDate
-                  ? new Date(s.admissionDate).toISOString().split("T")[0]
-                  : s.createdAt
-                    ? new Date(s.createdAt).toISOString().split("T")[0]
-                    : "N/A",
-                batch: s.batch || "Not Assigned",
-                country: s.country || "BD",
-                attendance,
-                assignments,
-                quiz,
-                exam,
-                progress,
-                performance,
-                course: s.course || "",
-                username: s.username || "",
-                studentId: s.studentId || "",
-                courseFee: s.courseFee || 0,
-                paidAmount: s.paidAmount || 0,
-                dueAmount: s.dueAmount || 0,
-                scholarshipAmount: s.scholarshipAmount || 0,
-                transactionId: s.transactionId || "",
-                comments: s.comments || "",
-                enrolledCourses: s.enrolledCourses || [],
-                raw: s,
-              };
-            });
-          }
-        } catch (e) {
-          console.error("Admission parse error:", e);
-        }
-      }
-
-      // ---------- 2) Basic Tazweed Students ----------
+      // ---------- 1) Basic Tazweed Students ----------
       let tazweedStudents = [];
       if (tazweedRes.status === "fulfilled") {
         try {
@@ -300,7 +221,7 @@ const Adminstudent_profile = () => {
         }
       }
 
-      // ---------- 3) Najera Batch Students ----------
+      // ---------- 2) Najera Batch Students ----------
       let najeraStudents = [];
       if (najeraRes.status === "fulfilled") {
         try {
@@ -386,11 +307,7 @@ const Adminstudent_profile = () => {
       }
 
       // ✅ Combine and sort
-      const combined = [
-        ...admissionStudents,
-        ...tazweedStudents,
-        ...najeraStudents,
-      ].sort((a, b) => {
+      const combined = [...tazweedStudents, ...najeraStudents].sort((a, b) => {
         const da = new Date(a.raw?.createdAt || 0).getTime();
         const db = new Date(b.raw?.createdAt || 0).getTime();
         return db - da;
@@ -398,7 +315,6 @@ const Adminstudent_profile = () => {
 
       console.log("════════════════════════════════");
       console.log(`✅ Loaded student profiles:`);
-      console.log(`   - Admission: ${admissionStudents.length}`);
       console.log(`   - Tazweed: ${tazweedStudents.length}`);
       console.log(`   - Najera: ${najeraStudents.length}`);
       console.log(`   - Total: ${combined.length}`);
@@ -461,21 +377,10 @@ const Adminstudent_profile = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "today-class",
           path: "/admin-dashboard/today-class",
           label: "Today's Class",
-        },
-        {
-          id: "basic-tazweed",
-          path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed Payment Overview",
-        },
-        {
-          id: "najera-batch",
-          path: "/admin-dashboard/najera-batch",
-          label: "Najera Payment Overview",
         },
         {
           id: "new-admission",
@@ -495,11 +400,6 @@ const Adminstudent_profile = () => {
       icon: <FaUsers className="text-xl" />,
       label: "Student Management",
       subItems: [
-        {
-          id: "student-add",
-          path: "/admin-students/add",
-          label: "Student Add",
-        },
         {
           id: "batch-manual",
           path: "/admin-students/batch",
@@ -540,7 +440,6 @@ const Adminstudent_profile = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -561,7 +460,6 @@ const Adminstudent_profile = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -592,20 +490,6 @@ const Adminstudent_profile = () => {
           path: "/admin-crm/data-entry",
           label: "Data Entry",
         },
-      ],
-    },
-    {
-      id: "salary",
-      path: "/admin-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary",
-      subItems: [
-        {
-          id: "total-salary",
-          path: "/admin-salary/total",
-          label: "Total Salary",
-        },
-        { id: "due-salary", path: "/admin-salary/due", label: "Due Salary" },
       ],
     },
   ];
@@ -654,10 +538,9 @@ const Adminstudent_profile = () => {
     ...new Set(students.map((s) => s.performance).filter(Boolean)),
   ];
 
-  // Source counts
+  // Source counts (Admission বাদ)
   const sourceCounts = {
     All: students.length,
-    Admission: students.filter((s) => s.source === "Admission").length,
     Tazweed: students.filter((s) => s.source === "Tazweed").length,
     Najera: students.filter((s) => s.source === "Najera").length,
   };
@@ -698,8 +581,6 @@ const Adminstudent_profile = () => {
 
   const getSourceBadge = (source) => {
     switch (source) {
-      case "Admission":
-        return "bg-blue-100 text-blue-700";
       case "Tazweed":
         return "bg-green-100 text-green-700";
       case "Najera":
@@ -774,10 +655,8 @@ const Adminstudent_profile = () => {
     const performance = determinePerformance(progress);
 
     // ✅ Source অনুযায়ী সঠিক endpoint
-    let updateUrl = `${API_BASE}/admin-students/update/${selectedStudent._id}`;
-    if (selectedStudent.source === "Tazweed") {
-      updateUrl = `${API_BASE}/basic-tazweed/update/${selectedStudent._id}`;
-    } else if (selectedStudent.source === "Najera") {
+    let updateUrl = `${API_BASE}/basic-tazweed/update/${selectedStudent._id}`;
+    if (selectedStudent.source === "Najera") {
       updateUrl = `${API_BASE}/najera-batch/update/${selectedStudent._id}`;
     }
 
@@ -849,10 +728,8 @@ const Adminstudent_profile = () => {
     if (!result.isConfirmed) return;
 
     // ✅ Source অনুযায়ী সঠিক endpoint
-    let deleteUrl = `${API_BASE}/admin-students/delete/${id}`;
-    if (source === "Tazweed") {
-      deleteUrl = `${API_BASE}/basic-tazweed/delete/${id}`;
-    } else if (source === "Najera") {
+    let deleteUrl = `${API_BASE}/basic-tazweed/delete/${id}`;
+    if (source === "Najera") {
       deleteUrl = `${API_BASE}/najera-batch/delete/${id}`;
     }
 
@@ -1046,8 +923,7 @@ const Adminstudent_profile = () => {
                 <span className="text-teal-700">All Sources</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Admission Form + Basic Tazweed + Najera Batch ({students.length}{" "}
-                total)
+                Basic Tazweed + Najera Batch ({students.length} total)
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -1063,12 +939,7 @@ const Adminstudent_profile = () => {
                 />{" "}
                 Refresh
               </button>
-              <Link
-                to="/admin-students/add"
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
-              >
-                <FaPlusCircle size={12} /> Add Student
-              </Link>
+
               <span className="text-xs font-semibold text-gray-700 hidden sm:block">
                 {adminInfo.name}
               </span>
@@ -1102,11 +973,10 @@ const Adminstudent_profile = () => {
             </div>
           ) : (
             <>
-              {/* Source Tabs */}
+              {/* Source Tabs — Admission Form বাদ */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto">
                 {[
                   { id: "All", label: "All Students", color: "blue" },
-                  { id: "Admission", label: "Admission Form", color: "blue" },
                   { id: "Tazweed", label: "Basic Tazweed", color: "green" },
                   { id: "Najera", label: "Najera Batch", color: "purple" },
                 ].map((tab) => (
@@ -1184,7 +1054,7 @@ const Adminstudent_profile = () => {
                     <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
                     <input
                       type="text"
-                      placeholder="Search name, father, class, email, studentId..."
+                      placeholder="Search name, class, studentId, phone..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1364,8 +1234,7 @@ const Adminstudent_profile = () => {
                     No Students Found
                   </h3>
                   <p className="text-xs text-gray-500">
-                    Admission Form, Basic Tazweed বা Najera Batch থেকে student
-                    add করুন।
+                    Basic Tazweed বা Najera Batch থেকে student add করুন।
                   </p>
                 </div>
               )}
