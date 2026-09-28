@@ -1010,6 +1010,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   const [dbClasses, setDbClasses] = useState([]);
   const [loadingClasses, setLoadingClasses] = useState(false);
 
+  // ✅ NEW: Materials from MongoDB collection
+  const [dbMaterials, setDbMaterials] = useState([]);
+  const [loadingMaterials, setLoadingMaterials] = useState(false);
   /* ---------- Student ---------- */
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState(null);
@@ -1123,10 +1126,33 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     }
   };
 
+  /* ✅ Fetch materials from batch_materials collection */
+  const fetchDbMaterials = async () => {
+    try {
+      setLoadingMaterials(true);
+      const res = await fetch(
+        `${API_URL}/api/batch-materials/all?batchId=${encodeURIComponent(batchId)}`,
+      );
+      const data = await res.json();
+      if (data.success) {
+        setDbMaterials(data.materials || []);
+      } else {
+        setDbMaterials([]);
+      }
+    } catch (e) {
+      console.error("❌ fetchDbMaterials error:", e);
+      setDbMaterials([]);
+    } finally {
+      setLoadingMaterials(false);
+    }
+  };
+
   useEffect(() => {
     fetchBatch();
     fetchDbStudents();
     fetchDbClasses(); // ✅ নতুন
+    fetchDbMaterials(); // ✅ নতুন
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [batchId]);
 
@@ -1171,7 +1197,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   const students = dbStudents; // ✅ from MongoDB collection
   // ✅ নতুন — MongoDB collection থেকে
   const classesList = dbClasses;
-  const materialsList = batch?.materialsList || [];
+  const materialsList = dbMaterials;
   const videos = batch?.videos || [];
 
   const calcPaid = (s) =>
@@ -1687,41 +1713,64 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       });
       return;
     }
+
     setSavingMaterial(true);
-    const newItem = {
-      _id: uid("mat"),
-      type: materialForm.type,
-      title: materialForm.title.trim(),
-      url: materialForm.url.trim(),
-      date: materialForm.date || todayStr(),
-      classId: materialForm.classId || null,
-      marks: materialForm.marks === "" ? null : Number(materialForm.marks),
-      totalMarks:
-        materialForm.totalMarks === "" ? null : Number(materialForm.totalMarks),
-      addedAt: new Date().toISOString(),
-    };
-    const ok = await saveBatchFields(
-      { materialsList: [...materialsList, newItem] },
-      "Uploaded!",
-    );
-    setSavingMaterial(false);
-    if (ok) {
-      setMaterialForm({
-        type: "exam",
-        title: "",
-        url: "",
-        date: todayStr(),
-        classId: "",
-        marks: "",
-        totalMarks: "",
+
+    try {
+      const res = await fetch(`${API_URL}/api/batch-materials/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          batchId: batchId,
+          type: materialForm.type,
+          title: materialForm.title.trim(),
+          url: materialForm.url.trim(),
+          date: materialForm.date || todayStr(),
+          classId: materialForm.classId || null,
+          marks: materialForm.marks === "" ? null : Number(materialForm.marks),
+          totalMarks:
+            materialForm.totalMarks === ""
+              ? null
+              : Number(materialForm.totalMarks),
+        }),
       });
-      setShowMaterialModal(false);
+
+      const data = await res.json();
+
+      if (data.success) {
+        await fetchDbMaterials();
+        setMaterialForm({
+          type: "exam",
+          title: "",
+          url: "",
+          date: todayStr(),
+          classId: "",
+          marks: "",
+          totalMarks: "",
+        });
+        setShowMaterialModal(false);
+        Swal.fire({
+          icon: "success",
+          title: "Uploaded!",
+          text: "Material saved to database.",
+          timer: 1200,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+      }
+    } catch (err) {
+      console.error("❌ Save material error:", err);
+      Swal.fire({ icon: "error", title: "Server Error", text: err.message });
+    } finally {
+      setSavingMaterial(false);
     }
   };
 
   const handleDeleteMaterial = (id) => {
     Swal.fire({
       title: "Delete?",
+      text: "This material will be permanently removed!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -1729,10 +1778,26 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       confirmButtonText: "Yes, delete!",
     }).then(async (r) => {
       if (r.isConfirmed) {
-        await saveBatchFields(
-          { materialsList: materialsList.filter((m) => m._id !== id) },
-          "Deleted!",
-        );
+        try {
+          const res = await fetch(
+            `${API_URL}/api/batch-materials/delete/${id}`,
+            { method: "DELETE" },
+          );
+          const data = await res.json();
+          if (data.success) {
+            await fetchDbMaterials();
+            Swal.fire({
+              icon: "success",
+              title: "Deleted!",
+              timer: 1100,
+              showConfirmButton: false,
+            });
+          } else {
+            Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+          }
+        } catch (err) {
+          Swal.fire({ icon: "error", title: "Error", text: err.message });
+        }
       }
     });
   };
