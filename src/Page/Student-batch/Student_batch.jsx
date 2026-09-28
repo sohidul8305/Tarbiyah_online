@@ -930,18 +930,87 @@ const BatchFormModal = ({
               placeholder="e.g., Mon, Wed 09:00 AM"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Teacher
+          {/* ✅ Multiple Teachers */}
+          <div className="md:col-span-2">
+            <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+              Teachers (একাধিক যোগ করতে পারবেন)
             </label>
-            <input
-              type="text"
-              value={formData.teacher}
-              onChange={(e) =>
-                setFormData({ ...formData, teacher: e.target.value })
-              }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
-            />
+
+            {/* Input + Add Button */}
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                id="teacherInputField"
+                placeholder="Teacher name লিখুন, তারপর + Add ক্লিক করুন বা Enter চাপুন"
+                className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const val = e.target.value.trim();
+                    if (val && !classForm.teachers.includes(val)) {
+                      setClassForm({
+                        ...classForm,
+                        teachers: [...classForm.teachers, val],
+                      });
+                      e.target.value = "";
+                    }
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const input = document.getElementById("teacherInputField");
+                  const val = input?.value.trim();
+                  if (val && !classForm.teachers.includes(val)) {
+                    setClassForm({
+                      ...classForm,
+                      teachers: [...classForm.teachers, val],
+                    });
+                    input.value = "";
+                  }
+                }}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1"
+              >
+                <FaPlusCircle size={11} /> Add
+              </button>
+            </div>
+
+            {/* Added Teachers as Chips */}
+            {classForm.teachers.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 p-2 bg-gray-50 rounded-lg border border-gray-200">
+                {classForm.teachers.map((t, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-800 text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                  >
+                    <FaChalkboardTeacher size={10} />
+                    {t}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setClassForm({
+                          ...classForm,
+                          teachers: classForm.teachers.filter(
+                            (_, i) => i !== idx,
+                          ),
+                        })
+                      }
+                      className="text-purple-600 hover:text-red-600 font-bold text-sm leading-none"
+                      title="Remove"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {classForm.teachers.length === 0 && (
+              <p className="text-[10px] text-gray-400 italic">
+                এখনো কোনো teacher যোগ করা হয়নি
+              </p>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1037,7 +1106,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     day: "Saturday",
     time: "",
     gender: "Male",
-    teacher: "",
+    teachers: [], // ✅ multiple teachers
     meetingLink: "",
   });
 
@@ -1424,12 +1493,11 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       day: "Saturday",
       time: "",
       gender: "Male",
-      teacher: "",
+      teachers: [],
       meetingLink: "",
     });
     setShowClassModal(true);
   };
-
   const openEditClass = (c) => {
     setEditingClassId(c._id);
     setClassForm({
@@ -1437,7 +1505,13 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       day: c.day || "Saturday",
       time: c.time || "",
       gender: c.gender || "Male",
-      teacher: c.teacher || "",
+      // ✅ Support both old (teacher) and new (teachers) format
+      teachers:
+        Array.isArray(c.teachers) && c.teachers.length > 0
+          ? c.teachers
+          : c.teacher
+            ? [c.teacher]
+            : [],
       meetingLink: c.meetingLink || "",
     });
     setShowClassModal(true);
@@ -2415,14 +2489,35 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                               <FaClock size={10} className="text-gray-400" />{" "}
                               {c.time}
                             </p>
-                            {c.teacher && (
-                              <p className="flex items-center gap-1.5">
+                            {/* ✅ Multiple Teachers Display */}
+                            {Array.isArray(c.teachers) &&
+                            c.teachers.length > 0 ? (
+                              <div className="flex items-start gap-1.5 flex-wrap">
                                 <FaChalkboardTeacher
                                   size={10}
-                                  className="text-gray-400"
-                                />{" "}
-                                {c.teacher}
-                              </p>
+                                  className="text-gray-400 mt-0.5"
+                                />
+                                <div className="flex flex-wrap gap-1">
+                                  {c.teachers.map((t, i) => (
+                                    <span
+                                      key={i}
+                                      className="text-[9px] bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded-full font-semibold"
+                                    >
+                                      {t}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              c.teacher && (
+                                <p className="flex items-center gap-1.5">
+                                  <FaChalkboardTeacher
+                                    size={10}
+                                    className="text-gray-400"
+                                  />
+                                  {c.teacher}
+                                </p>
+                              )
                             )}
                             {c.meetingLink && (
                               <a
@@ -3051,12 +3146,13 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                   />
                 </div>
 
-                {/* ✅ Country */}
+                {/* ✅ Country — Free Text Input */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Country
                   </label>
-                  <select
+                  <input
+                    type="text"
                     value={studentForm.country}
                     onChange={(e) =>
                       setStudentForm({
@@ -3065,19 +3161,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                       })
                     }
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                  >
-                    <option value="BD">Bangladesh (BD)</option>
-                    <option value="IN">India (IN)</option>
-                    <option value="PK">Pakistan (PK)</option>
-                    <option value="SA">Saudi Arabia (SA)</option>
-                    <option value="AE">UAE (AE)</option>
-                    <option value="MY">Malaysia (MY)</option>
-                    <option value="UK">United Kingdom (UK)</option>
-                    <option value="US">United States (US)</option>
-                    <option value="CA">Canada (CA)</option>
-                    <option value="AU">Australia (AU)</option>
-                    <option value="OTHER">Other</option>
-                  </select>
+                    placeholder="e.g., Bangladesh"
+                  />
                 </div>
 
                 {/* Course */}
