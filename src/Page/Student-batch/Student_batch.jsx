@@ -1831,6 +1831,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   /* ============================================================
      VIDEO handlers
   ============================================================ */
+  // ✅ নতুন — batch_videos MongoDB collection এ save করবে
   const handleAddVideo = async () => {
     if (!newVideo.title.trim() || !newVideo.url.trim()) {
       Swal.fire({
@@ -1841,18 +1842,40 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       });
       return;
     }
+
     setSavingVideo(true);
-    const updated = [
-      ...videos,
-      {
-        title: newVideo.title.trim(),
-        url: newVideo.url.trim(),
-        addedAt: new Date().toISOString(),
-      },
-    ];
-    const ok = await saveBatchFields({ videos: updated }, "Video Added!");
-    setSavingVideo(false);
-    if (ok) setNewVideo({ title: "", url: "" });
+
+    try {
+      const res = await fetch(`${API_URL}/api/batch-videos/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          batchId: batchId,
+          title: newVideo.title.trim(),
+          url: newVideo.url.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        await fetchDbVideos(); // ✅ DB থেকে re-fetch
+        setNewVideo({ title: "", url: "" });
+        Swal.fire({
+          icon: "success",
+          title: "Video Added!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+      }
+    } catch (err) {
+      console.error("❌ Save video error:", err);
+      Swal.fire({ icon: "error", title: "Server Error", text: err.message });
+    } finally {
+      setSavingVideo(false);
+    }
   };
 
   const handleDeleteVideo = (id) => {
@@ -3515,7 +3538,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       )}
     </div>
   );
-};
+};;
 
 /* ============================================================
    ✅ Small reusable UI
