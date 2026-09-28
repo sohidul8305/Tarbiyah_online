@@ -60,6 +60,12 @@ const Adminstudent_profile = () => {
   const [studentsError, setStudentsError] = useState(null);
   const [sourceFilter, setSourceFilter] = useState("All");
 
+  // ✅ Batch state
+  const [batches, setBatches] = useState([]);
+  const [selectedBatchId, setSelectedBatchId] = useState("All");
+  const [batchStudents, setBatchStudents] = useState([]);
+  const [loadingBatchStudents, setLoadingBatchStudents] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCourse, setFilterCourse] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
@@ -96,7 +102,9 @@ const Adminstudent_profile = () => {
     performance: "Pending",
   });
 
+  // ============================================================
   // Load admin info
+  // ============================================================
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
@@ -117,26 +125,136 @@ const Adminstudent_profile = () => {
     }
   }, [user]);
 
-  // Fetch students
-  useEffect(() => {
-    fetchStudents();
-  }, []);
+  // ============================================================
+  // ✅ Fetch all LMS batches
+  // ============================================================
+  const fetchBatches = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/batches/all`);
+      const data = await res.json();
+      if (data.success) {
+        setBatches(data.batches || []);
+        console.log(`✅ Loaded ${data.batches?.length || 0} batches`);
+      }
+    } catch (err) {
+      console.error("❌ fetchBatches error:", err);
+    }
+  };
 
   // ============================================================
-  // ✅ Fetch from 2 API endpoints (Tazweed + Najera) & combine
+  // ✅ Fetch students of a specific batch
+  // ============================================================
+  const fetchBatchStudents = async (batchId) => {
+    if (!batchId || batchId === "All") {
+      setBatchStudents([]);
+      return;
+    }
+
+    try {
+      setLoadingBatchStudents(true);
+      const res = await fetch(
+        `${API_BASE}/batch-students/all?batchId=${encodeURIComponent(batchId)}`,
+      );
+      const data = await res.json();
+
+      if (data.success && Array.isArray(data.students)) {
+        const mapped = data.students.map((s) => {
+          const paid = (s.paidMonths || []).reduce(
+            (sum, p) => sum + Number(p.amount || 0),
+            0,
+          );
+
+          let status = "Active";
+          if (s.paymentStatus === "Unpaid") status = "Pending";
+
+          const batchInfo = batches.find((b) => b._id === s.batchId);
+
+          return {
+            id: s._id,
+            _id: s._id,
+            source: "Batch",
+            sourceLabel: batchInfo?.name || "Batch Student",
+            name: s.name || "Unknown",
+            fatherName: "",
+            motherName: "",
+            class: s.course || batchInfo?.course || "N/A",
+            subject: batchInfo?.course || "N/A",
+            roll: "N/A",
+            phone: "",
+            email: "",
+            address: "",
+            dob: "",
+            gender: "",
+            bloodGroup: "",
+            religion: "Islam",
+            nationality: "Bangladeshi",
+            previousSchool: "",
+            guardianContact: "",
+            status,
+            paymentStatus: s.paymentStatus || "Unpaid",
+            admissionDate: s.createdAt
+              ? new Date(s.createdAt).toISOString().split("T")[0]
+              : "N/A",
+            batch: batchInfo?.name || "N/A",
+            batchId: s.batchId,
+            country: "BD",
+            attendance: 0,
+            assignments: 0,
+            quiz: 0,
+            exam: 0,
+            progress: paid > 0 ? Math.min(100, paid) : 0,
+            performance:
+              paid >= 85
+                ? "Excellent"
+                : paid >= 70
+                  ? "Good"
+                  : paid >= 50
+                    ? "Average"
+                    : "Pending",
+            course: s.course || batchInfo?.course || "",
+            username: "",
+            studentId: s.studentId || "",
+            courseFee: 0,
+            paidAmount: paid,
+            dueAmount: 0,
+            scholarshipAmount: 0,
+            transactionId: "",
+            comments: "",
+            enrolledCourses: [],
+            paidMonths: s.paidMonths || [],
+            raw: s,
+          };
+        });
+
+        setBatchStudents(mapped);
+        console.log(
+          `✅ Loaded ${mapped.length} students for batch: ${batchId}`,
+        );
+      } else {
+        setBatchStudents([]);
+      }
+    } catch (err) {
+      console.error("❌ fetchBatchStudents error:", err);
+      setBatchStudents([]);
+    } finally {
+      setLoadingBatchStudents(false);
+    }
+  };
+
+  // ============================================================
+  // ✅ Fetch from 2 API endpoints (Tazweed + Najera)
   // ============================================================
   const fetchStudents = async () => {
     try {
       setLoadingStudents(true);
       setStudentsError(null);
 
-      // ✅ ২টি endpoint একসাথে fetch (Admission Form বাদ)
       const [tazweedRes, najeraRes] = await Promise.allSettled([
         fetch(`${API_BASE}/basic-tazweed/all`),
         fetch(`${API_BASE}/najera-batch/all`),
       ]);
 
-      // ---------- 1) Basic Tazweed Students ----------
+      // ---------- 1) Basic Tazweed ----------
       let tazweedStudents = [];
       if (tazweedRes.status === "fulfilled") {
         try {
@@ -221,7 +339,7 @@ const Adminstudent_profile = () => {
         }
       }
 
-      // ---------- 2) Najera Batch Students ----------
+      // ---------- 2) Najera Batch ----------
       let najeraStudents = [];
       if (najeraRes.status === "fulfilled") {
         try {
@@ -306,7 +424,6 @@ const Adminstudent_profile = () => {
         }
       }
 
-      // ✅ Combine and sort
       const combined = [...tazweedStudents, ...najeraStudents].sort((a, b) => {
         const da = new Date(a.raw?.createdAt || 0).getTime();
         const db = new Date(b.raw?.createdAt || 0).getTime();
@@ -328,6 +445,24 @@ const Adminstudent_profile = () => {
       setLoadingStudents(false);
     }
   };
+
+  // ============================================================
+  // Initial fetch + batch change listener
+  // ============================================================
+  useEffect(() => {
+    fetchStudents();
+    fetchBatches();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (selectedBatchId === "All") {
+      setBatchStudents([]);
+    } else {
+      fetchBatchStudents(selectedBatchId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBatchId]);
 
   const handleLogout = async () => {
     try {
@@ -358,7 +493,9 @@ const Adminstudent_profile = () => {
     setActiveSubMenu(activeSubMenu === menu ? null : menu);
   };
 
+  // ============================================================
   // Sidebar Menu Items
+  // ============================================================
   const menuItems = [
     {
       id: "profile",
@@ -495,50 +632,52 @@ const Adminstudent_profile = () => {
   ];
 
   // ============================================================
-  // Filter
+  // Filter logic
   // ============================================================
-  const filteredStudents = students
-    .filter((s) => (sourceFilter === "All" ? true : s.source === sourceFilter))
-    .filter((student) => {
-      const matchesSearch =
-        (student.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (student.fatherName || "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        (student.class || "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        (student.email || "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        (student.studentId || "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        (student.phone || "").includes(searchTerm);
+  const baseList =
+    selectedBatchId === "All"
+      ? students.filter((s) =>
+          sourceFilter === "All" ? true : s.source === sourceFilter,
+        )
+      : batchStudents;
 
-      const matchesCourse =
-        filterCourse === "All" || student.class === filterCourse;
-      const matchesStatus =
-        filterStatus === "All" || student.status === filterStatus;
-      const matchesPerformance =
-        filterPerformance === "All" ||
-        student.performance === filterPerformance;
+  const filteredStudents = baseList.filter((student) => {
+    const matchesSearch =
+      (student.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (student.fatherName || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (student.class || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (student.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (student.studentId || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      (student.phone || "").includes(searchTerm);
 
-      return (
-        matchesSearch && matchesCourse && matchesStatus && matchesPerformance
-      );
-    });
+    const matchesCourse =
+      filterCourse === "All" || student.class === filterCourse;
+    const matchesStatus =
+      filterStatus === "All" || student.status === filterStatus;
+    const matchesPerformance =
+      filterPerformance === "All" || student.performance === filterPerformance;
+
+    return (
+      matchesSearch && matchesCourse && matchesStatus && matchesPerformance
+    );
+  });
+
+  const activeListForFilters =
+    selectedBatchId === "All" ? students : batchStudents;
 
   const uniqueCourses = [
     "All",
-    ...new Set(students.map((s) => s.class).filter(Boolean)),
+    ...new Set(activeListForFilters.map((s) => s.class).filter(Boolean)),
   ];
   const uniquePerformances = [
     "All",
-    ...new Set(students.map((s) => s.performance).filter(Boolean)),
+    ...new Set(activeListForFilters.map((s) => s.performance).filter(Boolean)),
   ];
 
-  // Source counts (Admission বাদ)
   const sourceCounts = {
     All: students.length,
     Tazweed: students.filter((s) => s.source === "Tazweed").length,
@@ -585,6 +724,8 @@ const Adminstudent_profile = () => {
         return "bg-green-100 text-green-700";
       case "Najera":
         return "bg-purple-100 text-purple-700";
+      case "Batch":
+        return "bg-teal-100 text-teal-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
@@ -638,6 +779,9 @@ const Adminstudent_profile = () => {
     return "Poor";
   };
 
+  // ============================================================
+  // Edit Student Handler
+  // ============================================================
   const handleEditStudent = async (e) => {
     e.preventDefault();
 
@@ -658,6 +802,8 @@ const Adminstudent_profile = () => {
     let updateUrl = `${API_BASE}/basic-tazweed/update/${selectedStudent._id}`;
     if (selectedStudent.source === "Najera") {
       updateUrl = `${API_BASE}/najera-batch/update/${selectedStudent._id}`;
+    } else if (selectedStudent.source === "Batch") {
+      updateUrl = `${API_BASE}/batch-students/update/${selectedStudent._id}`;
     }
 
     try {
@@ -677,22 +823,26 @@ const Adminstudent_profile = () => {
       const data = await res.json();
 
       if (data.success) {
-        setStudents(
-          students.map((s) =>
-            s.id === selectedStudent.id
-              ? {
-                  ...s,
-                  ...formData,
-                  attendance,
-                  assignments,
-                  quiz,
-                  exam,
-                  progress,
-                  performance,
-                }
-              : s,
-          ),
-        );
+        if (selectedStudent.source === "Batch") {
+          await fetchBatchStudents(selectedBatchId);
+        } else {
+          setStudents(
+            students.map((s) =>
+              s.id === selectedStudent.id
+                ? {
+                    ...s,
+                    ...formData,
+                    attendance,
+                    assignments,
+                    quiz,
+                    exam,
+                    progress,
+                    performance,
+                  }
+                : s,
+            ),
+          );
+        }
         setShowEditModal(false);
         Swal.fire({
           icon: "success",
@@ -713,7 +863,9 @@ const Adminstudent_profile = () => {
     }
   };
 
-  // ✅ Source অনুযায়ী delete
+  // ============================================================
+  // Delete Student Handler
+  // ============================================================
   const handleDeleteStudent = async (id, name, source) => {
     const result = await Swal.fire({
       title: `Delete ${name}?`,
@@ -731,13 +883,19 @@ const Adminstudent_profile = () => {
     let deleteUrl = `${API_BASE}/basic-tazweed/delete/${id}`;
     if (source === "Najera") {
       deleteUrl = `${API_BASE}/najera-batch/delete/${id}`;
+    } else if (source === "Batch") {
+      deleteUrl = `${API_BASE}/batch-students/delete/${id}`;
     }
 
     try {
       const res = await fetch(deleteUrl, { method: "DELETE" });
       const data = await res.json();
       if (data.success) {
-        setStudents(students.filter((s) => s.id !== id));
+        if (source === "Batch") {
+          await fetchBatchStudents(selectedBatchId);
+        } else {
+          setStudents(students.filter((s) => s.id !== id));
+        }
         Swal.fire("Deleted!", "Student removed.", "success");
       } else {
         Swal.fire("Error!", data.message || "Failed to delete.", "error");
@@ -923,12 +1081,20 @@ const Adminstudent_profile = () => {
                 <span className="text-teal-700">All Sources</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Basic Tazweed + Najera Batch ({students.length} total)
+                {selectedBatchId === "All"
+                  ? `Basic Tazweed + Najera Batch (${students.length} total)`
+                  : `${batches.find((b) => b._id === selectedBatchId)?.name || "Batch"} (${batchStudents.length} students)`}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <button
-                onClick={fetchStudents}
+                onClick={() => {
+                  fetchStudents();
+                  fetchBatches();
+                  if (selectedBatchId !== "All") {
+                    fetchBatchStudents(selectedBatchId);
+                  }
+                }}
                 disabled={loadingStudents}
                 className="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
                 title="Refresh"
@@ -973,7 +1139,55 @@ const Adminstudent_profile = () => {
             </div>
           ) : (
             <>
-              {/* Source Tabs — Admission Form বাদ */}
+              {/* ✅ Batch Selector */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <FaLayerGroup className="text-teal-600" />
+                  <label className="text-xs font-bold text-gray-700">
+                    Filter by Batch:
+                  </label>
+                  <select
+                    value={selectedBatchId}
+                    onChange={(e) => {
+                      setSelectedBatchId(e.target.value);
+                      setSourceFilter("All");
+                      setFilterCourse("All");
+                      setFilterStatus("All");
+                      setFilterPerformance("All");
+                    }}
+                    className="px-3 py-1.5 text-xs border border-gray-300 rounded-lg font-semibold focus:ring-2 focus:ring-teal-500 max-w-full"
+                  >
+                    <option value="All">🌐 All Batches (All Sources)</option>
+                    {batches.map((b) => (
+                      <option key={b._id} value={b._id}>
+                        📚 {b.name} — {b.course} ({b.students || 0} students)
+                      </option>
+                    ))}
+                  </select>
+
+                  {selectedBatchId !== "All" && (
+                    <>
+                      <span className="text-[10px] bg-teal-50 text-teal-700 px-2 py-1 rounded-full font-semibold">
+                        Showing: {batchStudents.length} students
+                      </span>
+                      {loadingBatchStudents && (
+                        <span className="text-[10px] text-blue-600 font-semibold flex items-center gap-1">
+                          <FaSyncAlt size={10} className="animate-spin" />{" "}
+                          Loading...
+                        </span>
+                      )}
+                      <button
+                        onClick={() => setSelectedBatchId("All")}
+                        className="text-[10px] bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded-full font-semibold ml-auto"
+                      >
+                        ✕ Clear Filter
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Source Tabs — disabled when batch selected */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto">
                 {[
                   { id: "All", label: "All Students", color: "blue" },
@@ -982,9 +1196,17 @@ const Adminstudent_profile = () => {
                 ].map((tab) => (
                   <button
                     key={tab.id}
-                    onClick={() => setSourceFilter(tab.id)}
+                    onClick={() => {
+                      setSourceFilter(tab.id);
+                      setSelectedBatchId("All");
+                    }}
+                    disabled={selectedBatchId !== "All"}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                      sourceFilter === tab.id
+                      selectedBatchId !== "All"
+                        ? "opacity-40 cursor-not-allowed"
+                        : ""
+                    } ${
+                      sourceFilter === tab.id && selectedBatchId === "All"
                         ? tab.color === "blue"
                           ? "bg-blue-50 text-blue-700 shadow-sm"
                           : tab.color === "green"
@@ -996,7 +1218,7 @@ const Adminstudent_profile = () => {
                     {tab.label}
                     <span
                       className={`text-[10px] px-1.5 rounded-full ${
-                        sourceFilter === tab.id
+                        sourceFilter === tab.id && selectedBatchId === "All"
                           ? "bg-white text-gray-700"
                           : "bg-gray-200 text-gray-600"
                       }`}
@@ -1011,10 +1233,16 @@ const Adminstudent_profile = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
                   <p className="text-lg font-bold text-blue-600">
-                    {sourceCounts[sourceFilter]}
+                    {selectedBatchId === "All"
+                      ? sourceCounts[sourceFilter]
+                      : batchStudents.length}
                   </p>
                   <p className="text-[10px] text-gray-500">
-                    {sourceFilter === "All" ? "Total" : sourceFilter}
+                    {selectedBatchId === "All"
+                      ? sourceFilter === "All"
+                        ? "Total"
+                        : sourceFilter
+                      : "Batch Students"}
                   </p>
                 </div>
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
@@ -1098,146 +1326,165 @@ const Adminstudent_profile = () => {
               </div>
 
               {/* Students Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {filteredStudents.map((student) => (
-                  <div
-                    key={student.id}
-                    className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden"
-                  >
+              {loadingBatchStudents && selectedBatchId !== "All" ? (
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-12 text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mx-auto"></div>
+                  <p className="text-sm text-gray-500 mt-3">
+                    Loading batch students...
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {filteredStudents.map((student) => (
                     <div
-                      className={`h-1 ${
-                        student.status === "Active"
-                          ? "bg-green-500"
-                          : student.status === "Pending"
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
-                      }`}
-                    ></div>
-                    <div className="p-3">
-                      <div className="flex items-start gap-2">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                          {student.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-800 text-xs truncate">
-                            {student.name}
-                          </h3>
-                          <p className="text-[10px] text-gray-500 truncate">
-                            {student.class}
-                          </p>
-                          {student.studentId && (
-                            <p className="text-[9px] text-blue-600 font-mono truncate">
-                              ID: {student.studentId}
+                      key={student.id}
+                      className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden"
+                    >
+                      <div
+                        className={`h-1 ${
+                          student.status === "Active"
+                            ? "bg-green-500"
+                            : student.status === "Pending"
+                              ? "bg-yellow-500"
+                              : "bg-red-500"
+                        }`}
+                      ></div>
+                      <div className="p-3">
+                        <div className="flex items-start gap-2">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                            {student.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-gray-800 text-xs truncate">
+                              {student.name}
+                            </h3>
+                            <p className="text-[10px] text-gray-500 truncate">
+                              {student.class}
                             </p>
-                          )}
-                          <div className="flex items-center gap-1 mt-0.5 flex-wrap">
-                            <span
-                              className={`text-[8px] px-1.5 py-0.5 rounded-full font-semibold ${getSourceBadge(
-                                student.source,
-                              )}`}
-                            >
-                              {student.sourceLabel}
-                            </span>
-                            <span
-                              className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(student.status)}`}
-                            >
-                              {student.status}
-                            </span>
-                            <span
-                              className={`text-[8px] px-1.5 py-0.5 rounded-full ${getPerformanceColor(student.performance)}`}
-                            >
-                              {student.performance}
-                            </span>
+                            {student.studentId && (
+                              <p className="text-[9px] text-blue-600 font-mono truncate">
+                                ID: {student.studentId}
+                              </p>
+                            )}
+                            <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                              <span
+                                className={`text-[8px] px-1.5 py-0.5 rounded-full font-semibold ${getSourceBadge(
+                                  student.source,
+                                )}`}
+                              >
+                                {student.sourceLabel}
+                              </span>
+                              <span
+                                className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(student.status)}`}
+                              >
+                                {student.status}
+                              </span>
+                              <span
+                                className={`text-[8px] px-1.5 py-0.5 rounded-full ${getPerformanceColor(student.performance)}`}
+                              >
+                                {student.performance}
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <div className="mt-1.5 grid grid-cols-3 gap-1 text-center">
-                        <div className="bg-gray-50 rounded-lg p-1">
-                          <p className="text-[10px] font-bold text-green-600">
-                            ৳{student.paidAmount?.toLocaleString() || 0}
-                          </p>
-                          <p className="text-[8px] text-gray-500">Paid</p>
+                        <div className="mt-1.5 grid grid-cols-3 gap-1 text-center">
+                          <div className="bg-gray-50 rounded-lg p-1">
+                            <p className="text-[10px] font-bold text-green-600">
+                              ৳{student.paidAmount?.toLocaleString() || 0}
+                            </p>
+                            <p className="text-[8px] text-gray-500">Paid</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-1">
+                            <p className="text-[10px] font-bold text-red-600">
+                              ৳{student.dueAmount?.toLocaleString() || 0}
+                            </p>
+                            <p className="text-[8px] text-gray-500">Due</p>
+                          </div>
+                          <div className="bg-gray-50 rounded-lg p-1">
+                            <p className="text-[10px] font-bold text-blue-600">
+                              {student.progress}%
+                            </p>
+                            <p className="text-[8px] text-gray-500">Progress</p>
+                          </div>
                         </div>
-                        <div className="bg-gray-50 rounded-lg p-1">
-                          <p className="text-[10px] font-bold text-red-600">
-                            ৳{student.dueAmount?.toLocaleString() || 0}
-                          </p>
-                          <p className="text-[8px] text-gray-500">Due</p>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg p-1">
-                          <p className="text-[10px] font-bold text-blue-600">
-                            {student.progress}%
-                          </p>
-                          <p className="text-[8px] text-gray-500">Progress</p>
-                        </div>
-                      </div>
 
-                      <div className="mt-1.5">
-                        <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full ${getProgressColor(student.progress)}`}
-                            style={{ width: `${student.progress}%` }}
-                          ></div>
+                        <div className="mt-1.5">
+                          <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${getProgressColor(student.progress)}`}
+                              style={{ width: `${student.progress}%` }}
+                            ></div>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100">
-                        <button
-                          onClick={() => openDetailsModal(student)}
-                          className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all"
-                        >
-                          View Profile
-                        </button>
-                        <button
-                          onClick={() => openEditModal(student)}
-                          className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
-                          title="Edit"
-                        >
-                          <FaEdit size={12} />
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleDeleteStudent(
-                              student.id,
-                              student.name,
-                              student.source,
-                            )
-                          }
-                          className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
-                          title="Delete"
-                        >
-                          <FaTrash size={12} />
-                        </button>
+                        <div className="mt-2 flex items-center gap-1 pt-1.5 border-t border-gray-100">
+                          <button
+                            onClick={() => openDetailsModal(student)}
+                            className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all"
+                          >
+                            View Profile
+                          </button>
+                          <button
+                            onClick={() => openEditModal(student)}
+                            className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
+                            title="Edit"
+                          >
+                            <FaEdit size={12} />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleDeleteStudent(
+                                student.id,
+                                student.name,
+                                student.source,
+                              )
+                            }
+                            className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
+                            title="Delete"
+                          >
+                            <FaTrash size={12} />
+                          </button>
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+              )}
+
+              {filteredStudents.length === 0 &&
+                !loadingBatchStudents &&
+                (selectedBatchId === "All"
+                  ? students.length > 0
+                  : batchStudents.length > 0) && (
+                  <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
+                    <FaUserGraduate className="text-5xl text-gray-300 mx-auto mb-3" />
+                    <h3 className="text-base font-bold text-gray-800 mb-0.5">
+                      No Matching Students
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      Try adjusting filters or search
+                    </p>
                   </div>
-                ))}
-              </div>
+                )}
 
-              {filteredStudents.length === 0 && students.length > 0 && (
-                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
-                  <FaUserGraduate className="text-5xl text-gray-300 mx-auto mb-3" />
-                  <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                    No Matching Students
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Try adjusting filters or search
-                  </p>
-                </div>
-              )}
-
-              {students.length === 0 && (
-                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
-                  <FaUserGraduate className="text-5xl text-gray-300 mx-auto mb-3" />
-                  <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                    No Students Found
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Basic Tazweed বা Najera Batch থেকে student add করুন।
-                  </p>
-                </div>
-              )}
+              {filteredStudents.length === 0 &&
+                !loadingBatchStudents &&
+                (selectedBatchId === "All"
+                  ? students.length === 0
+                  : batchStudents.length === 0) && (
+                  <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
+                    <FaUserGraduate className="text-5xl text-gray-300 mx-auto mb-3" />
+                    <h3 className="text-base font-bold text-gray-800 mb-0.5">
+                      No Students Found
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      {selectedBatchId === "All"
+                        ? "Basic Tazweed বা Najera Batch থেকে student add করুন।"
+                        : "এই batch এ এখনো কোনো student add করা হয়নি।"}
+                    </p>
+                  </div>
+                )}
             </>
           )}
         </main>
@@ -1288,11 +1535,15 @@ const Adminstudent_profile = () => {
                     {selectedStudent.studentId && (
                       <span>🆔 {selectedStudent.studentId}</span>
                     )}
-                    <span>📱 {selectedStudent.phone}</span>
+                    {selectedStudent.phone && (
+                      <span>📱 {selectedStudent.phone}</span>
+                    )}
                     {selectedStudent.email && (
                       <span>📧 {selectedStudent.email}</span>
                     )}
-                    <span>📚 {selectedStudent.batch}</span>
+                    {selectedStudent.batch && (
+                      <span>📚 {selectedStudent.batch}</span>
+                    )}
                   </div>
                   <div className="mt-2 flex justify-center md:justify-start">
                     {renderStars(selectedStudent.performance)}
@@ -1538,11 +1789,10 @@ const Adminstudent_profile = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Phone *
+                    Phone
                   </label>
                   <input
                     type="text"
-                    required
                     value={formData.phone}
                     onChange={(e) =>
                       setFormData({ ...formData, phone: e.target.value })
