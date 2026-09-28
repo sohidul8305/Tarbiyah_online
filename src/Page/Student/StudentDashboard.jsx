@@ -1,7 +1,6 @@
 // src/Page/Student/StudentDashboard.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, Outlet } from "react-router-dom";
-
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
 import {
@@ -25,28 +24,51 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
+const API_BASE = "https://api.tarbiyahonline.com/api";
+
 const StudentDashboard = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [loading, setLoading] = useState(true);
+
+  // ✅ Dynamic Student State
   const [studentInfo, setStudentInfo] = useState({
+    _id: "",
     name: "",
     email: "",
     phone: "",
     class: "",
     roll: "",
     username: "",
+    studentId: "",
     status: "",
     admissionDate: "",
     course: "",
+    enrolledCourses: [],
     paymentStatus: "",
     paymentMethod: "",
     transactionId: "",
-    paidAmount: "",
+    paidAmount: 0,
+    dueAmount: 0,
+    courseFee: 0,
+    scholarshipAmount: 0,
+    monthlyFee: 0,
+    country: "",
+    gender: "",
+    guardianName: "",
+    guardianPhone: "",
+    paidMonths: [],
+    loginSource: "",
   });
 
+  const [courses, setCourses] = useState([]);
+  const [loadingCourses, setLoadingCourses] = useState(false);
+
+  // ============================================================
+  // ✅ Load basic info from localStorage, then fetch fresh from API
+  // ============================================================
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isStudentLoggedIn");
     if (!isLoggedIn) {
@@ -54,30 +76,238 @@ const StudentDashboard = () => {
       return;
     }
 
-    const info = localStorage.getItem("studentInfo");
-    if (info) {
-      const parsedInfo = JSON.parse(info);
-      setStudentInfo({
-        name: parsedInfo.name || "Shakil Ahmmed",
-        email: parsedInfo.email || "",
-        phone: parsedInfo.phone || "",
-        class:
-          parsedInfo.class ||
-          parsedInfo.course ||
-          "BA in Dawah and Islamic Studies",
-        roll: parsedInfo.roll || "26160110266",
-        username: parsedInfo.username || "",
-        status: parsedInfo.status || "Active",
-        admissionDate: parsedInfo.admissionDate || parsedInfo.createdAt || "",
-        course: parsedInfo.course || parsedInfo.class || "",
-        paymentStatus: parsedInfo.paymentStatus || "Unpaid",
-        paymentMethod: parsedInfo.paymentMethod || "",
-        transactionId: parsedInfo.transactionId || "",
-        paidAmount: parsedInfo.paidAmount || "",
-      });
+    const raw = localStorage.getItem("studentInfo");
+    if (!raw) {
+      navigate("/student-login");
+      return;
     }
-    setLoading(false);
-  }, [navigate]);
+
+    let parsed = {};
+    try {
+      parsed = JSON.parse(raw);
+    } catch (e) {
+      navigate("/student-login");
+      return;
+    }
+
+    // Set initial data from localStorage (fast load)
+    setStudentInfo((prev) => ({
+      ...prev,
+      ...parsed,
+      name: parsed.name || "",
+      roll: parsed.roll || "",
+      course: parsed.course || parsed.class || "",
+      class: parsed.class || parsed.course || "",
+    }));
+
+    // Then fetch fresh data from API
+    if (parsed._id) {
+      fetchFullStudentData(parsed._id, parsed.loginSource);
+    } else {
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ============================================================
+  // ✅ Fetch full student data from correct source
+  // ============================================================
+  // ============================================================
+  // ✅ Fetch full student data from correct source — FIXED
+  // ============================================================
+  const fetchFullStudentData = async (studentId, loginSource) => {
+    try {
+      let data = null;
+
+      // ✅ loginSource resolve করুন (localStorage fallback সহ)
+      const resolvedSource =
+        loginSource || localStorage.getItem("loginSource") || "students";
+
+      console.log(
+        `🔍 Fetching student [${studentId}] from source: ${resolvedSource}`,
+      );
+
+      if (resolvedSource === "basic_tazweed_students") {
+        const res = await fetch(`${API_BASE}/basic-tazweed/all`);
+        const d = await res.json();
+        if (d.success && Array.isArray(d.students)) {
+          data = d.students.find(
+            (s) => s._id === studentId || s.studentId === studentId,
+          );
+        }
+      } else if (resolvedSource === "najera_batch_students") {
+        const res = await fetch(`${API_BASE}/najera-batch/all`);
+        const d = await res.json();
+        if (d.success && Array.isArray(d.students)) {
+          data = d.students.find(
+            (s) => s._id === studentId || s.studentId === studentId,
+          );
+        }
+      } else {
+        const res = await fetch(`${API_BASE}/students/details/${studentId}`);
+        const d = await res.json();
+        if (d.success) data = d.student;
+      }
+
+      if (data) {
+        console.log("✅ Fresh student data:", data);
+
+        // ✅ Payment calculation
+        const paid =
+          Number(data.paidAmount) ||
+          (data.paidMonths || []).reduce(
+            (s, p) => s + Number(p.amount || 0),
+            0,
+          );
+        const fee = Number(data.courseFee) || 0;
+        const scholarship = Number(data.scholarshipAmount) || 0;
+        const due =
+          Number(data.dueAmount) || Math.max(fee - scholarship - paid, 0);
+
+        // ✅ সব field সঠিকভাবে map — Tazweed/Najera/Students সব source এর জন্য
+        setStudentInfo((prev) => ({
+          ...prev,
+          ...data,
+          _id: data._id || prev._id,
+          name: data.name || prev.name || "",
+          roll: data.roll || prev.roll || "",
+          username: data.username || prev.username || "",
+          studentId: data.studentId || prev.studentId || "",
+          course: data.course || data.class || prev.course || "",
+          class: data.class || data.course || prev.class || "",
+          email: data.email || prev.email || "",
+          phone: data.phone || prev.phone || "",
+          // ✅ Missing fields — এখন সহজে map হচ্ছে
+          gender: data.gender || prev.gender || "",
+          country: data.country || prev.country || "BD",
+          dob: data.dob || data.dateOfBirth || prev.dob || "",
+          address: data.address || prev.address || "",
+          fatherName:
+            data.fatherName || data.guardianName || prev.fatherName || "",
+          motherName: data.motherName || prev.motherName || "",
+          guardianName:
+            data.guardianName || data.fatherName || prev.guardianName || "",
+          guardianPhone:
+            data.guardianPhone || data.phone || prev.guardianPhone || "",
+          admissionDate:
+            data.admissionDate || data.createdAt || prev.admissionDate || "",
+          status: data.status || "Active",
+          paymentStatus:
+            due === 0 && paid > 0 ? "Paid" : paid > 0 ? "Partial" : "Unpaid",
+          paymentMethod: data.paymentMethod || "",
+          transactionId: data.transactionId || "",
+          paidAmount: paid,
+          dueAmount: due,
+          courseFee: fee,
+          scholarshipAmount: scholarship,
+          monthlyFee: Number(data.monthlyFee) || fee,
+          paidMonths: data.paidMonths || [],
+          // ✅ loginSource save
+          loginSource: resolvedSource,
+        }));
+
+        // ✅ localStorage update — loginSource সহ
+        localStorage.setItem(
+          "studentInfo",
+          JSON.stringify({
+            ...data,
+            loginSource: resolvedSource,
+          }),
+        );
+        localStorage.setItem("loginSource", resolvedSource);
+      } else {
+        console.warn(`⚠️ Student ${studentId} not found in ${resolvedSource}`);
+      }
+
+      // ✅ Courses fetch
+      await fetchEnrolledCourses(studentId, resolvedSource);
+    } catch (e) {
+      console.error("❌ Fetch student error:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+  // ============================================================
+  // ✅ Fetch enrolled courses
+  // ============================================================
+  // ============================================================
+  // ✅ Fetch enrolled courses — Multi-source friendly
+  // ============================================================
+  const fetchEnrolledCourses = async (studentId, loginSource) => {
+    try {
+      setLoadingCourses(true);
+
+      // ✅ Step 1: Students collection এর জন্য API hit
+      if (!loginSource || loginSource === "students") {
+        try {
+          const res = await fetch(
+            `${API_BASE}/students/my-courses/${studentId}`,
+          );
+          const d = await res.json();
+          if (d.success && Array.isArray(d.courses) && d.courses.length > 0) {
+            setCourses(d.courses);
+            return;
+          }
+        } catch (e) {
+          console.warn("⚠️ my-courses API failed, using fallback");
+        }
+      }
+
+      // ✅ Step 2: Fallback — studentInfo থেকে course string parse
+      const raw = localStorage.getItem("studentInfo");
+      if (!raw) {
+        setCourses([]);
+        return;
+      }
+
+      const parsed = JSON.parse(raw);
+
+      // ✅ Priority: enrolledCourses array > course string > class string
+      if (
+        Array.isArray(parsed.enrolledCourses) &&
+        parsed.enrolledCourses.length > 0
+      ) {
+        setCourses(parsed.enrolledCourses);
+        return;
+      }
+
+      const courseString = parsed.course || parsed.class || "";
+      if (!courseString) {
+        setCourses([]);
+        return;
+      }
+
+      const courseNames = String(courseString)
+        .split(/[,\n]/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      if (courseNames.length === 0) {
+        setCourses([]);
+        return;
+      }
+
+      const fallbackCourses = courseNames.map((name, i) => ({
+        _id: `fallback_${i}_${Date.now()}`,
+        code: name
+          .substring(0, 8)
+          .toUpperCase()
+          .replace(/[^A-Z0-9]/g, ""),
+        title: name,
+        className: name,
+        section: "",
+        teacher: "",
+        duration: "",
+      }));
+
+      setCourses(fallbackCourses);
+    } catch (e) {
+      console.error("❌ Fetch courses error:", e);
+      setCourses([]);
+    } finally {
+      setLoadingCourses(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -104,9 +334,7 @@ const StudentDashboard = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const menuItems = [
     {
@@ -192,8 +420,15 @@ const StudentDashboard = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{studentInfo.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {studentInfo.class}
+                  {studentInfo.class || studentInfo.course}
                 </p>
+
+                {/* ✅ Source Badge এখানে যোগ করুন */}
+                {studentInfo.sourceLabel && (
+                  <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-white/25 font-semibold">
+                    {studentInfo.sourceLabel}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -246,7 +481,6 @@ const StudentDashboard = () => {
         )}
 
         <main className="flex-grow p-4 md:p-6 overflow-x-auto w-full">
-          {/* Top Bar control buttons */}
           <div className="bg-white p-3 rounded-sm shadow-sm border border-gray-200 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
               <h1 className="text-base font-bold text-gray-800">Dashboard</h1>
@@ -254,6 +488,7 @@ const StudentDashboard = () => {
             <div className="flex items-center gap-2 text-gray-600">
               <button
                 title="Edit Profile"
+                onClick={() => navigate("/student-profile")}
                 className="p-1.5 hover:bg-gray-100 rounded border border-gray-300 text-xs"
               >
                 <FaEdit />
@@ -299,7 +534,14 @@ const StudentDashboard = () => {
           <Outlet />
 
           {activeMenu === "dashboard" && (
-            <DashboardContent studentInfo={studentInfo} />
+            <DashboardContent
+              studentInfo={studentInfo}
+              courses={courses}
+              loadingCourses={loadingCourses}
+              onRefresh={() =>
+                fetchFullStudentData(studentInfo._id, studentInfo.loginSource)
+              }
+            />
           )}
         </main>
       </div>
@@ -308,73 +550,20 @@ const StudentDashboard = () => {
 };
 
 // ==========================================
-// ড্যাশবোর্ড কন্টেন্ট (ডাইনামিক কোর্স ডাটা সহ)
+// Dashboard Content — Fully Dynamic
 // ==========================================
-
-const DashboardContent = ({ studentInfo }) => {
+const DashboardContent = ({
+  studentInfo,
+  courses,
+  loadingCourses,
+  onRefresh,
+}) => {
   const [paymentTab, setPaymentTab] = useState("summary");
-  const [courses, setCourses] = useState([]);
-  const [loadingCourses, setLoadingCourses] = useState(true);
 
-  // ডাইনামিক কোর্স ডেটা ফেচ করার জন্য ইফেক্ট (আপনার ব্যাকএন্ড API বা রুট অনুযায়ী এটি এডজাস্ট করে নিতে পারেন)
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        // যদি আপনার API থাকে তবে এখানে ফেচ কল হবে, নিচে উদাহরণস্বরূপ লোকাল বা ডাইনামিক স্টেট হ্যান্ডেল করা হলো:
-        // const res = await fetch(`https://your-api-url/courses?email=${studentInfo.email}`);
-        // const data = await res.json();
-
-        // সাময়িকভাবে ডাইনামিক রেন্ডারিং লজিক বা প্রপস থেকে আসা কোর্স ডাটা ব্যবহার করা হচ্ছে:
-        const dynamicCourses = studentInfo.courses || [
-          {
-            id: 1,
-            code: "AQD-101",
-            title: "Aqeedah",
-            section: "[Brother-A-B16]",
-          },
-          {
-            id: 2,
-            code: "ATI-101",
-            title: "Adabu Talibil Il'm",
-            section: "[Brother-A-B16]",
-          },
-          {
-            id: 3,
-            code: "DNS-101",
-            title: "Da'wah & Sunnah",
-            section: "[Brother-A-B16]",
-          },
-          {
-            id: 4,
-            code: "FQH-101",
-            title: "Fiqh-I",
-            section: "[Brother-A-B16]",
-          },
-          {
-            id: 5,
-            code: "TAJ-101",
-            title: "Tajweed-I",
-            section: "[Brother-A-B16]",
-          },
-        ];
-        setCourses(dynamicCourses);
-      } catch (error) {
-        console.error("Error fetching courses:", error);
-      } finally {
-        setLoadingCourses(false);
-      }
-    };
-
-    if (studentInfo) {
-      fetchCourses();
-    }
-  }, [studentInfo]);
-
-  // Payment Calculation
-  const paidAmount = parseFloat(studentInfo.paidAmount) || 0;
-  const totalBill = paidAmount > 0 ? paidAmount : 2280;
-  const totalPaid = studentInfo.paymentStatus === "Paid" ? totalBill : 0;
-  const totalDue = studentInfo.paymentStatus === "Paid" ? 0 : totalBill;
+  // ✅ Calculate payments from real data
+  const totalBill = Number(studentInfo.courseFee) || 0;
+  const totalPaid = Number(studentInfo.paidAmount) || 0;
+  const totalDue = Number(studentInfo.dueAmount) || 0;
 
   return (
     <div className="space-y-4">
@@ -384,13 +573,13 @@ const DashboardContent = ({ studentInfo }) => {
           Assalamu alaikum wa rahmatullahi wa barakatuh. Ahlan wa Sahlan WA
           Masa'al Khair!{" "}
           <strong>
-            {studentInfo.name || "Shakil Ahmmed"} [
-            {studentInfo.roll || "26160110266"}]
+            {studentInfo.name || "Student"}{" "}
+            {studentInfo.roll ? `[${studentInfo.roll}]` : ""}
           </strong>
         </p>
       </div>
 
-      {/* Important Links Section */}
+      {/* Important Links */}
       <div className="border border-[#00ADD2] bg-white rounded-sm shadow-sm">
         <div className="bg-[#00ADD2] text-white px-3 py-2 flex justify-between items-center rounded-t-sm">
           <div className="flex items-center gap-2 text-sm font-medium">
@@ -408,7 +597,6 @@ const DashboardContent = ({ studentInfo }) => {
 
         <div className="p-4 bg-[#f8f9fa]">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Card 1 */}
             <div className="bg-[#78b866] text-white rounded-sm relative flex flex-col justify-between h-[100px] hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg leading-tight">
@@ -424,7 +612,6 @@ const DashboardContent = ({ studentInfo }) => {
               </Link>
             </div>
 
-            {/* Card 2 */}
             <div className="bg-[#8c1c44] text-white rounded-sm relative flex flex-col justify-between h-[100px] hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg leading-tight">
@@ -440,7 +627,6 @@ const DashboardContent = ({ studentInfo }) => {
               </Link>
             </div>
 
-            {/* Card 3 */}
             <div className="bg-[#00a65a] text-white rounded-sm relative flex flex-col justify-between h-[100px] hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg leading-tight">
@@ -456,7 +642,6 @@ const DashboardContent = ({ studentInfo }) => {
               </Link>
             </div>
 
-            {/* Card 4 */}
             <div className="bg-[#0073b7] text-white rounded-sm relative flex flex-col justify-between h-[100px] hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg leading-tight">
@@ -472,14 +657,12 @@ const DashboardContent = ({ studentInfo }) => {
               </Link>
             </div>
 
-            {/* Orange Warning Text */}
             <div className="col-span-1 md:col-span-1 bg-[#f39c12] text-white text-xs p-2 rounded-sm leading-relaxed mt-2">
               আপনার পোর্টাল এবং ক্যাম্পাসের পাসওয়ার্ড যদি একই থাকে সে ক্ষেত্রে
               আপনি সরাসরি ক্যাম্পাসে লগইন হয়ে যেতে পারবেন, অন্যথায় আপনাকে
               ক্যাম্পাসে পাসওয়ার্ড দিয়ে লগইন করতে হবে।
             </div>
 
-            {/* Campus Login Card */}
             <div className="col-span-1 md:col-span-1 bg-[#00a65a] text-white rounded-sm relative flex flex-col justify-between h-[100px] mt-2 hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg mb-1">Campus</h3>
@@ -501,14 +684,35 @@ const DashboardContent = ({ studentInfo }) => {
         </div>
       </div>
 
-      {/* Registered Courses Section (Dynamic Mapping) */}
+      {/* ✅ Registered Courses — Dynamic with Source */}
       <div className="border border-[#00ADD2] bg-white rounded-sm shadow-sm mb-6">
         <div className="flex items-center gap-2 p-2 border-b border-[#00ADD2] text-sm bg-[#f4f6f9] font-medium text-gray-700">
           <FaFileAlt className="text-[#00ADD2]" /> Registered Courses of
           <select className="border border-[#00ADD2] rounded px-2 py-0.5 text-xs bg-white focus:outline-none">
             <option>Fall 2026 (Jul-Dec)</option>
           </select>
+          {/* ✅ Source Badge — Header এ */}
+          {studentInfo.sourceLabel && (
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                studentInfo.source === "basic_tazweed_students"
+                  ? "bg-green-100 text-green-700"
+                  : studentInfo.source === "najera_batch_students"
+                    ? "bg-purple-100 text-purple-700"
+                    : "bg-blue-100 text-blue-700"
+              }`}
+            >
+              🎓 {studentInfo.sourceLabel}
+            </span>
+          )}
+          <button
+            onClick={onRefresh}
+            className="ml-auto text-[#00ADD2] hover:text-[#008c9e] text-xs flex items-center gap-1"
+          >
+            <FaSync size={10} /> Refresh
+          </button>
         </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left text-gray-600">
             <thead className="text-xs text-gray-700 bg-gray-100 border-b border-gray-200">
@@ -517,19 +721,24 @@ const DashboardContent = ({ studentInfo }) => {
                   Ser
                 </th>
                 <th className="px-4 py-2 font-semibold">Title</th>
+                {/* ✅ Source Column */}
+                <th className="px-4 py-2 font-semibold w-40 border-l border-gray-200 text-center">
+                  Source
+                </th>
               </tr>
             </thead>
             <tbody>
               {loadingCourses ? (
                 <tr>
-                  <td colSpan="2" className="text-center py-4 text-gray-500">
-                    Loading registered courses...
+                  <td colSpan="3" className="text-center py-4 text-gray-500">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00ADD2] mx-auto"></div>
+                    <p className="mt-2 text-xs">Loading courses...</p>
                   </td>
                 </tr>
               ) : courses.length > 0 ? (
                 courses.map((course, index) => (
                   <tr
-                    key={course.id || index}
+                    key={course._id || index}
                     className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
                   >
                     <td className="px-4 py-3 align-top border-r border-gray-200 text-center">
@@ -537,34 +746,63 @@ const DashboardContent = ({ studentInfo }) => {
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-medium text-[#00ADD2]">
-                        {course.code}: {course.title}{" "}
-                        {course.section || "[Brother-A-B16]"}
+                        {course.code ? `${course.code}: ` : ""}
+                        {course.title || course.className || "Course"}{" "}
+                        {course.section ? `[${course.section}]` : ""}
                       </p>
                       <div className="text-[11px] text-[#00ADD2] flex gap-2 mt-1">
                         <Link
-                          to={`/student-attendance/${course.code}`}
+                          to={`/student-attendance/${course.code || course._id}`}
                           className="hover:underline"
                         >
                           [Attendances]
                         </Link>
                         <Link
-                          to={`/course-notices/${course.code}`}
+                          to={`/course-notices/${course.code || course._id}`}
                           className="hover:underline"
                         >
                           [Course Notices]
                         </Link>
                       </div>
                       <p className="text-xs text-gray-500 italic mt-1 font-serif">
-                        {studentInfo.class || "BA in Dawah and Islamic Studies"}{" "}
-                        (Fall 2026 (Jul-Dec))
+                        {course.teacher
+                          ? `Teacher: ${course.teacher}`
+                          : studentInfo.class || ""}{" "}
+                        {course.duration ? `(${course.duration})` : ""}
                       </p>
+                    </td>
+
+                    {/* ✅ Source Cell */}
+                    <td className="px-4 py-3 align-top border-l border-gray-200 text-center">
+                      <span
+                        className={`inline-block text-[10px] px-2 py-1 rounded-full font-bold ${
+                          studentInfo.source === "basic_tazweed_students"
+                            ? "bg-green-100 text-green-700"
+                            : studentInfo.source === "najera_batch_students"
+                              ? "bg-purple-100 text-purple-700"
+                              : "bg-blue-100 text-blue-700"
+                        }`}
+                      >
+                        {studentInfo.sourceLabel || "Regular"}
+                      </span>
+
+                      {/* ✅ Course-level source থাকলে ছোট করে দেখাবে */}
+                      {course.source &&
+                        course.source !== studentInfo.source && (
+                          <p className="text-[9px] text-gray-400 mt-1">
+                            from: {course.source}
+                          </p>
+                        )}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="2" className="text-center py-4 text-gray-500">
-                    No registered courses found for this semester.
+                  <td colSpan="3" className="text-center py-4 text-gray-500">
+                    <FaInfoCircle className="text-2xl text-gray-300 mx-auto mb-2" />
+                    <p className="text-xs">
+                      No registered courses found. Please contact admin.
+                    </p>
                   </td>
                 </tr>
               )}
@@ -573,7 +811,7 @@ const DashboardContent = ({ studentInfo }) => {
         </div>
       </div>
 
-      {/* Payment Section */}
+      {/* ✅ Payment Section — Dynamic */}
       <PaymentSection
         paymentTab={paymentTab}
         setPaymentTab={setPaymentTab}
@@ -587,9 +825,8 @@ const DashboardContent = ({ studentInfo }) => {
 };
 
 // ==========================================
-// Payment Section Components
+// Payment Section
 // ==========================================
-
 const PaymentSection = ({
   paymentTab,
   setPaymentTab,
@@ -621,24 +858,6 @@ const PaymentSection = ({
         ))}
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-200 mb-6 gap-3">
-        <div className="flex items-center gap-2 text-sm text-gray-700 w-full sm:w-auto">
-          <span>📋 Payment Summary for</span>
-          <select className="border border-gray-300 rounded px-3 py-1 bg-white text-sm focus:outline-none focus:ring-[#00ADD2]">
-            <option>Fall 2026 (Jul-Dec)</option>
-            <option>Spring 2026 (Jan-Jun)</option>
-          </select>
-        </div>
-        <button
-          onClick={() =>
-            Swal.fire("Refreshed", "Data updated successfully", "success")
-          }
-          className="bg-[#00ADD2] hover:bg-[#008c9e] text-white text-xs px-3 py-1.5 rounded font-bold flex items-center gap-1 shadow-sm"
-        >
-          <span>🔄</span> Refresh
-        </button>
-      </div>
-
       {paymentTab === "summary" && (
         <PaymentSummary
           totalBill={totalBill}
@@ -657,35 +876,36 @@ const PaymentSection = ({
 };
 
 const PaymentSummary = ({ totalBill, totalPaid, totalDue, studentInfo }) => {
-  const bill =
-    typeof totalBill === "number" ? totalBill : parseFloat(totalBill) || 0;
-  const paid =
-    typeof totalPaid === "number" ? totalPaid : parseFloat(totalPaid) || 0;
-  const due =
-    typeof totalDue === "number" ? totalDue : parseFloat(totalDue) || 0;
+  const bill = Number(totalBill) || 0;
+  const paid = Number(totalPaid) || 0;
+  const due = Number(totalDue) || 0;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div className="border border-gray-300 rounded-lg overflow-hidden bg-white shadow-sm">
         <div className="bg-[#00ADD2] text-white px-4 py-2 border-b border-gray-300 font-bold text-sm flex items-center gap-2">
-          <span>📊</span> Payment Summary for Fall 2026 (Jul-Dec)
+          <span>📊</span> Payment Summary
         </div>
         <div className="p-4 space-y-3 text-sm text-gray-700">
           <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-            <span>Previous Advance:</span>
-            <span className="font-semibold">0.00</span>
+            <span>Course Fee:</span>
+            <span className="font-semibold">{bill.toFixed(2)}</span>
           </div>
           <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-            <span>This Semester Bill:</span>
-            <span className="font-semibold">{bill.toFixed(2)}</span>
+            <span>Scholarship:</span>
+            <span className="font-semibold text-blue-600">
+              {Number(studentInfo.scholarshipAmount || 0).toFixed(2)}
+            </span>
           </div>
           <div className="border-t border-black my-1"></div>
           <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-            <span>This Semester Paid:</span>
-            <span className="font-semibold">{paid.toFixed(2)}</span>
+            <span>Total Paid:</span>
+            <span className="font-semibold text-green-600">
+              {paid.toFixed(2)}
+            </span>
           </div>
           <div className="flex justify-between py-1 text-base font-bold text-gray-900">
-            <span>This Semester Due:</span>
+            <span>Total Due:</span>
             <span className="text-red-600">{due.toFixed(2)}</span>
           </div>
           <div className="text-xs text-gray-400 mt-2 border-t pt-2">
@@ -697,7 +917,9 @@ const PaymentSummary = ({ totalBill, totalPaid, totalDue, studentInfo }) => {
                 className={
                   studentInfo.paymentStatus === "Paid"
                     ? "text-green-600 font-bold"
-                    : "text-red-600 font-bold"
+                    : studentInfo.paymentStatus === "Partial"
+                      ? "text-yellow-600 font-bold"
+                      : "text-red-600 font-bold"
                 }
               >
                 {studentInfo.paymentStatus || "Unpaid"}
@@ -713,12 +935,14 @@ const PaymentSummary = ({ totalBill, totalPaid, totalDue, studentInfo }) => {
         </div>
         <div className="p-4 space-y-3 text-sm text-gray-700">
           <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-            <span>Total Bill (Debit):</span>
+            <span>Total Bill:</span>
             <span className="font-semibold">{bill.toFixed(2)}</span>
           </div>
           <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-            <span>Total Paid (Credit):</span>
-            <span className="font-semibold">{paid.toFixed(2)}</span>
+            <span>Total Paid:</span>
+            <span className="font-semibold text-green-600">
+              {paid.toFixed(2)}
+            </span>
           </div>
           <div className="border-t border-black my-1"></div>
           <div className="flex justify-between items-center py-2 bg-gray-50 px-2 rounded">
@@ -734,21 +958,26 @@ const PaymentSummary = ({ totalBill, totalPaid, totalDue, studentInfo }) => {
 };
 
 const AllBill = ({ studentInfo }) => {
-  const paidAmount = parseFloat(studentInfo.paidAmount) || 2280;
+  const bill = Number(studentInfo.courseFee) || 0;
+  const status = studentInfo.paymentStatus || "Unpaid";
 
   return (
     <div className="p-4 text-sm text-gray-600 bg-gray-50 rounded-lg border">
       <p className="font-bold text-gray-800 mb-4">All Semester Bills:</p>
       <div className="space-y-2">
         <div className="flex justify-between items-center p-2 bg-white rounded border">
-          <span>Fall 2026 Semester Bill</span>
-          <span className="font-bold text-red-600">
-            {paidAmount.toFixed(2)} BDT
-          </span>
+          <span>Course Fee</span>
+          <span className="font-bold text-red-600">{bill.toFixed(2)} BDT</span>
           <span
-            className={`text-xs px-2 py-1 rounded ${studentInfo.paymentStatus === "Paid" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+            className={`text-xs px-2 py-1 rounded ${
+              status === "Paid"
+                ? "bg-green-100 text-green-700"
+                : status === "Partial"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-red-100 text-red-700"
+            }`}
           >
-            {studentInfo.paymentStatus || "Due"}
+            {status}
           </span>
         </div>
       </div>
@@ -757,46 +986,58 @@ const AllBill = ({ studentInfo }) => {
 };
 
 const PaymentHistory = ({ studentInfo }) => {
-  const paidAmount = parseFloat(studentInfo.paidAmount) || 0;
+  const paid = Number(studentInfo.paidAmount) || 0;
+  const paidMonths = studentInfo.paidMonths || [];
 
   return (
     <div className="p-4 text-sm text-gray-600 bg-gray-50 rounded-lg border">
       <p className="font-bold text-gray-800 mb-2">Payment History (Credit):</p>
-      {studentInfo.paymentStatus === "Paid" && paidAmount > 0 ? (
+      {paidMonths.length > 0 ? (
+        <div className="space-y-2">
+          {paidMonths.map((p, i) => (
+            <div
+              key={p._id || i}
+              className="flex justify-between items-center p-2 bg-white rounded border"
+            >
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-gray-800">
+                  {p.month || "Payment"}
+                </p>
+                <p className="text-[10px] text-gray-400">
+                  {p.method || ""}{" "}
+                  {p.paidAt
+                    ? `• ${new Date(p.paidAt).toLocaleDateString()}`
+                    : ""}
+                </p>
+              </div>
+              <span className="font-bold text-green-600">
+                ৳{Number(p.amount || 0).toFixed(2)}
+              </span>
+            </div>
+          ))}
+        </div>
+      ) : paid > 0 ? (
         <div className="space-y-2">
           <div className="flex justify-between items-center p-2 bg-white rounded border">
-            <span>Fall 2026 - Semester Fee</span>
-            <span className="font-bold text-green-600">
-              {paidAmount.toFixed(2)} BDT
-            </span>
+            <span>Payment</span>
+            <span className="font-bold text-green-600">৳{paid.toFixed(2)}</span>
             <span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">
               Paid
             </span>
-          </div>
-          <div className="text-xs text-gray-400 mt-2">
-            <p>📌 Transaction: {studentInfo.transactionId || "N/A"}</p>
-            <p>📌 Method: {studentInfo.paymentMethod || "N/A"}</p>
           </div>
         </div>
       ) : (
         <p className="text-gray-500">No payment records found yet.</p>
       )}
       <div className="mt-4 text-xs text-gray-400">
-        <p>
-          📌 Total Paid:{" "}
-          {studentInfo.paymentStatus === "Paid"
-            ? paidAmount.toFixed(2)
-            : "0.00"}{" "}
-          BDT
-        </p>
+        <p>📌 Total Paid: ৳{paid.toFixed(2)}</p>
       </div>
     </div>
   );
 };
 
 const OnlinePaymentHistory = ({ studentInfo }) => {
-  const paidAmount = parseFloat(studentInfo.paidAmount) || 2280;
-  const isPaid = studentInfo.paymentStatus === "Paid";
+  const due = Number(studentInfo.dueAmount) || 0;
 
   return (
     <div className="p-4 text-sm bg-teal-50 rounded-lg border border-teal-100 text-center space-y-4">
@@ -806,22 +1047,26 @@ const OnlinePaymentHistory = ({ studentInfo }) => {
       <p className="text-gray-600 text-sm">
         আপনার বকেয়া{" "}
         <span className="font-bold text-red-600">
-          {isPaid ? "০.০০" : paidAmount.toFixed(2)} টাকা
+          {due > 0 ? `${due.toFixed(2)} টাকা` : "০.০০ টাকা"}
         </span>{" "}
         অনলাইনে পরিশোধ করতে নিচের বাটনে ক্লিক করুন।
       </p>
       <button
-        onClick={() =>
+        onClick={() => {
+          if (due <= 0) {
+            Swal.fire("Info", "আপনার কোনো বকেয়া নেই!", "info");
+            return;
+          }
           Swal.fire({
             title: "Payment Gateway",
             text: "Connecting to bKash Gateway...",
             icon: "info",
             confirmButtonColor: "#00ADD2",
-          })
-        }
+          });
+        }}
         className="bg-[#00ADD2] hover:bg-[#008c9e] text-white px-8 py-3 rounded-lg font-bold text-sm shadow-lg transition-all"
       >
-        Pay {isPaid ? "0.00" : paidAmount.toFixed(2)} BDT Now
+        Pay {due > 0 ? due.toFixed(2) : "0.00"} BDT Now
       </button>
     </div>
   );

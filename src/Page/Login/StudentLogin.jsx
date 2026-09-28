@@ -124,7 +124,7 @@ const StudentLogin = () => {
                   value={studentId}
                   onChange={(e) => setStudentId(e.target.value)}
                   className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d] focus:border-transparent transition-all text-sm sm:text-base font-mono"
-                  placeholder="যেমন: TAR2648213"
+                  placeholder="ID"
                   required
                 />
               </div>
@@ -198,14 +198,15 @@ const StudentLogin = () => {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth="2"
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.0
+                        64 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
                       />
                     </svg>
                   )}
                 </button>
               </div>
               <p className="text-xs text-gray-400 mt-1">
-                💡 ডিফল্ট পাসওয়ার্ড: <strong>student123S@</strong>
+                💡 অ্যাডমিন/ভর্তি ফরমে প্রদত্ত Student Password ব্যবহার করুন
               </p>
             </div>
 
