@@ -930,18 +930,17 @@ const BatchFormModal = ({
               placeholder="e.g., Mon, Wed 09:00 AM"
             />
           </div>
-          {/* ✅ Multiple Teachers */}
+          {/* ✅ Multiple Teachers — Unlimited */}
           <div className="md:col-span-2">
             <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-              Teachers (একাধিক যোগ করতে পারবেন)
+              Teachers (যতজন চান যোগ করুন)
             </label>
 
-            {/* Input + Add Button */}
             <div className="flex gap-2 mb-2">
               <input
                 type="text"
                 id="teacherInputField"
-                placeholder="Teacher name লিখুন, তারপর + Add ক্লিক করুন বা Enter চাপুন"
+                placeholder="Teacher name লিখুন → Enter চাপুন বা + Add ক্লিক করুন"
                 className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
@@ -968,23 +967,26 @@ const BatchFormModal = ({
                       teachers: [...classForm.teachers, val],
                     });
                     input.value = "";
+                    input.focus();
                   }
                 }}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1"
+                className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1 whitespace-nowrap"
               >
                 <FaPlusCircle size={11} /> Add
               </button>
             </div>
 
-            {/* Added Teachers as Chips */}
             {classForm.teachers.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 p-2 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex flex-wrap gap-1.5 p-2 bg-purple-50 rounded-lg border border-purple-200">
                 {classForm.teachers.map((t, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1.5 bg-purple-100 text-purple-800 text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                    className="inline-flex items-center gap-1.5 bg-white text-purple-800 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-purple-300"
                   >
-                    <FaChalkboardTeacher size={10} />
+                    <FaChalkboardTeacher
+                      size={10}
+                      className="text-purple-600"
+                    />
                     {t}
                     <button
                       type="button"
@@ -996,7 +998,7 @@ const BatchFormModal = ({
                           ),
                         })
                       }
-                      className="text-purple-600 hover:text-red-600 font-bold text-sm leading-none"
+                      className="text-purple-500 hover:text-red-600 font-bold text-base leading-none ml-0.5"
                       title="Remove"
                     >
                       ×
@@ -1008,7 +1010,7 @@ const BatchFormModal = ({
 
             {classForm.teachers.length === 0 && (
               <p className="text-[10px] text-gray-400 italic">
-                এখনো কোনো teacher যোগ করা হয়নি
+                এখনো কোনো teacher যোগ করা হয়নি — উপরে লিখে Add করুন
               </p>
             )}
           </div>
@@ -1106,7 +1108,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     day: "Saturday",
     time: "",
     gender: "Male",
-    teachers: [], // ✅ multiple teachers
+    teachers: [],
     meetingLink: "",
   });
 
@@ -1505,7 +1507,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       day: c.day || "Saturday",
       time: c.time || "",
       gender: c.gender || "Male",
-      // ✅ Support both old (teacher) and new (teachers) format
       teachers:
         Array.isArray(c.teachers) && c.teachers.length > 0
           ? c.teachers
@@ -2413,10 +2414,10 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
               )}
             </div>
           )}
-
           {/* ==================== CLASSES ==================== */}
           {section === "classes" && (
             <div className="space-y-4">
+              {/* Header */}
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="text-sm font-bold text-gray-800">
@@ -2424,7 +2425,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                   </p>
                   <p className="text-[11px] text-gray-500">
                     Add multiple classes (e.g., 3:00–4:30 PM Female, 5:00–6:30
-                    PM Male)
+                    PM Male) with unlimited teachers
                   </p>
                 </div>
                 <button
@@ -2435,16 +2436,24 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                 </button>
               </div>
 
+              {/* Empty state */}
               {classesList.length === 0 ? (
                 <EmptyState
                   icon={<FaChalkboardTeacher />}
                   title="No classes yet"
-                  subtitle="Add a class with Day, Time, Gender & Teacher"
+                  subtitle="Add a class with Day, Time, Gender & Teachers"
                 />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                   {classesList.map((c) => {
                     const attendanceCount = (c.attendance || []).length;
+                    const teachersList =
+                      Array.isArray(c.teachers) && c.teachers.length > 0
+                        ? c.teachers
+                        : c.teacher
+                          ? [c.teacher]
+                          : [];
+
                     return (
                       <div
                         key={c._id}
@@ -2458,17 +2467,18 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                           }`}
                         />
                         <div className="p-4">
+                          {/* Header: Class name + Gender */}
                           <div className="flex items-start justify-between">
-                            <div>
+                            <div className="min-w-0 flex-1">
                               <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">
                                 Class
                               </p>
-                              <p className="font-bold text-sm text-gray-800">
+                              <p className="font-bold text-sm text-gray-800 truncate">
                                 {c.name}
                               </p>
                             </div>
                             <span
-                              className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
+                              className={`text-[9px] px-2 py-0.5 rounded-full font-bold flex-shrink-0 ${
                                 c.gender === "Female"
                                   ? "bg-pink-100 text-pink-700"
                                   : "bg-blue-100 text-blue-700"
@@ -2477,48 +2487,42 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                               {c.gender}
                             </span>
                           </div>
-                          <div className="mt-2 space-y-1 text-[11px] text-gray-600">
+
+                          {/* Info: Day, Time, Teachers, Meeting */}
+                          <div className="mt-2 space-y-1.5 text-[11px] text-gray-600">
                             <p className="flex items-center gap-1.5">
                               <FaCalendarAlt
                                 size={10}
                                 className="text-gray-400"
-                              />{" "}
+                              />
                               {c.day}
                             </p>
                             <p className="flex items-center gap-1.5">
-                              <FaClock size={10} className="text-gray-400" />{" "}
+                              <FaClock size={10} className="text-gray-400" />
                               {c.time}
                             </p>
-                            {/* ✅ Multiple Teachers Display */}
-                            {Array.isArray(c.teachers) &&
-                            c.teachers.length > 0 ? (
-                              <div className="flex items-start gap-1.5 flex-wrap">
+
+                            {/* ✅ Multiple Teachers */}
+                            {teachersList.length > 0 && (
+                              <div className="flex items-start gap-1.5">
                                 <FaChalkboardTeacher
                                   size={10}
-                                  className="text-gray-400 mt-0.5"
+                                  className="text-gray-400 mt-0.5 flex-shrink-0"
                                 />
                                 <div className="flex flex-wrap gap-1">
-                                  {c.teachers.map((t, i) => (
+                                  {teachersList.map((t, i) => (
                                     <span
                                       key={i}
-                                      className="text-[9px] bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded-full font-semibold"
+                                      className="text-[9px] bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded-full font-semibold border border-purple-200"
                                     >
                                       {t}
                                     </span>
                                   ))}
                                 </div>
                               </div>
-                            ) : (
-                              c.teacher && (
-                                <p className="flex items-center gap-1.5">
-                                  <FaChalkboardTeacher
-                                    size={10}
-                                    className="text-gray-400"
-                                  />
-                                  {c.teacher}
-                                </p>
-                              )
                             )}
+
+                            {/* Meeting Link */}
                             {c.meetingLink && (
                               <a
                                 href={c.meetingLink}
@@ -2531,13 +2535,20 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                             )}
                           </div>
 
-                          <div className="mt-3 flex items-center gap-2">
+                          {/* Attendance count badge */}
+                          <div className="mt-3 flex items-center gap-2 flex-wrap">
                             <span className="text-[10px] bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
                               <FaCalendarCheck size={9} /> {attendanceCount}{" "}
                               Attendance
                             </span>
+                            <span className="text-[10px] bg-purple-50 text-purple-700 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <FaChalkboardTeacher size={9} />{" "}
+                              {teachersList.length} Teacher
+                              {teachersList.length !== 1 ? "s" : ""}
+                            </span>
                           </div>
 
+                          {/* Action buttons */}
                           <div className="mt-3 grid grid-cols-3 gap-1 pt-3 border-t border-gray-100">
                             <MiniBtn
                               icon={<FaCalendarCheck size={11} />}
