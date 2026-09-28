@@ -358,11 +358,12 @@ const Student_batch = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
-          studentsList: [],
-          classesList: [],
-          materialsList: [],
-          videos: [],
+          name: studentForm.name.trim(),
+          studentId: studentForm.studentId.trim(),
+          phone: studentForm.phone.trim(),
+          country: studentForm.country || "BD",
+          course: studentForm.course,
+          paymentStatus: studentForm.paymentStatus,
         }),
       });
       const data = await res.json();
@@ -1023,10 +1024,11 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   const [studentForm, setStudentForm] = useState({
     name: "",
     studentId: "",
+    phone: "",
+    country: "BD",
     course: "",
     paymentStatus: "Unpaid",
   });
-
   /* ---------- Class ---------- */
   const [showClassModal, setShowClassModal] = useState(false);
   const [editingClassId, setEditingClassId] = useState(null);
@@ -1269,6 +1271,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     setStudentForm({
       name: "",
       studentId: "",
+      phone: "",
+      country: "BD",
       course: batch?.course || "",
       paymentStatus: "Unpaid",
     });
@@ -1280,6 +1284,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     setStudentForm({
       name: s.name || "",
       studentId: s.studentId || "",
+      phone: s.phone || "",
+      country: s.country || "BD",
       course: s.course || batch?.course || "",
       paymentStatus: s.paymentStatus || "Unpaid",
     });
@@ -2262,6 +2268,16 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                             <p className="text-[10px] text-gray-500 flex items-center gap-1">
                               <FaIdCard size={9} /> {stu.studentId}
                             </p>
+                            {stu.phone && (
+                              <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                                <FaPhone size={9} /> {stu.phone}
+                              </p>
+                            )}
+                            {stu.country && stu.country !== "BD" && (
+                              <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                                🌍 {stu.country}
+                              </p>
+                            )}
                             {stu.course && (
                               <p className="text-[10px] text-indigo-600 font-semibold truncate mt-0.5">
                                 {stu.course}
@@ -3016,6 +3032,53 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     placeholder="Auto-generate if empty"
                   />
                 </div>
+                {/* ✅ Phone Number */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={studentForm.phone}
+                    onChange={(e) =>
+                      setStudentForm({
+                        ...studentForm,
+                        phone: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder="e.g., 01712345678"
+                  />
+                </div>
+
+                {/* ✅ Country */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Country
+                  </label>
+                  <select
+                    value={studentForm.country}
+                    onChange={(e) =>
+                      setStudentForm({
+                        ...studentForm,
+                        country: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  >
+                    <option value="BD">Bangladesh (BD)</option>
+                    <option value="IN">India (IN)</option>
+                    <option value="PK">Pakistan (PK)</option>
+                    <option value="SA">Saudi Arabia (SA)</option>
+                    <option value="AE">UAE (AE)</option>
+                    <option value="MY">Malaysia (MY)</option>
+                    <option value="UK">United Kingdom (UK)</option>
+                    <option value="US">United States (US)</option>
+                    <option value="CA">Canada (CA)</option>
+                    <option value="AU">Australia (AU)</option>
+                    <option value="OTHER">Other</option>
+                  </select>
+                </div>
 
                 {/* Course */}
                 <div>
@@ -3538,7 +3601,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       )}
     </div>
   );
-};;
+};
 
 /* ============================================================
    ✅ Small reusable UI
