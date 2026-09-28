@@ -32,7 +32,7 @@ import {
 import { MdDashboard, MdVerified } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-const API_BASE = "http://localhost:5010";
+const API_BASE = "http://api.tarbiyahonline.com";
 
 // ✅ ImgBB API Key
 const IMAGEBB_API_KEY =

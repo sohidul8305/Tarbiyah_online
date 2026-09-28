@@ -17,7 +17,7 @@ import {
 } from "react-icons/fa";
 
 // ✅ API Base URL — deploy হলে "https://api.tarbiyahonline.com" করুন
-const API_BASE = "http://localhost:5010";
+const API_BASE = "http://api.tarbiyahonline.com";
 
 const My_courses = () => {
   const navigate = useNavigate();

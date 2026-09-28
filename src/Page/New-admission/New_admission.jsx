@@ -44,6 +44,22 @@ const mapStatus = (s) => {
   return "Pending";
 };
 
+// ✅ FIXED: Backend student object থেকে status নির্ধারণ
+// Payment থেকে নয় — সরাসরি backend.status দেখে
+const resolveStatus = (s) => {
+  const raw = String(s?.status || "").trim();
+
+  // Backend status আগে দেখুন
+  if (raw === "Active" || raw === "Approved") return "Approved";
+  if (raw === "Rejected" || raw === "Inactive") return "Rejected";
+  if (raw === "Pending") return "Pending";
+
+  // Backend-এ status না থাকলে payment থেকে derive (fallback)
+  if (Number(s?.dueAmount) === 0 && Number(s?.paidAmount) > 0)
+    return "Approved";
+  return "Pending";
+};
+
 // ✅ Student ID generator
 const generateStudentId = (prefix = "TAR") => {
   const year = new Date().getFullYear().toString().slice(-2);
@@ -58,7 +74,7 @@ const New_admission = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [activeSubMenu, setActiveSubMenu] = useState("dashboard");
   const [loading, setLoading] = useState(true);
-  const [sourceFilter, setSourceFilter] = useState("Tazweed"); // Default to Tazweed
+  const [sourceFilter, setSourceFilter] = useState("Tazweed");
 
   const [adminInfo, setAdminInfo] = useState({
     name: "",
@@ -106,7 +122,6 @@ const New_admission = () => {
     try {
       setLoading(true);
 
-      // ✅ ২টি endpoint fetch
       const [tazweedRes, najeraRes] = await Promise.allSettled([
         fetch(`${API_BASE}/basic-tazweed/all`),
         fetch(`${API_BASE}/najera-batch/all`),
@@ -118,56 +133,57 @@ const New_admission = () => {
         try {
           const d = await tazweedRes.value.json();
           if (d.success && Array.isArray(d.students)) {
-            tazweedStudents = d.students.map((s) => ({
-              id: s._id,
-              _id: s._id,
-              source: "Tazweed",
-              sourceLabel: "Basic Tazweed",
-              name: s.name || "",
-              fatherName: "",
-              motherName: "",
-              course: "Basic Tajweed (Level-1)",
-              subject: "Basic Tajweed (Level-1)",
-              class: "Basic Tajweed (Level-1)",
-              phone: s.phone || "",
-              email: "",
-              address: "",
-              permanentAddress: "",
-              dobOrNid: "",
-              age: "",
-              gender: "",
-              occupation: "",
-              maritalStatus: "",
-              guardianName: "",
-              guardianPhone: s.phone || "",
-              status:
-                Number(s.dueAmount) === 0 && Number(s.paidAmount) > 0
-                  ? "Approved"
-                  : "Pending",
-              rawStatus: "Pending",
-              paymentStatus:
-                Number(s.dueAmount) === 0
-                  ? "Paid"
-                  : Number(s.paidAmount) > 0
-                    ? "Partial"
-                    : "Unpaid",
-              paidAmount: s.paidAmount || 0,
-              paymentMethod: "",
-              paymentType: "",
-              transactionId: s.transactionId || "",
-              paymentRemarks: s.comments || "",
-              studentId: s.studentId || "",
-              username: "",
-              roll: "",
-              batch: "Basic Tazweed 6th Batch",
-              country: s.country || "BD",
-              date: s.createdAt ? String(s.createdAt).split("T")[0] : "",
-              createdAt: s.createdAt || "",
-              dueAmount: s.dueAmount || 0,
-              courseFee: s.courseFee || 0,
-              scholarshipAmount: s.scholarshipAmount || 0,
-              raw: s,
-            }));
+            tazweedStudents = d.students.map((s) => {
+              const status = resolveStatus(s); // ✅ Fixed
+              return {
+                id: s._id,
+                _id: s._id,
+                source: "Tazweed",
+                sourceLabel: "Basic Tazweed",
+                name: s.name || "",
+                fatherName: "",
+                motherName: "",
+                course: "Basic Tajweed (Level-1)",
+                subject: "Basic Tajweed (Level-1)",
+                class: "Basic Tajweed (Level-1)",
+                phone: s.phone || "",
+                email: "",
+                address: "",
+                permanentAddress: "",
+                dobOrNid: "",
+                age: "",
+                gender: "",
+                occupation: "",
+                maritalStatus: "",
+                guardianName: "",
+                guardianPhone: s.phone || "",
+                status: status, // ✅ From backend.status
+                rawStatus: s.status || "Pending",
+                paymentStatus:
+                  Number(s.dueAmount) === 0
+                    ? "Paid"
+                    : Number(s.paidAmount) > 0
+                      ? "Partial"
+                      : "Unpaid",
+                paidAmount: s.paidAmount || 0,
+                paymentMethod: "",
+                paymentType: "",
+                transactionId: s.transactionId || "",
+                paymentRemarks: s.comments || "",
+                studentId: s.studentId || "",
+                username: s.username || "",
+                roll: s.roll || "",
+                password: s.password || "",
+                batch: "Basic Tazweed 6th Batch",
+                country: s.country || "BD",
+                date: s.createdAt ? String(s.createdAt).split("T")[0] : "",
+                createdAt: s.createdAt || "",
+                dueAmount: s.dueAmount || 0,
+                courseFee: s.courseFee || 0,
+                scholarshipAmount: s.scholarshipAmount || 0,
+                raw: s,
+              };
+            });
           }
         } catch (e) {
           console.error("Tazweed parse error:", e);
@@ -180,63 +196,63 @@ const New_admission = () => {
         try {
           const d = await najeraRes.value.json();
           if (d.success && Array.isArray(d.students)) {
-            najeraStudents = d.students.map((s) => ({
-              id: s._id,
-              _id: s._id,
-              source: "Najera",
-              sourceLabel: "Najera Batch",
-              name: s.name || "",
-              fatherName: "",
-              motherName: "",
-              course: "Quran Nazera",
-              subject: "Quran Nazera",
-              class: "Quran Nazera",
-              phone: s.phone || "",
-              email: "",
-              address: "",
-              permanentAddress: "",
-              dobOrNid: "",
-              age: "",
-              gender: "",
-              occupation: "",
-              maritalStatus: "",
-              guardianName: "",
-              guardianPhone: s.phone || "",
-              status:
-                Number(s.dueAmount) === 0 && Number(s.paidAmount) > 0
-                  ? "Approved"
-                  : "Pending",
-              rawStatus: "Pending",
-              paymentStatus:
-                Number(s.dueAmount) === 0
-                  ? "Paid"
-                  : Number(s.paidAmount) > 0
-                    ? "Partial"
-                    : "Unpaid",
-              paidAmount: s.paidAmount || 0,
-              paymentMethod: "",
-              paymentType: "",
-              transactionId: s.transactionId || "",
-              paymentRemarks: s.comments || "",
-              studentId: s.studentId || "",
-              username: "",
-              roll: "",
-              batch: "Najera Batch-02",
-              country: s.country || "BD",
-              date: s.createdAt ? String(s.createdAt).split("T")[0] : "",
-              createdAt: s.createdAt || "",
-              dueAmount: s.dueAmount || 0,
-              courseFee: s.courseFee || 0,
-              scholarshipAmount: s.scholarshipAmount || 0,
-              raw: s,
-            }));
+            najeraStudents = d.students.map((s) => {
+              const status = resolveStatus(s); // ✅ Fixed
+              return {
+                id: s._id,
+                _id: s._id,
+                source: "Najera",
+                sourceLabel: "Najera Batch",
+                name: s.name || "",
+                fatherName: "",
+                motherName: "",
+                course: "Quran Nazera",
+                subject: "Quran Nazera",
+                class: "Quran Nazera",
+                phone: s.phone || "",
+                email: "",
+                address: "",
+                permanentAddress: "",
+                dobOrNid: "",
+                age: "",
+                gender: "",
+                occupation: "",
+                maritalStatus: "",
+                guardianName: "",
+                guardianPhone: s.phone || "",
+                status: status, // ✅ From backend.status
+                rawStatus: s.status || "Pending",
+                paymentStatus:
+                  Number(s.dueAmount) === 0
+                    ? "Paid"
+                    : Number(s.paidAmount) > 0
+                      ? "Partial"
+                      : "Unpaid",
+                paidAmount: s.paidAmount || 0,
+                paymentMethod: "",
+                paymentType: "",
+                transactionId: s.transactionId || "",
+                paymentRemarks: s.comments || "",
+                studentId: s.studentId || "",
+                username: s.username || "",
+                roll: s.roll || "",
+                password: s.password || "",
+                batch: "Najera Batch-02",
+                country: s.country || "BD",
+                date: s.createdAt ? String(s.createdAt).split("T")[0] : "",
+                createdAt: s.createdAt || "",
+                dueAmount: s.dueAmount || 0,
+                courseFee: s.courseFee || 0,
+                scholarshipAmount: s.scholarshipAmount || 0,
+                raw: s,
+              };
+            });
           }
         } catch (e) {
           console.error("Najera parse error:", e);
         }
       }
 
-      // ✅ Combine and sort
       const combined = [...tazweedStudents, ...najeraStudents].sort((a, b) => {
         const da = new Date(a.createdAt || 0).getTime();
         const db = new Date(b.createdAt || 0).getTime();
@@ -289,7 +305,7 @@ const New_admission = () => {
     setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
   // ============================================================
-  // Sidebar Menu (No Change)
+  // Sidebar Menu
   // ============================================================
   const menuItems = [
     {
@@ -309,7 +325,6 @@ const New_admission = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "today-class",
           path: "/admin-dashboard/today-class",
@@ -373,7 +388,6 @@ const New_admission = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -394,7 +408,6 @@ const New_admission = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -430,10 +443,9 @@ const New_admission = () => {
   ];
 
   // ============================================================
-  // ✅ Filtering (source + search + status + payment)
+  // Filtering
   // ============================================================
   const filteredAdmissions = admissions.filter((a) => {
-    // Source filter
     if (sourceFilter !== "All" && a.source !== sourceFilter) return false;
 
     const term = searchTerm.toLowerCase().trim();
@@ -462,7 +474,6 @@ const New_admission = () => {
     ...new Set(admissions.map((a) => a.paymentStatus).filter(Boolean)),
   ];
 
-  // Source counts
   const sourceCounts = {
     All: admissions.length,
     Tazweed: admissions.filter((a) => a.source === "Tazweed").length,
@@ -523,7 +534,7 @@ const New_admission = () => {
   };
 
   // ============================================================
-  // ✅ Approve — শুধু Tazweed/Najera source এর জন্য
+  // ✅ Approve — persistent
   // ============================================================
   const handleApprove = async (id) => {
     const student = admissions.find((a) => a.id === id);
@@ -573,14 +584,28 @@ const New_admission = () => {
       const res = await fetch(`${API_BASE}/students/approve/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId, password }),
+        body: JSON.stringify({
+          studentId,
+          password,
+          roll: student.roll || "",
+        }),
       });
       const data = await res.json();
 
       if (data.success) {
+        // ✅ Local state update with rawStatus
         setAdmissions((prev) =>
           prev.map((a) =>
-            a.id === id ? { ...a, status: "Approved", studentId } : a,
+            a.id === id
+              ? {
+                  ...a,
+                  status: "Approved",
+                  rawStatus: "Active",
+                  studentId,
+                  password,
+                  username: student.username || "",
+                }
+              : a,
           ),
         );
 
@@ -600,6 +625,9 @@ const New_admission = () => {
           `,
           confirmButtonColor: "#004d4d",
         });
+
+        // ✅ Backend থেকে fresh data reload — যাতে sync থাকে
+        setTimeout(() => fetchAdmissions(), 500);
       } else {
         Swal.fire({
           icon: "error",
@@ -612,6 +640,7 @@ const New_admission = () => {
     }
   };
 
+  // ✅ FIXED: Source অনুযায়ী সঠিক reject endpoint
   const handleReject = async (id) => {
     const student = admissions.find((a) => a.id === id);
     if (!student) return;
@@ -626,22 +655,41 @@ const New_admission = () => {
     });
     if (!result.isConfirmed) return;
 
+    // ✅ Source অনুযায়ী সঠিক endpoint
+    let rejectUrl = `${API_BASE}/basic-tazweed/update/${id}`;
+    if (student.source === "Najera") {
+      rejectUrl = `${API_BASE}/najera-batch/update/${id}`;
+    }
+
     try {
-      const res = await fetch(`${API_BASE}/admin-students/update/${id}`, {
+      const res = await fetch(rejectUrl, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "Inactive" }),
+        body: JSON.stringify({ status: "Rejected" }),
       });
       const data = await res.json();
       if (data.success) {
         setAdmissions((prev) =>
-          prev.map((a) => (a.id === id ? { ...a, status: "Rejected" } : a)),
+          prev.map((a) =>
+            a.id === id
+              ? { ...a, status: "Rejected", rawStatus: "Rejected" }
+              : a,
+          ),
         );
         Swal.fire({
           icon: "success",
           title: "Rejected!",
           timer: 1500,
           showConfirmButton: false,
+        });
+
+        // ✅ Backend reload
+        setTimeout(() => fetchAdmissions(), 500);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Could not reject.",
         });
       }
     } catch (err) {
@@ -664,11 +712,8 @@ const New_admission = () => {
     });
     if (!result.isConfirmed) return;
 
-    // ✅ Source অনুযায়ী সঠিক delete endpoint call
-    let deleteUrl = `${API_BASE}/admin-students/delete/${id}`;
-    if (student.source === "Tazweed") {
-      deleteUrl = `${API_BASE}/basic-tazweed/delete/${id}`;
-    } else if (student.source === "Najera") {
+    let deleteUrl = `${API_BASE}/basic-tazweed/delete/${id}`;
+    if (student.source === "Najera") {
       deleteUrl = `${API_BASE}/najera-batch/delete/${id}`;
     }
 
@@ -682,6 +727,12 @@ const New_admission = () => {
           title: "Deleted!",
           timer: 1500,
           showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Could not delete.",
         });
       }
     } catch (err) {

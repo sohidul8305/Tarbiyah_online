@@ -140,7 +140,7 @@ const Student_batch = () => {
       Swal.fire({
         icon: "error",
         title: "Failed to load batches",
-        text: "Backend running on port 5010?",
+        text: "Backend connection error!",
         timer: 2200,
         showConfirmButton: false,
       });
@@ -426,6 +426,11 @@ const Student_batch = () => {
     }).then(async (r) => {
       if (r.isConfirmed) {
         try {
+          // ✅ Delete all students of this batch first
+          await fetch(`${API_URL}/api/batch-students/delete-by-batch/${id}`, {
+            method: "DELETE",
+          });
+
           const res = await fetch(`${API_URL}/api/batches/delete/${id}`, {
             method: "DELETE",
           });
@@ -644,14 +649,7 @@ const Student_batch = () => {
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-blue-600">
-                {batches.reduce(
-                  (sum, b) =>
-                    sum +
-                    ((b.studentsList && b.studentsList.length) ||
-                      Number(b.students) ||
-                      0),
-                  0,
-                )}
+                {batches.reduce((sum, b) => sum + (Number(b.students) || 0), 0)}
               </p>
               <p className="text-[10px] text-gray-500">Total Students</p>
             </div>
@@ -712,10 +710,7 @@ const Student_batch = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {filteredBatches.map((batch) => {
-                const stuCount =
-                  (batch.studentsList && batch.studentsList.length) ||
-                  Number(batch.students) ||
-                  0;
+                const stuCount = Number(batch.students) || 0;
                 return (
                   <div
                     key={batch._id}
@@ -1007,19 +1002,22 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   const [section, setSection] = useState("overview");
   const [lmsSidebarOpen, setLmsSidebarOpen] = useState(false);
 
+  /* ✅ Students from new MongoDB collection */
+  const [dbStudents, setDbStudents] = useState([]);
+  const [loadingDbStudents, setLoadingDbStudents] = useState(false);
+
+  // ✅ NEW: Classes from MongoDB collection
+  const [dbClasses, setDbClasses] = useState([]);
+  const [loadingClasses, setLoadingClasses] = useState(false);
+
   /* ---------- Student ---------- */
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState(null);
   const [studentForm, setStudentForm] = useState({
     name: "",
     studentId: "",
-    phone: "",
-    guardian: "",
-    email: "",
-    address: "",
-    admissionDate: todayStr(),
-    monthlyFee: "",
-    status: "Active",
+    course: "",
+    paymentStatus: "Unpaid",
   });
 
   /* ---------- Class ---------- */
@@ -1083,8 +1081,58 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     }
   };
 
+  /* ✅ Fetch students from batch_students collection */
+  const fetchDbStudents = async () => {
+    try {
+      setLoadingDbStudents(true);
+      const res = await fetch(
+        `${API_URL}/api/batch-students/all?batchId=${encodeURIComponent(batchId)}`,
+      );
+      const data = await res.json();
+      if (data.success) {
+        setDbStudents(data.students || []);
+      } else {
+        setDbStudents([]);
+      }
+    } catch (e) {
+      console.error("❌ fetchDbStudents error:", e);
+      setDbStudents([]);
+    } finally {
+      setLoadingDbStudents(false);
+    }
+  };
+
+  /* ✅ Fetch classes from batch_classes collection */
+  const fetchDbClasses = async () => {
+    try {
+      setLoadingClasses(true);
+      const res = await fetch(
+        `${API_URL}/api/batch-classes/all?batchId=${encodeURIComponent(batchId)}`,
+      );
+      const data = await res.json();
+      if (data.success) {
+        setDbClasses(data.classes || []);
+      } else {
+        setDbClasses([]);
+      }
+    } catch (e) {
+      console.error("❌ fetchDbClasses error:", e);
+      setDbClasses([]);
+    } finally {
+      setLoadingClasses(false);
+    }
+  };
+
   useEffect(() => {
     fetchBatch();
+    fetchDbStudents();
+    fetchDbClasses(); // ✅ নতুন
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [batchId]);
+
+  useEffect(() => {
+    fetchBatch();
+    fetchDbStudents();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [batchId]);
 
@@ -1120,8 +1168,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   };
 
   /* ---------- Derived ---------- */
-  const students = batch?.studentsList || [];
-  const classesList = batch?.classesList || [];
+  const students = dbStudents; // ✅ from MongoDB collection
+  // ✅ নতুন — MongoDB collection থেকে
+  const classesList = dbClasses;
   const materialsList = batch?.materialsList || [];
   const videos = batch?.videos || [];
 
@@ -1144,7 +1193,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   const totalCollected = students.reduce((sum, s) => sum + calcPaid(s), 0);
   const totalDue = students.reduce((sum, s) => sum + calcDue(s), 0);
 
-  /* ---------- Attendance draft: when class/date changes ---------- */
+  /* ---------- Attendance draft ---------- */
   useEffect(() => {
     if (section !== "attendance" || !batch || !attendanceClassId) return;
     const cls = classesList.find((c) => c._id === attendanceClassId);
@@ -1158,7 +1207,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     });
     setAttendanceDraft(draft);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [section, attendanceDate, attendanceClassId, batch]);
+  }, [section, attendanceDate, attendanceClassId, batch, dbStudents]);
 
   /* ============================================================
      STUDENT handlers
@@ -1168,13 +1217,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     setStudentForm({
       name: "",
       studentId: "",
-      phone: "",
-      guardian: "",
-      email: "",
-      address: "",
-      admissionDate: todayStr(),
-      monthlyFee: "",
-      status: "Active",
+      course: batch?.course || "",
+      paymentStatus: "Unpaid",
     });
     setShowStudentModal(true);
   };
@@ -1184,13 +1228,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     setStudentForm({
       name: s.name || "",
       studentId: s.studentId || "",
-      phone: s.phone || "",
-      guardian: s.guardian || "",
-      email: s.email || "",
-      address: s.address || "",
-      admissionDate: s.admissionDate || todayStr(),
-      monthlyFee: s.monthlyFee || "",
-      status: s.status || "Active",
+      course: s.course || batch?.course || "",
+      paymentStatus: s.paymentStatus || "Unpaid",
     });
     setShowStudentModal(true);
   };
@@ -1206,40 +1245,81 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       });
       return;
     }
-    let updatedList;
-    if (editingStudentId) {
-      updatedList = students.map((s) =>
-        s._id === editingStudentId
-          ? {
-              ...s,
-              ...studentForm,
-              monthlyFee: Number(studentForm.monthlyFee) || 0,
-            }
-          : s,
-      );
-    } else {
-      const newStudent = {
-        _id: uid("stu"),
-        ...studentForm,
-        studentId:
-          studentForm.studentId.trim() ||
-          `S-${Date.now().toString().slice(-5)}`,
-        monthlyFee: Number(studentForm.monthlyFee) || 0,
-        paidMonths: [],
-        createdAt: new Date().toISOString(),
-      };
-      updatedList = [...students, newStudent];
+
+    try {
+      let res, data;
+
+      if (editingStudentId) {
+        // ✅ UPDATE
+        res = await fetch(
+          `${API_URL}/api/batch-students/update/${editingStudentId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: studentForm.name.trim(),
+              studentId: studentForm.studentId.trim(),
+              course: studentForm.course,
+              paymentStatus: studentForm.paymentStatus,
+            }),
+          },
+        );
+        data = await res.json();
+
+        if (data.success) {
+          await fetchDbStudents();
+          setShowStudentModal(false);
+          Swal.fire({
+            icon: "success",
+            title: "Student Updated!",
+            timer: 1200,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+        }
+      } else {
+        // ✅ CREATE
+        res = await fetch(`${API_URL}/api/batch-students/create`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            batchId: batchId,
+            name: studentForm.name.trim(),
+            studentId: studentForm.studentId.trim(),
+            course: studentForm.course || batch?.course || "",
+            paymentStatus: studentForm.paymentStatus || "Unpaid",
+          }),
+        });
+        data = await res.json();
+
+        if (data.success) {
+          // Sync batch.students count
+          const newCount = dbStudents.length + 1;
+          await saveBatchFields({ students: newCount }, "");
+          await fetchDbStudents();
+          setShowStudentModal(false);
+          Swal.fire({
+            icon: "success",
+            title: "Student Added!",
+            text: "Saved to database successfully.",
+            timer: 1200,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+        }
+      }
+    } catch (err) {
+      console.error("❌ Save error:", err);
+      Swal.fire({ icon: "error", title: "Server Error", text: err.message });
     }
-    const ok = await saveBatchFields(
-      { studentsList: updatedList, students: updatedList.length },
-      editingStudentId ? "Student Updated!" : "Student Added!",
-    );
-    if (ok) setShowStudentModal(false);
   };
 
   const handleDeleteStudent = (id) => {
     Swal.fire({
       title: "Delete Student?",
+      text: "This will remove the student from database permanently!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -1247,11 +1327,31 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       confirmButtonText: "Yes, delete!",
     }).then(async (r) => {
       if (r.isConfirmed) {
-        const updatedList = students.filter((s) => s._id !== id);
-        await saveBatchFields(
-          { studentsList: updatedList, students: updatedList.length },
-          "Student Deleted!",
-        );
+        try {
+          const res = await fetch(
+            `${API_URL}/api/batch-students/delete/${id}`,
+            { method: "DELETE" },
+          );
+          const data = await res.json();
+
+          if (data.success) {
+            // Sync batch.students count
+            const newCount = Math.max(0, dbStudents.length - 1);
+            await saveBatchFields({ students: newCount }, "");
+            await fetchDbStudents();
+
+            Swal.fire({
+              icon: "success",
+              title: "Deleted!",
+              timer: 1200,
+              showConfirmButton: false,
+            });
+          } else {
+            Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+          }
+        } catch (err) {
+          Swal.fire({ icon: "error", title: "Error", text: err.message });
+        }
       }
     });
   };
@@ -1296,29 +1396,63 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       });
       return;
     }
-    let updated;
-    if (editingClassId) {
-      updated = classesList.map((c) =>
-        c._id === editingClassId ? { ...c, ...classForm } : c,
-      );
-    } else {
-      updated = [
-        ...classesList,
-        {
-          _id: uid("cls"),
-          ...classForm,
-          attendance: [],
-          createdAt: new Date().toISOString(),
-        },
-      ];
-    }
-    const ok = await saveBatchFields(
-      { classesList: updated },
-      editingClassId ? "Class Updated!" : "Class Added!",
-    );
-    if (ok) setShowClassModal(false);
-  };
 
+    try {
+      let res, data;
+
+      if (editingClassId) {
+        // ✅ UPDATE
+        res = await fetch(
+          `${API_URL}/api/batch-classes/update/${editingClassId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(classForm),
+          },
+        );
+        data = await res.json();
+        if (data.success) {
+          await fetchDbClasses();
+          setShowClassModal(false);
+          Swal.fire({
+            icon: "success",
+            title: "Class Updated!",
+            timer: 1200,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+        }
+      } else {
+        // ✅ CREATE
+        res = await fetch(`${API_URL}/api/batch-classes/create`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            batchId: batchId,
+            ...classForm,
+          }),
+        });
+        data = await res.json();
+        if (data.success) {
+          await fetchDbClasses();
+          setShowClassModal(false);
+          Swal.fire({
+            icon: "success",
+            title: "Class Added!",
+            text: "Saved to database successfully.",
+            timer: 1200,
+            showConfirmButton: false,
+          });
+        } else {
+          Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+        }
+      }
+    } catch (err) {
+      console.error("❌ Save class error:", err);
+      Swal.fire({ icon: "error", title: "Server Error", text: err.message });
+    }
+  };
   const handleDeleteClass = (id) => {
     Swal.fire({
       title: "Delete Class?",
@@ -1330,11 +1464,26 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       confirmButtonText: "Yes, delete!",
     }).then(async (r) => {
       if (r.isConfirmed) {
-        await saveBatchFields(
-          { classesList: classesList.filter((c) => c._id !== id) },
-          "Class Deleted!",
-        );
-        if (attendanceClassId === id) setAttendanceClassId("");
+        try {
+          const res = await fetch(`${API_URL}/api/batch-classes/delete/${id}`, {
+            method: "DELETE",
+          });
+          const data = await res.json();
+          if (data.success) {
+            await fetchDbClasses();
+            if (attendanceClassId === id) setAttendanceClassId("");
+            Swal.fire({
+              icon: "success",
+              title: "Deleted!",
+              timer: 1100,
+              showConfirmButton: false,
+            });
+          } else {
+            Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+          }
+        } catch (err) {
+          Swal.fire({ icon: "error", title: "Error", text: err.message });
+        }
       }
     });
   };
@@ -1361,24 +1510,34 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       });
       return;
     }
-    const updated = classesList.map((c) => {
-      if (c._id !== attendanceClassId) return c;
-      const others = (c.attendance || []).filter(
-        (a) => a.date !== attendanceDate,
-      );
-      return {
-        ...c,
-        attendance: [
-          ...others,
-          {
+
+    try {
+      const res = await fetch(
+        `${API_URL}/api/batch-classes/attendance/${attendanceClassId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
             date: attendanceDate,
             records: attendanceDraft,
-            markedAt: new Date().toISOString(),
-          },
-        ],
-      };
-    });
-    await saveBatchFields({ classesList: updated }, "Attendance Saved!");
+          }),
+        },
+      );
+      const data = await res.json();
+      if (data.success) {
+        await fetchDbClasses();
+        Swal.fire({
+          icon: "success",
+          title: "Attendance Saved!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+      }
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Server Error", text: err.message });
+    }
   };
 
   /* ============================================================
@@ -1406,28 +1565,48 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       });
       return;
     }
-    const updatedList = students.map((s) => {
-      if (s._id !== paymentStudentId) return s;
-      return {
-        ...s,
-        paidMonths: [
-          ...(s.paidMonths || []),
-          {
-            _id: uid("pay"),
-            month: paymentForm.month,
-            amount: Number(paymentForm.amount),
-            method: paymentForm.method,
-            note: paymentForm.note.trim(),
-            paidAt: new Date().toISOString(),
-          },
-        ],
-      };
-    });
-    const ok = await saveBatchFields(
-      { studentsList: updatedList },
-      "Payment Recorded!",
-    );
-    if (ok) setShowPaymentModal(false);
+
+    // ✅ Update student payment in MongoDB
+    const stu = students.find((s) => s._id === paymentStudentId);
+    if (!stu) return;
+
+    const updatedPaid = [
+      ...(stu.paidMonths || []),
+      {
+        _id: uid("pay"),
+        month: paymentForm.month,
+        amount: Number(paymentForm.amount),
+        method: paymentForm.method,
+        note: paymentForm.note.trim(),
+        paidAt: new Date().toISOString(),
+      },
+    ];
+
+    try {
+      const res = await fetch(
+        `${API_URL}/api/batch-students/update/${paymentStudentId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paidMonths: updatedPaid }),
+        },
+      );
+      const data = await res.json();
+      if (data.success) {
+        await fetchDbStudents();
+        setShowPaymentModal(false);
+        Swal.fire({
+          icon: "success",
+          title: "Payment Recorded!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+      }
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Error", text: err.message });
+    }
   };
 
   const handleDeletePayment = (studentId, paymentId) => {
@@ -1440,17 +1619,33 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       confirmButtonText: "Yes, delete!",
     }).then(async (r) => {
       if (r.isConfirmed) {
-        const updated = students.map((s) =>
-          s._id === studentId
-            ? {
-                ...s,
-                paidMonths: (s.paidMonths || []).filter(
-                  (p) => p._id !== paymentId,
-                ),
-              }
-            : s,
+        const stu = students.find((s) => s._id === studentId);
+        if (!stu) return;
+        const updatedPaid = (stu.paidMonths || []).filter(
+          (p) => p._id !== paymentId,
         );
-        await saveBatchFields({ studentsList: updated }, "Payment Deleted!");
+        try {
+          const res = await fetch(
+            `${API_URL}/api/batch-students/update/${studentId}`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ paidMonths: updatedPaid }),
+            },
+          );
+          const data = await res.json();
+          if (data.success) {
+            await fetchDbStudents();
+            Swal.fire({
+              icon: "success",
+              title: "Deleted!",
+              timer: 1100,
+              showConfirmButton: false,
+            });
+          }
+        } catch (err) {
+          Swal.fire({ icon: "error", title: "Error", text: err.message });
+        }
       }
     });
   };
@@ -1906,7 +2101,12 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                 </button>
               </div>
 
-              {students.length === 0 ? (
+              {loadingDbStudents ? (
+                <div className="bg-white border border-gray-200 rounded-xl p-8 text-center">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto mb-3"></div>
+                  <p className="text-xs text-gray-500">Loading students...</p>
+                </div>
+              ) : students.length === 0 ? (
                 <EmptyState
                   icon={<FaUserGraduate />}
                   title="No students yet"
@@ -1933,37 +2133,23 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                             <p className="text-[10px] text-gray-500 flex items-center gap-1">
                               <FaIdCard size={9} /> {stu.studentId}
                             </p>
+                            {stu.course && (
+                              <p className="text-[10px] text-indigo-600 font-semibold truncate mt-0.5">
+                                {stu.course}
+                              </p>
+                            )}
                           </div>
                           <span
                             className={`text-[9px] px-1.5 py-0.5 rounded-full ${
-                              stu.status === "Active"
+                              stu.paymentStatus === "Paid"
                                 ? "bg-green-100 text-green-700"
-                                : "bg-gray-100 text-gray-700"
+                                : stu.paymentStatus === "Partial"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-red-100 text-red-700"
                             }`}
                           >
-                            {stu.status}
+                            {stu.paymentStatus || "Unpaid"}
                           </span>
-                        </div>
-
-                        <div className="mt-3 space-y-1 text-[11px] text-gray-600">
-                          {stu.phone && (
-                            <p className="flex items-center gap-1.5">
-                              <FaPhone size={9} className="text-gray-400" />{" "}
-                              {stu.phone}
-                            </p>
-                          )}
-                          {stu.guardian && (
-                            <p className="flex items-center gap-1.5">
-                              <FaUser size={9} className="text-gray-400" />{" "}
-                              {stu.guardian}
-                            </p>
-                          )}
-                          {stu.email && (
-                            <p className="flex items-center gap-1.5 truncate">
-                              <FaEnvelope size={9} className="text-gray-400" />{" "}
-                              {stu.email}
-                            </p>
-                          )}
                         </div>
 
                         <div className="mt-3 grid grid-cols-2 gap-1.5 text-center">
@@ -2346,8 +2532,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                                 {stu.name}
                               </p>
                               <p className="text-[10px] text-gray-500">
-                                Monthly Fee: ৳{stu.monthlyFee || 0} • ID:{" "}
-                                {stu.studentId}
+                                ID: {stu.studentId} • {stu.paymentStatus}
                               </p>
                             </div>
                           </div>
@@ -2428,7 +2613,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
             </div>
           )}
 
-          {/* ==================== MATERIALS (Exams & Quizzes & PDF) ==================== */}
+          {/* ==================== MATERIALS ==================== */}
           {section === "materials" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -2449,7 +2634,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                 </button>
               </div>
 
-              {/* Filter counts */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-center">
                   <FaFilePdf className="text-red-600 mx-auto mb-1" />
@@ -2653,7 +2837,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       {/* ================ Add/Edit Student Modal ================ */}
       {showStudentModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-5 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                 <FaUserPlus className="text-indigo-600" />
@@ -2668,9 +2852,10 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
             </div>
             <form onSubmit={handleSaveStudent} className="p-5 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
+                {/* Student Name */}
+                <div className="md:col-span-2">
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Full Name *
+                    Student Name *
                   </label>
                   <input
                     type="text"
@@ -2679,9 +2864,12 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     onChange={(e) =>
                       setStudentForm({ ...studentForm, name: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    placeholder="Enter full name"
                   />
                 </div>
+
+                {/* Student ID */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Student ID
@@ -2695,117 +2883,58 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                         studentId: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                     placeholder="Auto-generate if empty"
                   />
                 </div>
+
+                {/* Course */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Phone
-                  </label>
-                  <input
-                    type="text"
-                    value={studentForm.phone}
-                    onChange={(e) =>
-                      setStudentForm({ ...studentForm, phone: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Guardian Name
-                  </label>
-                  <input
-                    type="text"
-                    value={studentForm.guardian}
-                    onChange={(e) =>
-                      setStudentForm({
-                        ...studentForm,
-                        guardian: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={studentForm.email}
-                    onChange={(e) =>
-                      setStudentForm({ ...studentForm, email: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Admission Date
-                  </label>
-                  <input
-                    type="date"
-                    value={studentForm.admissionDate}
-                    onChange={(e) =>
-                      setStudentForm({
-                        ...studentForm,
-                        admissionDate: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Monthly Fee (৳)
-                  </label>
-                  <input
-                    type="number"
-                    value={studentForm.monthlyFee}
-                    onChange={(e) =>
-                      setStudentForm({
-                        ...studentForm,
-                        monthlyFee: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="e.g., 1000"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Status
+                    Course
                   </label>
                   <select
-                    value={studentForm.status}
+                    value={studentForm.course}
                     onChange={(e) =>
-                      setStudentForm({ ...studentForm, status: e.target.value })
+                      setStudentForm({ ...studentForm, course: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                   >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
+                    <option value="">Select Course</option>
+                    {COURSE_OPTIONS.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                    {batch?.course &&
+                      !COURSE_OPTIONS.includes(batch.course) && (
+                        <option value={batch.course}>{batch.course}</option>
+                      )}
                   </select>
                 </div>
+
+                {/* Payment Status */}
                 <div className="md:col-span-2">
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Address
+                    Payment Status
                   </label>
-                  <input
-                    type="text"
-                    value={studentForm.address}
+                  <select
+                    value={studentForm.paymentStatus}
                     onChange={(e) =>
                       setStudentForm({
                         ...studentForm,
-                        address: e.target.value,
+                        paymentStatus: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                  />
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  >
+                    <option value="Paid">Paid</option>
+                    <option value="Partial">Partial</option>
+                    <option value="Unpaid">Unpaid</option>
+                  </select>
                 </div>
               </div>
+
               <div className="flex gap-2 pt-3 border-t border-gray-200">
                 <button
                   type="submit"
@@ -3058,7 +3187,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         </div>
       )}
 
-      {/* ================ Upload Material Modal (Exam/Quiz/PDF) ================ */}
+      {/* ================ Upload Material Modal ================ */}
       {showMaterialModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -3075,7 +3204,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
               </button>
             </div>
             <form onSubmit={handleAddMaterial} className="p-5 space-y-3">
-              {/* Type */}
               <div className="grid grid-cols-3 gap-2">
                 {[
                   {
