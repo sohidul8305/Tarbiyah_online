@@ -1016,6 +1016,10 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   /* ---------- Student ---------- */
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState(null);
+
+  // ✅ NEW: Videos from MongoDB collection
+  const [dbVideos, setDbVideos] = useState([]);
+  const [loadingVideos, setLoadingVideos] = useState(false);
   const [studentForm, setStudentForm] = useState({
     name: "",
     studentId: "",
@@ -1147,11 +1151,33 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     }
   };
 
+  /* ✅ Fetch videos from batch_videos collection */
+  const fetchDbVideos = async () => {
+    try {
+      setLoadingVideos(true);
+      const res = await fetch(
+        `${API_URL}/api/batch-videos/all?batchId=${encodeURIComponent(batchId)}`,
+      );
+      const data = await res.json();
+      if (data.success) {
+        setDbVideos(data.videos || []);
+      } else {
+        setDbVideos([]);
+      }
+    } catch (e) {
+      console.error("❌ fetchDbVideos error:", e);
+      setDbVideos([]);
+    } finally {
+      setLoadingVideos(false);
+    }
+  };
+
   useEffect(() => {
     fetchBatch();
     fetchDbStudents();
     fetchDbClasses(); // ✅ নতুন
     fetchDbMaterials(); // ✅ নতুন
+    fetchDbVideos(); // ✅ নতুন
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [batchId]);
@@ -1198,8 +1224,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   // ✅ নতুন — MongoDB collection থেকে
   const classesList = dbClasses;
   const materialsList = dbMaterials;
-  const videos = batch?.videos || [];
-
+  // ✅ নতুন — MongoDB collection থেকে
+  const videos = dbVideos;
   const calcPaid = (s) =>
     (s.paidMonths || []).reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
@@ -1829,7 +1855,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     if (ok) setNewVideo({ title: "", url: "" });
   };
 
-  const handleDeleteVideo = (index) => {
+  const handleDeleteVideo = (id) => {
     Swal.fire({
       title: "Delete Video?",
       icon: "warning",
@@ -1839,10 +1865,25 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       confirmButtonText: "Yes, delete!",
     }).then(async (r) => {
       if (r.isConfirmed) {
-        await saveBatchFields(
-          { videos: videos.filter((_, i) => i !== index) },
-          "Video Deleted!",
-        );
+        try {
+          const res = await fetch(`${API_URL}/api/batch-videos/delete/${id}`, {
+            method: "DELETE",
+          });
+          const data = await res.json();
+          if (data.success) {
+            await fetchDbVideos();
+            Swal.fire({
+              icon: "success",
+              title: "Deleted!",
+              timer: 1100,
+              showConfirmButton: false,
+            });
+          } else {
+            Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+          }
+        } catch (err) {
+          Swal.fire({ icon: "error", title: "Error", text: err.message });
+        }
       }
     });
   };
@@ -2884,7 +2925,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                           {v.title || `Video ${i + 1}`}
                         </a>
                         <button
-                          onClick={() => handleDeleteVideo(i)}
+                          onClick={() => handleDeleteVideo(v._id)}
                           className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 flex-shrink-0"
                         >
                           <FaTrash size={11} />
