@@ -1,19 +1,15 @@
 // src/Page/Student-acedemic/Student_acedemic.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import Swal from "sweetalert2";
 import {
   FaUser,
   FaUniversity,
   FaFileAlt,
   FaCreditCard,
   FaMoneyBillWave,
-  FaBook,
   FaGraduationCap,
   FaCalendarAlt,
-  FaCheckCircle,
   FaClock,
-  FaHourglassHalf,
   FaVideo,
   FaFilePdf,
   FaLink,
@@ -21,12 +17,39 @@ import {
   FaPlay,
   FaSync,
   FaExternalLinkAlt,
-  FaUsers,
-  FaClipboardList,
+  FaInfoCircle,
 } from "react-icons/fa";
 import { MdDashboard, MdOutlineQuiz } from "react-icons/md";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
+
+// ============================================================
+// ✅ Student এর Department বের করার helper
+// ============================================================
+const getStudentDepartment = (parsed) => {
+  if (!parsed) return "";
+
+  // Priority 1: explicit course / class
+  if (parsed.course && String(parsed.course).trim())
+    return String(parsed.course).trim();
+  if (parsed.class && String(parsed.class).trim())
+    return String(parsed.class).trim();
+
+  // Priority 2: department field
+  if (parsed.department && String(parsed.department).trim())
+    return String(parsed.department).trim();
+
+  // Priority 3: batch
+  if (parsed.batch && String(parsed.batch).trim())
+    return String(parsed.batch).trim();
+
+  // Priority 4: loginSource → keyword mapping (Tazweed/Najera students এর জন্য)
+  const src = parsed.loginSource || parsed.source || "";
+  if (src === "basic_tazweed_students") return "Tajweed";
+  if (src === "najera_batch_students") return "Nazera";
+
+  return "";
+};
 
 const StudentAcademic = () => {
   const location = useLocation();
@@ -34,14 +57,15 @@ const StudentAcademic = () => {
     name: "Student",
     class: "Not Assigned",
     roll: "N/A",
-    course: "",
+    department: "",
   });
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("classes");
+  const [fetchError, setFetchError] = useState(null);
+  const [department, setDepartment] = useState("");
 
-  // ✅ Academic data from backend
   const [academicData, setAcademicData] = useState({
     videos: [],
     classes: [],
@@ -58,49 +82,43 @@ const StudentAcademic = () => {
   });
 
   // ============================================================
-  // ✅ Load student info + fetch academic data
+  // ✅ Fetch academic data — Department অনুযায়ী filtered
   // ============================================================
-  useEffect(() => {
-    const savedInfo = localStorage.getItem("studentInfo");
-    if (!savedInfo) {
-      setLoading(false);
-      return;
-    }
-
-    let parsed = {};
+  const fetchAcademicData = async (dept) => {
     try {
-      parsed = JSON.parse(savedInfo);
-    } catch (e) {
-      setLoading(false);
-      return;
-    }
+      setFetchError(null);
 
-    const studentData = {
-      name: parsed.name || "Student",
-      class: parsed.class || parsed.course || "Not Assigned",
-      roll: parsed.roll || parsed.studentId || "N/A",
-      course: parsed.course || parsed.class || "",
-    };
-    setStudentInfo(studentData);
+      if (!dept) {
+        console.warn("⚠️ No department — nothing to fetch");
+        setAcademicData({
+          videos: [],
+          classes: [],
+          materials: { all: [], exams: [], quizzes: [], pdfs: [] },
+          stats: {
+            totalVideos: 0,
+            totalExams: 0,
+            totalQuizzes: 0,
+            totalPdfs: 0,
+            totalClasses: 0,
+            totalMaterials: 0,
+          },
+          matchedBatches: [],
+        });
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
 
-    if (studentData.course) {
-      fetchAcademicData(studentData.course);
-    } else {
-      setLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ============================================================
-  // ✅ Fetch academic data by course
-  // ============================================================
-  const fetchAcademicData = async () => {
-    try {
-      // ✅ NEW — সব batch data একসাথে আনবে (সব student একই data দেখবে)
-      const url = `${API_BASE}/student/academic-all`;
-      console.log("📥 Fetching ALL academic data:", url);
+      const url = `${API_BASE}/student/academic/${encodeURIComponent(dept)}`;
+      console.log(`📥 Fetching academic data for dept: "${dept}"`);
+      console.log("   URL:", url);
 
       const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+
       const d = await res.json();
       console.log("📥 Academic data response:", d);
 
@@ -122,22 +140,66 @@ const StudentAcademic = () => {
             totalClasses: 0,
             totalMaterials: 0,
           },
-          matchedBatches: d.batches || [],
+          matchedBatches: d.matchedBatches || [],
         });
+        console.log(
+          `✅ Loaded for "${dept}": Classes=${d.classes?.length || 0}, Videos=${d.videos?.length || 0}, Exams=${d.materials?.exams?.length || 0}, Quizzes=${d.materials?.quizzes?.length || 0}, PDFs=${d.materials?.pdfs?.length || 0}`,
+        );
+      } else {
+        console.warn("⚠️ API returned success: false", d);
+        setFetchError(d.message || "API returned success: false");
       }
     } catch (e) {
       console.error("❌ Fetch academic error:", e);
+      setFetchError(e.message || "Failed to fetch academic data");
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
+
+  // ============================================================
+  // ✅ Load student info + fetch filtered data
+  // ============================================================
+  useEffect(() => {
+    const savedInfo = localStorage.getItem("studentInfo");
+
+    if (!savedInfo) {
+      setLoading(false);
+      return;
+    }
+
+    let parsed = {};
+    try {
+      parsed = JSON.parse(savedInfo);
+    } catch (e) {
+      console.warn("⚠️ studentInfo parse error:", e);
+      setLoading(false);
+      return;
+    }
+
+    const dept = getStudentDepartment(parsed);
+    console.log("🎯 Student department:", dept || "(empty)");
+    console.log("   studentInfo:", parsed);
+
+    setStudentInfo({
+      name: parsed.name || "Student",
+      class:
+        parsed.class || parsed.course || parsed.department || "Not Assigned",
+      roll: parsed.roll || parsed.studentId || "N/A",
+      department: dept,
+    });
+    setDepartment(dept);
+
+    fetchAcademicData(dept);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchAcademicData();
+    fetchAcademicData(department);
   };
 
-  // Sidebar Menu Items
   const menuItems = [
     {
       id: "dashboard",
@@ -177,7 +239,6 @@ const StudentAcademic = () => {
     },
   ];
 
-  // Stats
   const stats = academicData.stats;
 
   const tabs = [
@@ -186,35 +247,30 @@ const StudentAcademic = () => {
       label: "Class Schedule",
       icon: <FaCalendarAlt />,
       count: stats.totalClasses,
-      color: "indigo",
     },
     {
       id: "videos",
       label: "Class Videos",
       icon: <FaVideo />,
       count: stats.totalVideos,
-      color: "red",
     },
     {
       id: "exams",
       label: "Exams",
       icon: <FaGraduationCap />,
       count: stats.totalExams,
-      color: "purple",
     },
     {
       id: "quizzes",
       label: "Quizzes",
       icon: <MdOutlineQuiz />,
       count: stats.totalQuizzes,
-      color: "blue",
     },
     {
       id: "pdfs",
       label: "PDF Notes",
       icon: <FaFilePdf />,
       count: stats.totalPdfs,
-      color: "orange",
     },
   ];
 
@@ -280,6 +336,11 @@ const StudentAcademic = () => {
                   {studentInfo.name} • {studentInfo.class} • Roll:{" "}
                   {studentInfo.roll}
                 </p>
+                {department && (
+                  <p className="text-xs opacity-90 mt-1 inline-block bg-white/20 px-2 py-0.5 rounded-full">
+                    🎓 Department: <strong>{department}</strong>
+                  </p>
+                )}
               </div>
               <button
                 onClick={handleRefresh}
@@ -291,6 +352,34 @@ const StudentAcademic = () => {
               </button>
             </div>
           </div>
+
+          {/* ✅ No Department Warning */}
+          {!department && (
+            <div className="bg-yellow-50 border-b border-yellow-200 p-4 text-center">
+              <FaInfoCircle className="text-yellow-600 text-2xl mx-auto mb-1" />
+              <p className="text-sm font-semibold text-yellow-800">
+                Your department is not assigned yet
+              </p>
+              <p className="text-xs text-yellow-700 mt-1">
+                Please contact admin to assign you a department
+              </p>
+            </div>
+          )}
+
+          {/* ✅ Error Banner */}
+          {fetchError && (
+            <div className="bg-red-50 border-b border-red-200 p-3 text-center">
+              <p className="text-xs text-red-700 font-semibold">
+                ⚠️ {fetchError}
+              </p>
+              <button
+                onClick={handleRefresh}
+                className="mt-1 text-xs text-red-600 underline"
+              >
+                Try again
+              </button>
+            </div>
+          )}
 
           {/* Summary Stats */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-gray-50 border-b border-gray-200">
@@ -365,14 +454,14 @@ const StudentAcademic = () => {
 
           {/* Content */}
           <div className="p-4">
-            {/* ============ CLASSES ============ */}
+            {/* CLASSES */}
             {activeTab === "classes" && (
               <div className="space-y-3">
                 {academicData.classes.length === 0 ? (
                   <EmptyState
                     icon={<FaCalendarAlt />}
-                    title="No classes scheduled yet"
-                    subtitle="Your teacher will add classes soon"
+                    title="No classes in your department"
+                    subtitle="Classes will appear here once your teacher adds them"
                   />
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -395,6 +484,11 @@ const StudentAcademic = () => {
                               <p className="font-bold text-gray-800">
                                 {cls.name}
                               </p>
+                              {cls.batchName && (
+                                <p className="text-[10px] text-gray-400">
+                                  {cls.batchName}
+                                </p>
+                              )}
                             </div>
                             <span
                               className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
@@ -453,13 +547,13 @@ const StudentAcademic = () => {
               </div>
             )}
 
-            {/* ============ VIDEOS ============ */}
+            {/* VIDEOS */}
             {activeTab === "videos" && (
               <div className="space-y-3">
                 {academicData.videos.length === 0 ? (
                   <EmptyState
                     icon={<FaVideo />}
-                    title="No videos available yet"
+                    title="No videos in your department"
                     subtitle="Class videos will appear here"
                   />
                 ) : (
@@ -494,13 +588,13 @@ const StudentAcademic = () => {
               </div>
             )}
 
-            {/* ============ EXAMS ============ */}
+            {/* EXAMS */}
             {activeTab === "exams" && (
               <div className="space-y-3">
                 {academicData.materials.exams.length === 0 ? (
                   <EmptyState
                     icon={<FaGraduationCap />}
-                    title="No exams published yet"
+                    title="No exams in your department"
                     subtitle="Exam results will appear here"
                   />
                 ) : (
@@ -513,13 +607,13 @@ const StudentAcademic = () => {
               </div>
             )}
 
-            {/* ============ QUIZZES ============ */}
+            {/* QUIZZES */}
             {activeTab === "quizzes" && (
               <div className="space-y-3">
                 {academicData.materials.quizzes.length === 0 ? (
                   <EmptyState
                     icon={<MdOutlineQuiz />}
-                    title="No quizzes available yet"
+                    title="No quizzes in your department"
                     subtitle="Quizzes will appear here"
                   />
                 ) : (
@@ -532,13 +626,13 @@ const StudentAcademic = () => {
               </div>
             )}
 
-            {/* ============ PDFs ============ */}
+            {/* PDFs */}
             {activeTab === "pdfs" && (
               <div className="space-y-3">
                 {academicData.materials.pdfs.length === 0 ? (
                   <EmptyState
                     icon={<FaFilePdf />}
-                    title="No PDF notes available yet"
+                    title="No PDF notes in your department"
                     subtitle="PDF notes will appear here"
                   />
                 ) : (

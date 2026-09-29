@@ -9,24 +9,51 @@ import {
   FaFileAlt,
   FaCreditCard,
   FaMoneyBillWave,
-  FaBook,
   FaGraduationCap,
   FaDownload,
   FaPrint,
-  FaEye,
   FaCheckCircle,
   FaTimesCircle,
   FaClock,
+  FaSync,
+  FaInfoCircle,
 } from "react-icons/fa";
-import { MdDashboard } from "react-icons/md";
+import { MdDashboard, MdOutlineQuiz } from "react-icons/md";
+
+const API_BASE = "https://api.tarbiyahonline.com/api";
+
+// ============================================================
+// ✅ Student এর department বের করার helper
+// ============================================================
+const getStudentDepartment = (parsed) => {
+  if (!parsed) return "";
+  if (parsed.course && String(parsed.course).trim())
+    return String(parsed.course).trim();
+  if (parsed.class && String(parsed.class).trim())
+    return String(parsed.class).trim();
+  if (parsed.department && String(parsed.department).trim())
+    return String(parsed.department).trim();
+  if (parsed.batch && String(parsed.batch).trim())
+    return String(parsed.batch).trim();
+
+  const src = parsed.loginSource || parsed.source || "";
+  if (src === "basic_tazweed_students") return "Tajweed";
+  if (src === "najera_batch_students") return "Nazera";
+  return "";
+};
 
 const Student_result = () => {
-  const { user, logOut } = useAuth();
+  const { logOut } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [resultTab, setResultTab] = useState("exam");
+  const [fetchError, setFetchError] = useState(null);
+  const [department, setDepartment] = useState("");
 
-  // Student Info from localStorage
   const [studentInfo, setStudentInfo] = useState({
+    _id: "",
+    studentId: "",
     name: "",
     email: "",
     phone: "",
@@ -35,52 +62,129 @@ const Student_result = () => {
     username: "",
     status: "",
     course: "",
+    loginSource: "",
   });
 
+  // ✅ Data from backend
+  const [academicData, setAcademicData] = useState({
+    exams: [],
+    quizzes: [],
+    pdfs: [],
+    stats: { totalExams: 0, totalQuizzes: 0, totalPdfs: 0 },
+  });
+
+  // ============================================================
+  // ✅ Fetch — student এর department এর exam/quiz
+  // ============================================================
+  const fetchAllResults = async (dept) => {
+    try {
+      setFetchError(null);
+
+      // ✅ student এর department না থাকলে সব show হবে
+      let url;
+      if (dept) {
+        url = `${API_BASE}/student/academic/${encodeURIComponent(dept)}`;
+      } else {
+        url = `${API_BASE}/student/academic-all`;
+      }
+
+      console.log(`📥 Fetching results from: ${url}`);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const d = await res.json();
+      console.log("📥 Result data response:", d);
+
+      if (d.success && d.materials) {
+        setAcademicData({
+          exams: d.materials.exams || [],
+          quizzes: d.materials.quizzes || [],
+          pdfs: d.materials.pdfs || [],
+          stats: {
+            totalExams: d.materials.exams?.length || 0,
+            totalQuizzes: d.materials.quizzes?.length || 0,
+            totalPdfs: d.materials.pdfs?.length || 0,
+          },
+        });
+        console.log(
+          `✅ Loaded: Exams=${d.materials.exams?.length || 0}, Quizzes=${d.materials.quizzes?.length || 0}`,
+        );
+      } else {
+        console.warn("⚠️ No materials found");
+      }
+    } catch (e) {
+      console.error("❌ Fetch error:", e);
+      setFetchError(e.message || "Failed to load results");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  // ============================================================
+  // ✅ Load student + fetch results
+  // ============================================================
   useEffect(() => {
     const savedInfo = localStorage.getItem("studentInfo");
-    if (savedInfo) {
-      const parsedInfo = JSON.parse(savedInfo);
-      setStudentInfo({
-        name: parsedInfo.name || "Student",
-        email: parsedInfo.email || "",
-        phone: parsedInfo.phone || "",
-        class: parsedInfo.class || "",
-        roll: parsedInfo.roll || "",
-        username: parsedInfo.username || "",
-        status: parsedInfo.status || "Active",
-        course: parsedInfo.course || "",
-      });
+    if (!savedInfo) {
+      setLoading(false);
+      return;
     }
-    setLoading(false);
+
+    let parsed = {};
+    try {
+      parsed = JSON.parse(savedInfo);
+    } catch (e) {
+      setLoading(false);
+      return;
+    }
+
+    const info = {
+      _id: parsed._id || "",
+      studentId: parsed.studentId || "",
+      name: parsed.name || "Student",
+      email: parsed.email || "",
+      phone: parsed.phone || "",
+      class: parsed.class || parsed.course || "",
+      roll: parsed.roll || "",
+      username: parsed.username || "",
+      status: parsed.status || "Active",
+      course: parsed.course || parsed.class || "",
+      loginSource: parsed.loginSource || "",
+    };
+    setStudentInfo(info);
+
+    const dept = getStudentDepartment(parsed);
+    setDepartment(dept);
+    console.log("🎯 Student department:", dept || "(empty)");
+
+    fetchAllResults(dept);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchAllResults(department);
+  };
 
   const handleLogout = async () => {
     try {
       await logOut();
       localStorage.removeItem("isStudentLoggedIn");
       localStorage.removeItem("studentInfo");
-      localStorage.removeItem("studentEmail");
-      localStorage.removeItem("studentPhone");
-
+      localStorage.removeItem("loginSource");
       await Swal.fire({
         icon: "success",
-        title: "Logged Out Successfully",
+        title: "Logged Out",
         timer: 1200,
         showConfirmButton: false,
       });
       navigate("/student-login");
     } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
+      Swal.fire({ icon: "error", title: "Logout Failed" });
     }
   };
 
-  // Sidebar Menu Items
   const menuItems = [
     {
       id: "dashboard",
@@ -120,126 +224,95 @@ const Student_result = () => {
     },
   ];
 
-  // State for active menu and result tab
-  const [activeMenu, setActiveMenu] = useState("result");
-  const [resultTab, setResultTab] = useState("midterm");
+  // Stats
+  const exams = academicData.exams;
+  const quizzes = academicData.quizzes;
 
-  // Mid-Term Results Data (Dynamic based on student's course)
-  const getMidTermResults = () => {
-    const courseName = studentInfo.course || "";
-    if (courseName) {
-      const courseList = courseName.split(",").map((c) => c.trim());
-      return courseList.map((course, index) => ({
-        id: index + 1,
-        code: `ISL-${String(index + 1).padStart(3, "0")}`,
-        name: course,
-        totalMarks: 100,
-        obtainedMarks: 75 + Math.floor(Math.random() * 20),
-        grade: ["A+", "A", "A-", "B+"][index % 4],
-        status: "Passed",
-      }));
-    }
-    return [
-      {
-        id: 1,
-        code: "ISL-101",
-        name: "Al-Quran Studies & Tafseer",
-        totalMarks: 100,
-        obtainedMarks: 82,
-        grade: "A+",
-        status: "Passed",
-      },
-      {
-        id: 2,
-        code: "ISL-102",
-        name: "Hadith Methodology & Sunnah",
-        totalMarks: 100,
-        obtainedMarks: 75,
-        grade: "A",
-        status: "Passed",
-      },
-      {
-        id: 3,
-        code: "ARAB-101",
-        name: "Classic Arabic Grammar",
-        totalMarks: 100,
-        obtainedMarks: 88,
-        grade: "A+",
-        status: "Passed",
-      },
-    ];
+  // ============================================================
+  // ✅ Marks calculation
+  // ============================================================
+  const calcPercent = (m) => {
+    if (!m.marks || !m.totalMarks || m.totalMarks === 0) return null;
+    return Math.round((m.marks / m.totalMarks) * 100);
   };
 
-  // Quiz Results Data
-  const getQuizResults = () => {
-    const courseName = studentInfo.course || "";
-    const quizData = [
-      {
-        id: 1,
-        title: "Quiz 01: Fundamentals of Quranic Studies",
-        subject: courseName.split(",")[0]?.trim() || "Al-Quran",
-        fullMarks: 20,
-        obtainedMarks: 18,
-        performance: "Excellent",
-      },
-      {
-        id: 2,
-        title: "Quiz 02: Introduction to Hadith Sciences",
-        subject: courseName.split(",")[1]?.trim() || "Hadith",
-        fullMarks: 20,
-        obtainedMarks: 16,
-        performance: "Good",
-      },
-      {
-        id: 3,
-        title: "Quiz 03: Arabic Grammar Fundamentals",
-        subject: courseName.split(",")[2]?.trim() || "Arabic Grammar",
-        fullMarks: 20,
-        obtainedMarks: 14,
-        performance: "Average",
-      },
-      {
-        id: 4,
-        title: "Quiz 04: Tajweed Rules (Makharijul Huruf)",
-        subject: courseName.split(",")[0]?.trim() || "Al-Quran",
-        fullMarks: 20,
-        obtainedMarks: 19,
-        performance: "Outstanding",
-      },
-    ];
-    return quizData;
+  const getGrade = (percent) => {
+    if (percent === null) return "N/A";
+    if (percent >= 90) return "A+";
+    if (percent >= 80) return "A";
+    if (percent >= 70) return "A-";
+    if (percent >= 65) return "B+";
+    if (percent >= 60) return "B";
+    if (percent >= 55) return "B-";
+    if (percent >= 50) return "C+";
+    if (percent >= 45) return "C";
+    if (percent >= 40) return "D";
+    return "F";
   };
 
-  const midTermResults = getMidTermResults();
-  const quizResults = getQuizResults();
+  const getGradeColor = (grade) => {
+    if (!grade || grade === "N/A") return "bg-gray-100 text-gray-700";
+    if (["A+", "A", "A-"].includes(grade)) return "bg-green-100 text-green-700";
+    if (["B+", "B", "B-"].includes(grade)) return "bg-blue-100 text-blue-700";
+    if (["C+", "C"].includes(grade)) return "bg-yellow-100 text-yellow-700";
+    if (grade === "D") return "bg-orange-100 text-orange-700";
+    if (grade === "F") return "bg-red-100 text-red-700";
+    return "bg-gray-100 text-gray-700";
+  };
 
-  // Calculate statistics
-  const totalCourses = midTermResults.length;
-  const passedCourses = midTermResults.filter(
-    (r) => r.status === "Passed",
+  // Stats
+  const totalExamsWithMarks = exams.filter(
+    (e) => e.marks !== null && e.marks !== undefined,
   ).length;
-  const totalMarks = midTermResults.reduce((sum, r) => sum + r.totalMarks, 0);
-  const totalObtained = midTermResults.reduce(
-    (sum, r) => sum + r.obtainedMarks,
-    0,
-  );
-  const overallPercentage =
-    totalMarks > 0 ? (totalObtained / totalMarks) * 100 : 0;
+  const totalExamsPending = exams.length - totalExamsWithMarks;
+  const passedExams = exams.filter((e) => {
+    const p = calcPercent(e);
+    return p !== null && p >= 40;
+  }).length;
+  const failedExams = exams.filter((e) => {
+    const p = calcPercent(e);
+    return p !== null && p < 40;
+  }).length;
 
-  const getPerformanceColor = (performance) => {
-    switch (performance) {
-      case "Outstanding":
-        return "bg-purple-100 text-purple-700";
-      case "Excellent":
-        return "bg-green-100 text-green-700";
-      case "Good":
-        return "bg-blue-100 text-blue-700";
-      case "Average":
-        return "bg-yellow-100 text-yellow-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
-  };
+  // CGPA
+  const gradesWithMarks = exams.filter((e) => calcPercent(e) !== null);
+  const cgpa =
+    gradesWithMarks.length > 0
+      ? (
+          gradesWithMarks.reduce((s, e) => {
+            const p = calcPercent(e);
+            const gp =
+              p >= 90
+                ? 4.0
+                : p >= 80
+                  ? 3.75
+                  : p >= 70
+                    ? 3.5
+                    : p >= 65
+                      ? 3.25
+                      : p >= 60
+                        ? 3.0
+                        : p >= 55
+                          ? 2.75
+                          : p >= 50
+                            ? 2.5
+                            : p >= 45
+                              ? 2.0
+                              : p >= 40
+                                ? 1.0
+                                : 0;
+            return s + gp;
+          }, 0) / gradesWithMarks.length
+        ).toFixed(2)
+      : "N/A";
+
+  const overallPercent =
+    gradesWithMarks.length > 0
+      ? (
+          gradesWithMarks.reduce((s, e) => s + calcPercent(e), 0) /
+          gradesWithMarks.length
+        ).toFixed(1)
+      : "0.0";
 
   if (loading) {
     return (
@@ -255,7 +328,7 @@ const Student_result = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="flex flex-grow">
-        {/* ================= LEFT SIDEBAR ================= */}
+        {/* Sidebar */}
         <aside className="hidden md:block w-64 bg-white border-r border-gray-200 shadow-sm h-screen sticky top-0 flex-shrink-0">
           <div className="p-4 bg-gradient-to-r from-[#00ADD2] to-[#00c4e6] text-white">
             <div className="flex items-center gap-3">
@@ -273,32 +346,22 @@ const Student_result = () => {
 
           <nav className="p-3 space-y-1">
             {menuItems.map((item) => {
-              const isActive =
-                window.location.pathname === item.path ||
-                (item.id === "result" &&
-                  window.location.pathname === "/student-result");
+              const isActive = window.location.pathname === item.path;
               return (
                 <button
                   key={item.id}
-                  onClick={() => {
-                    setActiveMenu(item.id);
-                    navigate(item.path);
-                  }}
-                  className={`
-                    w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                    ${
-                      isActive
-                        ? "bg-[#e6f7f9] text-[#00ADD2] font-bold shadow-sm"
-                        : "text-gray-700 hover:bg-gray-50 hover:text-[#00ADD2]"
-                    }
-                  `}
+                  onClick={() => navigate(item.path)}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                    isActive
+                      ? "bg-[#e6f7f9] text-[#00ADD2] font-bold shadow-sm"
+                      : "text-gray-700 hover:bg-gray-50 hover:text-[#00ADD2]"
+                  }`}
                 >
                   <span className="text-gray-600">{item.icon}</span>
                   <span>{item.label}</span>
                 </button>
               );
             })}
-
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4 text-sm"
@@ -306,13 +369,9 @@ const Student_result = () => {
               <span>🚪</span> Logout
             </button>
           </nav>
-
-          <div className="absolute bottom-0 left-0 right-0 p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
-          </div>
         </aside>
 
-        {/* ================= RIGHT MAIN CONTENT ================= */}
+        {/* Main */}
         <main className="flex-grow p-4 md:p-6 overflow-x-auto">
           {/* Top Bar */}
           <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -323,55 +382,74 @@ const Student_result = () => {
               </h1>
               <p className="text-sm text-gray-500">
                 {studentInfo.name} • {studentInfo.class} • Roll:{" "}
-                {studentInfo.roll || "N/A"}
+                {studentInfo.roll || studentInfo.studentId || "N/A"}
               </p>
+              {department && (
+                <p className="text-xs text-[#00ADD2] font-semibold mt-1 inline-block bg-[#e6f7f9] px-2 py-0.5 rounded-full">
+                  🎓 {department}
+                </p>
+              )}
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-gray-700 hidden sm:block">
-                {studentInfo.name}
-              </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="bg-[#00ADD2] hover:bg-[#008c9e] text-white text-xs px-3 py-2 rounded-lg font-bold flex items-center gap-1 disabled:opacity-50"
+              >
+                <FaSync
+                  className={refreshing ? "animate-spin" : ""}
+                  size={11}
+                />
+                Refresh
+              </button>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-lg font-bold"
               >
                 Logout
               </button>
             </div>
           </div>
 
+          {/* Error */}
+          {fetchError && (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-3 mb-6 text-center">
+              <p className="text-xs text-red-700 font-semibold">
+                ⚠️ {fetchError}
+              </p>
+            </div>
+          )}
+
           {/* Summary Cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-              <p className="text-xs text-gray-500">Total Courses</p>
+            <div className="bg-white p-4 rounded-xl shadow-sm border">
+              <p className="text-xs text-gray-500">Total Exams</p>
               <p className="text-2xl font-bold text-[#00ADD2]">
-                {totalCourses}
+                {exams.length}
               </p>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+            <div className="bg-white p-4 rounded-xl shadow-sm border">
               <p className="text-xs text-gray-500">Passed</p>
-              <p className="text-2xl font-bold text-green-600">
-                {passedCourses}
-              </p>
+              <p className="text-2xl font-bold text-green-600">{passedExams}</p>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-              <p className="text-xs text-gray-500">Overall Percentage</p>
+            <div className="bg-white p-4 rounded-xl shadow-sm border">
+              <p className="text-xs text-gray-500">Overall %</p>
               <p className="text-2xl font-bold text-[#00ADD2]">
-                {overallPercentage.toFixed(1)}%
+                {overallPercent}%
               </p>
             </div>
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+            <div className="bg-white p-4 rounded-xl shadow-sm border">
               <p className="text-xs text-gray-500">CGPA</p>
-              <p className="text-2xl font-bold text-[#00ADD2]">3.75</p>
+              <p className="text-2xl font-bold text-[#00ADD2]">{cgpa}</p>
             </div>
           </div>
 
-          {/* Result Sub-Tabs Navigation */}
+          {/* Sub-Tabs */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-6">
             <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-3 text-sm">
               {[
-                { id: "midterm", label: "📊 Mid-Term Results" },
-                { id: "quiz", label: "📝 Quiz Test Results" },
-                { id: "final", label: "🎓 Semester Final" },
+                { id: "exam", label: `📊 Exams (${exams.length})` },
+                { id: "quiz", label: `📝 Quizzes (${quizzes.length})` },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -388,174 +466,181 @@ const Student_result = () => {
             </div>
           </div>
 
-          {/* Tab 1: Mid-Term Results */}
-          {resultTab === "midterm" && (
+          {/* ============ EXAMS ============ */}
+          {resultTab === "exam" && (
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 md:p-6 space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-3">
-                <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  📊 Mid-Term Examination Results (Fall 2026)
+              <div className="flex justify-between items-center border-b pb-3">
+                <h2 className="text-lg font-bold text-gray-800">
+                  📊 Exam Results
                 </h2>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() =>
-                      Swal.fire({
-                        icon: "success",
-                        title: "Downloading...",
-                        text: "Mid-Term Marksheet PDF is being downloaded.",
-                        timer: 1500,
-                        showConfirmButton: false,
-                      })
-                    }
-                    className="bg-[#00ADD2] hover:bg-[#008c9e] text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1"
-                  >
-                    <FaDownload size={12} /> Download marksheet
-                  </button>
-                  <button
-                    onClick={() =>
-                      Swal.fire({
-                        icon: "info",
-                        title: "Printing...",
-                        text: "Preparing marksheet for print.",
-                        timer: 1500,
-                        showConfirmButton: false,
-                      })
-                    }
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1"
-                  >
-                    <FaPrint size={12} /> Print
-                  </button>
-                </div>
+                <button
+                  onClick={() => window.print()}
+                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
+                >
+                  <FaPrint size={12} /> Print
+                </button>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-gray-50 text-gray-700 uppercase text-xs border-b">
-                    <tr>
-                      <th className="p-3 font-semibold">#</th>
-                      <th className="p-3 font-semibold">Course Code & Name</th>
-                      <th className="p-3 font-semibold">Total Marks</th>
-                      <th className="p-3 font-semibold">Obtained</th>
-                      <th className="p-3 font-semibold">Grade</th>
-                      <th className="p-3 font-semibold">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {midTermResults.map((result, index) => (
-                      <tr
-                        key={result.id}
-                        className="border-b hover:bg-gray-50 transition"
-                      >
-                        <td className="p-3 text-gray-500">{index + 1}</td>
-                        <td className="p-3">
-                          <p className="font-medium text-gray-800">
-                            {result.code}
-                          </p>
-                          <p className="text-xs text-gray-500">{result.name}</p>
-                        </td>
-                        <td className="p-3">{result.totalMarks}</td>
-                        <td className="p-3 font-semibold text-[#00ADD2]">
-                          {result.obtainedMarks}
-                        </td>
-                        <td className="p-3 font-bold text-[#00ADD2]">
-                          {result.grade}
-                        </td>
-                        <td className="p-3">
-                          <span className="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1 w-fit">
-                            <FaCheckCircle size={12} /> {result.status}
-                          </span>
-                        </td>
+              {exams.length === 0 ? (
+                <EmptyResult
+                  icon={<FaFileAlt />}
+                  title="No exams in your department"
+                  subtitle="Exams will appear here once your teacher publishes them"
+                />
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-gray-50 text-gray-700 uppercase text-xs border-b">
+                      <tr>
+                        <th className="p-3 font-semibold">#</th>
+                        <th className="p-3 font-semibold">Exam Title</th>
+                        <th className="p-3 font-semibold">Date</th>
+                        <th className="p-3 font-semibold">Marks</th>
+                        <th className="p-3 font-semibold">%</th>
+                        <th className="p-3 font-semibold">Grade</th>
+                        <th className="p-3 font-semibold">Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {exams.map((exam, i) => {
+                        const pct = calcPercent(exam);
+                        const grade = getGrade(pct);
+                        const passed = pct !== null && pct >= 40;
+                        return (
+                          <tr
+                            key={exam._id || i}
+                            className="border-b hover:bg-gray-50"
+                          >
+                            <td className="p-3 text-gray-500 font-mono">
+                              {String(i + 1).padStart(2, "0")}
+                            </td>
+                            <td className="p-3">
+                              <a
+                                href={exam.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-medium text-gray-800 hover:text-[#00ADD2]"
+                              >
+                                {exam.title}
+                              </a>
+                            </td>
+                            <td className="p-3 text-xs text-gray-500">
+                              {exam.date || "—"}
+                            </td>
+                            <td className="p-3 font-semibold text-[#00ADD2]">
+                              {exam.marks !== null && exam.marks !== undefined
+                                ? `${exam.marks}/${exam.totalMarks}`
+                                : "Pending"}
+                            </td>
+                            <td className="p-3 font-semibold">
+                              {pct !== null ? `${pct}%` : "—"}
+                            </td>
+                            <td className="p-3">
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full font-bold ${getGradeColor(grade)}`}
+                              >
+                                {grade}
+                              </span>
+                            </td>
+                            <td className="p-3">
+                              {pct === null ? (
+                                <span className="bg-gray-100 text-gray-700 text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1 w-fit">
+                                  <FaClock size={12} /> Pending
+                                </span>
+                              ) : passed ? (
+                                <span className="bg-green-100 text-green-700 text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1 w-fit">
+                                  <FaCheckCircle size={12} /> Passed
+                                </span>
+                              ) : (
+                                <span className="bg-red-100 text-red-700 text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1 w-fit">
+                                  <FaTimesCircle size={12} /> Failed
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
-          {/* Tab 2: Quiz Test Results */}
+          {/* ============ QUIZZES ============ */}
           {resultTab === "quiz" && (
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 md:p-6 space-y-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b pb-3">
+              <div className="flex justify-between items-center border-b pb-3">
                 <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  📝 Weekly Quiz Test Results
+                  <MdOutlineQuiz className="text-blue-600" /> Quiz Test Results
                 </h2>
                 <span className="text-xs text-[#00ADD2] font-bold bg-[#e6f7f9] px-3 py-1 rounded-full">
-                  Total Quizzes: {quizResults.length}
+                  Total: {quizzes.length}
                 </span>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-gray-50 text-gray-700 uppercase text-xs border-b">
-                    <tr>
-                      <th className="p-3 font-semibold">#</th>
-                      <th className="p-3 font-semibold">Quiz Title</th>
-                      <th className="p-3 font-semibold">Subject</th>
-                      <th className="p-3 font-semibold">Full Marks</th>
-                      <th className="p-3 font-semibold">Obtained</th>
-                      <th className="p-3 font-semibold">Performance</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {quizResults.map((quiz, index) => (
-                      <tr
-                        key={quiz.id}
-                        className="border-b hover:bg-gray-50 transition"
-                      >
-                        <td className="p-3 text-gray-500">{index + 1}</td>
-                        <td className="p-3 font-medium text-gray-800">
-                          {quiz.title}
-                        </td>
-                        <td className="p-3 text-gray-600">{quiz.subject}</td>
-                        <td className="p-3">{quiz.fullMarks}</td>
-                        <td className="p-3 font-semibold text-[#00ADD2]">
-                          {quiz.obtainedMarks}
-                        </td>
-                        <td className="p-3">
-                          <span
-                            className={`px-2.5 py-1 rounded-full text-xs font-bold ${getPerformanceColor(quiz.performance)}`}
-                          >
-                            {quiz.performance}
-                          </span>
-                        </td>
+              {quizzes.length === 0 ? (
+                <EmptyResult
+                  icon={<MdOutlineQuiz />}
+                  title="No quiz results yet"
+                  subtitle="Quiz scores will appear here once published"
+                />
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-gray-50 text-gray-700 uppercase text-xs border-b">
+                      <tr>
+                        <th className="p-3 font-semibold">#</th>
+                        <th className="p-3 font-semibold">Quiz Title</th>
+                        <th className="p-3 font-semibold">Date</th>
+                        <th className="p-3 font-semibold">Marks</th>
+                        <th className="p-3 font-semibold">Grade</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Tab 3: Semester Final Result */}
-          {resultTab === "final" && (
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center space-y-4">
-              <div className="text-5xl mb-2">🎓</div>
-              <h2 className="text-2xl font-bold text-gray-800">
-                Semester Final Result Sheet
-              </h2>
-              <p className="text-sm text-gray-500 max-w-md mx-auto">
-                Fall 2026 সেমিস্টারের ফাইনাল পরীক্ষার ফলাফল এখনো প্রকাশিত হয়নি।
-                পরীক্ষা শেষ হওয়ার পর মূল গ্রেডশিট ও সার্টিফিকেট এখানে দেখতে
-                পাবেন।
-              </p>
-              <div className="flex flex-col items-center gap-3">
-                <div className="flex items-center gap-2 text-amber-600 bg-amber-50 px-4 py-2 rounded-lg">
-                  <FaClock /> Result will be published soon
+                    </thead>
+                    <tbody>
+                      {quizzes.map((quiz, i) => {
+                        const pct = calcPercent(quiz);
+                        const grade = getGrade(pct);
+                        return (
+                          <tr
+                            key={quiz._id || i}
+                            className="border-b hover:bg-gray-50"
+                          >
+                            <td className="p-3 text-gray-500 font-mono">
+                              {String(i + 1).padStart(2, "0")}
+                            </td>
+                            <td className="p-3">
+                              <a
+                                href={quiz.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="font-medium text-gray-800 hover:text-[#00ADD2]"
+                              >
+                                {quiz.title}
+                              </a>
+                            </td>
+                            <td className="p-3 text-xs text-gray-500">
+                              {quiz.date || "—"}
+                            </td>
+                            <td className="p-3 font-semibold text-[#00ADD2]">
+                              {quiz.marks !== null && quiz.marks !== undefined
+                                ? `${quiz.marks}/${quiz.totalMarks}`
+                                : "Pending"}
+                            </td>
+                            <td className="p-3">
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full font-bold ${getGradeColor(grade)}`}
+                              >
+                                {grade}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
-                <button
-                  onClick={() =>
-                    Swal.fire({
-                      icon: "info",
-                      title: "Notice",
-                      text: "Final results will be published after semester completion.",
-                      confirmButtonColor: "#00ADD2",
-                    })
-                  }
-                  className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-bold text-sm cursor-not-allowed"
-                >
-                  Result Not Published Yet
-                </button>
-              </div>
+              )}
             </div>
           )}
         </main>
@@ -563,5 +648,15 @@ const Student_result = () => {
     </div>
   );
 };
+
+const EmptyResult = ({ icon, title, subtitle }) => (
+  <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-8 text-center">
+    <div className="text-4xl text-gray-300 flex justify-center mb-2">
+      {icon}
+    </div>
+    <p className="font-semibold text-gray-700">{title}</p>
+    <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+  </div>
+);
 
 export default Student_result;
