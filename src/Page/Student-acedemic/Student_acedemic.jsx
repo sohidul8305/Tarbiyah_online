@@ -1,5 +1,5 @@
 // src/Page/Student-acedemic/Student_acedemic.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
   FaUser,
@@ -32,6 +32,7 @@ const StudentAcademic = () => {
     class: "Not Assigned",
     roll: "N/A",
     course: "",
+    phone: "",
   });
 
   const [loading, setLoading] = useState(true);
@@ -55,22 +56,33 @@ const StudentAcademic = () => {
   });
 
   // ============================================================
-  // ✅ Fetch by studentId — batch-based
+  // ✅ Fetch academic data by MULTIPLE identifiers
+  //     useCallback দিয়ে wrap করা — TDZ error হবে না
   // ============================================================
-  const fetchAcademicData = async (studentId) => {
+  const fetchAcademicData = useCallback(async (identifiers = {}) => {
     try {
       setFetchError(null);
 
-      if (!studentId) {
-        console.warn("⚠️ No studentId");
+      const { id, studentId, phone, name, username, course } = identifiers;
+
+      // Build query params
+      const params = new URLSearchParams();
+      if (id) params.append("id", id);
+      if (studentId) params.append("studentId", studentId);
+      if (phone) params.append("phone", phone);
+      if (name) params.append("name", name);
+      if (username) params.append("username", username);
+      if (course) params.append("course", course);
+
+      if (params.toString() === "") {
+        console.warn("⚠️ No identifiers to search");
         setLoading(false);
         setRefreshing(false);
         return;
       }
 
-      const url = `${API_BASE}/student/my-academic/${encodeURIComponent(studentId)}`;
-      console.log(`📥 Fetching academic for studentId: ${studentId}`);
-      console.log("   URL:", url);
+      const url = `${API_BASE}/student/my-academic?${params.toString()}`;
+      console.log(`📥 Fetching academic:`, url);
 
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -103,7 +115,7 @@ const StudentAcademic = () => {
           `✅ Loaded — Videos: ${d.stats?.totalVideos}, Classes: ${d.stats?.totalClasses}, Exams: ${d.stats?.totalExams}, Quizzes: ${d.stats?.totalQuizzes}, PDFs: ${d.stats?.totalPdfs}`,
         );
 
-        // Auto switch to a non-empty tab
+        // Auto switch to first non-empty tab
         if (d.videos?.length > 0) setActiveTab("videos");
         else if (d.classes?.length > 0) setActiveTab("classes");
         else if (d.materials?.exams?.length > 0) setActiveTab("exams");
@@ -119,15 +131,16 @@ const StudentAcademic = () => {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, []);
 
   // ============================================================
-  // ✅ Load student info + fetch by studentId
+  // ✅ Load student info from localStorage
   // ============================================================
   useEffect(() => {
     const savedInfo = localStorage.getItem("studentInfo");
 
     if (!savedInfo) {
+      console.warn("⚠️ No studentInfo in localStorage");
       setLoading(false);
       return;
     }
@@ -136,12 +149,12 @@ const StudentAcademic = () => {
     try {
       parsed = JSON.parse(savedInfo);
     } catch (e) {
+      console.warn("⚠️ Parse error:", e);
       setLoading(false);
       return;
     }
 
-    const sid = parsed._id || parsed.studentId || parsed.username;
-    console.log("🎯 Student ID for fetch:", sid);
+    console.log("🎯 Student info from localStorage:", parsed);
 
     setStudentInfo({
       _id: parsed._id || "",
@@ -151,17 +164,36 @@ const StudentAcademic = () => {
         parsed.class || parsed.course || parsed.department || "Not Assigned",
       roll: parsed.roll || parsed.studentId || "N/A",
       course: parsed.course || parsed.class || "",
+      phone: parsed.phone || "",
     });
 
-    fetchAcademicData(sid);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // ✅ Fetch with ALL identifiers
+    fetchAcademicData({
+      id: parsed._id,
+      studentId: parsed.studentId,
+      phone: parsed.phone,
+      name: parsed.name,
+      username: parsed.username,
+      course: parsed.course || parsed.class,
+    });
+  }, [fetchAcademicData]);
 
   const handleRefresh = () => {
     setRefreshing(true);
-    fetchAcademicData(studentInfo._id || studentInfo.studentId);
+    const parsed = JSON.parse(localStorage.getItem("studentInfo") || "{}");
+    fetchAcademicData({
+      id: parsed._id,
+      studentId: parsed.studentId,
+      phone: parsed.phone,
+      name: parsed.name,
+      username: parsed.username,
+      course: parsed.course || parsed.class,
+    });
   };
 
+  // ============================================================
+  // Sidebar Menu
+  // ============================================================
   const menuItems = [
     {
       id: "dashboard",
@@ -339,7 +371,7 @@ const StudentAcademic = () => {
           )}
 
           {/* No batch warning */}
-          {studentBatches.length === 0 && !fetchError && (
+          {studentBatches.length === 0 && !fetchError && !loading && (
             <div className="bg-yellow-50 border-b border-yellow-200 p-4 text-center">
               <FaInfoCircle className="text-yellow-600 text-2xl mx-auto mb-1" />
               <p className="text-sm font-semibold text-yellow-800">
@@ -633,6 +665,9 @@ const StudentAcademic = () => {
   );
 };
 
+// ==========================================
+// Reusable Components
+// ==========================================
 const EmptyState = ({ icon, title, subtitle }) => (
   <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-8 text-center">
     <div className="text-4xl text-gray-300 flex justify-center mb-2">
