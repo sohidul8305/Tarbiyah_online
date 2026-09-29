@@ -358,12 +358,13 @@ const Student_batch = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: studentForm.name.trim(),
-          studentId: studentForm.studentId.trim(),
-          phone: studentForm.phone.trim(),
-          country: studentForm.country || "BD",
-          course: studentForm.course,
-          paymentStatus: studentForm.paymentStatus,
+          name: formData.name.trim(),
+          course: formData.course,
+          students: Number(formData.students) || 0,
+          schedule: formData.schedule || "",
+          teacher: formData.teacher || "",
+          description: formData.description || "",
+          status: formData.status || "Active",
         }),
       });
       const data = await res.json();
@@ -384,7 +385,6 @@ const Student_batch = () => {
       Swal.fire({ icon: "error", title: "Server Error", text: err.message });
     }
   };
-
   const handleEditBatch = async (e) => {
     e.preventDefault();
     try {
@@ -850,6 +850,9 @@ const Student_batch = () => {
 /* ============================================================
    ✅ BATCH FORM MODAL
 ============================================================ */
+/* ============================================================
+   ✅ BATCH FORM MODAL
+============================================================ */
 const BatchFormModal = ({
   title,
   icon,
@@ -859,7 +862,6 @@ const BatchFormModal = ({
   onClose,
   submitText,
 }) => {
-  // ✅ Local state for teachers array
   const [teachers, setTeachers] = React.useState(() => {
     if (Array.isArray(formData.teachers)) return formData.teachers;
     if (formData.teacher) {
@@ -872,35 +874,28 @@ const BatchFormModal = ({
   });
   const [teacherInput, setTeacherInput] = React.useState("");
 
-  // ✅ Add teacher
   const addTeacher = (value) => {
     const val = (value || "").trim();
     if (val && !teachers.includes(val)) {
       const updated = [...teachers, val];
       setTeachers(updated);
-      // Sync with formData.teacher (comma-joined)
       setFormData({ ...formData, teacher: updated.join(", ") });
       setTeacherInput("");
     }
   };
 
-  // ✅ Remove teacher
   const removeTeacher = (idx) => {
     const updated = teachers.filter((_, i) => i !== idx);
     setTeachers(updated);
     setFormData({ ...formData, teacher: updated.join(", ") });
   };
 
-  // ✅ Handle form submit — sync teachers before submit
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Make sure formData has latest teachers list
     setFormData((prev) => ({
       ...prev,
       teacher: teachers.join(", "),
-      teachers: teachers,
     }));
-    // Delay to let state update, then call onSubmit
     setTimeout(() => onSubmit(e), 0);
   };
 
@@ -918,8 +913,10 @@ const BatchFormModal = ({
             <FiX size={24} />
           </button>
         </div>
+
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Batch Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Batch Name *
@@ -935,6 +932,8 @@ const BatchFormModal = ({
                 placeholder="e.g., Batch 2026-A"
               />
             </div>
+
+            {/* Course */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Course *
@@ -955,6 +954,8 @@ const BatchFormModal = ({
                 ))}
               </select>
             </div>
+
+            {/* Students */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Students
@@ -966,8 +967,11 @@ const BatchFormModal = ({
                   setFormData({ ...formData, students: e.target.value })
                 }
                 className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                placeholder="0"
               />
             </div>
+
+            {/* Schedule */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Schedule
@@ -983,10 +987,10 @@ const BatchFormModal = ({
               />
             </div>
 
-            {/* ✅ Multiple Teachers — Unlimited */}
+            {/* Multiple Teachers */}
             <div className="md:col-span-2">
               <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                Teachers (যতজন চান যোগ করুন)
+                Teachers (একাধিক যোগ করা যাবে)
               </label>
 
               <div className="flex gap-2 mb-2">
@@ -1044,7 +1048,8 @@ const BatchFormModal = ({
               )}
             </div>
 
-            <div>
+            {/* Status */}
+            <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Status
               </label>
@@ -1063,6 +1068,7 @@ const BatchFormModal = ({
             </div>
           </div>
 
+          {/* Description */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Description
@@ -1074,9 +1080,11 @@ const BatchFormModal = ({
               }
               rows="2"
               className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              placeholder="Optional description"
             />
           </div>
 
+          {/* Buttons */}
           <div className="flex gap-3 pt-4 border-t border-gray-200">
             <button
               type="submit"
@@ -3359,19 +3367,102 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     <option value="Mixed">Mixed</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Teacher
+                <div className="md:col-span-2">
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1 flex items-center gap-1">
+                    <FaChalkboardTeacher className="text-purple-600" /> Teachers
+                    (একাধিক যোগ করা যাবে)
                   </label>
-                  <input
-                    type="text"
-                    value={classForm.teacher}
-                    onChange={(e) =>
-                      setClassForm({ ...classForm, teacher: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="Teacher name"
-                  />
+
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      id="classTeacherInput"
+                      placeholder="Teacher name লিখুন → Enter চাপুন বা + Add ক্লিক করুন"
+                      className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          const val = e.target.value.trim();
+                          const existing = Array.isArray(classForm.teachers)
+                            ? classForm.teachers
+                            : [];
+                          if (val && !existing.includes(val)) {
+                            setClassForm({
+                              ...classForm,
+                              teachers: [...existing, val],
+                              teacher: [...existing, val].join(", "),
+                            });
+                            e.target.value = "";
+                          }
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const input =
+                          document.getElementById("classTeacherInput");
+                        const val = input?.value.trim();
+                        const existing = Array.isArray(classForm.teachers)
+                          ? classForm.teachers
+                          : [];
+                        if (val && !existing.includes(val)) {
+                          setClassForm({
+                            ...classForm,
+                            teachers: [...existing, val],
+                            teacher: [...existing, val].join(", "),
+                          });
+                          input.value = "";
+                          input.focus();
+                        }
+                      }}
+                      className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1 whitespace-nowrap"
+                    >
+                      <FaPlusCircle size={11} /> Add
+                    </button>
+                  </div>
+
+                  {Array.isArray(classForm.teachers) &&
+                    classForm.teachers.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 p-2 bg-purple-50 rounded-lg border border-purple-200">
+                        {classForm.teachers.map((t, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1.5 bg-white text-purple-800 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-purple-300"
+                          >
+                            <FaChalkboardTeacher
+                              size={10}
+                              className="text-purple-600"
+                            />
+                            {t}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = classForm.teachers.filter(
+                                  (_, i) => i !== idx,
+                                );
+                                setClassForm({
+                                  ...classForm,
+                                  teachers: updated,
+                                  teacher: updated.join(", "),
+                                });
+                              }}
+                              className="text-purple-500 hover:text-red-600 font-bold text-base leading-none ml-0.5"
+                              title="Remove"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                  {(!Array.isArray(classForm.teachers) ||
+                    classForm.teachers.length === 0) && (
+                    <p className="text-[10px] text-gray-400 italic">
+                      এখনো কোনো teacher যোগ করা হয়নি — উপরে লিখে Add করুন
+                    </p>
+                  )}
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
