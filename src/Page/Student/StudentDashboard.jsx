@@ -26,7 +26,7 @@ import { FiMenu, FiX } from "react-icons/fi";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
 
-// ✅ Helper — source label resolve
+// ✅ Source label helper
 const getSourceLabel = (src) => {
   if (src === "basic_tazweed_students") return "Basic Tazweed";
   if (src === "najera_batch_students") return "Najera Batch";
@@ -76,7 +76,7 @@ const StudentDashboard = () => {
   const [loadingCourses, setLoadingCourses] = useState(false);
 
   // ============================================================
-  // ✅ Load basic info from localStorage, then fetch fresh from API
+  // ✅ Load from localStorage + fetch fresh
   // ============================================================
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isStudentLoggedIn");
@@ -125,7 +125,7 @@ const StudentDashboard = () => {
   }, []);
 
   // ============================================================
-  // ✅ Fetch full student data from correct source
+  // ✅ Fetch full student data
   // ============================================================
   const fetchFullStudentData = async (studentId, loginSource) => {
     try {
@@ -187,7 +187,6 @@ const StudentDashboard = () => {
             data.class ||
             data.subject ||
             data.program ||
-            data.enrolledCourse ||
             prev.course ||
             "",
           class:
@@ -195,7 +194,6 @@ const StudentDashboard = () => {
             data.course ||
             data.subject ||
             data.program ||
-            data.enrolledCourse ||
             prev.class ||
             "",
           email: data.email || prev.email || "",
@@ -250,7 +248,7 @@ const StudentDashboard = () => {
   };
 
   // ============================================================
-  // ✅ Fetch enrolled courses — Multi-source friendly
+  // ✅ Fetch enrolled courses
   // ============================================================
   const fetchEnrolledCourses = async (studentId, loginSource) => {
     try {
@@ -270,6 +268,7 @@ const StudentDashboard = () => {
         console.warn("⚠️ my-courses API failed:", e.message);
       }
 
+      // Fallback — course string থেকে
       if (loadedCourses.length === 0) {
         const raw = localStorage.getItem("studentInfo");
         if (raw) {
@@ -280,7 +279,6 @@ const StudentDashboard = () => {
             parsed.enrolledCourses.length > 0
           ) {
             loadedCourses = parsed.enrolledCourses;
-            console.log("✅ Fallback: enrolledCourses array");
           } else {
             const courseString =
               parsed.course ||
@@ -307,7 +305,7 @@ const StudentDashboard = () => {
                 duration: "",
               }));
               console.log(
-                `✅ Fallback: ${loadedCourses.length} from course string`,
+                `✅ Fallback: ${loadedCourses.length} courses from course string`,
               );
             }
           }
@@ -438,7 +436,6 @@ const StudentDashboard = () => {
                 <p className="text-xs opacity-80 truncate">
                   {studentInfo.class || studentInfo.course}
                 </p>
-
                 {studentInfo.sourceLabel && (
                   <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-white/25 font-semibold">
                     {studentInfo.sourceLabel}
@@ -565,7 +562,7 @@ const StudentDashboard = () => {
 };
 
 // ==========================================
-// Dashboard Content — Fully Dynamic
+// Dashboard Content
 // ==========================================
 const DashboardContent = ({
   studentInfo,
@@ -578,6 +575,10 @@ const DashboardContent = ({
   const totalBill = Number(studentInfo.courseFee) || 0;
   const totalPaid = Number(studentInfo.paidAmount) || 0;
   const totalDue = Number(studentInfo.dueAmount) || 0;
+
+  // ✅ This value shows both in header and title
+  const courseDisplayValue =
+    studentInfo.course || studentInfo.class || "Basic Tazweed";
 
   return (
     <div className="space-y-4">
@@ -707,9 +708,11 @@ const DashboardContent = ({
       <div className="border border-[#00ADD2] bg-white rounded-sm shadow-sm mb-6">
         <div className="flex flex-wrap items-center gap-2 p-2 border-b border-[#00ADD2] text-sm bg-[#f4f6f9] font-medium text-gray-700">
           <FaFileAlt className="text-[#00ADD2]" /> Registered Courses of
+          {/* ✅ Course value — header এ */}
           <span className="border border-[#00ADD2] rounded px-2 py-0.5 text-xs bg-white font-bold text-[#00ADD2]">
-            {studentInfo.course || studentInfo.class || "N/A"}
+            {courseDisplayValue}
           </span>
+          {/* ✅ Source badge */}
           {studentInfo.sourceLabel && (
             <span
               className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
@@ -749,8 +752,19 @@ const DashboardContent = ({
                     <p className="mt-2 text-xs">Loading courses...</p>
                   </td>
                 </tr>
-              ) : courses.length > 0 ? (
-                courses.map((course, index) => (
+              ) : (
+                // ✅ courses empty হলেও অন্তত ১টা row দেখাবে
+                (courses.length > 0
+                  ? courses
+                  : [
+                      {
+                        _id: "fallback_0",
+                        code: "CRS-001",
+                        title: "Basic Tazweed",
+                        className: "Basic Tazweed",
+                      },
+                    ]
+                ).map((course, index) => (
                   <tr
                     key={course._id || index}
                     className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
@@ -760,19 +774,15 @@ const DashboardContent = ({
                       {String(index + 1).padStart(2, "0")}
                     </td>
 
-                    {/* ✅ Title — Course Name */}
+                    {/* ✅ Title — Hardcoded "Basic Tazweed" */}
                     <td className="px-4 py-3">
                       <p className="font-medium text-[#00ADD2]">
-                        {course.title ||
-                          course.className ||
-                          studentInfo.course ||
-                          studentInfo.class ||
-                          "Basic Tazweed"}
+                        Basic Tazweed
                       </p>
 
                       <div className="text-[11px] text-[#00ADD2] flex gap-2 mt-1">
                         <Link
-                          to={`/student-attendance/${course.code || course._id}`}
+                          to={`/student-attendance/:courseId${course.code || course._id}`}
                           className="hover:underline"
                         >
                           [Attendances]
@@ -786,28 +796,18 @@ const DashboardContent = ({
                       </div>
 
                       <p className="text-xs text-gray-500 italic mt-1 font-serif">
-                        {course.teacher ? `Teacher: ${course.teacher}` : ""}{" "}
-                        {course.duration ? `(${course.duration})` : ""}
+                        {studentInfo.class || "Fall 2026 (Jul-Dec)"}
                       </p>
                     </td>
                   </tr>
                 ))
-              ) : (
-                <tr>
-                  <td colSpan="2" className="text-center py-4 text-gray-500">
-                    <FaInfoCircle className="text-2xl text-gray-300 mx-auto mb-2" />
-                    <p className="text-xs">
-                      No registered courses found. Please contact admin.
-                    </p>
-                  </td>
-                </tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ✅ Payment Section — Dynamic */}
+      {/* ✅ Payment Section */}
       <PaymentSection
         paymentTab={paymentTab}
         setPaymentTab={setPaymentTab}

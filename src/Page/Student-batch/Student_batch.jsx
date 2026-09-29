@@ -847,6 +847,9 @@ const Student_batch = () => {
 /* ============================================================
    ✅ BATCH FORM MODAL
 ============================================================ */
+/* ============================================================
+   ✅ BATCH FORM MODAL
+============================================================ */
 const BatchFormModal = ({
   title,
   icon,
@@ -855,215 +858,245 @@ const BatchFormModal = ({
   onSubmit,
   onClose,
   submitText,
-}) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-      <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
-        <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          {icon} {title}
-        </h3>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-          <FiX size={24} />
-        </button>
-      </div>
-      <form onSubmit={onSubmit} className="p-6 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Batch Name *
-            </label>
-            <input
-              type="text"
-              required
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
-              placeholder="e.g., Batch 2026-A"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Course *
-            </label>
-            <select
-              required
-              value={formData.course}
-              onChange={(e) =>
-                setFormData({ ...formData, course: e.target.value })
-              }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
-            >
-              <option value="">Select Course</option>
-              {COURSE_OPTIONS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Students
-            </label>
-            <input
-              type="number"
-              value={formData.students}
-              onChange={(e) =>
-                setFormData({ ...formData, students: e.target.value })
-              }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Schedule
-            </label>
-            <input
-              type="text"
-              value={formData.schedule}
-              onChange={(e) =>
-                setFormData({ ...formData, schedule: e.target.value })
-              }
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
-              placeholder="e.g., Mon, Wed 09:00 AM"
-            />
-          </div>
-          {/* ✅ Multiple Teachers — Unlimited */}
-          <div className="md:col-span-2">
-            <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-              Teachers (যতজন চান যোগ করুন)
-            </label>
+}) => {
+  // ✅ Local state for teachers array
+  const [teachers, setTeachers] = React.useState(() => {
+    if (Array.isArray(formData.teachers)) return formData.teachers;
+    if (formData.teacher) {
+      return String(formData.teacher)
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+    }
+    return [];
+  });
+  const [teacherInput, setTeacherInput] = React.useState("");
 
-            <div className="flex gap-2 mb-2">
+  // ✅ Add teacher
+  const addTeacher = (value) => {
+    const val = (value || "").trim();
+    if (val && !teachers.includes(val)) {
+      const updated = [...teachers, val];
+      setTeachers(updated);
+      // Sync with formData.teacher (comma-joined)
+      setFormData({ ...formData, teacher: updated.join(", ") });
+      setTeacherInput("");
+    }
+  };
+
+  // ✅ Remove teacher
+  const removeTeacher = (idx) => {
+    const updated = teachers.filter((_, i) => i !== idx);
+    setTeachers(updated);
+    setFormData({ ...formData, teacher: updated.join(", ") });
+  };
+
+  // ✅ Handle form submit — sync teachers before submit
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Make sure formData has latest teachers list
+    setFormData((prev) => ({
+      ...prev,
+      teacher: teachers.join(", "),
+      teachers: teachers,
+    }));
+    // Delay to let state update, then call onSubmit
+    setTimeout(() => onSubmit(e), 0);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+          <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            {icon} {title}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+          >
+            <FiX size={24} />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Batch Name *
+              </label>
               <input
                 type="text"
-                id="teacherInputField"
-                placeholder="Teacher name লিখুন → Enter চাপুন বা + Add ক্লিক করুন"
-                className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    const val = e.target.value.trim();
-                    if (val && !classForm.teachers.includes(val)) {
-                      setClassForm({
-                        ...classForm,
-                        teachers: [...classForm.teachers, val],
-                      });
-                      e.target.value = "";
-                    }
-                  }
-                }}
+                required
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                placeholder="e.g., Batch 2026-A"
               />
-              <button
-                type="button"
-                onClick={() => {
-                  const input = document.getElementById("teacherInputField");
-                  const val = input?.value.trim();
-                  if (val && !classForm.teachers.includes(val)) {
-                    setClassForm({
-                      ...classForm,
-                      teachers: [...classForm.teachers, val],
-                    });
-                    input.value = "";
-                    input.focus();
-                  }
-                }}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1 whitespace-nowrap"
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Course *
+              </label>
+              <select
+                required
+                value={formData.course}
+                onChange={(e) =>
+                  setFormData({ ...formData, course: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
               >
-                <FaPlusCircle size={11} /> Add
-              </button>
+                <option value="">Select Course</option>
+                {COURSE_OPTIONS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Students
+              </label>
+              <input
+                type="number"
+                value={formData.students}
+                onChange={(e) =>
+                  setFormData({ ...formData, students: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Schedule
+              </label>
+              <input
+                type="text"
+                value={formData.schedule}
+                onChange={(e) =>
+                  setFormData({ ...formData, schedule: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                placeholder="e.g., Mon, Wed 09:00 AM"
+              />
             </div>
 
-            {classForm.teachers.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 p-2 bg-purple-50 rounded-lg border border-purple-200">
-                {classForm.teachers.map((t, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center gap-1.5 bg-white text-purple-800 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-purple-300"
-                  >
-                    <FaChalkboardTeacher
-                      size={10}
-                      className="text-purple-600"
-                    />
-                    {t}
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setClassForm({
-                          ...classForm,
-                          teachers: classForm.teachers.filter(
-                            (_, i) => i !== idx,
-                          ),
-                        })
-                      }
-                      className="text-purple-500 hover:text-red-600 font-bold text-base leading-none ml-0.5"
-                      title="Remove"
-                    >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
+            {/* ✅ Multiple Teachers — Unlimited */}
+            <div className="md:col-span-2">
+              <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                Teachers (যতজন চান যোগ করুন)
+              </label>
 
-            {classForm.teachers.length === 0 && (
-              <p className="text-[10px] text-gray-400 italic">
-                এখনো কোনো teacher যোগ করা হয়নি — উপরে লিখে Add করুন
-              </p>
-            )}
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={teacherInput}
+                  placeholder="Teacher name লিখুন → Enter চাপুন বা + Add ক্লিক করুন"
+                  onChange={(e) => setTeacherInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      addTeacher(teacherInput);
+                    }
+                  }}
+                  className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                />
+                <button
+                  type="button"
+                  onClick={() => addTeacher(teacherInput)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1 whitespace-nowrap"
+                >
+                  <FaPlusCircle size={11} /> Add
+                </button>
+              </div>
+
+              {teachers.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 p-2 bg-purple-50 rounded-lg border border-purple-200">
+                  {teachers.map((t, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1.5 bg-white text-purple-800 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-purple-300"
+                    >
+                      <FaChalkboardTeacher
+                        size={10}
+                        className="text-purple-600"
+                      />
+                      {t}
+                      <button
+                        type="button"
+                        onClick={() => removeTeacher(idx)}
+                        className="text-purple-500 hover:text-red-600 font-bold text-base leading-none ml-0.5"
+                        title="Remove"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {teachers.length === 0 && (
+                <p className="text-[10px] text-gray-400 italic">
+                  এখনো কোনো teacher যোগ করা হয়নি — উপরে লিখে Add করুন
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Status
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) =>
+                  setFormData({ ...formData, status: e.target.value })
+                }
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              >
+                <option value="Active">Active</option>
+                <option value="Upcoming">Upcoming</option>
+                <option value="Completed">Completed</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+            </div>
           </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Status
+              Description
             </label>
-            <select
-              value={formData.status}
+            <textarea
+              value={formData.description}
               onChange={(e) =>
-                setFormData({ ...formData, status: e.target.value })
+                setFormData({ ...formData, description: e.target.value })
               }
+              rows="2"
               className="w-full border border-gray-300 rounded-lg px-3 py-2"
-            >
-              <option value="Active">Active</option>
-              <option value="Upcoming">Upcoming</option>
-              <option value="Completed">Completed</option>
-              <option value="Cancelled">Cancelled</option>
-            </select>
+            />
           </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Description
-          </label>
-          <textarea
-            value={formData.description}
-            onChange={(e) =>
-              setFormData({ ...formData, description: e.target.value })
-            }
-            rows="2"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          />
-        </div>
-        <div className="flex gap-3 pt-4 border-t border-gray-200">
-          <button
-            type="submit"
-            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold"
-          >
-            {submitText}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
+
+          <div className="flex gap-3 pt-4 border-t border-gray-200">
+            <button
+              type="submit"
+              className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold"
+            >
+              {submitText}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 /* ============================================================
    ✅ CLASS LMS VIEW  (Main LMS)

@@ -686,7 +686,7 @@ const Due_payment = () => {
 };
 
 // ==========================================
-// Reusable
+// Reusablestuden
 // ==========================================
 const EmptyState = ({ icon, title, subtitle }) => (
   <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-8 text-center">
