@@ -17,7 +17,6 @@ import {
   FaCalendarAlt,
   FaUserGraduate,
   FaMapMarkerAlt,
-  FaTransgender,
   FaIdCard,
   FaKey,
   FaGlobe,
@@ -43,24 +42,16 @@ const StudentProfile = () => {
     _id: "",
     name: "",
     studentId: "",
-    username: "",
     password: "",
-    email: "",
     phone: "",
-    roll: "",
     class: "",
     course: "",
     status: "",
-    // ✅ Source info
-    loginSource: "",
-    source: "",
-    sourceLabel: "",
     // ✅ Personal
     fatherName: "",
     motherName: "",
     guardianName: "",
     guardianPhone: "",
-    gender: "",
     dob: "",
     bloodGroup: "",
     religion: "",
@@ -146,11 +137,8 @@ const StudentProfile = () => {
       _id: d._id || prev._id || "",
       name: d.name || prev.name || "",
       studentId: d.studentId || prev.studentId || "",
-      username: d.username || prev.username || "",
       password: d.password || prev.password || "••••••••",
-      email: d.email || prev.email || "",
       phone: d.phone || prev.phone || "",
-      roll: d.roll || prev.roll || "",
       class: d.class || d.course || prev.class || "",
       course: d.course || d.class || prev.course || "",
       status: d.status || prev.status || "Active",
@@ -163,7 +151,6 @@ const StudentProfile = () => {
       motherName: d.motherName || prev.motherName || "",
       guardianName: d.guardianName || d.fatherName || prev.guardianName || "",
       guardianPhone: d.guardianPhone || d.phone || prev.guardianPhone || "",
-      gender: d.gender || prev.gender || "",
       dob: d.dob || d.dateOfBirth || prev.dob || "",
       bloodGroup: d.bloodGroup || prev.bloodGroup || "",
       religion: d.religion || prev.religion || "",
@@ -484,32 +471,11 @@ const StudentProfile = () => {
                 </p>
               </Field>
 
-              <Field label="Username" icon={<FaUser />}>
-                <p className="text-gray-800 font-mono text-sm">
-                  {profile.username || "Not assigned"}
-                </p>
-              </Field>
-
               <Field label="Password" icon={<FaKey />}>
                 <p className="text-gray-800 font-mono text-sm">
                   {profile.password || "••••••••"}
                 </p>
               </Field>
-
-              <Field label="Email" icon={<FaEnvelope />}>
-                {isEditing ? (
-                  <input
-                    type="email"
-                    name="email"
-                    value={profile.email}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 text-sm"
-                  />
-                ) : (
-                  <p className="text-gray-800">{profile.email || "N/A"}</p>
-                )}
-              </Field>
-
               <Field label="Phone" icon={<FaPhone />}>
                 {isEditing ? (
                   <input
@@ -524,46 +490,8 @@ const StudentProfile = () => {
                 )}
               </Field>
 
-              <Field label="Father's Name" icon={<FaUserGraduate />}>
-                <p className="text-gray-800">{profile.fatherName || "N/A"}</p>
-              </Field>
-
-              <Field label="Mother's Name" icon={<FaUserGraduate />}>
-                <p className="text-gray-800">{profile.motherName || "N/A"}</p>
-              </Field>
-
-              <Field label="Gender" icon={<FaTransgender />}>
-                {isEditing ? (
-                  <select
-                    name="gender"
-                    value={profile.gender}
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 text-sm"
-                  >
-                    <option value="">Select</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                ) : (
-                  <p className="text-gray-800">{profile.gender || "N/A"}</p>
-                )}
-              </Field>
-
-              <Field label="Date of Birth" icon={<FaCalendarAlt />}>
-                <p className="text-gray-800">
-                  {profile.dob
-                    ? new Date(profile.dob).toLocaleDateString()
-                    : "N/A"}
-                </p>
-              </Field>
-
               <Field label="Country" icon={<FaGlobe />}>
                 <p className="text-gray-800">{profile.country || "N/A"}</p>
-              </Field>
-
-              <Field label="Blood Group" icon={<FaIdCard />}>
-                <p className="text-gray-800">{profile.bloodGroup || "N/A"}</p>
               </Field>
             </div>
 
@@ -574,12 +502,13 @@ const StudentProfile = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
               <Field label="Course / Class" icon={<FaBook />}>
                 <p className="text-gray-800 font-medium">
-                  {profile.course || profile.class || "N/A"}
+                  {profile.sourceLabel ||
+                    profile.course ||
+                    profile.class ||
+                    "N/A"}
                 </p>
               </Field>
-              <Field label="Roll" icon={<FaIdCard />}>
-                <p className="text-gray-800">{profile.roll || "N/A"}</p>
-              </Field>
+
               <Field label="Admission Date" icon={<FaCalendarAlt />}>
                 <p className="text-gray-800">
                   {profile.admissionDate
@@ -587,51 +516,9 @@ const StudentProfile = () => {
                     : "N/A"}
                 </p>
               </Field>
-              <Field label="Source" icon={<FaUniversity />}>
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-bold border ${sourceStyle(profile.source)}`}
-                >
-                  {profile.sourceLabel || "Regular Student"}
-                </span>
-              </Field>
             </div>
 
-            {/* ============ Address ============ */}
-            <h3 className="text-sm font-bold text-gray-700 mb-3 pb-2 border-b flex items-center gap-2">
-              <FaMapMarkerAlt /> Address
-            </h3>
-            <div className="grid grid-cols-1 gap-4 mb-6">
-              <Field label="Present Address" icon={<FaMapMarkerAlt />}>
-                {isEditing ? (
-                  <textarea
-                    name="presentAddress"
-                    value={profile.presentAddress}
-                    onChange={handleChange}
-                    rows="2"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 text-sm"
-                  />
-                ) : (
-                  <p className="text-gray-800">
-                    {profile.presentAddress || profile.address || "N/A"}
-                  </p>
-                )}
-              </Field>
-              <Field label="Permanent Address" icon={<FaMapMarkerAlt />}>
-                {isEditing ? (
-                  <textarea
-                    name="permanentAddress"
-                    value={profile.permanentAddress}
-                    onChange={handleChange}
-                    rows="2"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 text-sm"
-                  />
-                ) : (
-                  <p className="text-gray-800">
-                    {profile.permanentAddress || profile.address || "N/A"}
-                  </p>
-                )}
-              </Field>
-            </div>
+            <div className="grid grid-cols-1 gap-4 mb-6"></div>
 
             {/* ============ Payment Info ============ */}
             <h3 className="text-sm font-bold text-gray-700 mb-3 pb-2 border-b flex items-center gap-2">

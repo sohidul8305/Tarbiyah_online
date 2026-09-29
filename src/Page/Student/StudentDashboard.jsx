@@ -26,6 +26,13 @@ import { FiMenu, FiX } from "react-icons/fi";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
 
+// ✅ Helper — source label resolve
+const getSourceLabel = (src) => {
+  if (src === "basic_tazweed_students") return "Basic Tazweed";
+  if (src === "najera_batch_students") return "Najera Batch";
+  return "Regular Student";
+};
+
 const StudentDashboard = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
@@ -61,6 +68,8 @@ const StudentDashboard = () => {
     guardianPhone: "",
     paidMonths: [],
     loginSource: "",
+    source: "",
+    sourceLabel: "",
   });
 
   const [courses, setCourses] = useState([]);
@@ -90,19 +99,25 @@ const StudentDashboard = () => {
       return;
     }
 
-    // Set initial data from localStorage (fast load)
+    const resolvedSource =
+      parsed.loginSource || localStorage.getItem("loginSource") || "students";
+
     setStudentInfo((prev) => ({
       ...prev,
       ...parsed,
       name: parsed.name || "",
       roll: parsed.roll || "",
-      course: parsed.course || parsed.class || "",
-      class: parsed.class || parsed.course || "",
+      course:
+        parsed.course || parsed.class || parsed.subject || parsed.program || "",
+      class:
+        parsed.class || parsed.course || parsed.subject || parsed.program || "",
+      loginSource: resolvedSource,
+      source: resolvedSource,
+      sourceLabel: getSourceLabel(resolvedSource),
     }));
 
-    // Then fetch fresh data from API
     if (parsed._id) {
-      fetchFullStudentData(parsed._id, parsed.loginSource);
+      fetchFullStudentData(parsed._id, resolvedSource);
     } else {
       setLoading(false);
     }
@@ -112,14 +127,10 @@ const StudentDashboard = () => {
   // ============================================================
   // ✅ Fetch full student data from correct source
   // ============================================================
-  // ============================================================
-  // ✅ Fetch full student data from correct source — FIXED
-  // ============================================================
   const fetchFullStudentData = async (studentId, loginSource) => {
     try {
       let data = null;
 
-      // ✅ loginSource resolve করুন (localStorage fallback সহ)
       const resolvedSource =
         loginSource || localStorage.getItem("loginSource") || "students";
 
@@ -152,7 +163,6 @@ const StudentDashboard = () => {
       if (data) {
         console.log("✅ Fresh student data:", data);
 
-        // ✅ Payment calculation
         const paid =
           Number(data.paidAmount) ||
           (data.paidMonths || []).reduce(
@@ -164,7 +174,6 @@ const StudentDashboard = () => {
         const due =
           Number(data.dueAmount) || Math.max(fee - scholarship - paid, 0);
 
-        // ✅ সব field সঠিকভাবে map — Tazweed/Najera/Students সব source এর জন্য
         setStudentInfo((prev) => ({
           ...prev,
           ...data,
@@ -173,11 +182,24 @@ const StudentDashboard = () => {
           roll: data.roll || prev.roll || "",
           username: data.username || prev.username || "",
           studentId: data.studentId || prev.studentId || "",
-          course: data.course || data.class || prev.course || "",
-          class: data.class || data.course || prev.class || "",
+          course:
+            data.course ||
+            data.class ||
+            data.subject ||
+            data.program ||
+            data.enrolledCourse ||
+            prev.course ||
+            "",
+          class:
+            data.class ||
+            data.course ||
+            data.subject ||
+            data.program ||
+            data.enrolledCourse ||
+            prev.class ||
+            "",
           email: data.email || prev.email || "",
           phone: data.phone || prev.phone || "",
-          // ✅ Missing fields — এখন সহজে map হচ্ছে
           gender: data.gender || prev.gender || "",
           country: data.country || prev.country || "BD",
           dob: data.dob || data.dateOfBirth || prev.dob || "",
@@ -202,11 +224,11 @@ const StudentDashboard = () => {
           scholarshipAmount: scholarship,
           monthlyFee: Number(data.monthlyFee) || fee,
           paidMonths: data.paidMonths || [],
-          // ✅ loginSource save
           loginSource: resolvedSource,
+          source: resolvedSource,
+          sourceLabel: getSourceLabel(resolvedSource),
         }));
 
-        // ✅ localStorage update — loginSource সহ
         localStorage.setItem(
           "studentInfo",
           JSON.stringify({
@@ -219,7 +241,6 @@ const StudentDashboard = () => {
         console.warn(`⚠️ Student ${studentId} not found in ${resolvedSource}`);
       }
 
-      // ✅ Courses fetch
       await fetchEnrolledCourses(studentId, resolvedSource);
     } catch (e) {
       console.error("❌ Fetch student error:", e);
@@ -227,80 +248,73 @@ const StudentDashboard = () => {
       setLoading(false);
     }
   };
-  // ============================================================
-  // ✅ Fetch enrolled courses
-  // ============================================================
+
   // ============================================================
   // ✅ Fetch enrolled courses — Multi-source friendly
   // ============================================================
   const fetchEnrolledCourses = async (studentId, loginSource) => {
     try {
       setLoadingCourses(true);
+      let loadedCourses = [];
 
-      // ✅ Step 1: Students collection এর জন্য API hit
-      if (!loginSource || loginSource === "students") {
-        try {
-          const res = await fetch(
-            `${API_BASE}/students/my-courses/${studentId}`,
-          );
-          const d = await res.json();
-          if (d.success && Array.isArray(d.courses) && d.courses.length > 0) {
-            setCourses(d.courses);
-            return;
+      try {
+        const res = await fetch(`${API_BASE}/students/my-courses/${studentId}`);
+        const d = await res.json();
+        console.log("📚 my-courses API response:", d);
+
+        if (d.success && Array.isArray(d.courses) && d.courses.length > 0) {
+          loadedCourses = d.courses;
+          console.log(`✅ Loaded ${d.courses.length} courses from API`);
+        }
+      } catch (e) {
+        console.warn("⚠️ my-courses API failed:", e.message);
+      }
+
+      if (loadedCourses.length === 0) {
+        const raw = localStorage.getItem("studentInfo");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+
+          if (
+            Array.isArray(parsed.enrolledCourses) &&
+            parsed.enrolledCourses.length > 0
+          ) {
+            loadedCourses = parsed.enrolledCourses;
+            console.log("✅ Fallback: enrolledCourses array");
+          } else {
+            const courseString =
+              parsed.course ||
+              parsed.class ||
+              parsed.subject ||
+              parsed.program ||
+              "";
+            if (courseString) {
+              const courseNames = String(courseString)
+                .split(/[,\n]/)
+                .map((s) => s.trim())
+                .filter(Boolean);
+
+              loadedCourses = courseNames.map((name, i) => ({
+                _id: `fallback_${i}_${Date.now()}`,
+                code: name
+                  .substring(0, 8)
+                  .toUpperCase()
+                  .replace(/[^A-Z0-9]/g, ""),
+                title: name,
+                className: name,
+                section: "",
+                teacher: "",
+                duration: "",
+              }));
+              console.log(
+                `✅ Fallback: ${loadedCourses.length} from course string`,
+              );
+            }
           }
-        } catch (e) {
-          console.warn("⚠️ my-courses API failed, using fallback");
         }
       }
 
-      // ✅ Step 2: Fallback — studentInfo থেকে course string parse
-      const raw = localStorage.getItem("studentInfo");
-      if (!raw) {
-        setCourses([]);
-        return;
-      }
-
-      const parsed = JSON.parse(raw);
-
-      // ✅ Priority: enrolledCourses array > course string > class string
-      if (
-        Array.isArray(parsed.enrolledCourses) &&
-        parsed.enrolledCourses.length > 0
-      ) {
-        setCourses(parsed.enrolledCourses);
-        return;
-      }
-
-      const courseString = parsed.course || parsed.class || "";
-      if (!courseString) {
-        setCourses([]);
-        return;
-      }
-
-      const courseNames = String(courseString)
-        .split(/[,\n]/)
-        .map((s) => s.trim())
-        .filter(Boolean);
-
-      if (courseNames.length === 0) {
-        setCourses([]);
-        return;
-      }
-
-      const fallbackCourses = courseNames.map((name, i) => ({
-        _id: `fallback_${i}_${Date.now()}`,
-        code: name
-          .substring(0, 8)
-          .toUpperCase()
-          .replace(/[^A-Z0-9]/g, ""),
-        title: name,
-        className: name,
-        section: "",
-        teacher: "",
-        duration: "",
-      }));
-
-      setCourses(fallbackCourses);
+      setCourses(loadedCourses);
     } catch (e) {
       console.error("❌ Fetch courses error:", e);
       setCourses([]);
@@ -316,6 +330,8 @@ const StudentDashboard = () => {
       localStorage.removeItem("studentInfo");
       localStorage.removeItem("studentEmail");
       localStorage.removeItem("studentPhone");
+      localStorage.removeItem("loginSource");
+      localStorage.removeItem("studentToken");
 
       await Swal.fire({
         icon: "success",
@@ -423,7 +439,6 @@ const StudentDashboard = () => {
                   {studentInfo.class || studentInfo.course}
                 </p>
 
-                {/* ✅ Source Badge এখানে যোগ করুন */}
                 {studentInfo.sourceLabel && (
                   <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-white/25 font-semibold">
                     {studentInfo.sourceLabel}
@@ -560,7 +575,6 @@ const DashboardContent = ({
 }) => {
   const [paymentTab, setPaymentTab] = useState("summary");
 
-  // ✅ Calculate payments from real data
   const totalBill = Number(studentInfo.courseFee) || 0;
   const totalPaid = Number(studentInfo.paidAmount) || 0;
   const totalDue = Number(studentInfo.dueAmount) || 0;
@@ -568,7 +582,7 @@ const DashboardContent = ({
   return (
     <div className="space-y-4">
       {/* Welcome Banner */}
-      <div className="bg-[#6b2158] text-white p-3 rounded-sm shadow-sm text-sm flex items-center">
+      <div className="bg-[#6b2158] text-white p-3 rounded-sm shadow-sm text-sm flex items-center justify-between gap-3">
         <p>
           Assalamu alaikum wa rahmatullahi wa barakatuh. Ahlan wa Sahlan WA
           Masa'al Khair!{" "}
@@ -577,6 +591,11 @@ const DashboardContent = ({
             {studentInfo.roll ? `[${studentInfo.roll}]` : ""}
           </strong>
         </p>
+        {studentInfo.sourceLabel && (
+          <span className="shrink-0 text-[10px] px-2 py-1 rounded-full bg-white/20 font-bold">
+            🎓 {studentInfo.sourceLabel}
+          </span>
+        )}
       </div>
 
       {/* Important Links */}
@@ -684,14 +703,13 @@ const DashboardContent = ({
         </div>
       </div>
 
-      {/* ✅ Registered Courses — Dynamic with Source */}
+      {/* ✅ Registered Courses — Dynamic */}
       <div className="border border-[#00ADD2] bg-white rounded-sm shadow-sm mb-6">
-        <div className="flex items-center gap-2 p-2 border-b border-[#00ADD2] text-sm bg-[#f4f6f9] font-medium text-gray-700">
+        <div className="flex flex-wrap items-center gap-2 p-2 border-b border-[#00ADD2] text-sm bg-[#f4f6f9] font-medium text-gray-700">
           <FaFileAlt className="text-[#00ADD2]" /> Registered Courses of
-          <select className="border border-[#00ADD2] rounded px-2 py-0.5 text-xs bg-white focus:outline-none">
-            <option>Fall 2026 (Jul-Dec)</option>
-          </select>
-          {/* ✅ Source Badge — Header এ */}
+          <span className="border border-[#00ADD2] rounded px-2 py-0.5 text-xs bg-white font-bold text-[#00ADD2]">
+            {studentInfo.course || studentInfo.class || "N/A"}
+          </span>
           {studentInfo.sourceLabel && (
             <span
               className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
@@ -721,16 +739,12 @@ const DashboardContent = ({
                   Ser
                 </th>
                 <th className="px-4 py-2 font-semibold">Title</th>
-                {/* ✅ Source Column */}
-                <th className="px-4 py-2 font-semibold w-40 border-l border-gray-200 text-center">
-                  Source
-                </th>
               </tr>
             </thead>
             <tbody>
               {loadingCourses ? (
                 <tr>
-                  <td colSpan="3" className="text-center py-4 text-gray-500">
+                  <td colSpan="2" className="text-center py-4 text-gray-500">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#00ADD2] mx-auto"></div>
                     <p className="mt-2 text-xs">Loading courses...</p>
                   </td>
@@ -741,15 +755,21 @@ const DashboardContent = ({
                     key={course._id || index}
                     className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
                   >
-                    <td className="px-4 py-3 align-top border-r border-gray-200 text-center">
-                      {index + 1}
+                    {/* ✅ Serial — 01, 02, 03 */}
+                    <td className="px-4 py-3 align-top border-r border-gray-200 text-center font-mono">
+                      {String(index + 1).padStart(2, "0")}
                     </td>
+
+                    {/* ✅ Title — Course Name */}
                     <td className="px-4 py-3">
                       <p className="font-medium text-[#00ADD2]">
-                        {course.code ? `${course.code}: ` : ""}
-                        {course.title || course.className || "Course"}{" "}
-                        {course.section ? `[${course.section}]` : ""}
+                        {course.title ||
+                          course.className ||
+                          studentInfo.course ||
+                          studentInfo.class ||
+                          "Basic Tazweed"}
                       </p>
+
                       <div className="text-[11px] text-[#00ADD2] flex gap-2 mt-1">
                         <Link
                           to={`/student-attendance/${course.code || course._id}`}
@@ -764,41 +784,17 @@ const DashboardContent = ({
                           [Course Notices]
                         </Link>
                       </div>
+
                       <p className="text-xs text-gray-500 italic mt-1 font-serif">
-                        {course.teacher
-                          ? `Teacher: ${course.teacher}`
-                          : studentInfo.class || ""}{" "}
+                        {course.teacher ? `Teacher: ${course.teacher}` : ""}{" "}
                         {course.duration ? `(${course.duration})` : ""}
                       </p>
-                    </td>
-
-                    {/* ✅ Source Cell */}
-                    <td className="px-4 py-3 align-top border-l border-gray-200 text-center">
-                      <span
-                        className={`inline-block text-[10px] px-2 py-1 rounded-full font-bold ${
-                          studentInfo.source === "basic_tazweed_students"
-                            ? "bg-green-100 text-green-700"
-                            : studentInfo.source === "najera_batch_students"
-                              ? "bg-purple-100 text-purple-700"
-                              : "bg-blue-100 text-blue-700"
-                        }`}
-                      >
-                        {studentInfo.sourceLabel || "Regular"}
-                      </span>
-
-                      {/* ✅ Course-level source থাকলে ছোট করে দেখাবে */}
-                      {course.source &&
-                        course.source !== studentInfo.source && (
-                          <p className="text-[9px] text-gray-400 mt-1">
-                            from: {course.source}
-                          </p>
-                        )}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="3" className="text-center py-4 text-gray-500">
+                  <td colSpan="2" className="text-center py-4 text-gray-500">
                     <FaInfoCircle className="text-2xl text-gray-300 mx-auto mb-2" />
                     <p className="text-xs">
                       No registered courses found. Please contact admin.
