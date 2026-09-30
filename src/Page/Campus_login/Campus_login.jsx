@@ -1,12 +1,12 @@
 // src/Page/Campus/Campus_login.jsx
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUser, FaLock, FaArrowLeft } from "react-icons/fa";
+import { FaUser, FaLock, FaArrowLeft, FaIdCard } from "react-icons/fa";
 import Swal from "sweetalert2";
 
 const Campus_login = () => {
   const [credentials, setCredentials] = useState({
-    username: "",
+    studentId: "",
     password: "",
   });
   const [loading, setLoading] = useState(false);
@@ -22,13 +22,16 @@ const Campus_login = () => {
     setLoading(true);
 
     try {
+      console.log("📤 Sending login:", credentials);
+
       const response = await fetch(
         "https://api.tarbiyahonline.com/api/students/login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            username: credentials.username.trim(),
+            studentId: credentials.studentId.trim(),
+            username: credentials.studentId.trim(), // fallback
             password: credentials.password.trim(),
           }),
         },
@@ -38,12 +41,17 @@ const Campus_login = () => {
       console.log("🎯 Login Response:", data);
 
       if (data.success && data.user) {
-        // ✅ localStorage-এ save
+        // ✅ localStorage-এ save — সব পেজে ব্যবহার হবে
         localStorage.setItem("isCampusLoggedIn", "true");
         localStorage.setItem("campusStudentInfo", JSON.stringify(data.user));
         localStorage.setItem("campusStudentToken", data.token || "");
-        localStorage.setItem("studentUsername", data.user.username);
+        localStorage.setItem("studentUsername", data.user.username || "");
+        localStorage.setItem("studentId", data.user.studentId || "");
         localStorage.setItem("studentInfo", JSON.stringify(data.user));
+        localStorage.setItem(
+          "loginSource",
+          data.user.loginSource || "students",
+        );
 
         await Swal.fire({
           icon: "success",
@@ -53,12 +61,12 @@ const Campus_login = () => {
           showConfirmButton: false,
         });
 
-        navigate("/campus-dashboard");
+        navigate("/campus");
       } else {
         Swal.fire({
           icon: "error",
           title: "Login Failed",
-          text: data.message || "Invalid Username or Password!",
+          text: data.message || "Invalid ID or Password!",
         });
       }
     } catch (error) {
@@ -78,31 +86,32 @@ const Campus_login = () => {
       <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden border border-gray-200">
         <div className="bg-[#00a65a] p-6 text-center">
           <h2 className="text-2xl font-bold text-white mb-1">Campus Login</h2>
-          <p className="text-green-100 text-sm">
-            Sign in with your provided credentials
-          </p>
+          <p className="text-green-100 text-sm">Login with your Student ID</p>
         </div>
 
         <div className="p-8">
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Username
+                Student ID
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaUser className="text-gray-400" />
+                  <FaIdCard className="text-gray-400" />
                 </div>
                 <input
                   type="text"
-                  name="username"
-                  value={credentials.username}
+                  name="studentId"
+                  value={credentials.studentId}
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-[#00a65a] focus:border-[#00a65a] sm:text-sm outline-none"
-                  placeholder="Enter your username"
+                  placeholder="e.g., TEST-001"
                   required
                 />
               </div>
+              <p className="text-[10px] text-gray-400 mt-1">
+                Admin থেকে দেওয়া Student ID ব্যবহার করুন
+              </p>
             </div>
 
             <div>
@@ -119,10 +128,13 @@ const Campus_login = () => {
                   value={credentials.password}
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-[#00a65a] focus:border-[#00a65a] sm:text-sm outline-none"
-                  placeholder="••••••••"
+                  placeholder="student123S@"
                   required
                 />
               </div>
+              <p className="text-[10px] text-gray-400 mt-1">
+                Default: <span className="font-mono">student123S@</span>
+              </p>
             </div>
 
             <button

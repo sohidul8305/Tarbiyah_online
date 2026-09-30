@@ -154,23 +154,35 @@ const Campus_dashboard = () => {
         if (!isMounted) return;
         setStudent(studentData);
 
-        const studentId = studentData._id || studentData.id;
-        if (!studentId) {
+        // ✅ Multi-identifier: studentId first, then _id
+        const identifier =
+          studentData.studentId || studentData._id || studentData.id;
+
+        if (!identifier) {
           setError("Student ID পাওয়া যায়নি!");
           return;
         }
 
-        const apiUrl = `https://api.tarbiyahonline.com/api/students/my-courses/${studentId}`;
-        console.log("📡 Fetching:", apiUrl);
+        const apiUrl = `https://api.tarbiyahonline.com/api/student/campus-data/${encodeURIComponent(identifier)}`;
+        console.log("📡 Fetching campus-data:", apiUrl);
 
         const response = await fetch(apiUrl);
         const data = await response.json();
-        console.log("📥 Response total:", data.total);
+        console.log("📥 Campus data response:", data);
 
         if (!isMounted) return;
 
         if (data.success) {
-          // ✅ Smart image assignment
+          // ✅ Update student info
+          if (data.student) {
+            setStudent(data.student);
+            localStorage.setItem(
+              "campusStudentInfo",
+              JSON.stringify(data.student),
+            );
+          }
+
+          // ✅ Smart image assignment for each course
           const list = (data.courses || []).map((c) => ({
             ...c,
             image: getCourseImage(c),

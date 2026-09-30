@@ -1,6 +1,7 @@
+// src/Page/Campus/Campus.jsx
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   FaSearch,
   FaArrowLeft,
@@ -10,17 +11,30 @@ import {
   FaClipboardList,
   FaAward,
   FaBookOpen,
-  FaEllipsisV,
+  FaSpinner,
+  FaSync,
+  FaInfoCircle,
 } from "react-icons/fa";
+import Swal from "sweetalert2";
+
+const API_BASE = "https://api.tarbiyahonline.com/api";
 
 const Campus = () => {
   const [language, setLanguage] = useState(
     () => localStorage.getItem("language") || "en",
   );
   const location = useLocation();
+  const navigate = useNavigate();
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
+  // ✅ Dynamic data
+  const [studentInfo, setStudentInfo] = useState(null);
+  const [courses, setCourses] = useState([]);
+
+  // Language sync
   useEffect(() => {
     const handleStorageChange = () => {
       setLanguage(localStorage.getItem("language") || "en");
@@ -29,18 +43,80 @@ const Campus = () => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  const getCurrentTab = () => {
-    if (location.pathname.includes("/campus-dashboard")) return "dashboard";
-    if (location.pathname.includes("/my-courses")) return "my-courses";
-    return "home";
-  };
-  const activeTab = getCurrentTab();
+  // ✅ Fetch campus data
+  const fetchCampusData = async () => {
+    try {
+      const raw =
+        localStorage.getItem("campusStudentInfo") ||
+        localStorage.getItem("studentInfo");
+      if (!raw) {
+        console.warn("⚠️ No student info found");
+        setLoading(false);
+        return;
+      }
 
+      const parsed = JSON.parse(raw);
+      const studentId = parsed.studentId || parsed._id;
+      if (!studentId) {
+        setLoading(false);
+        return;
+      }
+
+      console.log("📥 Fetching campus data for:", studentId);
+
+      const res = await fetch(`${API_BASE}/student/campus-data/${studentId}`);
+      const d = await res.json();
+
+      console.log("📥 Campus data:", d);
+
+      if (d.success) {
+        setStudentInfo(d.student);
+        setCourses(d.courses || []);
+        // Update localStorage with fresh data
+        localStorage.setItem("campusStudentInfo", JSON.stringify(d.student));
+      } else {
+        console.warn("⚠️ Campus data fetch failed:", d.message);
+      }
+    } catch (e) {
+      console.error("❌ Fetch error:", e);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    // ✅ Login check
+    const isLoggedIn = localStorage.getItem("isCampusLoggedIn");
+    if (!isLoggedIn) {
+      Swal.fire({
+        icon: "warning",
+        title: "Login Required",
+        text: "Please login to access the Campus portal.",
+        confirmButtonColor: "#00a65a",
+      }).then(() => {
+        navigate("/campus-login");
+      });
+      return;
+    }
+
+    fetchCampusData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchCampusData();
+  };
+
+  // ============================================================
+  // Language Content
+  // ============================================================
   const content = {
     en: {
       homeTab: "Home",
       dashboardTab: "Dashboard",
-      myCoursesTab: "My courses",
+      myCoursesTab: "My Courses",
       homeTitle: "Tarbiyah Campus",
       virtualCampusTitle: "Tarbiyah Campus",
       virtualCampusDesc: "Tarbiyah Virtual Campus & Learning Environment",
@@ -49,12 +125,9 @@ const Campus = () => {
       courseOverview: "Course Overview",
       all: "All",
       searchPlaceholder: "Search courses...",
-      sortCourse: "Sort by course name",
-      cardView: "Card",
       backToCourses: "Back to My Courses",
       outcomeTitle: "Course Outcome",
       materialsTitle: "Materials",
-
       modulesTitle: "Module Content",
       gradeTitle: "Grades & Results",
       classTest: "Class Test Score",
@@ -65,6 +138,10 @@ const Campus = () => {
       quizzes: "Quizzes",
       completed: "Completed",
       instructor: "Instructor",
+      noCourses: "No courses assigned yet",
+      noCoursesDesc: "Contact admin to enroll you in a batch",
+      loading: "Loading campus data...",
+      myEnrolledCourses: "My Enrolled Courses",
     },
     bn: {
       homeTab: "হোম",
@@ -79,13 +156,11 @@ const Campus = () => {
       courseOverview: "কোর্স ওভারভিউ",
       all: "সব",
       searchPlaceholder: "কোর্স খুঁজুন...",
-      sortCourse: "কোর্সের নাম অনুযায়ী সাজান",
-      cardView: "কার্ড",
       backToCourses: "আমার কোর্সসমূহে ফিরে যান",
       outcomeTitle: "কোর্স আউটকাম",
-      materialsTitle: "ম্যাটেরিয়ালস (Materials)",
-      modulesTitle: "মডিউল (Module)",
-      gradeTitle: "গ্রেড ও ফলাফল (Grades)",
+      materialsTitle: "ম্যাটেরিয়ালস",
+      modulesTitle: "মডিউল",
+      gradeTitle: "গ্রেড ও ফলাফল",
       classTest: "ক্লাস টেস্ট নম্বর",
       midTermExam: "মিড টার্ম পরীক্ষার ফলাফল",
       finalExam: "ফাইনাল পরীক্ষার ফলাফল",
@@ -94,92 +169,88 @@ const Campus = () => {
       quizzes: "কুইজসমূহ",
       completed: "সম্পন্ন",
       instructor: "শিক্ষক",
+      noCourses: "এখনো কোনো কোর্স অ্যাসাইন হয়নি",
+      noCoursesDesc: "Admin এর সাথে যোগাযোগ করুন",
+      loading: "ক্যাম্পাস ডাটা লোড হচ্ছে...",
+      myEnrolledCourses: "আমার এনরোলড কোর্সসমূহ",
     },
   };
   const t = content[language];
 
-  const enrolledCourses = [
-    {
-      id: 1,
-      titleEn: "Diploma in Islamic Studies",
-      titleBn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
-      image: "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png",
-      progress: "75%",
-      instructor: "Mufti Abdullah",
-      semester: "First Semester",
-      outcomeEn:
-        "Gain deep foundational knowledge in Quran, Hadith, Fiqh, and Islamic History with modern academic standards.",
-      outcomeBn:
-        "আধুনিক একাডেমিক স্ট্যান্ডার্ডসহ কুরআন, হাদিস, ফিকহ এবং ইসলামিক ইতিহাসের ওপর গভীর ও মৌলিক জ্ঞান অর্জন করুন।",
-    },
-    {
-      id: 2,
-      titleEn: "Tarbiyah Online Hifz Course",
-      titleBn: "তারবিয়াহ অনলাইন হিফজ কোর্স",
-      image: "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png",
-      progress: "40%",
-      instructor: "Qari Ibrahim",
-      semester: "First Semester",
-      outcomeEn:
-        "Memorize the Holy Quran accurately with proper Makhraj, Tajweed, and regular revision under expert supervision.",
-      outcomeBn:
-        "বিশেষজ্ঞ তত্ত্বাবধানে সঠিক মাখরাজ, তাজবীদ এবং নিয়মিত রিভিশনের মাধ্যমে পবিত্র কুরআন হিফজ সম্পন্ন করুন।",
-    },
-    {
-      id: 3,
-      titleEn: "Alemiyah for Kids",
-      titleBn: "আলিমিয়াহ ফর কিডস",
-      image: "https://i.ibb.co.com/7tWnV1pB/banner.jpg",
-      progress: "90%",
-      instructor: "Sheikh Mahmud",
-      semester: "First Semester",
-      outcomeEn:
-        "Build a strong Islamic moral character alongside essential Arabic language and basic Islamic studies designed for kids.",
-      outcomeBn:
-        "শিশুদের উপযোগী আরবি ভাষা এবং প্রাথমিক ইসলামিক শিক্ষার পাশাপাশি একটি শক্ত ইসলামি নৈতিক চরিত্র গঠন করুন।",
-    },
-  ];
+  const getCurrentTab = () => {
+    if (location.pathname.includes("/campus-dashboard")) return "dashboard";
+    if (location.pathname.includes("/my-courses")) return "my-courses";
+    return "home";
+  };
+  const activeTab = getCurrentTab();
 
-  const filteredCourses = enrolledCourses.filter((course) => {
+  // ✅ Filtered courses
+  const filteredCourses = courses.filter((course) => {
     const title = language === "en" ? course.titleEn : course.titleBn;
-    return title.toLowerCase().includes(searchTerm.toLowerCase());
+    return (title || "").toLowerCase().includes(searchTerm.toLowerCase());
   });
+
+  // ============================================================
+  // Loading
+  // ============================================================
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <FaSpinner className="animate-spin text-4xl text-[#00a65a] mx-auto mb-3" />
+          <p className="text-sm text-gray-500">{t.loading}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
       {/* ================= TOP NAVIGATION TABS BAR ================= */}
-      <div className="bg-white border-b border-gray-200 px-6 md:px-16 flex items-center space-x-8 shadow-sm">
-        <Link
-          to="/campus"
-          onClick={() => setSelectedCourse(null)}
-          className={`py-3 text-sm font-semibold transition-colors relative ${
-            activeTab === "home" && !selectedCourse
-              ? "text-gray-900 border-b-2 border-blue-600"
-              : "text-gray-600 hover:text-gray-900"
-          }`}
+      <div className="bg-white border-b border-gray-200 px-6 md:px-16 flex items-center justify-between shadow-sm">
+        <div className="flex items-center space-x-8">
+          <Link
+            to="/campus"
+            onClick={() => setSelectedCourse(null)}
+            className={`py-3 text-sm font-semibold transition-colors relative ${
+              activeTab === "home" && !selectedCourse
+                ? "text-gray-900 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            {t.homeTab}
+          </Link>
+          <Link
+            to="/campus-dashboard"
+            className={`py-3 text-sm font-semibold transition-colors relative ${
+              activeTab === "dashboard"
+                ? "text-gray-900 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            {t.dashboardTab}
+          </Link>
+          <Link
+            to="/my-courses"
+            className={`py-3 text-sm font-semibold transition-colors relative ${
+              activeTab === "my-courses"
+                ? "text-gray-900 border-b-2 border-blue-600"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            {t.myCoursesTab}
+          </Link>
+        </div>
+
+        {/* Refresh button */}
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="text-[#00a65a] hover:text-[#008d4c] p-2"
+          title="Refresh"
         >
-          {t.homeTab}
-        </Link>
-        <Link
-          to="/campus-dashboard"
-          className={`py-3 text-sm font-semibold transition-colors relative ${
-            activeTab === "dashboard"
-              ? "text-gray-900 border-b-2 border-blue-600"
-              : "text-gray-600 hover:text-gray-900"
-          }`}
-        >
-          {t.dashboardTab}
-        </Link>
-        <Link
-          to="/my-courses"
-          className={`py-3 text-sm font-semibold transition-colors relative ${
-            activeTab === "my-courses"
-              ? "text-gray-900 border-b-2 border-blue-600"
-              : "text-gray-600 hover:text-gray-900"
-          }`}
-        >
-          {t.myCoursesTab}
-        </Link>
+          <FaSync className={refreshing ? "animate-spin" : ""} />
+        </button>
       </div>
 
       {/* ================= MAIN CONTENT ================= */}
@@ -226,6 +297,16 @@ const Campus = () => {
                     </span>{" "}
                     {t.completed}
                   </p>
+                  {selectedCourse.batchName && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      📚 Batch: {selectedCourse.batchName}
+                    </p>
+                  )}
+                  {selectedCourse.schedule && (
+                    <p className="text-xs text-blue-600 mt-0.5">
+                      ⏰ {selectedCourse.schedule}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -241,6 +322,7 @@ const Campus = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Grades */}
                 <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                   <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
                     <FaAward className="text-[#004d4d]" /> {t.gradeTitle}
@@ -250,16 +332,16 @@ const Campus = () => {
                       <span className="font-medium text-gray-700">
                         {t.classTest}
                       </span>
-                      <span className="text-xs bg-teal-100 text-[#004d4d] px-2 py-0.5 rounded font-bold">
-                        A+
+                      <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold">
+                        Pending
                       </span>
                     </li>
                     <li className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm">
                       <span className="font-medium text-gray-700">
                         {t.midTermExam}
                       </span>
-                      <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded font-bold">
-                        A
+                      <span className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded font-bold">
+                        Pending
                       </span>
                     </li>
                     <li className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm">
@@ -273,52 +355,76 @@ const Campus = () => {
                   </ul>
                 </div>
 
+                {/* Materials */}
                 <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                   <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
                     <FaClipboardList className="text-[#004d4d]" />{" "}
                     {t.materialsTitle}
                   </h3>
-                  <ul className="space-y-2.5">
-                    <li className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm">
-                      <span className="font-medium text-gray-700">
-                        Lecture Slide 01
-                      </span>
-                      <span className="text-xs text-blue-600 font-semibold hover:underline cursor-pointer">
-                        Download
-                      </span>
-                    </li>
-                    <li className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm">
-                      <span className="font-medium text-gray-700">
-                        Reference Book PDF
-                      </span>
-                      <span className="text-xs text-blue-600 font-semibold hover:underline cursor-pointer">
-                        Download
-                      </span>
-                    </li>
-                  </ul>
+                  {selectedCourse.materials &&
+                  selectedCourse.materials.length > 0 ? (
+                    <ul className="space-y-2.5">
+                      {selectedCourse.materials.slice(0, 5).map((m, i) => (
+                        <li
+                          key={m._id || i}
+                          className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm"
+                        >
+                          <span className="font-medium text-gray-700 truncate">
+                            {m.title}
+                          </span>
+                          <a
+                            href={m.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-xs text-blue-600 font-semibold hover:underline ml-2"
+                          >
+                            View
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-gray-400 italic">
+                      No materials uploaded yet
+                    </p>
+                  )}
                 </div>
 
+                {/* Modules */}
                 <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                   <h3 className="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
                     <FaBookOpen className="text-[#004d4d]" /> {t.modulesTitle}
                   </h3>
                   <ul className="space-y-2.5">
-                    <li className="flex items-center gap-2.5 p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm hover:bg-teal-50/50 cursor-pointer">
-                      <FaVideo className="text-red-500 text-sm flex-shrink-0" />
-                      <span className="font-medium text-gray-700">
+                    <li className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm">
+                      <span className="flex items-center gap-2.5 font-medium text-gray-700">
+                        <FaVideo className="text-red-500 text-sm" />
                         {t.videoRecording}
                       </span>
-                    </li>
-                    <li className="flex items-center gap-2.5 p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm hover:bg-teal-50/50 cursor-pointer">
-                      <FaFilePdf className="text-blue-500 text-sm flex-shrink-0" />
-                      <span className="font-medium text-gray-700">
-                        {t.pdfNotes}
+                      <span className="text-xs bg-teal-100 text-[#004d4d] px-2 py-0.5 rounded font-bold">
+                        {selectedCourse.totalVideos || 0}
                       </span>
                     </li>
-                    <li className="flex items-center gap-2.5 p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm hover:bg-teal-50/50 cursor-pointer">
-                      <FaQuestionCircle className="text-green-500 text-sm flex-shrink-0" />
-                      <span className="font-medium text-gray-700">
+                    <li className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm">
+                      <span className="flex items-center gap-2.5 font-medium text-gray-700">
+                        <FaFilePdf className="text-blue-500 text-sm" />
+                        {t.pdfNotes}
+                      </span>
+                      <span className="text-xs bg-teal-100 text-[#004d4d] px-2 py-0.5 rounded font-bold">
+                        {selectedCourse.materials?.filter(
+                          (m) => m.type === "pdf",
+                        ).length || 0}
+                      </span>
+                    </li>
+                    <li className="flex items-center justify-between p-2.5 bg-gray-50 rounded-lg border border-gray-100 text-sm">
+                      <span className="flex items-center gap-2.5 font-medium text-gray-700">
+                        <FaQuestionCircle className="text-green-500 text-sm" />
                         {t.quizzes}
+                      </span>
+                      <span className="text-xs bg-teal-100 text-[#004d4d] px-2 py-0.5 rounded font-bold">
+                        {selectedCourse.materials?.filter(
+                          (m) => m.type === "quiz",
+                        ).length || 0}
                       </span>
                     </li>
                   </ul>
@@ -335,9 +441,22 @@ const Campus = () => {
               transition={{ duration: 0.3 }}
               className="space-y-8"
             >
-              <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
-                {t.homeTitle}
-              </h1>
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div>
+                  <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">
+                    {t.homeTitle}
+                  </h1>
+                  {studentInfo && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Welcome,{" "}
+                      <span className="font-semibold text-[#004d4d]">
+                        {studentInfo.name}
+                      </span>{" "}
+                      • ID: {studentInfo.studentId || "N/A"}
+                    </p>
+                  )}
+                </div>
+              </div>
 
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-4xl">
                 <h2 className="text-xl font-bold text-gray-900 mb-1">
@@ -353,6 +472,114 @@ const Campus = () => {
                 <div className="bg-[#d2e8ec] text-[#0a4654] p-4 rounded-md text-sm border border-[#bce0e6]">
                   {t.noNotice}
                 </div>
+              </div>
+
+              {/* ✅ Course List — Dynamic */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {t.myEnrolledCourses} ({courses.length})
+                  </h2>
+
+                  <div className="relative">
+                    <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                    <input
+                      type="text"
+                      placeholder={t.searchPlaceholder}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00a65a] outline-none"
+                    />
+                  </div>
+                </div>
+
+                {filteredCourses.length === 0 ? (
+                  <div className="bg-white border-2 border-dashed border-gray-300 rounded-xl p-10 text-center">
+                    <FaInfoCircle className="text-4xl text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-bold text-gray-700">
+                      {t.noCourses}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {t.noCoursesDesc}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredCourses.map((course, idx) => (
+                      <motion.div
+                        key={course.id || idx}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        onClick={() => setSelectedCourse(course)}
+                        className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md cursor-pointer transition-all"
+                      >
+                        <div className="h-32 overflow-hidden">
+                          <img
+                            src={course.image}
+                            alt={course.titleEn}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-bold text-gray-800 text-sm mb-1 line-clamp-2">
+                            {language === "en"
+                              ? course.titleEn
+                              : course.titleBn}
+                          </h3>
+                          <p className="text-[10px] text-gray-500 mb-2">
+                            👨‍🏫 {course.instructor}
+                          </p>
+                          {course.batchName && (
+                            <p className="text-[10px] text-blue-600 mb-1">
+                              📚 {course.batchName}
+                            </p>
+                          )}
+
+                          <div className="flex items-center justify-between text-[10px] mb-2">
+                            <span className="text-gray-500">
+                              Progress: {course.progress}
+                            </span>
+                            <span
+                              className={`font-bold px-2 py-0.5 rounded-full ${
+                                course.status === "Active"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-gray-100 text-gray-700"
+                              }`}
+                            >
+                              {course.status}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-1 pt-2 border-t border-gray-100">
+                            <div className="text-center">
+                              <p className="text-[9px] text-gray-500">Videos</p>
+                              <p className="text-xs font-bold text-red-600">
+                                {course.totalVideos || 0}
+                              </p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-[9px] text-gray-500">
+                                Materials
+                              </p>
+                              <p className="text-xs font-bold text-blue-600">
+                                {course.totalMaterials || 0}
+                              </p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-[9px] text-gray-500">
+                                Classes
+                              </p>
+                              <p className="text-xs font-bold text-purple-600">
+                                {course.totalClasses || 0}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

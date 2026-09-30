@@ -44,7 +44,7 @@ import AdminDashboard from "../Page/Admin/AdminDashboard";
 
 // ===== ড্যাশবোর্ড চাইল্ড পেজ =====
 // Student
-import MyCourse from "../Page/Dashboard/Student/MyCourse";
+import MyCourse from "../Page/Dashboard/My_courses";
 import MyAssignments from "../Page/Dashboard/Student/MyAssignments";
 import MyQuizzes from "../Page/Dashboard/Student/MyQuizzes";
 import Certificates from "../Page/Dashboard/Student/Certificates";
@@ -170,7 +170,7 @@ import Surahmulk_details from "../Components/Surahmulk_details/Surahmulk_details
 import Student_attendance from "../Components/Student_attendance/Student_attendance";
 import Course_notice from "../Components/Course_notice/Course_notice";
 import Campus_dashboard from "../Components/Campus_dashboard/Campus_dashboard";
-import My_courses from "../Components/My_courses/My_courses";
+import My_courses from "../Page/Dashboard/My_courses";
 import Academicampus from "../Components/Academicampus/Academicampus";
 import BasicTazweed from "../Page/Admin/BasicTazweed";
 import NajeraBatch from "../Page/Admin/NajeraBatch";
