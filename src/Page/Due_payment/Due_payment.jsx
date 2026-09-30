@@ -11,6 +11,7 @@ import {
   FaSync,
   FaCheckCircle,
   FaClock,
+  FaChalkboardTeacher,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 
@@ -22,6 +23,7 @@ const API_BASE = "https://api.tarbiyahonline.com/api";
 const getSourceLabel = (src) => {
   if (src === "basic_tazweed_students") return "Basic Tazweed";
   if (src === "najera_batch_students") return "Najera Batch";
+  if (src === "batch_students") return "Batch Student";
   return "Regular Student";
 };
 
@@ -52,10 +54,15 @@ const Due_payment = () => {
     paidMonths: [],
     admissionDate: "",
     paymentStatus: "Unpaid",
+    // Batch info (from Admin)
+    batchName: "",
+    batchCourse: "",
+    batchTeacher: "",
+    batchSchedule: "",
   });
 
   // ============================================================
-  // ✅ Fetch fresh student data
+  // ✅ Fetch fresh student data — Dashboard এর same logic
   // ============================================================
   const fetchStudentData = async () => {
     try {
@@ -75,31 +82,57 @@ const Due_payment = () => {
 
       const resolvedSource =
         parsed.loginSource || localStorage.getItem("loginSource") || "students";
-      const studentId = parsed._id || parsed.studentId;
+
+      // ✅ Multi-identifier params
+      const params = new URLSearchParams();
+      if (parsed._id) params.append("id", parsed._id);
+      if (parsed.studentId) params.append("studentId", parsed.studentId);
+      if (parsed.phone) params.append("phone", parsed.phone);
+      if (parsed.name && parsed.name !== "Student")
+        params.append("name", parsed.name);
+      if (parsed.username) params.append("username", parsed.username);
 
       let data = null;
+      let finalSource = resolvedSource;
 
-      if (resolvedSource === "basic_tazweed_students") {
-        const res = await fetch(`${API_BASE}/basic-tazweed/all`);
+      // ✅ STEP 1: dashboard-full endpoint (batch_students সহ)
+      try {
+        const url = `${API_BASE}/student/dashboard-full?${params.toString()}`;
+        const res = await fetch(url);
         const d = await res.json();
-        if (d.success && Array.isArray(d.students)) {
-          data = d.students.find(
-            (s) => s._id === studentId || s.studentId === studentId,
-          );
+        console.log("📥 Due payment fetch:", d);
+
+        if (d.success && d.student) {
+          data = d.student;
+          finalSource = d.source || resolvedSource;
+          console.log(`✅ Found in ${finalSource}:`, data.name);
         }
-      } else if (resolvedSource === "najera_batch_students") {
-        const res = await fetch(`${API_BASE}/najera-batch/all`);
-        const d = await res.json();
-        if (d.success && Array.isArray(d.students)) {
-          data = d.students.find(
-            (s) => s._id === studentId || s.studentId === studentId,
-          );
-        }
-      } else {
-        if (studentId) {
+      } catch (e) {
+        console.warn("⚠️ dashboard-full failed:", e.message);
+      }
+
+      // ✅ STEP 2: Fallback — original source
+      if (!data) {
+        if (resolvedSource === "basic_tazweed_students") {
+          const res = await fetch(`${API_BASE}/basic-tazweed/all`);
+          const d = await res.json();
+          if (d.success && Array.isArray(d.students)) {
+            data = d.students.find(
+              (s) => s._id === parsed._id || s.studentId === parsed.studentId,
+            );
+          }
+        } else if (resolvedSource === "najera_batch_students") {
+          const res = await fetch(`${API_BASE}/najera-batch/all`);
+          const d = await res.json();
+          if (d.success && Array.isArray(d.students)) {
+            data = d.students.find(
+              (s) => s._id === parsed._id || s.studentId === parsed.studentId,
+            );
+          }
+        } else if (parsed._id) {
           try {
             const res = await fetch(
-              `${API_BASE}/students/details/${studentId}`,
+              `${API_BASE}/students/details/${parsed._id}`,
             );
             const d = await res.json();
             if (d.success && d.student) data = d.student;
@@ -111,30 +144,39 @@ const Due_payment = () => {
 
       const merged = data ? { ...parsed, ...data } : parsed;
 
-      // ✅ Calculate paid from paidMonths if paidAmount missing
-      const paidFromMonths = (merged.paidMonths || []).reduce(
+      // ✅ Payment calculation
+      const fromMonths = (merged.paidMonths || []).reduce(
         (s, p) => s + Number(p.amount || 0),
         0,
       );
-      const paid = Number(merged.paidAmount) || paidFromMonths || 0;
-
+      const paid = fromMonths > 0 ? fromMonths : Number(merged.paidAmount) || 0;
       const fee =
         Number(merged.courseFee) || Number(merged.monthlyFee) * 12 || 0;
       const scholarship = Number(merged.scholarshipAmount) || 0;
       const due =
-        Number(merged.dueAmount) || Math.max(fee - scholarship - paid, 0);
+        merged.dueAmount !== undefined && merged.dueAmount !== null
+          ? Number(merged.dueAmount)
+          : Math.max(fee - scholarship - paid, 0);
+
+      let autoStatus = merged.paymentStatus;
+      if (!autoStatus) {
+        if (due === 0 && paid > 0) autoStatus = "Paid";
+        else if (paid > 0) autoStatus = "Partial";
+        else autoStatus = "Unpaid";
+      }
 
       setStudentInfo({
         _id: merged._id || "",
         name: merged.name || "Student",
         email: merged.email || "",
         phone: merged.phone || "",
-        class: merged.class || merged.course || "Not Assigned",
+        class:
+          merged.batchCourse || merged.class || merged.course || "Not Assigned",
         roll: merged.roll || merged.studentId || "",
         username: merged.username || "",
         studentId: merged.studentId || "",
-        course: merged.course || merged.class || "",
-        loginSource: resolvedSource,
+        course: merged.batchCourse || merged.course || merged.class || "",
+        loginSource: finalSource,
         status: merged.status || "Active",
         courseFee: fee,
         scholarshipAmount: scholarship,
@@ -143,11 +185,28 @@ const Due_payment = () => {
         monthlyFee: Number(merged.monthlyFee) || fee / 12 || 0,
         paidMonths: merged.paidMonths || [],
         admissionDate: merged.admissionDate || merged.createdAt || "",
-        paymentStatus:
-          due === 0 && paid > 0 ? "Paid" : paid > 0 ? "Partial" : "Unpaid",
+        paymentStatus: autoStatus || "Unpaid",
+        batchName: merged.batchName || "",
+        batchCourse: merged.batchCourse || "",
+        batchTeacher: merged.batchTeacher || "",
+        batchSchedule: merged.batchSchedule || "",
       });
 
-      localStorage.setItem("studentInfo", JSON.stringify(merged));
+      // ✅ Store identifiers
+      const stored = {
+        _id: merged._id,
+        name: merged.name,
+        studentId: merged.studentId || "",
+        phone: merged.phone || "",
+        username: merged.username || "",
+        course: merged.batchCourse || merged.course || merged.class || "",
+        class: merged.batchCourse || merged.class || merged.course || "",
+        batchName: merged.batchName || "",
+        batchCourse: merged.batchCourse || "",
+        loginSource: finalSource,
+      };
+      localStorage.setItem("studentInfo", JSON.stringify(stored));
+      localStorage.setItem("loginSource", finalSource);
     } catch (e) {
       console.error("❌ Fetch student error:", e);
     } finally {
@@ -284,7 +343,7 @@ const Due_payment = () => {
 
   return (
     <div className="flex flex-col md:flex-row gap-6">
-      {/* Sidebar — unchanged */}
+      {/* Sidebar */}
       <aside className="hidden md:block w-64 bg-white border border-gray-200 rounded-xl shadow-sm h-fit overflow-hidden flex-shrink-0">
         <div className="p-4 bg-gradient-to-r from-[#00ADD2] to-[#00c4e6] text-white">
           <div className="flex items-center gap-3">
@@ -294,6 +353,11 @@ const Due_payment = () => {
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm truncate">{studentInfo.name}</p>
               <p className="text-xs opacity-80 truncate">{studentInfo.class}</p>
+              {studentInfo.loginSource && (
+                <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-white/25 font-semibold">
+                  {getSourceLabel(studentInfo.loginSource)}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -321,6 +385,41 @@ const Due_payment = () => {
 
       {/* Main Content */}
       <div className="flex-1 space-y-4">
+        {/* ✅ Student Summary Card — NEW */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 flex flex-wrap gap-3 justify-between items-center">
+          <div>
+            <p className="text-sm font-bold text-gray-800">
+              {studentInfo.name}
+            </p>
+            <p className="text-xs text-gray-500">
+              ID: {studentInfo.studentId || studentInfo.roll || "N/A"}
+              {studentInfo.batchName && <> • 📚 {studentInfo.batchName}</>}
+            </p>
+            {studentInfo.batchTeacher && (
+              <p className="text-[10px] text-purple-600 mt-0.5">
+                👨‍🏫 {studentInfo.batchTeacher}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span
+              className={`text-xs px-2 py-1 rounded-full font-bold ${getStatusColor(
+                studentInfo.paymentStatus,
+              )}`}
+            >
+              {studentInfo.paymentStatus}
+            </span>
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-1.5 bg-[#00ADD2] hover:bg-[#008c9e] text-white px-3 py-1.5 rounded-md text-xs font-semibold transition shadow-sm disabled:opacity-50"
+            >
+              <FaSync className={refreshing ? "animate-spin" : ""} />
+              {refreshing ? "..." : "Refresh"}
+            </button>
+          </div>
+        </div>
+
         {/* Notice Banner */}
         <div className="bg-[#5cb85c] text-white rounded-t-lg shadow-sm">
           <div className="px-4 py-2.5 flex items-center gap-2 font-semibold text-sm border-b border-white/20">
@@ -370,19 +469,9 @@ const Due_payment = () => {
                       📑 Payment Summary for
                     </span>
                     <span className="px-3 py-1.5 bg-white border border-gray-300 rounded-md text-sm font-semibold text-[#00ADD2]">
-                      {studentInfo.course || "2026"}
+                      {studentInfo.course || "N/A"}
                     </span>
                   </div>
-                  <button
-                    onClick={handleRefresh}
-                    disabled={refreshing}
-                    className="flex items-center gap-1.5 bg-[#00ADD2] hover:bg-[#008c9e] text-white px-3 py-1.5 rounded-md text-sm font-semibold transition shadow-sm w-full sm:w-auto justify-center disabled:opacity-50"
-                  >
-                    <FaSync
-                      className={`text-xs ${refreshing ? "animate-spin" : ""}`}
-                    />{" "}
-                    Refresh
-                  </button>
                 </div>
 
                 {/* Two Column Layout */}
@@ -686,7 +775,7 @@ const Due_payment = () => {
 };
 
 // ==========================================
-// Reusablestuden
+// Reusable
 // ==========================================
 const EmptyState = ({ icon, title, subtitle }) => (
   <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-8 text-center">

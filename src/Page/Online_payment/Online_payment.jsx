@@ -1,6 +1,5 @@
-// src/Page/Online_payment/Online_payment.jsx
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // ⬅️ এটাই দরকার
 import {
   FaUser,
   FaUniversity,
@@ -18,40 +17,27 @@ import Swal from "sweetalert2";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
 
-// ✅ সব ১২ মাসের নাম
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
-// ============================================================
-// ✅ Helper: LoginSource অনুযায়ী সঠিক endpoint
-// ============================================================
+// ✅ Source label helper
 const getSourceLabel = (src) => {
   if (src === "basic_tazweed_students") return "Basic Tazweed";
   if (src === "najera_batch_students") return "Najera Batch";
+  if (src === "batch_students") return "Batch Student";
   return "Regular Student";
 };
 
 const Online_payment = () => {
   const location = useLocation();
   const [selectedMethod, setSelectedMethod] = useState("bkash");
-  const [selectedFees, setSelectedFees] = useState({});
+  const [payAmount, setPayAmount] = useState("");
+  const [payMonth, setPayMonth] = useState(
+    new Date().toISOString().slice(0, 7), // YYYY-MM
+  );
+  const [payNote, setPayNote] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [processing, setProcessing] = useState(false);
 
-  // ✅ Full student data (from backend)
+  // ✅ Full student data
   const [studentInfo, setStudentInfo] = useState({
     _id: "",
     name: "",
@@ -63,7 +49,6 @@ const Online_payment = () => {
     studentId: "",
     course: "",
     loginSource: "",
-    // Payment fields
     monthlyFee: 0,
     courseFee: 0,
     scholarshipAmount: 0,
@@ -72,13 +57,13 @@ const Online_payment = () => {
     paidMonths: [],
   });
 
-  // ✅ Merchant Numbers — আপনার দেওয়া (unchanged)
+  // ✅ Merchant Numbers
   const merchantNumbers = {
     bkash: "01841412525",
     nagad: "01841512525",
   };
 
-  // ✅ Bank Info — আপনার দেওয়া (unchanged)
+  // ✅ Bank Info
   const bankInfo = {
     accountName: "Tarbiyah Academy",
     accountNumber: "401211100007923",
@@ -90,7 +75,7 @@ const Online_payment = () => {
   };
 
   // ============================================================
-  // ✅ Fetch fresh student data from backend
+  // ✅ Fetch fresh student data — Dashboard এর same logic
   // ============================================================
   const fetchStudentData = async () => {
     try {
@@ -110,66 +95,88 @@ const Online_payment = () => {
 
       const resolvedSource =
         parsed.loginSource || localStorage.getItem("loginSource") || "students";
-      const studentId = parsed._id || parsed.studentId;
+
+      // ✅ Multi-identifier params
+      const params = new URLSearchParams();
+      if (parsed._id) params.append("id", parsed._id);
+      if (parsed.studentId) params.append("studentId", parsed.studentId);
+      if (parsed.phone) params.append("phone", parsed.phone);
+      if (parsed.name && parsed.name !== "Student")
+        params.append("name", parsed.name);
+      if (parsed.username) params.append("username", parsed.username);
 
       let data = null;
+      let finalSource = resolvedSource;
 
-      if (resolvedSource === "basic_tazweed_students") {
-        const res = await fetch(`${API_BASE}/basic-tazweed/all`);
+      // ✅ STEP 1: dashboard-full endpoint
+      try {
+        const res = await fetch(
+          `${API_BASE}/student/dashboard-full?${params.toString()}`,
+        );
         const d = await res.json();
-        if (d.success && Array.isArray(d.students)) {
-          data = d.students.find(
-            (s) => s._id === studentId || s.studentId === studentId,
-          );
+        if (d.success && d.student) {
+          data = d.student;
+          finalSource = d.source || resolvedSource;
         }
-      } else if (resolvedSource === "najera_batch_students") {
-        const res = await fetch(`${API_BASE}/najera-batch/all`);
-        const d = await res.json();
-        if (d.success && Array.isArray(d.students)) {
-          data = d.students.find(
-            (s) => s._id === studentId || s.studentId === studentId,
-          );
-        }
-      } else {
-        // students collection
-        if (studentId) {
+      } catch (e) {
+        console.warn("⚠️ dashboard-full failed:", e.message);
+      }
+
+      // ✅ STEP 2: Fallback
+      if (!data) {
+        if (resolvedSource === "basic_tazweed_students") {
+          const res = await fetch(`${API_BASE}/basic-tazweed/all`);
+          const d = await res.json();
+          if (d.success && Array.isArray(d.students)) {
+            data = d.students.find(
+              (s) => s._id === parsed._id || s.studentId === parsed.studentId,
+            );
+          }
+        } else if (resolvedSource === "najera_batch_students") {
+          const res = await fetch(`${API_BASE}/najera-batch/all`);
+          const d = await res.json();
+          if (d.success && Array.isArray(d.students)) {
+            data = d.students.find(
+              (s) => s._id === parsed._id || s.studentId === parsed.studentId,
+            );
+          }
+        } else if (parsed._id) {
           try {
             const res = await fetch(
-              `${API_BASE}/students/details/${studentId}`,
+              `${API_BASE}/students/details/${parsed._id}`,
             );
             const d = await res.json();
             if (d.success && d.student) data = d.student;
-          } catch (e) {
-            console.warn("⚠️ details API failed:", e.message);
-          }
+          } catch (e) {}
         }
       }
 
       const merged = data ? { ...parsed, ...data } : parsed;
 
       // Payment calculation
-      const paid =
-        Number(merged.paidAmount) ||
-        (merged.paidMonths || []).reduce(
-          (s, p) => s + Number(p.amount || 0),
-          0,
-        );
-      const fee = Number(merged.courseFee) || 0;
+      const fromMonths = (merged.paidMonths || []).reduce(
+        (s, p) => s + Number(p.amount || 0),
+        0,
+      );
+      const paid = fromMonths > 0 ? fromMonths : Number(merged.paidAmount) || 0;
+      const fee = Number(merged.courseFee) || Number(merged.monthlyFee) || 0;
       const scholarship = Number(merged.scholarshipAmount) || 0;
       const due =
-        Number(merged.dueAmount) || Math.max(fee - scholarship - paid, 0);
+        merged.dueAmount !== undefined && merged.dueAmount !== null
+          ? Number(merged.dueAmount)
+          : Math.max(fee - scholarship - paid, 0);
 
       setStudentInfo({
         _id: merged._id || "",
         name: merged.name || "Student",
         email: merged.email || "",
         phone: merged.phone || "",
-        class: merged.class || merged.course || "Not Assigned",
+        class: merged.batchCourse || merged.class || merged.course || "N/A",
         roll: merged.roll || merged.studentId || "",
         username: merged.username || "",
         studentId: merged.studentId || "",
-        course: merged.course || merged.class || "",
-        loginSource: resolvedSource,
+        course: merged.batchCourse || merged.course || merged.class || "",
+        loginSource: finalSource,
         monthlyFee: Number(merged.monthlyFee) || 0,
         courseFee: fee,
         scholarshipAmount: scholarship,
@@ -178,8 +185,21 @@ const Online_payment = () => {
         paidMonths: merged.paidMonths || [],
       });
 
-      // Update localStorage
-      localStorage.setItem("studentInfo", JSON.stringify(merged));
+      // Update localStorage with identifiers
+      const stored = {
+        _id: merged._id,
+        name: merged.name,
+        studentId: merged.studentId || "",
+        phone: merged.phone || "",
+        username: merged.username || "",
+        course: merged.batchCourse || merged.course || merged.class || "",
+        class: merged.batchCourse || merged.class || merged.course || "",
+        batchName: merged.batchName || "",
+        batchCourse: merged.batchCourse || "",
+        loginSource: finalSource,
+      };
+      localStorage.setItem("studentInfo", JSON.stringify(stored));
+      localStorage.setItem("loginSource", finalSource);
     } catch (e) {
       console.error("❌ Fetch student error:", e);
     } finally {
@@ -199,88 +219,71 @@ const Online_payment = () => {
   };
 
   // ============================================================
-  // ✅ Month paid কি না check
+  // ✅ Submit Payment — save to backend + auto update
   // ============================================================
-  const isMonthPaid = (monthName) => {
-    const months = studentInfo.paidMonths || [];
-    const monthLower = monthName.toLowerCase();
-    const shortName = monthName.split(" ")[0].toLowerCase(); // "january"
-
-    return months.find((p) => {
-      const pMonth = String(p.month || "").toLowerCase();
-      return (
-        pMonth === monthLower ||
-        pMonth.includes(shortName) ||
-        pMonth.includes(monthLower) ||
-        monthLower.includes(pMonth)
-      );
-    });
-  };
-
-  // ============================================================
-  // ✅ 12 মাসের fee list
-  // ============================================================
-  const buildFeeList = () => {
-    const monthlyFee =
-      Number(studentInfo.monthlyFee) || Number(studentInfo.courseFee) || 300; // fallback
-
-    return MONTHS.map((monthName, idx) => {
-      const paidRecord = isMonthPaid(monthName);
-      return {
-        id: idx + 1,
-        name: `Tuition Fee (${monthName})`,
-        amount: paidRecord
-          ? Number(paidRecord.amount) || monthlyFee
-          : monthlyFee,
-        status: paidRecord ? "Paid" : "Unpaid",
-        paidAt: paidRecord?.paidAt || null,
-        method: paidRecord?.method || null,
-        monthKey: monthName,
-      };
-    });
-  };
-
-  const feeList = buildFeeList();
-
-  // ============================================================
-  // ✅ Total calculation
-  // ============================================================
-  const totalAmount = Object.values(selectedFees).reduce(
-    (acc, curr) => acc + Number(curr || 0),
-    0,
-  );
-
-  const handleCheckboxChange = (id, amount) => {
-    setSelectedFees((prev) => {
-      const updated = { ...prev };
-      if (updated[id]) {
-        delete updated[id];
-      } else {
-        updated[id] = Number(amount);
-      }
-      return updated;
-    });
-  };
-
-  // ============================================================
-  // ✅ Payment submit
-  // ============================================================
-  const handlePayment = (e) => {
+  const handlePayment = async (e) => {
     e.preventDefault();
-    if (totalAmount <= 0) {
+
+    const amountNum = Number(payAmount);
+
+    if (!amountNum || amountNum <= 0) {
       Swal.fire({
         icon: "warning",
-        title: "তথ্য অসম্পূর্ণ!",
-        text: "অনুগ্রহ করে কমপক্ষে একটি ফি সিলেক্ট করুন।",
+        title: "Amount দিন!",
+        text: "অনুগ্রহ করে সঠিক পরিমাণ লিখুন (0 এর বেশি)",
         confirmButtonColor: "#00ADD2",
       });
       return;
     }
 
-    setProcessing(true);
-    setTimeout(() => {
-      setProcessing(false);
+    // ✅ Due এর বেশি হলে warning (optional)
+    if (studentInfo.dueAmount > 0 && amountNum > studentInfo.dueAmount) {
+      const confirm = await Swal.fire({
+        icon: "question",
+        title: "Due এর বেশি?",
+        text: `আপনার Due ৳${studentInfo.dueAmount}। আপনি ৳${amountNum} দিচ্ছেন। চালিয়ে যাবেন?`,
+        showCancelButton: true,
+        confirmButtonText: "হ্যাঁ",
+        cancelButtonText: "না",
+        confirmButtonColor: "#00ADD2",
+      });
+      if (!confirm.isConfirmed) return;
+    }
 
+    setProcessing(true);
+
+    try {
+      // ✅ Save payment to backend
+      const res = await fetch(`${API_BASE}/batch-students/add-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: studentInfo._id,
+          studentId: studentInfo.studentId,
+          phone: studentInfo.phone,
+          name: studentInfo.name,
+          amount: amountNum,
+          method: selectedMethod,
+          note: payNote || "",
+          month: payMonth,
+        }),
+      });
+
+      const data = await res.json();
+      console.log("📥 Payment response:", data);
+
+      if (!data.success) {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Payment failed",
+          confirmButtonColor: "#00ADD2",
+        });
+        setProcessing(false);
+        return;
+      }
+
+      // ✅ Success — show confirmation with merchant info
       let methodName = "bKash";
       let merchantNumber = merchantNumbers.bkash;
       if (selectedMethod === "nagad") {
@@ -292,18 +295,13 @@ const Online_payment = () => {
         methodName = "Bank Transfer";
       }
 
-      const selectedMonths = feeList
-        .filter((f) => selectedFees[f.id])
-        .map((f) => f.monthKey)
-        .join(", ");
-
       let htmlContent = `
         <div style="text-align: left; font-size: 14px;">
           <p><strong>👤 Student:</strong> ${studentInfo.name}</p>
-          <p><strong>🆔 ID:</strong> ${studentInfo.roll || studentInfo.studentId || "N/A"}</p>
-          <p><strong>💰 মোট টাকার পরিমাণ:</strong> ৳${totalAmount}</p>
-          <p><strong>📅 Month(s):</strong> ${selectedMonths}</p>
-          <p><strong>📱 পেমেন্ট মেথড:</strong> ${methodName}</p>
+          <p><strong>🆔 ID:</strong> ${studentInfo.studentId || studentInfo.roll || "N/A"}</p>
+          <p><strong>💰 পরিমাণ:</strong> ৳${amountNum}</p>
+          <p><strong>📅 Month:</strong> ${payMonth}</p>
+          <p><strong>📱 Method:</strong> ${methodName}</p>
       `;
 
       if (selectedMethod === "bkash" || selectedMethod === "nagad") {
@@ -327,12 +325,13 @@ const Online_payment = () => {
             <p style="font-size: 12px; margin: 4px 0;"><strong>A/C Name:</strong> ${bankInfo.accountName}</p>
             <p style="font-size: 12px; margin: 4px 0;"><strong>A/C Number:</strong> <span style="color: #00ADD2; font-weight: bold;">${bankInfo.accountNumber}</span></p>
             <p style="font-size: 12px; margin: 4px 0;"><strong>Bank:</strong> ${bankInfo.bankName}</p>
-            <p style="font-size: 12px; margin: 4px 0;"><strong>Branch:</strong> ${bankInfo.branch}</p>
           </div>
         `;
       }
 
-      Swal.fire({
+      htmlContent += `</div>`;
+
+      await Swal.fire({
         icon: "success",
         title: "✅ পেমেন্ট সফল!",
         html: htmlContent,
@@ -340,7 +339,32 @@ const Online_payment = () => {
         confirmButtonText: "ঠিক আছে",
         width: 500,
       });
-    }, 1500);
+
+      // ✅ Reset form
+      setPayAmount("");
+      setPayNote("");
+
+      // ✅ Refetch fresh data (auto update UI)
+      await fetchStudentData();
+
+      Swal.fire({
+        icon: "info",
+        title: "Updated!",
+        text: "আপনার payment auto update হয়েছে। Dashboard এ গিয়ে check করুন।",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error("❌ Payment error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Server Error",
+        text: err.message,
+        confirmButtonColor: "#00ADD2",
+      });
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const copyToClipboard = (text) => {
@@ -406,7 +430,7 @@ const Online_payment = () => {
 
   return (
     <div className="flex flex-col md:flex-row gap-6">
-      {/* Sidebar — unchanged */}
+      {/* Sidebar */}
       <aside className="hidden md:block w-64 bg-white border border-gray-200 rounded-xl shadow-sm h-fit overflow-hidden flex-shrink-0">
         <div className="p-4 bg-gradient-to-r from-[#00ADD2] to-[#00c4e6] text-white">
           <div className="flex items-center gap-3">
@@ -440,7 +464,7 @@ const Online_payment = () => {
         </nav>
       </aside>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="flex-1 space-y-6">
         {/* Student Info Card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center relative">
@@ -456,20 +480,26 @@ const Online_payment = () => {
             Name: {studentInfo.name}
           </h2>
           <p className="text-sm text-gray-600 font-semibold mt-1">
-            ID:{" "}
-            {studentInfo.roll || studentInfo.studentId || studentInfo.username}
+            ID: {studentInfo.studentId || studentInfo.roll || "N/A"}
           </p>
           {studentInfo.loginSource && (
             <span className="inline-block mt-2 text-xs px-3 py-1 rounded-full bg-[#e6f7f9] text-[#00ADD2] font-semibold">
               🎓 {getSourceLabel(studentInfo.loginSource)}
             </span>
           )}
-          {/* ✅ Dynamic Due Summary */}
-          <div className="mt-4 grid grid-cols-3 gap-2 max-w-md mx-auto">
+
+          {/* Due Summary */}
+          <div className="mt-4 grid grid-cols-4 gap-2 max-w-2xl mx-auto">
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-2">
               <p className="text-[10px] text-gray-500">Course Fee</p>
               <p className="text-sm font-bold text-gray-800">
                 ৳{studentInfo.courseFee}
+              </p>
+            </div>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
+              <p className="text-[10px] text-blue-600">Scholarship</p>
+              <p className="text-sm font-bold text-blue-700">
+                ৳{studentInfo.scholarshipAmount}
               </p>
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-2">
@@ -487,131 +517,94 @@ const Online_payment = () => {
           </div>
         </div>
 
-        {/* Step 1 & Step 2 */}
+        {/* Payment Form */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Step 1: Select Payment Amount */}
+          {/* LEFT: Amount Input */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div className="bg-[#00ADD2] px-4 py-3 text-white font-bold flex items-center gap-2">
-              <span>⏭</span> Step 1: Select Payment Amount
+              <span>💰</span> Payment Details
             </div>
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <span className="text-sm font-medium text-gray-700">
-                  Check Due For:
-                </span>
-                <span className="text-sm font-bold text-[#00ADD2]">
-                  2026 (Jan - Dec)
-                </span>
-              </div>
-
-              {/* 12 মাসের টেবিল */}
-              <div className="overflow-x-auto border border-gray-200 rounded-lg max-h-[480px] overflow-y-auto">
-                <table className="w-full text-left border-collapse text-sm">
-                  <thead className="sticky top-0 bg-gray-100 z-10">
-                    <tr className="border-b border-gray-200 text-gray-700">
-                      <th className="p-2.5 text-center border-r w-12">#SL</th>
-                      <th className="p-2.5 border-r">Particular Name</th>
-                      <th className="p-2.5 border-r text-center w-24">Dues</th>
-                      <th className="p-2.5 text-center w-16">Pay</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {feeList.map((fee, index) => (
-                      <tr
-                        key={fee.id}
-                        className={`border-b border-gray-100 transition ${
-                          fee.status === "Paid"
-                            ? "bg-green-50/40"
-                            : "hover:bg-gray-50"
-                        }`}
-                      >
-                        <td className="p-2.5 text-center border-r text-gray-600 font-mono">
-                          {String(index + 1).padStart(2, "0")}
-                        </td>
-                        <td className="p-2.5 border-r text-gray-800">
-                          <span
-                            className={
-                              fee.status === "Paid"
-                                ? "font-semibold text-green-700"
-                                : ""
-                            }
-                          >
-                            {fee.name}
-                          </span>
-                        </td>
-                        <td className="p-2.5 border-r text-center">
-                          {fee.status === "Paid" ? (
-                            <span className="text-green-600 font-semibold text-xs">
-                              Paid ({fee.amount})
-                            </span>
-                          ) : (
-                            <span className="font-semibold">{fee.amount}</span>
-                          )}
-                        </td>
-                        <td className="p-2.5 text-center">
-                          {fee.status === "Paid" ? (
-                            <input
-                              type="checkbox"
-                              checked
-                              disabled
-                              className="w-4 h-4 cursor-not-allowed opacity-50"
-                            />
-                          ) : (
-                            <input
-                              type="checkbox"
-                              checked={!!selectedFees[fee.id]}
-                              onChange={() =>
-                                handleCheckboxChange(fee.id, fee.amount)
-                              }
-                              className="w-4 h-4 text-[#00ADD2] rounded focus:ring-[#00ADD2] cursor-pointer"
-                            />
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Total Selected */}
-              {totalAmount > 0 && (
-                <div className="mt-3 p-3 bg-[#e6f7f9] border border-[#00ADD2] rounded-lg flex justify-between items-center">
-                  <span className="text-sm font-semibold text-gray-700">
-                    Selected Total:
+            <form onSubmit={handlePayment} className="p-4 space-y-4">
+              {/* Amount */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  পরিমাণ (৳) <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg font-bold">
+                    ৳
                   </span>
-                  <span className="text-lg font-bold text-[#00ADD2]">
-                    ৳{totalAmount}
-                  </span>
+                  <input
+                    type="number"
+                    min="1"
+                    value={payAmount}
+                    onChange={(e) => setPayAmount(e.target.value)}
+                    placeholder="যেমন: 500"
+                    className="w-full pl-8 pr-3 py-3 text-lg font-bold border-2 border-gray-300 rounded-lg focus:border-[#00ADD2] focus:ring-2 focus:ring-[#00ADD2]/20 outline-none"
+                    required
+                  />
                 </div>
-              )}
+                <p className="text-[11px] text-gray-500 mt-1">
+                  আপনি কত টাকা দিতে চান সেটা লিখুন
+                </p>
 
-              <button
-                type="button"
-                className="mt-4 w-full bg-[#00ADD2] hover:bg-[#008c9e] text-white py-2.5 rounded-lg font-semibold text-sm transition shadow-sm flex items-center justify-center gap-2"
-              >
-                Next (for Step 2) <span>▶</span>
-              </button>
-            </div>
-          </div>
+                {/* Quick Amount Buttons */}
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {[300, 500, 1000, 1500, 2000].map((amt) => (
+                    <button
+                      key={amt}
+                      type="button"
+                      onClick={() => setPayAmount(String(amt))}
+                      className="px-3 py-1 text-xs bg-gray-100 hover:bg-[#e6f7f9] hover:text-[#00ADD2] border border-gray-200 rounded-full font-semibold transition"
+                    >
+                      ৳{amt}
+                    </button>
+                  ))}
+                  {studentInfo.dueAmount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setPayAmount(String(studentInfo.dueAmount))
+                      }
+                      className="px-3 py-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-full font-semibold transition"
+                    >
+                      Full Due ৳{studentInfo.dueAmount}
+                    </button>
+                  )}
+                </div>
+              </div>
 
-          {/* Step 2: Online Payable Summary */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
-            <div className="bg-[#00ADD2] px-4 py-3 text-white font-bold flex items-center gap-2">
-              <span>⏭</span> Step 2: Online Payable Summary
-            </div>
-            <div className="p-4 space-y-4">
-              {/* Notice */}
-              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-center gap-2 text-yellow-800 text-sm">
-                <FaInfoCircle className="text-yellow-600 flex-shrink-0" />
-                <span>
-                  <strong>Attention!</strong> Please Complete Step 1.
-                </span>
+              {/* Month */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  মাস (Month)
+                </label>
+                <input
+                  type="month"
+                  value={payMonth}
+                  onChange={(e) => setPayMonth(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-[#00ADD2] outline-none"
+                />
+              </div>
+
+              {/* Note */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Note (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={payNote}
+                  onChange={(e) => setPayNote(e.target.value)}
+                  placeholder="যেমন: January fees"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-[#00ADD2] outline-none"
+                />
               </div>
 
               {/* Payment Method */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  পেমেন্ট মাধ্যম নির্বাচন করুন
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  পেমেন্ট মাধ্যম
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
@@ -636,7 +629,43 @@ const Online_payment = () => {
                 </div>
               </div>
 
-              {/* bKash/Nagad merchant info */}
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={processing}
+                className="w-full bg-[#00ADD2] hover:bg-[#008c9e] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-lg font-semibold text-sm transition shadow-md flex items-center justify-center gap-2"
+              >
+                {processing ? (
+                  <>
+                    <FaSync className="animate-spin" /> প্রসেসিং হচ্ছে...
+                  </>
+                ) : (
+                  <>
+                    <FaCheckCircle /> পেমেন্ট সম্পন্ন করুন
+                    {payAmount ? ` (৳${payAmount})` : ""}
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* RIGHT: Merchant Info */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
+            <div className="bg-[#00ADD2] px-4 py-3 text-white font-bold flex items-center gap-2">
+              <FaInfoCircle /> Payment Information
+            </div>
+            <div className="p-4 space-y-4">
+              {/* Notice */}
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2 text-yellow-800 text-sm">
+                <FaInfoCircle className="text-yellow-600 flex-shrink-0 mt-0.5" />
+                <span>
+                  <strong>নির্দেশনা:</strong> নিচের নাম্বার/অ্যাকাউন্টে টাকা
+                  পাঠিয়ে উপরের form পূরণ করে submit করুন। টাকা পাঠানোর পর
+                  payment auto save হবে।
+                </span>
+              </div>
+
+              {/* bKash / Nagad */}
               {(selectedMethod === "bkash" || selectedMethod === "nagad") && (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-xs space-y-1">
                   <p className="font-bold text-gray-700">
@@ -650,6 +679,7 @@ const Online_payment = () => {
                         : merchantNumbers.nagad}
                     </span>
                     <button
+                      type="button"
                       onClick={() =>
                         copyToClipboard(
                           selectedMethod === "bkash"
@@ -668,7 +698,7 @@ const Online_payment = () => {
                 </div>
               )}
 
-              {/* Bank info */}
+              {/* Bank */}
               {selectedMethod === "bank" && (
                 <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs space-y-1">
                   <p className="font-bold text-blue-800">
@@ -691,6 +721,7 @@ const Online_payment = () => {
                     <strong>Routing:</strong> {bankInfo.routingNo}
                   </p>
                   <button
+                    type="button"
                     onClick={() => copyToClipboard(bankInfo.accountNumber)}
                     className="mt-1 bg-blue-600 text-white px-2 py-1 rounded text-xs flex items-center gap-1"
                   >
@@ -699,40 +730,85 @@ const Online_payment = () => {
                 </div>
               )}
 
-              {/* Selected Months Preview */}
-              {totalAmount > 0 && (
-                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-xs space-y-1">
-                  <p className="font-bold text-gray-700">Selected Months:</p>
-                  <div className="flex flex-wrap gap-1">
-                    {feeList
-                      .filter((f) => selectedFees[f.id])
-                      .map((f) => (
-                        <span
-                          key={f.id}
-                          className="bg-[#e6f7f9] text-[#00ADD2] px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                        >
-                          {f.monthKey}
-                        </span>
-                      ))}
+              {/* Summary Preview */}
+              {payAmount && Number(payAmount) > 0 && (
+                <div className="p-3 bg-[#e6f7f9] border border-[#00ADD2] rounded-lg">
+                  <p className="font-bold text-[#00ADD2] text-sm mb-2">
+                    📋 Payment Summary
+                  </p>
+                  <div className="space-y-1 text-xs text-gray-700">
+                    <p className="flex justify-between">
+                      <span>Amount:</span>
+                      <strong>৳{payAmount}</strong>
+                    </p>
+                    <p className="flex justify-between">
+                      <span>Month:</span>
+                      <strong>{payMonth}</strong>
+                    </p>
+                    <p className="flex justify-between">
+                      <span>Method:</span>
+                      <strong className="capitalize">{selectedMethod}</strong>
+                    </p>
+                    <div className="border-t pt-1 mt-1 flex justify-between">
+                      <span>Current Paid:</span>
+                      <strong className="text-green-600">
+                        ৳{studentInfo.paidAmount}
+                      </strong>
+                    </div>
+                    <p className="flex justify-between">
+                      <span>New Total After Pay:</span>
+                      <strong className="text-[#00ADD2]">
+                        ৳{studentInfo.paidAmount + Number(payAmount || 0)}
+                      </strong>
+                    </p>
+                    <p className="flex justify-between">
+                      <span>New Due:</span>
+                      <strong className="text-red-600">
+                        ৳
+                        {Math.max(
+                          studentInfo.dueAmount - Number(payAmount || 0),
+                          0,
+                        )}
+                      </strong>
+                    </p>
                   </div>
                 </div>
               )}
 
-              {/* Pay Button */}
-              <button
-                type="button"
-                onClick={handlePayment}
-                disabled={processing || totalAmount <= 0}
-                className="w-full bg-[#00ADD2] hover:bg-[#008c9e] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-lg font-semibold text-sm transition shadow-md flex items-center justify-center gap-2"
-              >
-                {processing ? (
-                  "প্রসেসিং হচ্ছে..."
-                ) : (
-                  <>
-                    <FaCheckCircle /> পেমেন্ট সম্পন্ন করুন (৳{totalAmount})
-                  </>
-                )}
-              </button>
+              {/* Payment History */}
+              {studentInfo.paidMonths && studentInfo.paidMonths.length > 0 && (
+                <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="font-bold text-gray-700 text-sm mb-2">
+                    📜 Recent Payments
+                  </p>
+                  <div className="space-y-1.5 max-h-[180px] overflow-y-auto">
+                    {[...studentInfo.paidMonths]
+                      .sort((a, b) => new Date(b.paidAt) - new Date(a.paidAt))
+                      .slice(0, 5)
+                      .map((p, i) => (
+                        <div
+                          key={p._id || i}
+                          className="flex justify-between items-center text-xs bg-white border border-gray-200 rounded px-2 py-1.5"
+                        >
+                          <div>
+                            <p className="font-semibold text-gray-800">
+                              {p.month || "Payment"}
+                            </p>
+                            <p className="text-[10px] text-gray-400">
+                              {p.method} •{" "}
+                              {p.paidAt
+                                ? new Date(p.paidAt).toLocaleDateString()
+                                : ""}
+                            </p>
+                          </div>
+                          <span className="font-bold text-green-600">
+                            ৳{p.amount}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

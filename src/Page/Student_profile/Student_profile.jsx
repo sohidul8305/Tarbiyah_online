@@ -26,10 +26,30 @@ import {
   FaTimesCircle,
   FaHourglassHalf,
   FaSync,
+  FaChalkboardTeacher,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
+
+// ✅ Source label helper
+const getSourceLabel = (src) => {
+  if (src === "basic_tazweed_students") return "Basic Tazweed";
+  if (src === "najera_batch_students") return "Najera Batch";
+  if (src === "batch_students") return "Batch Student";
+  return "Regular Student";
+};
+
+// ✅ Source color helper
+const getSourceColor = (src) => {
+  if (src === "basic_tazweed_students")
+    return "bg-green-100 text-green-700 border-green-300";
+  if (src === "najera_batch_students")
+    return "bg-purple-100 text-purple-700 border-purple-300";
+  if (src === "batch_students")
+    return "bg-indigo-100 text-indigo-700 border-indigo-300";
+  return "bg-blue-100 text-blue-700 border-blue-300";
+};
 
 const StudentProfile = () => {
   const { user } = useAuth();
@@ -37,6 +57,7 @@ const StudentProfile = () => {
   const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [profile, setProfile] = useState({
     _id: "",
@@ -57,6 +78,7 @@ const StudentProfile = () => {
     religion: "",
     nationality: "",
     country: "",
+    gender: "",
     // ✅ Address
     address: "",
     presentAddress: "",
@@ -69,14 +91,26 @@ const StudentProfile = () => {
     dueAmount: 0,
     courseFee: 0,
     scholarshipAmount: 0,
+    scholarshipNote: "",
     monthlyFee: 0,
+    paidMonths: [],
+    // ✅ Batch info (from Admin)
+    batchName: "",
+    batchCourse: "",
+    batchTeacher: "",
+    batchSchedule: "",
+    batchClasses: [],
     // ✅ Dates
     admissionDate: "",
     createdAt: "",
+    // ✅ Source
+    loginSource: "",
+    source: "",
+    sourceLabel: "",
   });
 
   // ============================================================
-  // ✅ Load from localStorage, then fetch fresh from API
+  // ✅ Load from localStorage, then fetch fresh
   // ============================================================
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isStudentLoggedIn");
@@ -102,9 +136,10 @@ const StudentProfile = () => {
     // Fast load from localStorage
     setProfile((prev) => mapProfileData(parsed, prev));
 
-    // Then fetch fresh
-    if (parsed._id) {
-      fetchFreshProfile(parsed._id, parsed.loginSource);
+    // ✅ Primary key: _id → studentId → phone
+    const primaryKey = parsed._id || parsed.studentId || parsed.phone;
+    if (primaryKey) {
+      fetchFreshProfile(primaryKey, parsed.loginSource);
     } else {
       setLoading(false);
     }
@@ -112,24 +147,28 @@ const StudentProfile = () => {
   }, []);
 
   // ============================================================
-  // ✅ Field mapper — সব source এর জন্য
+  // ✅ Field mapper — সব source এর জন্য (batch info সহ)
   // ============================================================
   const mapProfileData = (d, prev = {}) => {
     const paid =
       Number(d.paidAmount) ||
       (d.paidMonths || []).reduce((s, p) => s + Number(p.amount || 0), 0);
-    const fee = Number(d.courseFee) || 0;
+    const fee = Number(d.courseFee) || Number(d.monthlyFee) || 0;
     const scholarship = Number(d.scholarshipAmount) || 0;
-    const due = Number(d.dueAmount) || Math.max(fee - scholarship - paid, 0);
+    const due =
+      d.dueAmount !== undefined && d.dueAmount !== null
+        ? Number(d.dueAmount)
+        : Math.max(fee - scholarship - paid, 0);
 
     const src = d.loginSource || d.source || "students";
-    const srcLabel =
-      d.sourceLabel ||
-      (src === "basic_tazweed_students"
-        ? "Basic Tazweed"
-        : src === "najera_batch_students"
-          ? "Najera Batch"
-          : "Regular Student");
+    const srcLabel = d.sourceLabel || getSourceLabel(src);
+
+    let autoStatus = d.paymentStatus;
+    if (!autoStatus) {
+      if (due === 0 && paid > 0) autoStatus = "Paid";
+      else if (paid > 0) autoStatus = "Partial";
+      else autoStatus = "Unpaid";
+    }
 
     return {
       ...prev,
@@ -139,15 +178,23 @@ const StudentProfile = () => {
       studentId: d.studentId || prev.studentId || "",
       password: d.password || prev.password || "••••••••",
       phone: d.phone || prev.phone || "",
-      class: d.class || d.course || prev.class || "",
-      course: d.course || d.class || prev.course || "",
+      // ✅ Course from batch OR direct
+      class: d.batchCourse || d.class || d.course || prev.class || "",
+      course: d.batchCourse || d.course || d.class || prev.course || "",
       status: d.status || prev.status || "Active",
+
+      // ✅ Batch info from Admin LMS
+      batchName: d.batchName || prev.batchName || "",
+      batchCourse: d.batchCourse || prev.batchCourse || "",
+      batchTeacher: d.batchTeacher || prev.batchTeacher || "",
+      batchSchedule: d.batchSchedule || prev.batchSchedule || "",
+      batchClasses: d.batchClasses || prev.batchClasses || [],
 
       loginSource: src,
       source: src,
       sourceLabel: srcLabel,
 
-      fatherName: d.fatherName || prev.fatherName || "",
+      fatherName: d.fatherName || d.guardianName || prev.fatherName || "",
       motherName: d.motherName || prev.motherName || "",
       guardianName: d.guardianName || d.fatherName || prev.guardianName || "",
       guardianPhone: d.guardianPhone || d.phone || prev.guardianPhone || "",
@@ -156,6 +203,7 @@ const StudentProfile = () => {
       religion: d.religion || prev.religion || "",
       nationality: d.nationality || prev.nationality || "",
       country: d.country || prev.country || "BD",
+      gender: d.gender || prev.gender || "",
 
       address: d.address || d.presentAddress || prev.address || "",
       presentAddress:
@@ -163,16 +211,16 @@ const StudentProfile = () => {
       permanentAddress:
         d.permanentAddress || d.address || prev.permanentAddress || "",
 
-      paymentStatus:
-        d.paymentStatus ||
-        (due === 0 && paid > 0 ? "Paid" : paid > 0 ? "Partial" : "Unpaid"),
+      paymentStatus: autoStatus || "Unpaid",
       paymentMethod: d.paymentMethod || prev.paymentMethod || "",
       transactionId: d.transactionId || prev.transactionId || "",
       paidAmount: paid,
       dueAmount: due,
       courseFee: fee,
       scholarshipAmount: scholarship,
+      scholarshipNote: d.scholarshipNote || prev.scholarshipNote || "",
       monthlyFee: Number(d.monthlyFee) || fee,
+      paidMonths: d.paidMonths || prev.paidMonths || [],
 
       admissionDate: d.admissionDate || d.createdAt || prev.admissionDate || "",
       createdAt: d.createdAt || prev.createdAt || "",
@@ -180,48 +228,109 @@ const StudentProfile = () => {
   };
 
   // ============================================================
-  // ✅ Fetch fresh from correct API source
+  // ✅ Fetch fresh profile — Academic এর exact same approach
   // ============================================================
   const fetchFreshProfile = async (studentId, loginSource) => {
     try {
       const resolvedSource =
         loginSource || localStorage.getItem("loginSource") || "students";
 
-      let data = null;
+      // ✅ Read localStorage with ALL identifiers
+      const raw = localStorage.getItem("studentInfo");
+      const parsed = raw ? JSON.parse(raw) : {};
 
-      if (resolvedSource === "basic_tazweed_students") {
-        const res = await fetch(`${API_BASE}/basic-tazweed/all`);
+      const params = new URLSearchParams();
+      if (parsed._id) params.append("id", parsed._id);
+      if (studentId && studentId !== parsed._id)
+        params.append("studentId", studentId);
+      if (parsed.studentId) params.append("studentId", parsed.studentId);
+      if (parsed.phone) params.append("phone", parsed.phone);
+      if (parsed.name && parsed.name !== "Student")
+        params.append("name", parsed.name);
+      if (parsed.username) params.append("username", parsed.username);
+
+      console.log("📥 Fetching profile with params:", params.toString());
+
+      let data = null;
+      let finalSource = resolvedSource;
+
+      // ✅ STEP 1: Unified endpoint (Student Dashboard এর same)
+      try {
+        const url = `${API_BASE}/student/dashboard-full?${params.toString()}`;
+        const res = await fetch(url);
         const d = await res.json();
-        if (d.success && Array.isArray(d.students)) {
-          data = d.students.find(
-            (s) => s._id === studentId || s.studentId === studentId,
-          );
+        console.log("📥 Profile response:", d);
+
+        if (d.success && d.student) {
+          data = d.student;
+          finalSource = d.source || resolvedSource;
+          console.log(`✅ Found in ${finalSource}:`, data.name);
         }
-      } else if (resolvedSource === "najera_batch_students") {
-        const res = await fetch(`${API_BASE}/najera-batch/all`);
-        const d = await res.json();
-        if (d.success && Array.isArray(d.students)) {
-          data = d.students.find(
-            (s) => s._id === studentId || s.studentId === studentId,
-          );
-        }
-      } else {
-        const res = await fetch(`${API_BASE}/students/details/${studentId}`);
-        const d = await res.json();
-        if (d.success) data = d.student;
+      } catch (e) {
+        console.warn("⚠️ dashboard-full failed:", e.message);
       }
 
+      // ✅ STEP 2: Fallback — original source
+      if (!data) {
+        if (resolvedSource === "basic_tazweed_students") {
+          const res = await fetch(`${API_BASE}/basic-tazweed/all`);
+          const d = await res.json();
+          if (d.success && Array.isArray(d.students)) {
+            data = d.students.find(
+              (s) => s._id === studentId || s.studentId === studentId,
+            );
+          }
+        } else if (resolvedSource === "najera_batch_students") {
+          const res = await fetch(`${API_BASE}/najera-batch/all`);
+          const d = await res.json();
+          if (d.success && Array.isArray(d.students)) {
+            data = d.students.find(
+              (s) => s._id === studentId || s.studentId === studentId,
+            );
+          }
+        } else if (studentId) {
+          const res = await fetch(`${API_BASE}/students/details/${studentId}`);
+          const d = await res.json();
+          if (d.success) data = d.student;
+        }
+      }
+
+      // ✅ STEP 3: Process data
       if (data) {
-        const enriched = { ...data, loginSource: resolvedSource };
+        const enriched = { ...data, loginSource: finalSource };
         setProfile((prev) => mapProfileData(enriched, prev));
-        localStorage.setItem("studentInfo", JSON.stringify(enriched));
-        localStorage.setItem("loginSource", resolvedSource);
+
+        // ✅ Store identifiers only
+        const stored = {
+          _id: data._id,
+          name: data.name,
+          studentId: data.studentId || "",
+          phone: data.phone || "",
+          username: data.username || "",
+          course: data.batchCourse || data.course || data.class || "",
+          class: data.batchCourse || data.class || data.course || "",
+          batchName: data.batchName || "",
+          batchCourse: data.batchCourse || "",
+          loginSource: finalSource,
+        };
+        localStorage.setItem("studentInfo", JSON.stringify(stored));
+        localStorage.setItem("loginSource", finalSource);
+      } else {
+        console.warn(`⚠️ Student ${studentId} not found in any source`);
       }
     } catch (e) {
       console.error("❌ Fetch profile error:", e);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    const primaryKey =
+      profile._id || profile.studentId || profile.phone || profile._id;
+    fetchFreshProfile(primaryKey, profile.loginSource);
   };
 
   const handleChange = (e) => {
@@ -295,18 +404,6 @@ const StudentProfile = () => {
     },
   ];
 
-  // ✅ Source color helper
-  const sourceStyle = (src) => {
-    switch (src) {
-      case "basic_tazweed_students":
-        return "bg-green-100 text-green-700 border-green-300";
-      case "najera_batch_students":
-        return "bg-purple-100 text-purple-700 border-purple-300";
-      default:
-        return "bg-blue-100 text-blue-700 border-blue-300";
-    }
-  };
-
   const statusStyle = (s) => {
     if (s === "Active" || s === "Paid") return "bg-green-100 text-green-700";
     if (s === "Partial" || s === "Pending")
@@ -337,7 +434,7 @@ const StudentProfile = () => {
             <div className="flex-1 min-w-0">
               <p className="font-bold text-sm truncate">{profile.name}</p>
               <p className="text-xs opacity-80 truncate">
-                {profile.class || profile.course}
+                {profile.course || profile.class}
               </p>
               {profile.sourceLabel && (
                 <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-white/25 font-semibold">
@@ -379,17 +476,21 @@ const StudentProfile = () => {
                   <FaUser /> Student Profile
                 </h2>
                 <p className="text-sm opacity-80">
-                  Complete personal & academic information
+                  {profile.name || "Student"} •{" "}
+                  {profile.course || profile.class || "N/A"}
                 </p>
               </div>
               <div className="flex gap-2">
                 <button
-                  onClick={() =>
-                    fetchFreshProfile(profile._id, profile.loginSource)
-                  }
-                  className="px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-white text-sm flex items-center gap-2"
+                  onClick={handleRefresh}
+                  disabled={refreshing}
+                  className="px-3 py-2 rounded-lg bg-white/20 hover:bg-white/30 text-white text-sm flex items-center gap-2 disabled:opacity-50"
                 >
-                  <FaSync size={12} /> Refresh
+                  <FaSync
+                    size={12}
+                    className={refreshing ? "animate-spin" : ""}
+                  />
+                  {refreshing ? "Refreshing..." : "Refresh"}
                 </button>
                 <button
                   onClick={() => setIsEditing(!isEditing)}
@@ -422,10 +523,9 @@ const StudentProfile = () => {
                 {profile.status || "Active"}
               </span>
 
-              {/* ✅ Source Badge */}
               {profile.sourceLabel && (
                 <span
-                  className={`px-3 py-1 rounded-full text-xs font-bold border ${sourceStyle(profile.source)}`}
+                  className={`px-3 py-1 rounded-full text-xs font-bold border ${getSourceColor(profile.source)}`}
                 >
                   🎓 {profile.sourceLabel}
                 </span>
@@ -476,6 +576,7 @@ const StudentProfile = () => {
                   {profile.password || "••••••••"}
                 </p>
               </Field>
+
               <Field label="Phone" icon={<FaPhone />}>
                 {isEditing ? (
                   <input
@@ -491,8 +592,36 @@ const StudentProfile = () => {
               </Field>
 
               <Field label="Country" icon={<FaGlobe />}>
-                <p className="text-gray-800">{profile.country || "N/A"}</p>
+                {isEditing ? (
+                  <input
+                    type="text"
+                    name="country"
+                    value={profile.country}
+                    onChange={handleChange}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 text-sm"
+                  />
+                ) : (
+                  <p className="text-gray-800">{profile.country || "N/A"}</p>
+                )}
               </Field>
+
+              {profile.gender && (
+                <Field label="Gender" icon={<FaUser />}>
+                  <p className="text-gray-800">{profile.gender}</p>
+                </Field>
+              )}
+
+              {profile.fatherName && (
+                <Field label="Father's Name" icon={<FaUser />}>
+                  <p className="text-gray-800">{profile.fatherName}</p>
+                </Field>
+              )}
+
+              {profile.motherName && (
+                <Field label="Mother's Name" icon={<FaUser />}>
+                  <p className="text-gray-800">{profile.motherName}</p>
+                </Field>
+              )}
             </div>
 
             {/* ============ Academic Info ============ */}
@@ -500,10 +629,10 @@ const StudentProfile = () => {
               <FaBook /> Academic Information
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-              <Field label="Course / Class" icon={<FaBook />}>
+              <Field label="Course" icon={<FaBook />}>
                 <p className="text-gray-800 font-medium">
-                  {profile.sourceLabel ||
-                    profile.course ||
+                  {profile.course ||
+                    profile.batchCourse ||
                     profile.class ||
                     "N/A"}
                 </p>
@@ -516,9 +645,28 @@ const StudentProfile = () => {
                     : "N/A"}
                 </p>
               </Field>
-            </div>
 
-            <div className="grid grid-cols-1 gap-4 mb-6"></div>
+              {/* ✅ Batch info (from Admin LMS) */}
+              {profile.batchName && (
+                <Field label="Batch" icon={<FaUserGraduate />}>
+                  <p className="text-gray-800 font-semibold">
+                    {profile.batchName}
+                  </p>
+                </Field>
+              )}
+
+              {profile.batchTeacher && (
+                <Field label="Teacher" icon={<FaChalkboardTeacher />}>
+                  <p className="text-gray-800">{profile.batchTeacher}</p>
+                </Field>
+              )}
+
+              {profile.batchSchedule && (
+                <Field label="Schedule" icon={<FaCalendarAlt />}>
+                  <p className="text-gray-800">{profile.batchSchedule}</p>
+                </Field>
+              )}
+            </div>
 
             {/* ============ Payment Info ============ */}
             <h3 className="text-sm font-bold text-gray-700 mb-3 pb-2 border-b flex items-center gap-2">
@@ -573,6 +721,51 @@ const StudentProfile = () => {
                 color="text-gray-800"
               />
             </div>
+
+            {/* ✅ Scholarship Note (if present) */}
+            {profile.scholarshipNote && (
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-[10px] text-blue-700 font-bold uppercase">
+                  Scholarship Note
+                </p>
+                <p className="text-sm text-blue-900 mt-1">
+                  {profile.scholarshipNote}
+                </p>
+              </div>
+            )}
+
+            {/* ✅ Payment History */}
+            {profile.paidMonths && profile.paidMonths.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-sm font-bold text-gray-700 mb-3 pb-2 border-b flex items-center gap-2">
+                  <FaMoneyCheckAlt /> Payment History
+                </h3>
+                <div className="space-y-2">
+                  {profile.paidMonths.map((p, i) => (
+                    <div
+                      key={p._id || i}
+                      className="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-200"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-gray-800">
+                          {p.month || "Payment"}
+                        </p>
+                        <p className="text-[10px] text-gray-400">
+                          {p.method || ""}{" "}
+                          {p.paidAt
+                            ? `• ${new Date(p.paidAt).toLocaleDateString()}`
+                            : ""}
+                          {p.note ? ` • ${p.note}` : ""}
+                        </p>
+                      </div>
+                      <span className="font-bold text-green-600">
+                        ৳{Number(p.amount || 0).toFixed(2)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Save buttons */}
             {isEditing && (
