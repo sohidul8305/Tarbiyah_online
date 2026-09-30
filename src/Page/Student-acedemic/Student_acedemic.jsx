@@ -547,6 +547,30 @@ const StudentAcademic = () => {
                           </div>
 
                           <div className="space-y-1 text-xs text-gray-600">
+                            {/* ⬇️ নতুন যোগ করুন */}
+                            {cls.classNo && (
+                              <p className="flex items-center gap-2">
+                                <FaInfoCircle className="text-gray-400" />
+                                <span>
+                                  Class No:{" "}
+                                  <b className="text-gray-800">{cls.classNo}</b>
+                                </span>
+                              </p>
+                            )}
+                            {cls.classDate && (
+                              <p className="flex items-center gap-2">
+                                <FaCalendarAlt className="text-gray-400" />
+                                <span>
+                                  Date:{" "}
+                                  <b className="text-gray-800">
+                                    {cls.classDate}
+                                  </b>
+                                </span>
+                              </p>
+                            )}
+
+                            {/* পুরনো কোড */}
+
                             <p className="flex items-center gap-2">
                               <FaCalendarAlt className="text-gray-400" />
                               {cls.day}

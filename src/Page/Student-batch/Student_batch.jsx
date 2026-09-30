@@ -1140,12 +1140,24 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     country: "BD",
     course: "",
     paymentStatus: "Unpaid",
+    // ⬇️ নতুন
+    scholarshipAmount: "",
+    scholarshipNote: "",
+    courseFee: "",
+    monthlyFee: "",
+    paidAmount: "",
+    admissionDate: todayStr(),
+    paymentMethod: "Cash",
+    transactionId: "",
+    notes: "",
   });
   /* ---------- Class ---------- */
   const [showClassModal, setShowClassModal] = useState(false);
   const [editingClassId, setEditingClassId] = useState(null);
   const [classForm, setClassForm] = useState({
     name: "",
+    classNo: "", // ⬅️ NEW
+    classDate: "", // ⬅️ NEW
     day: "Saturday",
     time: "",
     gender: "Male",
@@ -1340,20 +1352,31 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   const materialsList = dbMaterials;
   // ✅ নতুন — MongoDB collection থেকে
   const videos = dbVideos;
-  const calcPaid = (s) =>
-    (s.paidMonths || []).reduce((sum, p) => sum + Number(p.amount || 0), 0);
+  const calcPaid = (s) => {
+    // Priority: paidMonths sum → paidAmount field → 0
+    const fromMonths = (s.paidMonths || []).reduce(
+      (sum, p) => sum + Number(p.amount || 0),
+      0,
+    );
+    if (fromMonths > 0) return fromMonths;
+    return Number(s.paidAmount) || 0;
+  };
 
   const calcDue = (s) => {
-    const fee = Number(s.monthlyFee || 0);
-    if (!s.admissionDate || fee <= 0) return 0;
-    const start = new Date(s.admissionDate);
-    const now = new Date();
-    let months =
-      (now.getFullYear() - start.getFullYear()) * 12 +
-      (now.getMonth() - start.getMonth()) +
-      1;
-    if (months < 0) months = 0;
-    return Math.max(months * fee - calcPaid(s), 0);
+    // ✅ Use stored dueAmount if present
+    if (
+      s.dueAmount !== undefined &&
+      s.dueAmount !== null &&
+      s.dueAmount !== ""
+    ) {
+      const d = Number(s.dueAmount);
+      if (!Number.isNaN(d)) return Math.max(d, 0);
+    }
+    // Fallback: calculate
+    const fee = Number(s.courseFee || s.monthlyFee || 0);
+    const scholarship = Number(s.scholarshipAmount || 0);
+    const paid = calcPaid(s);
+    return Math.max(fee - scholarship - paid, 0);
   };
 
   const totalCollected = students.reduce((sum, s) => sum + calcPaid(s), 0);
@@ -1387,6 +1410,16 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       country: "BD",
       course: batch?.course || "",
       paymentStatus: "Unpaid",
+      // ⬇️ নতুন
+      scholarshipAmount: "",
+      scholarshipNote: "",
+      courseFee: "",
+      monthlyFee: "",
+      paidAmount: "",
+      admissionDate: todayStr(),
+      paymentMethod: "Cash",
+      transactionId: "",
+      notes: "",
     });
     setShowStudentModal(true);
   };
@@ -1400,6 +1433,18 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       country: s.country || "BD",
       course: s.course || batch?.course || "",
       paymentStatus: s.paymentStatus || "Unpaid",
+      // ⬇️ এই লাইনগুলো থাকতে হবে
+      scholarshipAmount: s.scholarshipAmount || "",
+      scholarshipNote: s.scholarshipNote || "",
+      courseFee: s.courseFee || "",
+      monthlyFee: s.monthlyFee || "",
+      paidAmount: s.paidAmount || "",
+      admissionDate: s.admissionDate
+        ? String(s.admissionDate).slice(0, 10)
+        : todayStr(),
+      paymentMethod: s.paymentMethod || "Cash",
+      transactionId: s.transactionId || "",
+      notes: s.notes || "",
     });
     setShowStudentModal(true);
   };
@@ -1419,19 +1464,32 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     try {
       let res, data;
 
+      const payload = {
+        name: studentForm.name.trim(),
+        studentId: studentForm.studentId.trim(),
+        phone: studentForm.phone,
+        country: studentForm.country,
+        course: studentForm.course || batch?.course || "",
+        paymentStatus: studentForm.paymentStatus,
+        scholarshipAmount: studentForm.scholarshipAmount,
+        scholarshipNote: studentForm.scholarshipNote,
+        courseFee: studentForm.courseFee,
+        monthlyFee: studentForm.monthlyFee || studentForm.courseFee,
+        paidAmount: studentForm.paidAmount,
+        admissionDate: studentForm.admissionDate,
+        paymentMethod: studentForm.paymentMethod,
+        transactionId: studentForm.transactionId,
+        notes: studentForm.notes,
+      };
+
       if (editingStudentId) {
-        // ✅ UPDATE
+        // UPDATE
         res = await fetch(
           `${API_URL}/api/batch-students/update/${editingStudentId}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: studentForm.name.trim(),
-              studentId: studentForm.studentId.trim(),
-              course: studentForm.course,
-              paymentStatus: studentForm.paymentStatus,
-            }),
+            body: JSON.stringify(payload),
           },
         );
         data = await res.json();
@@ -1442,6 +1500,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
           Swal.fire({
             icon: "success",
             title: "Student Updated!",
+            text: "Due recalculated automatically.",
             timer: 1200,
             showConfirmButton: false,
           });
@@ -1449,22 +1508,15 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
           Swal.fire({ icon: "error", title: "Failed!", text: data.message });
         }
       } else {
-        // ✅ CREATE
+        // CREATE
         res = await fetch(`${API_URL}/api/batch-students/create`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            batchId: batchId,
-            name: studentForm.name.trim(),
-            studentId: studentForm.studentId.trim(),
-            course: studentForm.course || batch?.course || "",
-            paymentStatus: studentForm.paymentStatus || "Unpaid",
-          }),
+          body: JSON.stringify({ batchId: batchId, ...payload }),
         });
         data = await res.json();
 
         if (data.success) {
-          // Sync batch.students count
           const newCount = dbStudents.length + 1;
           await saveBatchFields({ students: newCount }, "");
           await fetchDbStudents();
@@ -1472,8 +1524,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
           Swal.fire({
             icon: "success",
             title: "Student Added!",
-            text: "Saved to database successfully.",
-            timer: 1200,
+            text: `Due auto-calculated: ৳${data.student?.dueAmount ?? 0}`,
+            timer: 1600,
             showConfirmButton: false,
           });
         } else {
@@ -1533,6 +1585,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     setEditingClassId(null);
     setClassForm({
       name: "",
+      classNo: "", // ⬅️ NEW
+      classDate: "", // ⬅️ NEW
       day: "Saturday",
       time: "",
       gender: "Male",
@@ -1545,6 +1599,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     setEditingClassId(c._id);
     setClassForm({
       name: c.name || "",
+      classNo: c.classNo || "", // ⬅️ NEW
+      classDate: c.classDate || "", // ⬅️ NEW
       day: c.day || "Saturday",
       time: c.time || "",
       gender: c.gender || "Male",
@@ -2373,6 +2429,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                         key={stu._id}
                         className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all"
                       >
+                        {/* Header: Avatar + Info + Status Badge */}
                         <div className="flex items-start gap-3">
                           <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
                             {stu.name?.charAt(0)?.toUpperCase() || "S"}
@@ -2413,6 +2470,19 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                           </span>
                         </div>
 
+                        {/* 🎓 Scholarship Badge — নতুন যোগ হয়েছে */}
+                        {Number(stu.scholarshipAmount) > 0 && (
+                          <div className="mt-2 bg-purple-50 rounded-md py-1 px-2 flex justify-between items-center">
+                            <span className="text-[9px] text-purple-700 font-semibold">
+                              🎓 Scholarship
+                            </span>
+                            <span className="text-[10px] font-bold text-purple-800">
+                              ৳{stu.scholarshipAmount}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Paid / Due grid */}
                         <div className="mt-3 grid grid-cols-2 gap-1.5 text-center">
                           <div className="bg-green-50 rounded-md py-1.5">
                             <p className="text-[9px] text-green-600">Paid</p>
@@ -2428,6 +2498,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                           </div>
                         </div>
 
+                        {/* Action buttons */}
                         <div className="mt-3 grid grid-cols-3 gap-1 pt-3 border-t border-gray-100">
                           <MiniBtn
                             icon={<FaMoneyCheckAlt size={11} />}
@@ -2455,6 +2526,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
               )}
             </div>
           )}
+
           {/* ==================== CLASSES ==================== */}
           {section === "classes" && (
             <div className="space-y-4">
@@ -2531,6 +2603,34 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
 
                           {/* Info: Day, Time, Teachers, Meeting */}
                           <div className="mt-2 space-y-1.5 text-[11px] text-gray-600">
+                            {/* ⬇️ নতুন যোগ করুন */}
+                            {c.classNo && (
+                              <p className="flex items-center gap-1.5">
+                                <FaInfoCircle
+                                  size={10}
+                                  className="text-gray-400"
+                                />
+                                Class No:{" "}
+                                <span className="font-bold text-gray-800">
+                                  {c.classNo}
+                                </span>
+                              </p>
+                            )}
+                            {c.classDate && (
+                              <p className="flex items-center gap-1.5">
+                                <FaCalendarAlt
+                                  size={10}
+                                  className="text-gray-400"
+                                />
+                                Date:{" "}
+                                <span className="font-bold text-gray-800">
+                                  {c.classDate}
+                                </span>
+                              </p>
+                            )}
+
+                            {/* পুরনো কোড অপরিবর্তিত */}
+
                             <p className="flex items-center gap-1.5">
                               <FaCalendarAlt
                                 size={10}
@@ -3242,6 +3342,201 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                   </select>
                 </div>
 
+                {/* ⬇️ নতুন ফিল্ড block শুরু ⬇️ */}
+
+                {/* Course Fee */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Course Fee (৳)
+                  </label>
+                  <input
+                    type="number"
+                    value={studentForm.courseFee}
+                    onChange={(e) =>
+                      setStudentForm({
+                        ...studentForm,
+                        courseFee: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    placeholder="e.g., 5000"
+                  />
+                </div>
+
+                {/* Monthly Fee */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Monthly Fee (৳)
+                  </label>
+                  <input
+                    type="number"
+                    value={studentForm.monthlyFee}
+                    onChange={(e) =>
+                      setStudentForm({
+                        ...studentForm,
+                        monthlyFee: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    placeholder="Empty হলে Course Fee হবে"
+                  />
+                </div>
+
+                {/* Scholarship Amount */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Scholarship (৳)
+                  </label>
+                  <input
+                    type="number"
+                    value={studentForm.scholarshipAmount}
+                    onChange={(e) =>
+                      setStudentForm({
+                        ...studentForm,
+                        scholarshipAmount: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    placeholder="e.g., 1000"
+                  />
+                </div>
+
+                {/* Scholarship Reason — Textarea */}
+                <div className="md:col-span-2">
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Scholarship কেন দেওয়া হলো? (Note)
+                  </label>
+                  <textarea
+                    rows="2"
+                    value={studentForm.scholarshipNote}
+                    onChange={(e) =>
+                      setStudentForm({
+                        ...studentForm,
+                        scholarshipNote: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    placeholder="যেমন: Financial hardship, Merit-based, Sibling discount..."
+                  />
+                </div>
+
+                {/* Admission Date */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Admission Date
+                  </label>
+                  <input
+                    type="date"
+                    value={studentForm.admissionDate}
+                    onChange={(e) =>
+                      setStudentForm({
+                        ...studentForm,
+                        admissionDate: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                  />
+                </div>
+
+                {/* Initial Paid Amount */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Initial Paid Amount (৳)
+                  </label>
+                  <input
+                    type="number"
+                    value={studentForm.paidAmount}
+                    onChange={(e) =>
+                      setStudentForm({
+                        ...studentForm,
+                        paidAmount: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    placeholder="এখন কত টাকা দিলো?"
+                  />
+                </div>
+
+                {/* Payment Method */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Payment Method
+                  </label>
+                  <select
+                    value={studentForm.paymentMethod}
+                    onChange={(e) =>
+                      setStudentForm({
+                        ...studentForm,
+                        paymentMethod: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                  >
+                    <option value="Cash">Cash</option>
+                    <option value="bKash">bKash</option>
+                    <option value="Nagad">Nagad</option>
+                    <option value="Rocket">Rocket</option>
+                    <option value="Bank">Bank Transfer</option>
+                  </select>
+                </div>
+
+                {/* Transaction ID */}
+                <div className="md:col-span-2">
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Transaction ID (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={studentForm.transactionId}
+                    onChange={(e) =>
+                      setStudentForm({
+                        ...studentForm,
+                        transactionId: e.target.value,
+                      })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    placeholder="bKash/Nagad TrxID"
+                  />
+                </div>
+
+                {/* ⬇️ Auto-calculated Due Preview ⬇️ */}
+                <div className="md:col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-[11px] font-bold text-blue-800 mb-1.5">
+                    📊 Auto Calculation Preview
+                  </p>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="bg-white rounded-md py-1.5">
+                      <p className="text-[9px] text-gray-500">Fee</p>
+                      <p className="text-xs font-bold text-gray-700">
+                        ৳{Number(studentForm.courseFee) || 0}
+                      </p>
+                    </div>
+                    <div className="bg-white rounded-md py-1.5">
+                      <p className="text-[9px] text-gray-500">Paid</p>
+                      <p className="text-xs font-bold text-green-600">
+                        ৳{Number(studentForm.paidAmount) || 0}
+                      </p>
+                    </div>
+                    <div className="bg-white rounded-md py-1.5">
+                      <p className="text-[9px] text-gray-500">Due</p>
+                      <p className="text-xs font-bold text-red-600">
+                        ৳
+                        {Math.max(
+                          (Number(studentForm.courseFee) || 0) -
+                            (Number(studentForm.scholarshipAmount) || 0) -
+                            (Number(studentForm.paidAmount) || 0),
+                          0,
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-blue-700 mt-1.5">
+                    Due = Fee − Scholarship − Paid
+                  </p>
+                </div>
+
+                {/* ⬆️ নতুন ফিল্ড block শেষ ⬆️ */}
+
                 {/* Payment Status */}
                 <div className="md:col-span-2">
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
@@ -3318,6 +3613,38 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     placeholder="e.g., Morning Female Batch"
                   />
                 </div>
+                {/* Class No */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Class No
+                  </label>
+                  <input
+                    type="text"
+                    value={classForm.classNo}
+                    onChange={(e) =>
+                      setClassForm({ ...classForm, classNo: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    placeholder="e.g., Class-01"
+                  />
+                </div>
+
+                {/* Class Date */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Class Date
+                  </label>
+                  <input
+                    type="date"
+                    value={classForm.classDate}
+                    onChange={(e) =>
+                      setClassForm({ ...classForm, classDate: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                  />
+                </div>
+
+                {/* ⬆️ ⬆️ নতুন যোগ শেষ ⬆️ ⬆️ */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Day *
