@@ -3483,7 +3483,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                 {/* Transaction ID */}
                 <div className="md:col-span-2">
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Transaction ID (Optional)
+                    Transaction ID
                   </label>
                   <input
                     type="text"
