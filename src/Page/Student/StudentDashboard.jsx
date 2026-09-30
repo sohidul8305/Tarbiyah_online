@@ -30,7 +30,16 @@ const API_BASE = "https://api.tarbiyahonline.com/api";
 const getSourceLabel = (src) => {
   if (src === "basic_tazweed_students") return "Basic Tazweed";
   if (src === "najera_batch_students") return "Najera Batch";
+  if (src === "batch_students") return "Batch Student";
   return "Regular Student";
+};
+
+// ✅ Source badge color helper
+const getSourceColor = (src) => {
+  if (src === "basic_tazweed_students") return "bg-green-100 text-green-700";
+  if (src === "najera_batch_students") return "bg-purple-100 text-purple-700";
+  if (src === "batch_students") return "bg-indigo-100 text-indigo-700";
+  return "bg-blue-100 text-blue-700";
 };
 
 const StudentDashboard = () => {
@@ -67,6 +76,11 @@ const StudentDashboard = () => {
     guardianName: "",
     guardianPhone: "",
     paidMonths: [],
+    batchName: "",
+    batchTeacher: "",
+    batchCourse: "",
+    batchSchedule: "",
+    batchClasses: [],
     loginSource: "",
     source: "",
     sourceLabel: "",
@@ -116,8 +130,10 @@ const StudentDashboard = () => {
       sourceLabel: getSourceLabel(resolvedSource),
     }));
 
-    if (parsed._id) {
-      fetchFullStudentData(parsed._id, resolvedSource);
+    // ✅ Primary key: _id → studentId → phone
+    const primaryKey = parsed._id || parsed.studentId || parsed.phone;
+    if (primaryKey) {
+      fetchFullStudentData(primaryKey, resolvedSource);
     } else {
       setLoading(false);
     }
@@ -125,54 +141,61 @@ const StudentDashboard = () => {
   }, []);
 
   // ============================================================
-  // ✅ Fetch full student data
+  // ✅ Fetch full student data — Academic এর মতো multi-identifier
+  // ============================================================
   // ============================================================
   const fetchFullStudentData = async (studentId, loginSource) => {
     try {
-      let data = null;
-
       const resolvedSource =
         loginSource || localStorage.getItem("loginSource") || "students";
 
-      console.log(
-        `🔍 Fetching student [${studentId}] from source: ${resolvedSource}`,
-      );
+      // ✅ Read localStorage
+      const raw = localStorage.getItem("studentInfo");
+      const parsed = raw ? JSON.parse(raw) : {};
 
-      if (resolvedSource === "basic_tazweed_students") {
-        const res = await fetch(`${API_BASE}/basic-tazweed/all`);
-        const d = await res.json();
-        if (d.success && Array.isArray(d.students)) {
-          data = d.students.find(
-            (s) => s._id === studentId || s.studentId === studentId,
-          );
-        }
-      } else if (resolvedSource === "najera_batch_students") {
-        const res = await fetch(`${API_BASE}/najera-batch/all`);
-        const d = await res.json();
-        if (d.success && Array.isArray(d.students)) {
-          data = d.students.find(
-            (s) => s._id === studentId || s.studentId === studentId,
-          );
-        }
-      } else {
-        const res = await fetch(`${API_BASE}/students/details/${studentId}`);
-        const d = await res.json();
-        if (d.success) data = d.student;
-      }
+      // ✅ Academic এর মতো same params
+      const params = new URLSearchParams();
+      if (parsed._id) params.append("id", parsed._id);
+      if (studentId && studentId !== parsed._id)
+        params.append("studentId", studentId);
+      if (parsed.studentId) params.append("studentId", parsed.studentId);
+      if (parsed.phone) params.append("phone", parsed.phone);
+      if (parsed.name && parsed.name !== "Student")
+        params.append("name", parsed.name);
+      if (parsed.username) params.append("username", parsed.username);
 
-      if (data) {
-        console.log("✅ Fresh student data:", data);
+      console.log("📥 Fetching dashboard-full:", params.toString());
 
-        const paid =
-          Number(data.paidAmount) ||
-          (data.paidMonths || []).reduce(
-            (s, p) => s + Number(p.amount || 0),
-            0,
-          );
-        const fee = Number(data.courseFee) || 0;
+      const url = `${API_BASE}/student/dashboard-full?${params.toString()}`;
+      const res = await fetch(url);
+      const d = await res.json();
+      console.log("📥 Response:", d);
+
+      if (d.success && d.student) {
+        const data = d.student;
+        const finalSource = d.source || resolvedSource;
+
+        console.log(`✅ Found in ${finalSource}:`, data.name);
+
+        // Payment calculation
+        const fee = Number(data.courseFee) || Number(data.monthlyFee) || 0;
         const scholarship = Number(data.scholarshipAmount) || 0;
+        const fromMonths = (data.paidMonths || []).reduce(
+          (sum, p) => sum + Number(p.amount || 0),
+          0,
+        );
+        const paid = fromMonths > 0 ? fromMonths : Number(data.paidAmount) || 0;
         const due =
-          Number(data.dueAmount) || Math.max(fee - scholarship - paid, 0);
+          data.dueAmount !== undefined && data.dueAmount !== null
+            ? Number(data.dueAmount)
+            : Math.max(fee - scholarship - paid, 0);
+
+        let autoStatus = data.paymentStatus;
+        if (!autoStatus) {
+          if (due === 0 && paid > 0) autoStatus = "Paid";
+          else if (paid > 0) autoStatus = "Partial";
+          else autoStatus = "Unpaid";
+        }
 
         setStudentInfo((prev) => ({
           ...prev,
@@ -183,37 +206,22 @@ const StudentDashboard = () => {
           username: data.username || prev.username || "",
           studentId: data.studentId || prev.studentId || "",
           course:
-            data.course ||
-            data.class ||
-            data.subject ||
-            data.program ||
-            prev.course ||
-            "",
+            data.batchCourse || data.course || data.class || prev.course || "",
           class:
-            data.class ||
-            data.course ||
-            data.subject ||
-            data.program ||
-            prev.class ||
-            "",
+            data.batchCourse || data.class || data.course || prev.class || "",
+          batchName: data.batchName || prev.batchName || "",
+          batchTeacher: data.batchTeacher || prev.batchTeacher || "",
+          batchCourse: data.batchCourse || prev.batchCourse || "",
+          batchSchedule: data.batchSchedule || prev.batchSchedule || "",
+          batchClasses: data.batchClasses || prev.batchClasses || [],
           email: data.email || prev.email || "",
           phone: data.phone || prev.phone || "",
           gender: data.gender || prev.gender || "",
           country: data.country || prev.country || "BD",
-          dob: data.dob || data.dateOfBirth || prev.dob || "",
-          address: data.address || prev.address || "",
-          fatherName:
-            data.fatherName || data.guardianName || prev.fatherName || "",
-          motherName: data.motherName || prev.motherName || "",
-          guardianName:
-            data.guardianName || data.fatherName || prev.guardianName || "",
-          guardianPhone:
-            data.guardianPhone || data.phone || prev.guardianPhone || "",
           admissionDate:
             data.admissionDate || data.createdAt || prev.admissionDate || "",
           status: data.status || "Active",
-          paymentStatus:
-            due === 0 && paid > 0 ? "Paid" : paid > 0 ? "Partial" : "Unpaid",
+          paymentStatus: autoStatus || "Unpaid",
           paymentMethod: data.paymentMethod || "",
           transactionId: data.transactionId || "",
           paidAmount: paid,
@@ -222,26 +230,33 @@ const StudentDashboard = () => {
           scholarshipAmount: scholarship,
           monthlyFee: Number(data.monthlyFee) || fee,
           paidMonths: data.paidMonths || [],
-          loginSource: resolvedSource,
-          source: resolvedSource,
-          sourceLabel: getSourceLabel(resolvedSource),
+          loginSource: finalSource,
+          source: finalSource,
+          sourceLabel: getSourceLabel(finalSource),
         }));
 
-        localStorage.setItem(
-          "studentInfo",
-          JSON.stringify({
-            ...data,
-            loginSource: resolvedSource,
-          }),
-        );
-        localStorage.setItem("loginSource", resolvedSource);
+        // ✅ Store identifiers
+        const stored = {
+          _id: data._id,
+          name: data.name,
+          studentId: data.studentId || "",
+          phone: data.phone || "",
+          username: data.username || "",
+          course: data.batchCourse || data.course || data.class || "",
+          class: data.batchCourse || data.class || data.course || "",
+          batchName: data.batchName || "",
+          batchCourse: data.batchCourse || "",
+          loginSource: finalSource,
+        };
+        localStorage.setItem("studentInfo", JSON.stringify(stored));
+        localStorage.setItem("loginSource", finalSource);
       } else {
-        console.warn(`⚠️ Student ${studentId} not found in ${resolvedSource}`);
+        console.warn("⚠️ Student not found:", d.message);
       }
 
       await fetchEnrolledCourses(studentId, resolvedSource);
     } catch (e) {
-      console.error("❌ Fetch student error:", e);
+      console.error("❌ Fetch error:", e);
     } finally {
       setLoading(false);
     }
@@ -255,6 +270,7 @@ const StudentDashboard = () => {
       setLoadingCourses(true);
       let loadedCourses = [];
 
+      // Try my-courses API
       try {
         const res = await fetch(`${API_BASE}/students/my-courses/${studentId}`);
         const d = await res.json();
@@ -281,6 +297,7 @@ const StudentDashboard = () => {
             loadedCourses = parsed.enrolledCourses;
           } else {
             const courseString =
+              parsed.batchCourse ||
               parsed.course ||
               parsed.class ||
               parsed.subject ||
@@ -434,7 +451,7 @@ const StudentDashboard = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{studentInfo.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {studentInfo.class || studentInfo.course}
+                  {studentInfo.course || studentInfo.class}
                 </p>
                 {studentInfo.sourceLabel && (
                   <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full bg-white/25 font-semibold">
@@ -551,7 +568,10 @@ const StudentDashboard = () => {
               courses={courses}
               loadingCourses={loadingCourses}
               onRefresh={() =>
-                fetchFullStudentData(studentInfo._id, studentInfo.loginSource)
+                fetchFullStudentData(
+                  studentInfo._id || studentInfo.studentId,
+                  studentInfo.loginSource,
+                )
               }
             />
           )}
@@ -576,22 +596,32 @@ const DashboardContent = ({
   const totalPaid = Number(studentInfo.paidAmount) || 0;
   const totalDue = Number(studentInfo.dueAmount) || 0;
 
-  // ✅ This value shows both in header and title
+  // ✅ Dynamic course display
   const courseDisplayValue =
-    studentInfo.course || studentInfo.class || "Basic Tazweed";
+    studentInfo.course || studentInfo.batchCourse || studentInfo.class || "N/A";
 
   return (
     <div className="space-y-4">
       {/* Welcome Banner */}
-      <div className="bg-[#6b2158] text-white p-3 rounded-sm shadow-sm text-sm flex items-center justify-between gap-3">
-        <p>
-          Assalamu alaikum wa rahmatullahi wa barakatuh. Ahlan wa Sahlan WA
-          Masa'al Khair!{" "}
-          <strong>
-            {studentInfo.name || "Student"}{" "}
-            {studentInfo.roll ? `[${studentInfo.roll}]` : ""}
-          </strong>
-        </p>
+      <div className="bg-[#6b2158] text-white p-3 rounded-sm shadow-sm text-sm flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <p>
+            Assalamu alaikum wa rahmatullahi wa barakatuh. Ahlan wa Sahlan WA
+            Masa'al Khair!{" "}
+            <strong>
+              {studentInfo.name || "Student"}{" "}
+              {studentInfo.studentId ? `[${studentInfo.studentId}]` : ""}
+            </strong>
+          </p>
+          {studentInfo.batchName && (
+            <p className="text-[11px] opacity-80 mt-0.5">
+              📚 Batch: <strong>{studentInfo.batchName}</strong>
+              {studentInfo.batchTeacher && (
+                <> • 👨‍🏫 {studentInfo.batchTeacher}</>
+              )}
+            </p>
+          )}
+        </div>
         {studentInfo.sourceLabel && (
           <span className="shrink-0 text-[10px] px-2 py-1 rounded-full bg-white/20 font-bold">
             🎓 {studentInfo.sourceLabel}
@@ -704,24 +734,18 @@ const DashboardContent = ({
         </div>
       </div>
 
-      {/* ✅ Registered Courses — Dynamic */}
+      {/* ✅ Registered Courses — Fully Dynamic */}
       <div className="border border-[#00ADD2] bg-white rounded-sm shadow-sm mb-6">
         <div className="flex flex-wrap items-center gap-2 p-2 border-b border-[#00ADD2] text-sm bg-[#f4f6f9] font-medium text-gray-700">
           <FaFileAlt className="text-[#00ADD2]" /> Registered Courses of
-          {/* ✅ Course value — header এ */}
           <span className="border border-[#00ADD2] rounded px-2 py-0.5 text-xs bg-white font-bold text-[#00ADD2]">
             {courseDisplayValue}
           </span>
-          {/* ✅ Source badge */}
           {studentInfo.sourceLabel && (
             <span
-              className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                studentInfo.source === "basic_tazweed_students"
-                  ? "bg-green-100 text-green-700"
-                  : studentInfo.source === "najera_batch_students"
-                    ? "bg-purple-100 text-purple-700"
-                    : "bg-blue-100 text-blue-700"
-              }`}
+              className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${getSourceColor(
+                studentInfo.source,
+              )}`}
             >
               🎓 {studentInfo.sourceLabel}
             </span>
@@ -753,15 +777,22 @@ const DashboardContent = ({
                   </td>
                 </tr>
               ) : (
-                // ✅ courses empty হলেও অন্তত ১টা row দেখাবে
                 (courses.length > 0
                   ? courses
                   : [
                       {
                         _id: "fallback_0",
-                        code: "CRS-001",
-                        title: "Basic Tazweed",
-                        className: "Basic Tazweed",
+                        code: studentInfo.studentId || "CRS-001",
+                        title:
+                          studentInfo.course ||
+                          studentInfo.batchCourse ||
+                          studentInfo.class ||
+                          "N/A",
+                        className:
+                          studentInfo.course ||
+                          studentInfo.batchCourse ||
+                          studentInfo.class ||
+                          "N/A",
                       },
                     ]
                 ).map((course, index) => (
@@ -769,20 +800,50 @@ const DashboardContent = ({
                     key={course._id || index}
                     className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
                   >
-                    {/* ✅ Serial — 01, 02, 03 */}
                     <td className="px-4 py-3 align-top border-r border-gray-200 text-center font-mono">
                       {String(index + 1).padStart(2, "0")}
                     </td>
 
-                    {/* ✅ Title — Hardcoded "Basic Tazweed" */}
                     <td className="px-4 py-3">
                       <p className="font-medium text-[#00ADD2]">
-                        Basic Tazweed
+                        {course.title ||
+                          course.className ||
+                          studentInfo.course ||
+                          studentInfo.batchCourse ||
+                          studentInfo.class ||
+                          "N/A"}
                       </p>
+
+                      {studentInfo.batchName && (
+                        <p className="text-[10px] text-gray-500 mt-0.5">
+                          📚 Batch:{" "}
+                          <span className="font-semibold text-gray-700">
+                            {studentInfo.batchName}
+                          </span>
+                        </p>
+                      )}
+
+                      {studentInfo.batchTeacher && (
+                        <p className="text-[10px] text-purple-600 mt-0.5">
+                          👨‍🏫 Teacher:{" "}
+                          <span className="font-semibold">
+                            {studentInfo.batchTeacher}
+                          </span>
+                        </p>
+                      )}
+
+                      {studentInfo.batchSchedule && (
+                        <p className="text-[10px] text-blue-600 mt-0.5">
+                          ⏰ Schedule:{" "}
+                          <span className="font-semibold">
+                            {studentInfo.batchSchedule}
+                          </span>
+                        </p>
+                      )}
 
                       <div className="text-[11px] text-[#00ADD2] flex gap-2 mt-1">
                         <Link
-                          to={`/student-attendance/:courseId${course.code || course._id}`}
+                          to={`/student-attendance/${course.code || course._id}`}
                           className="hover:underline"
                         >
                           [Attendances]
@@ -796,7 +857,9 @@ const DashboardContent = ({
                       </div>
 
                       <p className="text-xs text-gray-500 italic mt-1 font-serif">
-                        {studentInfo.class || "Fall 2026 (Jul-Dec)"}
+                        {studentInfo.batchSchedule ||
+                          studentInfo.class ||
+                          "Fall 2026"}
                       </p>
                     </td>
                   </tr>
@@ -875,6 +938,7 @@ const PaymentSummary = ({ totalBill, totalPaid, totalDue, studentInfo }) => {
   const bill = Number(totalBill) || 0;
   const paid = Number(totalPaid) || 0;
   const due = Number(totalDue) || 0;
+  const scholarship = Number(studentInfo.scholarshipAmount) || 0;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -890,7 +954,7 @@ const PaymentSummary = ({ totalBill, totalPaid, totalDue, studentInfo }) => {
           <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
             <span>Scholarship:</span>
             <span className="font-semibold text-blue-600">
-              {Number(studentInfo.scholarshipAmount || 0).toFixed(2)}
+              {scholarship.toFixed(2)}
             </span>
           </div>
           <div className="border-t border-black my-1"></div>
