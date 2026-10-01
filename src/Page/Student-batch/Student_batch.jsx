@@ -70,6 +70,33 @@ const readFileAsDataURL = (file) =>
     reader.readAsDataURL(file);
   });
 
+/* ✅ NEW — Student ID generator (Admin Dashboard এর মতো) */
+const generateStudentId = (prefix = "TAR") => {
+  const year = new Date().getFullYear().toString().slice(-2);
+  const random = Math.floor(10000 + Math.random() * 90000);
+  return `${prefix}${year}${random}`;
+};
+
+/* ✅ NEW — Credential Copy to Clipboard */
+const copyToClipboard = async (text) => {
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+/* ✅ NEW — Unique random password generator */
+const generatePassword = () => {
+  const prefixes = ["TAR", "STU", "MDR", "QUR", "NOOR"];
+  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+  const num = Math.floor(100000 + Math.random() * 900000);
+  const chars = "ABCDEFGHJKMNPQRS";
+  const c1 = chars[Math.floor(Math.random() * chars.length)];
+  const c2 = chars[Math.floor(Math.random() * chars.length)];
+  return `${prefix}${num}${c1}${c2}@`;
+};
 const uid = (prefix = "id") =>
   `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
@@ -1136,11 +1163,11 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   const [studentForm, setStudentForm] = useState({
     name: "",
     studentId: "",
+    password: "", // ✅ NEW
     phone: "",
     country: "BD",
     course: "",
     paymentStatus: "Unpaid",
-    // ⬇️ নতুন
     scholarshipAmount: "",
     scholarshipNote: "",
     courseFee: "",
@@ -1405,12 +1432,12 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     setEditingStudentId(null);
     setStudentForm({
       name: "",
-      studentId: "",
+      studentId: generateStudentId(), // ✅ Auto-fill
+      password: generatePassword(), // ✅ Auto-generate unique
       phone: "",
       country: "BD",
       course: batch?.course || "",
       paymentStatus: "Unpaid",
-      // ⬇️ নতুন
       scholarshipAmount: "",
       scholarshipNote: "",
       courseFee: "",
@@ -1429,11 +1456,11 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     setStudentForm({
       name: s.name || "",
       studentId: s.studentId || "",
+      password: s.password || "", // ✅ আগের password দেখাবে
       phone: s.phone || "",
       country: s.country || "BD",
       course: s.course || batch?.course || "",
       paymentStatus: s.paymentStatus || "Unpaid",
-      // ⬇️ এই লাইনগুলো থাকতে হবে
       scholarshipAmount: s.scholarshipAmount || "",
       scholarshipNote: s.scholarshipNote || "",
       courseFee: s.courseFee || "",
@@ -1451,6 +1478,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
 
   const handleSaveStudent = async (e) => {
     e.preventDefault();
+
+    // ✅ Validation
     if (!studentForm.name.trim()) {
       Swal.fire({
         icon: "warning",
@@ -1460,13 +1489,35 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       });
       return;
     }
+    if (!studentForm.studentId.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Student ID required!",
+        text: "🎲 Auto button দিয়ে generate করুন।",
+        timer: 1800,
+        showConfirmButton: false,
+      });
+      return;
+    }
+    if (
+      !studentForm.password.trim() ||
+      studentForm.password.trim().length < 6
+    ) {
+      Swal.fire({
+        icon: "warning",
+        title: "Password আবশ্যক!",
+        text: "কমপক্ষে ৬ অক্ষরের password দিন বা 🎲 Auto চাপুন।",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      return;
+    }
 
     try {
-      let res, data;
-
       const payload = {
         name: studentForm.name.trim(),
         studentId: studentForm.studentId.trim(),
+        password: studentForm.password.trim(), // ✅ NEW — এখানে save হবে
         phone: studentForm.phone,
         country: studentForm.country,
         course: studentForm.course || batch?.course || "",
@@ -1481,6 +1532,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         transactionId: studentForm.transactionId,
         notes: studentForm.notes,
       };
+
+      let res, data;
 
       if (editingStudentId) {
         // UPDATE
@@ -1497,12 +1550,32 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         if (data.success) {
           await fetchDbStudents();
           setShowStudentModal(false);
-          Swal.fire({
+
+          // ✅ Credentials দেখাও
+          await Swal.fire({
             icon: "success",
-            title: "Student Updated!",
-            text: "Due recalculated automatically.",
-            timer: 1200,
-            showConfirmButton: false,
+            title: "✅ Student Updated!",
+            html: `
+            <div style="text-align: left; font-size: 13px;">
+              <p><strong>Name:</strong> ${payload.name}</p>
+              <p><strong>Batch:</strong> ${batch?.name || ""}</p>
+              <hr style="margin: 10px 0;">
+              <div style="background:#f0fdf4; padding:12px; border-radius:8px; border:2px solid #86efac;">
+                <p style="font-weight:bold; color:#004d4d; margin-bottom:6px;">🔑 Login Credentials</p>
+                <p><strong>Student ID:</strong>
+                  <span style="color:#004d4d; font-family:monospace; font-size:16px;">${payload.studentId}</span>
+                </p>
+                <p><strong>Password:</strong>
+                  <span style="color:#004d4d; font-family:monospace;">${payload.password}</span>
+                </p>
+                <p style="margin-top:8px; font-size:11px; color:#666;">
+                  📌 Student কে এই তথ্য জানান — সে এটা দিয়ে login করবে।
+                </p>
+              </div>
+            </div>
+          `,
+            confirmButtonColor: "#004d4d",
+            confirmButtonText: "OK",
           });
         } else {
           Swal.fire({ icon: "error", title: "Failed!", text: data.message });
@@ -1521,12 +1594,34 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
           await saveBatchFields({ students: newCount }, "");
           await fetchDbStudents();
           setShowStudentModal(false);
-          Swal.fire({
+
+          // ✅ Credentials দেখাও
+          await Swal.fire({
             icon: "success",
-            title: "Student Added!",
-            text: `Due auto-calculated: ৳${data.student?.dueAmount ?? 0}`,
-            timer: 1600,
-            showConfirmButton: false,
+            title: "✅ Student Added!",
+            html: `
+            <div style="text-align: left; font-size: 13px;">
+              <p><strong>Name:</strong> ${payload.name}</p>
+              <p><strong>Batch:</strong> ${batch?.name || ""}</p>
+              <p><strong>Due:</strong> ৳${data.student?.dueAmount ?? 0}</p>
+              <hr style="margin: 10px 0;">
+              <div style="background:#f0fdf4; padding:12px; border-radius:8px; border:2px solid #86efac;">
+                <p style="font-weight:bold; color:#004d4d; margin-bottom:6px;">🔑 Student Login Credentials</p>
+                <p><strong>Student ID:</strong>
+                  <span style="color:#004d4d; font-family:monospace; font-size:16px; letter-spacing:1px;">${payload.studentId}</span>
+                </p>
+                <p><strong>Password:</strong>
+                  <span style="color:#004d4d; font-family:monospace;">${payload.password}</span>
+                </p>
+                <p style="margin-top:8px; font-size:11px; color:#666;">
+                  📌 এই তথ্য Student কে দিন — সে এটা দিয়ে
+                  <strong>tarbiyahonline.com/student-login</strong> এ login করবে।
+                </p>
+              </div>
+            </div>
+          `,
+            confirmButtonColor: "#004d4d",
+            confirmButtonText: "OK",
           });
         } else {
           Swal.fire({ icon: "error", title: "Failed!", text: data.message });
@@ -3262,22 +3357,81 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                 </div>
 
                 {/* Student ID */}
+                {/* Student ID + 🎲 Auto */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Student ID
+                    Student ID *
                   </label>
-                  <input
-                    type="text"
-                    value={studentForm.studentId}
-                    onChange={(e) =>
-                      setStudentForm({
-                        ...studentForm,
-                        studentId: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="Auto-generate if empty"
-                  />
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      required
+                      value={studentForm.studentId}
+                      onChange={(e) =>
+                        setStudentForm({
+                          ...studentForm,
+                          studentId: e.target.value,
+                        })
+                      }
+                      className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      placeholder="e.g., TAR2648213"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setStudentForm({
+                          ...studentForm,
+                          studentId: generateStudentId(),
+                        })
+                      }
+                      className="bg-blue-500 hover:bg-blue-600 text-white text-[10px] font-bold px-2.5 rounded-lg whitespace-nowrap"
+                      title="Auto-generate Student ID"
+                    >
+                      🎲 Auto
+                    </button>
+                  </div>
+                </div>
+
+                {/* ✅ Password + 🎲 Auto — NEW FIELD */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Password *{" "}
+                    <span className="text-gray-400 font-normal">
+                      (প্রতিটি student এর আলাদা)
+                    </span>
+                  </label>
+                  <div className="flex gap-1.5">
+                    <input
+                      type="text"
+                      required
+                      value={studentForm.password}
+                      onChange={(e) =>
+                        setStudentForm({
+                          ...studentForm,
+                          password: e.target.value,
+                        })
+                      }
+                      className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs font-mono focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="e.g., TAR458921AB@"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setStudentForm({
+                          ...studentForm,
+                          password: generatePassword(),
+                        })
+                      }
+                      className="bg-purple-500 hover:bg-purple-600 text-white text-[10px] font-bold px-2.5 rounded-lg whitespace-nowrap"
+                      title="Generate unique password"
+                    >
+                      🎲 Auto
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    💡 Admin এই password student কে জানাবে — সে এটা দিয়েই login
+                    করবে।
+                  </p>
                 </div>
                 {/* ✅ Phone Number */}
                 <div>

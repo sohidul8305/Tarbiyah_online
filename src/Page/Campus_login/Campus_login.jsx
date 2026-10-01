@@ -22,7 +22,10 @@ const Campus_login = () => {
     setLoading(true);
 
     try {
-      console.log("📤 Sending login:", credentials);
+      console.log("📤 Sending login:", {
+        studentId: credentials.studentId,
+        password: "***", // ✅ password কখনো log করবেন না
+      });
 
       const response = await fetch(
         "https://api.tarbiyahonline.com/api/students/login",
@@ -38,7 +41,7 @@ const Campus_login = () => {
       );
 
       const data = await response.json();
-      console.log("🎯 Login Response:", data);
+      console.log("🎯 Login Response:", data.success ? "OK" : data.message);
 
       if (data.success && data.user) {
         // ✅ localStorage-এ save — সব পেজে ব্যবহার হবে
@@ -104,13 +107,13 @@ const Campus_login = () => {
                   name="studentId"
                   value={credentials.studentId}
                   onChange={handleChange}
-                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-[#00a65a] focus:border-[#00a65a] sm:text-sm outline-none"
-                  placeholder="e.g., TEST-001"
+                  className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-[#00a65a] focus:border-[#00a65a] sm:text-sm outline-none font-mono"
+                  placeholder="e.g., TAR2648213"
                   required
                 />
               </div>
               <p className="text-[10px] text-gray-400 mt-1">
-                Admin থেকে দেওয়া Student ID ব্যবহার করুন
+                💡 Admin থেকে দেওয়া Student ID ব্যবহার করুন
               </p>
             </div>
 
@@ -128,12 +131,12 @@ const Campus_login = () => {
                   value={credentials.password}
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-[#00a65a] focus:border-[#00a65a] sm:text-sm outline-none"
-                  placeholder="student123S@"
+                  placeholder="আপনার নিজের password লিখুন"
                   required
                 />
               </div>
               <p className="text-[10px] text-gray-400 mt-1">
-                Default: <span className="font-mono">student123S@</span>
+                💡 Admin/Admission form থেকে পাওয়া নিজের Password ব্যবহার করুন
               </p>
             </div>
 

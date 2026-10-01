@@ -7,7 +7,7 @@ import Footer from "../../Components/Navbar/Footer/Footer";
 
 const StudentLogin = () => {
   const [studentId, setStudentId] = useState("");
-  const [password, setPassword] = useState("student123S@"); // Default password
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -132,7 +132,6 @@ const StudentLogin = () => {
                 💡 অ্যাডমিন/ভর্তি ফরমে প্রদত্ত Student ID ব্যবহার করুন
               </p>
             </div>
-
             {/* ✅ Password Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -160,7 +159,7 @@ const StudentLogin = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="w-full pl-11 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004d4d] focus:border-transparent transition-all text-sm sm:text-base"
-                  placeholder="Enter your password"
+                  placeholder="Admin থেকে পাওয়া password লিখুন"
                 />
                 <button
                   type="button"
@@ -209,7 +208,7 @@ const StudentLogin = () => {
                 💡 অ্যাডমিন/ভর্তি ফরমে প্রদত্ত Student Password ব্যবহার করুন
               </p>
             </div>
-
+            \
             <button
               type="submit"
               disabled={loading}

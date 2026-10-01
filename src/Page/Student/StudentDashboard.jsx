@@ -172,6 +172,10 @@ const StudentDashboard = () => {
       console.log("📥 Response:", d);
 
       if (d.success && d.student) {
+        // ✅ Security — password কখনো frontend state-এ রাখবেন না
+        if (data.password) {
+          delete data.password;
+        }
         const data = d.student;
         const finalSource = d.source || resolvedSource;
 
@@ -341,12 +345,15 @@ const StudentDashboard = () => {
   const handleLogout = async () => {
     try {
       await logOut();
+      // ✅ সব student-related key clear করুন
       localStorage.removeItem("isStudentLoggedIn");
       localStorage.removeItem("studentInfo");
       localStorage.removeItem("studentEmail");
       localStorage.removeItem("studentPhone");
+      localStorage.removeItem("studentUsername"); // ✅ NEW
       localStorage.removeItem("loginSource");
       localStorage.removeItem("studentToken");
+      localStorage.removeItem("studentId"); // ✅ NEW
 
       await Swal.fire({
         icon: "success",

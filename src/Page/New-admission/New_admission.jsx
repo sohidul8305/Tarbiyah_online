@@ -44,6 +44,17 @@ const mapStatus = (s) => {
   return "Pending";
 };
 
+// ✅ Random unique password generator
+const generatePassword = () => {
+  const prefixes = ["TAR", "STU", "MDR", "QUR", "NOOR"];
+  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+  const num = Math.floor(100000 + Math.random() * 900000);
+  const chars = "ABCDEFGHJKMNPQRS";
+  const c1 = chars[Math.floor(Math.random() * chars.length)];
+  const c2 = chars[Math.floor(Math.random() * chars.length)];
+  return `${prefix}${num}${c1}${c2}@`;
+};
+
 // ✅ FIXED: Backend student object থেকে status নির্ধারণ
 // Payment থেকে নয় — সরাসরি backend.status দেখে
 const resolveStatus = (s) => {
