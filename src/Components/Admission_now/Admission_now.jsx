@@ -46,9 +46,6 @@ const Admission_now = () => {
     bankAccount: "",
   });
 
-  // ============================================================
-  // সম্পূর্ণ আপডেটেড ডিপার্টমেন্ট ও কোর্স (নতুন ফি স্ট্রাকচার)
-  // ============================================================
   const departments = {
     "islamic-studies": {
       name: "Diploma in Islamic Studies",
@@ -57,11 +54,11 @@ const Admission_now = () => {
           id: "is1",
           name: "Diploma in Islamic Studies",
           duration: "1 Year",
-          admissionFee: 0, // নির্দিষ্ট নেই, পুরো টাকা এককালীন
+          admissionFee: 0,
           monthlyFee: 0,
           totalOneTime: 12000,
           discount: 0,
-          price: 12000, // প্রদর্শনের জন্য
+          price: 12000,
         },
       ],
     },
@@ -74,7 +71,7 @@ const Admission_now = () => {
           duration: "6 Months",
           admissionFee: 2000,
           monthlyFee: 2000,
-          totalOneTime: 2000 + 2000 * 6, // 14000
+          totalOneTime: 2000 + 2000 * 6,
           discount: 0,
           price: 14000,
         },
@@ -84,7 +81,7 @@ const Admission_now = () => {
           duration: "6 Months",
           admissionFee: 3000,
           monthlyFee: 3000,
-          totalOneTime: 3000 + 3000 * 6, // 21000
+          totalOneTime: 3000 + 3000 * 6,
           discount: 0,
           price: 21000,
         },
@@ -93,8 +90,8 @@ const Admission_now = () => {
           name: "Alimiyah Program (Bangla Version)",
           duration: "2 Years",
           admissionFee: 2000,
-          monthlyFee: 0, // semester fee system; total one-time = admission + semester fee
-          totalOneTime: 2000 + 4000, // 6000? কিন্তু আপনি লিখেছেন Semester Fee 4000 TK, ধরে নিচ্ছি পুরো কোর্সের জন্য 4000? আসলে ২ বছরে কয় সেমিস্টার? আমি ধরে নিচ্ছি পুরো কোর্সের ফি 6000
+          monthlyFee: 0,
+          totalOneTime: 2000 + 4000,
           discount: 0,
           price: 6000,
         },
@@ -104,7 +101,7 @@ const Admission_now = () => {
           duration: "2 Years",
           admissionFee: 3000,
           monthlyFee: 0,
-          totalOneTime: 3000 + 12000, // 15000
+          totalOneTime: 3000 + 12000,
           discount: 0,
           price: 15000,
         },
@@ -119,7 +116,7 @@ const Admission_now = () => {
           duration: "2 Months",
           admissionFee: 1000,
           monthlyFee: 1000,
-          totalOneTime: 1000 + 1000 * 2, // 3000
+          totalOneTime: 1000 + 1000 * 2,
           discount: 0,
           price: 3000,
         },
@@ -129,7 +126,7 @@ const Admission_now = () => {
           duration: "2 Months",
           admissionFee: 2000,
           monthlyFee: 2000,
-          totalOneTime: 2000 + 2000 * 2, // 6000
+          totalOneTime: 2000 + 2000 * 2,
           discount: 0,
           price: 6000,
         },
@@ -139,7 +136,7 @@ const Admission_now = () => {
           duration: "3 Months",
           admissionFee: 1000,
           monthlyFee: 1000,
-          totalOneTime: 1000 + 1000 * 3, // 4000
+          totalOneTime: 1000 + 1000 * 3,
           discount: 0,
           price: 4000,
         },
@@ -149,7 +146,7 @@ const Admission_now = () => {
           duration: "3 Months",
           admissionFee: 2000,
           monthlyFee: 2000,
-          totalOneTime: 2000 + 2000 * 3, // 8000
+          totalOneTime: 2000 + 2000 * 3,
           discount: 0,
           price: 8000,
         },
@@ -159,7 +156,7 @@ const Admission_now = () => {
           duration: "2 Years",
           admissionFee: 2000,
           monthlyFee: 2000,
-          totalOneTime: 2000 + 2000 * 24, // 50000? কিন্তু আপনি ২০০০ মাসিক বলেছেন, ২ বছর = ২৪ মাস, তাহলে ৫০০০০ হয়। তবে আপনি হয়তো পুরো কোর্সের ফি বোঝাতে চেয়েছেন। আমি ধরে নিচ্ছি ২০০০ মাসিক + ২০০০ ভর্তি = মোট ৫০০০০ (ডিসকাউন্ট নেই)
+          totalOneTime: 2000 + 2000 * 24,
           discount: 0,
           price: 50000,
         },
@@ -169,7 +166,7 @@ const Admission_now = () => {
           duration: "6 Months",
           admissionFee: 2000,
           monthlyFee: 2000,
-          totalOneTime: 2000 + 2000 * 6, // 14000
+          totalOneTime: 2000 + 2000 * 6,
           discount: 0,
           price: 14000,
         },
@@ -179,18 +176,17 @@ const Admission_now = () => {
           duration: "6 Months",
           admissionFee: 2000,
           monthlyFee: 2000,
-          totalOneTime: 2000 + 2000 * 6, // 14000
+          totalOneTime: 2000 + 2000 * 6,
           discount: 0,
           price: 14000,
         },
-        // নতুন: One to One (আলাদা) – যদিও Hifz Revision এর সাথে মিলে যায়, তবু আলাদা করলাম
         {
           id: "qs5",
           name: "One-to-One Program (Bangla Medium)",
           duration: "Flexible",
           admissionFee: 1000,
           monthlyFee: 5000,
-          totalOneTime: 1000 + 5000 * 6, // ধরে নিচ্ছি ৬ মাসের কোর্স, 31000
+          totalOneTime: 1000 + 5000 * 6,
           discount: 0,
           price: 31000,
         },
@@ -215,9 +211,9 @@ const Admission_now = () => {
           duration: "4 Months",
           admissionFee: 1000,
           monthlyFee: 1000,
-          totalOneTime: 5000, // admission 1000 + monthly 1000*4 = 5000, discount 500
+          totalOneTime: 5000,
           discount: 500,
-          price: 4500, // after discount
+          price: 4500,
         },
         {
           id: "qe2",
@@ -245,7 +241,7 @@ const Admission_now = () => {
           duration: "6 Months",
           admissionFee: 1000,
           monthlyFee: 1000,
-          totalOneTime: 6000, // 1000 + 1000*5? কিন্তু আপনি ৬ মাস বলেছেন, তাহলে 1000+6000=7000? কিন্তু আপনার দেওয়া লিস্টে এককালীন ৬০০০ ও ডিসকাউন্ট ৫০০, তাই আমি ধরে নিচ্ছি ৫ মাসের ফি + ভর্তি = ৬০০০
+          totalOneTime: 6000,
           discount: 500,
           price: 5500,
         },
@@ -311,7 +307,6 @@ const Admission_now = () => {
     }
   };
 
-  // স্টেপ ১-এ ভ্যালিডেশন
   const handleNext = () => {
     if (step === 1) {
       if (!formData.selectedDepartment) {
@@ -344,8 +339,106 @@ const Admission_now = () => {
     return departments[formData.selectedDepartment]?.courses || [];
   };
 
+  // ============================================================
+  // SSLCommerz পেমেন্ট হ্যান্ডলার
+  // ============================================================
+  const handleSSLCommerzPayment = async () => {
+    if (!formData.name || !formData.phoneNumber || !formData.email) {
+      Swal.fire({
+        icon: "warning",
+        title: "Information Incomplete!",
+        text: "Name, Phone Number and Email are required.",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const totalAmount = calculateTotal();
+      const selectedCourseNames = formData.selectedCourses
+        .map((courseId) => {
+          const course = getCurrentCourses().find((c) => c.id === courseId);
+          return course ? course.name : "";
+        })
+        .filter(Boolean);
+
+      // SSLCommerz এর জন্য পেলোড (ব্যাকএন্ডে পাঠানো হবে)
+      const sslPayload = {
+        total_amount: totalAmount,
+        currency: "BDT",
+        tran_id: "TARBIYAH_" + Date.now(), // ইউনিক ট্রানজেকশন আইডি
+        success_url: `${window.location.origin}/payment/success`,
+        fail_url: `${window.location.origin}/payment/fail`,
+        cancel_url: `${window.location.origin}/payment/cancel`,
+        cus_name: formData.name,
+        cus_email: formData.email,
+        cus_phone: formData.phoneNumber,
+        cus_add1: formData.presentAddress || "N/A",
+        cus_city: "Dhaka",
+        cus_country: "Bangladesh",
+        product_name: selectedCourseNames.join(", ") || "Admission Fee",
+        product_category: "Education",
+        product_profile: "general",
+        // আপনার স্টুডেন্ট ডাটা (ব্যাকএন্ডে সেভ করার জন্য)
+        studentData: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phoneNumber,
+          course: selectedCourseNames.join(", "),
+          department: formData.selectedDepartment,
+          fatherName: formData.fatherName,
+          motherName: formData.motherName,
+          presentAddress: formData.presentAddress,
+          permanentAddress: formData.permanentAddress,
+          gender: formData.gender,
+          age: formData.age,
+        },
+      };
+
+      // ⚠️ আপনার ব্যাকএন্ড API এন্ডপয়েন্ট এখানে বসবে
+      const response = await fetch(
+        "https://api.tarbiyahonline.com/api/payment/sslcommerz/initiate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(sslPayload),
+        },
+      );
+
+      const data = await response.json();
+
+      if (data.GatewayPageURL) {
+        // SSLCommerz এর পেমেন্ট পেজে রিডাইরেক্ট
+        window.location.href = data.GatewayPageURL;
+      } else {
+        throw new Error(
+          data.message || "Failed to initiate SSLCommerz payment",
+        );
+      }
+    } catch (error) {
+      console.error("❌ SSLCommerz Error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Payment Gateway Error!",
+        text:
+          error.message || "Could not connect to SSLCommerz. Please try again.",
+        confirmButtonColor: "#004d4d",
+      });
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // যদি SSLCommerz সিলেক্ট করা থাকে, তবে আলাদা ফাংশন কল হবে
+    if (formData.paymentMethod === "ssl") {
+      handleSSLCommerzPayment();
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -401,13 +494,6 @@ const Admission_now = () => {
         admissionDate: new Date().toISOString(),
       };
 
-      console.log("📤 ====== SENDING PAYLOAD ======");
-      console.log("📤 Payment Method:", payload.paymentMethod);
-      console.log("📤 Transaction ID:", payload.transactionId);
-      console.log("📤 Payment Status:", payload.paymentStatus);
-      console.log("📤 Admission Date:", payload.admissionDate);
-      console.log("📤 ===========================");
-
       const response = await fetch(
         "https://api.tarbiyahonline.com/api/students/register/student",
         {
@@ -419,13 +505,9 @@ const Admission_now = () => {
         },
       );
 
-      // "https://api.tarbiyahonline.com/api/students/register/student"
-
       const data = await response.json();
-      console.log("📥 Response:", data);
 
       if (data.success) {
-        // ✅ Response থেকে studentId নিন
         const generatedStudentId =
           data.student?.studentId || "Admin approve করলে পাবেন";
 
@@ -461,7 +543,6 @@ const Admission_now = () => {
           width: 550,
         });
 
-        // Reset form (আগের মতোই)
         setFormData({
           name: "",
           nationalId: "",
@@ -513,21 +594,18 @@ const Admission_now = () => {
     }
   };
 
-  // টোটাল এককালীন পেমেন্ট (সিলেক্টেড কোর্সগুলোর totalOneTime এর যোগফল, ডিসকাউন্ট বিবেচনায়)
   const calculateTotal = () => {
     let total = 0;
     const currentCourses = getCurrentCourses();
     formData.selectedCourses.forEach((courseId) => {
       const course = currentCourses.find((c) => c.id === courseId);
       if (course) {
-        // এককালীন পেমেন্ট = totalOneTime - discount (কারণ price হলো discount সহ)
         total += course.price || course.totalOneTime || 0;
       }
     });
     return total;
   };
 
-  // সিলেক্টেড কোর্সের বিস্তারিত (পেমেন্ট টেবিলের জন্য)
   const getSelectedCourseDetails = () => {
     const currentCourses = getCurrentCourses();
     return formData.selectedCourses
@@ -1376,10 +1454,12 @@ const Admission_now = () => {
                   </p>
                   <button
                     type="button"
-                    className="mt-2 text-white px-4 py-2 rounded hover:opacity-90"
+                    onClick={handleSSLCommerzPayment} // ✅ এখানে ফাংশন যুক্ত করা হয়েছে
+                    disabled={loading}
+                    className="mt-2 text-white px-4 py-2 rounded hover:opacity-90 disabled:opacity-50"
                     style={{ backgroundColor: "#00ADD2" }}
                   >
-                    Pay with SSL Commerz
+                    {loading ? "Processing..." : "Pay with SSL Commerz"}
                   </button>
                 </div>
               )}
@@ -1436,6 +1516,7 @@ const Admission_now = () => {
                 >
                   ← Previous
                 </button>
+                {/* ✅ Main Submit Button also handles SSL */}
                 <button
                   type="submit"
                   disabled={loading}
