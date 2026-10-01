@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import Navbar from "../Navbar/Navbar"; // আপনার সঠিক পাথ দিন
-import Footer from "../Navbar/Footer/Footer"; // আপনার সঠিক পাথ দিন
+import Navbar from "../Components/Navbar/Navbar";
+import Footer from "../Components/Navbar/Footer/Footer";
 import Swal from "sweetalert2";
 
 const PaymentStatus = () => {
@@ -30,7 +30,10 @@ const PaymentStatus = () => {
   }, [isSuccess]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div
+      className="min-h-screen bg-g
+    ray-50 flex flex-col"
+    >
       <Navbar />
       <div className="flex-grow flex items-center justify-center p-6">
         <div
