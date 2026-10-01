@@ -383,7 +383,8 @@ const Admission_now = () => {
         studentData: {
           name: formData.name,
           email: formData.email,
-          password: "student123S@",
+          password: generatedPassword, // ✅ Unique auto-generated
+          studentId: generatedId, // ✅ Suggested ID
           phone: formData.phoneNumber,
           course: selectedCourseNames.join(", "),
           department: formData.selectedDepartment,
@@ -469,7 +470,8 @@ const Admission_now = () => {
         name: formData.name,
         email: formData.email,
         phone: formData.phoneNumber,
-        password: "student123S@",
+        password: generatedPassword, // ✅ Unique
+        studentId: generatedId, // ✅ Suggested
         course:
           selectedCourseNames.join(", ") ||
           formData.selectedDepartment ||
@@ -507,16 +509,12 @@ const Admission_now = () => {
       );
 
       const data = await response.json();
-
       if (data.success) {
-        const generatedStudentId =
-          data.student?.studentId || "Admin approve করলে পাবেন";
-
         Swal.fire({
           icon: "success",
           title: "🎉 Admission Completed!",
           html: `
-      <div style="text-align: left;">
+      <div style="text-align: left; font-size: 13px;">
         <p><strong>Name:</strong> ${formData.name}</p>
         <p><strong>Phone:</strong> ${formData.phoneNumber}</p>
         <p><strong>Email:</strong> ${formData.email}</p>
@@ -528,13 +526,14 @@ const Admission_now = () => {
         <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
           <p style="font-weight: bold; color: #004d4d; margin-bottom: 8px;">🔑 Your Login Credentials:</p>
           <p style="font-size: 15px;"><strong>Student ID:</strong> 
-            <span style="color: #004d4d; font-size: 18px; letter-spacing: 1px; font-family: monospace;">${generatedStudentId}</span>
+            <span style="color: #004d4d; font-size: 18px; letter-spacing: 1px; font-family: monospace;">${generatedId}</span>
           </p>
           <p><strong>Password:</strong> 
-            <span style="color: #004d4d;">student123S@</span>
+            <span style="color: #004d4d; font-family: monospace; font-size: 15px;">${generatedPassword}</span>
           </p>
-          <p style="font-size: 12px; color: #666; margin-top: 8px;">
-            ⚠️ Admin approve করার পর আপনি এই Student ID দিয়ে লগইন করতে পারবেন।
+          <p style="font-size: 11px; color: #666; margin-top: 8px;">
+            ⚠️ এই তথ্য নিরাপদে সংরক্ষণ করুন।<br>
+            📌 Admin approve করার পর আপনি এগুলো দিয়ে <strong>tarbiyahonline.com/student-login</strong> এ login করতে পারবেন।
           </p>
         </div>
       </div>
@@ -543,6 +542,8 @@ const Admission_now = () => {
           confirmButtonText: "OK",
           width: 550,
         });
+
+        // ... form reset অপরিবর্তিত
 
         setFormData({
           name: "",
