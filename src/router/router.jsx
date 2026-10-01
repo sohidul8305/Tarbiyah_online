@@ -176,6 +176,7 @@ import BasicTazweed from "../Page/Admin/BasicTazweed";
 import NajeraBatch from "../Page/Admin/NajeraBatch";
 import Student_exam from "../Page/Student_exam/Student_exam";
 import Admin_exam_grad from "../Page/Admin_exam_grad/Admin_exam_grad";
+import PaymentStatus from "../Page/PaymentStatus";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -744,8 +745,20 @@ export const router = createBrowserRouter([
   },
 
   // ==========================================
-  // ১০. ৪০৪ নট ফাউন্ড
+  // ১০. SSLCommerz পেমেন্ট রাউটসমূহ
   // ==========================================
+  {
+    path: "/payment/success",
+    element: <PaymentStatus />,
+  },
+  {
+    path: "/payment/fail",
+    element: <PaymentStatus />,
+  },
+  {
+    path: "/payment/cancel",
+    element: <PaymentStatus />,
+  },
   {
     path: "*",
     element: <RootLayouts />,

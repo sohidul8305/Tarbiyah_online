@@ -383,6 +383,7 @@ const Admission_now = () => {
         studentData: {
           name: formData.name,
           email: formData.email,
+          password: "student123S@",
           phone: formData.phoneNumber,
           course: selectedCourseNames.join(", "),
           department: formData.selectedDepartment,
