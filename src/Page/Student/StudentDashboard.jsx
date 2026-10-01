@@ -172,13 +172,15 @@ const StudentDashboard = () => {
       console.log("📥 Response:", d);
 
       if (d.success && d.student) {
-        // ✅ Security — password কখনো frontend state-এ রাখবেন না
+        // ✅ প্রথমে data declare
+        const data = d.student;
+
+        // ✅ Security — password strip
         if (data.password) {
           delete data.password;
         }
-        const data = d.student;
-        const finalSource = d.source || resolvedSource;
 
+        const finalSource = d.source || resolvedSource;
         console.log(`✅ Found in ${finalSource}:`, data.name);
 
         // Payment calculation
@@ -597,7 +599,9 @@ const DashboardContent = ({
   loadingCourses,
   onRefresh,
 }) => {
+  const navigate = useNavigate(); // ✅ এই লাইন যোগ করুন
   const [paymentTab, setPaymentTab] = useState("summary");
+  // ...
 
   const totalBill = Number(studentInfo.courseFee) || 0;
   const totalPaid = Number(studentInfo.paidAmount) || 0;
@@ -720,22 +724,59 @@ const DashboardContent = ({
               ক্যাম্পাসে পাসওয়ার্ড দিয়ে লগইন করতে হবে।
             </div>
 
+            {/* Campus Card */}
             <div className="col-span-1 md:col-span-1 bg-[#00a65a] text-white rounded-sm relative flex flex-col justify-between h-[100px] mt-2 hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg mb-1">Campus</h3>
-                <Link to="/campus-login">
-                  <button className="bg-[#008c9e] hover:bg-[#006b7a] text-white text-xs px-3 py-1 rounded shadow-sm transition-colors border border-transparent">
-                    Login to Campus
+                {(studentInfo.dueAmount || 0) > 0 ? (
+                  // ✅ Due থাকলে disabled button
+                  <button
+                    onClick={() =>
+                      Swal.fire({
+                        icon: "warning",
+                        title: "🚫 Due বাকি আছে!",
+                        html: `
+              <p>আপনার বকেয়া <strong>৳${studentInfo.dueAmount}</strong></p>
+              <p style="font-size: 13px; color: #666; margin-top: 8px;">
+                Campus-এ প্রবেশের আগে payment সম্পূর্ণ করুন।
+              </p>
+            `,
+                        confirmButtonText: "Payment করব",
+                        confirmButtonColor: "#00ADD2",
+                        showCancelButton: true,
+                        cancelButtonText: "পরে",
+                      }).then((r) => {
+                        if (r.isConfirmed) navigate("/online-payment");
+                      })
+                    }
+                    className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded shadow-sm transition-colors border border-transparent cursor-not-allowed opacity-90"
+                  >
+                    🔒 Due বাকি — Locked
                   </button>
-                </Link>
+                ) : (
+                  // ✅ Due নেই → normal login button
+                  <Link to="/campus-login">
+                    <button className="bg-[#008c9e] hover:bg-[#006b7a] text-white text-xs px-3 py-1 rounded shadow-sm transition-colors border border-transparent">
+                      Login to Campus
+                    </button>
+                  </Link>
+                )}
               </div>
               <FaGraduationCap className="absolute right-2 top-2 text-[60px] opacity-20 z-0" />
-              <Link
-                to="/campus-login"
-                className="bg-black/10 py-1 text-center text-xs hover:bg-black/20 cursor-pointer block transition-colors w-full mt-auto z-10"
-              >
-                Go to Campus ➔
-              </Link>
+
+              {/* Bottom bar */}
+              {(studentInfo.dueAmount || 0) > 0 ? (
+                <div className="bg-red-700/40 py-1 text-center text-[10px] w-full mt-auto z-10 cursor-not-allowed">
+                  🔒 Payment Pending
+                </div>
+              ) : (
+                <Link
+                  to="/campus-login"
+                  className="bg-black/10 py-1 text-center text-xs hover:bg-black/20 cursor-pointer block transition-colors w-full mt-auto z-10"
+                >
+                  Go to Campus ➔
+                </Link>
+              )}
             </div>
           </div>
         </div>

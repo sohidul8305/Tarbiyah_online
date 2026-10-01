@@ -22,29 +22,77 @@ const Campus_login = () => {
     setLoading(true);
 
     try {
-      console.log("📤 Sending login:", {
+      console.log("📤 Campus login:", {
         studentId: credentials.studentId,
-        password: "***", // ✅ password কখনো log করবেন না
+        password: "***",
       });
 
+      // ✅ Campus-specific endpoint use করছি
       const response = await fetch(
-        "https://api.tarbiyahonline.com/api/students/login",
+        "https://api.tarbiyahonline.com/api/students/campus-login",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             studentId: credentials.studentId.trim(),
-            username: credentials.studentId.trim(), // fallback
+            username: credentials.studentId.trim(),
             password: credentials.password.trim(),
           }),
         },
       );
 
       const data = await response.json();
-      console.log("🎯 Login Response:", data.success ? "OK" : data.message);
+      console.log(
+        "🎯 Campus Login Response:",
+        data.success ? "OK" : data.message,
+      );
+
+      // ✅ DUE থাকলে BLOCK
+      if (data.blocked) {
+        await Swal.fire({
+          icon: "error",
+          title: "🚫 Campus Access Blocked",
+          html: `
+          <div style="text-align: left; font-size: 14px;">
+            <p><strong>Student:</strong> ${data.studentName || "N/A"}</p>
+            <p><strong>ID:</strong> ${data.studentId || "N/A"}</p>
+            <hr style="margin: 10px 0;">
+            <div style="background: #fef2f2; padding: 14px; border-radius: 8px; border: 2px solid #fca5a5;">
+              <p style="font-weight: bold; color: #991b1b; font-size: 15px; margin-bottom: 6px;">
+                💰 বকেয়া: ৳${data.dueAmount}
+              </p>
+              <p style="font-size: 13px; color: #7f1d1d;">
+                Campus-এ প্রবেশের আগে আপনার <strong>monthly payment</strong> সম্পূর্ণ পরিশোধ করুন।
+              </p>
+            </div>
+            <div style="background: #eff6ff; padding: 12px; border-radius: 8px; margin-top: 12px;">
+              <p style="font-weight: bold; color: #1e40af; font-size: 13px; margin-bottom: 6px;">
+                📱 কীভাবে Payment করবেন?
+              </p>
+              <p style="font-size: 12px; color: #1e3a8a;">
+                ১. Student Dashboard → Online Payment
+              </p>
+              <p style="font-size: 12px; color: #1e3a8a;">
+                ২. bKash/Nagad Merchant-এ payment
+              </p>
+              <p style="font-size: 12px; color: #1e3a8a;">
+                ৩. Admin verify করলে Campus-এ login করতে পারবেন
+              </p>
+            </div>
+          </div>
+        `,
+          confirmButtonText: "Payment করব",
+          confirmButtonColor: "#00a65a",
+          width: 520,
+        });
+
+        // ✅ Payment page-এ পাঠান
+        navigate("/online-payment");
+        return;
+      }
 
       if (data.success && data.user) {
-        // ✅ localStorage-এ save — সব পেজে ব্যবহার হবে
+        // ✅ localStorage-এ save
         localStorage.setItem("isCampusLoggedIn", "true");
         localStorage.setItem("campusStudentInfo", JSON.stringify(data.user));
         localStorage.setItem("campusStudentToken", data.token || "");
@@ -83,7 +131,6 @@ const Campus_login = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-100 flex justify-center items-center p-4 font-sans">
       <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden border border-gray-200">

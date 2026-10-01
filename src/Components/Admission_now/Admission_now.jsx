@@ -543,8 +543,6 @@ const Admission_now = () => {
           width: 550,
         });
 
-        // ... form reset অপরিবর্তিত
-
         setFormData({
           name: "",
           nationalId: "",
