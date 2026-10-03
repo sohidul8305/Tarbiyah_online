@@ -308,11 +308,7 @@ const Payment_overview = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-        {
-          id: "today-class",
-          path: "/admin-dashboard/today-class",
-          label: "Today's Class",
-        },
+
         {
           id: "payment-overview",
           path: "/admin-dashboard/payment-overview",

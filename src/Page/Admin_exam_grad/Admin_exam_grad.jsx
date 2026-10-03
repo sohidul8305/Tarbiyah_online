@@ -128,11 +128,7 @@ const Admin_exam_grad = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-        {
-          id: "today-class",
-          path: "/admin-dashboard/today-class",
-          label: "Today's Class",
-        },
+
         {
           id: "basic-tazweed",
           path: "/admin-dashboard/basic-tazweed",

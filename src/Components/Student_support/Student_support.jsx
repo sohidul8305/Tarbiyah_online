@@ -1,7 +1,10 @@
+// src/Page/Student-support/Student_support.jsx
 import React, { useState, useEffect } from "react";
 import Navbar from "../Navbar/Navbar";
 import Footer from "../Navbar/Footer/Footer";
 import { useLanguage } from "../../context/useLanguage";
+
+const API = "https://api.tarbiyahonline.com/api";
 
 const Student_support = () => {
   const { t } = useLanguage();
@@ -22,6 +25,9 @@ const Student_support = () => {
     reference: "",
     subject: "",
     problemDetails: "",
+    priority: "Medium",
+    category: "General",
+    attachmentUrl: "",
   });
 
   const [searchBy, setSearchBy] = useState("phone");
@@ -29,14 +35,30 @@ const Student_support = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
-
-  // ➕ নতুন State (স্টুডেন্ট রিপ্লাই করার জন্য)
   const [studentReply, setStudentReply] = useState("");
   const [isSendingReply, setIsSendingReply] = useState(false);
 
   useEffect(() => {
     generateCaptcha();
     generateStatusCaptcha();
+    // ✅ Auto-fill from logged-in student
+    try {
+      const saved =
+        localStorage.getItem("studentInfo") ||
+        localStorage.getItem("campusStudentInfo");
+      if (saved) {
+        const s = JSON.parse(saved);
+        setFormData((p) => ({
+          ...p,
+          name: s.name || p.name,
+          phone: s.phone || p.phone,
+          email: s.email || p.email,
+          studentId: s.studentId || s._id || p.studentId,
+          gender: (s.gender || "").toLowerCase() || p.gender,
+          department: s.course || s.department || p.department,
+        }));
+      }
+    } catch (e) {}
   }, []);
 
   const generateCaptcha = () =>
@@ -57,20 +79,17 @@ const Student_support = () => {
     }
 
     try {
-      const response = await fetch(
-        "https://api.tarbiyahonline.com/api/support/submit",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        },
-      );
+      const response = await fetch(`${API}/support/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
       const data = await response.json();
       if (data.success) {
         alert(
           t({
-            en: "Support application submitted successfully!",
-            bn: "সাপোর্ট আবেদন সফলভাবে জমা হয়েছে!",
+            en: "Support ticket submitted successfully!",
+            bn: "সাপোর্ট টিকেট সফলভাবে জমা হয়েছে!",
           }),
         );
         setFormData({
@@ -83,18 +102,17 @@ const Student_support = () => {
           reference: "",
           subject: "",
           problemDetails: "",
+          priority: "Medium",
+          category: "General",
+          attachmentUrl: "",
         });
         setCaptchaInput("");
         generateCaptcha();
       } else {
-        alert(
-          data.message ||
-            t({ en: "Something went wrong!", bn: "কিছু ভুল হয়েছে!" }),
-        );
+        alert(data.message || "Something went wrong!");
       }
     } catch (error) {
-      console.error("Submit error:", error);
-      alert(t({ en: "Network error!", bn: "নেটওয়ার্ক সমস্যা!" }));
+      alert("Network error!");
     }
   };
 
@@ -109,111 +127,101 @@ const Student_support = () => {
 
     try {
       const response = await fetch(
-        `https://api.tarbiyahonline.com/api/support/status?type=${searchBy}&value=${searchValue.trim()}`,
+        `${API}/support/status?type=${searchBy}&value=${searchValue.trim()}`,
       );
-
-      let data;
-      try {
-        data = await response.json();
-      } catch (err) {
-        data = { message: "Invalid JSON from server" };
-      }
-
-      if (!response.ok) {
-        alert(
-          data.message ||
-            t({
-              en: "Server error! Please try again later.",
-              bn: "সার্ভার এরর! পরে আবার চেষ্টা করুন।",
-            }),
-        );
-        setSearchResults([]);
-        setHasSearched(true);
-        return;
-      }
-
+      const data = await response.json();
       if (data.success && data.data) {
         setSearchResults(data.data);
       } else {
         setSearchResults([]);
-        alert(
-          data.message ||
-            t({ en: "No records found!", bn: "কোনো রেকর্ড পাওয়া যায়নি!" }),
-        );
+        alert(data.message || "No records found!");
       }
-
       setHasSearched(true);
     } catch (error) {
-      alert(
-        t({
-          en: "Network error! Please try again.",
-          bn: "নেটওয়ার্ক সমস্যা! আবার চেষ্টা করুন।",
-        }),
-      );
       setSearchResults([]);
       setHasSearched(true);
     }
   };
 
-  // ➕ স্টুডেন্ট রিপ্লাই পাঠানোর ফাংশন
   const sendStudentReply = async () => {
-    if (!studentReply.trim()) {
-      alert("রিপ্লাই লিখুন!");
-      return;
-    }
-    if (!selectedTicket) return;
-
+    if (!studentReply.trim() || !selectedTicket) return;
     setIsSendingReply(true);
     try {
       const response = await fetch(
-        `https://api.tarbiyahonline.com/api/support/ticket/${selectedTicket.supportNo}/reply`,
+        `${API}/support/ticket/${selectedTicket.supportNo}/reply`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: studentReply }),
+          body: JSON.stringify({
+            message: studentReply,
+            role: "user", // ✅ স্টুডেন্ট রিপ্লাই হিসেবে চিহ্নিত
+          }),
         },
       );
       const data = await response.json();
       if (data.success) {
-        // সফল হলে সাথে সাথে UI-তে রিপ্লাই দেখান
-        setSelectedTicket((prev) => ({
-          ...prev,
-          replies: [
-            ...(prev.replies || []),
-            {
-              role: "user",
-              message: studentReply,
-              date: new Date().toLocaleString(),
-            },
-          ],
-        }));
+        setSelectedTicket({
+          ...data.ticket,
+          supportNo: data.ticket._id,
+          dept: data.ticket.department,
+          desc: data.ticket.problemDetails,
+          description: data.ticket.problemDetails,
+        });
         setStudentReply("");
-        alert("রিপ্লাই পাঠানো হয়েছে!");
       } else {
-        alert(data.message || "রিপ্লাই পাঠানো যায়নি!");
+        alert(data.message || "Failed to send reply");
       }
     } catch (error) {
-      console.error("Reply error:", error);
-      alert("সার্ভার এরর! আবার চেষ্টা করুন।");
+      alert("Server error!");
     } finally {
       setIsSendingReply(false);
     }
   };
 
+  const getPriorityBadge = (priority) => {
+    const p = (priority || "Medium").toLowerCase();
+    if (p === "high") return "bg-red-100 text-red-700 border-red-300";
+    if (p === "low") return "bg-gray-100 text-gray-700 border-gray-300";
+    return "bg-yellow-100 text-yellow-700 border-yellow-300";
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "Pending":
+        return "bg-yellow-100 text-yellow-700";
+      case "In Progress":
+        return "bg-blue-100 text-blue-700";
+      case "Resolved":
+        return "bg-green-100 text-green-700";
+      case "Closed":
+        return "bg-gray-100 text-gray-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between">
+    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
       <Navbar />
       <div className="container mx-auto px-4 py-8 max-w-7xl flex-grow">
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => setActiveTab("submit")}
-            className={`px-6 py-2.5 rounded-md font-medium transition-all shadow-md ${activeTab === "submit" ? "bg-blue-600 text-white shadow-blue-500/20" : "bg-white text-slate-700 hover:bg-slate-100"}`}
+            className={`px-6 py-2.5 rounded-md font-medium transition-all shadow-md ${
+              activeTab === "submit"
+                ? "bg-blue-600 text-white"
+                : "bg-white text-slate-700 hover:bg-slate-100"
+            }`}
           >
             {t({ en: "Submit Support", bn: "সাবমিট সাপোর্ট" })}
           </button>
           <button
             onClick={() => setActiveTab("status")}
-            className={`px-6 py-2.5 rounded-md font-medium transition-all shadow-md ${activeTab === "status" ? "bg-blue-600 text-white shadow-blue-500/20" : "bg-white text-slate-700 hover:bg-slate-100"}`}
+            className={`px-6 py-2.5 rounded-md font-medium transition-all shadow-md ${
+              activeTab === "status"
+                ? "bg-blue-600 text-white"
+                : "bg-white text-slate-700 hover:bg-slate-100"
+            }`}
           >
             {t({ en: "My Support Status", bn: "আমার সাপোর্ট স্ট্যাটাস" })}
           </button>
@@ -226,33 +234,70 @@ const Student_support = () => {
                 Support Form
               </h2>
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Department */}
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-slate-700">
-                    Department:
+                  <label className="block text-sm font-semibold mb-1">
+                    Department: *
                   </label>
                   <select
                     name="department"
                     value={formData.department}
                     onChange={handleChange}
                     required
-                    className="w-full border border-slate-300 rounded-md p-2.5 bg-white"
+                    className="w-full border border-slate-300 rounded-md p-2.5"
                   >
                     <option value="">--Select Department--</option>
                     <option value="Diploma">Diploma In Islamic Studies</option>
                     <option value="Allimiyah">Allimiyah</option>
                     <option value="Quran studies">Quran Studies</option>
                     <option value="Quran for elder">Quran For Elder</option>
+                    <option value="Basic Tajweed (Level-1)">
+                      Basic Tajweed (Level-1)
+                    </option>
+                    <option value="Quran Nazera">Quran Nazera</option>
                   </select>
                 </div>
+
+                {/* Student ID + Name */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-1 text-slate-700">
-                      Phone:
+                    <label className="block text-sm font-semibold mb-1">
+                      Student ID: *
+                    </label>
+                    <input
+                      type="text"
+                      name="studentId"
+                      value={formData.studentId}
+                      onChange={handleChange}
+                      required
+                      placeholder="TAR2648213"
+                      className="w-full border border-slate-300 rounded-md p-2.5 font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">
+                      Name: *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      className="w-full border border-slate-300 rounded-md p-2.5"
+                    />
+                  </div>
+                </div>
+
+                {/* Phone + Email */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">
+                      Phone: *
                     </label>
                     <input
                       type="tel"
                       name="phone"
-                      placeholder="Phone"
                       value={formData.phone}
                       onChange={handleChange}
                       required
@@ -260,13 +305,12 @@ const Student_support = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold mb-1 text-slate-700">
-                      Email:
+                    <label className="block text-sm font-semibold mb-1">
+                      Email: *
                     </label>
                     <input
                       type="email"
                       name="email"
-                      placeholder="Email"
                       value={formData.email}
                       onChange={handleChange}
                       required
@@ -274,69 +318,110 @@ const Student_support = () => {
                     />
                   </div>
                 </div>
+
+                {/* Gender + Priority */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-semibold mb-1 text-slate-700">
-                      Name:
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      placeholder="Name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className="w-full border border-slate-300 rounded-md p-2.5"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-1 text-slate-700">
+                    <label className="block text-sm font-semibold mb-1">
                       Gender:
                     </label>
                     <select
                       name="gender"
                       value={formData.gender}
                       onChange={handleChange}
-                      required
-                      className="w-full border border-slate-300 rounded-md p-2.5 bg-white"
+                      className="w-full border border-slate-300 rounded-md p-2.5"
                     >
                       <option value="">--Select Gender--</option>
                       <option value="male">Male</option>
                       <option value="female">Female</option>
                     </select>
                   </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">
+                      Priority: *
+                    </label>
+                    <select
+                      name="priority"
+                      value={formData.priority}
+                      onChange={handleChange}
+                      className="w-full border border-slate-300 rounded-md p-2.5"
+                    >
+                      <option value="Low">Low</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                    </select>
+                  </div>
                 </div>
+
+                {/* Category */}
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-slate-700">
-                    Subject:
+                  <label className="block text-sm font-semibold mb-1">
+                    Category:
+                  </label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    className="w-full border border-slate-300 rounded-md p-2.5"
+                  >
+                    <option value="General">General</option>
+                    <option value="Payment">Payment / Fee</option>
+                    <option value="Technical">Technical Issue</option>
+                    <option value="Course">Course / Content</option>
+                    <option value="Account">Account / Login</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                {/* Subject */}
+                <div>
+                  <label className="block text-sm font-semibold mb-1">
+                    Subject: *
                   </label>
                   <input
                     type="text"
                     name="subject"
-                    placeholder="Subject"
                     value={formData.subject}
                     onChange={handleChange}
                     required
                     className="w-full border border-slate-300 rounded-md p-2.5"
                   />
                 </div>
+
+                {/* Problem Details */}
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-slate-700">
-                    Problem Details:
+                  <label className="block text-sm font-semibold mb-1">
+                    Problem Details: *
                   </label>
                   <textarea
                     name="problemDetails"
                     rows="4"
-                    placeholder="Write problem details..."
                     value={formData.problemDetails}
                     onChange={handleChange}
                     required
                     className="w-full border border-slate-300 rounded-md p-2.5"
                   ></textarea>
                 </div>
+
+                {/* Attachment URL */}
                 <div>
-                  <label className="block text-sm font-semibold mb-1 text-slate-700">
-                    Captcha:
+                  <label className="block text-sm font-semibold mb-1">
+                    Attachment URL (optional):
+                  </label>
+                  <input
+                    type="text"
+                    name="attachmentUrl"
+                    value={formData.attachmentUrl}
+                    onChange={handleChange}
+                    placeholder="https://drive.google.com/... (screenshot / file link)"
+                    className="w-full border border-slate-300 rounded-md p-2.5"
+                  />
+                </div>
+
+                {/* Captcha */}
+                <div>
+                  <label className="block text-sm font-semibold mb-1">
+                    Captcha: *
                   </label>
                   <div className="flex items-center gap-3">
                     <div className="bg-slate-100 border border-slate-300 px-4 py-2 rounded font-bold text-lg text-blue-800">
@@ -344,7 +429,6 @@ const Student_support = () => {
                     </div>
                     <input
                       type="text"
-                      placeholder="Enter captcha"
                       value={captchaInput}
                       onChange={(e) => setCaptchaInput(e.target.value)}
                       required
@@ -352,6 +436,7 @@ const Student_support = () => {
                     />
                   </div>
                 </div>
+
                 <button
                   type="submit"
                   className="w-full md:w-auto px-8 py-3 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-md shadow-lg"
@@ -360,9 +445,15 @@ const Student_support = () => {
                 </button>
               </form>
             </div>
+
             <div className="lg:col-span-5 bg-amber-50 border border-amber-200 text-amber-900 p-6 rounded-lg shadow-xl">
               <p className="font-bold text-red-600 bg-red-50 p-3 rounded border border-red-200">
-                সাপোর্ট লেখার সময় অবশ্যই ডিপার্টমেন্ট ঠিকমতো সিলেক্ট করতে হবে।
+                সাপোর্ট লেখার সময় অবশ্যই ডিপার্টমেন্ট ও Student ID ঠিকমতো দিন।
+              </p>
+              <p className="mt-4 text-sm">
+                ⏱️ সাধারণত ২৪ ঘণ্টার মধ্যে অ্যাডমিন রিপ্লাই দিবেন। আপনি "My
+                Support Status" ট্যাবে গিয়ে রিপ্লাই দেখতে ও নতুন মেসেজ পাঠাতে
+                পারবেন।
               </p>
             </div>
           </div>
@@ -376,16 +467,21 @@ const Student_support = () => {
                 >
                   ← Back to List
                 </button>
-                <div className="flex justify-between mb-6 border-b pb-3">
-                  <h2 className="text-xl font-bold text-green-600">
-                    Status: {selectedTicket.status}
-                  </h2>
-                  <h2 className="text-xl font-bold">
+                <div className="flex justify-between mb-4 border-b pb-3 flex-wrap gap-2">
+                  <h2 className="text-lg font-bold">
                     Support No: {selectedTicket.supportNo}
                   </h2>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusBadge(
+                      selectedTicket.status,
+                    )}`}
+                  >
+                    {selectedTicket.status}
+                  </span>
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div className="border p-4 rounded bg-gray-50">
+                  <div className="border p-4 rounded bg-gray-50 text-sm space-y-1">
                     <p>
                       <strong>Name:</strong> {selectedTicket.name}
                     </p>
@@ -395,58 +491,77 @@ const Student_support = () => {
                     <p>
                       <strong>Email:</strong> {selectedTicket.email}
                     </p>
+                    {selectedTicket.studentId && (
+                      <p>
+                        <strong>Student ID:</strong> {selectedTicket.studentId}
+                      </p>
+                    )}
                   </div>
-                  <div className="border p-4 rounded bg-gray-50">
+                  <div className="border p-4 rounded bg-gray-50 text-sm space-y-1">
                     <p>
                       <strong>Department:</strong> {selectedTicket.dept}
                     </p>
                     <p>
                       <strong>Date:</strong> {selectedTicket.date}
                     </p>
+                    {selectedTicket.priority && (
+                      <p>
+                        <strong>Priority:</strong>{" "}
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded border ${getPriorityBadge(
+                            selectedTicket.priority,
+                          )}`}
+                        >
+                          {selectedTicket.priority}
+                        </span>
+                      </p>
+                    )}
                   </div>
                 </div>
+
                 <div className="border p-4 rounded bg-gray-50 mb-4">
                   <p className="font-bold mb-1">
                     Subject: {selectedTicket.subject}
                   </p>
-                  <p>{selectedTicket.description}</p>
+                  <p className="text-sm">{selectedTicket.description}</p>
                 </div>
 
-                {/* ✅ কনভারসেশন (Replies) অংশ - এখানে স্টুডেন্ট রিপ্লাই যোগ করা হয়েছে */}
+                {/* 💬 Chat */}
                 <div className="border rounded p-4 bg-gray-50">
                   <h3 className="font-bold mb-4 text-blue-700">
-                    💬 কনভারসেশন (Replies)
+                    💬 Conversation
                   </h3>
 
-                  <div className="space-y-4 mb-4">
+                  <div className="space-y-3 mb-4 max-h-96 overflow-y-auto">
                     {selectedTicket.replies &&
                     selectedTicket.replies.length > 0 ? (
                       selectedTicket.replies.map((reply, index) => (
                         <div
                           key={index}
-                          className={`p-3 rounded ${reply.role === "admin" ? "bg-green-100 border-l-4 border-green-500" : "bg-blue-100 border-l-4 border-blue-500"}`}
+                          className={`p-3 rounded-lg ${
+                            reply.role === "admin"
+                              ? "bg-green-100 border-l-4 border-green-500 ml-0 mr-8"
+                              : "bg-blue-100 border-l-4 border-blue-500 ml-8 mr-0"
+                          }`}
                         >
                           <div className="flex justify-between items-center mb-1">
-                            <strong>
-                              {reply.role === "admin"
-                                ? "👤 অ্যাডমিন"
-                                : "👤 আপনি"}
+                            <strong className="text-sm">
+                              {reply.role === "admin" ? "👨‍💼 Admin" : "👤 You"}
                             </strong>
                             <span className="text-xs text-gray-500">
                               {reply.date}
                             </span>
                           </div>
-                          <p>{reply.message}</p>
+                          <p className="text-sm">{reply.message}</p>
                         </div>
                       ))
                     ) : (
-                      <p className="text-gray-500 text-sm">
-                        এখনো কোনো রিপ্লাই আসেনি।
+                      <p className="text-gray-500 text-sm text-center py-4">
+                        এখনো কোনো রিপ্লাই আসেনি। অনুগ্রহ করে অপেক্ষা করুন।
                       </p>
                     )}
                   </div>
 
-                  {/* ➕ স্টুডেন্ট রিপ্লাই দেওয়ার UI */}
                   <div className="mt-4 border-t pt-4">
                     <textarea
                       className="w-full border p-2 rounded mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -454,13 +569,13 @@ const Student_support = () => {
                       placeholder="আপনার রিপ্লাই লিখুন..."
                       value={studentReply}
                       onChange={(e) => setStudentReply(e.target.value)}
-                    ></textarea>
+                    />
                     <button
                       onClick={sendStudentReply}
                       disabled={isSendingReply}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-50 font-semibold text-sm"
                     >
-                      {isSendingReply ? "পাঠানো হচ্ছে..." : "রিপ্লাই পাঠান"}
+                      {isSendingReply ? "Sending..." : "Send Reply"}
                     </button>
                   </div>
                 </div>
@@ -500,19 +615,17 @@ const Student_support = () => {
                       checked={searchBy === "ticket"}
                       onChange={(e) => setSearchBy(e.target.value)}
                     />{" "}
-                    Ticket
+                    Ticket No
                   </label>
                 </div>
                 <div className="grid md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <input
-                      type="text"
-                      placeholder="Enter value..."
-                      value={searchValue}
-                      onChange={(e) => setSearchValue(e.target.value)}
-                      className="w-full border border-slate-300 rounded-md p-2.5"
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    placeholder="Enter value..."
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                    className="w-full border border-slate-300 rounded-md p-2.5"
+                  />
                   <div className="flex gap-3">
                     <div className="bg-slate-100 px-4 py-2 rounded font-bold text-lg">
                       {statusCaptchaNum}
@@ -534,35 +647,54 @@ const Student_support = () => {
                 </button>
 
                 {searchResults.length > 0 ? (
-                  <table className="w-full mt-6 border-collapse border border-gray-300">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border p-3">Dept</th>
-                        <th className="border p-3">Description</th>
-                        <th className="border p-3">Status</th>
-                        <th className="border p-3">Details</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {searchResults.map((ticket) => (
-                        <tr key={ticket.supportNo} className="hover:bg-blue-50">
-                          <td className="border p-3">{ticket.dept}</td>
-                          <td className="border p-3">{ticket.desc}</td>
-                          <td className="border p-3 text-green-600">
-                            {ticket.status}
-                          </td>
-                          <td className="border p-3">
-                            <button
-                              onClick={() => setSelectedTicket(ticket)}
-                              className="text-blue-600 hover:underline"
-                            >
-                              Details
-                            </button>
-                          </td>
+                  <div className="mt-6 overflow-x-auto">
+                    <table className="w-full border-collapse border border-gray-300 text-sm">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          <th className="border p-3">Support No</th>
+                          <th className="border p-3">Dept</th>
+                          <th className="border p-3">Subject</th>
+                          <th className="border p-3">Status</th>
+                          <th className="border p-3">Replies</th>
+                          <th className="border p-3">Details</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {searchResults.map((ticket) => (
+                          <tr
+                            key={ticket.supportNo}
+                            className="hover:bg-blue-50"
+                          >
+                            <td className="border p-3 font-mono text-xs">
+                              {ticket.supportNo}
+                            </td>
+                            <td className="border p-3">{ticket.dept}</td>
+                            <td className="border p-3">{ticket.subject}</td>
+                            <td className="border p-3">
+                              <span
+                                className={`px-2 py-0.5 rounded-full text-xs font-bold ${getStatusBadge(
+                                  ticket.status,
+                                )}`}
+                              >
+                                {ticket.status}
+                              </span>
+                            </td>
+                            <td className="border p-3 text-center">
+                              {(ticket.replies || []).length}
+                            </td>
+                            <td className="border p-3">
+                              <button
+                                onClick={() => setSelectedTicket(ticket)}
+                                className="text-blue-600 hover:underline font-semibold"
+                              >
+                                Open
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 ) : hasSearched ? (
                   <div className="text-center text-gray-500 py-6 mt-4 bg-gray-50 border rounded">
                     No tickets found!

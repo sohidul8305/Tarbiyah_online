@@ -71,11 +71,6 @@ const Total_salary = () => {
         },
 
         {
-          id: "today-class",
-          path: "/admin-dashboard/today-class",
-          label: "Today's Class",
-        },
-        {
           id: "basic-tazweed",
           path: "/admin-dashboard/basic-tazweed",
           label: "Basic Tazweed Payment Overview",

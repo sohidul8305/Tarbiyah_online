@@ -302,11 +302,7 @@ const AdminDashboard = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-        {
-          id: "today-class",
-          path: "/admin-dashboard/today-class",
-          label: "Today's Class",
-        },
+
         {
           id: "basic-tazweed",
           path: "/admin-dashboard/basic-tazweed",
@@ -661,9 +657,7 @@ const DashboardContent = ({ stats, notifications }) => {
         <Link
           to="/admin-dashboard/today-class"
           className="hover:text-teal-600 text-[10px]"
-        >
-          Today's Class
-        </Link>
+        ></Link>
       ),
       value: stats.todayClasses,
       icon: <FaCalendarAlt className="text-purple-500" />,

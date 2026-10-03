@@ -501,7 +501,7 @@ const Teacher_classes = () => {
     });
   };
 
-  // Get today's classes count
+  // Get es count
   const todayClassesCount = classes.filter((c) => c.isToday === true).length;
 
   return (
@@ -621,7 +621,7 @@ const Teacher_classes = () => {
             </div>
           </div>
 
-          {/* Today's Classes Banner */}
+          {/* es Banner */}
           {todayClassesCount > 0 && (
             <div className="bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-3 mb-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -629,9 +629,7 @@ const Teacher_classes = () => {
                   <FaCalendarCheck size={16} />
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-purple-800">
-                    Today's Classes
-                  </p>
+                  <p className="text-sm font-bold text-purple-800">es</p>
                   <p className="text-xs text-purple-600">
                     You have {todayClassesCount} class
                     {todayClassesCount > 1 ? "es" : ""} today
@@ -646,7 +644,7 @@ const Teacher_classes = () => {
                     : "bg-white text-purple-600 border border-purple-300 hover:bg-purple-50"
                 }`}
               >
-                {showTodayOnly ? "Show All" : "View Today's Classes"}
+                {showTodayOnly ? "Show All" : "View es"}
               </button>
             </div>
           )}
@@ -764,7 +762,7 @@ const Teacher_classes = () => {
                 ></div>
                 {cls.isToday && (
                   <div className="bg-purple-600 text-white text-[8px] font-bold px-2 py-0.5 flex items-center gap-1">
-                    <FaCalendarCheck size={10} /> Today's Class
+                    <FaCalendarCheck size={10} />
                   </div>
                 )}
                 <div className="p-3">
@@ -1385,7 +1383,7 @@ const Teacher_classes = () => {
                   </div>
                   {selectedClass.isToday && (
                     <div className="bg-purple-100 text-purple-700 text-xs font-semibold px-3 py-1.5 rounded-full inline-flex items-center gap-1">
-                      <FaCalendarCheck /> Today's Class
+                      <FaCalendarCheck />
                     </div>
                   )}
                   <div>

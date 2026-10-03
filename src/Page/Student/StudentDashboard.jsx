@@ -23,6 +23,7 @@ import {
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+import SupportChatWidget from "./SupportChatWidget";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
 
@@ -49,7 +50,6 @@ const StudentDashboard = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [loading, setLoading] = useState(true);
 
-  // ✅ Dynamic Student State
   const [studentInfo, setStudentInfo] = useState({
     _id: "",
     name: "",
@@ -89,9 +89,6 @@ const StudentDashboard = () => {
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(false);
 
-  // ============================================================
-  // ✅ Load from localStorage + fetch fresh
-  // ============================================================
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isStudentLoggedIn");
     if (!isLoggedIn) {
@@ -130,7 +127,6 @@ const StudentDashboard = () => {
       sourceLabel: getSourceLabel(resolvedSource),
     }));
 
-    // ✅ Primary key: _id → studentId → phone
     const primaryKey = parsed._id || parsed.studentId || parsed.phone;
     if (primaryKey) {
       fetchFullStudentData(primaryKey, resolvedSource);
@@ -140,20 +136,14 @@ const StudentDashboard = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ============================================================
-  // ✅ Fetch full student data — Academic এর মতো multi-identifier
-  // ============================================================
-  // ============================================================
   const fetchFullStudentData = async (studentId, loginSource) => {
     try {
       const resolvedSource =
         loginSource || localStorage.getItem("loginSource") || "students";
 
-      // ✅ Read localStorage
       const raw = localStorage.getItem("studentInfo");
       const parsed = raw ? JSON.parse(raw) : {};
 
-      // ✅ Academic এর মতো same params
       const params = new URLSearchParams();
       if (parsed._id) params.append("id", parsed._id);
       if (studentId && studentId !== parsed._id)
@@ -172,10 +162,8 @@ const StudentDashboard = () => {
       console.log("📥 Response:", d);
 
       if (d.success && d.student) {
-        // ✅ প্রথমে data declare
         const data = d.student;
 
-        // ✅ Security — password strip
         if (data.password) {
           delete data.password;
         }
@@ -183,7 +171,6 @@ const StudentDashboard = () => {
         const finalSource = d.source || resolvedSource;
         console.log(`✅ Found in ${finalSource}:`, data.name);
 
-        // Payment calculation
         const fee = Number(data.courseFee) || Number(data.monthlyFee) || 0;
         const scholarship = Number(data.scholarshipAmount) || 0;
         const fromMonths = (data.paidMonths || []).reduce(
@@ -241,7 +228,6 @@ const StudentDashboard = () => {
           sourceLabel: getSourceLabel(finalSource),
         }));
 
-        // ✅ Store identifiers
         const stored = {
           _id: data._id,
           name: data.name,
@@ -268,15 +254,11 @@ const StudentDashboard = () => {
     }
   };
 
-  // ============================================================
-  // ✅ Fetch enrolled courses
-  // ============================================================
   const fetchEnrolledCourses = async (studentId, loginSource) => {
     try {
       setLoadingCourses(true);
       let loadedCourses = [];
 
-      // Try my-courses API
       try {
         const res = await fetch(`${API_BASE}/students/my-courses/${studentId}`);
         const d = await res.json();
@@ -290,7 +272,6 @@ const StudentDashboard = () => {
         console.warn("⚠️ my-courses API failed:", e.message);
       }
 
-      // Fallback — course string থেকে
       if (loadedCourses.length === 0) {
         const raw = localStorage.getItem("studentInfo");
         if (raw) {
@@ -347,15 +328,14 @@ const StudentDashboard = () => {
   const handleLogout = async () => {
     try {
       await logOut();
-      // ✅ সব student-related key clear করুন
       localStorage.removeItem("isStudentLoggedIn");
       localStorage.removeItem("studentInfo");
       localStorage.removeItem("studentEmail");
       localStorage.removeItem("studentPhone");
-      localStorage.removeItem("studentUsername"); // ✅ NEW
+      localStorage.removeItem("studentUsername");
       localStorage.removeItem("loginSource");
       localStorage.removeItem("studentToken");
-      localStorage.removeItem("studentId"); // ✅ NEW
+      localStorage.removeItem("studentId");
 
       await Swal.fire({
         icon: "success",
@@ -586,6 +566,9 @@ const StudentDashboard = () => {
           )}
         </main>
       </div>
+
+      {/* ✅ Support Chat Widget — Floating Button */}
+      <SupportChatWidget />
     </div>
   );
 };
@@ -599,15 +582,13 @@ const DashboardContent = ({
   loadingCourses,
   onRefresh,
 }) => {
-  const navigate = useNavigate(); // ✅ এই লাইন যোগ করুন
+  const navigate = useNavigate();
   const [paymentTab, setPaymentTab] = useState("summary");
-  // ...
 
   const totalBill = Number(studentInfo.courseFee) || 0;
   const totalPaid = Number(studentInfo.paidAmount) || 0;
   const totalDue = Number(studentInfo.dueAmount) || 0;
 
-  // ✅ Dynamic course display
   const courseDisplayValue =
     studentInfo.course || studentInfo.batchCourse || studentInfo.class || "N/A";
 
@@ -724,12 +705,10 @@ const DashboardContent = ({
               ক্যাম্পাসে পাসওয়ার্ড দিয়ে লগইন করতে হবে।
             </div>
 
-            {/* Campus Card */}
             <div className="col-span-1 md:col-span-1 bg-[#00a65a] text-white rounded-sm relative flex flex-col justify-between h-[100px] mt-2 hover:brightness-105 transition-all">
               <div className="p-3 z-10">
                 <h3 className="font-semibold text-lg mb-1">Campus</h3>
                 {(studentInfo.dueAmount || 0) > 0 ? (
-                  // ✅ Due থাকলে disabled button
                   <button
                     onClick={() =>
                       Swal.fire({
@@ -754,7 +733,6 @@ const DashboardContent = ({
                     🔒 Due বাকি — Locked
                   </button>
                 ) : (
-                  // ✅ Due নেই → normal login button
                   <Link to="/campus-login">
                     <button className="bg-[#008c9e] hover:bg-[#006b7a] text-white text-xs px-3 py-1 rounded shadow-sm transition-colors border border-transparent">
                       Login to Campus
@@ -764,7 +742,6 @@ const DashboardContent = ({
               </div>
               <FaGraduationCap className="absolute right-2 top-2 text-[60px] opacity-20 z-0" />
 
-              {/* Bottom bar */}
               {(studentInfo.dueAmount || 0) > 0 ? (
                 <div className="bg-red-700/40 py-1 text-center text-[10px] w-full mt-auto z-10 cursor-not-allowed">
                   🔒 Payment Pending
@@ -782,7 +759,7 @@ const DashboardContent = ({
         </div>
       </div>
 
-      {/* ✅ Registered Courses — Fully Dynamic */}
+      {/* Registered Courses */}
       <div className="border border-[#00ADD2] bg-white rounded-sm shadow-sm mb-6">
         <div className="flex flex-wrap items-center gap-2 p-2 border-b border-[#00ADD2] text-sm bg-[#f4f6f9] font-medium text-gray-700">
           <FaFileAlt className="text-[#00ADD2]" /> Registered Courses of
@@ -918,7 +895,6 @@ const DashboardContent = ({
         </div>
       </div>
 
-      {/* ✅ Payment Section */}
       <PaymentSection
         paymentTab={paymentTab}
         setPaymentTab={setPaymentTab}

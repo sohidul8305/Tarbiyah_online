@@ -609,7 +609,7 @@ const DashboardContent = ({
       textColor: "text-green-600",
     },
     {
-      label: "Today's Classes",
+      label: "es",
       value: todayClasses?.length || 0,
       icon: <FaCalendarAlt className="text-2xl" />,
       color: "bg-purple-50",
@@ -664,10 +664,10 @@ const DashboardContent = ({
         ))}
       </div>
 
-      {/* Today's Classes Section */}
+      {/* es Section */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
         <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-          <FaCalendarAlt className="text-purple-600" /> Today's Classes
+          <FaCalendarAlt className="text-purple-600" /> es
         </h3>
         {todayClasses.length > 0 ? (
           <div className="space-y-3">

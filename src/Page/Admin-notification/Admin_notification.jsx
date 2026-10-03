@@ -22,6 +22,9 @@ import {
   FaUserPlus,
   FaBook,
   FaBookOpen,
+  FaPaperPlane,
+  FaHeadset,
+  FaTimes,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -37,10 +40,18 @@ const Admin_notification = () => {
 
   const [admissions, setAdmissions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sourceFilter, setSourceFilter] = useState("All"); // All | Tazweed | Najera
+  const [sourceFilter, setSourceFilter] = useState("All"); // All | Tazweed | Najera | Support
 
   const [readFilter, setReadFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // ✅ Support Tickets State
+  const [supportTickets, setSupportTickets] = useState([]);
+  const [supportLoading, setSupportLoading] = useState(false);
+  const [unreadSupportCount, setUnreadSupportCount] = useState(0);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [adminReplyText, setAdminReplyText] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
 
   const [adminInfo, setAdminInfo] = useState({
     name: "",
@@ -81,7 +92,6 @@ const Admin_notification = () => {
     try {
       setLoading(true);
 
-      // ✅ ২টি endpoint একসাথে fetch
       const [tazweedRes, najeraRes] = await Promise.allSettled([
         fetch(`${API_BASE}/basic-tazweed/all`),
         fetch(`${API_BASE}/najera-batch/all`),
@@ -191,7 +201,6 @@ const Admin_notification = () => {
         }
       }
 
-      // ✅ Combine and sort
       const combined = [...tazweedStudents, ...najeraStudents].sort((a, b) => {
         const da = new Date(a.createdAt || 0).getTime();
         const db = new Date(b.createdAt || 0).getTime();
@@ -213,11 +222,129 @@ const Admin_notification = () => {
     }
   };
 
+  // ============================================================
+  // ✅ Fetch Support Tickets
+  // ============================================================
+  const fetchSupportTickets = async () => {
+    try {
+      setSupportLoading(true);
+      const res = await fetch(`${API_BASE}/support/tickets`);
+      const data = await res.json();
+      if (data.success) {
+        setSupportTickets(data.tickets || []);
+        setUnreadSupportCount(
+          (data.tickets || []).filter((t) => !t.isRead).length,
+        );
+      }
+    } catch (err) {
+      console.error("Support fetch error:", err);
+    } finally {
+      setSupportLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAdmissions();
-    const interval = setInterval(fetchAdmissions, 30000);
+    fetchSupportTickets();
+
+    const interval = setInterval(() => {
+      fetchAdmissions();
+      fetchSupportTickets();
+    }, 30000);
+
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ============================================================
+  // ✅ Send Admin Reply
+  // ============================================================
+  const sendAdminReply = async () => {
+    if (!adminReplyText.trim() || !selectedTicket) return;
+    setSendingReply(true);
+    try {
+      const res = await fetch(
+        `${API_BASE}/support/ticket/${selectedTicket._id}/reply`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: adminReplyText,
+            role: "admin",
+          }),
+        },
+      );
+      const data = await res.json();
+      if (data.success) {
+        setSelectedTicket(data.ticket);
+        setAdminReplyText("");
+        await fetchSupportTickets();
+      } else {
+        Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+      }
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Error", text: err.message });
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
+  // ============================================================
+  // ✅ Update Ticket Status
+  // ============================================================
+  const updateTicketStatus = async (newStatus) => {
+    if (!selectedTicket) return;
+    try {
+      const res = await fetch(
+        `${API_BASE}/support/ticket/${selectedTicket._id}/status`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: newStatus }),
+        },
+      );
+      const data = await res.json();
+      if (data.success) {
+        setSelectedTicket(data.ticket);
+        await fetchSupportTickets();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // ============================================================
+  // ✅ Delete Support Ticket
+  // ============================================================
+  const deleteSupportTicket = async (id) => {
+    const ok = await Swal.fire({
+      title: "Delete this ticket?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Delete",
+    });
+    if (!ok.isConfirmed) return;
+    try {
+      const res = await fetch(`${API_BASE}/support/ticket/${id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSupportTickets((prev) => prev.filter((t) => t._id !== id));
+        if (selectedTicket?._id === id) setSelectedTicket(null);
+        setUnreadSupportCount((c) => Math.max(0, c - 1));
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
+      }
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Error", text: err.message });
+    }
+  };
 
   // ============================================================
   // Logout
@@ -316,7 +443,6 @@ const Admin_notification = () => {
     });
     if (!result.isConfirmed) return;
 
-    // ✅ Source অনুযায়ী সঠিক endpoint
     let deleteUrl = `${API_BASE}/admin-students/delete/${id}`;
     if (source === "Tazweed") {
       deleteUrl = `${API_BASE}/basic-tazweed/delete/${id}`;
@@ -363,12 +489,6 @@ const Admin_notification = () => {
           id: "department",
           path: "/admin-dashboard/department",
           label: "Department",
-        },
-
-        {
-          id: "today-class",
-          path: "/admin-dashboard/today-class",
-          label: "Today's Class",
         },
         {
           id: "new-admission",
@@ -428,7 +548,6 @@ const Admin_notification = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -449,7 +568,6 @@ const Admin_notification = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -512,7 +630,6 @@ const Admin_notification = () => {
     0,
   );
 
-  // Source counts
   const sourceCounts = {
     All: admissions.length,
     Tazweed: admissions.filter((a) => a.source === "Tazweed").length,
@@ -677,7 +794,7 @@ const Admin_notification = () => {
                 <FaBell className="text-teal-600" /> All Notifications
               </h1>
               <p className="text-xs text-gray-500">
-                Basic Tazweed + Najera Batch — সব Student
+                Basic Tazweed + Najera Batch + Support Tickets
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -685,11 +802,17 @@ const Admin_notification = () => {
                 {adminInfo.name}
               </span>
               <button
-                onClick={fetchAdmissions}
-                disabled={loading}
+                onClick={() => {
+                  fetchAdmissions();
+                  fetchSupportTickets();
+                }}
+                disabled={loading || supportLoading}
                 className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1 disabled:opacity-50"
               >
-                <FaSync size={10} className={loading ? "animate-spin" : ""} />{" "}
+                <FaSync
+                  size={10}
+                  className={loading || supportLoading ? "animate-spin" : ""}
+                />{" "}
                 Refresh
               </button>
               <button
@@ -707,6 +830,7 @@ const Admin_notification = () => {
               { id: "All", label: "All Students", color: "blue" },
               { id: "Tazweed", label: "Basic Tazweed", color: "green" },
               { id: "Najera", label: "Najera Batch", color: "purple" },
+              { id: "Support", label: "🎧 Support Tickets", color: "orange" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -717,224 +841,566 @@ const Admin_notification = () => {
                       ? "bg-blue-50 text-blue-700 shadow-sm"
                       : tab.color === "green"
                         ? "bg-green-50 text-green-700 shadow-sm"
-                        : "bg-purple-50 text-purple-700 shadow-sm"
+                        : tab.color === "purple"
+                          ? "bg-purple-50 text-purple-700 shadow-sm"
+                          : "bg-orange-50 text-orange-700 shadow-sm"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 {tab.label}
                 <span
-                  className={`text-[10px] px-1.5 rounded-full ${
+                  className={`text-[10px] px-1.5 rounded-full font-bold ${
                     sourceFilter === tab.id
                       ? "bg-white text-gray-700"
-                      : "bg-gray-200 text-gray-600"
+                      : tab.id === "Support" && unreadSupportCount > 0
+                        ? "bg-red-500 text-white animate-pulse"
+                        : "bg-gray-200 text-gray-600"
                   }`}
                 >
-                  {sourceCounts[tab.id]}
+                  {tab.id === "Support"
+                    ? supportTickets.length
+                    : sourceCounts[tab.id]}
                 </span>
               </button>
             ))}
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 flex-shrink-0">
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-blue-600">
-                {sourceCounts[sourceFilter]}
-              </p>
-              <p className="text-[10px] text-gray-500">
-                {sourceFilter === "All" ? "Total" : sourceFilter}
-              </p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-green-600">
-                ৳{totalPaid.toLocaleString()}
-              </p>
-              <p className="text-[10px] text-gray-500">Total Paid</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-red-600">
-                ৳{totalDue.toLocaleString()}
-              </p>
-              <p className="text-[10px] text-gray-500">Total Due</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-teal-600">{approvedCount}</p>
-              <p className="text-[10px] text-gray-500">Active</p>
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 mb-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2 flex-shrink-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-bold text-gray-700">Filter:</span>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-2 py-1 border rounded-lg text-xs"
-              >
-                <option value="all">All Status</option>
-                <option value="Approved">Approved</option>
-                <option value="Pending">Pending</option>
-                <option value="Rejected">Rejected</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Table */}
-          <div className="flex-1 overflow-hidden">
-            {loading ? (
-              <div className="bg-white border border-gray-200 rounded-xl h-full flex items-center justify-center">
-                <div className="text-center">
-                  <FaSync
-                    size={32}
-                    className="animate-spin text-blue-600 mx-auto mb-3"
-                  />
-                  <p className="text-sm text-gray-500">
-                    Loading notifications...
+          {/* Stats — only for Student tabs */}
+          {sourceFilter !== "Support" && (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 flex-shrink-0">
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                  <p className="text-lg font-bold text-blue-600">
+                    {sourceCounts[sourceFilter]}
+                  </p>
+                  <p className="text-[10px] text-gray-500">
+                    {sourceFilter === "All" ? "Total" : sourceFilter}
                   </p>
                 </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                  <p className="text-lg font-bold text-green-600">
+                    ৳{totalPaid.toLocaleString()}
+                  </p>
+                  <p className="text-[10px] text-gray-500">Total Paid</p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                  <p className="text-lg font-bold text-red-600">
+                    ৳{totalDue.toLocaleString()}
+                  </p>
+                  <p className="text-[10px] text-gray-500">Total Due</p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                  <p className="text-lg font-bold text-teal-600">
+                    {approvedCount}
+                  </p>
+                  <p className="text-[10px] text-gray-500">Active</p>
+                </div>
               </div>
-            ) : (
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden h-full">
-                <div className="overflow-auto h-full">
-                  <table className="w-full">
-                    <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
-                      <tr>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Student
-                        </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Source
-                        </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Course
-                        </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Country
-                        </th>
-                        <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                          Payment
-                        </th>
-                        <th className="px-3 py-2 text-right text-[10px] font-bold text-gray-600 uppercase">
-                          Paid
-                        </th>
-                        <th className="px-3 py-2 text-right text-[10px] font-bold text-gray-600 uppercase">
-                          Due
-                        </th>
-                        <th className="px-3 py-2 text-center text-[10px] font-bold text-gray-600 uppercase">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {filteredAdmissions.map((adm) => (
-                        <tr
-                          key={adm._id}
-                          className="hover:bg-gray-50 transition-colors"
-                        >
-                          <td className="px-3 py-2">
-                            <p className="text-xs font-medium text-gray-800">
-                              {adm.name}
-                            </p>
-                            <p className="text-[10px] text-gray-500">
-                              {adm.phone}
-                            </p>
-                            {adm.studentId && (
-                              <p className="text-[9px] text-blue-600 font-mono">
-                                ID: {adm.studentId}
-                              </p>
-                            )}
-                          </td>
-                          <td className="px-3 py-2">
-                            <span
-                              className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${getSourceBadge(
-                                adm.source,
-                              )}`}
-                            >
-                              {adm.sourceLabel}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2">
-                            <p className="text-xs text-gray-700 max-w-[180px]">
-                              {adm.course}
-                            </p>
-                          </td>
-                          <td className="px-3 py-2">
-                            <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-full">
-                              {adm.country || "BD"}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2">
-                            <span
-                              className={`text-[8px] px-1.5 py-0.5 rounded-full ${
-                                adm.paymentStatus === "Paid"
-                                  ? "bg-green-100 text-green-700"
-                                  : adm.paymentStatus === "Partial"
-                                    ? "bg-yellow-100 text-yellow-700"
-                                    : "bg-red-100 text-red-700"
-                              }`}
-                            >
-                              {adm.paymentStatus}
-                            </span>
-                          </td>
-                          <td className="px-3 py-2 text-right text-xs font-semibold text-green-600">
-                            ৳{Number(adm.paidAmount || 0).toLocaleString()}
-                          </td>
-                          <td
-                            className={`px-3 py-2 text-right text-xs font-semibold ${
-                              Number(adm.dueAmount) > 0
-                                ? "text-red-600"
-                                : "text-gray-500"
+
+              {/* Filters */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 mb-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-bold text-gray-700">
+                    Filter:
+                  </span>
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="px-2 py-1 border rounded-lg text-xs"
+                  >
+                    <option value="all">All Status</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Support Stats — for Support tab */}
+          {sourceFilter === "Support" && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 flex-shrink-0">
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                <p className="text-lg font-bold text-orange-600">
+                  {supportTickets.length}
+                </p>
+                <p className="text-[10px] text-gray-500">Total Tickets</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                <p className="text-lg font-bold text-red-600">
+                  {unreadSupportCount}
+                </p>
+                <p className="text-[10px] text-gray-500">Unread</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                <p className="text-lg font-bold text-yellow-600">
+                  {supportTickets.filter((t) => t.status === "Pending").length}
+                </p>
+                <p className="text-[10px] text-gray-500">Pending</p>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                <p className="text-lg font-bold text-green-600">
+                  {supportTickets.filter((t) => t.status === "Resolved").length}
+                </p>
+                <p className="text-[10px] text-gray-500">Resolved</p>
+              </div>
+            </div>
+          )}
+
+          {/* Main Content Area */}
+          <div className="flex-1 overflow-hidden">
+            {/* 🎧 SUPPORT TICKETS SECTION */}
+            {sourceFilter === "Support" ? (
+              supportLoading ? (
+                <div className="bg-white border rounded-xl h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <FaSync className="animate-spin text-orange-600 text-3xl mx-auto mb-2" />
+                    <p className="text-xs text-gray-500">
+                      Loading support tickets...
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden h-full">
+                  <div className="overflow-auto h-full">
+                    <table className="w-full">
+                      <thead className="bg-orange-50 border-b sticky top-0 z-10">
+                        <tr>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Student
+                          </th>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Subject
+                          </th>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Dept
+                          </th>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Priority
+                          </th>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Status
+                          </th>
+                          <th className="px-3 py-2 text-center text-[10px] font-bold text-gray-600 uppercase">
+                            Replies
+                          </th>
+                          <th className="px-3 py-2 text-center text-[10px] font-bold text-gray-600 uppercase">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {supportTickets.map((tk) => (
+                          <tr
+                            key={tk._id}
+                            className={`hover:bg-gray-50 transition-colors ${
+                              !tk.isRead ? "bg-red-50/40" : ""
                             }`}
                           >
-                            ৳{Number(adm.dueAmount || 0).toLocaleString()}
-                          </td>
-                          <td className="px-3 py-2">
-                            <div className="flex gap-1 justify-center">
-                              <button
-                                onClick={() => viewAdmission(adm)}
-                                className="text-teal-600 hover:bg-teal-50 p-1 rounded"
-                                title="View"
+                            <td className="px-3 py-2">
+                              <div className="flex items-center gap-2">
+                                {!tk.isRead && (
+                                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse flex-shrink-0" />
+                                )}
+                                <div className="min-w-0">
+                                  <p className="text-xs font-semibold text-gray-800 truncate">
+                                    {tk.name}
+                                  </p>
+                                  <p className="text-[10px] text-gray-500 truncate">
+                                    {tk.studentId || tk.phone}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-3 py-2 text-xs text-gray-700 max-w-[200px] truncate">
+                              {tk.subject}
+                            </td>
+                            <td className="px-3 py-2 text-xs text-gray-600">
+                              {tk.department}
+                            </td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
+                                  tk.priority === "High"
+                                    ? "bg-red-100 text-red-700"
+                                    : tk.priority === "Low"
+                                      ? "bg-gray-100 text-gray-700"
+                                      : "bg-yellow-100 text-yellow-700"
+                                }`}
                               >
-                                <FaEye size={14} />
-                              </button>
-                              <button
-                                onClick={() =>
-                                  deleteAdmission(adm._id, adm.name, adm.source)
-                                }
-                                className="text-red-600 hover:bg-red-50 p-1 rounded"
-                                title="Delete"
+                                {tk.priority || "Medium"}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={`text-[9px] px-2 py-0.5 rounded-full font-bold ${
+                                  tk.status === "Resolved"
+                                    ? "bg-green-100 text-green-700"
+                                    : tk.status === "In Progress"
+                                      ? "bg-blue-100 text-blue-700"
+                                      : tk.status === "Closed"
+                                        ? "bg-gray-100 text-gray-700"
+                                        : "bg-yellow-100 text-yellow-700"
+                                }`}
                               >
-                                <FaTrash size={14} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-
-                      {filteredAdmissions.length === 0 && (
-                        <tr>
-                          <td colSpan="8" className="p-10 text-center">
-                            <FaBell className="text-5xl text-gray-300 mx-auto mb-3" />
-                            <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                              No Students Found
-                            </h3>
-                            <p className="text-xs text-gray-500">
-                              {admissions.length === 0
-                                ? "Basic Tazweed বা Najera Batch থেকে student add করুন।"
-                                : "আপনার filter এর সাথে কোনো match নেই।"}
-                            </p>
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                                {tk.status}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-center text-xs font-bold text-blue-600">
+                              {(tk.replies || []).length}
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="flex justify-center gap-1">
+                                <button
+                                  onClick={() => setSelectedTicket(tk)}
+                                  className="text-orange-600 hover:bg-orange-50 p-1 rounded"
+                                  title="Open chat"
+                                >
+                                  <FaEye size={14} />
+                                </button>
+                                <button
+                                  onClick={() => deleteSupportTicket(tk._id)}
+                                  className="text-red-600 hover:bg-red-50 p-1 rounded"
+                                  title="Delete"
+                                >
+                                  <FaTrash size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                        {supportTickets.length === 0 && (
+                          <tr>
+                            <td colSpan="7" className="p-10 text-center">
+                              <FaHeadset className="text-5xl text-gray-300 mx-auto mb-3" />
+                              <p className="text-sm font-bold text-gray-700">
+                                No support tickets yet
+                              </p>
+                              <p className="text-[10px] text-gray-500 mt-1">
+                                Students can submit support from their dashboard
+                              </p>
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
+              )
+            ) : (
+              /* Student Table */
+              <div className="h-full">
+                {loading ? (
+                  <div className="bg-white border border-gray-200 rounded-xl h-full flex items-center justify-center">
+                    <div className="text-center">
+                      <FaSync
+                        size={32}
+                        className="animate-spin text-blue-600 mx-auto mb-3"
+                      />
+                      <p className="text-sm text-gray-500">
+                        Loading notifications...
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden h-full">
+                    <div className="overflow-auto h-full">
+                      <table className="w-full">
+                        <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
+                          <tr>
+                            <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                              Student
+                            </th>
+                            <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                              Source
+                            </th>
+                            <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                              Course
+                            </th>
+                            <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                              Country
+                            </th>
+                            <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                              Payment
+                            </th>
+                            <th className="px-3 py-2 text-right text-[10px] font-bold text-gray-600 uppercase">
+                              Paid
+                            </th>
+                            <th className="px-3 py-2 text-right text-[10px] font-bold text-gray-600 uppercase">
+                              Due
+                            </th>
+                            <th className="px-3 py-2 text-center text-[10px] font-bold text-gray-600 uppercase">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-100">
+                          {filteredAdmissions.map((adm) => (
+                            <tr
+                              key={adm._id}
+                              className="hover:bg-gray-50 transition-colors"
+                            >
+                              <td className="px-3 py-2">
+                                <p className="text-xs font-medium text-gray-800">
+                                  {adm.name}
+                                </p>
+                                <p className="text-[10px] text-gray-500">
+                                  {adm.phone}
+                                </p>
+                                {adm.studentId && (
+                                  <p className="text-[9px] text-blue-600 font-mono">
+                                    ID: {adm.studentId}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="px-3 py-2">
+                                <span
+                                  className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${getSourceBadge(
+                                    adm.source,
+                                  )}`}
+                                >
+                                  {adm.sourceLabel}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2">
+                                <p className="text-xs text-gray-700 max-w-[180px]">
+                                  {adm.course}
+                                </p>
+                              </td>
+                              <td className="px-3 py-2">
+                                <span className="bg-blue-100 text-blue-700 text-[9px] px-1.5 py-0.5 rounded-full">
+                                  {adm.country || "BD"}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2">
+                                <span
+                                  className={`text-[8px] px-1.5 py-0.5 rounded-full ${
+                                    adm.paymentStatus === "Paid"
+                                      ? "bg-green-100 text-green-700"
+                                      : adm.paymentStatus === "Partial"
+                                        ? "bg-yellow-100 text-yellow-700"
+                                        : "bg-red-100 text-red-700"
+                                  }`}
+                                >
+                                  {adm.paymentStatus}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2 text-right text-xs font-semibold text-green-600">
+                                ৳{Number(adm.paidAmount || 0).toLocaleString()}
+                              </td>
+                              <td
+                                className={`px-3 py-2 text-right text-xs font-semibold ${
+                                  Number(adm.dueAmount) > 0
+                                    ? "text-red-600"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                ৳{Number(adm.dueAmount || 0).toLocaleString()}
+                              </td>
+                              <td className="px-3 py-2">
+                                <div className="flex gap-1 justify-center">
+                                  <button
+                                    onClick={() => viewAdmission(adm)}
+                                    className="text-teal-600 hover:bg-teal-50 p-1 rounded"
+                                    title="View"
+                                  >
+                                    <FaEye size={14} />
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      deleteAdmission(
+                                        adm._id,
+                                        adm.name,
+                                        adm.source,
+                                      )
+                                    }
+                                    className="text-red-600 hover:bg-red-50 p-1 rounded"
+                                    title="Delete"
+                                  >
+                                    <FaTrash size={14} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+
+                          {filteredAdmissions.length === 0 && (
+                            <tr>
+                              <td colSpan="8" className="p-10 text-center">
+                                <FaBell className="text-5xl text-gray-300 mx-auto mb-3" />
+                                <h3 className="text-base font-bold text-gray-800 mb-0.5">
+                                  No Students Found
+                                </h3>
+                                <p className="text-xs text-gray-500">
+                                  {admissions.length === 0
+                                    ? "Basic Tazweed বা Najera Batch থেকে student add করুন।"
+                                    : "আপনার filter এর সাথে কোনো match নেই।"}
+                                </p>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
         </main>
       </div>
+
+      {/* 🎧 SUPPORT CHAT MODAL */}
+      {selectedTicket && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            {/* Header */}
+            <div className="p-4 border-b flex justify-between items-center bg-orange-50 rounded-t-xl">
+              <div className="min-w-0">
+                <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2 truncate">
+                  <FaHeadset className="text-orange-600 flex-shrink-0" />
+                  <span className="truncate">{selectedTicket.subject}</span>
+                </h3>
+                <p className="text-[10px] text-gray-500 mt-0.5 truncate">
+                  Ticket #{selectedTicket._id} • {selectedTicket.name} •{" "}
+                  {selectedTicket.phone}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedTicket(null);
+                  setAdminReplyText("");
+                }}
+                className="text-gray-400 hover:text-gray-700 p-1 flex-shrink-0"
+              >
+                <FaTimes size={20} />
+              </button>
+            </div>
+
+            {/* Status + priority row */}
+            <div className="px-4 py-2 flex items-center gap-2 border-b bg-gray-50 flex-wrap">
+              <span
+                className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                  selectedTicket.priority === "High"
+                    ? "bg-red-100 text-red-700"
+                    : selectedTicket.priority === "Low"
+                      ? "bg-gray-200 text-gray-700"
+                      : "bg-yellow-100 text-yellow-700"
+                }`}
+              >
+                Priority: {selectedTicket.priority || "Medium"}
+              </span>
+
+              {selectedTicket.category && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-blue-100 text-blue-700">
+                  {selectedTicket.category}
+                </span>
+              )}
+
+              <select
+                value={selectedTicket.status}
+                onChange={(e) => updateTicketStatus(e.target.value)}
+                className="text-[10px] border rounded px-2 py-0.5 font-bold"
+              >
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+                <option value="Closed">Closed</option>
+              </select>
+
+              <span className="text-[10px] text-gray-500 ml-auto">
+                {new Date(selectedTicket.createdAt).toLocaleString()}
+              </span>
+            </div>
+
+            {/* Original Problem */}
+            <div className="p-4 bg-blue-50 border-b">
+              <p className="text-[10px] font-bold text-blue-700 mb-1">
+                📝 Problem Details:
+              </p>
+              <p className="text-xs text-gray-700">
+                {selectedTicket.problemDetails}
+              </p>
+              {selectedTicket.attachmentUrl && (
+                <a
+                  href={selectedTicket.attachmentUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[10px] text-blue-600 underline mt-1 inline-block"
+                >
+                  📎 View Attachment
+                </a>
+              )}
+            </div>
+
+            {/* Chat Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+              {(selectedTicket.replies || []).length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-6">
+                  এখনো কোনো রিপ্লাই নেই — নিচে লিখে শুরু করুন
+                </p>
+              ) : (
+                selectedTicket.replies.map((r, i) => (
+                  <div
+                    key={i}
+                    className={`flex ${
+                      r.role === "admin" ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`max-w-[80%] p-3 rounded-lg shadow-sm ${
+                        r.role === "admin"
+                          ? "bg-orange-100 border-l-4 border-orange-500"
+                          : "bg-blue-100 border-l-4 border-blue-500"
+                      }`}
+                    >
+                      <div className="flex justify-between items-center gap-4 mb-1">
+                        <strong className="text-[10px]">
+                          {r.role === "admin"
+                            ? "👨‍💼 You (Admin)"
+                            : `👤 ${selectedTicket.name}`}
+                        </strong>
+                        <span className="text-[9px] text-gray-500">
+                          {r.date}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-800">{r.message}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Reply Box */}
+            <div className="p-3 border-t bg-white rounded-b-xl">
+              <div className="flex gap-2">
+                <textarea
+                  value={adminReplyText}
+                  onChange={(e) => setAdminReplyText(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      sendAdminReply();
+                    }
+                  }}
+                  rows="2"
+                  placeholder="আপনার রিপ্লাই লিখুন... (Enter = Send)"
+                  className="flex-1 border rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-orange-500 resize-none"
+                />
+                <button
+                  onClick={sendAdminReply}
+                  disabled={sendingReply || !adminReplyText.trim()}
+                  className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-300 text-white px-4 rounded-lg font-bold text-xs flex items-center gap-1"
+                >
+                  <FaPaperPlane size={11} />
+                  {sendingReply ? "..." : "Send"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

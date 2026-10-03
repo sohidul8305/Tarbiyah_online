@@ -707,11 +707,7 @@ const Syllabus = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-        {
-          id: "today-class",
-          path: "/admin-dashboard/today-class",
-          label: "Today's Class",
-        },
+
         {
           id: "basic-tazweed payment overview",
           path: "/admin-dashboard/basic-tazweed",

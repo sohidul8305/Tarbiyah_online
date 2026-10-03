@@ -476,11 +476,6 @@ const Today_class = () => {
         },
 
         {
-          id: "today-class",
-          path: "/admin-dashboard/today-class",
-          label: "Today's Class",
-        },
-        {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
           label: "New Admission",
@@ -654,7 +649,7 @@ const Today_class = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Today's Classes</h1>
+          <h1 className="text-sm font-bold text-gray-800">es</h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -801,11 +796,9 @@ const Today_class = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaCalendarAlt className="text-purple-600" /> Today's Classes
+                <FaCalendarAlt className="text-purple-600" /> es
               </h1>
-              <p className="text-xs text-gray-500">
-                View and manage today's class schedule
-              </p>
+              <p className="text-xs text-gray-500">View and manage schedule</p>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-gray-700 hidden sm:block">

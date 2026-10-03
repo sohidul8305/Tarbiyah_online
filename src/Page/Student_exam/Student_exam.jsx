@@ -541,11 +541,7 @@ const Student_exam = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-        {
-          id: "today-class",
-          path: "/admin-dashboard/today-class",
-          label: "Today's Class",
-        },
+
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",

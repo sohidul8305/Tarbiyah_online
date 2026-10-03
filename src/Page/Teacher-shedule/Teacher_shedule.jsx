@@ -433,11 +433,6 @@ const Teacher_shedule = () => {
         },
 
         {
-          id: "today-class",
-          path: "/admin-dashboard/today-class",
-          label: "Today's Class",
-        },
-        {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
           label: "New Admission",
