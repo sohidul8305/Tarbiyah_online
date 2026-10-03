@@ -3380,6 +3380,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
           )}
 
           {/* ==================== GRADES ==================== */}
+          {/* ==================== GRADES ==================== */}
           {section === "grades" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -3389,22 +3390,19 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                   </p>
                   <p className="text-[11px] text-gray-500">
                     প্রতিটি student এর Grade, Class Test, Mid Term, Final Exam
-                    publish করুন
+                    সরাসরি লিখে Save চাপুন
                   </p>
                 </div>
-                <button
-                  onClick={openAddGrade}
-                  className="bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 rounded-lg font-semibold text-xs flex items-center gap-1.5"
-                >
-                  <FaPlusCircle size={12} /> Publish Grade
-                </button>
+                <span className="text-[10px] bg-teal-50 text-teal-700 px-3 py-1 rounded-full font-bold">
+                  {students.length} Students • {dbGrades.length} Published
+                </span>
               </div>
 
-              {dbGrades.length === 0 ? (
+              {students.length === 0 ? (
                 <EmptyState
-                  icon={<FaAward />}
-                  title="No grades published yet"
-                  subtitle="Click 'Publish Grade' to add marks for a student"
+                  icon={<FaUserGraduate />}
+                  title="No students in this batch"
+                  subtitle="Add students first in the Students section"
                 />
               ) : (
                 <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
@@ -3415,65 +3413,36 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                           <th className="px-3 py-2.5 text-left font-bold">
                             Student
                           </th>
-                          <th className="px-3 py-2.5 text-center font-bold">
+                          <th className="px-2 py-2.5 text-center font-bold">
                             Grade
                           </th>
-                          <th className="px-3 py-2.5 text-center font-bold">
+                          <th className="px-2 py-2.5 text-center font-bold">
                             Class Test
                           </th>
-                          <th className="px-3 py-2.5 text-center font-bold">
+                          <th className="px-2 py-2.5 text-center font-bold">
                             Mid Term
                           </th>
-                          <th className="px-3 py-2.5 text-center font-bold">
+                          <th className="px-2 py-2.5 text-center font-bold">
                             Final Exam
                           </th>
-                          <th className="px-3 py-2.5 text-center font-bold">
-                            Actions
+                          <th className="px-2 py-2.5 text-center font-bold">
+                            Save
                           </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {dbGrades.map((g) => (
-                          <tr key={g._id} className="hover:bg-gray-50">
-                            <td className="px-3 py-2.5">
-                              <p className="font-semibold text-gray-800">
-                                {g.studentName || "N/A"}
-                              </p>
-                              <p className="text-[10px] text-gray-500">
-                                {g.studentId}
-                              </p>
-                            </td>
-                            <td className="px-3 py-2.5 text-center">
-                              <span className="font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded">
-                                {g.grad || "N/A"}
-                              </span>
-                            </td>
-                            <td className="px-3 py-2.5 text-center font-semibold text-blue-700">
-                              {g.classTest || "N/A"}
-                            </td>
-                            <td className="px-3 py-2.5 text-center font-semibold text-orange-700">
-                              {g.midTerm || "N/A"}
-                            </td>
-                            <td className="px-3 py-2.5 text-center font-semibold text-green-700">
-                              {g.finalExam || "Pending"}
-                            </td>
-                            <td className="px-3 py-2.5">
-                              <div className="flex items-center justify-center gap-1">
-                                <button
-                                  onClick={() => openEditGrade(g)}
-                                  className="text-indigo-600 hover:bg-indigo-50 p-1.5 rounded"
-                                >
-                                  <FaEdit size={11} />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteGrade(g._id)}
-                                  className="text-red-600 hover:bg-red-50 p-1.5 rounded"
-                                >
-                                  <FaTrash size={11} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
+                        {students.map((stu) => (
+                          <GradeRow
+                            key={stu._id}
+                            student={stu}
+                            existingGrade={dbGrades.find(
+                              (g) =>
+                                String(g.studentId) === String(stu.studentId),
+                            )}
+                            batchId={batchId}
+                            courseTitle={batch?.course || ""}
+                            onSaved={fetchDbGrades}
+                          />
                         ))}
                       </tbody>
                     </table>
@@ -4791,6 +4760,177 @@ const MiniBtn = ({ icon, label, color, onClick }) => {
     >
       {icon} {label}
     </button>
+  );
+};
+
+/* ============================================================
+   ✅ GRADE ROW — Inline editable row per student
+============================================================ */
+const GradeRow = ({
+  student,
+  existingGrade,
+  batchId,
+  courseTitle,
+  onSaved,
+}) => {
+  const [grad, setGrad] = React.useState(existingGrade?.grad || "");
+  const [classTest, setClassTest] = React.useState(
+    existingGrade?.classTest || "",
+  );
+  const [midTerm, setMidTerm] = React.useState(existingGrade?.midTerm || "");
+  const [finalExam, setFinalExam] = React.useState(
+    existingGrade?.finalExam || "",
+  );
+  const [saving, setSaving] = React.useState(false);
+
+  // ✅ When existingGrade changes (after fetch), update fields
+  React.useEffect(() => {
+    setGrad(existingGrade?.grad || "");
+    setClassTest(existingGrade?.classTest || "");
+    setMidTerm(existingGrade?.midTerm || "");
+    setFinalExam(existingGrade?.finalExam || "");
+  }, [existingGrade]);
+
+  const handleSave = async () => {
+    if (!grad && !classTest && !midTerm && !finalExam) {
+      Swal.fire({
+        icon: "warning",
+        title: "কিছু লিখুন!",
+        text: "অন্তত একটা field পূরণ করুন।",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const res = await fetch(`${API_URL}/api/grades/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: student.studentId || student._id,
+          studentName: student.name || "",
+          studentRoll: student.studentId || "",
+          batchId: batchId,
+          courseId: batchId,
+          courseTitle: courseTitle,
+          grad: grad || "N/A",
+          classTest: classTest || "N/A",
+          midTerm: midTerm || "N/A",
+          finalExam: finalExam || "Pending",
+          teacher: student?.teacher || "",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "✅ Saved!",
+          text: `${student.name} এর grade publish হয়েছে।`,
+          timer: 1200,
+          showConfirmButton: false,
+        });
+        if (onSaved) await onSaved();
+      } else {
+        Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+      }
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Server Error", text: err.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const hasExisting = !!existingGrade;
+
+  return (
+    <tr className={`hover:bg-gray-50 ${hasExisting ? "bg-green-50/30" : ""}`}>
+      <td className="px-3 py-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+              hasExisting
+                ? "bg-green-100 text-green-700"
+                : "bg-indigo-100 text-indigo-700"
+            }`}
+          >
+            {student.name?.charAt(0)?.toUpperCase() || "S"}
+          </div>
+          <div className="min-w-0">
+            <p className="font-semibold text-gray-800 truncate text-xs">
+              {student.name}
+            </p>
+            <p className="text-[10px] text-gray-500 truncate">
+              {student.studentId}
+            </p>
+          </div>
+        </div>
+      </td>
+
+      <td className="px-2 py-2">
+        <input
+          type="text"
+          value={grad}
+          onChange={(e) => setGrad(e.target.value)}
+          placeholder="A+"
+          className="w-16 border border-gray-300 rounded px-1.5 py-1 text-[11px] text-center font-semibold focus:ring-2 focus:ring-teal-500"
+        />
+      </td>
+
+      <td className="px-2 py-2">
+        <input
+          type="text"
+          value={classTest}
+          onChange={(e) => setClassTest(e.target.value)}
+          placeholder="18/20"
+          className="w-20 border border-gray-300 rounded px-1.5 py-1 text-[11px] text-center focus:ring-2 focus:ring-blue-500"
+        />
+      </td>
+
+      <td className="px-2 py-2">
+        <input
+          type="text"
+          value={midTerm}
+          onChange={(e) => setMidTerm(e.target.value)}
+          placeholder="45/50"
+          className="w-20 border border-gray-300 rounded px-1.5 py-1 text-[11px] text-center focus:ring-2 focus:ring-orange-500"
+        />
+      </td>
+
+      <td className="px-2 py-2">
+        <input
+          type="text"
+          value={finalExam}
+          onChange={(e) => setFinalExam(e.target.value)}
+          placeholder="85/100"
+          className="w-20 border border-gray-300 rounded px-1.5 py-1 text-[11px] text-center focus:ring-2 focus:ring-green-500"
+        />
+      </td>
+
+      <td className="px-2 py-2 text-center">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className={`px-2.5 py-1 rounded text-[10px] font-bold text-white flex items-center gap-1 mx-auto ${
+            saving
+              ? "bg-gray-400"
+              : hasExisting
+                ? "bg-green-600 hover:bg-green-700"
+                : "bg-teal-600 hover:bg-teal-700"
+          }`}
+        >
+          {saving ? (
+            "..."
+          ) : (
+            <>
+              <FaCheckCircle size={9} />
+              {hasExisting ? "Update" : "Save"}
+            </>
+          )}
+        </button>
+      </td>
+    </tr>
   );
 };
 
