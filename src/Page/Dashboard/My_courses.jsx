@@ -28,6 +28,7 @@ const My_courses = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [student, setStudent] = useState(null);
+  const [studentGrades, setStudentGrades] = useState([]);
 
   // ✅ Video playerrouer
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
@@ -81,6 +82,25 @@ const My_courses = () => {
         setStudent(d.student);
         setCourses(d.courses || []);
 
+        // ✅ NEW: Fetch student's grades
+        try {
+          const gradeIdentifier =
+            d.student?.studentId || d.student?._id || identifier;
+          const gradeRes = await fetch(
+            `${API_BASE}/grades/student/${encodeURIComponent(gradeIdentifier)}`,
+          );
+          const gradeData = await gradeRes.json();
+          if (gradeData.success) {
+            setStudentGrades(gradeData.grades || []);
+            console.log("✅ Grades loaded:", gradeData.grades?.length);
+          } else {
+            setStudentGrades([]);
+          }
+        } catch (ge) {
+          console.warn("⚠️ Grades fetch failed:", ge);
+          setStudentGrades([]);
+        }
+
         // ✅ Update localStorage with fresh
         localStorage.setItem("campusStudentInfo", JSON.stringify(d.student));
       } else {
@@ -116,6 +136,18 @@ const My_courses = () => {
         .includes(searchTerm.toLowerCase()) ||
       (course.titleEn || "").toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  // ✅ Course এর জন্য grade খুঁজে বের করা
+  const getGradeForCourse = (course) => {
+    if (!course) return null;
+    return (
+      studentGrades.find(
+        (g) =>
+          String(g.courseId) === String(course.id) ||
+          String(g.batchId) === String(course.id),
+      ) || null
+    );
+  };
 
   const getEmbedUrl = (url) => {
     if (!url) return "";
@@ -304,27 +336,68 @@ const My_courses = () => {
                 <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
                   <FaAward className="text-[#004d4d]" /> Material / Grad & Exams
                 </h2>
-                <ul className="space-y-2">
-                  {["grad", "classTest", "midTerm", "finalExam"].map((key) => (
-                    <li
-                      key={key}
-                      className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs"
-                    >
-                      <span className="font-medium text-gray-700 capitalize">
-                        {key === "classTest"
-                          ? "Class Test"
-                          : key === "midTerm"
-                            ? "Mid Term"
-                            : key === "finalExam"
-                              ? "Final Exam"
-                              : "Grade"}
-                      </span>
-                      <span className="font-bold text-gray-600 bg-gray-200 px-2 py-0.5 rounded">
-                        Pending
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                {(() => {
+                  const grade = getGradeForCourse(selectedCourse);
+                  const rows = [
+                    { key: "grad", label: "Grade", value: grade?.grad },
+                    {
+                      key: "classTest",
+                      label: "Class Test",
+                      value: grade?.classTest,
+                    },
+                    {
+                      key: "midTerm",
+                      label: "Mid Term",
+                      value: grade?.midTerm,
+                    },
+                    {
+                      key: "finalExam",
+                      label: "Final Exam",
+                      value: grade?.finalExam,
+                    },
+                  ];
+                  return (
+                    <>
+                      <ul className="space-y-2">
+                        {rows.map((r) => (
+                          <li
+                            key={r.key}
+                            className="flex items-center justify-between p-2 bg-gray-50 rounded border border-gray-100 text-xs"
+                          >
+                            <span className="font-medium text-gray-700">
+                              {r.label}
+                            </span>
+                            <span
+                              className={`font-bold px-2 py-0.5 rounded ${
+                                r.value
+                                  ? "text-green-800 bg-green-100"
+                                  : "text-gray-500 bg-gray-200"
+                              }`}
+                            >
+                              {r.value || "Pending"}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+
+                      {grade?.teacher && (
+                        <p className="text-[10px] text-gray-500 italic pt-1">
+                          👨‍🏫 Teacher: {grade.teacher}
+                        </p>
+                      )}
+                      {grade?.remarks && (
+                        <p className="text-[10px] text-gray-500 italic pt-1">
+                          💬 {grade.remarks}
+                        </p>
+                      )}
+                      {!grade && (
+                        <p className="text-[10px] text-orange-600 italic pt-1 text-center">
+                          এখনো grade publish হয়নি
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Module Content */}

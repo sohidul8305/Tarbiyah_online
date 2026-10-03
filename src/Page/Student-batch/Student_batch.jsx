@@ -39,6 +39,7 @@ import {
   FaIdCard,
   FaWallet,
   FaVenusMars,
+  FaAward,
 } from "react-icons/fa";
 import { MdDashboard, MdOutlineQuiz } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -1207,6 +1208,23 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     note: "",
   });
 
+  /* ---------- Grades ---------- */
+  const [dbGrades, setDbGrades] = useState([]);
+  const [loadingGrades, setLoadingGrades] = useState(false);
+  const [showGradeModal, setShowGradeModal] = useState(false);
+  const [editingGradeId, setEditingGradeId] = useState(null);
+  const [gradeForm, setGradeForm] = useState({
+    studentId: "",
+    studentName: "",
+    studentRoll: "",
+    grad: "",
+    classTest: "",
+    midTerm: "",
+    finalExam: "",
+    teacher: "",
+    remarks: "",
+  });
+
   /* ---------- Materials (Exam / Quiz / PDF) ---------- */
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [materialForm, setMaterialForm] = useState({
@@ -1325,20 +1343,38 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     }
   };
 
+  /* ✅ Fetch grades from grades.json via batch */
+  const fetchDbGrades = async () => {
+    try {
+      setLoadingGrades(true);
+      const res = await fetch(`${API_URL}/api/grades/batch/${batchId}`);
+      const data = await res.json();
+      if (data.success) setDbGrades(data.grades || []);
+      else setDbGrades([]);
+    } catch (e) {
+      console.error("❌ fetchDbGrades error:", e);
+      setDbGrades([]);
+    } finally {
+      setLoadingGrades(false);
+    }
+  };
+
   useEffect(() => {
     fetchBatch();
     fetchDbStudents();
-    fetchDbClasses(); // ✅ নতুন
-    fetchDbMaterials(); // ✅ নতুন
-    fetchDbVideos(); // ✅ নতুন
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchDbClasses();
+    fetchDbMaterials();
+    fetchDbVideos();
+    fetchDbGrades();
   }, [batchId]);
 
   useEffect(() => {
     fetchBatch();
     fetchDbStudents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchDbClasses();
+    fetchDbMaterials();
+    fetchDbVideos();
+    fetchDbGrades();
   }, [batchId]);
 
   const saveBatchFields = async (payload, msg = "Saved!") => {
@@ -1373,11 +1409,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   };
 
   /* ---------- Derived ---------- */
-  const students = dbStudents; // ✅ from MongoDB collection
-  // ✅ নতুন — MongoDB collection থেকে
+  const students = dbStudents;
   const classesList = dbClasses;
   const materialsList = dbMaterials;
-  // ✅ নতুন — MongoDB collection থেকে
   const videos = dbVideos;
   const calcPaid = (s) => {
     // Priority: paidMonths sum → paidAmount field → 0
@@ -1432,8 +1466,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     setEditingStudentId(null);
     setStudentForm({
       name: "",
-      studentId: generateStudentId(), // ✅ Auto-fill
-      password: generatePassword(), // ✅ Auto-generate unique
+      studentId: generateStudentId(),
+      password: generatePassword(),
       phone: "",
       country: "BD",
       course: batch?.course || "",
@@ -1456,7 +1490,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     setStudentForm({
       name: s.name || "",
       studentId: s.studentId || "",
-      password: s.password || "", // ✅ আগের password দেখাবে
+      password: s.password || "",
       phone: s.phone || "",
       country: s.country || "BD",
       course: s.course || batch?.course || "",
@@ -1479,7 +1513,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   const handleSaveStudent = async (e) => {
     e.preventDefault();
 
-    // ✅ Validation
     if (!studentForm.name.trim()) {
       Swal.fire({
         icon: "warning",
@@ -2102,6 +2135,114 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   };
 
   /* ============================================================
+     GRADE handlers
+  ============================================================ */
+  const openAddGrade = () => {
+    setEditingGradeId(null);
+    setGradeForm({
+      studentId: "",
+      studentName: "",
+      studentRoll: "",
+      grad: "",
+      classTest: "",
+      midTerm: "",
+      finalExam: "",
+      teacher: batch?.teacher || "",
+      remarks: "",
+    });
+    setShowGradeModal(true);
+  };
+
+  const openEditGrade = (g) => {
+    setEditingGradeId(g._id);
+    setGradeForm({
+      studentId: g.studentId || "",
+      studentName: g.studentName || "",
+      studentRoll: g.studentRoll || "",
+      grad: g.grad || "",
+      classTest: g.classTest || "",
+      midTerm: g.midTerm || "",
+      finalExam: g.finalExam || "",
+      teacher: g.teacher || "",
+      remarks: g.remarks || "",
+    });
+    setShowGradeModal(true);
+  };
+
+  const handleSaveGrade = async (e) => {
+    e.preventDefault();
+    if (!gradeForm.studentId) {
+      Swal.fire({
+        icon: "warning",
+        title: "Student select করুন!",
+        timer: 1400,
+        showConfirmButton: false,
+      });
+      return;
+    }
+    try {
+      const res = await fetch(`${API_URL}/api/grades/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...gradeForm,
+          batchId: batchId,
+          courseId: batchId,
+          courseTitle: batch?.course || "",
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        await fetchDbGrades();
+        setShowGradeModal(false);
+        Swal.fire({
+          icon: "success",
+          title: data.updated ? "Grade Updated!" : "Grade Published!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+      }
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Server Error", text: err.message });
+    }
+  };
+
+  const handleDeleteGrade = (id) => {
+    Swal.fire({
+      title: "Delete Grade?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete!",
+    }).then(async (r) => {
+      if (r.isConfirmed) {
+        try {
+          const res = await fetch(`${API_URL}/api/grades/delete/${id}`, {
+            method: "DELETE",
+          });
+          const data = await res.json();
+          if (data.success) {
+            await fetchDbGrades();
+            Swal.fire({
+              icon: "success",
+              title: "Deleted!",
+              timer: 1100,
+              showConfirmButton: false,
+            });
+          } else {
+            Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+          }
+        } catch (err) {
+          Swal.fire({ icon: "error", title: "Error", text: err.message });
+        }
+      }
+    });
+  };
+
+  /* ============================================================
      VIDEO handlers
   ============================================================ */
   // ✅ নতুন — batch_videos MongoDB collection এ save করবে
@@ -2212,6 +2353,12 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       label: "Exams & Quizzes",
       icon: <FaGraduationCap size={16} />,
       badge: materialsList.length,
+    },
+    {
+      id: "grades",
+      label: "Grades & Exams",
+      icon: <FaAward size={16} />,
+      badge: dbGrades.length,
     },
     {
       id: "videos",
@@ -3226,6 +3373,110 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                           </div>
                         );
                       })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ==================== GRADES ==================== */}
+          {section === "grades" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <p className="text-sm font-bold text-gray-800">
+                    Grades & Exam Marks
+                  </p>
+                  <p className="text-[11px] text-gray-500">
+                    প্রতিটি student এর Grade, Class Test, Mid Term, Final Exam
+                    publish করুন
+                  </p>
+                </div>
+                <button
+                  onClick={openAddGrade}
+                  className="bg-teal-600 hover:bg-teal-700 text-white px-3 py-2 rounded-lg font-semibold text-xs flex items-center gap-1.5"
+                >
+                  <FaPlusCircle size={12} /> Publish Grade
+                </button>
+              </div>
+
+              {dbGrades.length === 0 ? (
+                <EmptyState
+                  icon={<FaAward />}
+                  title="No grades published yet"
+                  subtitle="Click 'Publish Grade' to add marks for a student"
+                />
+              ) : (
+                <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 text-gray-600">
+                        <tr>
+                          <th className="px-3 py-2.5 text-left font-bold">
+                            Student
+                          </th>
+                          <th className="px-3 py-2.5 text-center font-bold">
+                            Grade
+                          </th>
+                          <th className="px-3 py-2.5 text-center font-bold">
+                            Class Test
+                          </th>
+                          <th className="px-3 py-2.5 text-center font-bold">
+                            Mid Term
+                          </th>
+                          <th className="px-3 py-2.5 text-center font-bold">
+                            Final Exam
+                          </th>
+                          <th className="px-3 py-2.5 text-center font-bold">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {dbGrades.map((g) => (
+                          <tr key={g._id} className="hover:bg-gray-50">
+                            <td className="px-3 py-2.5">
+                              <p className="font-semibold text-gray-800">
+                                {g.studentName || "N/A"}
+                              </p>
+                              <p className="text-[10px] text-gray-500">
+                                {g.studentId}
+                              </p>
+                            </td>
+                            <td className="px-3 py-2.5 text-center">
+                              <span className="font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded">
+                                {g.grad || "N/A"}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5 text-center font-semibold text-blue-700">
+                              {g.classTest || "N/A"}
+                            </td>
+                            <td className="px-3 py-2.5 text-center font-semibold text-orange-700">
+                              {g.midTerm || "N/A"}
+                            </td>
+                            <td className="px-3 py-2.5 text-center font-semibold text-green-700">
+                              {g.finalExam || "Pending"}
+                            </td>
+                            <td className="px-3 py-2.5">
+                              <div className="flex items-center justify-center gap-1">
+                                <button
+                                  onClick={() => openEditGrade(g)}
+                                  className="text-indigo-600 hover:bg-indigo-50 p-1.5 rounded"
+                                >
+                                  <FaEdit size={11} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteGrade(g._id)}
+                                  className="text-red-600 hover:bg-red-50 p-1.5 rounded"
+                                >
+                                  <FaTrash size={11} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 </div>
               )}
@@ -4291,6 +4542,162 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                 <button
                   type="button"
                   onClick={() => setShowMaterialModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2.5 rounded-lg font-semibold text-xs"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ================ Publish / Edit Grade Modal ================ */}
+      {showGradeModal && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-5 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <FaAward className="text-teal-600" />
+                {editingGradeId ? "Edit Grade" : "Publish Grade"}
+              </h3>
+              <button
+                onClick={() => setShowGradeModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={22} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveGrade} className="p-5 space-y-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                  Student *
+                </label>
+                <select
+                  required
+                  value={gradeForm.studentId}
+                  onChange={(e) => {
+                    const stu = students.find(
+                      (s) =>
+                        s.studentId === e.target.value ||
+                        s._id === e.target.value,
+                    );
+                    setGradeForm({
+                      ...gradeForm,
+                      studentId: e.target.value,
+                      studentName: stu?.name || "",
+                      studentRoll: stu?.studentId || "",
+                    });
+                  }}
+                  className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                >
+                  <option value="">— Select Student —</option>
+                  {students.map((s) => (
+                    <option key={s._id} value={s.studentId || s._id}>
+                      {s.name} ({s.studentId || "N/A"})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Grade (Grad)
+                  </label>
+                  <input
+                    type="text"
+                    value={gradeForm.grad}
+                    onChange={(e) =>
+                      setGradeForm({ ...gradeForm, grad: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    placeholder="e.g., A+"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Class Test
+                  </label>
+                  <input
+                    type="text"
+                    value={gradeForm.classTest}
+                    onChange={(e) =>
+                      setGradeForm({ ...gradeForm, classTest: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    placeholder="e.g., 18/20"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Mid Term
+                  </label>
+                  <input
+                    type="text"
+                    value={gradeForm.midTerm}
+                    onChange={(e) =>
+                      setGradeForm({ ...gradeForm, midTerm: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    placeholder="e.g., 45/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                    Final Exam
+                  </label>
+                  <input
+                    type="text"
+                    value={gradeForm.finalExam}
+                    onChange={(e) =>
+                      setGradeForm({ ...gradeForm, finalExam: e.target.value })
+                    }
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                    placeholder="e.g., 85/100"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                  Teacher
+                </label>
+                <input
+                  type="text"
+                  value={gradeForm.teacher}
+                  onChange={(e) =>
+                    setGradeForm({ ...gradeForm, teacher: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                  Remarks
+                </label>
+                <textarea
+                  rows="2"
+                  value={gradeForm.remarks}
+                  onChange={(e) =>
+                    setGradeForm({ ...gradeForm, remarks: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-3 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg font-semibold text-xs"
+                >
+                  {editingGradeId ? "Update" : "Publish"} Grade
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowGradeModal(false)}
                   className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2.5 rounded-lg font-semibold text-xs"
                 >
                   Cancel

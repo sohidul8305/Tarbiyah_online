@@ -208,7 +208,7 @@ const StudentLogin = () => {
                 💡 অ্যাডমিন/ভর্তি ফরমে প্রদত্ত Student Password ব্যবহার করুন
               </p>
             </div>
-            \
+
             <button
               type="submit"
               disabled={loading}
