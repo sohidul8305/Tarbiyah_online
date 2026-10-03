@@ -3,7 +3,7 @@ import { useLanguage } from "../../context/useLanguage";
 import ShakilImg from "../../image/Shakil.png";
 import BariImg from "../../image/bari.png";
 import SohanImg from "../../image/sohan.png";
-import SohelImg from "../../image/sohel.png";
+import MamunImg from "../../image/Mamunhosen.png";
 import Mahfujur from "../../image/mahfuz.png";
 import Murad from "../../image/muradshek.png";
 import Sowrab from "../../image/surav.png";
@@ -37,10 +37,10 @@ const Members = () => {
       image: SohanImg,
     },
     {
-      name: { en: "MD Sohel Rana", bn: "মো. সোহেল রানা" },
+      name: { en: "Mamun Hosen", bn: "মামুন হোসেন " },
       designation: { en: "Junior Admin", bn: "জুনিয়র অ্যাডমিন" },
       department: { en: "Allimiyah", bn: "আলিমিয়াহ" },
-      image: SohelImg,
+      image: MamunImg,
     },
     {
       name: { en: "Mahfujur Rahman", bn: "মাহফুজুর রহমান" },
