@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getCourseImage } from "../../utils/courseImages";
 import {
   FaSearch,
   FaEllipsisV,
@@ -11,57 +12,7 @@ import {
 } from "react-icons/fa";
 
 // ✅ Course Image Map — category/title অনুযায়ী আলাদা image
-const getCourseImage = (course) => {
-  // ১. Course-এর নিজের image থাকলে সেটাই
-  if (course.image && course.image.trim() !== "") return course.image;
-
-  const title = (course.title || course.name || "").toLowerCase();
-
-  // ✅ ২. প্রথমে TITLE check করুন (specific)
-  // Alimiyah / Islamic Studies — Title-এ থাকলে
-  if (
-    title.includes("alimiyah") ||
-    title.includes("alimiya") ||
-    title.includes("islamic") ||
-    title.includes("diploma") ||
-    title.includes("alim")
-  ) {
-    return "https://i.ibb.co.com/W4Xxdqs9/Najeraadlatsbanner.png";
-  }
-
-  // Hifz / Hifzul / Revision
-  if (title.includes("hifz") || title.includes("hifzul")) {
-    return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
-  }
-
-  // Qaida / Noorani
-  if (title.includes("qaida") || title.includes("noorani")) {
-    return "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
-  }
-
-  // Nazera / Quran / Tajweed
-  if (
-    title.includes("nazera") ||
-    title.includes("quran") ||
-    title.includes("tajweed") ||
-    title.includes("tajwid")
-  ) {
-    return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
-  }
-
-  // ৩. Title-এ না পেলে category/department দেখুন
-  const category = (course.category || "").toLowerCase();
-  const dept = (course.department || "").toLowerCase();
-  const combined = `${category} ${dept}`;
-
-  if (combined.includes("quran") || combined.includes("hifz")) {
-    return "https://i.ibb.co.com/qFM5Lmb2/najerabanner.png";
-  }
-
-  // Default
-  return "https://i.ibb.co.com/7tWnV1pB/banner.jpg";
-};
-
+// ✅ Live Calendar Generator
 // ✅ Live Calendar Generator
 const generateCalendar = (date) => {
   const year = date.getFullYear();
@@ -181,8 +132,7 @@ const Campus_dashboard = () => {
               JSON.stringify(data.student),
             );
           }
-
-          // ✅ Smart image assignment for each course
+          // ✅ Smart image assignment using shared utility
           const list = (data.courses || []).map((c) => ({
             ...c,
             image: getCourseImage(c),

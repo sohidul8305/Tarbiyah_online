@@ -16,6 +16,7 @@ import {
   FaInfoCircle,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
+import { getCourseImage } from "../../utils/courseImages";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
 
@@ -71,7 +72,12 @@ const Campus = () => {
 
       if (d.success) {
         setStudentInfo(d.student);
-        setCourses(d.courses || []);
+        // ✅ Apply correct image for each course
+        const coursesWithImages = (d.courses || []).map((c) => ({
+          ...c,
+          image: getCourseImage(c),
+        }));
+        setCourses(coursesWithImages);
         // Update localStorage with fresh data
         localStorage.setItem("campusStudentInfo", JSON.stringify(d.student));
       } else {

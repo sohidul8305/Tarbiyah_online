@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { getCourseImage } from "../../utils/courseImages";
 import {
   FaSearch,
   FaEllipsisV,
@@ -80,7 +81,12 @@ const My_courses = () => {
 
       if (d.success) {
         setStudent(d.student);
-        setCourses(d.courses || []);
+        // ✅ Apply correct image for each course
+        const coursesWithImages = (d.courses || []).map((c) => ({
+          ...c,
+          image: getCourseImage(c),
+        }));
+        setCourses(coursesWithImages);
 
         // ✅ NEW: Fetch student's grades
         try {
