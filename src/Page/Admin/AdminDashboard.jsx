@@ -18,45 +18,24 @@ import {
   FaUserPlus,
   FaClipboardList,
   FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
-  FaUserTimes,
-  FaDollarSign,
   FaFileInvoice,
-  FaFileInvoiceDollar,
   FaCertificate,
   FaDatabase,
-  FaUserCog,
   FaListAlt,
-  FaClock,
   FaEye,
   FaEdit,
   FaTrash,
-  FaSearch,
-  FaFilter,
   FaPlusCircle,
-  FaDownload,
-  FaPrint,
   FaCheckCircle,
-  FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
   FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
   FaBookOpen,
   FaRoute,
   FaCalendarPlus,
+  FaUserTimes,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 import Admin_notification from "../Admin-notification/Admin_notification";
 
@@ -75,66 +54,56 @@ const AdminDashboard = () => {
     joinDate: "",
   });
 
+  // ✅ Department state
+  const [adminDepartment, setAdminDepartment] = useState("");
+
+  // ✅ Department-specific default stats
+  const DEPARTMENT_STATS = {
+    Elders: {
+      totalDepartments: 1,
+      todayClasses: 3,
+      totalStudents: 45,
+      newAdmissions: 5,
+      totalTeachers: 6,
+      notifications: 3,
+    },
+    "Quran Studies": {
+      totalDepartments: 1,
+      todayClasses: 4,
+      totalStudents: 62,
+      newAdmissions: 8,
+      totalTeachers: 9,
+      notifications: 5,
+    },
+    Alimiya: {
+      totalDepartments: 1,
+      todayClasses: 5,
+      totalStudents: 35,
+      newAdmissions: 6,
+      totalTeachers: 7,
+      notifications: 4,
+    },
+    Diploma: {
+      totalDepartments: 1,
+      todayClasses: 2,
+      totalStudents: 14,
+      newAdmissions: 2,
+      totalTeachers: 3,
+      notifications: 2,
+    },
+  };
+
   // Admin Dashboard Stats
   const [stats, setStats] = useState({
-    totalDepartments: 5,
-    todayClasses: 8,
-    totalStudents: 156,
-    newAdmissions: 12,
-    totalTeachers: 25,
-    totalIncome: 125000,
-    pendingFees: 35000,
-    notifications: 8,
+    totalDepartments: 1,
+    todayClasses: 0,
+    totalStudents: 0,
+    newAdmissions: 0,
+    totalTeachers: 0,
+    totalIncome: 0,
+    pendingFees: 0,
+    notifications: 0,
   });
-
-  // ✅ নতুন — localStorage থেকে department-specific stats load করো
-  useEffect(() => {
-    const savedStats = localStorage.getItem("adminStats");
-    if (savedStats) {
-      try {
-        const parsed = JSON.parse(savedStats);
-        if (parsed && Object.keys(parsed).length > 0) {
-          setStats((prev) => ({ ...prev, ...parsed }));
-        }
-      } catch (err) {
-        console.error("Failed to parse adminStats:", err);
-      }
-    }
-  }, []);
-
-  const handleView = (student) => {
-    Swal.fire({
-      title: `📋 Student Details: ${student.name}`,
-      html: `
-      <div style="text-align: left; font-size: 13px; max-height: 450px; overflow-y: auto;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">admin
-          <p><strong>নাম:</strong> ${student.name || "N/A"}</p>
-          <p><strong>ফোন:</strong> ${student.phone || "N/A"}</p>
-          <p><strong>ইমেইল:</strong> ${student.email || "N/A"}</p>
-          <p><strong>কোর্স:</strong> ${student.course || student.class || "N/A"}</p>
-          <p><strong>ইউজারনেম:</strong> ${student.username || "Not assigned"}</p>
-          <p><strong>স্ট্যাটাস:</strong> ${student.status || "Pending"}</p>
-          <p><strong>পিতার নাম:</strong> ${student.fatherName || student.guardianName || "N/A"}</p>
-          <p><strong>মাতার নাম:</strong> ${student.motherName || "N/A"}</p>
-          <p><strong>অভিভাবক:</strong> ${student.guardianName || "N/A"}</p>
-          <p><strong>অভিভাবক ফোন:</strong> ${student.guardianPhone || "N/A"}</p>
-          <p><strong>বর্তমান ঠিকানা:</strong> ${student.presentAddress || student.address || "N/A"}</p>
-          <p><strong>স্থায়ী ঠিকানা:</strong> ${student.permanentAddress || "N/A"}</p>
-          <p><strong>পরিচয়পত্র:</strong> ${student.dobOrNid || "N/A"}</p>
-          <p><strong>পেমেন্ট স্ট্যাটাস:</strong> ${student.paymentStatus || (student.paidAmount ? "Paid" : "Unpaid")}</p>
-          <p><strong>পেমেন্ট মেথড:</strong> ${student.paymentMethod || "N/A"}</p>
-          <p><strong>ট্রানজেকশন আইডি:</strong> ${student.transactionId || "N/A"}</p>
-          <p><strong>ভর্তি তারিখ:</strong> ${student.admissionDate ? new Date(student.admissionDate).toLocaleDateString() : "N/A"}</p>
-        </div>
-        <hr style="margin: 10px 0;">
-        <p style="font-size: 11px; color: #666;">রেজিস্ট্রেশন: ${student.createdAt ? new Date(student.createdAt).toLocaleString() : "N/A"}</p>
-      </div>
-    `,
-      confirmButtonColor: "#3b82f6",
-      confirmButtonText: "Close",
-      width: 650,
-    });
-  };
 
   // Students Data
   const [students, setStudents] = useState([
@@ -229,22 +198,49 @@ const AdminDashboard = () => {
     },
   ]);
 
-  // Load admin info
+  // ✅ Admin info + Department একসাথে load
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
+    const savedDept = localStorage.getItem("adminDepartment");
+
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        const parsed = JSON.parse(savedAdmin);
+        setAdminInfo(parsed);
+        setAdminDepartment(parsed.department || savedDept || "");
+      } catch (e) {
+        console.error("adminInfo parse error:", e);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: savedDept || "Administration",
         joinDate: "January 2024",
       });
+      setAdminDepartment(savedDept || "");
     }
   }, [user]);
+
+  // ✅ Department-specific stats apply
+  useEffect(() => {
+    if (!adminDepartment) return;
+
+    const savedStats = localStorage.getItem(`adminStats_${adminDepartment}`);
+    if (savedStats) {
+      try {
+        setStats((prev) => ({ ...prev, ...JSON.parse(savedStats) }));
+        return;
+      } catch {}
+    }
+
+    if (DEPARTMENT_STATS[adminDepartment]) {
+      setStats((prev) => ({ ...prev, ...DEPARTMENT_STATS[adminDepartment] }));
+    }
+    // eslint-disable-next-line
+  }, [adminDepartment]);
 
   const handleLogout = async () => {
     try {
@@ -252,7 +248,8 @@ const AdminDashboard = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-      localStorage.removeItem("adminStats"); // ✅ নতুন line
+      localStorage.removeItem("adminStats");
+      localStorage.removeItem("adminDepartment");
 
       await Swal.fire({
         icon: "success",
@@ -283,7 +280,7 @@ const AdminDashboard = () => {
     }
   };
 
-  // Sidebar Menu Items with all links
+  // Sidebar Menu Items
   const menuItems = [
     {
       id: "profile",
@@ -302,7 +299,6 @@ const AdminDashboard = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "basic-tazweed",
           path: "/admin-dashboard/basic-tazweed",
@@ -429,30 +425,46 @@ const AdminDashboard = () => {
   const renderContent = () => {
     switch (activeMenu) {
       case "dashboard":
-        return <DashboardContent stats={stats} notifications={notifications} />;
+        return (
+          <DashboardContent
+            stats={stats}
+            notifications={notifications}
+            department={adminDepartment}
+          />
+        );
       case "notification":
-        return <Admin_notification />;
-
+        return <Admin_notification department={adminDepartment} />;
       case "student-management":
-        return <StudentManagementContent students={students} />;
+        return <StudentManagementContent department={adminDepartment} />;
       case "teacher-management":
-        return <TeacherManagementContent teachers={teachers} />;
+        return (
+          <TeacherManagementContent
+            teachers={teachers}
+            department={adminDepartment}
+          />
+        );
       case "batch-course":
-        return <BatchCourseContent />;
+        return <BatchCourseContent department={adminDepartment} />;
       case "absence-student":
-        return <AbsenceStudentContent />;
+        return <AbsenceStudentContent department={adminDepartment} />;
       case "finance":
-        return <FinanceContent />;
+        return <FinanceContent department={adminDepartment} />;
       case "exam":
-        return <ExamContent />;
+        return <ExamContent department={adminDepartment} />;
       case "report-analytics":
-        return <ReportAnalyticsContent />;
+        return <ReportAnalyticsContent department={adminDepartment} />;
       case "crm-management":
-        return <CRMContent />;
+        return <CRMContent department={adminDepartment} />;
       case "salary":
-        return <SalaryContent />;
+        return <SalaryContent department={adminDepartment} />;
       default:
-        return <DashboardContent stats={stats} notifications={notifications} />;
+        return (
+          <DashboardContent
+            stats={stats}
+            notifications={notifications}
+            department={adminDepartment}
+          />
+        );
     }
   };
 
@@ -470,7 +482,7 @@ const AdminDashboard = () => {
           </button>
         </div>
 
-        {/* Sidebar - No Scroll */}
+        {/* Sidebar */}
         <aside
           className={`
             fixed md:relative z-50
@@ -484,7 +496,6 @@ const AdminDashboard = () => {
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
-          {/* Sidebar Header */}
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -497,12 +508,16 @@ const AdminDashboard = () => {
                 <p className="text-xs opacity-80 truncate">
                   {adminInfo.designation}
                 </p>
+                {adminDepartment && (
+                  <p className="text-[10px] opacity-90 truncate mt-0.5 bg-white/20 px-1.5 py-0.5 rounded-full inline-block">
+                    🏛️ {adminDepartment}
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Navigation Menu - No Scroll */}
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-200px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -576,7 +591,6 @@ const AdminDashboard = () => {
               </div>
             ))}
 
-            {/* Logout Button */}
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -591,7 +605,6 @@ const AdminDashboard = () => {
           </div>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -599,13 +612,16 @@ const AdminDashboard = () => {
           />
         )}
 
-        {/* Main Content - Full Screen */}
         <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
-          {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <MdDashboard className="text-teal-600" /> Admin Dashboard
+                {adminDepartment && (
+                  <span className="bg-teal-100 text-teal-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {adminDepartment}
+                  </span>
+                )}
               </h1>
               <p className="text-xs text-gray-500">
                 Welcome back, {adminInfo.name}!
@@ -624,7 +640,6 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Content - Full Screen */}
           <div className="h-[calc(100vh-170px)] overflow-hidden">
             {renderContent()}
           </div>
@@ -637,7 +652,7 @@ const AdminDashboard = () => {
 // ==========================================
 // 1. DASHBOARD CONTENT
 // ==========================================
-const DashboardContent = ({ stats, notifications }) => {
+const DashboardContent = ({ stats, notifications, department }) => {
   const dashboardStats = [
     {
       label: (
@@ -657,7 +672,9 @@ const DashboardContent = ({ stats, notifications }) => {
         <Link
           to="/admin-dashboard/today-class"
           className="hover:text-teal-600 text-[10px]"
-        ></Link>
+        >
+          Today's Class
+        </Link>
       ),
       value: stats.todayClasses,
       icon: <FaCalendarAlt className="text-purple-500" />,
@@ -693,6 +710,17 @@ const DashboardContent = ({ stats, notifications }) => {
 
   return (
     <div className="h-full flex flex-col space-y-3 overflow-hidden">
+      {/* ✅ Department Banner */}
+      {department && (
+        <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white p-3 rounded-xl shadow-sm flex items-center justify-between flex-shrink-0">
+          <div>
+            <p className="text-[10px] opacity-80">You are logged in as</p>
+            <p className="text-sm font-bold">{department} Department Admin</p>
+          </div>
+          <span className="text-2xl">🏛️</span>
+        </div>
+      )}
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2 flex-shrink-0">
         {dashboardStats.map((stat, index) => (
@@ -765,7 +793,7 @@ const DashboardContent = ({ stats, notifications }) => {
         </div>
       </div>
 
-      {/* Recent Activity & Notifications - Full Height */}
+      {/* Recent Activity & Notifications */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 flex-1 min-h-0">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 flex flex-col overflow-hidden">
           <h3 className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2 flex-shrink-0">
@@ -847,10 +875,11 @@ const DashboardContent = ({ stats, notifications }) => {
     </div>
   );
 };
+
 // ==========================================
-// 2. STUDENT MANAGEMENT CONTENT (Fixed)
+// 2. STUDENT MANAGEMENT CONTENT
 // ==========================================
-const StudentManagementContent = () => {
+const StudentManagementContent = ({ department }) => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -858,23 +887,20 @@ const StudentManagementContent = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshKey, setRefreshKey] = useState(0);
   const [availableCourses, setAvailableCourses] = useState([]);
-
-  // ✅ Approve Modal State
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
-  // ✅ Auto-generate Student ID helper
   const generateStudentId = () => {
     const year = new Date().getFullYear().toString().slice(-2);
     const random = Math.floor(10000 + Math.random() * 90000);
-    return `TAR${year}${random}`; // যেমন: TAR2648213
+    return `TAR${year}${random}`;
   };
 
   useEffect(() => {
     fetchStudents();
-  }, [refreshKey]);
+    // eslint-disable-next-line
+  }, [refreshKey, department]);
 
-  // ✅ Available Courses লোড
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -882,9 +908,7 @@ const StudentManagementContent = () => {
           "https://api.tarbiyahonline.com/api/courses/teacher/all",
         );
         const data = await response.json();
-        if (data.success) {
-          setAvailableCourses(data.courses || []);
-        }
+        if (data.success) setAvailableCourses(data.courses || []);
       } catch (err) {
         console.error("❌ Error fetching courses:", err);
       }
@@ -897,13 +921,15 @@ const StudentManagementContent = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(
-        "https://api.tarbiyahonline.com/api/students/all",
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        },
-      );
+      const url =
+        department && department !== "All"
+          ? `https://api.tarbiyahonline.com/api/students/all?department=${encodeURIComponent(department)}`
+          : "https://api.tarbiyahonline.com/api/students/all";
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (response.status === 404) {
         setError("API endpoint not found!");
@@ -920,7 +946,7 @@ const StudentManagementContent = () => {
         const studentList = data.students || [];
         setStudents(studentList);
         if (studentList.length === 0) {
-          setError("No students found. Please add a student.");
+          setError(`No students found in ${department || "this"} department.`);
         }
       } else {
         setError(data.message || "Failed to fetch students");
@@ -933,10 +959,9 @@ const StudentManagementContent = () => {
     }
   };
 
-  // ✅ Approve Student Function (Student ID সহ)
+  // ✅ Approve Student
   const handleApproveStudent = async () => {
     try {
-      // Validation
       if (!selectedStudent.studentId || !selectedStudent.studentId.trim()) {
         Swal.fire({
           icon: "warning",
@@ -1132,10 +1157,14 @@ const StudentManagementContent = () => {
 
   return (
     <div className="h-full flex flex-col space-y-3 overflow-hidden">
-      {/* Header */}
       <div className="flex justify-between items-center flex-shrink-0 flex-wrap gap-2">
         <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
           <FaUsers className="text-blue-600" /> Student Management
+          {department && (
+            <span className="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-0.5 rounded-full">
+              {department}
+            </span>
+          )}
           <span className="text-xs font-normal text-gray-500">
             (Total: {students.length})
           </span>
@@ -1172,6 +1201,12 @@ const StudentManagementContent = () => {
           </button>
         </div>
       </div>
+
+      {error && (
+        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-2 rounded-lg text-xs flex-shrink-0">
+          ⚠️ {error}
+        </div>
+      )}
 
       {/* Table */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex-1">
@@ -1279,16 +1314,25 @@ const StudentManagementContent = () => {
                   </td>
                 </tr>
               ))}
+              {filteredStudents.length === 0 && (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="px-3 py-8 text-center text-gray-400 text-sm"
+                  >
+                    No students found
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ✅ Approve Modal — Student ID Field সহ */}
+      {/* ✅ Approve Modal */}
       {showApproveModal && selectedStudent && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
             <div className="flex justify-between items-center mb-4 border-b pb-3">
               <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                 <FaCheckCircle className="text-green-600" /> Student Details
@@ -1304,7 +1348,6 @@ const StudentManagementContent = () => {
               </button>
             </div>
 
-            {/* Student Information Display */}
             <div className="bg-gray-50 p-4 rounded-lg mb-4 space-y-1 text-xs">
               <p>
                 <strong>Name:</strong> {selectedStudent.name}
@@ -1342,13 +1385,11 @@ const StudentManagementContent = () => {
               </p>
             </div>
 
-            {/* Set Login Credentials */}
             <div className="space-y-3 border-t pt-3">
               <h4 className="text-sm font-bold text-gray-700">
                 🔑 Set Login Credentials
               </h4>
 
-              {/* ✅ Student ID Field */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Student ID <span className="text-red-500">*</span>
@@ -1381,12 +1422,10 @@ const StudentManagementContent = () => {
                   </button>
                 </div>
                 <p className="text-xs text-gray-400 mt-1">
-                  💡 এই ID দিয়েই স্টুডেন্ট লগইন করবে। ম্যানুয়ালি লিখুন বা 🎲
-                  Auto ক্লিক করুন।
+                  💡 এই ID দিয়েই স্টুডেন্ট লগইন করবে।
                 </p>
               </div>
 
-              {/* Roll Number (Optional) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Roll Number{" "}
@@ -1406,7 +1445,6 @@ const StudentManagementContent = () => {
                 />
               </div>
 
-              {/* Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Password <span className="text-red-500">*</span>
@@ -1424,13 +1462,11 @@ const StudentManagementContent = () => {
                   placeholder="Enter password"
                 />
                 <p className="text-xs text-gray-400 mt-1">
-                  💡 Default password: <strong>student123S@</strong> — চাইলে
-                  পরিবর্তন করুন।
+                  💡 Default: <strong>student123S@</strong>
                 </p>
               </div>
             </div>
 
-            {/* Course Selection */}
             <div className="space-y-2 border-t pt-3 mt-3">
               <h4 className="text-sm font-bold text-gray-700 flex items-center justify-between">
                 <span>📚 Assign Courses</span>
@@ -1441,7 +1477,7 @@ const StudentManagementContent = () => {
 
               {availableCourses.length === 0 ? (
                 <p className="text-xs text-gray-400 italic">
-                  No courses available. Create courses from Batch & Course menu.
+                  No courses available.
                 </p>
               ) : (
                 <div className="border rounded-lg p-3 max-h-40 overflow-y-auto space-y-1.5 bg-gray-50">
@@ -1479,7 +1515,6 @@ const StudentManagementContent = () => {
               )}
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end gap-2 mt-4 pt-3 border-t">
               <button
                 onClick={() => {
@@ -1503,15 +1538,21 @@ const StudentManagementContent = () => {
     </div>
   );
 };
+
 // ==========================================
 // 3. TEACHER MANAGEMENT CONTENT
 // ==========================================
-const TeacherManagementContent = ({ teachers }) => {
+const TeacherManagementContent = ({ teachers, department }) => {
   return (
     <div className="h-full flex flex-col space-y-3 overflow-hidden">
       <div className="flex justify-between items-center flex-shrink-0">
         <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
           <FaChalkboardTeacher className="text-green-600" /> Teacher Management
+          {department && (
+            <span className="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-0.5 rounded-full">
+              {department}
+            </span>
+          )}
         </h2>
         <Link
           to="/admin-teachers/assign"
@@ -1665,7 +1706,6 @@ const BatchCourseContent = () => {
         </h2>
       </div>
 
-      {/* Tab Navigation */}
       <div className="flex gap-1 bg-gray-100 p-1 rounded-lg flex-shrink-0 overflow-x-auto">
         {tabs.map((tab) => (
           <Link
@@ -1684,7 +1724,6 @@ const BatchCourseContent = () => {
         ))}
       </div>
 
-      {/* Tab Content */}
       <div className="flex-1 overflow-hidden">
         {activeTab === "batch-make" && <BatchMakeContent />}
         {activeTab === "course-make" && <CourseMakeContent />}
@@ -1695,7 +1734,6 @@ const BatchCourseContent = () => {
   );
 };
 
-// Batch Make Content
 const BatchMakeContent = () => {
   const [batches] = useState([
     {
@@ -1814,7 +1852,6 @@ const BatchMakeContent = () => {
   );
 };
 
-// Course Make Content
 const CourseMakeContent = () => {
   const [courses] = useState([
     {
@@ -1939,7 +1976,6 @@ const CourseMakeContent = () => {
   );
 };
 
-// Syllabus Content
 const SyllabusContent = () => {
   return (
     <div className="h-full flex flex-col space-y-3 overflow-hidden">
@@ -1969,7 +2005,6 @@ const SyllabusContent = () => {
   );
 };
 
-// Clear Routine Content
 const ClearRoutineContent = () => {
   return (
     <div className="h-full flex flex-col space-y-3 overflow-hidden">
@@ -2273,7 +2308,6 @@ const ExamContent = () => {
   );
 };
 
-// Exam Make Content
 const ExamMakeContent = () => {
   const [exams] = useState([
     {
@@ -2389,7 +2423,6 @@ const ExamMakeContent = () => {
   );
 };
 
-// Result Publish Content
 const ResultPublishContent = () => {
   const [results] = useState([
     {
@@ -2491,7 +2524,6 @@ const ResultPublishContent = () => {
   );
 };
 
-// Certificate Permission Content
 const CertificatePermissionContent = () => {
   const [certificates] = useState([
     {

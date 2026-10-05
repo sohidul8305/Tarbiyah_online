@@ -69,14 +69,11 @@ const AdminLogin = () => {
             ? "♻️ Existing profile restored for predefined admin"
             : "🆕 New predefined admin — default profile set",
         );
-
         localStorage.setItem("adminInfo", JSON.stringify(finalProfile));
-        localStorage.setItem(
-          "adminStats",
-          JSON.stringify(predefinedAdmin.stats || {}),
-        );
+        localStorage.removeItem("adminStats");
         localStorage.setItem("isAdminLoggedIn", "true");
         localStorage.setItem("adminEmail", finalProfile.email);
+        localStorage.setItem("adminDepartment", finalProfile.department); // ✅ নতুন লাইন
 
         await Swal.fire({
           icon: "success",
@@ -129,9 +126,11 @@ const AdminLogin = () => {
       );
 
       localStorage.setItem("adminInfo", JSON.stringify(finalProfile));
-      localStorage.removeItem("adminStats");
+      localStorage.setItem("adminStats", JSON.stringify({}));
+
       localStorage.setItem("isAdminLoggedIn", "true");
       localStorage.setItem("adminEmail", finalProfile.email);
+      localStorage.setItem("adminDepartment", finalProfile.department); // ✅ নতুন লাইন
 
       await Swal.fire({
         icon: "success",

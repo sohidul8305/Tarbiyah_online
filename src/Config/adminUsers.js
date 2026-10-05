@@ -2,8 +2,6 @@
 
 // =============================================
 // ✅ PREDEFINED ADMIN USERS — Department-wise
-// প্রতিটি department এর নিজস্ব email + password
-// =============================================
 
 export const ADMIN_USERS = [
   // ─────────────────────────────────────────
@@ -118,6 +116,23 @@ export const findAdminByEmail = (email) => {
   return (
     ADMIN_USERS.find(
       (admin) => admin.email.toLowerCase().trim() === cleanEmail,
+    ) || null
+  );
+};
+
+// ✅ Get department by email — login পর auto filter এর জন্য
+export const getDepartmentByEmail = (email) => {
+  const admin = findAdminByEmail(email);
+  return admin?.profile?.department || null;
+};
+
+// ✅ Department-wise admin info
+export const getAdminByDepartment = (department) => {
+  if (!department) return null;
+  return (
+    ADMIN_USERS.find(
+      (a) =>
+        a.profile.department.toLowerCase() === department.toLowerCase().trim(),
     ) || null
   );
 };
