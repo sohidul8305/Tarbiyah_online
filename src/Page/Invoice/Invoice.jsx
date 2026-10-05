@@ -116,33 +116,6 @@ const getPrimaryCourse = (courseStr) => {
   return "Qaida Nuraniyah";
 };
 
-const ELDERS_STUDENTS_FALLBACK = [
-  {
-    _id: "ELDERS_STU_001",
-    name: "Omer Faruk",
-    studentId: "TET26FB6001",
-    course: "Qaida Nooraniya, Bakarah Hifz",
-    primaryCourse: "Qaida Nuraniyah",
-    class: "Elders Batch A",
-    batch: "Batch-03",
-    phone: "",
-    email: "omer@gmail.com",
-    courseFee: 5000,
-  },
-  {
-    _id: "ELDERS_STU_002",
-    name: "Ikramm",
-    studentId: "TET26FB6002",
-    course: "Qaida Nooraniya, Bakarah Hifz",
-    primaryCourse: "Qaida Nuraniyah",
-    class: "Elders Batch A",
-    batch: "Batch-03",
-    phone: "",
-    email: "ikramm@gmail.com",
-    courseFee: 5000,
-  },
-];
-
 const ELDERS_DEFAULT_INVOICES = [
   {
     id: 1,
@@ -455,7 +428,7 @@ const Invoice = () => {
   const fetchEldersStudents = async () => {
     try {
       setStudentsLoading(true);
-      let eldersList = [...ELDERS_STUDENTS_FALLBACK];
+      let eldersList = [];
 
       try {
         const res = await fetch(`${API_BASE}/api/students/all`);
@@ -496,7 +469,7 @@ const Invoice = () => {
       setEldersStudents(eldersList);
     } catch (err) {
       console.error("❌ Fetch students error:", err);
-      setEldersStudents(ELDERS_STUDENTS_FALLBACK);
+      setEldersStudents([]);
     } finally {
       setStudentsLoading(false);
     }

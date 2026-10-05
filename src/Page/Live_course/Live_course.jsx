@@ -161,7 +161,7 @@ const Live_course = () => {
         <p className="text-gray-600 max-w-2xl mx-auto text-sm md:text-base">
           {language === "bn"
             ? "সকল বয়স এবং স্তরের জন্য ডিজাইন করা আমাদের কোর্সসমূহ অন্বেষণ করুন"
-            : "Explore our comprehensive courses designed for all ages and levels"}
+            : ""}
         </p>
       </div>
 
