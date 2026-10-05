@@ -19,7 +19,6 @@ import {
   FaMoneyBillWave,
   FaChartLine,
   FaDatabase,
-  FaUserTimes,
   FaLayerGroup,
   FaCalendarCheck,
   FaArrowRight,
@@ -28,11 +27,12 @@ import {
   FaMapMarkerAlt,
   FaGlobe,
   FaSpinner,
+  FaLock,
 } from "react-icons/fa";
 import { MdDashboard, MdVerified } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-const API_BASE = "http://api.tarbiyahonline.com";
+const API_BASE = "https://api.tarbiyahonline.com"; // ✅ HTTPS
 
 // ✅ ImgBB API Key
 const IMAGEBB_API_KEY =
@@ -98,6 +98,9 @@ const Admin_profile = () => {
   const [backendConnected, setBackendConnected] = useState(true);
   const fileInputRef = useRef(null);
 
+  // ✅ adminDepartment — login এর সময় save করা department
+  const [adminDepartment, setAdminDepartment] = useState("");
+
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -115,14 +118,16 @@ const Admin_profile = () => {
 
   // ============================================================
   // ✅ Load admin info: Backend first, fallback to localStorage
+  // ✅ Per-admin isolated by email
   // ============================================================
   useEffect(() => {
     const loadProfile = async () => {
       setIsLoading(true);
 
-      // Get email from localStorage (source of truth for identity)
+      // Get email + department from localStorage (source of truth)
       const savedAdmin = localStorage.getItem("adminInfo");
       const savedImage = localStorage.getItem(ADMIN_IMAGE_KEY) || "";
+      const savedDept = localStorage.getItem("adminDepartment") || "";
 
       let localAdmin = null;
       if (savedAdmin) {
@@ -133,14 +138,20 @@ const Admin_profile = () => {
         }
       }
 
-      // Determine email
+      // ✅ Determine email — this makes each admin's profile separate
       const email =
         localAdmin?.email ||
         user?.email ||
         localStorage.getItem("adminEmail") ||
         "admin@tarabiyah.com";
 
-      // ✅ Try backend first
+      // ✅ Determine department — priority: profile > localStorage
+      const department =
+        localAdmin?.department || savedDept || "Administration";
+
+      setAdminDepartment(department);
+
+      // ✅ Try backend first — fetch by email (per-admin isolation)
       try {
         const res = await fetch(
           `${API_BASE}/api/admin-profile/${encodeURIComponent(email)}`,
@@ -153,16 +164,28 @@ const Admin_profile = () => {
           const merged = {
             ...data.profile,
             email,
-            profileImage: data.profile.profileImage || savedImage || "",
+            // ✅ department: profile > login dept > default
+            department: data.profile.department || department,
+            profileImage:
+              data.profile.profileImage ||
+              // per-admin image key
+              localStorage.getItem(`adminProfileImage_${email}`) ||
+              savedImage ||
+              "",
           };
 
           setAdminInfo(merged);
           setEditData(merged);
+          setAdminDepartment(merged.department);
 
           // Sync to localStorage as cache
           localStorage.setItem("adminInfo", JSON.stringify(merged));
           if (merged.profileImage) {
             localStorage.setItem(ADMIN_IMAGE_KEY, merged.profileImage);
+            localStorage.setItem(
+              `adminProfileImage_${email}`,
+              merged.profileImage,
+            );
           }
 
           setBackendConnected(true);
@@ -170,7 +193,6 @@ const Admin_profile = () => {
           return;
         }
 
-        // Profile not in backend → use local data, then auto-create in backend
         console.log("ℹ️ No backend profile, using local data");
         setBackendConnected(true);
       } catch (err) {
@@ -178,27 +200,36 @@ const Admin_profile = () => {
         setBackendConnected(false);
       }
 
-      // Fallback: local data
+      // Fallback: local data — with department-aware defaults
       const fallback = localAdmin || {
-        name: user?.displayName || "Admin",
+        name: user?.displayName || `${department} Admin`,
         email,
         phone: "+880 1700 123456",
-        designation: "Administrator",
-        department: "Administration",
+        designation: "Department Head",
+        department: department,
         joinDate: "January 2024",
-        bio: "Experienced administrator with a passion for education and Islamic studies.",
+        bio: `Administrator for the ${department} Department.`,
         address: "40/1, Safe Garden, Mohammadpur - 1207, Dhaka",
         website: "https://tarabiyahonline.com",
-        profileImage: savedImage || "",
+        profileImage:
+          localStorage.getItem(`adminProfileImage_${email}`) ||
+          savedImage ||
+          "",
       };
 
       const merged = {
         ...fallback,
-        profileImage: savedImage || fallback.profileImage || "",
+        department: fallback.department || department,
+        profileImage:
+          localStorage.getItem(`adminProfileImage_${email}`) ||
+          savedImage ||
+          fallback.profileImage ||
+          "",
       };
 
       setAdminInfo(merged);
       setEditData(merged);
+      setAdminDepartment(merged.department);
       setIsLoading(false);
     };
 
@@ -223,7 +254,8 @@ const Admin_profile = () => {
       await logOut();
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminEmail");
-      // ✅ adminInfo & adminProfileImage preserve থাকে
+      localStorage.removeItem("adminDepartment");
+      // ✅ adminInfo & per-admin image preserve থাকে
 
       await Swal.fire({
         icon: "success",
@@ -265,7 +297,6 @@ const Admin_profile = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -287,7 +318,7 @@ const Admin_profile = () => {
         {
           id: "batch-manual",
           path: "/admin-students/batch",
-          label: "Batch Create and  Maintain",
+          label: "Batch Create and Maintain",
         },
         {
           id: "student-profile",
@@ -324,7 +355,6 @@ const Admin_profile = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -345,7 +375,6 @@ const Admin_profile = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -381,30 +410,36 @@ const Admin_profile = () => {
   ];
 
   // ==================================================
-  // ✅ SAVE PROFILE (Backend + localStorage)
+  // ✅ SAVE PROFILE — per-admin (email-based)
   // ==================================================
   const handleEditToggle = async () => {
     if (!isEditing) {
-      // Enter edit mode
       setEditData({ ...adminInfo });
       setIsEditing(true);
       return;
     }
 
-    // Save mode
     setIsSaving(true);
 
+    // ✅ department always from login — cannot be changed by admin
     const dataToSave = {
       ...editData,
       email: adminInfo.email || editData.email,
+      department: adminDepartment || adminInfo.department,
     };
 
-    // ✅ Local cache first (instant feedback)
+    // ✅ Per-admin localStorage keys
+    const email = dataToSave.email;
     localStorage.setItem("adminInfo", JSON.stringify(dataToSave));
     if (dataToSave.profileImage) {
       localStorage.setItem(ADMIN_IMAGE_KEY, dataToSave.profileImage);
+      localStorage.setItem(
+        `adminProfileImage_${email}`,
+        dataToSave.profileImage,
+      );
     } else {
       localStorage.removeItem(ADMIN_IMAGE_KEY);
+      localStorage.removeItem(`adminProfileImage_${email}`);
     }
     setAdminInfo(dataToSave);
 
@@ -421,17 +456,21 @@ const Admin_profile = () => {
         console.log("✅ Saved to backend:", data.profile);
         setBackendConnected(true);
 
-        // Re-sync from backend response
         if (data.profile) {
-          setAdminInfo(data.profile);
-          setEditData(data.profile);
-          localStorage.setItem("adminInfo", JSON.stringify(data.profile));
+          // Ensure department stays from login
+          const synced = {
+            ...data.profile,
+            department: adminDepartment || data.profile.department,
+          };
+          setAdminInfo(synced);
+          setEditData(synced);
+          localStorage.setItem("adminInfo", JSON.stringify(synced));
         }
 
         Swal.fire({
           icon: "success",
           title: data.updated ? "Profile Updated!" : "Profile Created!",
-          text: "Your profile has been saved successfully.",
+          text: `Saved for ${adminDepartment} Department.`,
           timer: 1500,
           showConfirmButton: false,
         });
@@ -508,9 +547,13 @@ const Admin_profile = () => {
     try {
       const imageUrl = await uploadToImgBB(file);
 
+      // ✅ Per-admin image save
       setEditData((prev) => ({ ...prev, profileImage: imageUrl }));
       setAdminInfo((prev) => ({ ...prev, profileImage: imageUrl }));
       localStorage.setItem(ADMIN_IMAGE_KEY, imageUrl);
+      if (adminInfo.email) {
+        localStorage.setItem(`adminProfileImage_${adminInfo.email}`, imageUrl);
+      }
 
       Swal.fire({
         icon: "success",
@@ -540,6 +583,9 @@ const Admin_profile = () => {
     setEditData((prev) => ({ ...prev, profileImage: "" }));
     setAdminInfo((prev) => ({ ...prev, profileImage: "" }));
     localStorage.removeItem(ADMIN_IMAGE_KEY);
+    if (adminInfo.email) {
+      localStorage.removeItem(`adminProfileImage_${adminInfo.email}`);
+    }
     if (fileInputRef.current) fileInputRef.current.value = "";
     setImageLoadError(false);
 
@@ -581,6 +627,7 @@ const Admin_profile = () => {
       if (data.success) {
         localStorage.removeItem("adminInfo");
         localStorage.removeItem(ADMIN_IMAGE_KEY);
+        localStorage.removeItem(`adminProfileImage_${email}`);
 
         await Swal.fire({
           icon: "success",
@@ -671,12 +718,17 @@ const Admin_profile = () => {
                 <p className="text-xs opacity-80 truncate">
                   {adminInfo.designation}
                 </p>
+                {adminDepartment && (
+                  <p className="text-[10px] opacity-90 truncate mt-0.5 bg-white/20 px-1.5 py-0.5 rounded-full inline-block">
+                    🏛️ {adminDepartment}
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
           {/* Nav */}
-          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-120px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-140px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -774,9 +826,22 @@ const Admin_profile = () => {
                     Backend Not Connected
                   </p>
                   <p className="text-[11px] text-yellow-700 mt-0.5">
-                    Server running on port 5010? Data will save locally only.
+                    Data will save locally only. Please check server.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* ✅ Department Banner */}
+            {adminDepartment && (
+              <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white p-3 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] opacity-80">You are logged in as</p>
+                  <p className="text-sm font-bold">
+                    {adminDepartment} Department Admin
+                  </p>
+                </div>
+                <span className="text-2xl">🏛️</span>
               </div>
             )}
 
@@ -926,6 +991,7 @@ const Admin_profile = () => {
                             value={editData.email || ""}
                             onChange={handleInputChange}
                             className="bg-transparent border-none text-xs focus:outline-none w-32"
+                            readOnly
                           />
                         </div>
                         <div className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full">
@@ -982,24 +1048,23 @@ const Admin_profile = () => {
                   )}
                 </div>
 
+                {/* ✅ Department — READ ONLY (login থেকে আসে) */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
                   <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
                     <FaBuilding className="text-teal-600" size={14} />{" "}
                     Department
-                  </h3>
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="department"
-                      value={editData.department || ""}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-300 rounded-lg px-2 py-1 text-xs"
+                    <FaLock
+                      className="text-gray-400 ml-auto"
+                      size={10}
+                      title="Cannot be changed"
                     />
-                  ) : (
-                    <p className="text-gray-700 text-xs font-medium">
-                      {adminInfo.department || "N/A"}
-                    </p>
-                  )}
+                  </h3>
+                  <p className="text-gray-700 text-xs font-medium">
+                    {adminDepartment || adminInfo.department || "N/A"}
+                  </p>
+                  <p className="text-[10px] text-gray-400 mt-1">
+                    🔒 Department login থেকে auto-set — changed করা যাবে না
+                  </p>
                 </div>
 
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">

@@ -13,7 +13,6 @@ import {
   FaChartLine,
   FaUserGraduate,
   FaUserPlus,
-  FaUserTimes,
   FaDatabase,
   FaEye,
   FaTrash,
@@ -21,12 +20,10 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaLayerGroup,
   FaInfoCircle,
   FaClock as FaClockIcon,
   FaSync,
-  FaBook,
-  FaBookOpen,
+  FaBuilding,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -34,38 +31,13 @@ import { FiMenu, FiX } from "react-icons/fi";
 const API_BASE = "https://api.tarbiyahonline.com/api";
 
 // ============================================================
-// ✅ Backend status → UI status mapping
+// ✅ Status mapping
 // ============================================================
-const mapStatus = (s) => {
-  if (!s) return "Pending";
-  if (s === "Active") return "Approved";
-  if (s === "Inactive") return "Rejected";
-  if (s === "Approved" || s === "Rejected" || s === "Pending") return s;
-  return "Pending";
-};
-
-// ✅ Random unique password generator
-const generatePassword = () => {
-  const prefixes = ["TAR", "STU", "MDR", "QUR", "NOOR"];
-  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-  const num = Math.floor(100000 + Math.random() * 900000);
-  const chars = "ABCDEFGHJKMNPQRS";
-  const c1 = chars[Math.floor(Math.random() * chars.length)];
-  const c2 = chars[Math.floor(Math.random() * chars.length)];
-  return `${prefix}${num}${c1}${c2}@`;
-};
-
-// ✅ FIXED: Backend student object থেকে status নির্ধারণ
-// Payment থেকে নয় — সরাসরি backend.status দেখে
 const resolveStatus = (s) => {
   const raw = String(s?.status || "").trim();
-
-  // Backend status আগে দেখুন
   if (raw === "Active" || raw === "Approved") return "Approved";
   if (raw === "Rejected" || raw === "Inactive") return "Rejected";
   if (raw === "Pending") return "Pending";
-
-  // Backend-এ status না থাকলে payment থেকে derive (fallback)
   if (Number(s?.dueAmount) === 0 && Number(s?.paidAmount) > 0)
     return "Approved";
   return "Pending";
@@ -85,14 +57,17 @@ const New_admission = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [activeSubMenu, setActiveSubMenu] = useState("dashboard");
   const [loading, setLoading] = useState(true);
-  const [sourceFilter, setSourceFilter] = useState("Tazweed");
+  const [sourceFilter, setSourceFilter] = useState("All");
+
+  // ✅ Current admin এর department
+  const [adminDepartment, setAdminDepartment] = useState("");
 
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
     phone: "",
     designation: "",
-    department: "Administration",
+    department: "",
     joinDate: "",
   });
 
@@ -104,32 +79,49 @@ const New_admission = () => {
   const [selectedAdmission, setSelectedAdmission] = useState(null);
 
   // ============================================================
-  // Load admin info
+  // ✅ Load admin info + department
   // ============================================================
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
+    const savedDept = localStorage.getItem("adminDepartment");
+
     if (savedAdmin) {
       try {
-        setAdminInfo(JSON.parse(savedAdmin));
+        const parsed = JSON.parse(savedAdmin);
+        setAdminInfo(parsed);
+        setAdminDepartment(parsed.department || savedDept || "");
       } catch (err) {
         console.error("adminInfo parse error:", err);
       }
     } else {
+      const fallbackDept = savedDept || "Administration";
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: fallbackDept,
         joinDate: "January 2024",
       });
+      setAdminDepartment(fallbackDept);
     }
   }, [user]);
 
   // ============================================================
-  // ✅ Fetch students from 2 API endpoints (Tazweed & Najera)
+  // ✅ Fetch admissions — only if admin is Elders department
+  // কারণ Tazweed + Najera = Elders department
   // ============================================================
   const fetchAdmissions = async () => {
+    // ✅ Guard: শুধু Elders admin data দেখবে
+    if (!adminDepartment || adminDepartment !== "Elders") {
+      console.log(
+        `⛔ Skipping fetch — admin is "${adminDepartment}", not "Elders"`,
+      );
+      setAdmissions([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -145,7 +137,7 @@ const New_admission = () => {
           const d = await tazweedRes.value.json();
           if (d.success && Array.isArray(d.students)) {
             tazweedStudents = d.students.map((s) => {
-              const status = resolveStatus(s); // ✅ Fixed
+              const status = resolveStatus(s);
               return {
                 id: s._id,
                 _id: s._id,
@@ -168,7 +160,7 @@ const New_admission = () => {
                 maritalStatus: "",
                 guardianName: "",
                 guardianPhone: s.phone || "",
-                status: status, // ✅ From backend.status
+                status,
                 rawStatus: s.status || "Pending",
                 paymentStatus:
                   Number(s.dueAmount) === 0
@@ -208,7 +200,7 @@ const New_admission = () => {
           const d = await najeraRes.value.json();
           if (d.success && Array.isArray(d.students)) {
             najeraStudents = d.students.map((s) => {
-              const status = resolveStatus(s); // ✅ Fixed
+              const status = resolveStatus(s);
               return {
                 id: s._id,
                 _id: s._id,
@@ -231,7 +223,7 @@ const New_admission = () => {
                 maritalStatus: "",
                 guardianName: "",
                 guardianPhone: s.phone || "",
-                status: status, // ✅ From backend.status
+                status,
                 rawStatus: s.status || "Pending",
                 paymentStatus:
                   Number(s.dueAmount) === 0
@@ -272,7 +264,7 @@ const New_admission = () => {
 
       setAdmissions(combined);
       console.log(
-        `✅ Loaded: ${tazweedStudents.length} tazweed + ${najeraStudents.length} najera = ${combined.length} total`,
+        `✅ [${adminDepartment}] Loaded: ${tazweedStudents.length} tazweed + ${najeraStudents.length} najera`,
       );
     } catch (err) {
       console.error("❌ Fetch error:", err);
@@ -286,9 +278,13 @@ const New_admission = () => {
     }
   };
 
+  // ✅ Re-fetch when department changes
   useEffect(() => {
-    fetchAdmissions();
-  }, []);
+    if (adminDepartment) {
+      fetchAdmissions();
+    }
+    // eslint-disable-next-line
+  }, [adminDepartment]);
 
   // ============================================================
   // Logout
@@ -299,6 +295,7 @@ const New_admission = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
+      localStorage.removeItem("adminDepartment");
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -336,7 +333,6 @@ const New_admission = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -358,7 +354,7 @@ const New_admission = () => {
         {
           id: "batch-manual",
           path: "/admin-students/batch",
-          label: "Batch Create and  Maintain",
+          label: "Batch Create and Maintain",
         },
         {
           id: "student-profile",
@@ -459,11 +455,9 @@ const New_admission = () => {
     const matchesSearch =
       !term ||
       a.name.toLowerCase().includes(term) ||
-      a.fatherName.toLowerCase().includes(term) ||
-      a.guardianName.toLowerCase().includes(term) ||
-      a.email.toLowerCase().includes(term) ||
+      a.phone.includes(searchTerm) ||
       a.studentId.toLowerCase().includes(term) ||
-      a.phone.includes(searchTerm);
+      a.course.toLowerCase().includes(term);
 
     const matchesStatus = filterStatus === "All" || a.status === filterStatus;
     const matchesPayment =
@@ -541,7 +535,7 @@ const New_admission = () => {
   };
 
   // ============================================================
-  // ✅ Approve — persistent
+  // Approve
   // ============================================================
   const handleApprove = async (id) => {
     const student = admissions.find((a) => a.id === id);
@@ -600,7 +594,6 @@ const New_admission = () => {
       const data = await res.json();
 
       if (data.success) {
-        // ✅ Local state update with rawStatus
         setAdmissions((prev) =>
           prev.map((a) =>
             a.id === id
@@ -610,7 +603,6 @@ const New_admission = () => {
                   rawStatus: "Active",
                   studentId,
                   password,
-                  username: student.username || "",
                 }
               : a,
           ),
@@ -633,7 +625,6 @@ const New_admission = () => {
           confirmButtonColor: "#004d4d",
         });
 
-        // ✅ Backend থেকে fresh data reload — যাতে sync থাকে
         setTimeout(() => fetchAdmissions(), 500);
       } else {
         Swal.fire({
@@ -647,7 +638,7 @@ const New_admission = () => {
     }
   };
 
-  // ✅ FIXED: Source অনুযায়ী সঠিক reject endpoint
+  // ✅ Reject
   const handleReject = async (id) => {
     const student = admissions.find((a) => a.id === id);
     if (!student) return;
@@ -662,7 +653,6 @@ const New_admission = () => {
     });
     if (!result.isConfirmed) return;
 
-    // ✅ Source অনুযায়ী সঠিক endpoint
     let rejectUrl = `${API_BASE}/basic-tazweed/update/${id}`;
     if (student.source === "Najera") {
       rejectUrl = `${API_BASE}/najera-batch/update/${id}`;
@@ -689,8 +679,6 @@ const New_admission = () => {
           timer: 1500,
           showConfirmButton: false,
         });
-
-        // ✅ Backend reload
         setTimeout(() => fetchAdmissions(), 500);
       } else {
         Swal.fire({
@@ -753,6 +741,11 @@ const New_admission = () => {
   };
 
   // ============================================================
+  // ✅ Permission check: only Elders department
+  // ============================================================
+  const isEldersDept = adminDepartment === "Elders";
+
+  // ============================================================
   // Render
   // ============================================================
   return (
@@ -787,11 +780,16 @@ const New_admission = () => {
                 <p className="text-xs opacity-80 truncate">
                   {adminInfo.designation}
                 </p>
+                {adminDepartment && (
+                  <p className="text-[10px] opacity-90 truncate mt-0.5 bg-white/20 px-1.5 py-0.5 rounded-full inline-block">
+                    🏛️ {adminDepartment}
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-140px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -869,10 +867,6 @@ const New_admission = () => {
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
-          <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
-          </div>
         </aside>
 
         {isSidebarOpen && (
@@ -888,11 +882,17 @@ const New_admission = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-blue-600" /> New Admission —
-                <span className="text-teal-700">Tazweed & Najera</span>
+                <FaUserPlus className="text-blue-600" /> New Admission
+                {adminDepartment && (
+                  <span className="bg-teal-100 text-teal-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {adminDepartment}
+                  </span>
+                )}
               </h1>
               <p className="text-xs text-gray-500">
-                Basic Tazweed এবং Najera Batch এর সব স্টুডেন্ট
+                {isEldersDept
+                  ? "Basic Tazweed এবং Najera Batch এর সব স্টুডেন্ট"
+                  : "শুধু Elders department এই page ব্যবহার করতে পারবে"}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -901,7 +901,7 @@ const New_admission = () => {
               </span>
               <button
                 onClick={fetchAdmissions}
-                disabled={loading}
+                disabled={loading || !isEldersDept}
                 className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 disabled:opacity-50"
               >
                 <FaSync size={10} className={loading ? "animate-spin" : ""} />{" "}
@@ -916,274 +916,298 @@ const New_admission = () => {
             </div>
           </div>
 
-          {/* Source Tabs */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto">
-            {[
-              { id: "All", label: "All Students", color: "blue" },
-              { id: "Tazweed", label: "Basic Tazweed", color: "green" },
-              { id: "Najera", label: "Najera Batch", color: "purple" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setSourceFilter(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                  sourceFilter === tab.id
-                    ? tab.color === "blue"
-                      ? "bg-blue-50 text-blue-700 shadow-sm"
-                      : tab.color === "green"
-                        ? "bg-green-50 text-green-700 shadow-sm"
-                        : "bg-purple-50 text-purple-700 shadow-sm"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {tab.label}
-                <span
-                  className={`text-[10px] px-1.5 rounded-full ${
-                    sourceFilter === tab.id
-                      ? "bg-white text-gray-700"
-                      : "bg-gray-200 text-gray-600"
-                  }`}
-                >
-                  {sourceCounts[tab.id]}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-blue-600">
-                {sourceCounts[sourceFilter]}
-              </p>
-              <p className="text-[10px] text-gray-500">
-                {sourceFilter === "All" ? "Total" : sourceFilter}
-              </p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-yellow-600">
-                {
-                  filteredAdmissions.filter((a) => a.status === "Pending")
-                    .length
-                }
-              </p>
-              <p className="text-[10px] text-gray-500">Pending</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-green-600">
-                {
-                  filteredAdmissions.filter((a) => a.status === "Approved")
-                    .length
-                }
-              </p>
-              <p className="text-[10px] text-gray-500">Approved</p>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-red-600">
-                {
-                  filteredAdmissions.filter((a) => a.status === "Rejected")
-                    .length
-                }
-              </p>
-              <p className="text-[10px] text-gray-500">Rejected</p>
-            </div>
-          </div>
-
-          {/* Filters */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
-            <div className="flex flex-col md:flex-row gap-2">
-              <div className="flex-1 relative">
-                <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
-                <input
-                  type="text"
-                  placeholder="Search by name / phone / email / student ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-              <div className="flex items-center gap-1 flex-wrap">
-                <select
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
-                >
-                  {uniqueStatuses.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={filterPayment}
-                  onChange={(e) => setFilterPayment(e.target.value)}
-                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
-                >
-                  {uniquePayments.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Table */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            {loading ? (
-              <div className="p-10 text-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
-                <p className="text-xs text-gray-500 mt-3">
-                  Loading all students...
+          {/* ✅ Department banner */}
+          {adminDepartment && (
+            <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white p-3 rounded-xl shadow-sm mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] opacity-80">You are logged in as</p>
+                <p className="text-sm font-bold">
+                  {adminDepartment} Department Admin
                 </p>
               </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Student
-                      </th>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Student ID
-                      </th>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Source
-                      </th>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Course
-                      </th>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Date
-                      </th>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Status
-                      </th>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Payment
-                      </th>
-                      <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {filteredAdmissions.map((a) => (
-                      <tr
-                        key={a.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-3 py-2">
-                          <p className="text-xs font-medium text-gray-800">
-                            {a.name}
-                          </p>
-                          <p className="text-[10px] text-gray-500">
-                            {a.email || a.phone}
-                          </p>
-                        </td>
-                        <td className="px-3 py-2">
-                          {a.studentId ? (
-                            <span className="text-[10px] font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
-                              {a.studentId}
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-gray-400 italic">
-                              Not assigned
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-3 py-2">
-                          <span
-                            className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${getSourceBadge(
-                              a.source,
-                            )}`}
-                          >
-                            {a.sourceLabel}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2 text-xs text-gray-600 max-w-[200px]">
-                          {a.course || "N/A"}
-                        </td>
-                        <td className="px-3 py-2 text-xs text-gray-600">
-                          {a.date || "N/A"}
-                        </td>
-                        <td className="px-3 py-2">
-                          <span
-                            className={`text-[8px] px-1.5 py-0.5 rounded-full inline-flex items-center gap-1 ${getStatusColor(
-                              a.status,
-                            )}`}
-                          >
-                            {getStatusIcon(a.status)} {a.status}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2">
-                          <span
-                            className={`text-[8px] px-1.5 py-0.5 rounded-full ${getPaymentColor(
-                              a.paymentStatus,
-                            )}`}
-                          >
-                            {a.paymentStatus}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => openDetailsModal(a)}
-                              className="text-blue-600 hover:text-blue-800 p-0.5"
-                              title="View Details"
-                            >
-                              <FaEye size={12} />
-                            </button>
-                            {a.status === "Pending" && (
-                              <>
-                                <button
-                                  onClick={() => handleApprove(a.id)}
-                                  className="text-green-600 hover:text-green-800 p-0.5"
-                                  title="Approve"
-                                >
-                                  <FaCheckCircle size={12} />
-                                </button>
-                                <button
-                                  onClick={() => handleReject(a.id)}
-                                  className="text-red-600 hover:text-red-800 p-0.5"
-                                  title="Reject"
-                                >
-                                  <FaTimesCircle size={12} />
-                                </button>
-                              </>
-                            )}
-                            <button
-                              onClick={() => handleDelete(a.id)}
-                              className="text-red-600 hover:text-red-800 p-0.5"
-                              title="Delete"
-                            >
-                              <FaTrash size={12} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+              <span className="text-2xl">🏛️</span>
+            </div>
+          )}
 
-          {/* No Results */}
-          {!loading && filteredAdmissions.length === 0 && (
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
-              <FaUserPlus className="text-5xl text-gray-300 mx-auto mb-3" />
-              <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                No Students Found
-              </h3>
-              <p className="text-xs text-gray-500">
-                {admissions.length === 0
-                  ? "Basic Tazweed বা Najera Batch থেকে student add করুন।"
-                  : "আপনার search/filter এর সাথে কোনো student match করেনি।"}
+          {/* ✅ Non-Elders: Access Denied */}
+          {!isEldersDept ? (
+            <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-10 text-center">
+              <FaBuilding className="text-6xl text-yellow-500 mx-auto mb-4" />
+
+              <p className="text-sm text-yellow-700 mb-1">
+                <strong>{adminDepartment}</strong>
               </p>
             </div>
+          ) : (
+            <>
+              {/* Source Tabs */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto">
+                {[
+                  { id: "All", label: "All Students", color: "blue" },
+                  { id: "Tazweed", label: "Basic Tazweed", color: "green" },
+                  { id: "Najera", label: "Najera Batch", color: "purple" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSourceFilter(tab.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                      sourceFilter === tab.id
+                        ? tab.color === "blue"
+                          ? "bg-blue-50 text-blue-700 shadow-sm"
+                          : tab.color === "green"
+                            ? "bg-green-50 text-green-700 shadow-sm"
+                            : "bg-purple-50 text-purple-700 shadow-sm"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    {tab.label}
+                    <span
+                      className={`text-[10px] px-1.5 rounded-full ${
+                        sourceFilter === tab.id
+                          ? "bg-white text-gray-700"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      {sourceCounts[tab.id]}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                  <p className="text-lg font-bold text-blue-600">
+                    {sourceCounts[sourceFilter]}
+                  </p>
+                  <p className="text-[10px] text-gray-500">
+                    {sourceFilter === "All" ? "Total" : sourceFilter}
+                  </p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                  <p className="text-lg font-bold text-yellow-600">
+                    {
+                      filteredAdmissions.filter((a) => a.status === "Pending")
+                        .length
+                    }
+                  </p>
+                  <p className="text-[10px] text-gray-500">Pending</p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                  <p className="text-lg font-bold text-green-600">
+                    {
+                      filteredAdmissions.filter((a) => a.status === "Approved")
+                        .length
+                    }
+                  </p>
+                  <p className="text-[10px] text-gray-500">Approved</p>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
+                  <p className="text-lg font-bold text-red-600">
+                    {
+                      filteredAdmissions.filter((a) => a.status === "Rejected")
+                        .length
+                    }
+                  </p>
+                  <p className="text-[10px] text-gray-500">Rejected</p>
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
+                <div className="flex flex-col md:flex-row gap-2">
+                  <div className="flex-1 relative">
+                    <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
+                    <input
+                      type="text"
+                      placeholder="Search by name / phone / student ID..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
+                    >
+                      {uniqueStatuses.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      value={filterPayment}
+                      onChange={(e) => setFilterPayment(e.target.value)}
+                      className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
+                    >
+                      {uniquePayments.map((p) => (
+                        <option key={p} value={p}>
+                          {p}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                {loading ? (
+                  <div className="p-10 text-center">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-xs text-gray-500 mt-3">
+                      Loading students...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Student
+                          </th>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Student ID
+                          </th>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Source
+                          </th>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Course
+                          </th>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Date
+                          </th>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Status
+                          </th>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Payment
+                          </th>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {filteredAdmissions.map((a) => (
+                          <tr
+                            key={a.id}
+                            className="hover:bg-gray-50 transition-colors"
+                          >
+                            <td className="px-3 py-2">
+                              <p className="text-xs font-medium text-gray-800">
+                                {a.name}
+                              </p>
+                              <p className="text-[10px] text-gray-500">
+                                {a.email || a.phone}
+                              </p>
+                            </td>
+                            <td className="px-3 py-2">
+                              {a.studentId ? (
+                                <span className="text-[10px] font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                                  {a.studentId}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-gray-400 italic">
+                                  Not assigned
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${getSourceBadge(
+                                  a.source,
+                                )}`}
+                              >
+                                {a.sourceLabel}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-xs text-gray-600 max-w-[200px]">
+                              {a.course || "N/A"}
+                            </td>
+                            <td className="px-3 py-2 text-xs text-gray-600">
+                              {a.date || "N/A"}
+                            </td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={`text-[8px] px-1.5 py-0.5 rounded-full inline-flex items-center gap-1 ${getStatusColor(
+                                  a.status,
+                                )}`}
+                              >
+                                {getStatusIcon(a.status)} {a.status}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={`text-[8px] px-1.5 py-0.5 rounded-full ${getPaymentColor(
+                                  a.paymentStatus,
+                                )}`}
+                              >
+                                {a.paymentStatus}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2">
+                              <div className="flex items-center gap-1">
+                                <button
+                                  onClick={() => openDetailsModal(a)}
+                                  className="text-blue-600 hover:text-blue-800 p-0.5"
+                                  title="View Details"
+                                >
+                                  <FaEye size={12} />
+                                </button>
+                                {a.status === "Pending" && (
+                                  <>
+                                    <button
+                                      onClick={() => handleApprove(a.id)}
+                                      className="text-green-600 hover:text-green-800 p-0.5"
+                                      title="Approve"
+                                    >
+                                      <FaCheckCircle size={12} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleReject(a.id)}
+                                      className="text-red-600 hover:text-red-800 p-0.5"
+                                      title="Reject"
+                                    >
+                                      <FaTimesCircle size={12} />
+                                    </button>
+                                  </>
+                                )}
+                                <button
+                                  onClick={() => handleDelete(a.id)}
+                                  className="text-red-600 hover:text-red-800 p-0.5"
+                                  title="Delete"
+                                >
+                                  <FaTrash size={12} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
+              {/* No Results */}
+              {!loading && filteredAdmissions.length === 0 && (
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
+                  <FaUserPlus className="text-5xl text-gray-300 mx-auto mb-3" />
+                  <h3 className="text-base font-bold text-gray-800 mb-0.5">
+                    No Students Found
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Basic Tazweed বা Najera Batch থেকে student add করুন।
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </main>
       </div>
@@ -1240,42 +1264,6 @@ const New_admission = () => {
                       {selectedAdmission.status}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <p className="text-xs text-gray-500">Father</p>
-                      <p className="font-semibold text-sm">
-                        {selectedAdmission.fatherName || "N/A"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Mother</p>
-                      <p className="font-semibold text-sm">
-                        {selectedAdmission.motherName || "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">
-                      NID / Birth Reg / DOB
-                    </p>
-                    <p className="font-semibold">
-                      {selectedAdmission.dobOrNid || "N/A"}
-                    </p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <p className="text-xs text-gray-500">Gender</p>
-                      <p className="font-semibold">
-                        {selectedAdmission.gender || "N/A"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500">Country</p>
-                      <p className="font-semibold">
-                        {selectedAdmission.country || "N/A"}
-                      </p>
-                    </div>
-                  </div>
                   <div>
                     <p className="text-xs text-gray-500">Batch</p>
                     <p className="font-semibold">
@@ -1298,21 +1286,9 @@ const New_admission = () => {
                         </span>
                       </div>
                       <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Email</span>
-                        <span className="font-semibold text-right break-all">
-                          {selectedAdmission.email || "N/A"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Guardian Phone</span>
-                        <span className="font-semibold text-right">
-                          {selectedAdmission.guardianPhone || "N/A"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Address</span>
-                        <span className="font-semibold text-right max-w-[60%]">
-                          {selectedAdmission.address || "N/A"}
+                        <span className="text-gray-500">Country</span>
+                        <span className="font-semibold">
+                          {selectedAdmission.country || "BD"}
                         </span>
                       </div>
                     </div>
@@ -1324,7 +1300,7 @@ const New_admission = () => {
                     </h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Payment Status</span>
+                        <span className="text-gray-500">Status</span>
                         <span
                           className={`font-semibold px-2 rounded-full text-xs ${getPaymentColor(
                             selectedAdmission.paymentStatus,
@@ -1334,7 +1310,7 @@ const New_admission = () => {
                         </span>
                       </div>
                       <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Amount Paid</span>
+                        <span className="text-gray-500">Paid</span>
                         <span className="font-semibold">
                           ৳
                           {Number(
@@ -1344,7 +1320,7 @@ const New_admission = () => {
                       </div>
                       {selectedAdmission.dueAmount !== undefined && (
                         <div className="flex justify-between gap-2">
-                          <span className="text-gray-500">Due Amount</span>
+                          <span className="text-gray-500">Due</span>
                           <span className="font-semibold text-red-600">
                             ৳
                             {Number(
@@ -1353,18 +1329,6 @@ const New_admission = () => {
                           </span>
                         </div>
                       )}
-                      <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Method</span>
-                        <span className="font-semibold">
-                          {selectedAdmission.paymentMethod || "N/A"}
-                        </span>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Transaction ID</span>
-                        <span className="font-semibold text-xs text-right break-all">
-                          {selectedAdmission.transactionId || "N/A"}
-                        </span>
-                      </div>
                       <div className="flex justify-between gap-2">
                         <span className="text-gray-500">Applied Date</span>
                         <span className="font-semibold">

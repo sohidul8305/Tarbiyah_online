@@ -9,59 +9,69 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaBell,
-  FaCalendarAlt,
   FaBook,
-  FaFileAlt,
   FaChartLine,
   FaUserGraduate,
-  FaUserPlus,
-  FaClipboardList,
-  FaCalendarCheck,
-  FaIdCard,
-  FaUsersCog,
-  FaUserTimes,
-  FaDollarSign,
-  FaFileInvoice,
-  FaFileInvoiceDollar,
-  FaCertificate,
   FaDatabase,
-  FaUserCog,
-  FaListAlt,
-  FaClock,
-  FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
-  FaFilter,
   FaPlusCircle,
-  FaDownload,
-  FaPrint,
-  FaCheckCircle,
-  FaTimesCircle,
   FaArrowRight,
-  FaArrowLeft,
-  FaHome,
-  FaCog,
-  FaBars,
   FaLayerGroup,
-  FaSchool,
   FaBookOpen,
-  FaRoute,
-  FaCalendarPlus,
   FaBuilding,
   FaUniversity,
-  FaGraduationCap,
   FaGlobe,
+  FaGraduationCap,
+  FaSyncAlt,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+const API_BASE = "https://api.tarbiyahonline.com";
+
+// ✅ Department → Meta info (আইকন, রঙ, কোর্স)
+const DEPARTMENT_META = {
+  Elders: {
+    icon: <FaGraduationCap className="text-orange-500" />,
+    color: "bg-orange-500",
+    code: "ELD-101",
+    description: "Quran for elders with easy learning methods and Tajweed",
+    head: "Elders Department Head",
+    courses: [
+      "Qaida Nuraniyah",
+      "Quran Nazera",
+      "Bakarah Hifz",
+      "Basic Tajweed (Level-1)",
+      "Najera",
+    ],
+  },
+  "Quran Studies": {
+    icon: <FaBookOpen className="text-purple-500" />,
+    color: "bg-purple-500",
+    code: "QRN-201",
+    description: "Comprehensive Quran studies program",
+    head: "Quran Studies Department Head",
+    courses: ["Quran Studies", "Hifzul Quran", "Tarbiyah Quran Studies"],
+  },
+  Alimiya: {
+    icon: <FaUniversity className="text-blue-500" />,
+    color: "bg-blue-500",
+    code: "ALM-301",
+    description: "Alimiya program with Dawra, Tafsir, Fiqh, Hadith",
+    head: "Alimiya Department Head",
+    courses: ["Alimiya", "Dawra e Hadith", "Tafsir", "Fiqh", "Hadith"],
+  },
+  Diploma: {
+    icon: <FaGlobe className="text-green-500" />,
+    color: "bg-green-500",
+    code: "DPL-401",
+    description: "Diploma in Islamic Studies",
+    head: "Diploma Department Head",
+    courses: ["Diploma in Islamic Studies", "Certificate"],
+  },
+};
 
 const Department = () => {
   const { user, logOut } = useAuth();
@@ -78,100 +88,143 @@ const Department = () => {
     joinDate: "",
   });
 
-  // ✅ Quran for Elders Department — Quran.jsx এর সব Courses সহ
-  const [departments] = useState([
-    {
-      id: 4,
-      name: "Quran for Elders",
-      code: "QFE-101",
-      description:
-        "Dedicated Quran program for elders focusing on easy learning methods, Tajweed, and Quranic understanding",
-      head: "Mahfujur Rahman",
-      totalStudents: 40,
-      totalTeachers: 6,
-      totalCourses: 4,
-      status: "Active",
-      courses: [
-        {
-          id: 1,
-          name: "কায়দায়ে নূরানিয়্যাহ",
-          nameEn: "Qaida Nuraniyah",
-          code: "QFE-101",
-          students: 25,
-          teacher: "Jubayer Ahmad",
-          duration: "4 Months",
-          price: 4000,
-          subtitle: "সহি কুরআন শিক্ষার প্রথম ধাপ।",
-          link: "/course/quran/elders-quida",
-        },
-        {
-          id: 2,
-          name: "কুরআন নাজেরা",
-          nameEn: "Quran Nazera",
-          code: "QFE-201",
-          students: 20,
-          teacher: "Tahira Ustaja",
-          duration: "3 Months",
-          price: 4000,
-          subtitle: "তারতীলের সাথে সাবলীল কুরআন তিলাওয়াত।",
-          link: "/course/quran/elders-nazera",
-        },
-        {
-          id: 3,
-          name: "বাকারা হিফজ",
-          nameEn: "Bakarah Hifz",
-          code: "QFE-301",
-          students: 15,
-          teacher: "pending",
-          duration: "5 Months",
-          price: "2000",
-          subtitle:
-            "নিয়মিত মাশকের মাধ্যমে ধাপে ধাপে সম্পূর্ণ বাকারা হিফজ প্রোগ্রাম।",
-          link: "/course/Albakarah/details", // ✅ Custom link
-        },
-        {
-          id: 4,
-          name: "বেসিক তাজউইদ (লেভেল–১)",
-          nameEn: "Basic Tajweed (Level-1)",
-          code: "QFE-401",
-          students: 18,
-          teacher: "Jubayer Ahmad Farjana Yesmin mitu ",
-          duration: "4 Months",
-          price: 4000,
-          subtitle: "শুদ্ধ মাখরাজ ও তাজউইদের নিয়ম সহজভাবে শেখা।",
-          link: "/course/quran/elders-tajweed",
-        },
-      ],
-    },
-  ]);
+  // ✅ Current admin এর department
+  const [adminDepartment, setAdminDepartment] = useState("");
 
+  // ✅ Dynamic data
+  const [department, setDepartment] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [showCoursesModal, setShowCoursesModal] = useState(false);
 
-  // Load admin info
+  // ✅ Admin info + department load
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
+    const savedDept = localStorage.getItem("adminDepartment");
+
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        const parsed = JSON.parse(savedAdmin);
+        setAdminInfo(parsed);
+        setAdminDepartment(parsed.department || savedDept || "");
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: savedDept || "Administration",
         joinDate: "January 2024",
       });
+      setAdminDepartment(savedDept || "");
     }
   }, [user]);
+
+  // ✅ Fetch real data (students, teachers) for admin's department
+  const fetchDepartmentData = async () => {
+    if (!adminDepartment) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const deptParam = encodeURIComponent(adminDepartment);
+
+      // Fetch students & teachers for this department
+      const [studentsRes, teachersRes] = await Promise.allSettled([
+        fetch(`${API_BASE}/api/students/all?department=${deptParam}`),
+        fetch(
+          `${API_BASE}/api/teacher-attendance/stats?department=${deptParam}`,
+        ),
+      ]);
+
+      let studentsCount = 0;
+      let teachersCount = 0;
+
+      // Students
+      if (studentsRes.status === "fulfilled") {
+        try {
+          const data = await studentsRes.value.json();
+          if (data.success && Array.isArray(data.students)) {
+            studentsCount = data.students.length;
+          }
+        } catch (e) {
+          console.error("Students parse error:", e);
+        }
+      }
+
+      // Teachers
+      if (teachersRes.status === "fulfilled") {
+        try {
+          const data = await teachersRes.value.json();
+          if (data.success && Array.isArray(data.stats)) {
+            teachersCount = data.stats.length;
+          }
+        } catch (e) {
+          console.error("Teachers parse error:", e);
+        }
+      }
+
+      // Get meta for this department
+      const meta = DEPARTMENT_META[adminDepartment] || {
+        icon: <FaBuilding className="text-blue-500" />,
+        color: "bg-blue-500",
+        code: "DEPT-000",
+        description: `${adminDepartment} department`,
+        head: `${adminDepartment} Head`,
+        courses: [adminDepartment],
+      };
+
+      // Build department object
+      setDepartment({
+        id: adminDepartment,
+        name: adminDepartment,
+        code: meta.code,
+        description: meta.description,
+        head: meta.head,
+        icon: meta.icon,
+        color: meta.color,
+        totalStudents: studentsCount,
+        totalTeachers: teachersCount,
+        totalCourses: meta.courses.length,
+        status: "Active",
+        courses: meta.courses.map((courseName, idx) => ({
+          id: idx + 1,
+          name: courseName,
+          nameEn: courseName,
+          code: `${meta.code}-${String(idx + 1).padStart(3, "0")}`,
+          students: 0,
+          teacher: "—",
+          duration: "—",
+          price: 0,
+          subtitle: "",
+          link: "#",
+        })),
+      });
+    } catch (err) {
+      console.error("❌ Fetch department data error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (adminDepartment) {
+      fetchDepartmentData();
+    }
+  }, [adminDepartment]);
 
   const handleLogout = async () => {
     try {
       await logOut();
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminEmail");
-      // ✅ adminInfo preserve
+      localStorage.removeItem("adminDepartment");
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -189,19 +242,10 @@ const Department = () => {
     }
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  const toggleSubMenu = (menu) => {
-    if (activeSubMenu === menu) {
-      setActiveSubMenu(null);
-    } else {
-      setActiveSubMenu(menu);
-    }
-  };
-
-  // Sidebar Menu Items
   const menuItems = [
     {
       id: "profile",
@@ -220,7 +264,6 @@ const Department = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -242,7 +285,7 @@ const Department = () => {
         {
           id: "batch-manual",
           path: "/admin-students/batch",
-          label: "Batch Create and  Maintain",
+          label: "Batch Create and Maintain",
         },
         {
           id: "student-profile",
@@ -279,7 +322,6 @@ const Department = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -300,7 +342,6 @@ const Department = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -335,17 +376,14 @@ const Department = () => {
     },
   ];
 
-  const filteredDepartments = departments.filter(
-    (dept) =>
-      dept.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dept.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dept.head.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
-
-  const openCoursesModal = (dept) => {
-    setSelectedDepartment(dept);
-    setShowCoursesModal(true);
-  };
+  // Search filter (only one department, but keep for UI)
+  const filteredDepartments = department
+    ? [department].filter(
+        (dept) =>
+          dept.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          dept.code.toLowerCase().includes(searchTerm.toLowerCase()),
+      )
+    : [];
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -363,7 +401,7 @@ const Department = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Departments</h1>
+          <h1 className="text-sm font-bold text-gray-800">My Department</h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -380,9 +418,7 @@ const Department = () => {
             bg-white border-r border-gray-200 
             shadow-lg md:shadow-sm
             transition-all duration-300 ease-in-out
-            h-full
-            overflow-hidden
-            flex-shrink-0
+            h-full overflow-hidden flex-shrink-0
             ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
           `}
         >
@@ -406,11 +442,16 @@ const Department = () => {
                 <p className="text-xs opacity-80 truncate">
                   {adminInfo.designation}
                 </p>
+                {adminDepartment && (
+                  <p className="text-[10px] opacity-90 truncate mt-0.5 bg-white/20 px-1.5 py-0.5 rounded-full inline-block">
+                    🏛️ {adminDepartment}
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-hidden h-[calc(100vh-200px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -421,14 +462,11 @@ const Department = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`
-                        w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
@@ -467,14 +505,11 @@ const Department = () => {
                     }}
                   >
                     <button
-                      className={`
-                        w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm
-                        ${
-                          activeMenu === item.id
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }
-                      `}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
+                        activeMenu === item.id
+                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
+                      }`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -494,7 +529,7 @@ const Department = () => {
           </nav>
 
           <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
+            <p>© Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 
@@ -505,21 +540,34 @@ const Department = () => {
           />
         )}
 
-        <main className="flex-1 p-4 md:p-6 w-full overflow-hidden">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto pt-16 md:pt-6">
           {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaBuilding className="text-blue-600" /> Department Management
+                <FaBuilding className="text-blue-600" /> My Department
+                {adminDepartment && (
+                  <span className="bg-teal-100 text-teal-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {adminDepartment}
+                  </span>
+                )}
               </h1>
               <p className="text-xs text-gray-500">
-                Manage all departments and their courses
+                You are logged in as {adminDepartment} Department Admin
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
+              <button
+                onClick={fetchDepartmentData}
+                disabled={loading}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 disabled:opacity-50"
+              >
+                <FaSyncAlt
+                  size={12}
+                  className={loading ? "animate-spin" : ""}
+                />
+                Refresh
+              </button>
               <button
                 onClick={handleLogout}
                 className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
@@ -536,133 +584,117 @@ const Department = () => {
                 <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search departments..."
+                  placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              <button
-                onClick={() => {
-                  Swal.fire({
-                    icon: "success",
-                    title: "Department Added!",
-                    text: "New department has been created successfully.",
-                    timer: 1500,
-                    showConfirmButton: false,
-                  });
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all"
-              >
-                <FaPlusCircle size={12} /> Add Department
-              </button>
             </div>
           </div>
 
-          {/* Departments Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-3 h-[calc(100vh-240px)] overflow-hidden">
-            {filteredDepartments.map((dept) => (
-              <div
-                key={dept.id}
-                className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col"
-              >
+          {/* Loading */}
+          {loading ? (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-16 text-center">
+              <FaSyncAlt className="animate-spin text-4xl text-teal-600 mx-auto mb-3" />
+              <p className="text-sm text-gray-500">
+                Loading department data...
+              </p>
+            </div>
+          ) : !adminDepartment ? (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-8 text-center">
+              <FaBuilding className="text-5xl text-yellow-500 mx-auto mb-3" />
+              <h3 className="text-base font-bold text-yellow-800 mb-0.5">
+                No Department Assigned
+              </h3>
+              <p className="text-xs text-yellow-700">
+                আপনার অ্যাকাউন্টে কোনো department সেট করা হয়নি। অ্যাডমিনের সাথে
+                যোগাযোগ করুন।
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {filteredDepartments.map((dept) => (
                 <div
-                  className={`h-1 ${dept.id === 1 ? "bg-blue-500" : dept.id === 2 ? "bg-green-500" : dept.id === 3 ? "bg-purple-500" : "bg-orange-500"}`}
-                ></div>
-                <div className="p-4 flex-1 flex flex-col">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xl">
-                          {dept.id === 1 ? (
-                            <FaUniversity className="text-blue-500" />
-                          ) : dept.id === 2 ? (
-                            <FaGlobe className="text-green-500" />
-                          ) : dept.id === 3 ? (
-                            <FaBookOpen className="text-purple-500" />
-                          ) : (
-                            <FaGraduationCap className="text-orange-500" />
-                          )}
-                        </span>
-                        <h3 className="font-semibold text-gray-800 text-sm">
-                          {dept.name}
-                        </h3>
+                  key={dept.id}
+                  className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all overflow-hidden"
+                >
+                  <div className={`h-1 ${dept.color}`}></div>
+                  <div className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{dept.icon}</span>
+                          <h3 className="font-semibold text-gray-800 text-sm">
+                            {dept.name}
+                          </h3>
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-0.5">
+                          {dept.code}
+                        </p>
                       </div>
-                      <p className="text-[10px] text-gray-500 mt-0.5">
-                        {dept.code}
-                      </p>
+                      <span
+                        className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(dept.status)}`}
+                      >
+                        {dept.status}
+                      </span>
                     </div>
-                    <span
-                      className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(dept.status)}`}
-                    >
-                      {dept.status}
-                    </span>
-                  </div>
 
-                  <p className="text-[10px] text-gray-600 mt-2 line-clamp-2 flex-1">
-                    {dept.description}
-                  </p>
-
-                  <div className="mt-3 grid grid-cols-3 gap-1 text-center">
-                    <div className="bg-gray-50 rounded-lg p-1.5">
-                      <p className="text-xs font-bold text-blue-600">
-                        {dept.totalStudents}
-                      </p>
-                      <p className="text-[8px] text-gray-500">Students</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-1.5">
-                      <p className="text-xs font-bold text-green-600">
-                        {dept.totalTeachers}
-                      </p>
-                      <p className="text-[8px] text-gray-500">Teachers</p>
-                    </div>
-                    <div className="bg-gray-50 rounded-lg p-1.5">
-                      <p className="text-xs font-bold text-purple-600">
-                        {dept.totalCourses}
-                      </p>
-                      <p className="text-[8px] text-gray-500">Courses</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-2">
-                    <p className="text-[8px] text-gray-400">
-                      Head: {dept.head}
+                    <p className="text-[10px] text-gray-600 mt-2">
+                      {dept.description}
                     </p>
-                  </div>
 
-                  <div className="mt-3 flex items-center gap-1 pt-2 border-t border-gray-100">
-                    <button
-                      onClick={() => openCoursesModal(dept)}
-                      className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all"
-                    >
-                      View Courses ({dept.courses.length})
-                    </button>
-                    <button
-                      className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 transition-all"
-                      title="Edit"
-                    >
-                      <FaEdit size={12} />
-                    </button>
-                    <button
-                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 transition-all"
-                      title="Delete"
-                    >
-                      <FaTrash size={12} />
-                    </button>
+                    <div className="mt-3 grid grid-cols-3 gap-1 text-center">
+                      <div className="bg-gray-50 rounded-lg p-1.5">
+                        <p className="text-xs font-bold text-blue-600">
+                          {dept.totalStudents}
+                        </p>
+                        <p className="text-[8px] text-gray-500">Students</p>
+                      </div>
+                      <div className="bg-gray-50 rounded-lg p-1.5">
+                        <p className="text-xs font-bold text-green-600">
+                          {dept.totalTeachers}
+                        </p>
+                        <p className="text-[8px] text-gray-500">Teachers</p>
+                      </div>
+                      <div className="bg-gray-50 rounded-lg p-1.5">
+                        <p className="text-xs font-bold text-purple-600">
+                          {dept.totalCourses}
+                        </p>
+                        <p className="text-[8px] text-gray-500">Courses</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-2">
+                      <p className="text-[8px] text-gray-400">
+                        Head: {dept.head}
+                      </p>
+                    </div>
+
+                    <div className="mt-3 flex items-center gap-1 pt-2 border-t border-gray-100">
+                      <button
+                        onClick={() => {
+                          setShowCoursesModal(true);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all"
+                      >
+                        View Courses ({dept.courses.length})
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
-          {filteredDepartments.length === 0 && (
-            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center">
+          {!loading && filteredDepartments.length === 0 && adminDepartment && (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
               <FaBuilding className="text-5xl text-gray-300 mx-auto mb-3" />
               <h3 className="text-base font-bold text-gray-800 mb-0.5">
-                No Departments Found
+                No Department Found
               </h3>
               <p className="text-xs text-gray-500">
-                Try adjusting your search criteria
+                "{adminDepartment}" এর জন্য কোনো data পাওয়া যায়নি।
               </p>
             </div>
           )}
@@ -670,13 +702,13 @@ const Department = () => {
       </div>
 
       {/* Courses Modal */}
-      {showCoursesModal && selectedDepartment && (
+      {showCoursesModal && department && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <FaBookOpen className="text-blue-600" />
-                {selectedDepartment.name} - Courses
+                {department.name} - Courses
               </h3>
               <button
                 onClick={() => setShowCoursesModal(false)}
@@ -689,20 +721,20 @@ const Department = () => {
               <div className="bg-blue-50 rounded-lg p-3 mb-4">
                 <p className="text-sm text-gray-700">
                   <span className="font-semibold">Department Head:</span>{" "}
-                  {selectedDepartment.head}
+                  {department.head}
                 </p>
                 <p className="text-sm text-gray-700">
                   <span className="font-semibold">Total Courses:</span>{" "}
-                  {selectedDepartment.totalCourses}
+                  {department.totalCourses}
                 </p>
                 <p className="text-sm text-gray-700">
                   <span className="font-semibold">Total Students:</span>{" "}
-                  {selectedDepartment.totalStudents}
+                  {department.totalStudents}
                 </p>
               </div>
 
               <div className="space-y-2">
-                {selectedDepartment.courses.map((course) => (
+                {department.courses.map((course) => (
                   <div
                     key={course.id}
                     className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all"
@@ -715,57 +747,18 @@ const Department = () => {
                         <p className="text-xs text-gray-500">
                           {course.nameEn} • {course.code}
                         </p>
-                        {course.subtitle && (
-                          <p className="text-[11px] text-gray-500 mt-1 italic">
-                            {course.subtitle}
-                          </p>
-                        )}
                       </div>
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full whitespace-nowrap">
-                        {course.students} Students
-                      </span>
                     </div>
 
                     <div className="mt-2 flex items-center gap-4 text-xs text-gray-500 flex-wrap">
                       <span>👨‍🏫 {course.teacher}</span>
                       <span>⏱️ {course.duration}</span>
-                      <span>💰 ৳{course.price}</span>
-                    </div>
-
-                    <div className="mt-2 flex items-center gap-1 pt-2 border-t border-gray-100">
-                      {/* ✅ View Details — course.link এ navigate করবে */}
-                      <Link
-                        to={course.link || "#"}
-                        className="text-blue-600 hover:text-blue-800 text-[10px] font-medium flex-1 text-center py-1 rounded border border-blue-200 hover:bg-blue-50 transition-all"
-                      >
-                        View Details
-                      </Link>
-                      <button className="text-green-600 hover:text-green-800 p-1">
-                        <FaEdit size={12} />
-                      </button>
-                      <button className="text-red-600 hover:text-red-800 p-1">
-                        <FaTrash size={12} />
-                      </button>
                     </div>
                   </div>
                 ))}
               </div>
 
               <div className="flex gap-3 pt-4 border-t border-gray-200 mt-4">
-                <button
-                  onClick={() => {
-                    Swal.fire({
-                      icon: "success",
-                      title: "Course Added!",
-                      text: "New course has been added to this department.",
-                      timer: 1500,
-                      showConfirmButton: false,
-                    });
-                  }}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold text-sm transition-all flex items-center justify-center gap-1"
-                >
-                  <FaPlusCircle size={14} /> Add Course
-                </button>
                 <button
                   onClick={() => setShowCoursesModal(false)}
                   className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm transition-all"
