@@ -11,25 +11,58 @@ import {
   FaSignOutAlt,
   FaBell,
   FaChartLine,
-  FaUserTimes,
   FaDatabase,
   FaEye,
   FaTrash,
   FaSync,
   FaArrowRight,
-  FaLayerGroup,
   FaCalendarCheck,
   FaUserPlus,
-  FaBook,
-  FaBookOpen,
   FaPaperPlane,
   FaHeadset,
   FaTimes,
+  FaBuilding,
+  FaLock,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
+
+// ============================================================
+// ✅ Department → Support form department mapping
+// ============================================================
+const SUPPORT_DEPT_MAP = {
+  Elders: [
+    "quran for elder",
+    "quran for elders",
+    "basic tajweed",
+    "quran nazera",
+    "qaida",
+    "najera",
+    "bakarah",
+  ],
+  "Quran Studies": ["quran studies", "quran study", "hifzul quran"],
+  Alimiya: ["allimiyah", "alimiya", "alimiyyah", "dawra", "tafsir", "fiqh"],
+  Diploma: ["diploma"],
+};
+
+// ✅ Check if a support ticket belongs to admin's department
+const ticketMatchesDepartment = (ticket, adminDept) => {
+  if (!adminDept || adminDept === "All") return true;
+
+  const keywords = SUPPORT_DEPT_MAP[adminDept];
+  if (!keywords) return false;
+
+  const ticketDept = String(ticket.department || "")
+    .toLowerCase()
+    .trim();
+  if (!ticketDept) return false;
+
+  return keywords.some(
+    (kw) => ticketDept.includes(kw) || kw.includes(ticketDept),
+  );
+};
 
 const Admin_notification = () => {
   const { user, logOut } = useAuth();
@@ -38,11 +71,13 @@ const Admin_notification = () => {
   const [activeMenu, setActiveMenu] = useState("notification");
   const [activeSubMenu, setActiveSubMenu] = useState(null);
 
+  // ✅ Current admin's department
+  const [adminDepartment, setAdminDepartment] = useState("");
+
   const [admissions, setAdmissions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [sourceFilter, setSourceFilter] = useState("All"); // All | Tazweed | Najera | Support
+  const [sourceFilter, setSourceFilter] = useState("All");
 
-  const [readFilter, setReadFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
 
   // ✅ Support Tickets State
@@ -63,32 +98,48 @@ const Admin_notification = () => {
   });
 
   // ============================================================
-  // Load admin info
+  // ✅ Load admin info + department
   // ============================================================
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
+    const savedDept = localStorage.getItem("adminDepartment");
+
     if (savedAdmin) {
       try {
-        setAdminInfo(JSON.parse(savedAdmin));
+        const parsed = JSON.parse(savedAdmin);
+        setAdminInfo(parsed);
+        setAdminDepartment(parsed.department || savedDept || "");
       } catch (err) {
         console.error(err);
       }
     } else {
+      const fallbackDept = savedDept || "Administration";
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: fallbackDept,
         joinDate: "January 2024",
       });
+      setAdminDepartment(fallbackDept);
     }
   }, [user]);
 
   // ============================================================
-  // ✅ Fetch only Tazweed + Najera students
+  // ✅ Fetch notifications — Tazweed + Najera (Elders only)
   // ============================================================
   const fetchAdmissions = async () => {
+    // Guard: Tazweed + Najera শুধু Elders department
+    if (!adminDepartment || adminDepartment !== "Elders") {
+      console.log(
+        `⛔ Skipping admissions fetch — admin is "${adminDepartment}"`,
+      );
+      setAdmissions([]);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -97,7 +148,6 @@ const Admin_notification = () => {
         fetch(`${API_BASE}/najera-batch/all`),
       ]);
 
-      // ---------- 1) Basic Tazweed Students ----------
       let tazweedStudents = [];
       if (tazweedRes.status === "fulfilled") {
         try {
@@ -149,7 +199,6 @@ const Admin_notification = () => {
         }
       }
 
-      // ---------- 2) Najera Batch Students ----------
       let najeraStudents = [];
       if (najeraRes.status === "fulfilled") {
         try {
@@ -207,14 +256,10 @@ const Admin_notification = () => {
         return db - da;
       });
 
-      console.log("════════════════════════════════");
-      console.log(`✅ Loaded notifications:`);
-      console.log(`   - Tazweed: ${tazweedStudents.length}`);
-      console.log(`   - Najera: ${najeraStudents.length}`);
-      console.log(`   - Total: ${combined.length}`);
-      console.log("════════════════════════════════");
-
       setAdmissions(combined);
+      console.log(
+        `✅ [${adminDepartment}] Loaded: ${tazweedStudents.length} tazweed + ${najeraStudents.length} najera`,
+      );
     } catch (error) {
       console.error("Error fetching admissions:", error);
     } finally {
@@ -223,27 +268,44 @@ const Admin_notification = () => {
   };
 
   // ============================================================
-  // ✅ Fetch Support Tickets
+  // ✅ Fetch Support Tickets — department filtered
   // ============================================================
   const fetchSupportTickets = async () => {
+    if (!adminDepartment) return;
+
     try {
       setSupportLoading(true);
       const res = await fetch(`${API_BASE}/support/tickets`);
       const data = await res.json();
-      if (data.success) {
-        setSupportTickets(data.tickets || []);
-        setUnreadSupportCount(
-          (data.tickets || []).filter((t) => !t.isRead).length,
+
+      if (data.success && Array.isArray(data.tickets)) {
+        // ✅ Filter by admin's department
+        const filtered = data.tickets.filter((t) =>
+          ticketMatchesDepartment(t, adminDepartment),
         );
+
+        console.log(
+          `🎧 [${adminDepartment}] Support tickets: ${filtered.length}/${data.tickets.length}`,
+        );
+
+        setSupportTickets(filtered);
+        setUnreadSupportCount(filtered.filter((t) => !t.isRead).length);
+      } else {
+        setSupportTickets([]);
+        setUnreadSupportCount(0);
       }
     } catch (err) {
       console.error("Support fetch error:", err);
+      setSupportTickets([]);
+      setUnreadSupportCount(0);
     } finally {
       setSupportLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!adminDepartment) return;
+
     fetchAdmissions();
     fetchSupportTickets();
 
@@ -254,7 +316,7 @@ const Admin_notification = () => {
 
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [adminDepartment]);
 
   // ============================================================
   // ✅ Send Admin Reply
@@ -354,6 +416,7 @@ const Admin_notification = () => {
       await logOut();
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminEmail");
+      localStorage.removeItem("adminDepartment");
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -429,9 +492,6 @@ const Admin_notification = () => {
     });
   };
 
-  // ============================================================
-  // Delete Student — Source অনুযায়ী
-  // ============================================================
   const deleteAdmission = async (id, name, source) => {
     const result = await Swal.fire({
       title: `Delete ${name}?`,
@@ -511,7 +571,7 @@ const Admin_notification = () => {
         {
           id: "batch-manual",
           path: "/admin-students/batch",
-          label: "Batch Create and  Maintain",
+          label: "Batch Create and Maintain",
         },
         {
           id: "student-profile",
@@ -608,13 +668,6 @@ const Admin_notification = () => {
   const filteredAdmissions = admissions
     .filter((a) => (sourceFilter === "All" ? true : a.source === sourceFilter))
     .filter((a) =>
-      readFilter === "all"
-        ? true
-        : readFilter === "unread"
-          ? !a.isRead
-          : a.isRead,
-    )
-    .filter((a) =>
       statusFilter === "all" ? true : a.uiStatus === statusFilter,
     );
 
@@ -646,6 +699,9 @@ const Admin_notification = () => {
         return "bg-gray-100 text-gray-700";
     }
   };
+
+  // ✅ Permission check
+  const isEldersDept = adminDepartment === "Elders";
 
   // ============================================================
   // Render
@@ -690,11 +746,16 @@ const Admin_notification = () => {
                 <p className="text-xs opacity-80 truncate">
                   {adminInfo.designation}
                 </p>
+                {adminDepartment && (
+                  <p className="text-[10px] opacity-90 truncate mt-0.5 bg-white/20 px-1.5 py-0.5 rounded-full inline-block">
+                    🏛️ {adminDepartment}
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-140px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -772,10 +833,6 @@ const Admin_notification = () => {
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
-          <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
-          </div>
         </aside>
 
         {isSidebarOpen && (
@@ -792,9 +849,16 @@ const Admin_notification = () => {
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaBell className="text-teal-600" /> All Notifications
+                {adminDepartment && (
+                  <span className="bg-teal-100 text-teal-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {adminDepartment}
+                  </span>
+                )}
               </h1>
               <p className="text-xs text-gray-500">
-                Basic Tazweed + Najera Batch + Support Tickets
+                {isEldersDept
+                  ? "Basic Tazweed + Najera Batch + Support Tickets"
+                  : "Support Tickets only"}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -824,49 +888,80 @@ const Admin_notification = () => {
             </div>
           </div>
 
-          {/* ✅ Source Tabs */}
+          {/* ✅ Department Banner */}
+          {adminDepartment && (
+            <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white p-3 rounded-xl shadow-sm mb-3 flex items-center justify-between flex-shrink-0">
+              <div>
+                <p className="text-[10px] opacity-80">You are logged in as</p>
+                <p className="text-sm font-bold">
+                  {adminDepartment} Department Admin
+                </p>
+              </div>
+              <span className="text-2xl">🏛️</span>
+            </div>
+          )}
+
+          {/* ✅ Source Tabs — Tazweed/Najera only for Elders */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto flex-shrink-0">
-            {[
-              { id: "All", label: "All Students", color: "blue" },
-              { id: "Tazweed", label: "Basic Tazweed", color: "green" },
-              { id: "Najera", label: "Najera Batch", color: "purple" },
-              { id: "Support", label: "🎧 Support Tickets", color: "orange" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setSourceFilter(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                  sourceFilter === tab.id
-                    ? tab.color === "blue"
-                      ? "bg-blue-50 text-blue-700 shadow-sm"
-                      : tab.color === "green"
-                        ? "bg-green-50 text-green-700 shadow-sm"
-                        : tab.color === "purple"
-                          ? "bg-purple-50 text-purple-700 shadow-sm"
-                          : "bg-orange-50 text-orange-700 shadow-sm"
-                    : "text-gray-600 hover:bg-gray-100"
+            {isEldersDept && (
+              <>
+                {[
+                  { id: "All", label: "All Students", color: "blue" },
+                  { id: "Tazweed", label: "Basic Tazweed", color: "green" },
+                  { id: "Najera", label: "Najera Batch", color: "purple" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setSourceFilter(tab.id)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                      sourceFilter === tab.id
+                        ? tab.color === "blue"
+                          ? "bg-blue-50 text-blue-700 shadow-sm"
+                          : tab.color === "green"
+                            ? "bg-green-50 text-green-700 shadow-sm"
+                            : "bg-purple-50 text-purple-700 shadow-sm"
+                        : "text-gray-600 hover:bg-gray-100"
+                    }`}
+                  >
+                    {tab.label}
+                    <span
+                      className={`text-[10px] px-1.5 rounded-full ${
+                        sourceFilter === tab.id
+                          ? "bg-white text-gray-700"
+                          : "bg-gray-200 text-gray-600"
+                      }`}
+                    >
+                      {sourceCounts[tab.id]}
+                    </span>
+                  </button>
+                ))}
+              </>
+            )}
+            <button
+              onClick={() => setSourceFilter("Support")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                sourceFilter === "Support"
+                  ? "bg-orange-50 text-orange-700 shadow-sm"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              🎧 Support Tickets
+              <span
+                className={`text-[10px] px-1.5 rounded-full font-bold ${
+                  sourceFilter === "Support"
+                    ? "bg-white text-gray-700"
+                    : unreadSupportCount > 0
+                      ? "bg-red-500 text-white animate-pulse"
+                      : "bg-gray-200 text-gray-600"
                 }`}
               >
-                {tab.label}
-                <span
-                  className={`text-[10px] px-1.5 rounded-full font-bold ${
-                    sourceFilter === tab.id
-                      ? "bg-white text-gray-700"
-                      : tab.id === "Support" && unreadSupportCount > 0
-                        ? "bg-red-500 text-white animate-pulse"
-                        : "bg-gray-200 text-gray-600"
-                  }`}
-                >
-                  {tab.id === "Support"
-                    ? supportTickets.length
-                    : sourceCounts[tab.id]}
-                </span>
-              </button>
-            ))}
+                {supportTickets.length}
+              </span>
+            </button>
           </div>
 
           {/* Stats — only for Student tabs */}
-          {sourceFilter !== "Support" && (
+          {sourceFilter !== "Support" && isEldersDept && (
             <>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 flex-shrink-0">
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
@@ -897,7 +992,6 @@ const Admin_notification = () => {
                 </div>
               </div>
 
-              {/* Filters */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 mb-3 flex flex-col md:flex-row justify-between items-start md:items-center gap-2 flex-shrink-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-bold text-gray-700">
@@ -918,14 +1012,16 @@ const Admin_notification = () => {
             </>
           )}
 
-          {/* Support Stats — for Support tab */}
+          {/* Support Stats */}
           {sourceFilter === "Support" && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 flex-shrink-0">
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
                 <p className="text-lg font-bold text-orange-600">
                   {supportTickets.length}
                 </p>
-                <p className="text-[10px] text-gray-500">Total Tickets</p>
+                <p className="text-[10px] text-gray-500">
+                  {adminDepartment} Tickets
+                </p>
               </div>
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
                 <p className="text-lg font-bold text-red-600">
@@ -948,16 +1044,15 @@ const Admin_notification = () => {
             </div>
           )}
 
-          {/* Main Content Area */}
+          {/* Main Content */}
           <div className="flex-1 overflow-hidden">
-            {/* 🎧 SUPPORT TICKETS SECTION */}
             {sourceFilter === "Support" ? (
               supportLoading ? (
                 <div className="bg-white border rounded-xl h-full flex items-center justify-center">
                   <div className="text-center">
                     <FaSync className="animate-spin text-orange-600 text-3xl mx-auto mb-2" />
                     <p className="text-xs text-gray-500">
-                      Loading support tickets...
+                      Loading your department tickets...
                     </p>
                   </div>
                 </div>
@@ -1075,10 +1170,10 @@ const Admin_notification = () => {
                             <td colSpan="7" className="p-10 text-center">
                               <FaHeadset className="text-5xl text-gray-300 mx-auto mb-3" />
                               <p className="text-sm font-bold text-gray-700">
-                                No support tickets yet
+                                No support tickets in {adminDepartment}
                               </p>
                               <p className="text-[10px] text-gray-500 mt-1">
-                                Students can submit support from their dashboard
+                                আপনার department এর কোনো ticket এখনো আসেনি
                               </p>
                             </td>
                           </tr>
@@ -1088,8 +1183,29 @@ const Admin_notification = () => {
                   </div>
                 </div>
               )
+            ) : !isEldersDept ? (
+              /* ✅ Non-Elders: Access Denied for Student tabs */
+              <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-10 text-center h-full flex flex-col items-center justify-center">
+                <FaLock className="text-6xl text-yellow-500 mb-4" />
+                <h3 className="text-lg font-bold text-yellow-800 mb-2">
+                  🔒 Student Notifications শুধু Elders Department এর জন্য
+                </h3>
+                <p className="text-sm text-yellow-700 mb-3">
+                  আপনি এখন <strong>{adminDepartment}</strong> department এ লগইন
+                  করেছেন।
+                </p>
+                <p className="text-xs text-yellow-600 mb-4">
+                  Basic Tazweed এবং Najera batch শুধু Elders department এর অংশ।
+                </p>
+                <button
+                  onClick={() => setSourceFilter("Support")}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                >
+                  🎧 আপনার Support Tickets দেখুন
+                </button>
+              </div>
             ) : (
-              /* Student Table */
+              /* Student Table — Elders only */
               <div className="h-full">
                 {loading ? (
                   <div className="bg-white border border-gray-200 rounded-xl h-full flex items-center justify-center">
@@ -1233,9 +1349,8 @@ const Admin_notification = () => {
                                   No Students Found
                                 </h3>
                                 <p className="text-xs text-gray-500">
-                                  {admissions.length === 0
-                                    ? "Basic Tazweed বা Najera Batch থেকে student add করুন।"
-                                    : "আপনার filter এর সাথে কোনো match নেই।"}
+                                  Basic Tazweed বা Najera Batch থেকে student add
+                                  করুন।
                                 </p>
                               </td>
                             </tr>
@@ -1251,11 +1366,10 @@ const Admin_notification = () => {
         </main>
       </div>
 
-      {/* 🎧 SUPPORT CHAT MODAL */}
+      {/* Support Chat Modal */}
       {selectedTicket && (
         <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/60 p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-            {/* Header */}
             <div className="p-4 border-b flex justify-between items-center bg-orange-50 rounded-t-xl">
               <div className="min-w-0">
                 <h3 className="font-bold text-gray-800 text-sm flex items-center gap-2 truncate">
@@ -1264,7 +1378,7 @@ const Admin_notification = () => {
                 </h3>
                 <p className="text-[10px] text-gray-500 mt-0.5 truncate">
                   Ticket #{selectedTicket._id} • {selectedTicket.name} •{" "}
-                  {selectedTicket.phone}
+                  {selectedTicket.phone} • Dept: {selectedTicket.department}
                 </p>
               </div>
               <button
@@ -1278,7 +1392,6 @@ const Admin_notification = () => {
               </button>
             </div>
 
-            {/* Status + priority row */}
             <div className="px-4 py-2 flex items-center gap-2 border-b bg-gray-50 flex-wrap">
               <span
                 className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
@@ -1314,7 +1427,6 @@ const Admin_notification = () => {
               </span>
             </div>
 
-            {/* Original Problem */}
             <div className="p-4 bg-blue-50 border-b">
               <p className="text-[10px] font-bold text-blue-700 mb-1">
                 📝 Problem Details:
@@ -1334,7 +1446,6 @@ const Admin_notification = () => {
               )}
             </div>
 
-            {/* Chat Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
               {(selectedTicket.replies || []).length === 0 ? (
                 <p className="text-xs text-gray-500 text-center py-6">
@@ -1372,7 +1483,6 @@ const Admin_notification = () => {
               )}
             </div>
 
-            {/* Reply Box */}
             <div className="p-3 border-t bg-white rounded-b-xl">
               <div className="flex gap-2">
                 <textarea

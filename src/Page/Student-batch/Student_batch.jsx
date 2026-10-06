@@ -1,3 +1,4 @@
+// src/Page/Admin/Student_batch.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
@@ -35,23 +36,45 @@ import {
   FaInfoCircle,
   FaArrowLeft,
   FaHome,
-  FaEnvelope,
   FaIdCard,
   FaWallet,
   FaVenusMars,
   FaAward,
+  FaBuilding,
+  FaLock,
 } from "react-icons/fa";
 import { MdDashboard, MdOutlineQuiz } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const API_URL = "https://api.tarbiyahonline.com";
 
-const COURSE_OPTIONS = [
+// ✅ Department → Courses mapping
+const COURSE_OPTIONS_BY_DEPT = {
+  Elders: [
+    "Qaida Nuraniyah",
+    "Quran Nazera",
+    "Bakarah Hifz",
+    "Basic Tajweed (Level-1)",
+    "Najera",
+  ],
+  "Quran Studies": ["Quran Studies", "Hifzul Quran", "Tarbiyah Quran Studies"],
+  Alimiya: ["Alimiya", "Dawra e Hadith", "Tafsir", "Fiqh", "Hadith"],
+  Diploma: ["Diploma in Islamic Studies", "Certificate"],
+};
+
+// ✅ Fallback (department না মিললে এইটা দেখাবে)
+const DEFAULT_COURSE_OPTIONS = [
   "Qaida Nuraniyah",
   "Quran Nazera",
   "Bakarah Hifz",
   "Basic Tajweed (Level-1)",
 ];
+
+// ✅ Helper — admin এর department অনুযায়ী courses
+const getCourseOptions = (dept) => {
+  if (!dept) return DEFAULT_COURSE_OPTIONS;
+  return COURSE_OPTIONS_BY_DEPT[dept] || DEFAULT_COURSE_OPTIONS;
+};
 
 const DAYS = [
   "Saturday",
@@ -71,24 +94,14 @@ const readFileAsDataURL = (file) =>
     reader.readAsDataURL(file);
   });
 
-/* ✅ NEW — Student ID generator (Admin Dashboard এর মতো) */
+/* ✅ Student ID generator */
 const generateStudentId = (prefix = "TAR") => {
   const year = new Date().getFullYear().toString().slice(-2);
   const random = Math.floor(10000 + Math.random() * 90000);
   return `${prefix}${year}${random}`;
 };
 
-/* ✅ NEW — Credential Copy to Clipboard */
-const copyToClipboard = async (text) => {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
-};
-
-/* ✅ NEW — Unique random password generator */
+/* ✅ Unique random password generator */
 const generatePassword = () => {
   const prefixes = ["TAR", "STU", "MDR", "QUR", "NOOR"];
   const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
@@ -98,6 +111,7 @@ const generatePassword = () => {
   const c2 = chars[Math.floor(Math.random() * chars.length)];
   return `${prefix}${num}${c1}${c2}@`;
 };
+
 const uid = (prefix = "id") =>
   `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
@@ -113,6 +127,10 @@ const Student_batch = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [activeSubMenu, setActiveSubMenu] = useState(null);
+
+  // ✅ Current admin এর department
+  const [adminDepartment, setAdminDepartment] = useState("");
+
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -143,26 +161,55 @@ const Student_batch = () => {
 
   const [lmsBatchId, setLmsBatchId] = useState(null);
 
+  // ============================================================
+  // ✅ Load admin info + department
+  // ============================================================
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
-    if (savedAdmin) setAdminInfo(JSON.parse(savedAdmin));
-    else
+    const savedDept = localStorage.getItem("adminDepartment");
+
+    if (savedAdmin) {
+      try {
+        const parsed = JSON.parse(savedAdmin);
+        setAdminInfo(parsed);
+        setAdminDepartment(parsed.department || savedDept || "");
+      } catch (err) {
+        console.error("adminInfo parse error:", err);
+      }
+    } else {
+      const fallbackDept = savedDept || "Administration";
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: fallbackDept,
         joinDate: "January 2024",
       });
+      setAdminDepartment(fallbackDept);
+    }
   }, [user]);
 
+  // ============================================================
+  // ✅ Fetch batches — department filtered
+  // ============================================================
   const fetchBatches = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_URL}/api/batches/all`);
+
+      const url =
+        adminDepartment && adminDepartment !== "All"
+          ? `${API_URL}/api/batches/all?department=${encodeURIComponent(adminDepartment)}`
+          : `${API_URL}/api/batches/all`;
+
+      const res = await fetch(url);
       const data = await res.json();
+
       setBatches(data.success ? data.batches || [] : []);
+
+      console.log(
+        `✅ [${adminDepartment}] Loaded ${(data.batches || []).length} batches`,
+      );
     } catch (error) {
       console.error(error);
       Swal.fire({
@@ -177,9 +224,13 @@ const Student_batch = () => {
     }
   };
 
+  // ✅ Re-fetch when department changes
   useEffect(() => {
-    fetchBatches();
-  }, []);
+    if (adminDepartment) {
+      fetchBatches();
+    }
+    // eslint-disable-next-line
+  }, [adminDepartment]);
 
   const handleLogout = async () => {
     try {
@@ -187,6 +238,7 @@ const Student_batch = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
+      localStorage.removeItem("adminDepartment");
       await Swal.fire({
         icon: "success",
         title: "Logged Out",
@@ -221,7 +273,6 @@ const Student_batch = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -366,6 +417,9 @@ const Student_batch = () => {
     }
   };
 
+  // ============================================================
+  // ✅ Add Batch — with department
+  // ============================================================
   const handleAddBatch = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.course) {
@@ -384,6 +438,8 @@ const Student_batch = () => {
         body: JSON.stringify({
           name: formData.name.trim(),
           course: formData.course,
+          // ✅ department save হবে
+          department: adminDepartment || "",
           students: Number(formData.students) || 0,
           schedule: formData.schedule || "",
           teacher: formData.teacher || "",
@@ -399,6 +455,7 @@ const Student_batch = () => {
         Swal.fire({
           icon: "success",
           title: "Batch Created!",
+          text: `Saved in ${adminDepartment} Department`,
           timer: 1500,
           showConfirmButton: false,
         });
@@ -409,6 +466,8 @@ const Student_batch = () => {
       Swal.fire({ icon: "error", title: "Server Error", text: err.message });
     }
   };
+
+  // ✅ Edit Batch — department preserved
   const handleEditBatch = async (e) => {
     e.preventDefault();
     try {
@@ -417,7 +476,11 @@ const Student_batch = () => {
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({
+            ...formData,
+            // ✅ department always preserved
+            department: adminDepartment || selectedBatch.department || "",
+          }),
         },
       );
       const data = await res.json();
@@ -451,7 +514,6 @@ const Student_batch = () => {
     }).then(async (r) => {
       if (r.isConfirmed) {
         try {
-          // ✅ Delete all students of this batch first
           await fetch(`${API_URL}/api/batch-students/delete-by-batch/${id}`, {
             method: "DELETE",
           });
@@ -503,6 +565,7 @@ const Student_batch = () => {
     return (
       <ClassLMSView
         batchId={lmsBatchId}
+        adminDepartment={adminDepartment}
         onBack={() => {
           setLmsBatchId(null);
           fetchBatches();
@@ -548,10 +611,15 @@ const Student_batch = () => {
                 <p className="text-xs opacity-80 truncate">
                   {adminInfo.designation}
                 </p>
+                {adminDepartment && (
+                  <p className="text-[10px] opacity-90 truncate mt-0.5 bg-white/20 px-1.5 py-0.5 rounded-full inline-block">
+                    🏛️ {adminDepartment}
+                  </p>
+                )}
               </div>
             </div>
           </div>
-          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-160px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -636,13 +704,19 @@ const Student_batch = () => {
 
         {/* Main */}
         <main className="flex-1 p-4 md:p-6 w-full overflow-y-auto pt-16 md:pt-6">
+          {/* Top Bar */}
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaUsersCogIcon className="text-indigo-600" /> Batch Maintain
+                {adminDepartment && (
+                  <span className="bg-teal-100 text-teal-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {adminDepartment}
+                  </span>
+                )}
               </h1>
               <p className="text-xs text-gray-500">
-                Create and manage student batches with full LMS
+                Create and manage batches for {adminDepartment} department
               </p>
             </div>
             <button
@@ -652,6 +726,19 @@ const Student_batch = () => {
               Logout
             </button>
           </div>
+
+          {/* ✅ Department banner */}
+          {adminDepartment && (
+            <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white p-3 rounded-xl shadow-sm mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] opacity-80">You are logged in as</p>
+                <p className="text-sm font-bold">
+                  {adminDepartment} Department Admin
+                </p>
+              </div>
+              <span className="text-2xl">🏛️</span>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
@@ -761,6 +848,11 @@ const Student_batch = () => {
                           <p className="text-[10px] text-gray-500">
                             {batch.course}
                           </p>
+                          {batch.department && (
+                            <p className="text-[9px] text-teal-600 font-semibold mt-0.5">
+                              🏛️ {batch.department}
+                            </p>
+                          )}
                         </div>
                         <span
                           className={`text-[8px] px-1.5 py-0.5 rounded-full ${getStatusColor(batch.status)}`}
@@ -835,7 +927,9 @@ const Student_batch = () => {
                 No Batches Found
               </h3>
               <p className="text-xs text-gray-500">
-                Try adjusting filters or create a new batch
+                {batches.length === 0
+                  ? `${adminDepartment} department এ এখনো কোনো batch নেই। নতুন batch তৈরি করুন।`
+                  : "Filter adjust করুন অথবা নতুন batch তৈরি করুন।"}
               </p>
             </div>
           )}
@@ -851,6 +945,7 @@ const Student_batch = () => {
           onSubmit={handleAddBatch}
           onClose={() => setShowAddModal(false)}
           submitText="Create Batch"
+          adminDepartment={adminDepartment}
         />
       )}
       {showEditModal && (
@@ -862,6 +957,7 @@ const Student_batch = () => {
           onSubmit={handleEditBatch}
           onClose={() => setShowEditModal(false)}
           submitText="Update Batch"
+          adminDepartment={adminDepartment}
         />
       )}
     </div>
@@ -869,13 +965,7 @@ const Student_batch = () => {
 };
 
 /* ============================================================
-   ✅ BATCH FORM MODAL
-============================================================ */
-/* ============================================================
-   ✅ BATCH FORM MODAL
-============================================================ */
-/* ============================================================
-   ✅ BATCH FORM MODAL
+   ✅ BATCH FORM MODAL — department aware
 ============================================================ */
 const BatchFormModal = ({
   title,
@@ -885,6 +975,7 @@ const BatchFormModal = ({
   onSubmit,
   onClose,
   submitText,
+  adminDepartment,
 }) => {
   const [teachers, setTeachers] = React.useState(() => {
     if (Array.isArray(formData.teachers)) return formData.teachers;
@@ -897,6 +988,9 @@ const BatchFormModal = ({
     return [];
   });
   const [teacherInput, setTeacherInput] = React.useState("");
+
+  // ✅ Course options based on department
+  const courseOptions = getCourseOptions(adminDepartment);
 
   const addTeacher = (value) => {
     const val = (value || "").trim();
@@ -929,6 +1023,11 @@ const BatchFormModal = ({
         <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
           <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
             {icon} {title}
+            {adminDepartment && (
+              <span className="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                {adminDepartment}
+              </span>
+            )}
           </h3>
           <button
             onClick={onClose}
@@ -957,10 +1056,13 @@ const BatchFormModal = ({
               />
             </div>
 
-            {/* Course */}
+            {/* Course — department-based options */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Course *
+                Course *{" "}
+                <span className="text-[10px] text-gray-400 font-normal">
+                  ({adminDepartment})
+                </span>
               </label>
               <select
                 required
@@ -971,7 +1073,7 @@ const BatchFormModal = ({
                 className="w-full border border-gray-300 rounded-lg px-3 py-2"
               >
                 <option value="">Select Course</option>
-                {COURSE_OPTIONS.map((c) => (
+                {courseOptions.map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>
@@ -1131,9 +1233,10 @@ const BatchFormModal = ({
 };
 
 /* ============================================================
-   ✅ CLASS LMS VIEW  (Main LMS)
+   ✅ CLASS LMS VIEW — same as before
+   (adminDepartment prop added for API calls)
 ============================================================ */
-const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
+const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
   const [batch, setBatch] = useState(null);
   const [loading, setLoading] = useState(true);
   const [section, setSection] = useState("overview");
@@ -1143,24 +1246,22 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   const [dbStudents, setDbStudents] = useState([]);
   const [loadingDbStudents, setLoadingDbStudents] = useState(false);
 
-  // ✅ NEW: Classes from MongoDB collection
   const [dbClasses, setDbClasses] = useState([]);
   const [loadingClasses, setLoadingClasses] = useState(false);
 
-  // ✅ NEW: Materials from MongoDB collection
   const [dbMaterials, setDbMaterials] = useState([]);
   const [loadingMaterials, setLoadingMaterials] = useState(false);
+
   /* ---------- Student ---------- */
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState(null);
 
-  // ✅ NEW: Videos from MongoDB collection
   const [dbVideos, setDbVideos] = useState([]);
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [studentForm, setStudentForm] = useState({
     name: "",
     studentId: "",
-    password: "", // ✅ NEW
+    password: "",
     phone: "",
     country: "BD",
     course: "",
@@ -1175,13 +1276,14 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     transactionId: "",
     notes: "",
   });
+
   /* ---------- Class ---------- */
   const [showClassModal, setShowClassModal] = useState(false);
   const [editingClassId, setEditingClassId] = useState(null);
   const [classForm, setClassForm] = useState({
     name: "",
-    classNo: "", // ⬅️ NEW
-    classDate: "", // ⬅️ NEW
+    classNo: "",
+    classDate: "",
     day: "Saturday",
     time: "",
     gender: "Male",
@@ -1221,7 +1323,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     remarks: "",
   });
 
-  /* ---------- Materials (Exam / Quiz / PDF) ---------- */
+  /* ---------- Materials ---------- */
   const [showMaterialModal, setShowMaterialModal] = useState(false);
   const [materialForm, setMaterialForm] = useState({
     type: "exam",
@@ -1242,7 +1344,11 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   const fetchBatch = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${API_URL}/api/batches/all`);
+      const url =
+        adminDepartment && adminDepartment !== "All"
+          ? `${API_URL}/api/batches/all?department=${encodeURIComponent(adminDepartment)}`
+          : `${API_URL}/api/batches/all`;
+      const res = await fetch(url);
       const data = await res.json();
       if (data.success) {
         const found = (data.batches || []).find((b) => b._id === batchId);
@@ -1255,7 +1361,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     }
   };
 
-  /* ✅ Fetch students from batch_students collection */
+  /* ✅ Fetch students */
   const fetchDbStudents = async () => {
     try {
       setLoadingDbStudents(true);
@@ -1263,11 +1369,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         `${API_URL}/api/batch-students/all?batchId=${encodeURIComponent(batchId)}`,
       );
       const data = await res.json();
-      if (data.success) {
-        setDbStudents(data.students || []);
-      } else {
-        setDbStudents([]);
-      }
+      setDbStudents(data.success ? data.students || [] : []);
     } catch (e) {
       console.error("❌ fetchDbStudents error:", e);
       setDbStudents([]);
@@ -1276,7 +1378,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     }
   };
 
-  /* ✅ Fetch classes from batch_classes collection */
+  /* ✅ Fetch classes */
   const fetchDbClasses = async () => {
     try {
       setLoadingClasses(true);
@@ -1284,11 +1386,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         `${API_URL}/api/batch-classes/all?batchId=${encodeURIComponent(batchId)}`,
       );
       const data = await res.json();
-      if (data.success) {
-        setDbClasses(data.classes || []);
-      } else {
-        setDbClasses([]);
-      }
+      setDbClasses(data.success ? data.classes || [] : []);
     } catch (e) {
       console.error("❌ fetchDbClasses error:", e);
       setDbClasses([]);
@@ -1297,7 +1395,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     }
   };
 
-  /* ✅ Fetch materials from batch_materials collection */
+  /* ✅ Fetch materials */
   const fetchDbMaterials = async () => {
     try {
       setLoadingMaterials(true);
@@ -1305,11 +1403,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         `${API_URL}/api/batch-materials/all?batchId=${encodeURIComponent(batchId)}`,
       );
       const data = await res.json();
-      if (data.success) {
-        setDbMaterials(data.materials || []);
-      } else {
-        setDbMaterials([]);
-      }
+      setDbMaterials(data.success ? data.materials || [] : []);
     } catch (e) {
       console.error("❌ fetchDbMaterials error:", e);
       setDbMaterials([]);
@@ -1318,7 +1412,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     }
   };
 
-  /* ✅ Fetch videos from batch_videos collection */
+  /* ✅ Fetch videos */
   const fetchDbVideos = async () => {
     try {
       setLoadingVideos(true);
@@ -1326,11 +1420,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         `${API_URL}/api/batch-videos/all?batchId=${encodeURIComponent(batchId)}`,
       );
       const data = await res.json();
-      if (data.success) {
-        setDbVideos(data.videos || []);
-      } else {
-        setDbVideos([]);
-      }
+      setDbVideos(data.success ? data.videos || [] : []);
     } catch (e) {
       console.error("❌ fetchDbVideos error:", e);
       setDbVideos([]);
@@ -1339,7 +1429,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     }
   };
 
-  /* ✅ Fetch grades from grades.json via batch */
+  /* ✅ Fetch grades */
   const fetchDbGrades = async () => {
     try {
       setLoadingGrades(true);
@@ -1362,15 +1452,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     fetchDbMaterials();
     fetchDbVideos();
     fetchDbGrades();
-  }, [batchId]);
-
-  useEffect(() => {
-    fetchBatch();
-    fetchDbStudents();
-    fetchDbClasses();
-    fetchDbMaterials();
-    fetchDbVideos();
-    fetchDbGrades();
+    // eslint-disable-next-line
   }, [batchId]);
 
   const saveBatchFields = async (payload, msg = "Saved!") => {
@@ -1409,8 +1491,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   const classesList = dbClasses;
   const materialsList = dbMaterials;
   const videos = dbVideos;
+
   const calcPaid = (s) => {
-    // Priority: paidMonths sum → paidAmount field → 0
     const fromMonths = (s.paidMonths || []).reduce(
       (sum, p) => sum + Number(p.amount || 0),
       0,
@@ -1420,7 +1502,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   };
 
   const calcDue = (s) => {
-    // ✅ Use stored dueAmount if present
     if (
       s.dueAmount !== undefined &&
       s.dueAmount !== null &&
@@ -1429,7 +1510,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       const d = Number(s.dueAmount);
       if (!Number.isNaN(d)) return Math.max(d, 0);
     }
-    // Fallback: calculate
     const fee = Number(s.courseFee || s.monthlyFee || 0);
     const scholarship = Number(s.scholarshipAmount || 0);
     const paid = calcPaid(s);
@@ -1452,7 +1532,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       draft[s._id] = existing?.records?.[s._id] || "present";
     });
     setAttendanceDraft(draft);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
   }, [section, attendanceDate, attendanceClassId, batch, dbStudents]);
 
   /* ============================================================
@@ -1546,10 +1626,11 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       const payload = {
         name: studentForm.name.trim(),
         studentId: studentForm.studentId.trim(),
-        password: studentForm.password.trim(), // ✅ NEW — এখানে save হবে
+        password: studentForm.password.trim(),
         phone: studentForm.phone,
         country: studentForm.country,
         course: studentForm.course || batch?.course || "",
+        department: adminDepartment || "", // ✅ Department added
         paymentStatus: studentForm.paymentStatus,
         scholarshipAmount: studentForm.scholarshipAmount,
         scholarshipNote: studentForm.scholarshipNote,
@@ -1565,7 +1646,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       let res, data;
 
       if (editingStudentId) {
-        // UPDATE
         res = await fetch(
           `${API_URL}/api/batch-students/update/${editingStudentId}`,
           {
@@ -1580,7 +1660,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
           await fetchDbStudents();
           setShowStudentModal(false);
 
-          // ✅ Credentials দেখাও
           await Swal.fire({
             icon: "success",
             title: "✅ Student Updated!",
@@ -1597,9 +1676,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                 <p><strong>Password:</strong>
                   <span style="color:#004d4d; font-family:monospace;">${payload.password}</span>
                 </p>
-                <p style="margin-top:8px; font-size:11px; color:#666;">
-                  📌 Student কে এই তথ্য জানান — সে এটা দিয়ে login করবে।
-                </p>
               </div>
             </div>
           `,
@@ -1610,7 +1686,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
           Swal.fire({ icon: "error", title: "Failed!", text: data.message });
         }
       } else {
-        // CREATE
         res = await fetch(`${API_URL}/api/batch-students/create`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1624,7 +1699,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
           await fetchDbStudents();
           setShowStudentModal(false);
 
-          // ✅ Credentials দেখাও
           await Swal.fire({
             icon: "success",
             title: "✅ Student Added!",
@@ -1641,10 +1715,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                 </p>
                 <p><strong>Password:</strong>
                   <span style="color:#004d4d; font-family:monospace;">${payload.password}</span>
-                </p>
-                <p style="margin-top:8px; font-size:11px; color:#666;">
-                  📌 এই তথ্য Student কে দিন — সে এটা দিয়ে
-                  <strong>tarbiyahonline.com/student-login</strong> এ login করবে।
                 </p>
               </div>
             </div>
@@ -1681,7 +1751,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
           const data = await res.json();
 
           if (data.success) {
-            // Sync batch.students count
             const newCount = Math.max(0, dbStudents.length - 1);
             await saveBatchFields({ students: newCount }, "");
             await fetchDbStudents();
@@ -1709,8 +1778,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     setEditingClassId(null);
     setClassForm({
       name: "",
-      classNo: "", // ⬅️ NEW
-      classDate: "", // ⬅️ NEW
+      classNo: "",
+      classDate: "",
       day: "Saturday",
       time: "",
       gender: "Male",
@@ -1723,8 +1792,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
     setEditingClassId(c._id);
     setClassForm({
       name: c.name || "",
-      classNo: c.classNo || "", // ⬅️ NEW
-      classDate: c.classDate || "", // ⬅️ NEW
+      classNo: c.classNo || "",
+      classDate: c.classDate || "",
       day: c.day || "Saturday",
       time: c.time || "",
       gender: c.gender || "Male",
@@ -1755,7 +1824,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       let res, data;
 
       if (editingClassId) {
-        // ✅ UPDATE
         res = await fetch(
           `${API_URL}/api/batch-classes/update/${editingClassId}`,
           {
@@ -1778,7 +1846,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
           Swal.fire({ icon: "error", title: "Failed!", text: data.message });
         }
       } else {
-        // ✅ CREATE
         res = await fetch(`${API_URL}/api/batch-classes/create`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1794,7 +1861,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
           Swal.fire({
             icon: "success",
             title: "Class Added!",
-            text: "Saved to database successfully.",
             timer: 1200,
             showConfirmButton: false,
           });
@@ -1920,7 +1986,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       return;
     }
 
-    // ✅ Update student payment in MongoDB
     const stu = students.find((s) => s._id === paymentStudentId);
     if (!stu) return;
 
@@ -2005,7 +2070,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   };
 
   /* ============================================================
-     MATERIAL (Exam / Quiz / PDF) handlers
+     MATERIAL handlers
   ============================================================ */
   const handleMaterialFile = async (e) => {
     const file = e.target.files?.[0];
@@ -2080,7 +2145,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         Swal.fire({
           icon: "success",
           title: "Uploaded!",
-          text: "Material saved to database.",
           timer: 1200,
           showConfirmButton: false,
         });
@@ -2241,7 +2305,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
   /* ============================================================
      VIDEO handlers
   ============================================================ */
-  // ✅ নতুন — batch_videos MongoDB collection এ save করবে
   const handleAddVideo = async () => {
     if (!newVideo.title.trim() || !newVideo.url.trim()) {
       Swal.fire({
@@ -2269,7 +2332,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
       const data = await res.json();
 
       if (data.success) {
-        await fetchDbVideos(); // ✅ DB থেকে re-fetch
+        await fetchDbVideos();
         setNewVideo({ title: "", url: "" });
         Swal.fire({
           icon: "success",
@@ -2391,7 +2454,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
 
   return (
     <div className="h-screen flex bg-gray-50 overflow-hidden">
-      {/* ================= LMS SIDEBAR ================= */}
+      {/* LMS Sidebar */}
       <aside
         className={`
           fixed md:relative z-50 w-64 bg-[#0f172a] text-white h-full flex flex-col
@@ -2412,6 +2475,11 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
             </p>
             <p className="font-bold text-sm mt-0.5 truncate">{batch.name}</p>
             <p className="text-[10px] text-gray-400 truncate">{batch.course}</p>
+            {adminDepartment && (
+              <p className="text-[9px] text-teal-400 font-semibold mt-1">
+                🏛️ {adminDepartment}
+              </p>
+            )}
             <div className="mt-2 flex items-center gap-2 text-[10px] flex-wrap">
               <span
                 className={`px-1.5 py-0.5 rounded-full ${
@@ -2483,7 +2551,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         />
       )}
 
-      {/* ================= MAIN CONTENT ================= */}
+      {/* Main */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
         <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between flex-shrink-0">
@@ -2518,7 +2586,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6">
-          {/* ==================== OVERVIEW ==================== */}
+          {/* OVERVIEW */}
           {section === "overview" && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -2626,7 +2694,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
             </div>
           )}
 
-          {/* ==================== STUDENTS ==================== */}
+          {/* STUDENTS */}
           {section === "students" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
@@ -2667,7 +2735,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                         key={stu._id}
                         className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-md transition-all"
                       >
-                        {/* Header: Avatar + Info + Status Badge */}
                         <div className="flex items-start gap-3">
                           <div className="w-11 h-11 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
                             {stu.name?.charAt(0)?.toUpperCase() || "S"}
@@ -2682,11 +2749,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                             {stu.phone && (
                               <p className="text-[10px] text-gray-500 flex items-center gap-1">
                                 <FaPhone size={9} /> {stu.phone}
-                              </p>
-                            )}
-                            {stu.country && stu.country !== "BD" && (
-                              <p className="text-[10px] text-gray-500 flex items-center gap-1">
-                                🌍 {stu.country}
                               </p>
                             )}
                             {stu.course && (
@@ -2708,7 +2770,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                           </span>
                         </div>
 
-                        {/* 🎓 Scholarship Badge — নতুন যোগ হয়েছে */}
                         {Number(stu.scholarshipAmount) > 0 && (
                           <div className="mt-2 bg-purple-50 rounded-md py-1 px-2 flex justify-between items-center">
                             <span className="text-[9px] text-purple-700 font-semibold">
@@ -2720,7 +2781,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                           </div>
                         )}
 
-                        {/* Paid / Due grid */}
                         <div className="mt-3 grid grid-cols-2 gap-1.5 text-center">
                           <div className="bg-green-50 rounded-md py-1.5">
                             <p className="text-[9px] text-green-600">Paid</p>
@@ -2736,7 +2796,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                           </div>
                         </div>
 
-                        {/* Action buttons */}
                         <div className="mt-3 grid grid-cols-3 gap-1 pt-3 border-t border-gray-100">
                           <MiniBtn
                             icon={<FaMoneyCheckAlt size={11} />}
@@ -2765,18 +2824,13 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
             </div>
           )}
 
-          {/* ==================== CLASSES ==================== */}
+          {/* CLASSES */}
           {section === "classes" && (
             <div className="space-y-4">
-              {/* Header */}
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="text-sm font-bold text-gray-800">
                     Classes / Schedule
-                  </p>
-                  <p className="text-[11px] text-gray-500">
-                    Add multiple classes (e.g., 3:00–4:30 PM Female, 5:00–6:30
-                    PM Male) with unlimited teachers
                   </p>
                 </div>
                 <button
@@ -2787,7 +2841,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                 </button>
               </div>
 
-              {/* Empty state */}
               {classesList.length === 0 ? (
                 <EmptyState
                   icon={<FaChalkboardTeacher />}
@@ -2804,7 +2857,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                         : c.teacher
                           ? [c.teacher]
                           : [];
-
                     return (
                       <div
                         key={c._id}
@@ -2818,7 +2870,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                           }`}
                         />
                         <div className="p-4">
-                          {/* Header: Class name + Gender */}
                           <div className="flex items-start justify-between">
                             <div className="min-w-0 flex-1">
                               <p className="text-[10px] text-gray-500 uppercase tracking-wider font-bold">
@@ -2839,9 +2890,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                             </span>
                           </div>
 
-                          {/* Info: Day, Time, Teachers, Meeting */}
                           <div className="mt-2 space-y-1.5 text-[11px] text-gray-600">
-                            {/* ⬇️ নতুন যোগ করুন */}
                             {c.classNo && (
                               <p className="flex items-center gap-1.5">
                                 <FaInfoCircle
@@ -2866,9 +2915,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                                 </span>
                               </p>
                             )}
-
-                            {/* পুরনো কোড অপরিবর্তিত */}
-
                             <p className="flex items-center gap-1.5">
                               <FaCalendarAlt
                                 size={10}
@@ -2881,7 +2927,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                               {c.time}
                             </p>
 
-                            {/* ✅ Multiple Teachers */}
                             {teachersList.length > 0 && (
                               <div className="flex items-start gap-1.5">
                                 <FaChalkboardTeacher
@@ -2901,7 +2946,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                               </div>
                             )}
 
-                            {/* Meeting Link */}
                             {c.meetingLink && (
                               <a
                                 href={c.meetingLink}
@@ -2914,7 +2958,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                             )}
                           </div>
 
-                          {/* Attendance count badge */}
                           <div className="mt-3 flex items-center gap-2 flex-wrap">
                             <span className="text-[10px] bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
                               <FaCalendarCheck size={9} /> {attendanceCount}{" "}
@@ -2927,7 +2970,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                             </span>
                           </div>
 
-                          {/* Action buttons */}
                           <div className="mt-3 grid grid-cols-3 gap-1 pt-3 border-t border-gray-100">
                             <MiniBtn
                               icon={<FaCalendarCheck size={11} />}
@@ -2961,7 +3003,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
             </div>
           )}
 
-          {/* ==================== ATTENDANCE ==================== */}
+          {/* ATTENDANCE */}
           {section === "attendance" && (
             <div className="space-y-4">
               <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
@@ -3115,7 +3157,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
             </div>
           )}
 
-          {/* ==================== PAYMENTS ==================== */}
+          {/* PAYMENTS */}
           {section === "payments" && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -3243,17 +3285,13 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
             </div>
           )}
 
-          {/* ==================== MATERIALS ==================== */}
+          {/* MATERIALS */}
           {section === "materials" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="text-sm font-bold text-gray-800">
                     Exams, Quizzes & PDFs
-                  </p>
-                  <p className="text-[11px] text-gray-500">
-                    Upload exam results, quiz links, and PDF notes for this
-                    batch
                   </p>
                 </div>
                 <button
@@ -3375,18 +3413,13 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
             </div>
           )}
 
-          {/* ==================== GRADES ==================== */}
-          {/* ==================== GRADES ==================== */}
+          {/* GRADES */}
           {section === "grades" && (
             <div className="space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="text-sm font-bold text-gray-800">
                     Grades & Exam Marks
-                  </p>
-                  <p className="text-[11px] text-gray-500">
-                    প্রতিটি student এর Grade, Class Test, Mid Term, Final Exam
-                    সরাসরি লিখে Save চাপুন
                   </p>
                 </div>
                 <span className="text-[10px] bg-teal-50 text-teal-700 px-3 py-1 rounded-full font-bold">
@@ -3448,7 +3481,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
             </div>
           )}
 
-          {/* ==================== VIDEOS ==================== */}
+          {/* VIDEOS */}
           {section === "videos" && (
             <div className="space-y-4">
               <div className="bg-white border border-gray-200 rounded-xl p-4">
@@ -3537,7 +3570,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         </div>
       </main>
 
-      {/* ================ Add/Edit Student Modal ================ */}
+      {/* Add/Edit Student Modal (same as before) */}
       {showStudentModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
@@ -3555,7 +3588,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
             </div>
             <form onSubmit={handleSaveStudent} className="p-5 space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {/* Student Name */}
                 <div className="md:col-span-2">
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Student Name *
@@ -3567,13 +3599,11 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     onChange={(e) =>
                       setStudentForm({ ...studentForm, name: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
                     placeholder="Enter full name"
                   />
                 </div>
 
-                {/* Student ID */}
-                {/* Student ID + 🎲 Auto */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Student ID *
@@ -3589,7 +3619,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                           studentId: e.target.value,
                         })
                       }
-                      className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs font-mono focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs font-mono"
                       placeholder="e.g., TAR2648213"
                     />
                     <button
@@ -3601,20 +3631,15 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                         })
                       }
                       className="bg-blue-500 hover:bg-blue-600 text-white text-[10px] font-bold px-2.5 rounded-lg whitespace-nowrap"
-                      title="Auto-generate Student ID"
                     >
                       🎲 Auto
                     </button>
                   </div>
                 </div>
 
-                {/* ✅ Password + 🎲 Auto — NEW FIELD */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Password *{" "}
-                    <span className="text-gray-400 font-normal">
-                      (প্রতিটি student এর আলাদা)
-                    </span>
+                    Password *
                   </label>
                   <div className="flex gap-1.5">
                     <input
@@ -3627,8 +3652,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                           password: e.target.value,
                         })
                       }
-                      className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs font-mono focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="e.g., TAR458921AB@"
+                      className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs font-mono"
                     />
                     <button
                       type="button"
@@ -3639,17 +3663,12 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                         })
                       }
                       className="bg-purple-500 hover:bg-purple-600 text-white text-[10px] font-bold px-2.5 rounded-lg whitespace-nowrap"
-                      title="Generate unique password"
                     >
                       🎲 Auto
                     </button>
                   </div>
-                  <p className="text-[10px] text-gray-400 mt-1">
-                    💡 Admin এই password student কে জানাবে — সে এটা দিয়েই login
-                    করবে।
-                  </p>
                 </div>
-                {/* ✅ Phone Number */}
+
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Phone Number
@@ -3658,17 +3677,12 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     type="tel"
                     value={studentForm.phone}
                     onChange={(e) =>
-                      setStudentForm({
-                        ...studentForm,
-                        phone: e.target.value,
-                      })
+                      setStudentForm({ ...studentForm, phone: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="e.g., 01712345678"
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
                   />
                 </div>
 
-                {/* ✅ Country — Free Text Input */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Country
@@ -3682,12 +3696,10 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                         country: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                    placeholder="e.g., Bangladesh"
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
                   />
                 </div>
 
-                {/* Course */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Course
@@ -3697,24 +3709,17 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     onChange={(e) =>
                       setStudentForm({ ...studentForm, course: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
                   >
                     <option value="">Select Course</option>
-                    {COURSE_OPTIONS.map((c) => (
+                    {getCourseOptions(adminDepartment).map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
                     ))}
-                    {batch?.course &&
-                      !COURSE_OPTIONS.includes(batch.course) && (
-                        <option value={batch.course}>{batch.course}</option>
-                      )}
                   </select>
                 </div>
 
-                {/* ⬇️ নতুন ফিল্ড block শুরু ⬇️ */}
-
-                {/* Course Fee */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Course Fee (৳)
@@ -3729,11 +3734,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                       })
                     }
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="e.g., 5000"
                   />
                 </div>
 
-                {/* Monthly Fee */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Monthly Fee (৳)
@@ -3748,11 +3751,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                       })
                     }
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="Empty হলে Course Fee হবে"
                   />
                 </div>
 
-                {/* Scholarship Amount */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Scholarship (৳)
@@ -3767,14 +3768,12 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                       })
                     }
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="e.g., 1000"
                   />
                 </div>
 
-                {/* Scholarship Reason — Textarea */}
                 <div className="md:col-span-2">
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Scholarship কেন দেওয়া হলো? (Note)
+                    Scholarship Note
                   </label>
                   <textarea
                     rows="2"
@@ -3786,11 +3785,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                       })
                     }
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="যেমন: Financial hardship, Merit-based, Sibling discount..."
                   />
                 </div>
 
-                {/* Admission Date */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Admission Date
@@ -3808,10 +3805,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                   />
                 </div>
 
-                {/* Initial Paid Amount */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Initial Paid Amount (৳)
+                    Initial Paid (৳)
                   </label>
                   <input
                     type="number"
@@ -3823,11 +3819,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                       })
                     }
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="এখন কত টাকা দিলো?"
                   />
                 </div>
 
-                {/* Payment Method */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Payment Method
@@ -3850,7 +3844,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                   </select>
                 </div>
 
-                {/* Transaction ID */}
                 <div className="md:col-span-2">
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Transaction ID
@@ -3865,14 +3858,12 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                       })
                     }
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="bKash/Nagad TrxID"
                   />
                 </div>
 
-                {/* ⬇️ Auto-calculated Due Preview ⬇️ */}
                 <div className="md:col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <p className="text-[11px] font-bold text-blue-800 mb-1.5">
-                    📊 Auto Calculation Preview
+                    📊 Auto Calculation
                   </p>
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="bg-white rounded-md py-1.5">
@@ -3900,14 +3891,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                       </p>
                     </div>
                   </div>
-                  <p className="text-[10px] text-blue-700 mt-1.5">
-                    Due = Fee − Scholarship − Paid
-                  </p>
                 </div>
 
-                {/* ⬆️ নতুন ফিল্ড block শেষ ⬆️ */}
-
-                {/* Payment Status */}
                 <div className="md:col-span-2">
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Payment Status
@@ -3920,7 +3905,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                         paymentStatus: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
                   >
                     <option value="Paid">Paid</option>
                     <option value="Partial">Partial</option>
@@ -3950,7 +3935,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         </div>
       )}
 
-      {/* ================ Add/Edit Class Modal ================ */}
+      {/* Add/Edit Class Modal */}
       {showClassModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
@@ -3980,10 +3965,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                       setClassForm({ ...classForm, name: e.target.value })
                     }
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="e.g., Morning Female Batch"
                   />
                 </div>
-                {/* Class No */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Class No
@@ -3995,11 +3978,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                       setClassForm({ ...classForm, classNo: e.target.value })
                     }
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="e.g., Class-01"
                   />
                 </div>
-
-                {/* Class Date */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Class Date
@@ -4013,8 +3993,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
                   />
                 </div>
-
-                {/* ⬆️ ⬆️ নতুন যোগ শেষ ⬆️ ⬆️ */}
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Day *
@@ -4035,7 +4013,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Time (e.g., 3:00 PM - 4:30 PM) *
+                    Time *
                   </label>
                   <input
                     type="text"
@@ -4045,7 +4023,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                       setClassForm({ ...classForm, time: e.target.value })
                     }
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="03:00 PM - 04:30 PM"
                   />
                 </div>
                 <div>
@@ -4067,15 +4044,13 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                 <div className="md:col-span-2">
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1 flex items-center gap-1">
                     <FaChalkboardTeacher className="text-purple-600" /> Teachers
-                    (একাধিক যোগ করা যাবে)
                   </label>
-
                   <div className="flex gap-2 mb-2">
                     <input
                       type="text"
                       id="classTeacherInput"
-                      placeholder="Teacher name লিখুন → Enter চাপুন বা + Add ক্লিক করুন"
-                      className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Teacher name লিখুন → Enter চাপুন"
+                      className="flex-1 border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
@@ -4127,10 +4102,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                             key={idx}
                             className="inline-flex items-center gap-1.5 bg-white text-purple-800 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-purple-300"
                           >
-                            <FaChalkboardTeacher
-                              size={10}
-                              className="text-purple-600"
-                            />
                             {t}
                             <button
                               type="button"
@@ -4144,8 +4115,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                                   teacher: updated.join(", "),
                                 });
                               }}
-                              className="text-purple-500 hover:text-red-600 font-bold text-base leading-none ml-0.5"
-                              title="Remove"
+                              className="text-purple-500 hover:text-red-600 font-bold"
                             >
                               ×
                             </button>
@@ -4153,13 +4123,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                         ))}
                       </div>
                     )}
-
-                  {(!Array.isArray(classForm.teachers) ||
-                    classForm.teachers.length === 0) && (
-                    <p className="text-[10px] text-gray-400 italic">
-                      এখনো কোনো teacher যোগ করা হয়নি — উপরে লিখে Add করুন
-                    </p>
-                  )}
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
@@ -4175,7 +4138,6 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                       })
                     }
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="https://meet.google.com/..."
                   />
                 </div>
               </div>
@@ -4200,11 +4162,11 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         </div>
       )}
 
-      {/* ================ Payment Modal ================ */}
+      {/* Payment Modal */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+            <div className="p-4 border-b flex justify-between items-center">
               <h3 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaMoneyCheckAlt className="text-green-600" /> Record Payment
               </h3>
@@ -4273,10 +4235,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     setPaymentForm({ ...paymentForm, note: e.target.value })
                   }
                   className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                  placeholder="Optional"
                 />
               </div>
-              <div className="flex gap-2 pt-2 border-t border-gray-200">
+              <div className="flex gap-2 pt-2 border-t">
                 <button
                   type="submit"
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-lg font-semibold text-xs"
@@ -4296,14 +4257,13 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
         </div>
       )}
 
-      {/* ================ Upload Material Modal ================ */}
+      {/* Upload Material Modal */}
       {showMaterialModal && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-5 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-5 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <FaGraduationCap className="text-orange-600" /> Upload Exam /
-                Quiz / PDF
+                <FaGraduationCap className="text-orange-600" /> Upload
               </h3>
               <button
                 onClick={() => setShowMaterialModal(false)}
@@ -4319,20 +4279,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     id: "exam",
                     label: "Exam",
                     icon: <FaGraduationCap />,
-                    color: "purple",
                   },
-                  {
-                    id: "quiz",
-                    label: "Quiz",
-                    icon: <MdOutlineQuiz />,
-                    color: "blue",
-                  },
-                  {
-                    id: "pdf",
-                    label: "PDF",
-                    icon: <FaFilePdf />,
-                    color: "red",
-                  },
+                  { id: "quiz", label: "Quiz", icon: <MdOutlineQuiz /> },
+                  { id: "pdf", label: "PDF", icon: <FaFilePdf /> },
                 ].map((t) => (
                   <button
                     key={t.id}
@@ -4340,10 +4289,10 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     onClick={() =>
                       setMaterialForm({ ...materialForm, type: t.id, url: "" })
                     }
-                    className={`p-3 rounded-lg border-2 flex flex-col items-center gap-1 transition-all ${
+                    className={`p-3 rounded-lg border-2 flex flex-col items-center gap-1 ${
                       materialForm.type === t.id
-                        ? `border-${t.color}-500 bg-${t.color}-50 text-${t.color}-700 font-bold`
-                        : "border-gray-200 text-gray-500 hover:border-gray-300"
+                        ? "border-orange-500 bg-orange-50 text-orange-700 font-bold"
+                        : "border-gray-200 text-gray-500"
                     }`}
                   >
                     <span className="text-lg">{t.icon}</span>
@@ -4352,32 +4301,22 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                 ))}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="md:col-span-2">
-                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Title *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={materialForm.title}
-                    onChange={(e) =>
-                      setMaterialForm({
-                        ...materialForm,
-                        title: e.target.value,
-                      })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder={
-                      materialForm.type === "pdf"
-                        ? "e.g., Tajweed Notes Chapter 1"
-                        : materialForm.type === "quiz"
-                          ? "e.g., Weekly Quiz 3"
-                          : "e.g., Mid-Term Exam 2026"
-                    }
-                  />
-                </div>
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                  Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={materialForm.title}
+                  onChange={(e) =>
+                    setMaterialForm({ ...materialForm, title: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                />
+              </div>
 
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     Date
@@ -4391,10 +4330,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
                   />
                 </div>
-
                 <div>
                   <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Assign to Class (optional)
+                    Assign to Class
                   </label>
                   <select
                     value={materialForm.classId}
@@ -4409,260 +4347,50 @@ const ClassLMSView = ({ batchId, onBack, adminInfo }) => {
                     <option value="">Whole Batch</option>
                     {classesList.map((c) => (
                       <option key={c._id} value={c._id}>
-                        {c.name} ({c.gender})
+                        {c.name}
                       </option>
                     ))}
                   </select>
                 </div>
-
-                {materialForm.type === "exam" && (
-                  <>
-                    <div>
-                      <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                        Total Marks
-                      </label>
-                      <input
-                        type="number"
-                        value={materialForm.totalMarks}
-                        onChange={(e) =>
-                          setMaterialForm({
-                            ...materialForm,
-                            totalMarks: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                        placeholder="e.g., 100"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                        Obtained Marks
-                      </label>
-                      <input
-                        type="number"
-                        value={materialForm.marks}
-                        onChange={(e) =>
-                          setMaterialForm({
-                            ...materialForm,
-                            marks: e.target.value,
-                          })
-                        }
-                        className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                        placeholder="e.g., 85"
-                      />
-                    </div>
-                  </>
-                )}
-
-                <div className="md:col-span-2">
-                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    {materialForm.type === "pdf"
-                      ? "Upload PDF (max 2MB) অথবা URL *"
-                      : "URL *"}
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={materialForm.url}
-                    onChange={(e) =>
-                      setMaterialForm({ ...materialForm, url: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs mb-2"
-                    placeholder={
-                      materialForm.type === "pdf"
-                        ? "https://drive.google.com/... অথবা ফাইল নির্বাচন করুন"
-                        : materialForm.type === "quiz"
-                          ? "https://forms.gle/... or https://quizizz.com/..."
-                          : "https://drive.google.com/... or exam result link"
-                    }
-                  />
-                  {materialForm.type === "pdf" && (
-                    <label className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-[11px] font-semibold cursor-pointer">
-                      <FaUpload size={11} /> Choose File
-                      <input
-                        type="file"
-                        accept="application/pdf,image/*"
-                        onChange={handleMaterialFile}
-                        className="hidden"
-                      />
-                    </label>
-                  )}
-                </div>
               </div>
 
-              <div className="flex gap-2 pt-3 border-t border-gray-200">
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                  URL / File *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={materialForm.url}
+                  onChange={(e) =>
+                    setMaterialForm({ ...materialForm, url: e.target.value })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
+                />
+                {materialForm.type === "pdf" && (
+                  <label className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-[11px] font-semibold cursor-pointer mt-2">
+                    <FaUpload size={11} /> Choose File (max 2MB)
+                    <input
+                      type="file"
+                      accept="application/pdf,image/*"
+                      onChange={handleMaterialFile}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+
+              <div className="flex gap-2 pt-3 border-t">
                 <button
                   type="submit"
                   disabled={savingMaterial}
-                  className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white py-2.5 rounded-lg font-semibold text-xs flex items-center justify-center gap-2"
+                  className="flex-1 bg-orange-600 hover:bg-orange-700 disabled:bg-orange-400 text-white py-2.5 rounded-lg font-semibold text-xs"
                 >
-                  {savingMaterial ? (
-                    "Saving..."
-                  ) : (
-                    <>
-                      <FaUpload size={11} /> Upload
-                    </>
-                  )}
+                  {savingMaterial ? "Saving..." : "Upload"}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowMaterialModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2.5 rounded-lg font-semibold text-xs"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ================ Publish / Edit Grade Modal ================ */}
-      {showGradeModal && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-5 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
-              <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                <FaAward className="text-teal-600" />
-                {editingGradeId ? "Edit Grade" : "Publish Grade"}
-              </h3>
-              <button
-                onClick={() => setShowGradeModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <FiX size={22} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveGrade} className="p-5 space-y-3">
-              <div>
-                <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                  Student *
-                </label>
-                <select
-                  required
-                  value={gradeForm.studentId}
-                  onChange={(e) => {
-                    const stu = students.find(
-                      (s) =>
-                        s.studentId === e.target.value ||
-                        s._id === e.target.value,
-                    );
-                    setGradeForm({
-                      ...gradeForm,
-                      studentId: e.target.value,
-                      studentName: stu?.name || "",
-                      studentRoll: stu?.studentId || "",
-                    });
-                  }}
-                  className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                >
-                  <option value="">— Select Student —</option>
-                  {students.map((s) => (
-                    <option key={s._id} value={s.studentId || s._id}>
-                      {s.name} ({s.studentId || "N/A"})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Grade (Grad)
-                  </label>
-                  <input
-                    type="text"
-                    value={gradeForm.grad}
-                    onChange={(e) =>
-                      setGradeForm({ ...gradeForm, grad: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="e.g., A+"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Class Test
-                  </label>
-                  <input
-                    type="text"
-                    value={gradeForm.classTest}
-                    onChange={(e) =>
-                      setGradeForm({ ...gradeForm, classTest: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="e.g., 18/20"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Mid Term
-                  </label>
-                  <input
-                    type="text"
-                    value={gradeForm.midTerm}
-                    onChange={(e) =>
-                      setGradeForm({ ...gradeForm, midTerm: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="e.g., 45/50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                    Final Exam
-                  </label>
-                  <input
-                    type="text"
-                    value={gradeForm.finalExam}
-                    onChange={(e) =>
-                      setGradeForm({ ...gradeForm, finalExam: e.target.value })
-                    }
-                    className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                    placeholder="e.g., 85/100"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                  Teacher
-                </label>
-                <input
-                  type="text"
-                  value={gradeForm.teacher}
-                  onChange={(e) =>
-                    setGradeForm({ ...gradeForm, teacher: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                  Remarks
-                </label>
-                <textarea
-                  rows="2"
-                  value={gradeForm.remarks}
-                  onChange={(e) =>
-                    setGradeForm({ ...gradeForm, remarks: e.target.value })
-                  }
-                  className="w-full border border-gray-300 rounded-lg px-2.5 py-2 text-xs"
-                />
-              </div>
-
-              <div className="flex gap-2 pt-3 border-t border-gray-200">
-                <button
-                  type="submit"
-                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-lg font-semibold text-xs"
-                >
-                  {editingGradeId ? "Update" : "Publish"} Grade
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowGradeModal(false)}
                   className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2.5 rounded-lg font-semibold text-xs"
                 >
                   Cancel
@@ -4759,9 +4487,6 @@ const MiniBtn = ({ icon, label, color, onClick }) => {
   );
 };
 
-/* ============================================================
-   ✅ GRADE ROW — Inline editable row per student
-============================================================ */
 const GradeRow = ({
   student,
   existingGrade,
@@ -4779,7 +4504,6 @@ const GradeRow = ({
   );
   const [saving, setSaving] = React.useState(false);
 
-  // ✅ When existingGrade changes (after fetch), update fields
   React.useEffect(() => {
     setGrad(existingGrade?.grad || "");
     setClassTest(existingGrade?.classTest || "");
@@ -4792,7 +4516,6 @@ const GradeRow = ({
       Swal.fire({
         icon: "warning",
         title: "কিছু লিখুন!",
-        text: "অন্তত একটা field পূরণ করুন।",
         timer: 1500,
         showConfirmButton: false,
       });
@@ -4823,7 +4546,6 @@ const GradeRow = ({
         Swal.fire({
           icon: "success",
           title: "✅ Saved!",
-          text: `${student.name} এর grade publish হয়েছে।`,
           timer: 1200,
           showConfirmButton: false,
         });
@@ -4870,7 +4592,7 @@ const GradeRow = ({
           value={grad}
           onChange={(e) => setGrad(e.target.value)}
           placeholder="A+"
-          className="w-16 border border-gray-300 rounded px-1.5 py-1 text-[11px] text-center font-semibold focus:ring-2 focus:ring-teal-500"
+          className="w-16 border border-gray-300 rounded px-1.5 py-1 text-[11px] text-center font-semibold"
         />
       </td>
 
@@ -4880,7 +4602,7 @@ const GradeRow = ({
           value={classTest}
           onChange={(e) => setClassTest(e.target.value)}
           placeholder="18/20"
-          className="w-20 border border-gray-300 rounded px-1.5 py-1 text-[11px] text-center focus:ring-2 focus:ring-blue-500"
+          className="w-20 border border-gray-300 rounded px-1.5 py-1 text-[11px] text-center"
         />
       </td>
 
@@ -4890,7 +4612,7 @@ const GradeRow = ({
           value={midTerm}
           onChange={(e) => setMidTerm(e.target.value)}
           placeholder="45/50"
-          className="w-20 border border-gray-300 rounded px-1.5 py-1 text-[11px] text-center focus:ring-2 focus:ring-orange-500"
+          className="w-20 border border-gray-300 rounded px-1.5 py-1 text-[11px] text-center"
         />
       </td>
 
@@ -4900,7 +4622,7 @@ const GradeRow = ({
           value={finalExam}
           onChange={(e) => setFinalExam(e.target.value)}
           placeholder="85/100"
-          className="w-20 border border-gray-300 rounded px-1.5 py-1 text-[11px] text-center focus:ring-2 focus:ring-green-500"
+          className="w-20 border border-gray-300 rounded px-1.5 py-1 text-[11px] text-center"
         />
       </td>
 
