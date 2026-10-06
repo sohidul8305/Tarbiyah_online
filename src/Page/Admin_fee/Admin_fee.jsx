@@ -22,9 +22,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaLayerGroup,
   FaSave,
-  FaUserTimes,
   FaHourglassHalf,
   FaExclamationCircle,
   FaFileDownload,
@@ -37,133 +35,111 @@ import { FiMenu, FiX } from "react-icons/fi";
 const API_BASE = "https://api.tarbiyahonline.com";
 
 // ============================================================
-// ✅ ELDERS DEPARTMENT
+// ✅ DEPARTMENT CONFIG
 // ============================================================
-const ELDERS_TEACHERS = ["Jubayer Ahmad", "Sumaiya Afrin Mim"];
-
-const ELDERS_COURSES = [
-  "Qaida Nuraniyah",
-  "Quran Nazera",
-  "Najera",
-  "Basic Tajweed",
-  "Bakarah Hifz",
-];
-
-const ELDERS_CLASSES = [
-  "Elders Batch A",
-  "Elders Batch B",
-  "Elders Batch C",
-  "Elders Batch D",
-  "Elders Batch E",
-];
-
-const ELDERS_BATCHES = [
-  "Batch-01",
-  "Batch-02",
-  "Batch-03",
-  "Batch-04",
-  "Batch-05",
-  "Batch-06",
-];
-
-// ✅ Elders course check (English + Bengali)
-const ELDERS_COURSE_KEYWORDS = [
-  "qaida nuraniyah",
-  "qaida nooraniya",
-  "qaida noorani",
-  "qaida nurani",
-  "qaidah nuraniyah",
-  "qaidah nooraniya",
-  "qaidah noorani",
-  "quran nazera",
-  "nazera quran",
-  "quran najera",
-  "najera quran",
-  "bakarah hifz",
-  "bakara hifz",
-  "baqarah hifz",
-  "baqara hifz",
-  "basic tajweed",
-];
-
-const isSingleEldersCourse = (singleCourse) => {
-  const p = String(singleCourse).toLowerCase().trim();
-  if (!p) return false;
-  return ELDERS_COURSE_KEYWORDS.some((c) => {
-    if (p === c) return true;
-    if (p.includes(c)) return true;
-    if (c.includes(p) && p.length >= 8) return true;
-    return false;
-  });
-};
-
-const isEldersCourse = (courseStr) => {
-  if (!courseStr) return false;
-  const parts = String(courseStr)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (parts.length === 0) return false;
-  return parts.every((part) => isSingleEldersCourse(part));
-};
-
-// ✅ Get primary course from course string
-const getPrimaryCourse = (courseStr) => {
-  if (!courseStr) return "";
-  const first = String(courseStr).split(",")[0].trim().toLowerCase();
-  if (first.includes("qaida")) return "Qaida Nuraniyah";
-  if (first.includes("najera") || first.includes("nazera")) return "Najera";
-  if (first.includes("tajweed")) return "Basic Tajweed";
-  if (first.includes("bakarah") || first.includes("bakara"))
-    return "Bakarah Hifz";
-  return "Qaida Nuraniyah";
-};
-
-// ✅ 2 Elders Students — fallback
-
-// ✅ Sample default fee records
-const ELDERS_DEFAULT_FEES = [
-  {
-    id: 1,
-    studentName: "Omer Faruk",
-    studentId: "TET26FB6001",
-    class: "Elders Batch A",
-    batch: "Batch-03",
-    subject: "Qaida Nuraniyah",
-    month: "September",
-    year: 2026,
-    amount: 5000,
-    paidAmount: 5000,
-    dueAmount: 0,
-    paymentDate: "2026-09-05",
-    paymentMethod: "bKash",
-    status: "Paid",
-    transactionId: "DGD9CFHU69",
-    notes: "Full payment",
-    collectedBy: "Admin",
-    invoiceNumber: "INV-2026-001",
+const DEPARTMENT_CONFIGS = {
+  Elders: {
+    label: "Quran For Elders",
+    courses: [
+      "Qaida Nuraniyah",
+      "Quran Nazera",
+      "Najera",
+      "Basic Tajweed",
+      "Bakarah Hifz",
+    ],
+    classes: [
+      "Elders Batch A",
+      "Elders Batch B",
+      "Elders Batch C",
+      "Elders Batch D",
+      "Elders Batch E",
+    ],
+    batches: [
+      "Batch-01",
+      "Batch-02",
+      "Batch-03",
+      "Batch-04",
+      "Batch-05",
+      "Batch-06",
+    ],
+    courseKeywords: [
+      "qaida nuraniyah",
+      "qaida nooraniya",
+      "qaida noorani",
+      "qaida nurani",
+      "qaidah nuraniyah",
+      "qaidah nooraniya",
+      "qaidah noorani",
+      "quran nazera",
+      "nazera quran",
+      "quran najera",
+      "najera quran",
+      "bakarah hifz",
+      "bakara hifz",
+      "baqarah hifz",
+      "baqara hifz",
+      "basic tajweed",
+      "quran for elders",
+    ],
   },
-  {
-    id: 2,
-    studentName: "Ikramm",
-    studentId: "TET26FB6002",
-    class: "Elders Batch A",
-    batch: "Batch-03",
-    subject: "Qaida Nuraniyah",
-    month: "September",
-    year: 2026,
-    amount: 5000,
-    paidAmount: 3000,
-    dueAmount: 2000,
-    paymentDate: "2026-09-06",
-    paymentMethod: "Nagad",
-    status: "Partial",
-    transactionId: "DGX9PQ45MN",
-    notes: "Partial payment - remaining due",
-    collectedBy: "Admin",
-    invoiceNumber: "INV-2026-002",
+  "Quran Studies": {
+    label: "Quran Studies",
+    courses: ["Hifzul Quran", "Tarbiyah Quran Studies", "Quran Translation"],
+    classes: ["Quran Studies A", "Quran Studies B", "Quran Studies C"],
+    batches: ["QS-Batch-01", "QS-Batch-02", "QS-Batch-03"],
+    courseKeywords: ["quran studies", "hifzul quran", "tarbiyah quran studies"],
   },
-];
+  Alimiya: {
+    label: "Alimiya",
+    courses: ["Dawra e Hadith", "Tafsir", "Fiqh", "Hadith", "Arabic Grammar"],
+    classes: ["Alimiya Year 1", "Alimiya Year 2", "Alimiya Year 3"],
+    batches: ["AL-Batch-01", "AL-Batch-02", "AL-Batch-03"],
+    courseKeywords: [
+      "alimiya",
+      "dawra",
+      "tafsir",
+      "fiqh",
+      "hadith",
+      "arabic grammar",
+    ],
+  },
+  Diploma: {
+    label: "Diploma",
+    courses: [
+      "Diploma in Islamic Studies",
+      "Diploma in Arabic",
+      "Certificate Course",
+    ],
+    classes: ["Diploma A", "Diploma B", "Diploma C"],
+    batches: ["DP-Batch-01", "DP-Batch-02", "DP-Batch-03"],
+    courseKeywords: ["diploma in islamic studies", "diploma", "certificate"],
+  },
+};
+
+const getCurrentDepartment = () => {
+  try {
+    const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
+    return info.department || "Elders";
+  } catch {
+    return "Elders";
+  }
+};
+
+const safeFetchJSON = async (url, options = {}) => {
+  try {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    if (text.trim().startsWith("<"))
+      return { success: false, _htmlError: true };
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, _jsonError: true };
+    }
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+};
 
 const Admin_fee = () => {
   const { user, logOut } = useAuth();
@@ -176,29 +152,23 @@ const Admin_fee = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "Quran for Elders",
+    department: "Elders",
     joinDate: "",
   });
 
-  // ✅ Elders students from API
-  const [eldersStudents, setEldersStudents] = useState(
-    ELDERS_STUDENTS_FALLBACK,
-  );
-  const [studentsLoading, setStudentsLoading] = useState(true);
+  const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
+  const deptConfig =
+    DEPARTMENT_CONFIGS[currentDept] || DEPARTMENT_CONFIGS["Elders"];
+  const DEPT_COURSES = deptConfig.courses;
+  const DEPT_CLASSES = deptConfig.classes;
+  const DEPT_BATCHES = deptConfig.batches;
+  const DEPT_KEYWORDS = deptConfig.courseKeywords;
+  const DEPT_LABEL = deptConfig.label;
 
-  // ✅ Elders fee records
-  const [feeRecords, setFeeRecords] = useState(() => {
-    const saved = localStorage.getItem("eldersFeeRecords");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    return ELDERS_DEFAULT_FEES;
-  });
+  const [deptStudents, setDeptStudents] = useState([]);
+  const [studentsLoading, setStudentsLoading] = useState(true);
+  const [feeRecords, setFeeRecords] = useState([]);
+  const [apiWorking, setApiWorking] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
@@ -211,6 +181,7 @@ const Admin_fee = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedFee, setSelectedFee] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     studentName: "",
@@ -248,12 +219,16 @@ const Admin_fee = () => {
   const paymentMethods = ["Cash", "bKash", "Nagad", "Rocket", "Bank Transfer"];
   const statuses = ["Paid", "Partial", "Unpaid", "Overdue"];
 
-  // Load admin info
+  // ============================================================
+  // Load admin info + department
+  // ============================================================
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
       try {
-        setAdminInfo(JSON.parse(savedAdmin));
+        const info = JSON.parse(savedAdmin);
+        setAdminInfo(info);
+        if (info.department) setCurrentDept(info.department);
       } catch (err) {
         console.error(err);
       }
@@ -263,81 +238,223 @@ const Admin_fee = () => {
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Quran for Elders",
+        department: "Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
   // ============================================================
-  // ✅ Fetch elders students from API
+  // ✅ Load Fees — API first, localStorage fallback
   // ============================================================
-  const fetchEldersStudents = async () => {
+  const loadFees = async () => {
     try {
-      setStudentsLoading(true);
-      let eldersList = [];
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/fees/all?department=${encodeURIComponent(currentDept)}&type=admin`,
+      );
 
-      try {
-        const res = await fetch(`${API_BASE}/api/students/all`);
-        const text = await res.text();
-
-        if (!text.trim().startsWith("<")) {
-          const data = JSON.parse(text);
-          if (data.success && Array.isArray(data.students)) {
-            const all = data.students || [];
-            const elders = all.filter((s) => isEldersCourse(s.course));
-
-            console.log("📥 Total students from API:", all.length);
-            console.log("✅ Elders students:", elders.length);
-
-            elders.forEach((s) => {
-              const formatted = {
-                _id: s._id,
-                name: s.name || "",
-                studentId: s.studentId || s._id?.slice(-8) || "N/A",
-                course: s.course || "",
-                primaryCourse: getPrimaryCourse(s.course),
-                class: s.batch || s.class || "Elders Batch A",
-                batch: s.batch || "Batch-03",
-                phone: s.phone || "",
-                email: s.email || "",
-                courseFee: Number(s.courseFee) || 5000,
-                scholarshipAmount: Number(s.scholarshipAmount) || 0,
-                paidAmount: Number(s.paidAmount) || 0,
-                dueAmount: Number(s.dueAmount) || 0,
-              };
-
-              const exists = eldersList.some(
-                (e) =>
-                  (e.name || "").toLowerCase() ===
-                  (formatted.name || "").toLowerCase(),
-              );
-              if (!exists) eldersList.push(formatted);
-            });
-          }
-        }
-      } catch (apiErr) {
-        console.warn("API fetch skipped:", apiErr.message);
+      if (data.success && Array.isArray(data.fees)) {
+        setFeeRecords(data.fees);
+        setApiWorking(true);
+        // Cache to localStorage
+        localStorage.setItem(
+          `feeRecords_${currentDept.replace(/\s+/g, "_")}`,
+          JSON.stringify(data.fees),
+        );
+        console.log(
+          `✅ Loaded ${data.fees.length} fees from API (${currentDept})`,
+        );
+        return;
       }
 
-      console.log("✅ Final elders students:", eldersList.length);
-      setEldersStudents(eldersList);
+      // API failed — load from localStorage
+      throw new Error(data.message || "API failed");
+    } catch (err) {
+      console.warn("⚠️ API failed, using localStorage:", err.message);
+      setApiWorking(false);
+      const key = `feeRecords_${currentDept.replace(/\s+/g, "_")}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        try {
+          setFeeRecords(JSON.parse(saved));
+        } catch {
+          setFeeRecords([]);
+        }
+      } else {
+        // Default Elders sample for first time
+        if (currentDept === "Elders") {
+          setFeeRecords([
+            {
+              _id: "sample-1",
+              studentName: "Omer Faruk",
+              studentId: "TET26FB6001",
+              class: "Elders Batch A",
+              batch: "Batch-03",
+              subject: "Qaida Nuraniyah",
+              month: "September",
+              year: 2026,
+              amount: 5000,
+              paidAmount: 5000,
+              dueAmount: 0,
+              paymentDate: "2026-09-05",
+              paymentMethod: "bKash",
+              status: "Paid",
+              transactionId: "DGD9CFHU69",
+              notes: "Full payment",
+              collectedBy: "Admin",
+              invoiceNumber: "INV-EL-2026-001",
+            },
+            {
+              _id: "sample-2",
+              studentName: "Ikramm",
+              studentId: "TET26FB6002",
+              class: "Elders Batch A",
+              batch: "Batch-03",
+              subject: "Qaida Nuraniyah",
+              month: "September",
+              year: 2026,
+              amount: 5000,
+              paidAmount: 3000,
+              dueAmount: 2000,
+              paymentDate: "2026-09-06",
+              paymentMethod: "Nagad",
+              status: "Partial",
+              transactionId: "DGX9PQ45MN",
+              notes: "Partial payment",
+              collectedBy: "Admin",
+              invoiceNumber: "INV-EL-2026-002",
+            },
+          ]);
+        } else {
+          setFeeRecords([]);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadFees();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
+
+  // Cache to localStorage on change
+  useEffect(() => {
+    if (!currentDept || feeRecords.length === 0) return;
+    const key = `feeRecords_${currentDept.replace(/\s+/g, "_")}`;
+    localStorage.setItem(key, JSON.stringify(feeRecords));
+  }, [feeRecords, currentDept]);
+
+  // ============================================================
+  // Fetch Students
+  // ============================================================
+  const fetchDeptStudents = async () => {
+    try {
+      setStudentsLoading(true);
+      const res = await fetch(
+        `${API_BASE}/api/students/all?department=${encodeURIComponent(currentDept)}`,
+      );
+      const text = await res.text();
+      if (text.trim().startsWith("<")) {
+        setDeptStudents([]);
+        return;
+      }
+      const data = JSON.parse(text);
+      if (!data.success || !Array.isArray(data.students)) {
+        setDeptStudents([]);
+        return;
+      }
+
+      const all = data.students || [];
+      const filtered = all.filter((s) => {
+        const sDept = String(s.department || "")
+          .toLowerCase()
+          .trim();
+        if (sDept && sDept === currentDept.toLowerCase().trim()) return true;
+        return isDeptCourse(s.course);
+      });
+
+      const formatted = filtered.map((s) => ({
+        _id: s._id,
+        name: s.name || "",
+        studentId: s.studentId || s._id?.slice(-8) || "N/A",
+        course: s.course || "",
+        primaryCourse: getPrimaryCourse(s.course),
+        class:
+          s.batch || s.class || DEPT_CLASSES[0] || `${currentDept} Batch A`,
+        batch: s.batch || DEPT_BATCHES[0] || "",
+        phone: s.phone || "",
+        email: s.email || "",
+        courseFee: Number(s.courseFee) || 5000,
+      }));
+
+      const deduped = [];
+      formatted.forEach((s) => {
+        const exists = deduped.some(
+          (d) => (d.name || "").toLowerCase() === (s.name || "").toLowerCase(),
+        );
+        if (!exists) deduped.push(s);
+      });
+
+      setDeptStudents(deduped);
     } catch (err) {
       console.error("❌ Fetch students error:", err);
-      setEldersStudents([]);
+      setDeptStudents([]);
     } finally {
       setStudentsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchEldersStudents();
-  }, []);
+    fetchDeptStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
 
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem("eldersFeeRecords", JSON.stringify(feeRecords));
-  }, [feeRecords]);
+  // ============================================================
+  // Course helpers
+  // ============================================================
+  const isSingleDeptCourse = (singleCourse) => {
+    const p = String(singleCourse).toLowerCase().trim();
+    if (!p) return false;
+    return DEPT_KEYWORDS.some((c) => {
+      if (p === c) return true;
+      if (p.includes(c)) return true;
+      if (c.includes(p) && p.length >= 8) return true;
+      return false;
+    });
+  };
+
+  const isDeptCourse = (courseStr) => {
+    if (!courseStr) return false;
+    const parts = String(courseStr)
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (parts.length === 0) return false;
+    return parts.every((part) => isSingleDeptCourse(part));
+  };
+
+  const getPrimaryCourse = (courseStr) => {
+    if (!courseStr) return DEPT_COURSES[0] || "";
+    const first = String(courseStr).split(",")[0].trim().toLowerCase();
+    if (first.includes("qaida") || first.includes("noorani"))
+      return "Qaida Nuraniyah";
+    if (first.includes("najera") || first.includes("nazera")) return "Najera";
+    if (first.includes("tajweed")) return "Basic Tajweed";
+    if (
+      first.includes("bakarah") ||
+      first.includes("bakara") ||
+      first.includes("baqarah")
+    )
+      return "Bakarah Hifz";
+    if (first.includes("hifzul") || first.includes("hifz"))
+      return "Hifzul Quran";
+    if (first.includes("dawra")) return "Dawra e Hadith";
+    if (first.includes("tafsir")) return "Tafsir";
+    if (first.includes("fiqh")) return "Fiqh";
+    if (first.includes("hadith")) return "Hadith";
+    if (first.includes("diploma")) return "Diploma in Islamic Studies";
+    return DEPT_COURSES[0] || first;
+  };
 
   const handleLogout = async () => {
     try {
@@ -379,7 +496,6 @@ const Admin_fee = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -438,7 +554,6 @@ const Admin_fee = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -459,7 +574,6 @@ const Admin_fee = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -560,7 +674,8 @@ const Admin_fee = () => {
   const generateInvoiceNumber = () => {
     const year = new Date().getFullYear();
     const count = feeRecords.length + 1;
-    return `INV-${year}-${String(count).padStart(4, "0")}`;
+    const prefix = currentDept.slice(0, 2).toUpperCase();
+    return `INV-${prefix}-${year}-${String(count).padStart(4, "0")}`;
   };
 
   const totalAmount = feeRecords.reduce((sum, f) => sum + (f.amount || 0), 0);
@@ -569,17 +684,19 @@ const Admin_fee = () => {
   const collectionRate =
     totalAmount > 0 ? Math.round((totalPaid / totalAmount) * 100) : 0;
 
+  // ============================================================
+  // ✅ Open Add Modal — always allowed, no student requirement
+  // ============================================================
   const openAddModal = () => {
-    const first = eldersStudents[0];
     setFormData({
-      studentName: first?.name || "",
-      studentId: first?.studentId || "",
-      class: first?.class || ELDERS_CLASSES[0],
-      batch: first?.batch || "Batch-03",
-      subject: first?.primaryCourse || ELDERS_COURSES[0],
+      studentName: "",
+      studentId: "",
+      class: DEPT_CLASSES[0] || `${currentDept} Batch A`,
+      batch: DEPT_BATCHES[0] || "",
+      subject: DEPT_COURSES[0] || "",
       month: months[new Date().getMonth()],
       year: new Date().getFullYear(),
-      amount: first?.courseFee || 5000,
+      amount: 5000,
       paidAmount: 0,
       paymentDate: "",
       paymentMethod: "",
@@ -591,9 +708,8 @@ const Admin_fee = () => {
     setShowAddModal(true);
   };
 
-  // ✅ Student select → auto-fill
   const handleStudentSelect = (studentId) => {
-    const s = eldersStudents.find((st) => st._id === studentId);
+    const s = deptStudents.find((st) => st._id === studentId);
     if (!s) return;
     setFormData((prev) => ({
       ...prev,
@@ -633,7 +749,10 @@ const Admin_fee = () => {
     setShowDetailsModal(true);
   };
 
-  const handleAddFee = (e) => {
+  // ============================================================
+  // ✅ ADD FEE — API first, localStorage fallback
+  // ============================================================
+  const handleAddFee = async (e) => {
     e.preventDefault();
 
     if (
@@ -656,10 +775,11 @@ const Admin_fee = () => {
     const status =
       dueAmount <= 0 ? "Paid" : paidAmount > 0 ? "Partial" : "Unpaid";
 
-    const newFee = {
-      id: Date.now(),
-      studentName: formData.studentName,
-      studentId: formData.studentId,
+    const payload = {
+      department: currentDept,
+      type: "admin",
+      studentName: formData.studentName.trim(),
+      studentId: formData.studentId.trim(),
       class: formData.class,
       batch: formData.batch || "",
       subject: formData.subject || "N/A",
@@ -667,13 +787,11 @@ const Admin_fee = () => {
       year: formData.year,
       amount: Number(formData.amount),
       paidAmount: paidAmount,
-      dueAmount: dueAmount,
       paymentDate:
         paidAmount > 0
           ? formData.paymentDate || new Date().toISOString().split("T")[0]
           : null,
       paymentMethod: paidAmount > 0 ? formData.paymentMethod : null,
-      status: status,
       transactionId:
         paidAmount > 0
           ? formData.transactionId || `TXN${Date.now().toString().slice(-6)}`
@@ -683,18 +801,48 @@ const Admin_fee = () => {
       invoiceNumber: formData.invoiceNumber || generateInvoiceNumber(),
     };
 
-    setFeeRecords([...feeRecords, newFee]);
-    setShowAddModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "✅ Fee Record Added!",
-      text: formData.studentName,
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    try {
+      setSaving(true);
+
+      // Try API
+      const data = await safeFetchJSON(`${API_BASE}/api/fees/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      let newFee;
+      if (data.success && data.fee) {
+        newFee = data.fee;
+        console.log("✅ Saved to API:", newFee._id);
+      } else {
+        // Fallback: local only
+        newFee = { _id: `LOCAL_${Date.now()}`, ...payload, dueAmount, status };
+        console.warn("⚠️ API failed, saved locally");
+      }
+
+      setFeeRecords([newFee, ...feeRecords]);
+      setShowAddModal(false);
+
+      Swal.fire({
+        icon: "success",
+        title: "✅ Fee Record Added!",
+        html: `<p><strong>${formData.studentName}</strong></p><p style="font-size: 12px; color: #666;">${formData.month} ${formData.year} — ৳${formData.amount}</p>`,
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error("Add error:", err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleEditFee = (e) => {
+  // ============================================================
+  // ✅ EDIT FEE — API first
+  // ============================================================
+  const handleEditFee = async (e) => {
     e.preventDefault();
 
     if (
@@ -717,47 +865,68 @@ const Admin_fee = () => {
     const status =
       dueAmount <= 0 ? "Paid" : paidAmount > 0 ? "Partial" : "Unpaid";
 
-    setFeeRecords(
-      feeRecords.map((f) =>
-        f.id === selectedFee.id
-          ? {
-              ...f,
-              studentName: formData.studentName,
-              studentId: formData.studentId,
-              class: formData.class,
-              batch: formData.batch || "",
-              subject: formData.subject || "N/A",
-              month: formData.month,
-              year: formData.year,
-              amount: Number(formData.amount),
-              paidAmount: paidAmount,
-              dueAmount: dueAmount,
-              paymentDate:
-                paidAmount > 0
-                  ? formData.paymentDate ||
-                    new Date().toISOString().split("T")[0]
-                  : null,
-              paymentMethod: paidAmount > 0 ? formData.paymentMethod : null,
-              status: status,
-              transactionId: paidAmount > 0 ? formData.transactionId : null,
-              notes: formData.notes || "",
-              collectedBy: paidAmount > 0 ? adminInfo.name : null,
-              invoiceNumber: formData.invoiceNumber,
-            }
-          : f,
-      ),
-    );
-    setShowEditModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "✅ Updated!",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    const payload = {
+      ...formData,
+      amount: Number(formData.amount),
+      paidAmount,
+      dueAmount,
+      status,
+      paymentDate:
+        paidAmount > 0
+          ? formData.paymentDate || new Date().toISOString().split("T")[0]
+          : null,
+      paymentMethod: paidAmount > 0 ? formData.paymentMethod : null,
+      transactionId: paidAmount > 0 ? formData.transactionId : null,
+      collectedBy: paidAmount > 0 ? adminInfo.name : null,
+    };
+
+    try {
+      setSaving(true);
+
+      const isLocalId = String(selectedFee._id).startsWith("LOCAL_");
+      let updatedFee;
+
+      if (!isLocalId) {
+        const data = await safeFetchJSON(
+          `${API_BASE}/api/fees/update/${selectedFee._id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          },
+        );
+        if (data.success && data.fee) {
+          updatedFee = data.fee;
+        } else {
+          updatedFee = { ...selectedFee, ...payload, dueAmount, status };
+        }
+      } else {
+        updatedFee = { ...selectedFee, ...payload, dueAmount, status };
+      }
+
+      setFeeRecords(
+        feeRecords.map((f) => (f._id === selectedFee._id ? updatedFee : f)),
+      );
+      setShowEditModal(false);
+      Swal.fire({
+        icon: "success",
+        title: "✅ Updated!",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDeleteFee = (id) => {
-    Swal.fire({
+  // ============================================================
+  // ✅ DELETE FEE
+  // ============================================================
+  const handleDeleteFee = async (id) => {
+    const result = await Swal.fire({
       title: "Delete Fee Record?",
       text: "This action cannot be undone!",
       icon: "warning",
@@ -765,17 +934,29 @@ const Admin_fee = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setFeeRecords(feeRecords.filter((f) => f.id !== id));
-        Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          timer: 1200,
-          showConfirmButton: false,
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const isLocalId =
+        String(id).startsWith("LOCAL_") || String(id).startsWith("sample-");
+      if (!isLocalId) {
+        await safeFetchJSON(`${API_BASE}/api/fees/delete/${id}`, {
+          method: "DELETE",
         });
       }
-    });
+      setFeeRecords(feeRecords.filter((f) => f._id !== id));
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    }
   };
 
   const handleMarkAsPaid = (fee) => {
@@ -787,41 +968,51 @@ const Admin_fee = () => {
       confirmButtonColor: "#22c55e",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, mark as paid!",
-    }).then((result) => {
-      if (result.isConfirmed) {
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+
+      const payload = {
+        ...fee,
+        status: "Paid",
+        paidAmount: fee.amount,
+        dueAmount: 0,
+        paymentDate: new Date().toISOString().split("T")[0],
+        paymentMethod: fee.paymentMethod || "Cash",
+        collectedBy: adminInfo.name,
+        transactionId:
+          fee.transactionId || `TXN${Date.now().toString().slice(-6)}`,
+      };
+
+      try {
+        const isLocalId =
+          String(fee._id).startsWith("LOCAL_") ||
+          String(fee._id).startsWith("sample-");
+        if (!isLocalId) {
+          await safeFetchJSON(`${API_BASE}/api/fees/update/${fee._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+        }
         setFeeRecords(
-          feeRecords.map((f) =>
-            f.id === fee.id
-              ? {
-                  ...f,
-                  status: "Paid",
-                  paidAmount: f.amount,
-                  dueAmount: 0,
-                  paymentDate: new Date().toISOString().split("T")[0],
-                  paymentMethod: f.paymentMethod || "Cash",
-                  collectedBy: adminInfo.name,
-                  transactionId:
-                    f.transactionId || `TXN${Date.now().toString().slice(-6)}`,
-                }
-              : f,
-          ),
+          feeRecords.map((f) => (f._id === fee._id ? { ...f, ...payload } : f)),
         );
         Swal.fire({
           icon: "success",
           title: "✅ Marked as Paid!",
-          timer: 1500,
+          timer: 1200,
           showConfirmButton: false,
         });
+      } catch (err) {
+        console.error(err);
       }
     });
   };
 
   const formatCurrency = (amount) => `৳${(amount || 0).toLocaleString()}`;
-
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", {
+    return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -834,7 +1025,7 @@ const Admin_fee = () => {
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
           <h1 className="text-sm font-bold text-gray-800">
-            Fee Management (Elders)
+            Fee Management ({currentDept})
           </h1>
           <button
             onClick={toggleSidebar}
@@ -846,11 +1037,7 @@ const Admin_fee = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -862,7 +1049,7 @@ const Admin_fee = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {adminInfo.designation}
+                  {adminInfo.department || adminInfo.designation}
                 </p>
               </div>
             </div>
@@ -879,20 +1066,14 @@ const Admin_fee = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${
-                          activeSubMenu === item.id ? "rotate-180" : ""
-                        }`}
+                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
                       >
                         <FaArrowRight size={12} />
                       </span>
@@ -907,11 +1088,7 @@ const Admin_fee = () => {
                               setActiveSubMenu(sub.id);
                               setIsSidebarOpen(false);
                             }}
-                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
+                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${activeSubMenu === sub.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                           >
                             {sub.label}
                           </Link>
@@ -928,11 +1105,7 @@ const Admin_fee = () => {
                     }}
                   >
                     <button
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -941,7 +1114,6 @@ const Admin_fee = () => {
                 )}
               </div>
             ))}
-
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -950,9 +1122,8 @@ const Admin_fee = () => {
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
           <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
+            <p>©Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 
@@ -970,24 +1141,30 @@ const Admin_fee = () => {
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaMoneyBillWave className="text-green-600" /> Fee Management —
-                <span className="text-teal-700">Quran For Elders</span>
+                <span className="text-teal-700">{DEPT_LABEL}</span>
               </h1>
               <p className="text-xs text-gray-500">
                 {studentsLoading
-                  ? "Loading elders students..."
-                  : `${eldersStudents.length} elders student${eldersStudents.length !== 1 ? "s" : ""} • Qaida • Nazera • Najera • Tajweed • Bakarah Hifz`}
+                  ? `Loading ${currentDept} students...`
+                  : `${deptStudents.length} ${currentDept} student${deptStudents.length !== 1 ? "s" : ""}`}
+                {!apiWorking && (
+                  <span className="ml-2 text-yellow-600">⚠️ Offline mode</span>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
-                onClick={fetchEldersStudents}
+                onClick={() => {
+                  loadFees();
+                  fetchDeptStudents();
+                }}
                 disabled={studentsLoading}
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 disabled:opacity-50"
               >
                 <FaSyncAlt
                   size={12}
                   className={studentsLoading ? "animate-spin" : ""}
-                />
+                />{" "}
                 Refresh
               </button>
               <button
@@ -1001,7 +1178,7 @@ const Admin_fee = () => {
                   Swal.fire({
                     icon: "info",
                     title: "Export Report",
-                    text: "Elders fee report will be downloaded.",
+                    text: `${currentDept} fee report will be downloaded.`,
                     timer: 1500,
                     showConfirmButton: false,
                   })
@@ -1019,22 +1196,29 @@ const Admin_fee = () => {
             </div>
           </div>
 
-          {/* ✅ Elders Students Card */}
-          <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
-            <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
-              <FaUsers size={12} /> Elders Students ({eldersStudents.length})
+          {/* Department Badge */}
+          <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-2 rounded-xl text-xs font-semibold mb-3">
+            🏫 Showing fee records of:{" "}
+            <span className="font-bold">{currentDept}</span> department
+          </div>
+
+          {/* Students Card */}
+          <div className="bg-white border border-gray-200 rounded-xl p-3 mb-3">
+            <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1">
+              <FaUsers size={12} className="text-teal-600" /> {currentDept}{" "}
+              Students ({deptStudents.length})
             </p>
-            {studentsLoading && eldersStudents.length === 0 ? (
+            {studentsLoading && deptStudents.length === 0 ? (
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div>
-                Loading from API...
+                Loading...
               </div>
-            ) : eldersStudents.length > 0 ? (
+            ) : deptStudents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {eldersStudents.map((s) => (
+                {deptStudents.map((s) => (
                   <div
                     key={s._id}
-                    className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
+                    className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center gap-3"
                   >
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {(s.name || "S").charAt(0)}
@@ -1054,9 +1238,18 @@ const Admin_fee = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-gray-500 italic">
-                No elders students found.
-              </p>
+              <div className="text-center py-4">
+                <FaUsers className="text-4xl text-gray-300 mx-auto mb-2" />
+                <p className="text-xs text-gray-500 mb-3">
+                  {currentDept} department-এ এখনো কোনো student নেই।
+                </p>
+                <button
+                  onClick={openAddModal}
+                  className="bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
+                >
+                  + Add Fee Manually
+                </button>
+              </div>
             )}
           </div>
 
@@ -1101,7 +1294,7 @@ const Admin_fee = () => {
                 <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search by student name, ID or invoice..."
+                  placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -1205,7 +1398,7 @@ const Admin_fee = () => {
                 <tbody className="divide-y divide-gray-100">
                   {filteredFees.length > 0 ? (
                     filteredFees.map((fee, index) => (
-                      <tr key={fee.id} className="hover:bg-gray-50">
+                      <tr key={fee._id || fee.id} className="hover:bg-gray-50">
                         <td className="px-3 py-2 font-medium text-gray-500">
                           {index + 1}
                         </td>
@@ -1253,7 +1446,7 @@ const Admin_fee = () => {
                               <button
                                 onClick={() => handleMarkAsPaid(fee)}
                                 className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
-                                title="Mark as Paid"
+                                title="Mark Paid"
                               >
                                 <FaCheckCircle size={12} />
                               </button>
@@ -1266,7 +1459,7 @@ const Admin_fee = () => {
                               <FaEdit size={12} />
                             </button>
                             <button
-                              onClick={() => handleDeleteFee(fee.id)}
+                              onClick={() => handleDeleteFee(fee._id || fee.id)}
                               className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                               title="Delete"
                             >
@@ -1283,7 +1476,13 @@ const Admin_fee = () => {
                         className="px-3 py-8 text-center text-gray-500"
                       >
                         <FaMoneyBillWave className="text-4xl text-gray-300 mx-auto mb-2" />
-                        <p>No elders fee records found</p>
+                        <p>{currentDept} department-এ কোনো fee record নেই</p>
+                        <button
+                          onClick={openAddModal}
+                          className="mt-3 bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
+                        >
+                          + Add First Fee Record
+                        </button>
                       </td>
                     </tr>
                   )}
@@ -1300,7 +1499,8 @@ const Admin_fee = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlusCircle className="text-green-600" /> Add Elders Fee
+                <FaPlusCircle className="text-green-600" /> Add Fee —{" "}
+                {currentDept}
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1311,32 +1511,33 @@ const Admin_fee = () => {
             </div>
             <form onSubmit={handleAddFee} className="p-6 space-y-4">
               <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
-                💡 Student select করলে বাকি information auto-fill হবে
+                💡 Student select করলে auto-fill হবে। অথবা **manually নাম type**
+                করুন।
               </div>
 
-              {/* Student dropdown */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Elders Student *
-                </label>
-                <select
-                  required
-                  value={
-                    eldersStudents.find(
-                      (s) => s.studentId === formData.studentId,
-                    )?._id || ""
-                  }
-                  onChange={(e) => handleStudentSelect(e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                >
-                  <option value="">Select Student</option>
-                  {eldersStudents.map((s) => (
-                    <option key={s._id} value={s._id}>
-                      {s.name} — {s.course}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {deptStudents.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Student (Optional)
+                  </label>
+                  <select
+                    value={
+                      deptStudents.find(
+                        (s) => s.studentId === formData.studentId,
+                      )?._id || ""
+                    }
+                    onChange={(e) => handleStudentSelect(e.target.value)}
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="">-- Manual Entry --</option>
+                    {deptStudents.map((s) => (
+                      <option key={s._id} value={s._id}>
+                        {s.name} — {s.course}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -1347,8 +1548,11 @@ const Admin_fee = () => {
                     type="text"
                     required
                     value={formData.studentName}
-                    readOnly
-                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
+                    onChange={(e) =>
+                      setFormData({ ...formData, studentName: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="Enter student name"
                   />
                 </div>
                 <div>
@@ -1358,8 +1562,11 @@ const Admin_fee = () => {
                   <input
                     type="text"
                     value={formData.studentId}
-                    readOnly
-                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
+                    onChange={(e) =>
+                      setFormData({ ...formData, studentId: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="e.g., TAR2648213"
                   />
                 </div>
               </div>
@@ -1371,6 +1578,7 @@ const Admin_fee = () => {
                   </label>
                   <input
                     type="text"
+                    required
                     value={formData.class}
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
@@ -1406,7 +1614,7 @@ const Admin_fee = () => {
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {ELDERS_COURSES.map((c) => (
+                    {DEPT_COURSES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1577,9 +1785,11 @@ const Admin_fee = () => {
               <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 rounded-lg font-semibold"
+                  disabled={saving}
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 rounded-lg font-semibold disabled:opacity-50"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Add Fee
+                  <FaSave className="inline mr-2" size={14} />{" "}
+                  {saving ? "Saving..." : "Add Fee"}
                 </button>
                 <button
                   type="button"
@@ -1594,13 +1804,13 @@ const Admin_fee = () => {
         </div>
       )}
 
-      {/* Edit Fee Modal */}
+      {/* Edit Modal — same as before but with saving state */}
       {showEditModal && selectedFee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaEdit className="text-yellow-600" /> Edit Elders Fee
+                <FaEdit className="text-yellow-600" /> Edit Fee — {currentDept}
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1683,7 +1893,7 @@ const Admin_fee = () => {
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {ELDERS_COURSES.map((c) => (
+                    {DEPT_COURSES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1852,9 +2062,11 @@ const Admin_fee = () => {
               <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold"
+                  disabled={saving}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold disabled:opacity-50"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Update Fee
+                  <FaSave className="inline mr-2" size={14} />{" "}
+                  {saving ? "Saving..." : "Update Fee"}
                 </button>
                 <button
                   type="button"
@@ -1875,7 +2087,8 @@ const Admin_fee = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaFileInvoice className="text-blue-600" /> Elders Fee Details
+                <FaFileInvoice className="text-blue-600" /> Fee Details —{" "}
+                {currentDept}
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}

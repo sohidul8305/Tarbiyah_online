@@ -34,11 +34,32 @@ import {
   FaAddressCard,
   FaGraduationCap,
   FaSyncAlt,
+  FaBuilding,
+  FaLock,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
+
+// ============================================================
+// ✅ Department → Course keywords (frontend safety filter)
+// ============================================================
+const DEPT_COURSE_KEYWORDS = {
+  Elders: [
+    "qaida",
+    "nazera",
+    "najera",
+    "bakarah",
+    "tajweed",
+    "quran for elders",
+    "basic tazweed",
+    "basic tajweed",
+  ],
+  "Quran Studies": ["quran studies", "hifzul quran", "tarbiyah quran"],
+  Alimiya: ["alimiya", "dawra", "tafsir", "fiqh", "hadith"],
+  Diploma: ["diploma"],
+};
 
 const Adminstudent_profile = () => {
   const { user, logOut } = useAuth();
@@ -46,6 +67,10 @@ const Adminstudent_profile = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("student-management");
   const [activeSubMenu, setActiveSubMenu] = useState("student-profile");
+
+  // ✅ Current admin এর department
+  const [adminDepartment, setAdminDepartment] = useState("");
+
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -103,38 +128,95 @@ const Adminstudent_profile = () => {
   });
 
   // ============================================================
-  // Load admin info
+  // ✅ Load admin info + department
   // ============================================================
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
+    const savedDept = localStorage.getItem("adminDepartment");
+
     if (savedAdmin) {
       try {
-        setAdminInfo(JSON.parse(savedAdmin));
+        const parsed = JSON.parse(savedAdmin);
+        setAdminInfo(parsed);
+        setAdminDepartment(parsed.department || savedDept || "");
       } catch (err) {
         console.error(err);
       }
     } else {
+      const fallbackDept = savedDept || "Administration";
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: fallbackDept,
         joinDate: "January 2024",
       });
+      setAdminDepartment(fallbackDept);
     }
   }, [user]);
 
   // ============================================================
-  // ✅ Fetch all LMS batches
+  // ✅ Check: student টা আমার department এর কিনা
+  // ============================================================
+  const studentBelongsToMyDept = (student) => {
+    if (!adminDepartment || adminDepartment === "All") return true;
+
+    const target = String(adminDepartment).toLowerCase().trim();
+
+    // Priority 1: student.department field
+    const sDept = String(student.department || student.raw?.department || "")
+      .toLowerCase()
+      .trim();
+    if (sDept) return sDept === target;
+
+    // Priority 2: course name দেখে
+    const keywords = DEPT_COURSE_KEYWORDS[adminDepartment];
+    if (!keywords) return false;
+
+    const courseStr = String(
+      student.course || student.raw?.course || student.class || "",
+    ).toLowerCase();
+
+    return keywords.some((kw) => courseStr.includes(kw));
+  };
+
+  // ============================================================
+  // ✅ Fetch LMS batches — department filtered
   // ============================================================
   const fetchBatches = async () => {
     try {
-      const res = await fetch(`${API_BASE}/batches/all`);
+      const url =
+        adminDepartment && adminDepartment !== "All"
+          ? `${API_BASE}/batches/all?department=${encodeURIComponent(adminDepartment)}`
+          : `${API_BASE}/batches/all`;
+
+      const res = await fetch(url);
       const data = await res.json();
+
       if (data.success) {
-        setBatches(data.batches || []);
-        console.log(`✅ Loaded ${data.batches?.length || 0} batches`);
+        // ✅ Frontend double-check
+        const filtered = (data.batches || []).filter((b) => {
+          if (!adminDepartment || adminDepartment === "All") return true;
+          const target = adminDepartment.toLowerCase().trim();
+          const bDept = String(b.department || "")
+            .toLowerCase()
+            .trim();
+          if (bDept) return bDept === target;
+
+          // Fallback: course keyword
+          const keywords = DEPT_COURSE_KEYWORDS[adminDepartment];
+          if (!keywords) return false;
+          const courseStr = String(b.course || "").toLowerCase();
+          const nameStr = String(b.name || "").toLowerCase();
+          const combined = courseStr + " " + nameStr;
+          return keywords.some((kw) => combined.includes(kw));
+        });
+
+        setBatches(filtered);
+        console.log(
+          `✅ [${adminDepartment}] Loaded ${filtered.length}/${data.batches?.length || 0} batches`,
+        );
       }
     } catch (err) {
       console.error("❌ fetchBatches error:", err);
@@ -142,7 +224,7 @@ const Adminstudent_profile = () => {
   };
 
   // ============================================================
-  // ✅ Fetch students of a specific batch
+  // ✅ Fetch batch students
   // ============================================================
   const fetchBatchStudents = async (batchId) => {
     if (!batchId || batchId === "All") {
@@ -180,7 +262,7 @@ const Adminstudent_profile = () => {
             class: s.course || batchInfo?.course || "N/A",
             subject: batchInfo?.course || "N/A",
             roll: "N/A",
-            phone: "",
+            phone: s.phone || "",
             email: "",
             address: "",
             dob: "",
@@ -242,9 +324,19 @@ const Adminstudent_profile = () => {
   };
 
   // ============================================================
-  // ✅ Fetch from 2 API endpoints (Tazweed + Najera)
+  // ✅ Fetch students — Tazweed + Najera (Elders only)
   // ============================================================
   const fetchStudents = async () => {
+    // ✅ Guard: Tazweed + Najera = Elders department only
+    if (!adminDepartment || adminDepartment !== "Elders") {
+      console.log(
+        `⛔ Skipping fetch — admin is "${adminDepartment}", not "Elders"`,
+      );
+      setStudents([]);
+      setLoadingStudents(false);
+      return;
+    }
+
     try {
       setLoadingStudents(true);
       setStudentsError(null);
@@ -330,6 +422,7 @@ const Adminstudent_profile = () => {
                 transactionId: s.transactionId || "",
                 comments: s.comments || "",
                 enrolledCourses: [],
+                department: "Elders", // ✅
                 raw: s,
               };
             });
@@ -415,6 +508,7 @@ const Adminstudent_profile = () => {
                 transactionId: s.transactionId || "",
                 comments: s.comments || "",
                 enrolledCourses: [],
+                department: "Elders", // ✅
                 raw: s,
               };
             });
@@ -431,7 +525,7 @@ const Adminstudent_profile = () => {
       });
 
       console.log("════════════════════════════════");
-      console.log(`✅ Loaded student profiles:`);
+      console.log(`✅ [Elders] Loaded student profiles:`);
       console.log(`   - Tazweed: ${tazweedStudents.length}`);
       console.log(`   - Najera: ${najeraStudents.length}`);
       console.log(`   - Total: ${combined.length}`);
@@ -447,13 +541,15 @@ const Adminstudent_profile = () => {
   };
 
   // ============================================================
-  // Initial fetch + batch change listener
+  // Initial fetch — only when department is ready
   // ============================================================
   useEffect(() => {
+    if (!adminDepartment) return;
+
     fetchStudents();
     fetchBatches();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [adminDepartment]);
 
   useEffect(() => {
     if (selectedBatchId === "All") {
@@ -470,6 +566,7 @@ const Adminstudent_profile = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
+      localStorage.removeItem("adminDepartment"); // ✅
 
       await Swal.fire({
         icon: "success",
@@ -514,7 +611,6 @@ const Adminstudent_profile = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -628,14 +724,17 @@ const Adminstudent_profile = () => {
   ];
 
   // ============================================================
-  // Filter logic
+  // Filter logic — with department safety net
   // ============================================================
-  const baseList =
+  const baseListRaw =
     selectedBatchId === "All"
       ? students.filter((s) =>
           sourceFilter === "All" ? true : s.source === sourceFilter,
         )
       : batchStudents;
+
+  // ✅ Department safety filter
+  const baseList = baseListRaw.filter((s) => studentBelongsToMyDept(s));
 
   const filteredStudents = baseList.filter((student) => {
     const matchesSearch =
@@ -662,8 +761,7 @@ const Adminstudent_profile = () => {
     );
   });
 
-  const activeListForFilters =
-    selectedBatchId === "All" ? students : batchStudents;
+  const activeListForFilters = baseList;
 
   const uniqueCourses = [
     "All",
@@ -794,7 +892,6 @@ const Adminstudent_profile = () => {
     const progress = calculateProgress(attendance, assignments, quiz, exam);
     const performance = determinePerformance(progress);
 
-    // ✅ Source অনুযায়ী সঠিক endpoint
     let updateUrl = `${API_BASE}/basic-tazweed/update/${selectedStudent._id}`;
     if (selectedStudent.source === "Najera") {
       updateUrl = `${API_BASE}/najera-batch/update/${selectedStudent._id}`;
@@ -875,7 +972,6 @@ const Adminstudent_profile = () => {
 
     if (!result.isConfirmed) return;
 
-    // ✅ Source অনুযায়ী সঠিক endpoint
     let deleteUrl = `${API_BASE}/basic-tazweed/delete/${id}`;
     if (source === "Najera") {
       deleteUrl = `${API_BASE}/najera-batch/delete/${id}`;
@@ -933,6 +1029,9 @@ const Adminstudent_profile = () => {
     );
   };
 
+  // ✅ Permission check
+  const isEldersDept = adminDepartment === "Elders";
+
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
@@ -968,11 +1067,16 @@ const Adminstudent_profile = () => {
                 <p className="text-xs opacity-80 truncate">
                   {adminInfo.designation}
                 </p>
+                {adminDepartment && (
+                  <p className="text-[10px] opacity-90 truncate mt-0.5 bg-white/20 px-1.5 py-0.5 rounded-full inline-block">
+                    🏛️ {adminDepartment}
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-160px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -1073,13 +1177,21 @@ const Adminstudent_profile = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaUserGraduate className="text-blue-600" /> Student Profiles —
-                <span className="text-teal-700">All Sources</span>
+                <FaUserGraduate className="text-blue-600" /> Student Profiles
+                {adminDepartment && (
+                  <span className="bg-teal-100 text-teal-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {adminDepartment}
+                  </span>
+                )}
               </h1>
               <p className="text-xs text-gray-500">
-                {selectedBatchId === "All"
-                  ? `Basic Tazweed + Najera Batch (${students.length} total)`
-                  : `${batches.find((b) => b._id === selectedBatchId)?.name || "Batch"} (${batchStudents.length} students)`}
+                {isEldersDept
+                  ? selectedBatchId === "All"
+                    ? `Basic Tazweed + Najera Batch (${students.length} total)`
+                    : `${batches.find((b) => b._id === selectedBatchId)?.name || "Batch"} (${batchStudents.length} students)`
+                  : selectedBatchId === "All"
+                    ? `Showing ${filteredStudents.length} students in your department`
+                    : `${batches.find((b) => b._id === selectedBatchId)?.name || "Batch"} (${batchStudents.length} students)`}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -1113,6 +1225,19 @@ const Adminstudent_profile = () => {
               </button>
             </div>
           </div>
+
+          {/* ✅ Department banner */}
+          {adminDepartment && (
+            <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white p-3 rounded-xl shadow-sm mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] opacity-80">You are logged in as</p>
+                <p className="text-sm font-bold">
+                  {adminDepartment} Department Admin
+                </p>
+              </div>
+              <span className="text-2xl">🏛️</span>
+            </div>
+          )}
 
           {/* Loading / Error */}
           {loadingStudents ? (
@@ -1153,7 +1278,9 @@ const Adminstudent_profile = () => {
                     }}
                     className="px-3 py-1.5 text-xs border border-gray-300 rounded-lg font-semibold focus:ring-2 focus:ring-teal-500 max-w-full"
                   >
-                    <option value="All">🌐 All Batches (All Sources)</option>
+                    <option value="All">
+                      🌐 All Batches ({adminDepartment})
+                    </option>
                     {batches.map((b) => (
                       <option key={b._id} value={b._id}>
                         📚 {b.name} — {b.course} ({b.students || 0} students)
@@ -1183,54 +1310,58 @@ const Adminstudent_profile = () => {
                 </div>
               </div>
 
-              {/* Source Tabs — disabled when batch selected */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto">
-                {[
-                  { id: "All", label: "All Students", color: "blue" },
-                  { id: "Tazweed", label: "Basic Tazweed", color: "green" },
-                  { id: "Najera", label: "Najera Batch", color: "purple" },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => {
-                      setSourceFilter(tab.id);
-                      setSelectedBatchId("All");
-                    }}
-                    disabled={selectedBatchId !== "All"}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                      selectedBatchId !== "All"
-                        ? "opacity-40 cursor-not-allowed"
-                        : ""
-                    } ${
-                      sourceFilter === tab.id && selectedBatchId === "All"
-                        ? tab.color === "blue"
-                          ? "bg-blue-50 text-blue-700 shadow-sm"
-                          : tab.color === "green"
-                            ? "bg-green-50 text-green-700 shadow-sm"
-                            : "bg-purple-50 text-purple-700 shadow-sm"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
-                  >
-                    {tab.label}
-                    <span
-                      className={`text-[10px] px-1.5 rounded-full ${
+              {/* Source Tabs — only for Elders */}
+              {isEldersDept && (
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto">
+                  {[
+                    { id: "All", label: "All Students", color: "blue" },
+                    { id: "Tazweed", label: "Basic Tazweed", color: "green" },
+                    { id: "Najera", label: "Najera Batch", color: "purple" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        setSourceFilter(tab.id);
+                        setSelectedBatchId("All");
+                      }}
+                      disabled={selectedBatchId !== "All"}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                        selectedBatchId !== "All"
+                          ? "opacity-40 cursor-not-allowed"
+                          : ""
+                      } ${
                         sourceFilter === tab.id && selectedBatchId === "All"
-                          ? "bg-white text-gray-700"
-                          : "bg-gray-200 text-gray-600"
+                          ? tab.color === "blue"
+                            ? "bg-blue-50 text-blue-700 shadow-sm"
+                            : tab.color === "green"
+                              ? "bg-green-50 text-green-700 shadow-sm"
+                              : "bg-purple-50 text-purple-700 shadow-sm"
+                          : "text-gray-600 hover:bg-gray-100"
                       }`}
                     >
-                      {sourceCounts[tab.id]}
-                    </span>
-                  </button>
-                ))}
-              </div>
+                      {tab.label}
+                      <span
+                        className={`text-[10px] px-1.5 rounded-full ${
+                          sourceFilter === tab.id && selectedBatchId === "All"
+                            ? "bg-white text-gray-700"
+                            : "bg-gray-200 text-gray-600"
+                        }`}
+                      >
+                        {sourceCounts[tab.id]}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
                   <p className="text-lg font-bold text-blue-600">
                     {selectedBatchId === "All"
-                      ? sourceCounts[sourceFilter]
+                      ? isEldersDept
+                        ? sourceCounts[sourceFilter]
+                        : filteredStudents.length
                       : batchStudents.length}
                   </p>
                   <p className="text-[10px] text-gray-500">
@@ -1448,11 +1579,10 @@ const Adminstudent_profile = () => {
                 </div>
               )}
 
+              {/* Empty states */}
               {filteredStudents.length === 0 &&
                 !loadingBatchStudents &&
-                (selectedBatchId === "All"
-                  ? students.length > 0
-                  : batchStudents.length > 0) && (
+                baseList.length > 0 && (
                   <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
                     <FaUserGraduate className="text-5xl text-gray-300 mx-auto mb-3" />
                     <h3 className="text-base font-bold text-gray-800 mb-0.5">
@@ -1466,9 +1596,7 @@ const Adminstudent_profile = () => {
 
               {filteredStudents.length === 0 &&
                 !loadingBatchStudents &&
-                (selectedBatchId === "All"
-                  ? students.length === 0
-                  : batchStudents.length === 0) && (
+                baseList.length === 0 && (
                   <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center mt-3">
                     <FaUserGraduate className="text-5xl text-gray-300 mx-auto mb-3" />
                     <h3 className="text-base font-bold text-gray-800 mb-0.5">
@@ -1476,7 +1604,9 @@ const Adminstudent_profile = () => {
                     </h3>
                     <p className="text-xs text-gray-500">
                       {selectedBatchId === "All"
-                        ? "Basic Tazweed বা Najera Batch থেকে student add করুন।"
+                        ? isEldersDept
+                          ? "Basic Tazweed বা Najera Batch থেকে student add করুন।"
+                          : `${adminDepartment} department এ এখনো কোনো student নেই। প্রথমে Batch তৈরি করে student add করুন।`
                         : "এই batch এ এখনো কোনো student add করা হয়নি।"}
                     </p>
                   </div>

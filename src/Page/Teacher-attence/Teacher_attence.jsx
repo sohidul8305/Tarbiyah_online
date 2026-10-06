@@ -18,12 +18,8 @@ import {
   FaEye,
   FaSearch,
   FaPlus,
-  FaCheckCircle,
-  FaTimesCircle,
   FaArrowRight,
   FaArrowLeft,
-  FaLayerGroup,
-  FaSave,
   FaClipboardCheck,
   FaCalendarDay,
   FaCalendarWeek,
@@ -39,65 +35,60 @@ import { FiMenu, FiX } from "react-icons/fi";
 const API_BASE = "https://api.tarbiyahonline.com";
 
 // ============================================================
-// ✅ ২ জন ELDERS TEACHER — hardcoded (সবসময় দেখাবে)
+// ✅ DEPARTMENT-WISE TEACHER CONFIG
+// প্রতিটা department এর নিজস্ব teacher list
 // ============================================================
-const ELDERS_TEACHERS_FALLBACK = [
-  {
-    _id: "TCH_FIXED_001",
-    id: 1,
-    teacherId: "TCH001",
-    name: "Jubayer Ahmad",
-    designation: "Senior Teacher",
-    subject: "Quran For Elders",
-    department: "Quran For Elders",
-    phone: "+880 1712 345678",
-    email: "jubayer@tarabiyah.com",
-    status: "Active",
-    isDefault: true,
-  },
-  {
-    _id: "TCH_FIXED_002",
-    id: 2,
-    teacherId: "TCH002",
-    name: "Sumaiya Afrin Mim",
-    designation: "Junior Teacher",
-    subject: "Quran For Elders",
-    department: "Quran For Elders",
-    phone: "+880 1723 456789",
-    email: "sumaiya@tarabiyah.com",
-    status: "Active",
-    isDefault: true,
-  },
-];
-
-// ✅ Elders teacher কিনা check
-const isEldersTeacher = (t) => {
-  if (!t) return false;
-  const id = t.teacherId || t.id || t._id;
-  if (["TCH001", "TCH002", 1, 2, "1", "2"].includes(id)) return true;
-
-  const name = String(t.name || "").toLowerCase();
-  const subj = String(t.subject || "").toLowerCase();
-  const dept = String(t.department || "").toLowerCase();
-
-  return (
-    name.includes("jubayer") ||
-    name.includes("sumaiya") ||
-    name.includes("afrin") ||
-    subj.includes("quran for elders") ||
-    dept.includes("quran for elders") ||
-    dept.includes("elders")
-  );
+const DEPARTMENT_TEACHERS_CONFIG = {
+  Elders: [
+    {
+      _id: "TCH_FIXED_001",
+      id: 1,
+      teacherId: "TCH001",
+      name: "Jubayer Ahmad",
+      designation: "Senior Teacher",
+      subject: "Quran For Elders",
+      department: "Elders",
+      phone: "+880 1712 345678",
+      email: "jubayer@tarabiyah.com",
+      status: "Active",
+      isDefault: true,
+    },
+    {
+      _id: "TCH_FIXED_002",
+      id: 2,
+      teacherId: "TCH002",
+      name: "Sumaiya Afrin Mim",
+      designation: "Junior Teacher",
+      subject: "Quran For Elders",
+      department: "Elders",
+      phone: "+880 1723 456789",
+      email: "sumaiya@tarabiyah.com",
+      status: "Active",
+      isDefault: true,
+    },
+  ],
+  "Quran Studies": [],
+  Alimiya: [],
+  Diploma: [],
 };
 
-// Safe fetch (HTML 404 response handle করে)
+// ✅ Current admin department বের করো
+const getCurrentDepartment = () => {
+  try {
+    const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
+    return info.department || "Elders";
+  } catch {
+    return "Elders";
+  }
+};
+
+// Safe fetch (HTML 404 handle করে)
 const safeFetchJSON = async (url, options = {}) => {
   try {
     const res = await fetch(url, options);
     const text = await res.text();
-    if (text.trim().startsWith("<")) {
+    if (text.trim().startsWith("<"))
       return { success: false, _htmlError: true };
-    }
     try {
       return JSON.parse(text);
     } catch {
@@ -115,19 +106,27 @@ const Teacher_attence = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("teacher-management");
   const [activeSubMenu, setActiveSubMenu] = useState("teacher-attendance");
+
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
     phone: "",
     designation: "",
-    department: "Quran for Elders",
+    department: "Elders",
     joinDate: "",
   });
 
+  // ✅ Current department
+  const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
+
   const today = new Date().toISOString().split("T")[0];
 
-  // ✅ Elders teachers only
-  const [teachers, setTeachers] = useState(ELDERS_TEACHERS_FALLBACK);
+  // ✅ Department-specific storage keys
+  const TEACHERS_STORAGE_KEY = `teachers_${currentDept.replace(/\s+/g, "_")}`;
+  const ATTENDANCE_STORAGE_KEY = `teacherAttendance_${currentDept.replace(/\s+/g, "_")}`;
+
+  // ✅ State
+  const [teachers, setTeachers] = useState([]);
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -142,6 +141,7 @@ const Teacher_attence = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showMarkModal, setShowMarkModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showAddTeacherModal, setShowAddTeacherModal] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [markStatus, setMarkStatus] = useState("Present");
   const [markNote, setMarkNote] = useState("");
@@ -161,14 +161,27 @@ const Teacher_attence = () => {
     note: "",
   });
 
+  const [newTeacherData, setNewTeacherData] = useState({
+    name: "",
+    shortName: "",
+    designation: "Teacher",
+    phone: "",
+    email: "",
+    subject: "",
+  });
+
   const statuses = ["Present", "Absent", "Late", "Leave"];
 
-  // Load admin info
+  // ============================================================
+  // ✅ Load admin info
+  // ============================================================
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
       try {
-        setAdminInfo(JSON.parse(savedAdmin));
+        const info = JSON.parse(savedAdmin);
+        setAdminInfo(info);
+        if (info.department) setCurrentDept(info.department);
       } catch (err) {
         console.error(err);
       }
@@ -178,95 +191,106 @@ const Teacher_attence = () => {
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Quran for Elders",
+        department: "Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
   // ============================================================
-  // Fetch Teachers — only elders
+  // ✅ Load teachers — department-specific
+  // ============================================================
+  useEffect(() => {
+    const key = `teachers_${currentDept.replace(/\s+/g, "_")}`;
+    const saved = localStorage.getItem(key);
+
+    if (saved) {
+      try {
+        setTeachers(JSON.parse(saved));
+      } catch {
+        setTeachers(DEPARTMENT_TEACHERS_CONFIG[currentDept] || []);
+      }
+    } else {
+      // ✅ Default config (Elders → 2, অন্য → খালি)
+      const defaults = DEPARTMENT_TEACHERS_CONFIG[currentDept] || [];
+      setTeachers(defaults);
+    }
+  }, [currentDept]);
+
+  // Save teachers
+  useEffect(() => {
+    if (!currentDept) return;
+    const key = `teachers_${currentDept.replace(/\s+/g, "_")}`;
+    localStorage.setItem(key, JSON.stringify(teachers));
+  }, [teachers, currentDept]);
+
+  // ============================================================
+  // ✅ Load attendance — department-specific
+  // ============================================================
+  useEffect(() => {
+    const key = `teacherAttendance_${currentDept.replace(/\s+/g, "_")}`;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      try {
+        setAttendanceRecords(JSON.parse(saved));
+      } catch {
+        setAttendanceRecords([]);
+      }
+    } else {
+      setAttendanceRecords([]);
+    }
+  }, [currentDept]);
+
+  // Save attendance
+  useEffect(() => {
+    if (!currentDept) return;
+    const key = `teacherAttendance_${currentDept.replace(/\s+/g, "_")}`;
+    localStorage.setItem(key, JSON.stringify(attendanceRecords));
+  }, [attendanceRecords, currentDept]);
+
+  // ============================================================
+  // ✅ Fetch teachers from backend (optional, only for this dept)
   // ============================================================
   const fetchTeachers = async () => {
     try {
-      // Start with fallback 2
-      let eldersList = [...ELDERS_TEACHERS_FALLBACK];
-
       const data = await safeFetchJSON(
-        `${API_BASE}/api/teacher-attendance/teachers`,
+        `${API_BASE}/api/teacher-attendance/teachers?department=${encodeURIComponent(currentDept)}`,
       );
 
       if (data.success && Array.isArray(data.teachers)) {
-        data.teachers.filter(isEldersTeacher).forEach((t) => {
-          const exists = eldersList.some(
-            (e) =>
-              (e.teacherId || "").toUpperCase() ===
-                (t.teacherId || "").toUpperCase() ||
-              (e.name || "").toLowerCase() === (t.name || "").toLowerCase(),
-          );
-          if (!exists) eldersList.push(t);
-        });
-      }
-
-      console.log("✅ Elders teachers loaded:", eldersList.length);
-      eldersList.forEach((t) => console.log("   →", t.name));
-
-      setTeachers(eldersList);
-    } catch (err) {
-      console.warn("Teachers fetch failed, using fallback");
-      setTeachers(ELDERS_TEACHERS_FALLBACK);
-    }
-  };
-
-  // ============================================================
-  // Fetch Attendance — only for elders teachers
-  // ============================================================
-  const fetchAttendance = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const data = await safeFetchJSON(
-        `${API_BASE}/api/teacher-attendance/all`,
-      );
-
-      if (data.success && Array.isArray(data.attendance)) {
-        // ✅ শুধু elders teachers এর attendance
-        const eldersIds = ELDERS_TEACHERS_FALLBACK.map((t) =>
-          String(t.id),
-        ).concat(ELDERS_TEACHERS_FALLBACK.map((t) => String(t.teacherId)));
-        const eldersNames = ELDERS_TEACHERS_FALLBACK.map((t) =>
-          String(t.name).toLowerCase(),
-        );
-
-        const filtered = data.attendance.filter((r) => {
-          const rid = String(r.teacherId || "");
-          const rname = String(r.teacherName || "").toLowerCase();
-          return (
-            eldersIds.includes(rid) ||
-            eldersNames.some((n) => rname.includes(n))
-          );
+        // ✅ শুধু current department এর teacher
+        const deptTeachers = data.teachers.filter((t) => {
+          const tDept = String(t.department || "").toLowerCase();
+          return tDept.includes(currentDept.toLowerCase());
         });
 
-        setAttendanceRecords(filtered);
-      } else {
-        setAttendanceRecords([]);
-        if (data._htmlError) {
-          setError("Backend attendance API not available — using local view");
+        if (deptTeachers.length > 0) {
+          // Merge with existing (don't overwrite)
+          setTeachers((prev) => {
+            const merged = [...prev];
+            deptTeachers.forEach((t) => {
+              const exists = merged.some(
+                (m) =>
+                  (m.teacherId || "").toUpperCase() ===
+                    (t.teacherId || "").toUpperCase() ||
+                  (m.name || "").toLowerCase() === (t.name || "").toLowerCase(),
+              );
+              if (!exists) merged.push(t);
+            });
+            return merged;
+          });
         }
       }
     } catch (err) {
-      console.warn("Attendance fetch error:", err);
-      setAttendanceRecords([]);
-    } finally {
-      setLoading(false);
+      console.warn("Teachers fetch failed, using local data");
     }
   };
 
   useEffect(() => {
     fetchTeachers();
-    fetchAttendance();
-  }, []);
+    setTimeout(() => setLoading(false), 400);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
 
   const handleLogout = async () => {
     try {
@@ -309,7 +333,6 @@ const Teacher_attence = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -368,7 +391,6 @@ const Teacher_attence = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -389,7 +411,6 @@ const Teacher_attence = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -424,16 +445,16 @@ const Teacher_attence = () => {
     },
   ];
 
-  // Get attendance for teacher+date
-  const getTeacherAttendance = (teacherId, date) => {
-    return attendanceRecords.find(
+  // ============================================================
+  // Helpers
+  // ============================================================
+  const getTeacherAttendance = (teacherId, date) =>
+    attendanceRecords.find(
       (r) => String(r.teacherId) === String(teacherId) && r.date === date,
     );
-  };
 
-  // Get monthly attendance
-  const getMonthlyAttendance = (teacherId, month, year) => {
-    return attendanceRecords.filter((r) => {
+  const getMonthlyAttendance = (teacherId, month, year) =>
+    attendanceRecords.filter((r) => {
       const d = new Date(r.date);
       return (
         String(r.teacherId) === String(teacherId) &&
@@ -441,7 +462,6 @@ const Teacher_attence = () => {
         d.getFullYear() === year
       );
     });
-  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -482,10 +502,11 @@ const Teacher_attence = () => {
     </span>
   );
 
-  // ============ SAVE ATTENDANCE (local + API) ============
+  // ============================================================
+  // SAVE ATTENDANCE
+  // ============================================================
   const saveAttendance = async () => {
     if (!selectedTeacher) return;
-
     try {
       setSaving(true);
 
@@ -515,7 +536,6 @@ const Teacher_attence = () => {
         },
       );
 
-      // Local update
       setAttendanceRecords((prev) => {
         const idx = prev.findIndex(
           (r) =>
@@ -550,7 +570,9 @@ const Teacher_attence = () => {
     }
   };
 
-  // ============ ADD ATTENDANCE ============
+  // ============================================================
+  // ADD ATTENDANCE
+  // ============================================================
   const handleAddAttendance = async (e) => {
     e.preventDefault();
 
@@ -584,16 +606,12 @@ const Teacher_attence = () => {
         note: formData.note || "",
       };
 
-      const data = await safeFetchJSON(
-        `${API_BASE}/api/teacher-attendance/mark`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
+      await safeFetchJSON(`${API_BASE}/api/teacher-attendance/mark`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-      // Local update
       setAttendanceRecords((prev) => {
         const idx = prev.findIndex(
           (r) =>
@@ -632,6 +650,86 @@ const Teacher_attence = () => {
     } finally {
       setSaving(false);
     }
+  };
+
+  // ============================================================
+  // ✅ ADD TEACHER (শুধু এই department-এর জন্য)
+  // ============================================================
+  const handleAddTeacher = (e) => {
+    e.preventDefault();
+
+    if (!newTeacherData.name.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Name required",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const newId = Math.max(0, ...teachers.map((t) => t.id || 0)) + 1;
+    const newTeacher = {
+      _id: `TCH_${currentDept.replace(/\s+/g, "_")}_${Date.now()}`,
+      id: newId,
+      teacherId: `TCH${String(newId).padStart(3, "0")}`,
+      name: newTeacherData.name.trim(),
+      shortName: newTeacherData.shortName.trim() || newTeacherData.name.trim(),
+      designation: newTeacherData.designation || "Teacher",
+      subject: newTeacherData.subject.trim() || currentDept,
+      department: currentDept,
+      phone: newTeacherData.phone.trim() || "",
+      email: newTeacherData.email.trim() || "",
+      status: "Active",
+      isCustom: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    setTeachers([...teachers, newTeacher]);
+    setNewTeacherData({
+      name: "",
+      shortName: "",
+      designation: "Teacher",
+      phone: "",
+      email: "",
+      subject: "",
+    });
+    setShowAddTeacherModal(false);
+
+    Swal.fire({
+      icon: "success",
+      title: "Teacher Added!",
+      html: `<p><strong>${newTeacher.name}</strong></p><p style="font-size:12px; color:#666;">Added to ${currentDept}</p>`,
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  };
+
+  // Remove teacher
+  const handleRemoveTeacher = (teacherId) => {
+    Swal.fire({
+      title: "Remove Teacher?",
+      text: "This will also remove their attendance records",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Yes, remove",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setTeachers(teachers.filter((t) => t.id !== teacherId));
+        setAttendanceRecords(
+          attendanceRecords.filter(
+            (r) => String(r.teacherId) !== String(teacherId),
+          ),
+        );
+        Swal.fire({
+          icon: "success",
+          title: "Removed!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
+      }
+    });
   };
 
   const handleMarkAttendance = (teacher) => {
@@ -756,7 +854,7 @@ const Teacher_attence = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="text-sm text-gray-500 mt-3">
-            Loading elders attendance...
+            Loading {currentDept} attendance...
           </p>
         </div>
       </div>
@@ -768,7 +866,9 @@ const Teacher_attence = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold">Teacher Attendance (Elders)</h1>
+          <h1 className="text-sm font-bold">
+            Teacher Attendance ({currentDept})
+          </h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100"
@@ -779,12 +879,7 @@ const Teacher_attence = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50 w-72 md:w-64 bg-white border-r
-            shadow-lg md:shadow-sm transition-all duration-300 h-full
-            overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -796,7 +891,7 @@ const Teacher_attence = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {adminInfo.designation}
+                  {adminInfo.department || adminInfo.designation}
                 </p>
               </div>
             </div>
@@ -813,11 +908,7 @@ const Teacher_attence = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold"
-                          : "text-gray-700 hover:bg-gray-50"
-                      }`}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-700 hover:bg-gray-50"}`}
                     >
                       <div className="flex items-center gap-3">
                         <span>{item.icon}</span>
@@ -846,11 +937,7 @@ const Teacher_attence = () => {
                 ) : (
                   <Link to={item.path} onClick={() => setIsSidebarOpen(false)}>
                     <button
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold"
-                          : "text-gray-700 hover:bg-gray-50"
-                      }`}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-700 hover:bg-gray-50"}`}
                     >
                       <span>{item.icon}</span>
                       <span>{item.label}</span>
@@ -884,18 +971,24 @@ const Teacher_attence = () => {
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaClipboardCheck className="text-blue-600" /> Teacher
-                Attendance —
-                <span className="text-teal-700">Quran For Elders</span>
+                Attendance —<span className="text-teal-700">{currentDept}</span>
               </h1>
               <p className="text-xs text-gray-500">
-                {teachers.length} elders teachers • {attendanceRecords.length}{" "}
-                records
+                {teachers.length} {currentDept} teachers •{" "}
+                {attendanceRecords.length} records
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
+                onClick={() => setShowAddTeacherModal(true)}
+                className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
+              >
+                <FaUserTie size={12} /> Add Teacher
+              </button>
+              <button
                 onClick={openAddModal}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+                disabled={teachers.length === 0}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white text-xs px-4 py-2 rounded-lg font-bold flex items-center gap-2"
               >
                 <FaPlus size={14} /> Add Attendance
               </button>
@@ -918,7 +1011,6 @@ const Teacher_attence = () => {
               <button
                 onClick={() => {
                   fetchTeachers();
-                  fetchAttendance();
                 }}
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-medium"
               >
@@ -933,50 +1025,90 @@ const Teacher_attence = () => {
             </div>
           </div>
 
-          {/* ✅ Teachers List Card */}
-          <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
-            <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
-              <FaUserTie size={12} /> Elders Teachers ({teachers.length})
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {teachers.map((t, idx) => {
-                const att = getTeacherAttendance(t.id, selectedDate);
-                return (
-                  <div
-                    key={t._id || t.id || idx}
-                    className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      {(t.name || "T").charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-800 truncate">
-                        {t.name}
-                      </p>
-                      <p className="text-[10px] text-gray-500 truncate">
-                        {t.designation || "Teacher"} • {t.teacherId}
-                      </p>
-                      <p className="text-[10px] text-teal-600 truncate">
-                        {t.subject || "Quran For Elders"}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      {att ? (
-                        <span
-                          className={`text-[9px] px-2 py-0.5 rounded-full ${getStatusColor(att.status)}`}
-                        >
-                          {att.status}
-                        </span>
-                      ) : (
-                        <span className="text-[9px] text-gray-400">
-                          Not Marked
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+          {/* Department Badge */}
+          <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-2 rounded-xl text-xs font-semibold mb-3">
+            🏫 Showing attendance of:{" "}
+            <span className="font-bold">{currentDept}</span> department
+          </div>
+
+          {/* Teachers List */}
+          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 mb-3">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                <FaUserTie size={12} className="text-teal-600" /> {currentDept}{" "}
+                Teachers ({teachers.length})
+              </p>
+              <button
+                onClick={() => setShowAddTeacherModal(true)}
+                className="text-[10px] text-teal-600 hover:text-teal-800 font-semibold flex items-center gap-1"
+              >
+                <FaPlus size={10} /> Add
+              </button>
             </div>
+
+            {teachers.length === 0 ? (
+              <div className="text-center py-6">
+                <FaUserTie className="text-4xl text-gray-300 mx-auto mb-2" />
+                <p className="text-xs text-gray-500 mb-3">
+                  {currentDept} department-এ এখনো কোনো teacher add করা হয়নি।
+                </p>
+                <button
+                  onClick={() => setShowAddTeacherModal(true)}
+                  className="bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
+                >
+                  + Add First Teacher
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {teachers.map((t, idx) => {
+                  const att = getTeacherAttendance(t.id, selectedDate);
+                  return (
+                    <div
+                      key={t._id || t.id || idx}
+                      className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center gap-3"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                        {(t.name || "T").charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-gray-800 truncate">
+                          {t.name}
+                        </p>
+                        <p className="text-[10px] text-gray-500 truncate">
+                          {t.designation || "Teacher"} • {t.teacherId}
+                        </p>
+                        <p className="text-[10px] text-teal-600 truncate">
+                          {t.subject || currentDept}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        {att ? (
+                          <span
+                            className={`text-[9px] px-2 py-0.5 rounded-full ${getStatusColor(att.status)}`}
+                          >
+                            {att.status}
+                          </span>
+                        ) : (
+                          <span className="text-[9px] text-gray-400">
+                            Not Marked
+                          </span>
+                        )}
+                        {t.isCustom && (
+                          <button
+                            onClick={() => handleRemoveTeacher(t.id)}
+                            className="block text-red-500 hover:text-red-700 mt-1 ml-auto"
+                            title="Remove teacher"
+                          >
+                            <FaUserTimes size={10} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Daily View */}
@@ -1026,7 +1158,7 @@ const Teacher_attence = () => {
                     <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                     <input
                       type="text"
-                      placeholder="Search elders teachers..."
+                      placeholder={`Search ${currentDept} teachers...`}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-7 pr-2 py-1 text-xs border rounded-lg"
@@ -1144,7 +1276,13 @@ const Teacher_attence = () => {
                             className="px-3 py-8 text-center text-gray-500"
                           >
                             <FaChalkboardTeacher className="text-4xl text-gray-300 mx-auto mb-2" />
-                            <p>No elders teachers found</p>
+                            <p>{currentDept} department-এ কোনো teacher নেই</p>
+                            <button
+                              onClick={() => setShowAddTeacherModal(true)}
+                              className="mt-3 bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
+                            >
+                              + Add Teacher
+                            </button>
                           </td>
                         </tr>
                       )}
@@ -1164,7 +1302,7 @@ const Teacher_attence = () => {
                   <FaArrowLeft />
                 </button>
                 <h3 className="text-base font-bold text-gray-800">
-                  {getMonthName(selectedMonth)} {selectedYear}
+                  {getMonthName(selectedMonth)} {selectedYear} — {currentDept}
                 </h3>
                 <button
                   onClick={() => handleMonthChange("next")}
@@ -1206,53 +1344,61 @@ const Teacher_attence = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y">
-                      {teachers.map((t) => {
-                        const s = calculateStats(t.id);
-                        return (
-                          <tr key={t._id || t.id} className="hover:bg-gray-50">
-                            <td className="px-2 py-2">
-                              <div className="font-medium text-gray-800">
-                                {t.name}
-                              </div>
-                              <div className="text-[10px] text-gray-400">
-                                {t.teacherId} • {t.designation}
-                              </div>
-                            </td>
-                            <td className="px-2 py-2 text-center font-medium">
-                              {s.total}
-                            </td>
-                            <td className="px-2 py-2 text-center text-green-600 font-medium">
-                              {s.present}
-                            </td>
-                            <td className="px-2 py-2 text-center text-red-600 font-medium">
-                              {s.absent}
-                            </td>
-                            <td className="px-2 py-2 text-center text-yellow-600 font-medium">
-                              {s.late}
-                            </td>
-                            <td className="px-2 py-2 text-center text-blue-600 font-medium">
-                              {s.leave}
-                            </td>
-                            <td className="px-2 py-2 text-center font-bold">
-                              {s.percentage}%
-                            </td>
-                            <td className="px-2 py-2 text-center">
-                              <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden mx-auto">
-                                <div
-                                  className={`h-full rounded-full ${
-                                    s.percentage >= 85
-                                      ? "bg-green-500"
-                                      : s.percentage >= 70
-                                        ? "bg-yellow-500"
-                                        : "bg-red-500"
-                                  }`}
-                                  style={{ width: `${s.percentage}%` }}
-                                />
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {teachers.length > 0 ? (
+                        teachers.map((t) => {
+                          const s = calculateStats(t.id);
+                          return (
+                            <tr
+                              key={t._id || t.id}
+                              className="hover:bg-gray-50"
+                            >
+                              <td className="px-2 py-2">
+                                <div className="font-medium text-gray-800">
+                                  {t.name}
+                                </div>
+                                <div className="text-[10px] text-gray-400">
+                                  {t.teacherId} • {t.designation}
+                                </div>
+                              </td>
+                              <td className="px-2 py-2 text-center font-medium">
+                                {s.total}
+                              </td>
+                              <td className="px-2 py-2 text-center text-green-600 font-medium">
+                                {s.present}
+                              </td>
+                              <td className="px-2 py-2 text-center text-red-600 font-medium">
+                                {s.absent}
+                              </td>
+                              <td className="px-2 py-2 text-center text-yellow-600 font-medium">
+                                {s.late}
+                              </td>
+                              <td className="px-2 py-2 text-center text-blue-600 font-medium">
+                                {s.leave}
+                              </td>
+                              <td className="px-2 py-2 text-center font-bold">
+                                {s.percentage}%
+                              </td>
+                              <td className="px-2 py-2 text-center">
+                                <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden mx-auto">
+                                  <div
+                                    className={`h-full rounded-full ${s.percentage >= 85 ? "bg-green-500" : s.percentage >= 70 ? "bg-yellow-500" : "bg-red-500"}`}
+                                    style={{ width: `${s.percentage}%` }}
+                                  />
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan="8"
+                            className="px-3 py-8 text-center text-gray-500"
+                          >
+                            No teachers yet
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1262,13 +1408,164 @@ const Teacher_attence = () => {
         </main>
       </div>
 
-      {/* Add Modal */}
+      {/* Add Teacher Modal */}
+      {showAddTeacherModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div className="p-6 border-b flex justify-between items-center">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaUserTie className="text-green-600" /> Add Teacher to{" "}
+                {currentDept}
+              </h3>
+              <button
+                onClick={() => setShowAddTeacherModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleAddTeacher} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newTeacherData.name}
+                  onChange={(e) =>
+                    setNewTeacherData({
+                      ...newTeacherData,
+                      name: e.target.value,
+                    })
+                  }
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="e.g., Muhammad Abdullah"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Short Name
+                </label>
+                <input
+                  type="text"
+                  value={newTeacherData.shortName}
+                  onChange={(e) =>
+                    setNewTeacherData({
+                      ...newTeacherData,
+                      shortName: e.target.value,
+                    })
+                  }
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="e.g., Abdullah Ustad"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Designation
+                  </label>
+                  <select
+                    value={newTeacherData.designation}
+                    onChange={(e) =>
+                      setNewTeacherData({
+                        ...newTeacherData,
+                        designation: e.target.value,
+                      })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="Senior Teacher">Senior Teacher</option>
+                    <option value="Junior Teacher">Junior Teacher</option>
+                    <option value="Teacher">Teacher</option>
+                    <option value="Guest Teacher">Guest Teacher</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Subject
+                  </label>
+                  <input
+                    type="text"
+                    value={newTeacherData.subject}
+                    onChange={(e) =>
+                      setNewTeacherData({
+                        ...newTeacherData,
+                        subject: e.target.value,
+                      })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder={currentDept}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone
+                </label>
+                <input
+                  type="text"
+                  value={newTeacherData.phone}
+                  onChange={(e) =>
+                    setNewTeacherData({
+                      ...newTeacherData,
+                      phone: e.target.value,
+                    })
+                  }
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="+880 1XXX XXXXXX"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={newTeacherData.email}
+                  onChange={(e) =>
+                    setNewTeacherData({
+                      ...newTeacherData,
+                      email: e.target.value,
+                    })
+                  }
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="teacher@example.com"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t">
+                <button
+                  type="submit"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold"
+                >
+                  <FaPlus className="inline mr-2" size={14} /> Add Teacher
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddTeacherModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Attendance Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlus className="text-blue-600" /> Add Attendance
+                <FaPlus className="text-blue-600" /> Add Attendance —{" "}
+                {currentDept}
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1298,7 +1595,7 @@ const Teacher_attence = () => {
                   }}
                   className="w-full border rounded-lg px-3 py-2 text-sm"
                 >
-                  <option value="">Select Elders Teacher</option>
+                  <option value="">Select Teacher</option>
                   {teachers.map((t) => (
                     <option key={t._id || t.id} value={t.id}>
                       {t.name} ({t.teacherId}) — {t.designation}
@@ -1332,11 +1629,7 @@ const Teacher_attence = () => {
                       key={s}
                       type="button"
                       onClick={() => setFormData({ ...formData, status: s })}
-                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                        formData.status === s
-                          ? `${getStatusColor(s)} border-2 border-blue-500`
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
+                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${formData.status === s ? `${getStatusColor(s)} border-2 border-blue-500` : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                     >
                       {s}
                     </button>
@@ -1398,7 +1691,6 @@ const Teacher_attence = () => {
                   disabled={saving}
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold disabled:opacity-50"
                 >
-                  <FaSave className="inline mr-2" size={14} />
                   {saving ? "Saving..." : "Add Attendance"}
                 </button>
                 <button
@@ -1443,11 +1735,7 @@ const Teacher_attence = () => {
                     <button
                       key={s}
                       onClick={() => setMarkStatus(s)}
-                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                        markStatus === s
-                          ? `${getStatusColor(s)} border-2 border-blue-500`
-                          : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                      }`}
+                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${markStatus === s ? `${getStatusColor(s)} border-2 border-blue-500` : "bg-gray-100 text-gray-700 hover:bg-gray-200"}`}
                     >
                       {s}
                     </button>
@@ -1503,7 +1791,6 @@ const Teacher_attence = () => {
                   disabled={saving}
                   className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold text-sm disabled:opacity-50"
                 >
-                  <FaSave className="inline mr-2" />{" "}
                   {saving ? "Saving..." : "Save"}
                 </button>
                 <button
@@ -1547,8 +1834,10 @@ const Teacher_attence = () => {
                   </p>
                   <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
                     <span>📚 {selectedTeacher.subject}</span>
-                    <span>🏛️ {selectedTeacher.department}</span>
-                    <span>📱 {selectedTeacher.phone}</span>
+                    <span>🏛️ {selectedTeacher.department || currentDept}</span>
+                    {selectedTeacher.phone && (
+                      <span>📱 {selectedTeacher.phone}</span>
+                    )}
                   </div>
                 </div>
               </div>

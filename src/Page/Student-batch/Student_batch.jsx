@@ -385,17 +385,68 @@ const Student_batch = () => {
     },
   ];
 
-  const filteredBatches = batches.filter((batch) => {
-    const matchesSearch =
-      (batch.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (batch.course || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (batch.teacher || "").toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      filterStatus === "All" || batch.status === filterStatus;
-    const matchesCourse =
-      filterCourse === "All" || batch.course === filterCourse;
-    return matchesSearch && matchesStatus && matchesCourse;
-  });
+  // ============================================================
+  // ✅ STRICT Department Filter — এটা ছাড়া backend ভুল data দিলে merge হবে
+  // ============================================================
+
+  // ✅ Department → course keywords (for old batches without department field)
+  const DEPT_COURSE_KEYWORDS = {
+    Elders: [
+      "qaida",
+      "nazera",
+      "najera",
+      "bakarah",
+      "tajweed",
+      "quran for elders",
+      "basic tazweed",
+    ],
+    "Quran Studies": ["quran studies", "hifzul quran", "tarbiyah quran"],
+    Alimiya: ["alimiya", "dawra", "tafsir", "fiqh", "hadith"],
+    Diploma: ["diploma"],
+  };
+
+  // ✅ Check: batch টা আমার department এর কিনা
+  const batchBelongsToMyDept = (batch) => {
+    if (!adminDepartment || adminDepartment === "All") return true;
+
+    const target = String(adminDepartment).toLowerCase().trim();
+
+    // 🔥 Priority 1: exact department field (সবচেয়ে নির্ভরযোগ্য)
+    const batchDept = String(batch.department || "")
+      .toLowerCase()
+      .trim();
+
+    if (batchDept) {
+      return batchDept === target; // ✅ Strict match
+    }
+
+    // 🔥 Priority 2: department field নেই (পুরনো batch) — course name দেখে
+    const keywords = DEPT_COURSE_KEYWORDS[adminDepartment];
+    if (!keywords) return false;
+
+    const courseStr = String(batch.course || "").toLowerCase();
+    const nameStr = String(batch.name || "").toLowerCase();
+    const combined = courseStr + " " + nameStr;
+
+    return keywords.some((kw) => combined.includes(kw));
+  };
+
+  // ✅ Filtered batches — প্রথমে department filter, তারপর UI filters
+  const filteredBatches = batches
+    // 🔥 STEP 1: STRICT department filter (safety net)
+    .filter((batch) => batchBelongsToMyDept(batch))
+    // 🔥 STEP 2: UI filters (search, status, course)
+    .filter((batch) => {
+      const matchesSearch =
+        (batch.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (batch.course || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (batch.teacher || "").toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        filterStatus === "All" || batch.status === filterStatus;
+      const matchesCourse =
+        filterCourse === "All" || batch.course === filterCourse;
+      return matchesSearch && matchesStatus && matchesCourse;
+    });
 
   const uniqueCourses = [
     "All",

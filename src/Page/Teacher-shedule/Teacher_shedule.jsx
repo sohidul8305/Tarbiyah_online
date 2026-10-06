@@ -11,75 +11,103 @@ import {
   FaSignOutAlt,
   FaCalendarAlt,
   FaChartLine,
-  FaUserGraduate,
-  FaUserPlus,
-  FaCalendarCheck,
   FaDatabase,
   FaEye,
   FaEdit,
   FaTrash,
   FaSearch,
   FaPlusCircle,
-  FaCheckCircle,
-  FaTimesCircle,
   FaArrowRight,
   FaSave,
-  FaLayerGroup,
   FaUserTimes,
   FaRegClock,
   FaInfoCircle,
   FaCalendarPlus,
   FaUserTie,
-  FaClock,
-  FaDownload,
   FaPrint,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 // ============================================================
-// ✅ ELDERS DEPARTMENT SCHEDULE
-// শুধু Jubayer Ahmad + Sumaiya Afrin Mim, শুধু elders courses
+// ✅ DEPARTMENT-WISE CONFIG
+// প্রতিটা department এর নিজস্ব teacher, subject, batch
 // ============================================================
-const ELDERS_TEACHERS = [
-  {
-    id: 1,
-    teacherId: "TCH001",
-    name: "Jubayer Ahmad",
-    shortName: "Jubayer Ustad",
-    subject: "Quran For Elders",
-    designation: "Senior Teacher",
-    color: "blue",
+const DEPARTMENT_CONFIGS = {
+  Elders: {
+    label: "Quran For Elders",
+    teachers: [
+      {
+        id: 1,
+        teacherId: "TCH001",
+        name: "Jubayer Ahmad",
+        shortName: "Jubayer Ustad",
+        subject: "Quran For Elders",
+        designation: "Senior Teacher",
+        color: "blue",
+      },
+      {
+        id: 2,
+        teacherId: "TCH002",
+        name: "Sumaiya Afrin Mim",
+        shortName: "Sumaiya Afrin",
+        subject: "Quran For Elders",
+        designation: "Junior Teacher",
+        color: "pink",
+      },
+    ],
+    subjects: ["QAIDA NURANIYAH", "Basic Tajweed", "Najera"],
+    batches: ["Batch-03", "Batch-06", "Batch-02"],
+    days: ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday"],
+    timeSlots: [
+      { id: "morning", label: "6:00 – 7:00 AM", color: "bg-blue-50" },
+      { id: "afternoon", label: "3:00 – 4:30 PM", color: "bg-yellow-50" },
+      { id: "evening", label: "8:00 – 9:00 PM", color: "bg-green-50" },
+    ],
   },
-  {
-    id: 2,
-    teacherId: "TCH002",
-    name: "Sumaiya Afrin Mim",
-    shortName: "Sumaiya Afrin",
-    subject: "Quran For Elders",
-    designation: "Junior Teacher",
-    color: "pink",
+
+  "Quran Studies": {
+    label: "Quran Studies",
+    teachers: [],
+    subjects: [],
+    batches: [],
+    days: ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
+    timeSlots: [
+      { id: "morning", label: "7:00 – 8:30 AM", color: "bg-blue-50" },
+      { id: "afternoon", label: "4:00 – 5:30 PM", color: "bg-yellow-50" },
+      { id: "evening", label: "8:00 – 9:30 PM", color: "bg-green-50" },
+    ],
   },
-];
 
-const ELDERS_SUBJECTS = [
-  "QAIDA NURANIYAH Batch-03",
-  "Basic Tajweed Batch-06",
-  "Najera Batch-02",
-];
+  Alimiya: {
+    label: "Alimiya",
+    teachers: [],
+    subjects: [],
+    batches: [],
+    days: ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
+    timeSlots: [
+      { id: "morning", label: "7:00 – 9:00 AM", color: "bg-blue-50" },
+      { id: "afternoon", label: "3:00 – 5:00 PM", color: "bg-yellow-50" },
+      { id: "evening", label: "7:30 – 9:00 PM", color: "bg-green-50" },
+    ],
+  },
 
-const ELDERS_DAYS = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday"];
+  Diploma: {
+    label: "Diploma",
+    teachers: [],
+    subjects: [],
+    batches: [],
+    days: ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
+    timeSlots: [
+      { id: "morning", label: "7:00 – 9:00 AM", color: "bg-blue-50" },
+      { id: "afternoon", label: "3:00 – 5:00 PM", color: "bg-yellow-50" },
+      { id: "evening", label: "7:30 – 9:00 PM", color: "bg-green-50" },
+    ],
+  },
+};
 
-// Image অনুযায়ী time slots
-const ELDERS_TIME_SLOTS = [
-  { id: "morning", label: "6:00 – 7:00 AM", color: "bg-blue-50" },
-  { id: "afternoon", label: "3:00 – 4:30 PM", color: "bg-yellow-50" },
-  { id: "evening", label: "8:00 – 9:00 PM", color: "bg-green-50" },
-];
-
-// Image এর schedule অনুযায়ী default data
-const DEFAULT_SCHEDULE = [
-  // ===== Morning: 6:00 - 7:00 AM =====
+// ✅ Default Elders schedule (শুধু Elders-এর জন্য pre-populated)
+const ELDERS_DEFAULT_SCHEDULE = [
   {
     id: "sat-morning-1",
     day: "Saturday",
@@ -120,8 +148,6 @@ const DEFAULT_SCHEDULE = [
     batch: "Batch-03",
     status: "Active",
   },
-
-  // ===== Afternoon: 3:00 - 4:30 PM =====
   {
     id: "sun-afternoon-1",
     day: "Sunday",
@@ -162,28 +188,6 @@ const DEFAULT_SCHEDULE = [
     batch: "Batch-06",
     status: "Active",
   },
-  {
-    id: "sat-afternoon",
-    day: "Saturday",
-    timeSlot: "afternoon",
-    teacherId: 2,
-    teacherName: "Sumaiya Afrin",
-    subject: "QAIDA NURANIYAH",
-    batch: "Batch-03",
-    status: "Active",
-  },
-  {
-    id: "mon-afternoon",
-    day: "Monday",
-    timeSlot: "afternoon",
-    teacherId: 2,
-    teacherName: "Sumaiya Afrin",
-    subject: "QAIDA NURANIYAH",
-    batch: "Batch-03",
-    status: "Active",
-  },
-
-  // ===== Evening: 8:00 - 9:00 PM =====
   {
     id: "sat-evening-1",
     day: "Saturday",
@@ -316,6 +320,19 @@ const DEFAULT_SCHEDULE = [
   },
 ];
 
+// ✅ Current admin এর department বের করো
+const getCurrentDepartment = () => {
+  try {
+    const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
+    return info.department || "Elders";
+  } catch {
+    return "Elders";
+  }
+};
+
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
 const Teacher_shedule = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
@@ -328,22 +345,57 @@ const Teacher_shedule = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "Quran for Elders",
+    department: "Elders",
     joinDate: "",
   });
 
-  // ✅ Elders schedule state
-  const [schedule, setSchedule] = useState(() => {
-    const saved = localStorage.getItem("eldersTeacherSchedule");
+  // ✅ Current department detect
+  const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
+
+  // ✅ Department config load
+  const deptConfig =
+    DEPARTMENT_CONFIGS[currentDept] || DEPARTMENT_CONFIGS["Elders"];
+  const DEPARTMENT_TEACHERS = deptConfig.teachers;
+  const DEPARTMENT_SUBJECTS = deptConfig.subjects;
+  const DEPARTMENT_BATCHES = deptConfig.batches;
+  const DEPARTMENT_DAYS = deptConfig.days;
+  const DEPARTMENT_TIME_SLOTS = deptConfig.timeSlots;
+  const DEPT_LABEL = deptConfig.label;
+
+  // ✅ Department-specific localStorage key
+  const STORAGE_KEY = `teacherSchedule_${currentDept.replace(/\s+/g, "_")}`;
+
+  // ✅ Schedule state — department specific
+  const [schedule, setSchedule] = useState([]);
+
+  // ✅ Load schedule when department changes
+  useEffect(() => {
+    const key = `teacherSchedule_${currentDept.replace(/\s+/g, "_")}`;
+    const saved = localStorage.getItem(key);
+
     if (saved) {
       try {
-        return JSON.parse(saved);
+        setSchedule(JSON.parse(saved));
       } catch (err) {
-        console.error(err);
+        console.error("Failed to parse schedule:", err);
+        setSchedule([]);
+      }
+    } else {
+      // ✅ Elders এর জন্য default, অন্য department-এর জন্য খালি
+      if (currentDept === "Elders") {
+        setSchedule(ELDERS_DEFAULT_SCHEDULE);
+      } else {
+        setSchedule([]);
       }
     }
-    return DEFAULT_SCHEDULE;
-  });
+  }, [currentDept]);
+
+  // ✅ Save schedule when it changes
+  useEffect(() => {
+    if (!currentDept) return;
+    const key = `teacherSchedule_${currentDept.replace(/\s+/g, "_")}`;
+    localStorage.setItem(key, JSON.stringify(schedule));
+  }, [schedule, currentDept]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterDay, setFilterDay] = useState("All");
@@ -352,6 +404,7 @@ const Teacher_shedule = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showAddTeacherModal, setShowAddTeacherModal] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -364,12 +417,47 @@ const Teacher_shedule = () => {
     status: "Active",
   });
 
+  const [newTeacherData, setNewTeacherData] = useState({
+    name: "",
+    shortName: "",
+    designation: "Teacher",
+  });
+
+  // ✅ Department-specific extra teachers (একই department এর ভেতরে add করা)
+  const [extraTeachers, setExtraTeachers] = useState([]);
+
+  // Load extra teachers for department
+  useEffect(() => {
+    const key = `extraTeachers_${currentDept.replace(/\s+/g, "_")}`;
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      try {
+        setExtraTeachers(JSON.parse(saved));
+      } catch {
+        setExtraTeachers([]);
+      }
+    } else {
+      setExtraTeachers([]);
+    }
+  }, [currentDept]);
+
+  // Save extra teachers
+  useEffect(() => {
+    const key = `extraTeachers_${currentDept.replace(/\s+/g, "_")}`;
+    localStorage.setItem(key, JSON.stringify(extraTeachers));
+  }, [extraTeachers, currentDept]);
+
+  // Combined teachers list
+  const ALL_TEACHERS = [...DEPARTMENT_TEACHERS, ...extraTeachers];
+
   // Load admin info
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
       try {
-        setAdminInfo(JSON.parse(savedAdmin));
+        const info = JSON.parse(savedAdmin);
+        setAdminInfo(info);
+        if (info.department) setCurrentDept(info.department);
       } catch (err) {
         console.error(err);
       }
@@ -379,16 +467,11 @@ const Teacher_shedule = () => {
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Quran for Elders",
+        department: "Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
-
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem("eldersTeacherSchedule", JSON.stringify(schedule));
-  }, [schedule]);
 
   const handleLogout = async () => {
     try {
@@ -412,7 +495,6 @@ const Teacher_shedule = () => {
   const toggleSubMenu = (menu) =>
     setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  // Sidebar Menu
   const menuItems = [
     {
       id: "profile",
@@ -431,7 +513,6 @@ const Teacher_shedule = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -490,7 +571,6 @@ const Teacher_shedule = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -511,7 +591,6 @@ const Teacher_shedule = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -545,9 +624,9 @@ const Teacher_shedule = () => {
       ],
     },
   ];
-  // Color helpers
+
   const getTeacherColor = (teacherId) => {
-    const t = ELDERS_TEACHERS.find((tt) => tt.id === teacherId);
+    const t = ALL_TEACHERS.find((tt) => tt.id === teacherId);
     return t?.color || "blue";
   };
 
@@ -557,11 +636,12 @@ const Teacher_shedule = () => {
       blue: "bg-blue-100 border-blue-500 text-blue-800",
       pink: "bg-pink-100 border-pink-500 text-pink-800",
       green: "bg-green-100 border-green-500 text-green-800",
+      purple: "bg-purple-100 border-purple-500 text-purple-800",
+      orange: "bg-orange-100 border-orange-500 text-orange-800",
     };
     return map[c] || map.blue;
   };
 
-  // Filter
   const filteredSchedule = schedule.filter((item) => {
     const s = searchTerm.toLowerCase();
     const matchesSearch =
@@ -575,26 +655,23 @@ const Teacher_shedule = () => {
     return matchesSearch && matchesDay && matchesTeacher;
   });
 
-  // Get classes for a specific cell (day + timeSlot)
   const getClassesInCell = (day, timeSlotId) => {
     return filteredSchedule.filter(
       (item) => item.day === day && item.timeSlot === timeSlotId,
     );
   };
 
-  // Stats
   const stats = {
     total: schedule.length,
     active: schedule.filter((s) => s.status === "Active").length,
-    teachers: ELDERS_TEACHERS.length,
+    teachers: ALL_TEACHERS.length,
     batches: new Set(schedule.map((s) => s.batch).filter(Boolean)).size,
   };
 
-  // Modal openers
   const openAddModal = () => {
     setFormData({
-      day: "Saturday",
-      timeSlot: "morning",
+      day: DEPARTMENT_DAYS[0] || "Saturday",
+      timeSlot: DEPARTMENT_TIME_SLOTS[0]?.id || "morning",
       teacherId: "",
       teacherName: "",
       subject: "",
@@ -623,26 +700,16 @@ const Teacher_shedule = () => {
     setShowDetailsModal(true);
   };
 
-  // Teacher select
   const handleTeacherSelect = (e) => {
     const id = parseInt(e.target.value);
-    const t = ELDERS_TEACHERS.find((tt) => tt.id === id);
+    const t = ALL_TEACHERS.find((tt) => tt.id === id);
     if (t) {
-      setFormData({
-        ...formData,
-        teacherId: t.id,
-        teacherName: t.shortName,
-      });
+      setFormData({ ...formData, teacherId: t.id, teacherName: t.shortName });
     } else {
-      setFormData({
-        ...formData,
-        teacherId: "",
-        teacherName: "",
-      });
+      setFormData({ ...formData, teacherId: "", teacherName: "" });
     }
   };
 
-  // Add
   const handleAddSchedule = (e) => {
     e.preventDefault();
 
@@ -656,11 +723,7 @@ const Teacher_shedule = () => {
       return;
     }
 
-    const newItem = {
-      id: `local-${Date.now()}-${Math.random()}`,
-      ...formData,
-    };
-
+    const newItem = { id: `local-${Date.now()}-${Math.random()}`, ...formData };
     setSchedule([...schedule, newItem]);
     setShowAddModal(false);
     Swal.fire({
@@ -672,7 +735,6 @@ const Teacher_shedule = () => {
     });
   };
 
-  // Edit
   const handleEditSchedule = (e) => {
     e.preventDefault();
     setSchedule(
@@ -689,7 +751,6 @@ const Teacher_shedule = () => {
     });
   };
 
-  // Delete
   const handleDeleteSchedule = (id) => {
     Swal.fire({
       title: "Delete Schedule?",
@@ -712,12 +773,66 @@ const Teacher_shedule = () => {
     });
   };
 
-  // Print
-  const handlePrint = () => {
-    window.print();
+  // ✅ নতুন teacher add (শুধু এই department-এর জন্য)
+  const handleAddTeacher = (e) => {
+    e.preventDefault();
+
+    if (!newTeacherData.name.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Name required",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
+    const newId = Math.max(0, ...ALL_TEACHERS.map((t) => t.id || 0)) + 1;
+    const colors = ["blue", "pink", "green", "purple", "orange"];
+    const newTeacher = {
+      id: newId,
+      teacherId: `TCH${String(newId).padStart(3, "0")}`,
+      name: newTeacherData.name.trim(),
+      shortName: newTeacherData.shortName.trim() || newTeacherData.name.trim(),
+      subject: DEPT_LABEL,
+      designation: newTeacherData.designation || "Teacher",
+      color: colors[newId % colors.length],
+      department: currentDept,
+    };
+
+    setExtraTeachers([...extraTeachers, newTeacher]);
+    setNewTeacherData({ name: "", shortName: "", designation: "Teacher" });
+    setShowAddTeacherModal(false);
+
+    Swal.fire({
+      icon: "success",
+      title: "Teacher Added!",
+      text: `${newTeacher.shortName} has been added to ${currentDept}`,
+      timer: 1500,
+      showConfirmButton: false,
+    });
   };
 
-  const uniqueDays = ["All", ...ELDERS_DAYS];
+  const handleRemoveExtraTeacher = (teacherId) => {
+    Swal.fire({
+      title: "Remove Teacher?",
+      text: "This will only remove from this department",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Yes, remove",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setExtraTeachers(extraTeachers.filter((t) => t.id !== teacherId));
+        // Also remove their schedules
+        setSchedule(schedule.filter((s) => s.teacherId !== teacherId));
+      }
+    });
+  };
+
+  const handlePrint = () => window.print();
+
+  const uniqueDays = ["All", ...DEPARTMENT_DAYS];
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -725,7 +840,7 @@ const Teacher_shedule = () => {
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
           <h1 className="text-sm font-bold text-gray-800">
-            Class Schedule (Elders)
+            Class Schedule ({currentDept})
           </h1>
           <button
             onClick={toggleSidebar}
@@ -737,11 +852,7 @@ const Teacher_shedule = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -753,7 +864,7 @@ const Teacher_shedule = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {adminInfo.designation}
+                  {adminInfo.department || adminInfo.designation}
                 </p>
               </div>
             </div>
@@ -770,20 +881,14 @@ const Teacher_shedule = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
                       </div>
                       <span
-                        className={`transition-transform ${
-                          activeSubMenu === item.id ? "rotate-180" : ""
-                        }`}
+                        className={`transition-transform ${activeSubMenu === item.id ? "rotate-180" : ""}`}
                       >
                         <FaArrowRight size={12} />
                       </span>
@@ -798,11 +903,7 @@ const Teacher_shedule = () => {
                               setActiveSubMenu(sub.id);
                               setIsSidebarOpen(false);
                             }}
-                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
+                            className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${activeSubMenu === sub.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                           >
                             {sub.label}
                           </Link>
@@ -819,11 +920,7 @@ const Teacher_shedule = () => {
                     }}
                   >
                     <button
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -843,7 +940,7 @@ const Teacher_shedule = () => {
           </nav>
 
           <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
+            <p>©Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 
@@ -861,10 +958,10 @@ const Teacher_shedule = () => {
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaCalendarAlt className="text-blue-600" /> Class Schedule —
-                <span className="text-teal-700">Quran For Elders</span>
+                <span className="text-teal-700">{DEPT_LABEL}</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Jubayer Ahmad • Sumaiya Afrin Mim — Edition August 2026
+                {currentDept} Department • {ALL_TEACHERS.length} teachers
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -873,6 +970,12 @@ const Teacher_shedule = () => {
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1"
               >
                 <FaPrint size={12} /> Print
+              </button>
+              <button
+                onClick={() => setShowAddTeacherModal(true)}
+                className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
+              >
+                <FaUserTie size={12} /> Add Teacher
               </button>
               <button
                 onClick={openAddModal}
@@ -889,6 +992,12 @@ const Teacher_shedule = () => {
             </div>
           </div>
 
+          {/* Department Badge */}
+          <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-2 rounded-xl text-xs font-semibold mb-3">
+            🏫 Showing schedule of:{" "}
+            <span className="font-bold">{currentDept}</span> department
+          </div>
+
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
@@ -903,7 +1012,7 @@ const Teacher_shedule = () => {
               <p className="text-lg font-bold text-purple-600">
                 {stats.teachers}
               </p>
-              <p className="text-[10px] text-gray-500">Elders Teachers</p>
+              <p className="text-[10px] text-gray-500">Teachers</p>
             </div>
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-orange-600">
@@ -915,35 +1024,68 @@ const Teacher_shedule = () => {
 
           {/* Teachers Legend */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 mb-3">
-            <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1">
-              <FaUserTie size={12} className="text-teal-600" /> Elders Teachers
-            </p>
-            <div className="flex flex-wrap gap-3">
-              {ELDERS_TEACHERS.map((t) => (
-                <div
-                  key={t.id}
-                  className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5"
-                >
-                  <div
-                    className={`w-6 h-6 rounded-full ${
-                      t.color === "blue"
-                        ? "bg-blue-500"
-                        : t.color === "pink"
-                          ? "bg-pink-500"
-                          : "bg-gray-500"
-                    } flex items-center justify-center text-white font-bold text-[10px]`}
-                  >
-                    {t.name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-gray-800">
-                      {t.shortName}
-                    </p>
-                    <p className="text-[9px] text-gray-500">{t.designation}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                <FaUserTie size={12} className="text-teal-600" /> {currentDept}{" "}
+                Teachers ({ALL_TEACHERS.length})
+              </p>
+              <button
+                onClick={() => setShowAddTeacherModal(true)}
+                className="text-[10px] text-teal-600 hover:text-teal-800 font-semibold flex items-center gap-1"
+              >
+                <FaPlusCircle size={10} /> Add
+              </button>
             </div>
+
+            {ALL_TEACHERS.length === 0 ? (
+              <div className="text-center py-4">
+                <FaUserTie className="text-3xl text-gray-300 mx-auto mb-2" />
+                <p className="text-xs text-gray-500 mb-2">
+                  No teachers added yet for {currentDept}
+                </p>
+                <button
+                  onClick={() => setShowAddTeacherModal(true)}
+                  className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold"
+                >
+                  + Add First Teacher
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {ALL_TEACHERS.map((t) => {
+                  const isExtra = extraTeachers.some((et) => et.id === t.id);
+                  return (
+                    <div
+                      key={t.id}
+                      className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5"
+                    >
+                      <div
+                        className={`w-6 h-6 rounded-full ${t.color === "blue" ? "bg-blue-500" : t.color === "pink" ? "bg-pink-500" : t.color === "green" ? "bg-green-500" : t.color === "purple" ? "bg-purple-500" : "bg-orange-500"} flex items-center justify-center text-white font-bold text-[10px]`}
+                      >
+                        {t.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-gray-800">
+                          {t.shortName}
+                        </p>
+                        <p className="text-[9px] text-gray-500">
+                          {t.designation}
+                        </p>
+                      </div>
+                      {isExtra && (
+                        <button
+                          onClick={() => handleRemoveExtraTeacher(t.id)}
+                          className="text-red-500 hover:text-red-700 ml-1"
+                          title="Remove"
+                        >
+                          <FaTimesCircle size={12} />
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Filters */}
@@ -977,7 +1119,7 @@ const Teacher_shedule = () => {
                   className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 >
                   <option value="All">All Teachers</option>
-                  {ELDERS_TEACHERS.map((t) => (
+                  {ALL_TEACHERS.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.shortName}
                     </option>
@@ -987,7 +1129,7 @@ const Teacher_shedule = () => {
             </div>
           </div>
 
-          {/* ✅ Schedule Table — Image Style */}
+          {/* Schedule Table */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-xs border-collapse">
@@ -996,7 +1138,7 @@ const Teacher_shedule = () => {
                     <th className="border border-gray-300 px-3 py-2 text-center font-bold text-gray-700 w-32">
                       Time
                     </th>
-                    {ELDERS_DAYS.map((day) => (
+                    {DEPARTMENT_DAYS.map((day) => (
                       <th
                         key={day}
                         className="border border-gray-300 px-3 py-2 text-center font-bold text-gray-700"
@@ -1007,75 +1149,56 @@ const Teacher_shedule = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {ELDERS_TIME_SLOTS.map((slot) => {
-                    const cellItems = ELDERS_DAYS.map((day) =>
-                      getClassesInCell(day, slot.id),
-                    );
-                    // Max height calculation - সব day এর মধ্যে সর্বোচ্চ item সংখ্যা
-                    const maxItems = Math.max(
-                      ...cellItems.map((arr) => arr.length),
-                      1,
-                    );
-
-                    return (
-                      <tr key={slot.id}>
-                        {/* Time column */}
-                        <td
-                          className={`border border-gray-300 ${slot.color} px-2 py-2 text-center font-bold align-middle`}
-                          rowSpan={1}
-                        >
-                          <div className="flex items-center justify-center gap-1">
-                            <FaRegClock className="text-green-600" size={12} />
-                            <span className="text-green-700 text-[11px] whitespace-nowrap">
-                              {slot.label}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Days columns */}
-                        {ELDERS_DAYS.map((day, dayIdx) => {
-                          const items = cellItems[dayIdx];
-                          return (
-                            <td
-                              key={day}
-                              className={`border border-gray-300 ${slot.color} p-1 align-top`}
-                              style={{
-                                minWidth: "140px",
-                              }}
-                            >
-                              {items.length > 0 ? (
-                                <div className="space-y-1">
-                                  {items.map((item) => (
-                                    <div
-                                      key={item.id}
-                                      onClick={() => openDetailsModal(item)}
-                                      className={`${getTeacherBg(
-                                        item.teacherId,
-                                      )} border-l-4 rounded p-1.5 cursor-pointer hover:shadow-md transition-all`}
-                                    >
-                                      <p className="text-[10px] font-bold truncate">
-                                        {item.subject}
-                                      </p>
-                                      <p className="text-[9px] truncate">
-                                        {item.batch}
-                                      </p>
-                                      <p className="text-[9px] font-medium truncate">
-                                        {item.teacherName}
-                                      </p>
-                                    </div>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div className="text-center text-gray-400 text-[11px] py-2">
-                                  —
-                                </div>
-                              )}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
+                  {DEPARTMENT_TIME_SLOTS.map((slot) => (
+                    <tr key={slot.id}>
+                      <td
+                        className={`border border-gray-300 ${slot.color} px-2 py-2 text-center font-bold align-middle`}
+                      >
+                        <div className="flex items-center justify-center gap-1">
+                          <FaRegClock className="text-green-600" size={12} />
+                          <span className="text-green-700 text-[11px] whitespace-nowrap">
+                            {slot.label}
+                          </span>
+                        </div>
+                      </td>
+                      {DEPARTMENT_DAYS.map((day) => {
+                        const items = getClassesInCell(day, slot.id);
+                        return (
+                          <td
+                            key={day}
+                            className={`border border-gray-300 ${slot.color} p-1 align-top`}
+                            style={{ minWidth: "140px" }}
+                          >
+                            {items.length > 0 ? (
+                              <div className="space-y-1">
+                                {items.map((item) => (
+                                  <div
+                                    key={item.id}
+                                    onClick={() => openDetailsModal(item)}
+                                    className={`${getTeacherBg(item.teacherId)} border-l-4 rounded p-1.5 cursor-pointer hover:shadow-md transition-all`}
+                                  >
+                                    <p className="text-[10px] font-bold truncate">
+                                      {item.subject}
+                                    </p>
+                                    <p className="text-[9px] truncate">
+                                      {item.batch}
+                                    </p>
+                                    <p className="text-[9px] font-medium truncate">
+                                      {item.teacherName}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-center text-gray-400 text-[11px] py-2">
+                                —
+                              </div>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -1083,26 +1206,14 @@ const Teacher_shedule = () => {
 
           {/* Legend */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 mt-3 flex flex-wrap gap-3 text-[10px]">
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded bg-blue-400"></div>
-              <span>Jubayer Ustad</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded bg-pink-400"></div>
-              <span>Sumaiya Afrin</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded bg-blue-200"></div>
-              <span>Morning (6:00-7:00 AM)</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded bg-yellow-200"></div>
-              <span>Afternoon (3:00-4:30 PM)</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 rounded bg-green-200"></div>
-              <span>Evening (8:00-9:00 PM)</span>
-            </div>
+            {ALL_TEACHERS.map((t) => (
+              <div key={t.id} className="flex items-center gap-1">
+                <div
+                  className={`w-3 h-3 rounded ${t.color === "blue" ? "bg-blue-400" : t.color === "pink" ? "bg-pink-400" : t.color === "green" ? "bg-green-400" : t.color === "purple" ? "bg-purple-400" : "bg-orange-400"}`}
+                ></div>
+                <span>{t.shortName}</span>
+              </div>
+            ))}
           </div>
 
           {/* Empty state */}
@@ -1112,21 +1223,120 @@ const Teacher_shedule = () => {
               <h3 className="text-base font-bold text-gray-800 mb-0.5">
                 No Schedule Found
               </h3>
-              <p className="text-xs text-gray-500">
-                Try adjusting your filters or add a new class
+              <p className="text-xs text-gray-500 mb-3">
+                {currentDept} department এর জন্য এখনো কোনো class add করা হয়নি।
               </p>
+              <button
+                onClick={openAddModal}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
+              >
+                + Add First Class
+              </button>
             </div>
           )}
         </main>
       </div>
 
-      {/* Add Modal */}
+      {/* Add Teacher Modal */}
+      {showAddTeacherModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaUserTie className="text-green-600" /> Add Teacher to{" "}
+                {currentDept}
+              </h3>
+              <button
+                onClick={() => setShowAddTeacherModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleAddTeacher} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newTeacherData.name}
+                  onChange={(e) =>
+                    setNewTeacherData({
+                      ...newTeacherData,
+                      name: e.target.value,
+                    })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  placeholder="e.g., Muhammad Abdullah"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Short Name (display)
+                </label>
+                <input
+                  type="text"
+                  value={newTeacherData.shortName}
+                  onChange={(e) =>
+                    setNewTeacherData({
+                      ...newTeacherData,
+                      shortName: e.target.value,
+                    })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  placeholder="e.g., Abdullah Ustad"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Designation
+                </label>
+                <select
+                  value={newTeacherData.designation}
+                  onChange={(e) =>
+                    setNewTeacherData({
+                      ...newTeacherData,
+                      designation: e.target.value,
+                    })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="Senior Teacher">Senior Teacher</option>
+                  <option value="Junior Teacher">Junior Teacher</option>
+                  <option value="Teacher">Teacher</option>
+                  <option value="Guest Teacher">Guest Teacher</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="submit"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold"
+                >
+                  <FaPlusCircle className="inline mr-2" size={14} /> Add Teacher
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddTeacherModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Add Class Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaCalendarPlus className="text-blue-600" /> Add Class
+                <FaCalendarPlus className="text-blue-600" /> Add Class —{" "}
+                {currentDept}
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1136,6 +1346,12 @@ const Teacher_shedule = () => {
               </button>
             </div>
             <form onSubmit={handleAddSchedule} className="p-6 space-y-4">
+              {ALL_TEACHERS.length === 0 && (
+                <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-3 py-2 rounded-lg text-xs">
+                  ⚠️ প্রথমে একজন teacher add করুন, তারপর class schedule করুন।
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1149,7 +1365,7 @@ const Teacher_shedule = () => {
                     }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {ELDERS_DAYS.map((d) => (
+                    {DEPARTMENT_DAYS.map((d) => (
                       <option key={d} value={d}>
                         {d}
                       </option>
@@ -1168,7 +1384,7 @@ const Teacher_shedule = () => {
                     }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {ELDERS_TIME_SLOTS.map((slot) => (
+                    {DEPARTMENT_TIME_SLOTS.map((slot) => (
                       <option key={slot.id} value={slot.id}>
                         {slot.label}
                       </option>
@@ -1187,8 +1403,8 @@ const Teacher_shedule = () => {
                   onChange={handleTeacherSelect}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
-                  <option value="">Select Elders Teacher</option>
-                  {ELDERS_TEACHERS.map((t) => (
+                  <option value="">Select {currentDept} Teacher</option>
+                  {ALL_TEACHERS.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.shortName} — {t.designation}
                     </option>
@@ -1208,13 +1424,13 @@ const Teacher_shedule = () => {
                     setFormData({ ...formData, subject: e.target.value })
                   }
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  placeholder="e.g., QAIDA NURANIYAH / Basic Tajweed / Najera"
-                  list="elders-subjects"
+                  placeholder="e.g., QAIDA NURANIYAH"
+                  list="dept-subjects"
                 />
-                <datalist id="elders-subjects">
-                  <option value="QAIDA NURANIYAH" />
-                  <option value="Basic Tajweed" />
-                  <option value="Najera" />
+                <datalist id="dept-subjects">
+                  {DEPARTMENT_SUBJECTS.map((s) => (
+                    <option key={s} value={s} />
+                  ))}
                 </datalist>
               </div>
 
@@ -1230,13 +1446,13 @@ const Teacher_shedule = () => {
                     setFormData({ ...formData, batch: e.target.value })
                   }
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  placeholder="e.g., Batch-03, Batch-06, Batch-02"
-                  list="elders-batches"
+                  placeholder="e.g., Batch-03"
+                  list="dept-batches"
                 />
-                <datalist id="elders-batches">
-                  <option value="Batch-03" />
-                  <option value="Batch-06" />
-                  <option value="Batch-02" />
+                <datalist id="dept-batches">
+                  {DEPARTMENT_BATCHES.map((b) => (
+                    <option key={b} value={b} />
+                  ))}
                 </datalist>
               </div>
 
@@ -1260,7 +1476,8 @@ const Teacher_shedule = () => {
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="submit"
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
+                  disabled={ALL_TEACHERS.length === 0}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-2 rounded-lg font-semibold"
                 >
                   <FaCalendarPlus className="inline mr-2" size={14} /> Add Class
                 </button>
@@ -1305,7 +1522,7 @@ const Teacher_shedule = () => {
                     }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {ELDERS_DAYS.map((d) => (
+                    {DEPARTMENT_DAYS.map((d) => (
                       <option key={d} value={d}>
                         {d}
                       </option>
@@ -1323,7 +1540,7 @@ const Teacher_shedule = () => {
                     }
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                   >
-                    {ELDERS_TIME_SLOTS.map((slot) => (
+                    {DEPARTMENT_TIME_SLOTS.map((slot) => (
                       <option key={slot.id} value={slot.id}>
                         {slot.label}
                       </option>
@@ -1342,7 +1559,7 @@ const Teacher_shedule = () => {
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
                 >
                   <option value="">Select</option>
-                  {ELDERS_TEACHERS.map((t) => (
+                  {ALL_TEACHERS.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.shortName}
                     </option>
@@ -1450,7 +1667,7 @@ const Teacher_shedule = () => {
                   <p className="text-[10px] text-gray-400">Time</p>
                   <p className="font-semibold">
                     {
-                      ELDERS_TIME_SLOTS.find(
+                      DEPARTMENT_TIME_SLOTS.find(
                         (s) => s.id === selectedSchedule.timeSlot,
                       )?.label
                     }
@@ -1467,13 +1684,7 @@ const Teacher_shedule = () => {
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
                   <p className="text-[10px] text-gray-400">Status</p>
                   <span
-                    className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                      selectedSchedule.status === "Active"
-                        ? "bg-green-100 text-green-700"
-                        : selectedSchedule.status === "Pending"
-                          ? "bg-yellow-100 text-yellow-700"
-                          : "bg-red-100 text-red-700"
-                    }`}
+                    className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${selectedSchedule.status === "Active" ? "bg-green-100 text-green-700" : selectedSchedule.status === "Pending" ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}
                   >
                     {selectedSchedule.status}
                   </span>

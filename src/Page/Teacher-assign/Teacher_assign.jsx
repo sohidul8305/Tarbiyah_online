@@ -23,55 +23,92 @@ import {
   FaTimesCircle,
   FaArrowRight,
   FaSave,
-  FaLayerGroup,
   FaUserTie,
   FaClock,
   FaStar,
+  FaBuilding,
+  FaLock,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
-import { FaUserTimes } from "react-icons/fa";
 
 const API_BASE = "https://api.tarbiyahonline.com";
 
 // ============================================================
-// ✅ ২ জন ELDERS TEACHER — সবসময় দেখাবে (hardcoded fallback)
+// ✅ Department → Subjects / Classes / Batches / Keywords
 // ============================================================
-const HARDCODED_ELDERS_TEACHERS = [
-  {
-    _id: "TCH_FIXED_001",
-    id: 1,
-    teacherId: "TCH001",
-    name: "Jubayer Ahmad",
-    designation: "Senior Teacher",
-    subject: "Quran For Elders",
-    department: "Quran For Elders",
-    specialization: "Qaida Nuraniyah",
-    phone: "+880 1712 345678",
-    email: "jubayer@tarabiyah.com",
-    status: "Active",
+const DEPARTMENT_DATA = {
+  Elders: {
+    label: "Quran For Elders",
+    subjects: [
+      "Qaida Nuraniyah",
+      "Quran Nazera",
+      "Bakarah Hifz",
+      "Basic Tajweed (Level-1)",
+    ],
+    classes: [
+      "Elders Batch A",
+      "Elders Batch B",
+      "Elders Batch C",
+      "Qaida Nurani Batch",
+      "Bakarah Hifz Batch",
+    ],
+    batches: [
+      "Basic Tazweed 6th Batch",
+      "Najera Batch-02",
+      "Qaida Nurani Batch",
+      "Bakarah Hifz Batch",
+      "Not Assigned",
+    ],
+    keywords: [
+      "qaida",
+      "nazera",
+      "najera",
+      "bakarah",
+      "tajweed",
+      "quran for elders",
+      "basic tazweed",
+      "elders",
+    ],
   },
-  {
-    _id: "TCH_FIXED_002",
-    id: 2,
-    teacherId: "TCH002",
-    name: "Sumaiya Afrin Mim",
-    designation: "Junior Teacher",
-    subject: "Quran For Elders",
-    department: "Quran For Elders",
-    specialization: "Quran Nazera",
-    phone: "+880 1723 456789",
-    email: "sumaiya@tarabiyah.com",
-    status: "Active",
+  "Quran Studies": {
+    label: "Quran Studies",
+    subjects: ["Quran Studies", "Hifzul Quran", "Tarbiyah Quran Studies"],
+    classes: ["Quran Studies Batch A", "Quran Studies Batch B"],
+    batches: ["Quran Studies Batch-01", "Quran Studies Batch-02"],
+    keywords: ["quran studies", "hifzul quran", "tarbiyah quran"],
   },
-];
+  Alimiya: {
+    label: "Alimiya",
+    subjects: ["Alimiya", "Dawra e Hadith", "Tafsir", "Fiqh", "Hadith"],
+    classes: ["Alimiya Batch A", "Alimiya Batch B"],
+    batches: ["Alimiya Batch-01", "Alimiya Batch-02"],
+    keywords: ["alimiya", "dawra", "tafsir", "fiqh", "hadith"],
+  },
+  Diploma: {
+    label: "Diploma",
+    subjects: ["Diploma in Islamic Studies", "Certificate"],
+    classes: ["Diploma Batch A", "Diploma Batch B"],
+    batches: ["Diploma Batch-01", "Diploma Batch-02"],
+    keywords: ["diploma"],
+  },
+};
 
-// Safe JSON fetch — HTML response পেলে error throw করবে না
+const DEFAULT_DEPT_DATA = {
+  label: "General",
+  subjects: ["General"],
+  classes: ["General Batch"],
+  batches: ["General Batch-01"],
+  keywords: [],
+};
+
+const getDeptData = (dept) => DEPARTMENT_DATA[dept] || DEFAULT_DEPT_DATA;
+
+// Safe JSON fetch
 const safeFetchJSON = async (url, options = {}) => {
   try {
     const res = await fetch(url, options);
     const text = await res.text();
-    // HTML response detect (404 page)
     if (text.trim().startsWith("<")) {
       return {
         success: false,
@@ -96,6 +133,10 @@ const Teacher_assign = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState("teacher-management");
   const [activeSubMenu, setActiveSubMenu] = useState("teacher-assign");
+
+  // ✅ Current admin এর department
+  const [adminDepartment, setAdminDepartment] = useState("");
+
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
@@ -105,47 +146,25 @@ const Teacher_assign = () => {
     joinDate: "",
   });
 
-  // ✅ Start with hardcoded 2 teachers (always visible)
   const [assignments, setAssignments] = useState([]);
-  const [loading, setLoading] = useState(false); // ✅ না দেখাই লোডিং
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [availableTeachers, setAvailableTeachers] = useState(
-    HARDCODED_ELDERS_TEACHERS,
-  );
+  // ✅ Teachers — no hardcoded fallback (department-based)
+  const [availableTeachers, setAvailableTeachers] = useState([]);
   const [teachersLoading, setTeachersLoading] = useState(false);
 
   const [teacherInput, setTeacherInput] = useState("");
   const [showTeacherSuggestions, setShowTeacherSuggestions] = useState(false);
-  const [filteredTeachers, setFilteredTeachers] = useState(
-    HARDCODED_ELDERS_TEACHERS,
-  );
+  const [filteredTeachers, setFilteredTeachers] = useState([]);
   const [addingQuickTeacher, setAddingQuickTeacher] = useState(false);
   const inputRef = useRef(null);
 
-  // Elders courses only
-  const [subjects] = useState([
-    "Qaida Nuraniyah",
-    "Quran Nazera",
-    "Bakarah Hifz",
-    "Basic Tajweed (Level-1)",
-  ]);
-
-  const [classes] = useState([
-    "Elders Batch A",
-    "Elders Batch B",
-    "Elders Batch C",
-    "Qaida Nurani Batch",
-    "Bakarah Hifz Batch",
-  ]);
-
-  const [batches] = useState([
-    "Basic Tazweed 6th Batch",
-    "Najera Batch-02",
-    "Qaida Nurani Batch",
-    "Bakarah Hifz Batch",
-    "Not Assigned",
-  ]);
+  // ✅ Department-specific data
+  const deptData = getDeptData(adminDepartment);
+  const subjects = deptData.subjects;
+  const classes = deptData.classes;
+  const batches = deptData.batches;
 
   const availableDays = [
     "Saturday",
@@ -190,158 +209,178 @@ const Teacher_assign = () => {
     name: "",
     email: "",
     phone: "",
-    specialization: "Qaida Nuraniyah",
+    specialization: "",
     experience: "",
     qualification: "",
     designation: "Teacher",
     gender: "Male",
     address: "",
     bio: "",
-    department: "Quran For Elders",
+    department: "",
   });
 
-  // Load admin info
+  // ============================================================
+  // ✅ Load admin info + department
+  // ============================================================
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
+    const savedDept = localStorage.getItem("adminDepartment");
+
     if (savedAdmin) {
       try {
-        setAdminInfo(JSON.parse(savedAdmin));
+        const parsed = JSON.parse(savedAdmin);
+        setAdminInfo(parsed);
+        setAdminDepartment(parsed.department || savedDept || "");
       } catch (err) {
         console.error(err);
       }
     } else {
+      const fallbackDept = savedDept || "Administration";
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Quran for Elders",
+        department: fallbackDept,
         joinDate: "January 2024",
       });
+      setAdminDepartment(fallbackDept);
     }
   }, [user]);
 
+  // ✅ Update newTeacherData default specialization when department ready
+  useEffect(() => {
+    if (deptData.subjects.length > 0) {
+      setNewTeacherData((prev) => ({
+        ...prev,
+        specialization: prev.specialization || deptData.subjects[0],
+        department: adminDepartment || "",
+      }));
+    }
+  }, [adminDepartment]);
+
   // ============================================================
-  // Fetch assignments — gracefully handle HTML 404
+  // ✅ Check: assignment belongs to my department?
+  // ============================================================
+  const assignmentBelongsToMyDept = (a) => {
+    if (!adminDepartment || adminDepartment === "All") return true;
+
+    const target = adminDepartment.toLowerCase().trim();
+    const aDept = String(a.department || "")
+      .toLowerCase()
+      .trim();
+    if (aDept) return aDept === target;
+
+    // Fallback: keyword match
+    const keywords = deptData.keywords || [];
+    if (keywords.length === 0) return false;
+
+    const combined =
+      `${a.teacherName || ""} ${a.subject || ""} ${a.class || ""} ${a.batch || ""}`.toLowerCase();
+    return keywords.some((kw) => combined.includes(kw));
+  };
+
+  // ============================================================
+  // ✅ Check: teacher belongs to my department?
+  // ============================================================
+  const teacherBelongsToMyDept = (t) => {
+    if (!adminDepartment || adminDepartment === "All") return true;
+
+    const target = adminDepartment.toLowerCase().trim();
+    const tDept = String(t.department || "")
+      .toLowerCase()
+      .trim();
+    if (tDept) {
+      // Match "Quran For Elders" to "Elders" etc.
+      if (tDept === target) return true;
+      if (target === "elders" && tDept.includes("elder")) return true;
+      if (target.includes(tDept)) return true;
+      if (tDept.includes(target)) return true;
+    }
+
+    const keywords = deptData.keywords || [];
+    if (keywords.length === 0) return false;
+
+    const combined =
+      `${t.name || ""} ${t.subject || ""} ${t.specialization || ""} ${t.department || ""}`.toLowerCase();
+    return keywords.some((kw) => combined.includes(kw));
+  };
+
+  // ============================================================
+  // ✅ Fetch assignments — department filtered
   // ============================================================
   const fetchAssignments = async () => {
     try {
       const data = await safeFetchJSON(`${API_BASE}/api/teacher-assign/all`);
 
       if (data.success && Array.isArray(data.assignments)) {
-        const all = data.assignments;
+        // ✅ Frontend safety filter
+        const filtered = data.assignments.filter((a) =>
+          assignmentBelongsToMyDept(a),
+        );
 
-        const eldersCourses = [
-          "qaida nuraniyah",
-          "qaida nooraniya",
-          "qaida noorani",
-          "quran nazera",
-          "nazera quran",
-          "bakarah hifz",
-          "bakara hifz",
-          "basic tajweed",
-        ];
-
-        const eldersAssignments = all.filter((a) => {
-          const teacherName = String(a.teacherName || "").toLowerCase();
-          const subject = String(a.subject || "").toLowerCase();
-          const cls = String(a.class || "").toLowerCase();
-          const dept = String(a.department || "").toLowerCase();
-          const combined = `${teacherName} ${subject} ${cls} ${dept}`;
-
-          if (
-            teacherName.includes("jubayer") ||
-            teacherName.includes("sumaiya")
-          ) {
-            return true;
-          }
-
-          return (
-            eldersCourses.some((c) => combined.includes(c)) ||
-            combined.includes("quran for elders")
-          );
-        });
-
-        setAssignments(eldersAssignments);
+        setAssignments(filtered);
+        console.log(
+          `✅ [${adminDepartment}] Assignments: ${filtered.length}/${data.assignments.length}`,
+        );
       } else {
-        // API fail হলে empty — কিন্তু error দেখাবে না
         setAssignments([]);
       }
     } catch (err) {
-      console.warn("Assignments fetch failed (expected):", err.message);
+      console.warn("Assignments fetch failed:", err.message);
       setAssignments([]);
     }
   };
 
   // ============================================================
-  // Fetch teachers — hardcoded 2 + API merge (কোনো error দেখাবে না)
+  // ✅ Fetch teachers — department filtered (no hardcoded fallback)
   // ============================================================
   const fetchTeachers = async () => {
+    if (!adminDepartment) {
+      setAvailableTeachers([]);
+      setFilteredTeachers([]);
+      return;
+    }
+
     try {
       setTeachersLoading(true);
 
-      // Start with hardcoded 2 teachers
-      let eldersTeachers = [...HARDCODED_ELDERS_TEACHERS];
+      let teachers = [];
 
-      // Try to fetch from API
-      try {
-        const data = await safeFetchJSON(
-          `${API_BASE}/api/teacher-attendance/teachers`,
-        );
+      // Fetch from API
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/teacher-attendance/teachers`,
+      );
 
-        if (data.success && Array.isArray(data.teachers)) {
-          data.teachers.forEach((t) => {
-            const isElders =
-              (t.teacherId || "").toUpperCase() === "TCH001" ||
-              (t.teacherId || "").toUpperCase() === "TCH002" ||
-              t.id === 1 ||
-              t.id === 2 ||
-              String(t.subject || "")
-                .toLowerCase()
-                .includes("quran for elders") ||
-              String(t.department || "")
-                .toLowerCase()
-                .includes("elders") ||
-              String(t.name || "")
-                .toLowerCase()
-                .includes("jubayer") ||
-              String(t.name || "")
-                .toLowerCase()
-                .includes("sumaiya");
-
-            if (isElders) {
-              const exists = eldersTeachers.some(
-                (e) =>
-                  (e.name || "").toLowerCase() === (t.name || "").toLowerCase(),
-              );
-              if (!exists) eldersTeachers.push(t);
-            }
-          });
-        }
-      } catch (err) {
-        console.warn("Attendance teachers fetch skipped");
+      if (data.success && Array.isArray(data.teachers)) {
+        teachers = data.teachers.filter((t) => teacherBelongsToMyDept(t));
       }
 
-      console.log("✅ Elders teachers loaded:", eldersTeachers.length);
-      eldersTeachers.forEach((t) =>
+      console.log(
+        `✅ [${adminDepartment}] Teachers loaded: ${teachers.length}`,
+      );
+      teachers.forEach((t) =>
         console.log("   →", t.name, "|", t.designation || ""),
       );
 
-      setAvailableTeachers(eldersTeachers);
-      setFilteredTeachers(eldersTeachers);
+      setAvailableTeachers(teachers);
+      setFilteredTeachers(teachers);
     } catch (err) {
-      console.warn("Teacher fetch error, using hardcoded only");
-      setAvailableTeachers(HARDCODED_ELDERS_TEACHERS);
-      setFilteredTeachers(HARDCODED_ELDERS_TEACHERS);
+      console.warn("Teacher fetch error:", err.message);
+      setAvailableTeachers([]);
+      setFilteredTeachers([]);
     } finally {
       setTeachersLoading(false);
     }
   };
 
+  // ✅ Re-fetch when department changes
   useEffect(() => {
+    if (!adminDepartment) return;
     fetchAssignments();
     fetchTeachers();
-  }, []);
+    // eslint-disable-next-line
+  }, [adminDepartment]);
 
   const handleLogout = async () => {
     try {
@@ -349,6 +388,7 @@ const Teacher_assign = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
+      localStorage.removeItem("adminDepartment");
       await Swal.fire({
         icon: "success",
         title: "Logged Out",
@@ -383,7 +423,6 @@ const Teacher_assign = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -442,7 +481,6 @@ const Teacher_assign = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -463,7 +501,6 @@ const Teacher_assign = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -567,89 +604,6 @@ const Teacher_assign = () => {
     });
   };
 
-  // ============ QUICK ADD TEACHER ============
-  const handleQuickAddTeacher = async (name) => {
-    if (!name || !name.trim()) return;
-
-    try {
-      setAddingQuickTeacher(true);
-
-      const data = await safeFetchJSON(
-        `${API_BASE}/api/teachers-manage/quick-add`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: name.trim(),
-            specialization: formData.subject || "Qaida Nuraniyah",
-            department: "Quran For Elders",
-            subject: "Quran For Elders",
-          }),
-        },
-      );
-
-      if (data.success && data.teacher) {
-        // Add to local list
-        const newT = data.teacher;
-        setAvailableTeachers((prev) => {
-          const exists = prev.some(
-            (t) =>
-              (t.name || "").toLowerCase() === (newT.name || "").toLowerCase(),
-          );
-          return exists ? prev : [...prev, newT];
-        });
-
-        setTeacherInput(newT.name);
-        setFormData((prev) => ({
-          ...prev,
-          teacherId: newT.id || newT._id,
-          teacherName: newT.name,
-          subject: prev.subject || newT.specialization || "",
-        }));
-        setShowTeacherSuggestions(false);
-
-        Swal.fire({
-          icon: "success",
-          title: "✅ Teacher Added!",
-          timer: 1800,
-          showConfirmButton: false,
-        });
-      } else {
-        // API fail হলেও local এ add করে দিই
-        const localTeacher = {
-          _id: "LOCAL_" + Date.now(),
-          id: "LOCAL_" + Date.now(),
-          name: name.trim(),
-          subject: "Quran For Elders",
-          department: "Quran For Elders",
-          specialization: formData.subject || "Qaida Nuraniyah",
-          designation: "Teacher",
-          status: "Active",
-        };
-        setAvailableTeachers((prev) => [...prev, localTeacher]);
-        setTeacherInput(localTeacher.name);
-        setFormData((prev) => ({
-          ...prev,
-          teacherId: localTeacher.id,
-          teacherName: localTeacher.name,
-        }));
-        setShowTeacherSuggestions(false);
-
-        Swal.fire({
-          icon: "success",
-          title: "✅ Added Locally!",
-          text: "Teacher locally added (server sync pending)",
-          timer: 1800,
-          showConfirmButton: false,
-        });
-      }
-    } catch (err) {
-      console.error("Quick Add:", err);
-    } finally {
-      setAddingQuickTeacher(false);
-    }
-  };
-
   // ============ FULL ADD TEACHER ============
   const handleAddNewTeacher = async (e) => {
     e.preventDefault();
@@ -673,16 +627,18 @@ const Teacher_assign = () => {
         didOpen: () => Swal.showLoading(),
       });
 
+      const payload = {
+        ...newTeacherData,
+        department: adminDepartment,
+        subject: deptData.label,
+      };
+
       const data = await safeFetchJSON(
-        `${API_BASE}/api/teachers-manage/create`,
+        `${API_BASE}/api/teachers-manage/quick-add`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...newTeacherData,
-            department: "Quran For Elders",
-            subject: "Quran For Elders",
-          }),
+          body: JSON.stringify(payload),
         },
       );
 
@@ -690,13 +646,12 @@ const Teacher_assign = () => {
       if (data.success && data.teacher) {
         newT = data.teacher;
       } else {
-        // Local fallback
         newT = {
           _id: "LOCAL_" + Date.now(),
           id: "LOCAL_" + Date.now(),
           ...newTeacherData,
-          subject: "Quran For Elders",
-          department: "Quran For Elders",
+          subject: deptData.label,
+          department: adminDepartment,
           status: "Active",
         };
       }
@@ -722,19 +677,20 @@ const Teacher_assign = () => {
         name: "",
         email: "",
         phone: "",
-        specialization: "Qaida Nuraniyah",
+        specialization: deptData.subjects[0] || "",
         experience: "",
         qualification: "",
         designation: "Teacher",
         gender: "Male",
         address: "",
         bio: "",
-        department: "Quran For Elders",
+        department: adminDepartment,
       });
 
       Swal.fire({
         icon: "success",
         title: "✅ Teacher Added!",
+        text: `Saved in ${adminDepartment} Department`,
         timer: 1800,
         showConfirmButton: false,
       });
@@ -778,7 +734,7 @@ const Teacher_assign = () => {
     setShowDetailsModal(true);
   };
 
-  // Assign — local + API try
+  // Assign
   const handleAssignTeacher = async (e) => {
     e.preventDefault();
 
@@ -812,15 +768,13 @@ const Teacher_assign = () => {
     try {
       setSubmitting(true);
 
-      // Local assignment object
       const newAssignment = {
         _id: "LOCAL_" + Date.now(),
         ...formData,
-        department: "Quran For Elders",
+        department: adminDepartment,
         assignedDate: new Date().toISOString().split("T")[0],
       };
 
-      // Try API (silently)
       try {
         const data = await safeFetchJSON(
           `${API_BASE}/api/teacher-assign/create`,
@@ -829,7 +783,7 @@ const Teacher_assign = () => {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               ...formData,
-              department: "Quran For Elders",
+              department: adminDepartment,
             }),
           },
         );
@@ -840,9 +794,7 @@ const Teacher_assign = () => {
         console.warn("API assign failed, saving locally");
       }
 
-      // Add to local state
       setAssignments((prev) => [newAssignment, ...prev]);
-
       setShowAssignModal(false);
       setFormData(initialFormData);
       setTeacherInput("");
@@ -857,6 +809,7 @@ const Teacher_assign = () => {
             <p><strong>Class:</strong> ${newAssignment.class}</p>
             <p><strong>Days:</strong> ${newAssignment.days.join(", ")}</p>
             <p><strong>Time:</strong> ${newAssignment.time}</p>
+            <p style="margin-top:8px; color:#004d4d;"><strong>Department:</strong> ${adminDepartment}</p>
           </div>
         `,
         timer: 2500,
@@ -892,24 +845,27 @@ const Teacher_assign = () => {
     try {
       setSubmitting(true);
 
-      // Try API (silently)
       try {
         await safeFetchJSON(
           `${API_BASE}/api/teacher-assign/update/${selectedAssignment._id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(formData),
+            body: JSON.stringify({
+              ...formData,
+              department: adminDepartment,
+            }),
           },
         );
       } catch (err) {
         console.warn("API update failed, updating locally");
       }
 
-      // Update local state
       setAssignments((prev) =>
         prev.map((a) =>
-          a._id === selectedAssignment._id ? { ...a, ...formData } : a,
+          a._id === selectedAssignment._id
+            ? { ...a, ...formData, department: adminDepartment }
+            : a,
         ),
       );
 
@@ -944,7 +900,6 @@ const Teacher_assign = () => {
 
     if (!result.isConfirmed) return;
 
-    // Try API silently
     try {
       await safeFetchJSON(`${API_BASE}/api/teacher-assign/delete/${id}`, {
         method: "DELETE",
@@ -994,9 +949,7 @@ const Teacher_assign = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">
-            Teacher Assign (Elders)
-          </h1>
+          <h1 className="text-sm font-bold text-gray-800">Teacher Assign</h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100"
@@ -1026,11 +979,16 @@ const Teacher_assign = () => {
                 <p className="text-xs opacity-80 truncate">
                   {adminInfo.designation}
                 </p>
+                {adminDepartment && (
+                  <p className="text-[10px] opacity-90 truncate mt-0.5 bg-white/20 px-1.5 py-0.5 rounded-full inline-block">
+                    🏛️ {adminDepartment}
+                  </p>
+                )}
               </div>
             </div>
           </div>
 
-          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
+          <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-160px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
                 {item.subItems ? (
@@ -1116,12 +1074,15 @@ const Teacher_assign = () => {
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaChalkboardTeacher className="text-blue-600" /> Teacher
-                Assignment —
-                <span className="text-teal-700">Quran For Elders</span>
+                Assignment
+                {adminDepartment && (
+                  <span className="bg-teal-100 text-teal-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {adminDepartment}
+                  </span>
+                )}
               </h1>
               <p className="text-xs text-gray-500">
-                Jubayer Ahmad • Sumaiya Afrin Mim — only elders department
-                teachers
+                Manage teacher assignments for {adminDepartment} department
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -1155,6 +1116,19 @@ const Teacher_assign = () => {
             </div>
           </div>
 
+          {/* ✅ Department banner */}
+          {adminDepartment && (
+            <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white p-3 rounded-xl shadow-sm mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] opacity-80">You are logged in as</p>
+                <p className="text-sm font-bold">
+                  {adminDepartment} Department Admin
+                </p>
+              </div>
+              <span className="text-2xl">🏛️</span>
+            </div>
+          )}
+
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
             <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
@@ -1181,57 +1155,70 @@ const Teacher_assign = () => {
               <p className="text-lg font-bold text-teal-600">
                 {availableTeachers.length}
               </p>
-              <p className="text-[10px] text-gray-500">Elders Teachers</p>
+              <p className="text-[10px] text-gray-500">
+                {adminDepartment} Teachers
+              </p>
             </div>
           </div>
 
-          {/* ✅ Always show teachers */}
+          {/* ✅ Available Teachers — department-based, no hardcoded */}
           <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
             <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
-              <FaUserTie size={12} /> Available Elders Teachers (
+              <FaUserTie size={12} /> Available {adminDepartment} Teachers (
               {availableTeachers.length})
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {availableTeachers.map((t, idx) => (
-                <div
-                  key={t._id || t.id || idx}
-                  className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
-                >
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                    {(t.name || "T").charAt(0)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-gray-800 truncate">
-                      {t.name}
-                    </p>
-                    <p className="text-[10px] text-gray-500 truncate">
-                      {t.designation || "Teacher"} •{" "}
-                      {t.subject || t.department || "Quran For Elders"}
-                    </p>
-                    {t.phone && (
-                      <p className="text-[10px] text-gray-400 truncate">
-                        📱 {t.phone}
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => {
-                      setFormData({
-                        ...initialFormData,
-                        teacherId: t.id || t._id,
-                        teacherName: t.name,
-                        subject: t.specialization || "",
-                      });
-                      setTeacherInput(t.name);
-                      setShowAssignModal(true);
-                    }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 whitespace-nowrap"
+            {teachersLoading ? (
+              <p className="text-xs text-gray-500 italic">
+                Loading teachers...
+              </p>
+            ) : availableTeachers.length === 0 ? (
+              <p className="text-xs text-gray-500 italic">
+                এই department এ এখনো কোনো teacher add করা হয়নি। উপরে "Add
+                Teacher" বাটন ব্যবহার করুন।
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {availableTeachers.map((t, idx) => (
+                  <div
+                    key={t._id || t.id || idx}
+                    className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
                   >
-                    <FaPlusCircle size={10} /> Assign
-                  </button>
-                </div>
-              ))}
-            </div>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      {(t.name || "T").charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-gray-800 truncate">
+                        {t.name}
+                      </p>
+                      <p className="text-[10px] text-gray-500 truncate">
+                        {t.designation || "Teacher"} •{" "}
+                        {t.subject || t.department || adminDepartment}
+                      </p>
+                      {t.phone && (
+                        <p className="text-[10px] text-gray-400 truncate">
+                          📱 {t.phone}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => {
+                        setFormData({
+                          ...initialFormData,
+                          teacherId: t.id || t._id,
+                          teacherName: t.name,
+                          subject: t.specialization || "",
+                        });
+                        setTeacherInput(t.name);
+                        setShowAssignModal(true);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 whitespace-nowrap"
+                    >
+                      <FaPlusCircle size={10} /> Assign
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Filters */}
@@ -1286,7 +1273,7 @@ const Teacher_assign = () => {
           </div>
 
           {/* Assignments Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto max-h-[calc(100vh-560px)]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto max-h-[calc(100vh-620px)]">
             {filteredAssignments.length > 0 ? (
               filteredAssignments.map((a) => (
                 <div
@@ -1403,8 +1390,8 @@ const Teacher_assign = () => {
                   No Assignments Yet
                 </h3>
                 <p className="text-xs text-gray-500 mb-3">
-                  উপরে "Assign" button ক্লিক করে Jubayer বা Sumaiya কে assign
-                  করুন
+                  {adminDepartment} department এ এখনো কোনো teacher assign করা
+                  হয়নি। "Assign Teacher" বাটন ব্যবহার করুন।
                 </p>
                 <button
                   onClick={openAssignModal}
@@ -1424,7 +1411,12 @@ const Teacher_assign = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-20">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-blue-600" /> Assign Teacher — Elders
+                <FaUserPlus className="text-blue-600" /> Assign Teacher
+                {adminDepartment && (
+                  <span className="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                    {adminDepartment}
+                  </span>
+                )}
               </h3>
               <button
                 onClick={() => setShowAssignModal(false)}
@@ -1434,57 +1426,70 @@ const Teacher_assign = () => {
               </button>
             </div>
             <form onSubmit={handleAssignTeacher} className="p-6 space-y-4">
-              {/* ✅ Teacher list — 2 cards clickable */}
+              {/* Teacher selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Select Teacher *
                 </label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
-                  {availableTeachers.map((t, idx) => {
-                    const isSelected = formData.teacherId === (t.id || t._id);
-                    return (
-                      <button
-                        key={t._id || t.id || idx}
-                        type="button"
-                        onClick={() => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            teacherId: t.id || t._id,
-                            teacherName: t.name,
-                            subject: prev.subject || t.specialization || "",
-                          }));
-                          setTeacherInput(t.name);
-                        }}
-                        className={`p-3 rounded-lg border-2 text-left transition-all flex items-center gap-2 ${
-                          isSelected
-                            ? "border-teal-500 bg-teal-50 shadow-sm"
-                            : "border-gray-200 hover:border-teal-300 hover:bg-gray-50"
-                        }`}
-                      >
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                          {(t.name || "T").charAt(0)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-bold text-gray-800 truncate">
-                            {t.name}
-                          </p>
-                          <p className="text-[10px] text-gray-500 truncate">
-                            {t.designation || "Teacher"}
-                          </p>
-                          <p className="text-[10px] text-teal-600 truncate">
-                            {t.subject || "Quran For Elders"}
-                          </p>
-                        </div>
-                        {isSelected && (
-                          <FaCheckCircle className="text-teal-500" size={16} />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-                <p className="text-[10px] text-gray-400">
-                  💡 আরো teacher add করতে "Add Teacher" button ব্যবহার করুন
-                </p>
+                {availableTeachers.length === 0 ? (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs text-yellow-800">
+                    কোনো teacher নেই। আগে "Add Teacher" বাটন দিয়ে teacher যোগ
+                    করুন।
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                      {availableTeachers.map((t, idx) => {
+                        const isSelected =
+                          formData.teacherId === (t.id || t._id);
+                        return (
+                          <button
+                            key={t._id || t.id || idx}
+                            type="button"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                teacherId: t.id || t._id,
+                                teacherName: t.name,
+                                subject: prev.subject || t.specialization || "",
+                              }));
+                              setTeacherInput(t.name);
+                            }}
+                            className={`p-3 rounded-lg border-2 text-left transition-all flex items-center gap-2 ${
+                              isSelected
+                                ? "border-teal-500 bg-teal-50 shadow-sm"
+                                : "border-gray-200 hover:border-teal-300 hover:bg-gray-50"
+                            }`}
+                          >
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                              {(t.name || "T").charAt(0)}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-bold text-gray-800 truncate">
+                                {t.name}
+                              </p>
+                              <p className="text-[10px] text-gray-500 truncate">
+                                {t.designation || "Teacher"}
+                              </p>
+                              <p className="text-[10px] text-teal-600 truncate">
+                                {t.subject || adminDepartment}
+                              </p>
+                            </div>
+                            {isSelected && (
+                              <FaCheckCircle
+                                className="text-teal-500"
+                                size={16}
+                              />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <p className="text-[10px] text-gray-400">
+                      💡 আরো teacher add করতে "Add Teacher" button ব্যবহার করুন
+                    </p>
+                  </>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1648,7 +1653,7 @@ const Teacher_assign = () => {
               <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  disabled={submitting}
+                  disabled={submitting || availableTeachers.length === 0}
                   className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold disabled:opacity-50"
                 >
                   <FaUserPlus className="inline mr-2" size={14} />
@@ -2003,7 +2008,12 @@ const Teacher_assign = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-green-600" /> Add New Elders Teacher
+                <FaUserPlus className="text-green-600" /> Add New Teacher
+                {adminDepartment && (
+                  <span className="bg-teal-100 text-teal-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                    {adminDepartment}
+                  </span>
+                )}
               </h3>
               <button
                 onClick={() => setShowAddTeacherModal(false)}
@@ -2015,7 +2025,7 @@ const Teacher_assign = () => {
 
             <form onSubmit={handleAddNewTeacher} className="p-6 space-y-4">
               <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
-                💡 Department: <strong>Quran For Elders</strong> — অটোমেটিক সেট
+                💡 Department: <strong>{adminDepartment}</strong> — অটোমেটিক সেট
                 হবে
               </div>
 
@@ -2053,7 +2063,7 @@ const Teacher_assign = () => {
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {subjects.map((s) => (
+                    {deptData.subjects.map((s) => (
                       <option key={s} value={s}>
                         {s}
                       </option>

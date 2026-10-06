@@ -35,130 +35,155 @@ import { FiMenu, FiX } from "react-icons/fi";
 const API_BASE = "https://api.tarbiyahonline.com";
 
 // ============================================================
-// ✅ ELDERS DEPARTMENT
+// ✅ DEPARTMENT CONFIG
 // ============================================================
-const ELDERS_TEACHERS = ["Jubayer Ahmad", "Sumaiya Afrin Mim"];
-
-const ELDERS_COURSES = [
-  "Qaida Nuraniyah",
-  "Quran Nazera",
-  "Najera",
-  "Basic Tajweed",
-  "Bakarah Hifz",
-];
-
-const ELDERS_CLASSES = [
-  "Elders Batch A",
-  "Elders Batch B",
-  "Elders Batch C",
-  "Elders Batch D",
-  "Elders Batch E",
-];
-
-const ELDERS_BATCHES = [
-  "Batch-01",
-  "Batch-02",
-  "Batch-03",
-  "Batch-04",
-  "Batch-05",
-  "Batch-06",
-];
-
-const ELDERS_COURSE_KEYWORDS = [
-  "qaida nuraniyah",
-  "qaida nooraniya",
-  "qaida noorani",
-  "qaida nurani",
-  "qaidah nuraniyah",
-  "qaidah nooraniya",
-  "qaidah noorani",
-  "quran nazera",
-  "nazera quran",
-  "quran najera",
-  "najera quran",
-  "bakarah hifz",
-  "bakara hifz",
-  "baqarah hifz",
-  "baqara hifz",
-  "basic tajweed",
-];
-
-const isSingleEldersCourse = (singleCourse) => {
-  const p = String(singleCourse).toLowerCase().trim();
-  if (!p) return false;
-  return ELDERS_COURSE_KEYWORDS.some((c) => {
-    if (p === c) return true;
-    if (p.includes(c)) return true;
-    if (c.includes(p) && p.length >= 8) return true;
-    return false;
-  });
+const DEPARTMENT_CONFIGS = {
+  Elders: {
+    label: "Quran For Elders",
+    courses: [
+      "Qaida Nuraniyah",
+      "Quran Nazera",
+      "Najera",
+      "Basic Tajweed",
+      "Bakarah Hifz",
+    ],
+    classes: [
+      "Elders Batch A",
+      "Elders Batch B",
+      "Elders Batch C",
+      "Elders Batch D",
+      "Elders Batch E",
+    ],
+    batches: [
+      "Batch-01",
+      "Batch-02",
+      "Batch-03",
+      "Batch-04",
+      "Batch-05",
+      "Batch-06",
+    ],
+    courseKeywords: [
+      "qaida nuraniyah",
+      "qaida nooraniya",
+      "qaida noorani",
+      "qaida nurani",
+      "qaidah nuraniyah",
+      "qaidah nooraniya",
+      "qaidah noorani",
+      "quran nazera",
+      "nazera quran",
+      "quran najera",
+      "najera quran",
+      "bakarah hifz",
+      "bakara hifz",
+      "baqarah hifz",
+      "baqara hifz",
+      "basic tajweed",
+      "quran for elders",
+    ],
+  },
+  "Quran Studies": {
+    label: "Quran Studies",
+    courses: ["Hifzul Quran", "Tarbiyah Quran Studies", "Quran Translation"],
+    classes: ["Quran Studies A", "Quran Studies B", "Quran Studies C"],
+    batches: ["QS-Batch-01", "QS-Batch-02", "QS-Batch-03"],
+    courseKeywords: ["quran studies", "hifzul quran", "tarbiyah quran studies"],
+  },
+  Alimiya: {
+    label: "Alimiya",
+    courses: ["Dawra e Hadith", "Tafsir", "Fiqh", "Hadith", "Arabic Grammar"],
+    classes: ["Alimiya Year 1", "Alimiya Year 2", "Alimiya Year 3"],
+    batches: ["AL-Batch-01", "AL-Batch-02", "AL-Batch-03"],
+    courseKeywords: [
+      "alimiya",
+      "dawra",
+      "tafsir",
+      "fiqh",
+      "hadith",
+      "arabic grammar",
+    ],
+  },
+  Diploma: {
+    label: "Diploma",
+    courses: [
+      "Diploma in Islamic Studies",
+      "Diploma in Arabic",
+      "Certificate Course",
+    ],
+    classes: ["Diploma A", "Diploma B", "Diploma C"],
+    batches: ["DP-Batch-01", "DP-Batch-02", "DP-Batch-03"],
+    courseKeywords: ["diploma in islamic studies", "diploma", "certificate"],
+  },
 };
 
-const isEldersCourse = (courseStr) => {
-  if (!courseStr) return false;
-  const parts = String(courseStr)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (parts.length === 0) return false;
-  return parts.every((part) => isSingleEldersCourse(part));
-};
-
-const getPrimaryCourse = (courseStr) => {
-  if (!courseStr) return "";
-  const first = String(courseStr).split(",")[0].trim().toLowerCase();
-  if (first.includes("qaida")) return "Qaida Nuraniyah";
-  if (first.includes("najera") || first.includes("nazera")) return "Najera";
-  if (first.includes("tajweed")) return "Basic Tajweed";
-  if (first.includes("bakarah") || first.includes("bakara"))
-    return "Bakarah Hifz";
-  return "Qaida Nuraniyah";
-};
-
+// ✅ Default monthly fees — শুধু Elders এর জন্য
 const ELDERS_DEFAULT_FEES = [
   {
-    id: "MF-2026-09-001",
+    _id: "sample-mf-1",
     studentName: "Omer Faruk",
     studentId: "TET26FB6001",
     class: "Elders Batch A",
     batch: "Batch-03",
     subject: "Qaida Nuraniyah",
     month: "September",
-    monthIndex: 8,
     year: 2026,
     amount: 5000,
     paidAmount: 5000,
     dueAmount: 0,
-    status: "Paid",
     paymentDate: "2026-09-05",
     paymentMethod: "bKash",
+    status: "Paid",
     transactionId: "DGD9CFHU69",
-    notes: "",
+    notes: "Full payment",
     collectedBy: "Admin",
-    invoiceNumber: "INV-2026-09-0001",
+    invoiceNumber: "MF-EL-2026-09-0001",
   },
   {
-    id: "MF-2026-09-002",
+    _id: "sample-mf-2",
     studentName: "Ikramm",
     studentId: "TET26FB6002",
     class: "Elders Batch A",
     batch: "Batch-03",
     subject: "Qaida Nuraniyah",
     month: "September",
-    monthIndex: 8,
     year: 2026,
     amount: 5000,
     paidAmount: 3000,
     dueAmount: 2000,
-    status: "Partial",
     paymentDate: "2026-09-06",
     paymentMethod: "Nagad",
+    status: "Partial",
     transactionId: "DGX9PQ45MN",
     notes: "Partial payment",
     collectedBy: "Admin",
-    invoiceNumber: "INV-2026-09-0002",
+    invoiceNumber: "MF-EL-2026-09-0002",
   },
 ];
+
+const getCurrentDepartment = () => {
+  try {
+    const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
+    return info.department || "Elders";
+  } catch {
+    return "Elders";
+  }
+};
+
+const safeFetchJSON = async (url, options = {}) => {
+  try {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    if (text.trim().startsWith("<"))
+      return { success: false, _htmlError: true };
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, _jsonError: true };
+    }
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+};
 
 const Monthly_fee = () => {
   const { user, logOut } = useAuth();
@@ -172,13 +197,22 @@ const Monthly_fee = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "Quran for Elders",
+    department: "Elders",
     joinDate: "",
   });
 
+  const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
+  const deptConfig =
+    DEPARTMENT_CONFIGS[currentDept] || DEPARTMENT_CONFIGS["Elders"];
+  const DEPT_COURSES = deptConfig.courses;
+  const DEPT_CLASSES = deptConfig.classes;
+  const DEPT_BATCHES = deptConfig.batches;
+  const DEPT_KEYWORDS = deptConfig.courseKeywords;
+  const DEPT_LABEL = deptConfig.label;
+
   const currentDate = new Date();
-  const currentMonth = currentDate.getMonth();
-  const currentYear = currentDate.getFullYear();
+  const currentMonthIndex = currentDate.getMonth();
+  const currentYearNum = currentDate.getFullYear();
   const months = [
     "January",
     "February",
@@ -194,27 +228,14 @@ const Monthly_fee = () => {
     "December",
   ];
 
-  const [eldersStudents, setEldersStudents] = useState(
-    ELDERS_STUDENTS_FALLBACK,
-  );
+  const [deptStudents, setDeptStudents] = useState([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
-
-  const [monthlyFees, setMonthlyFees] = useState(() => {
-    const saved = localStorage.getItem("eldersMonthlyFees");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    return ELDERS_DEFAULT_FEES;
-  });
+  const [monthlyFees, setMonthlyFees] = useState([]);
+  const [apiWorking, setApiWorking] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterMonth, setFilterMonth] = useState(months[currentMonth]);
-  const [filterYear, setFilterYear] = useState(currentYear);
+  const [filterMonth, setFilterMonth] = useState(months[currentMonthIndex]);
+  const [filterYear, setFilterYear] = useState(currentYearNum);
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterClass, setFilterClass] = useState("All");
 
@@ -222,6 +243,7 @@ const Monthly_fee = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedFee, setSelectedFee] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     studentName: "",
@@ -229,8 +251,8 @@ const Monthly_fee = () => {
     class: "",
     batch: "",
     subject: "",
-    month: months[currentMonth],
-    year: currentYear,
+    month: months[currentMonthIndex],
+    year: currentYearNum,
     amount: 0,
     paidAmount: 0,
     paymentDate: "",
@@ -242,11 +264,251 @@ const Monthly_fee = () => {
 
   const statuses = ["All", "Paid", "Partial", "Unpaid"];
   const paymentMethods = ["Cash", "bKash", "Nagad", "Rocket", "Bank Transfer"];
-  const years = [2024, 2025, 2026, 2027];
+  const years = [2024, 2025, 2026, 2027, 2028];
 
   // ============================================================
-  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
+  // Load admin info + department
   // ============================================================
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminInfo");
+    if (savedAdmin) {
+      try {
+        const info = JSON.parse(savedAdmin);
+        setAdminInfo(info);
+        if (info.department) setCurrentDept(info.department);
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      setAdminInfo({
+        name: user?.displayName || "Admin",
+        email: user?.email || "admin@tarabiyah.com",
+        phone: "01700000000",
+        designation: "Administrator",
+        department: "Elders",
+        joinDate: "January 2024",
+      });
+    }
+  }, [user]);
+
+  // ============================================================
+  // ✅ Load Monthly Fees — API first, localStorage fallback
+  // ============================================================
+  const loadMonthlyFees = async () => {
+    try {
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/fees/all?department=${encodeURIComponent(currentDept)}&type=monthly`,
+      );
+
+      if (data.success && Array.isArray(data.fees)) {
+        // If API has data, use it
+        if (data.fees.length > 0) {
+          setMonthlyFees(data.fees);
+          setApiWorking(true);
+          localStorage.setItem(
+            `monthlyFees_${currentDept.replace(/\s+/g, "_")}`,
+            JSON.stringify(data.fees),
+          );
+          console.log(
+            `✅ Loaded ${data.fees.length} monthly fees from API (${currentDept})`,
+          );
+          return;
+        }
+
+        // API empty — check localStorage for cached data
+        const key = `monthlyFees_${currentDept.replace(/\s+/g, "_")}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setMonthlyFees(parsed);
+              setApiWorking(true);
+              console.log(
+                `♻️ API empty, restored ${parsed.length} from localStorage`,
+              );
+              return;
+            }
+          } catch {}
+        }
+
+        // Both empty → default Elders sample or empty
+        setApiWorking(true);
+        setMonthlyFees(currentDept === "Elders" ? ELDERS_DEFAULT_FEES : []);
+        return;
+      }
+
+      throw new Error(data.message || "API failed");
+    } catch (err) {
+      console.warn("⚠️ API failed, using localStorage:", err.message);
+      setApiWorking(false);
+      const key = `monthlyFees_${currentDept.replace(/\s+/g, "_")}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setMonthlyFees(
+            Array.isArray(parsed) && parsed.length > 0
+              ? parsed
+              : currentDept === "Elders"
+                ? ELDERS_DEFAULT_FEES
+                : [],
+          );
+        } catch {
+          setMonthlyFees(currentDept === "Elders" ? ELDERS_DEFAULT_FEES : []);
+        }
+      } else {
+        setMonthlyFees(currentDept === "Elders" ? ELDERS_DEFAULT_FEES : []);
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadMonthlyFees();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
+
+  // Cache to localStorage
+  useEffect(() => {
+    if (!currentDept || monthlyFees.length === 0) return;
+    const key = `monthlyFees_${currentDept.replace(/\s+/g, "_")}`;
+    localStorage.setItem(key, JSON.stringify(monthlyFees));
+  }, [monthlyFees, currentDept]);
+
+  // ============================================================
+  // Course helpers
+  // ============================================================
+  const isSingleDeptCourse = (singleCourse) => {
+    const p = String(singleCourse).toLowerCase().trim();
+    if (!p) return false;
+    return DEPT_KEYWORDS.some((c) => {
+      if (p === c) return true;
+      if (p.includes(c)) return true;
+      if (c.includes(p) && p.length >= 8) return true;
+      return false;
+    });
+  };
+
+  const isDeptCourse = (courseStr) => {
+    if (!courseStr) return false;
+    const parts = String(courseStr)
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (parts.length === 0) return false;
+    return parts.every((part) => isSingleDeptCourse(part));
+  };
+
+  const getPrimaryCourse = (courseStr) => {
+    if (!courseStr) return DEPT_COURSES[0] || "";
+    const first = String(courseStr).split(",")[0].trim().toLowerCase();
+    if (first.includes("qaida") || first.includes("noorani"))
+      return "Qaida Nuraniyah";
+    if (first.includes("najera") || first.includes("nazera")) return "Najera";
+    if (first.includes("tajweed")) return "Basic Tajweed";
+    if (
+      first.includes("bakarah") ||
+      first.includes("bakara") ||
+      first.includes("baqarah")
+    )
+      return "Bakarah Hifz";
+    if (first.includes("hifzul") || first.includes("hifz"))
+      return "Hifzul Quran";
+    if (first.includes("dawra")) return "Dawra e Hadith";
+    if (first.includes("tafsir")) return "Tafsir";
+    if (first.includes("fiqh")) return "Fiqh";
+    if (first.includes("hadith")) return "Hadith";
+    if (first.includes("diploma")) return "Diploma in Islamic Studies";
+    return DEPT_COURSES[0] || first;
+  };
+
+  // ============================================================
+  // Fetch Students
+  // ============================================================
+  const fetchDeptStudents = async () => {
+    try {
+      setStudentsLoading(true);
+      const res = await fetch(
+        `${API_BASE}/api/students/all?department=${encodeURIComponent(currentDept)}`,
+      );
+      const text = await res.text();
+      if (text.trim().startsWith("<")) {
+        setDeptStudents([]);
+        return;
+      }
+
+      const data = JSON.parse(text);
+      if (!data.success || !Array.isArray(data.students)) {
+        setDeptStudents([]);
+        return;
+      }
+
+      const all = data.students || [];
+      const filtered = all.filter((s) => {
+        const sDept = String(s.department || "")
+          .toLowerCase()
+          .trim();
+        if (sDept && sDept === currentDept.toLowerCase().trim()) return true;
+        return isDeptCourse(s.course);
+      });
+
+      const formatted = filtered.map((s) => ({
+        _id: s._id,
+        name: s.name || "",
+        studentId: s.studentId || s._id?.slice(-8) || "N/A",
+        course: s.course || "",
+        primaryCourse: getPrimaryCourse(s.course),
+        class:
+          s.batch || s.class || DEPT_CLASSES[0] || `${currentDept} Batch A`,
+        batch: s.batch || DEPT_BATCHES[0] || "",
+        phone: s.phone || "",
+        email: s.email || "",
+        courseFee: Number(s.courseFee) || 5000,
+      }));
+
+      const deduped = [];
+      formatted.forEach((s) => {
+        const exists = deduped.some(
+          (d) => (d.name || "").toLowerCase() === (s.name || "").toLowerCase(),
+        );
+        if (!exists) deduped.push(s);
+      });
+
+      setDeptStudents(deduped);
+    } catch (err) {
+      console.error("❌ Fetch students error:", err);
+      setDeptStudents([]);
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDeptStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("adminEmail");
+      await Swal.fire({
+        icon: "success",
+        title: "Logged Out Successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      navigate("/admin-login");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setExpandedMenu(expandedMenu === menu ? null : menu);
+
   const menuItems = [
     {
       id: "profile",
@@ -265,7 +527,6 @@ const Monthly_fee = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -324,7 +585,6 @@ const Monthly_fee = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -345,7 +605,6 @@ const Monthly_fee = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -380,7 +639,7 @@ const Monthly_fee = () => {
     },
   ];
 
-  // ✅ URL থেকে active auto-detect
+  // Auto-detect active menu from URL
   const getActiveFromPath = () => {
     const currentPath = location.pathname;
     for (const item of menuItems) {
@@ -399,106 +658,9 @@ const Monthly_fee = () => {
     if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
   }, [activeMenu, activeSubMenu]);
 
-  // Load admin info
-  useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminInfo");
-    if (savedAdmin) {
-      try {
-        setAdminInfo(JSON.parse(savedAdmin));
-      } catch (err) {
-        console.error(err);
-      }
-    } else {
-      setAdminInfo({
-        name: user?.displayName || "Admin",
-        email: user?.email || "admin@tarabiyah.com",
-        phone: "01700000000",
-        designation: "Administrator",
-        department: "Quran for Elders",
-        joinDate: "January 2024",
-      });
-    }
-  }, [user]);
-
-  const fetchEldersStudents = async () => {
-    try {
-      setStudentsLoading(true);
-      let eldersList = [];
-
-      try {
-        const res = await fetch(`${API_BASE}/api/students/all`);
-        const text = await res.text();
-
-        if (!text.trim().startsWith("<")) {
-          const data = JSON.parse(text);
-          if (data.success && Array.isArray(data.students)) {
-            const all = data.students || [];
-            const elders = all.filter((s) => isEldersCourse(s.course));
-
-            elders.forEach((s) => {
-              const formatted = {
-                _id: s._id,
-                name: s.name || "",
-                studentId: s.studentId || s._id?.slice(-8) || "N/A",
-                course: s.course || "",
-                primaryCourse: getPrimaryCourse(s.course),
-                class: s.batch || s.class || "Elders Batch A",
-                batch: s.batch || "Batch-03",
-                phone: s.phone || "",
-                email: s.email || "",
-                courseFee: Number(s.courseFee) || 5000,
-              };
-              const exists = eldersList.some(
-                (e) =>
-                  (e.name || "").toLowerCase() ===
-                  (formatted.name || "").toLowerCase(),
-              );
-              if (!exists) eldersList.push(formatted);
-            });
-          }
-        }
-      } catch (apiErr) {
-        console.warn("API fetch skipped:", apiErr.message);
-      }
-
-      setEldersStudents(eldersList);
-    } catch (err) {
-      console.error("❌ Fetch students error:", err);
-      setEldersStudents([]);
-    } finally {
-      setStudentsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchEldersStudents();
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("eldersMonthlyFees", JSON.stringify(monthlyFees));
-  }, [monthlyFees]);
-
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminEmail");
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-      navigate("/admin-login");
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  const toggleSubMenu = (menu) =>
-    setExpandedMenu(expandedMenu === menu ? null : menu);
-
+  // ============================================================
+  // Status helpers
+  // ============================================================
   const getStatusColor = (status) => {
     switch (status) {
       case "Paid":
@@ -525,6 +687,9 @@ const Monthly_fee = () => {
     }
   };
 
+  // ============================================================
+  // Filter by selected month + year
+  // ============================================================
   const filteredFees = monthlyFees.filter((fee) => {
     const s = searchTerm.toLowerCase();
     const matchesSearch =
@@ -545,8 +710,15 @@ const Monthly_fee = () => {
     );
   });
 
-  const uniqueStatuses = ["All", ...new Set(monthlyFees.map((f) => f.status))];
-  const uniqueClasses = ["All", ...new Set(monthlyFees.map((f) => f.class))];
+  // Unique values from THIS month's fees only
+  const thisMonthFees = monthlyFees.filter(
+    (f) => f.month === filterMonth && f.year === filterYear,
+  );
+  const uniqueStatuses = [
+    "All",
+    ...new Set(thisMonthFees.map((f) => f.status)),
+  ];
+  const uniqueClasses = ["All", ...new Set(thisMonthFees.map((f) => f.class))];
 
   const monthlyTotal = filteredFees.reduce(
     (sum, f) => sum + (f.amount || 0),
@@ -567,6 +739,9 @@ const Monthly_fee = () => {
   const collectionRate =
     monthlyTotal > 0 ? Math.round((monthlyPaid / monthlyTotal) * 100) : 0;
 
+  // ============================================================
+  // Month navigation
+  // ============================================================
   const handleMonthChange = (direction) => {
     const currentIndex = months.indexOf(filterMonth);
     let newIndex;
@@ -592,20 +767,23 @@ const Monthly_fee = () => {
     const year = new Date().getFullYear();
     const month = String(new Date().getMonth() + 1).padStart(2, "0");
     const count = monthlyFees.length + 1;
-    return `INV-${year}-${month}-${String(count).padStart(4, "0")}`;
+    const prefix = currentDept.slice(0, 2).toUpperCase();
+    return `MF-${prefix}-${year}-${month}-${String(count).padStart(4, "0")}`;
   };
 
+  // ============================================================
+  // Open Add Modal — always allowed
+  // ============================================================
   const openAddModal = () => {
-    const first = eldersStudents[0];
     setFormData({
-      studentName: first?.name || "",
-      studentId: first?.studentId || "",
-      class: first?.class || ELDERS_CLASSES[0],
-      batch: first?.batch || "Batch-03",
-      subject: first?.primaryCourse || ELDERS_COURSES[0],
+      studentName: "",
+      studentId: "",
+      class: DEPT_CLASSES[0] || `${currentDept} Batch A`,
+      batch: DEPT_BATCHES[0] || "",
+      subject: DEPT_COURSES[0] || "",
       month: filterMonth,
       year: filterYear,
-      amount: first?.courseFee || 5000,
+      amount: 5000,
       paidAmount: 0,
       paymentDate: "",
       paymentMethod: "",
@@ -617,7 +795,7 @@ const Monthly_fee = () => {
   };
 
   const handleStudentSelect = (studentId) => {
-    const s = eldersStudents.find((st) => st._id === studentId);
+    const s = deptStudents.find((st) => st._id === studentId);
     if (!s) return;
     setFormData((prev) => ({
       ...prev,
@@ -656,8 +834,12 @@ const Monthly_fee = () => {
     setShowDetailsModal(true);
   };
 
-  const handleAddFee = (e) => {
+  // ============================================================
+  // ADD MONTHLY FEE
+  // ============================================================
+  const handleAddFee = async (e) => {
     e.preventDefault();
+
     if (
       !formData.studentName ||
       !formData.class ||
@@ -672,9 +854,12 @@ const Monthly_fee = () => {
       });
       return;
     }
+
+    // Check duplicate
     const existing = monthlyFees.find(
       (f) =>
-        f.studentName === formData.studentName &&
+        (f.studentName || "").toLowerCase() ===
+          formData.studentName.toLowerCase().trim() &&
         f.month === formData.month &&
         f.year === formData.year,
     );
@@ -682,28 +867,28 @@ const Monthly_fee = () => {
       Swal.fire({
         icon: "warning",
         title: "Fee Already Exists",
-        text: `Already exists for ${formData.studentName} - ${formData.month} ${formData.year}`,
+        text: `${formData.studentName} — ${formData.month} ${formData.year} এর fee already exists!`,
       });
       return;
     }
+
     const paidAmount = Number(formData.paidAmount) || 0;
-    const dueAmount = formData.amount - paidAmount;
+    const dueAmount = Number(formData.amount) - paidAmount;
     const status =
       dueAmount <= 0 ? "Paid" : paidAmount > 0 ? "Partial" : "Unpaid";
-    const newFee = {
-      id: `MF-${formData.year}-${String(months.indexOf(formData.month) + 1).padStart(2, "0")}-${formData.studentId || `STU${String(monthlyFees.length + 1).padStart(3, "0")}`}`,
-      studentName: formData.studentName,
-      studentId: formData.studentId,
+
+    const payload = {
+      department: currentDept,
+      type: "monthly",
+      studentName: formData.studentName.trim(),
+      studentId: formData.studentId.trim(),
       class: formData.class,
       batch: formData.batch || "",
       subject: formData.subject || "N/A",
       month: formData.month,
-      monthIndex: months.indexOf(formData.month),
       year: formData.year,
       amount: Number(formData.amount),
-      paidAmount,
-      dueAmount,
-      status,
+      paidAmount: paidAmount,
       paymentDate:
         paidAmount > 0
           ? formData.paymentDate || new Date().toISOString().split("T")[0]
@@ -717,109 +902,200 @@ const Monthly_fee = () => {
       collectedBy: paidAmount > 0 ? adminInfo.name : null,
       invoiceNumber: formData.invoiceNumber || generateInvoiceNumber(),
     };
-    setMonthlyFees([...monthlyFees, newFee]);
-    setShowAddModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "✅ Monthly Fee Added!",
-      text: formData.studentName,
-      timer: 1500,
-      showConfirmButton: false,
-    });
+
+    try {
+      setSaving(true);
+
+      const data = await safeFetchJSON(`${API_BASE}/api/fees/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      let newFee;
+      if (data.success && data.fee) {
+        newFee = data.fee;
+        console.log("✅ Saved to API:", newFee._id);
+      } else {
+        newFee = { _id: `LOCAL_${Date.now()}`, ...payload, dueAmount, status };
+        console.warn("⚠️ API failed, saved locally");
+      }
+
+      setMonthlyFees([newFee, ...monthlyFees]);
+      setShowAddModal(false);
+
+      Swal.fire({
+        icon: "success",
+        title: "✅ Monthly Fee Added!",
+        html: `<p><strong>${formData.studentName}</strong></p><p style="font-size: 12px; color: #666;">${formData.month} ${formData.year} — ৳${formData.amount}</p>`,
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleEditFee = (e) => {
+  // ============================================================
+  // EDIT MONTHLY FEE
+  // ============================================================
+  const handleEditFee = async (e) => {
     e.preventDefault();
+
     const paidAmount = Number(formData.paidAmount) || 0;
-    const dueAmount = selectedFee.amount - paidAmount;
+    const dueAmount = Number(formData.amount) - paidAmount;
     const status =
       dueAmount <= 0 ? "Paid" : paidAmount > 0 ? "Partial" : "Unpaid";
-    setMonthlyFees(
-      monthlyFees.map((f) =>
-        f.id === selectedFee.id
-          ? {
-              ...f,
-              paidAmount,
-              dueAmount,
-              status,
-              paymentDate:
-                paidAmount > 0
-                  ? formData.paymentDate ||
-                    new Date().toISOString().split("T")[0]
-                  : null,
-              paymentMethod: paidAmount > 0 ? formData.paymentMethod : null,
-              transactionId: paidAmount > 0 ? formData.transactionId : null,
-              notes: formData.notes || "",
-              collectedBy: paidAmount > 0 ? adminInfo.name : null,
-            }
-          : f,
-      ),
-    );
-    setShowEditModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "✅ Updated!",
-      timer: 1500,
-      showConfirmButton: false,
-    });
-  };
 
-  const handleMarkAsPaid = (fee) => {
-    Swal.fire({
-      title: "Mark as Paid?",
-      text: `Mark ${fee.studentName}'s fee as paid?`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#22c55e",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: "Yes, mark as paid!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setMonthlyFees(
-          monthlyFees.map((f) =>
-            f.id === fee.id
-              ? {
-                  ...f,
-                  status: "Paid",
-                  paidAmount: f.amount,
-                  dueAmount: 0,
-                  paymentDate: new Date().toISOString().split("T")[0],
-                  paymentMethod: f.paymentMethod || "Cash",
-                  collectedBy: adminInfo.name,
-                  transactionId:
-                    f.transactionId || `TXN${Date.now().toString().slice(-6)}`,
-                }
-              : f,
-          ),
+    const payload = {
+      ...formData,
+      amount: Number(formData.amount),
+      paidAmount,
+      dueAmount,
+      status,
+      paymentDate:
+        paidAmount > 0
+          ? formData.paymentDate || new Date().toISOString().split("T")[0]
+          : null,
+      paymentMethod: paidAmount > 0 ? formData.paymentMethod : null,
+      transactionId: paidAmount > 0 ? formData.transactionId : null,
+      collectedBy: paidAmount > 0 ? adminInfo.name : null,
+    };
+
+    try {
+      setSaving(true);
+
+      const isLocalId =
+        String(selectedFee._id).startsWith("LOCAL_") ||
+        String(selectedFee._id).startsWith("sample-");
+      let updatedFee;
+
+      if (!isLocalId) {
+        const data = await safeFetchJSON(
+          `${API_BASE}/api/fees/update/${selectedFee._id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          },
         );
-        Swal.fire({
-          icon: "success",
-          title: "✅ Marked as Paid!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
+        if (data.success && data.fee) {
+          updatedFee = data.fee;
+        } else {
+          updatedFee = { ...selectedFee, ...payload, dueAmount, status };
+        }
+      } else {
+        updatedFee = { ...selectedFee, ...payload, dueAmount, status };
       }
-    });
+
+      setMonthlyFees(
+        monthlyFees.map((f) => (f._id === selectedFee._id ? updatedFee : f)),
+      );
+      setShowEditModal(false);
+      Swal.fire({
+        icon: "success",
+        title: "✅ Updated!",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDeleteFee = (id) => {
-    Swal.fire({
-      title: "Delete Fee Record?",
+  // ============================================================
+  // DELETE
+  // ============================================================
+  const handleDeleteFee = async (id) => {
+    const result = await Swal.fire({
+      title: "Delete Monthly Fee?",
       text: "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setMonthlyFees(monthlyFees.filter((f) => f.id !== id));
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const isLocalId =
+        String(id).startsWith("LOCAL_") || String(id).startsWith("sample-");
+      if (!isLocalId) {
+        await safeFetchJSON(`${API_BASE}/api/fees/delete/${id}`, {
+          method: "DELETE",
+        });
+      }
+      setMonthlyFees(monthlyFees.filter((f) => f._id !== id));
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // ============================================================
+  // MARK AS PAID
+  // ============================================================
+  const handleMarkAsPaid = (fee) => {
+    Swal.fire({
+      title: "Mark as Paid?",
+      text: `Mark ${fee.studentName}'s monthly fee as paid?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#22c55e",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, mark as paid!",
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+
+      const payload = {
+        ...fee,
+        status: "Paid",
+        paidAmount: fee.amount,
+        dueAmount: 0,
+        paymentDate: new Date().toISOString().split("T")[0],
+        paymentMethod: fee.paymentMethod || "Cash",
+        collectedBy: adminInfo.name,
+        transactionId:
+          fee.transactionId || `TXN${Date.now().toString().slice(-6)}`,
+      };
+
+      try {
+        const isLocalId =
+          String(fee._id).startsWith("LOCAL_") ||
+          String(fee._id).startsWith("sample-");
+        if (!isLocalId) {
+          await safeFetchJSON(`${API_BASE}/api/fees/update/${fee._id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+        }
+        setMonthlyFees(
+          monthlyFees.map((f) =>
+            f._id === fee._id ? { ...f, ...payload } : f,
+          ),
+        );
         Swal.fire({
           icon: "success",
-          title: "Deleted!",
+          title: "✅ Marked as Paid!",
           timer: 1200,
           showConfirmButton: false,
         });
+      } catch (err) {
+        console.error(err);
       }
     });
   };
@@ -834,11 +1110,15 @@ const Monthly_fee = () => {
     });
   };
 
+  // ============================================================
+  // Report
+  // ============================================================
   const generateReport = () => {
     Swal.fire({
-      title: "Monthly Report",
+      title: `${currentDept} Monthly Report`,
       html: `
         <div style="text-align: left; font-size: 14px;">
+          <p><strong>Department:</strong> ${currentDept}</p>
           <p><strong>Month:</strong> ${filterMonth} ${filterYear}</p>
           <p><strong>Total Students:</strong> ${filteredFees.length}</p>
           <p><strong>Total Amount:</strong> ${formatCurrency(monthlyTotal)}</p>
@@ -869,7 +1149,7 @@ const Monthly_fee = () => {
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
           <h1 className="text-sm font-bold text-gray-800">
-            Monthly Fee (Elders)
+            Monthly Fee ({currentDept})
           </h1>
           <button
             onClick={toggleSidebar}
@@ -881,11 +1161,7 @@ const Monthly_fee = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -897,7 +1173,7 @@ const Monthly_fee = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {adminInfo.designation}
+                  {adminInfo.department || adminInfo.designation}
                 </p>
               </div>
             </div>
@@ -915,11 +1191,7 @@ const Monthly_fee = () => {
                           toggleSubMenu(item.id);
                           setIsSidebarOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                          isParentActive
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }`}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${isParentActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-gray-600">{item.icon}</span>
@@ -938,11 +1210,7 @@ const Monthly_fee = () => {
                               key={sub.id}
                               to={sub.path}
                               onClick={() => setIsSidebarOpen(false)}
-                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                                activeSubMenu === sub.id
-                                  ? "bg-teal-50 text-[#004d4d] font-bold"
-                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                              }`}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${activeSubMenu === sub.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                             >
                               {sub.label}
                             </Link>
@@ -956,11 +1224,7 @@ const Monthly_fee = () => {
                       onClick={() => setIsSidebarOpen(false)}
                     >
                       <button
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                          isParentActive
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }`}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${isParentActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                       >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
@@ -970,7 +1234,6 @@ const Monthly_fee = () => {
                 </div>
               );
             })}
-
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -979,9 +1242,8 @@ const Monthly_fee = () => {
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
           <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
+            <p>©Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 
@@ -999,17 +1261,23 @@ const Monthly_fee = () => {
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaMoneyBillWave className="text-green-600" /> Monthly Fee —
-                <span className="text-teal-700">Quran For Elders</span>
+                <span className="text-teal-700">{DEPT_LABEL}</span>
               </h1>
               <p className="text-xs text-gray-500">
                 {studentsLoading
-                  ? "Loading elders students..."
-                  : `${eldersStudents.length} elders student${eldersStudents.length !== 1 ? "s" : ""} • Qaida • Nazera • Najera • Tajweed • Bakarah Hifz`}
+                  ? `Loading ${currentDept} students...`
+                  : `${deptStudents.length} ${currentDept} student${deptStudents.length !== 1 ? "s" : ""}`}
+                {!apiWorking && (
+                  <span className="ml-2 text-yellow-600">⚠️ Offline mode</span>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
-                onClick={fetchEldersStudents}
+                onClick={() => {
+                  loadMonthlyFees();
+                  fetchDeptStudents();
+                }}
                 disabled={studentsLoading}
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 disabled:opacity-50"
               >
@@ -1040,22 +1308,29 @@ const Monthly_fee = () => {
             </div>
           </div>
 
-          {/* Elders Students Card */}
-          <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
-            <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
-              <FaUsers size={12} /> Elders Students ({eldersStudents.length})
+          {/* Department Badge */}
+          <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-2 rounded-xl text-xs font-semibold mb-3">
+            🏫 Showing monthly fees of:{" "}
+            <span className="font-bold">{currentDept}</span> department
+          </div>
+
+          {/* Students Card */}
+          <div className="bg-white border border-gray-200 rounded-xl p-3 mb-3">
+            <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1">
+              <FaUsers size={12} className="text-teal-600" /> {currentDept}{" "}
+              Students ({deptStudents.length})
             </p>
-            {studentsLoading && eldersStudents.length === 0 ? (
+            {studentsLoading && deptStudents.length === 0 ? (
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div>
-                Loading from API...
+                Loading {currentDept} students...
               </div>
-            ) : eldersStudents.length > 0 ? (
+            ) : deptStudents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {eldersStudents.map((s) => (
+                {deptStudents.map((s) => (
                   <div
                     key={s._id}
-                    className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
+                    className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center gap-3"
                   >
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {(s.name || "S").charAt(0)}
@@ -1075,9 +1350,18 @@ const Monthly_fee = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-gray-500 italic">
-                No elders students found.
-              </p>
+              <div className="text-center py-4">
+                <FaUsers className="text-4xl text-gray-300 mx-auto mb-2" />
+                <p className="text-xs text-gray-500 mb-3">
+                  {currentDept} department-এ এখনো কোনো student নেই।
+                </p>
+                <button
+                  onClick={openAddModal}
+                  className="bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
+                >
+                  + Add Monthly Fee Manually
+                </button>
+              </div>
             )}
           </div>
 
@@ -1137,7 +1421,7 @@ const Monthly_fee = () => {
                 <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search elders students..."
+                  placeholder={`Search ${currentDept} students...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -1172,7 +1456,7 @@ const Monthly_fee = () => {
 
           {/* Table */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto max-h-[calc(100vh-540px)] overflow-y-auto">
+            <div className="overflow-x-auto max-h-[calc(100vh-560px)] overflow-y-auto">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
@@ -1208,7 +1492,7 @@ const Monthly_fee = () => {
                 <tbody className="divide-y divide-gray-100">
                   {filteredFees.length > 0 ? (
                     filteredFees.map((fee, index) => (
-                      <tr key={fee.id} className="hover:bg-gray-50">
+                      <tr key={fee._id} className="hover:bg-gray-50">
                         <td className="px-3 py-2 font-medium text-gray-500">
                           {index + 1}
                         </td>
@@ -1269,7 +1553,7 @@ const Monthly_fee = () => {
                               <FaEdit size={12} />
                             </button>
                             <button
-                              onClick={() => handleDeleteFee(fee.id)}
+                              onClick={() => handleDeleteFee(fee._id)}
                               className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                               title="Delete"
                             >
@@ -1287,11 +1571,15 @@ const Monthly_fee = () => {
                       >
                         <FaMoneyBillWave className="text-4xl text-gray-300 mx-auto mb-2" />
                         <p>
-                          No fee records for {filterMonth} {filterYear}
+                          {currentDept} — {filterMonth} {filterYear} এর কোনো fee
+                          record নেই
                         </p>
-                        <p className="text-[10px] text-gray-400 mt-1">
-                          উপরে "Add Monthly Fee" ক্লিক করে যোগ করুন
-                        </p>
+                        <button
+                          onClick={openAddModal}
+                          className="mt-3 bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
+                        >
+                          + Add Monthly Fee for {filterMonth} {filterYear}
+                        </button>
                       </td>
                     </tr>
                   )}
@@ -1302,14 +1590,14 @@ const Monthly_fee = () => {
         </main>
       </div>
 
-      {/* Add Fee Modal */}
+      {/* Add Monthly Fee Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlusCircle className="text-green-600" /> Add Elders Monthly
-                Fee
+                <FaPlusCircle className="text-green-600" /> Add Monthly Fee —{" "}
+                {currentDept}
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1320,31 +1608,33 @@ const Monthly_fee = () => {
             </div>
             <form onSubmit={handleAddFee} className="p-6 space-y-4">
               <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
-                💡 Student select করলে বাকি information auto-fill হবে
+                💡 Student select করলে auto-fill হবে। অথবা manually নাম type
+                করুন।
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Elders Student *
-                </label>
-                <select
-                  required
-                  value={
-                    eldersStudents.find(
-                      (s) => s.studentId === formData.studentId,
-                    )?._id || ""
-                  }
-                  onChange={(e) => handleStudentSelect(e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                >
-                  <option value="">Select Student</option>
-                  {eldersStudents.map((s) => (
-                    <option key={s._id} value={s._id}>
-                      {s.name} — {s.course}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {deptStudents.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Student (Optional)
+                  </label>
+                  <select
+                    value={
+                      deptStudents.find(
+                        (s) => s.studentId === formData.studentId,
+                      )?._id || ""
+                    }
+                    onChange={(e) => handleStudentSelect(e.target.value)}
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="">-- Manual Entry --</option>
+                    {deptStudents.map((s) => (
+                      <option key={s._id} value={s._id}>
+                        {s.name} — {s.course}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -1355,8 +1645,11 @@ const Monthly_fee = () => {
                     type="text"
                     required
                     value={formData.studentName}
-                    readOnly
-                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
+                    onChange={(e) =>
+                      setFormData({ ...formData, studentName: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="Enter student name"
                   />
                 </div>
                 <div>
@@ -1366,8 +1659,11 @@ const Monthly_fee = () => {
                   <input
                     type="text"
                     value={formData.studentId}
-                    readOnly
-                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
+                    onChange={(e) =>
+                      setFormData({ ...formData, studentId: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="e.g., TAR2648213"
                   />
                 </div>
               </div>
@@ -1415,7 +1711,7 @@ const Monthly_fee = () => {
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {ELDERS_COURSES.map((c) => (
+                    {DEPT_COURSES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1585,9 +1881,11 @@ const Monthly_fee = () => {
               <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 rounded-lg font-semibold"
+                  disabled={saving}
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 rounded-lg font-semibold disabled:opacity-50"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Add Fee
+                  <FaSave className="inline mr-2" size={14} />{" "}
+                  {saving ? "Saving..." : "Add Monthly Fee"}
                 </button>
                 <button
                   type="button"
@@ -1605,47 +1903,172 @@ const Monthly_fee = () => {
       {/* Edit Modal */}
       {showEditModal && selectedFee && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2 mb-4">
-                <FaEdit className="text-yellow-600" /> Update Payment
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+              <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <FaEdit className="text-yellow-600" /> Edit Monthly Fee —{" "}
+                {currentDept}
               </h3>
-              <div className="mb-4">
-                <p className="text-sm text-gray-600">
-                  <span className="font-medium">{selectedFee.studentName}</span>
-                  <span className="text-gray-400 ml-2">
-                    ({selectedFee.studentId})
-                  </span>
-                </p>
-                <p className="text-xs text-gray-400 mt-1">
-                  {selectedFee.month} {selectedFee.year} • {selectedFee.class}
-                </p>
-                <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="text-gray-500">Amount:</span>
-                    <span className="font-bold text-blue-600 ml-1">
-                      {formatCurrency(selectedFee.amount)}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">Due:</span>
-                    <span className="font-bold text-red-600 ml-1">
-                      {formatCurrency(selectedFee.dueAmount)}
-                    </span>
-                  </div>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FiX size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleEditFee} className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Student Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.studentName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, studentName: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Student ID
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.studentId}
+                    onChange={(e) =>
+                      setFormData({ ...formData, studentId: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
                 </div>
               </div>
 
-              <form onSubmit={handleEditFee} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Paid Amount (৳) *
+                    Class *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.class}
+                    onChange={(e) =>
+                      setFormData({ ...formData, class: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Batch
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.batch}
+                    onChange={(e) =>
+                      setFormData({ ...formData, batch: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Course *
+                  </label>
+                  <select
+                    required
+                    value={formData.subject}
+                    onChange={(e) =>
+                      setFormData({ ...formData, subject: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {DEPT_COURSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Month *
+                  </label>
+                  <select
+                    required
+                    value={formData.month}
+                    onChange={(e) =>
+                      setFormData({ ...formData, month: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {months.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Year *
+                  </label>
+                  <select
+                    required
+                    value={formData.year}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        year: parseInt(e.target.value),
+                      })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    {years.map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Amount (৳) *
                   </label>
                   <input
                     type="number"
                     required
                     min="0"
-                    max={selectedFee.amount}
+                    value={formData.amount}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        amount: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Paid Amount (৳)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
                     value={formData.paidAmount}
                     onChange={(e) =>
                       setFormData({
@@ -1656,97 +2079,101 @@ const Monthly_fee = () => {
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
-
                 {formData.paidAmount > 0 && (
-                  <>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Payment Date
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.paymentDate}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            paymentDate: e.target.value,
-                          })
-                        }
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Payment Method
-                      </label>
-                      <select
-                        value={formData.paymentMethod}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            paymentMethod: e.target.value,
-                          })
-                        }
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                      >
-                        <option value="">Select</option>
-                        {paymentMethods.map((m) => (
-                          <option key={m} value={m}>
-                            {m}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Transaction ID
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.transactionId}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            transactionId: e.target.value,
-                          })
-                        }
-                        className="w-full border rounded-lg px-3 py-2 text-sm"
-                      />
-                    </div>
-                  </>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Payment Method
+                    </label>
+                    <select
+                      value={formData.paymentMethod}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          paymentMethod: e.target.value,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="">Select</option>
+                      {paymentMethods.map((m) => (
+                        <option key={m} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 )}
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Notes
-                  </label>
-                  <textarea
-                    value={formData.notes}
-                    onChange={(e) =>
-                      setFormData({ ...formData, notes: e.target.value })
-                    }
-                    rows="2"
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  />
+              {formData.paidAmount > 0 && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Payment Date
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.paymentDate}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          paymentDate: e.target.value,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Transaction ID
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.transactionId}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          transactionId: e.target.value,
+                        })
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
                 </div>
+              )}
 
-                <div className="flex gap-3 pt-4 border-t">
-                  <button
-                    type="submit"
-                    className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold text-sm"
-                  >
-                    <FaSave className="inline mr-2" size={14} /> Update
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowEditModal(false)}
-                    className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold text-sm"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Notes
+                </label>
+                <textarea
+                  value={formData.notes}
+                  onChange={(e) =>
+                    setFormData({ ...formData, notes: e.target.value })
+                  }
+                  rows="2"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold disabled:opacity-50"
+                >
+                  <FaSave className="inline mr-2" size={14} />{" "}
+                  {saving ? "Saving..." : "Update"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded-lg font-semibold"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -1757,7 +2184,8 @@ const Monthly_fee = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaFileInvoice className="text-blue-600" /> Elders Fee Details
+                <FaFileInvoice className="text-blue-600" /> Monthly Fee Details
+                — {currentDept}
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
