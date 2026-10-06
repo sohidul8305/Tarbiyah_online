@@ -537,7 +537,7 @@ const Student_batch = () => {
       const data = await res.json();
       if (data.success) {
         await fetchBatches();
-        setShowEditModal(false);
+        await fetchBatch(true); // ⬅️ Add this line
         resetForm();
         Swal.fire({
           icon: "success",
@@ -1402,9 +1402,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
   const [savingVideo, setSavingVideo] = useState(false);
 
   /* ---------- Fetch batch ---------- */
-  const fetchBatch = async () => {
+  const fetchBatch = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const url =
         adminDepartment && adminDepartment !== "All"
           ? `${API_URL}/api/batches/all?department=${encodeURIComponent(adminDepartment)}`
@@ -1418,7 +1418,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
     } catch (e) {
       console.error(e);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -1747,6 +1747,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
           Swal.fire({ icon: "error", title: "Failed!", text: data.message });
         }
       } else {
+        // ✅ CREATE new student
         res = await fetch(`${API_URL}/api/batch-students/create`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1755,9 +1756,13 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
         data = await res.json();
 
         if (data.success) {
-          const newCount = dbStudents.length + 1;
-          await saveBatchFields({ students: newCount }, "");
+          // ✅ Step 1: Refetch students list (source of truth)
           await fetchDbStudents();
+
+          // ✅ Step 2: Refresh batch info silently (count already synced by backend)
+          await fetchBatch(true);
+
+          // ✅ Step 3: Close modal
           setShowStudentModal(false);
 
           await Swal.fire({
@@ -1768,6 +1773,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
               <p><strong>Name:</strong> ${payload.name}</p>
               <p><strong>Batch:</strong> ${batch?.name || ""}</p>
               <p><strong>Due:</strong> ৳${data.student?.dueAmount ?? 0}</p>
+              <p><strong>Batch Total:</strong> ${data.batchStudentCount ?? "?"} students</p>
               <hr style="margin: 10px 0;">
               <div style="background:#f0fdf4; padding:12px; border-radius:8px; border:2px solid #86efac;">
                 <p style="font-weight:bold; color:#004d4d; margin-bottom:6px;">🔑 Student Login Credentials</p>
@@ -1784,7 +1790,11 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
             confirmButtonText: "OK",
           });
         } else {
-          Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+          Swal.fire({
+            icon: "error",
+            title: "Failed!",
+            text: data.message || "Student could not be added.",
+          });
         }
       }
     } catch (err) {
@@ -1812,9 +1822,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
           const data = await res.json();
 
           if (data.success) {
-            const newCount = Math.max(0, dbStudents.length - 1);
-            await saveBatchFields({ students: newCount }, "");
+            // ✅ Refetch students + silently refresh batch
             await fetchDbStudents();
+            await fetchBatch(true);
 
             Swal.fire({
               icon: "success",
@@ -1823,7 +1833,11 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
               showConfirmButton: false,
             });
           } else {
-            Swal.fire({ icon: "error", title: "Failed!", text: data.message });
+            Swal.fire({
+              icon: "error",
+              title: "Failed!",
+              text: data.message,
+            });
           }
         } catch (err) {
           Swal.fire({ icon: "error", title: "Error", text: err.message });
