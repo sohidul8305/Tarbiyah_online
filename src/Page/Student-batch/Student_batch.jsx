@@ -791,28 +791,38 @@ const Student_batch = () => {
             </div>
           )}
 
+          {/* Stats — filteredBatches ব্যবহার করুন */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-indigo-600">
-                {batches.length}
+                {filteredBatches.length} {/* ✅ */}
               </p>
               <p className="text-[10px] text-gray-500">Total Batches</p>
             </div>
+
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-green-600">
-                {batches.filter((b) => b.status === "Active").length}
+                {filteredBatches.filter((b) => b.status === "Active").length}{" "}
+                {/* ✅ */}
               </p>
               <p className="text-[10px] text-gray-500">Active</p>
             </div>
+
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-yellow-600">
-                {batches.filter((b) => b.status === "Upcoming").length}
+                {filteredBatches.filter((b) => b.status === "Upcoming").length}{" "}
+                {/* ✅ */}
               </p>
               <p className="text-[10px] text-gray-500">Upcoming</p>
             </div>
+
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-blue-600">
-                {batches.reduce((sum, b) => sum + (Number(b.students) || 0), 0)}
+                {filteredBatches.reduce(
+                  (sum, b) => sum + (Number(b.students) || 0),
+                  0,
+                )}{" "}
+                {/* ✅ */}
               </p>
               <p className="text-[10px] text-gray-500">Total Students</p>
             </div>
