@@ -10,8 +10,6 @@ import {
   FaMoneyBillWave,
   FaSignOutAlt,
   FaCalendarCheck,
-  FaLayerGroup,
-  FaUserTimes,
   FaChartLine,
   FaDatabase,
   FaEye,
@@ -36,7 +34,104 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-const API_BASE = "http://api.tarbiyahonline.com";
+// ✅ FIX: https not http
+const API_BASE = "https://api.tarbiyahonline.com";
+
+// ============================================================
+// ✅ DEPARTMENT-WISE CONFIG
+// ============================================================
+const DEPARTMENT_CONFIGS = {
+  Elders: {
+    label: "Quran For Elders",
+    courses: [
+      "Qaida Nuraniyah",
+      "Quran Nazera",
+      "Najera",
+      "Basic Tajweed",
+      "Bakarah Hifz",
+    ],
+    classes: [
+      "Elders Batch A",
+      "Elders Batch B",
+      "Elders Batch C",
+      "Elders Batch D",
+      "Elders Batch E",
+    ],
+    courseKeywords: [
+      "qaida nuraniyah",
+      "qaida nooraniya",
+      "qaida noorani",
+      "qaida nurani",
+      "qaidah nuraniyah",
+      "qaidah nooraniya",
+      "qaidah noorani",
+      "quran nazera",
+      "nazera quran",
+      "quran najera",
+      "najera quran",
+      "bakarah hifz",
+      "bakara hifz",
+      "baqarah hifz",
+      "baqara hifz",
+      "basic tajweed",
+      "quran for elders",
+    ],
+  },
+  "Quran Studies": {
+    label: "Quran Studies",
+    courses: ["Hifzul Quran", "Tarbiyah Quran Studies", "Quran Translation"],
+    classes: ["Quran Studies A", "Quran Studies B", "Quran Studies C"],
+    courseKeywords: ["quran studies", "hifzul quran", "tarbiyah quran studies"],
+  },
+  Alimiya: {
+    label: "Alimiya",
+    courses: ["Dawra e Hadith", "Tafsir", "Fiqh", "Hadith", "Arabic Grammar"],
+    classes: ["Alimiya Year 1", "Alimiya Year 2", "Alimiya Year 3"],
+    courseKeywords: [
+      "alimiya",
+      "dawra",
+      "tafsir",
+      "fiqh",
+      "hadith",
+      "arabic grammar",
+    ],
+  },
+  Diploma: {
+    label: "Diploma",
+    courses: [
+      "Diploma in Islamic Studies",
+      "Diploma in Arabic",
+      "Certificate Course",
+    ],
+    classes: ["Diploma A", "Diploma B", "Diploma C"],
+    courseKeywords: ["diploma in islamic studies", "diploma", "certificate"],
+  },
+};
+
+const getCurrentDepartment = () => {
+  try {
+    const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
+    return info.department || "Elders";
+  } catch {
+    return "Elders";
+  }
+};
+
+const safeFetchJSON = async (url, options = {}) => {
+  try {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    if (text.trim().startsWith("<"))
+      return { success: false, _htmlError: true };
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, _jsonError: true };
+    }
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+};
 
 const Admission_report = () => {
   const { user, logOut } = useAuth();
@@ -50,9 +145,18 @@ const Admission_report = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "",
+    department: "Elders",
     joinDate: "",
   });
+
+  // ✅ Current department
+  const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
+  const deptConfig =
+    DEPARTMENT_CONFIGS[currentDept] || DEPARTMENT_CONFIGS["Elders"];
+  const DEPT_COURSES = deptConfig.courses;
+  const DEPT_CLASSES = deptConfig.classes;
+  const DEPT_KEYWORDS = deptConfig.courseKeywords;
+  const DEPT_LABEL = deptConfig.label;
 
   // Filters
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -61,8 +165,9 @@ const Admission_report = () => {
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // ✅ Department filter
-  const [selectedDepartment, setSelectedDepartment] = useState("All");
+  // ✅ Department filter — default = current dept
+  const [filterMode, setFilterMode] = useState("myDept"); // "myDept" | "all" | "custom"
+  const [customDept, setCustomDept] = useState("");
   const [departments, setDepartments] = useState([]);
 
   // Modal states
@@ -76,7 +181,7 @@ const Admission_report = () => {
     studentId: "",
     class: "",
     subject: "",
-    applicationDate: "",
+    applicationDate: new Date().toISOString().split("T")[0],
     status: "Pending",
     parentName: "",
     parentPhone: "",
@@ -84,6 +189,7 @@ const Admission_report = () => {
     address: "",
     previousSchool: "",
     notes: "",
+    department: "", // ✅ new field
   });
 
   // ✅ Dynamic states
@@ -108,15 +214,6 @@ const Admission_report = () => {
     subjectWiseData: [],
   });
 
-  const classes = ["Class 6", "Class 7", "Class 8", "Class 9", "Class 10"];
-  const subjects = [
-    "Tajweed",
-    "Tafsir",
-    "Hadith",
-    "Fiqh",
-    "Aqeedah",
-    "Arabic Grammar",
-  ];
   const statuses = ["Pending", "Approved", "Rejected"];
   const months = [
     "January",
@@ -134,7 +231,33 @@ const Admission_report = () => {
   ];
 
   // ============================================================
-  // ✅ Sidebar Menu Items
+  // Load admin info
+  // ============================================================
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminInfo");
+    if (savedAdmin) {
+      try {
+        const info = JSON.parse(savedAdmin);
+        setAdminInfo(info);
+        if (info.department) setCurrentDept(info.department);
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      setAdminInfo({
+        name: user?.displayName || "Admin",
+        email: user?.email || "admin@tarabiyah.com",
+        phone: "01700000000",
+        designation: "Administrator",
+        department: "Elders",
+        joinDate: "January 2024",
+      });
+    }
+  }, [user]);
+
+  // ============================================================
+  // Sidebar
+  // ============================================================
   const menuItems = [
     {
       id: "profile",
@@ -153,7 +276,6 @@ const Admission_report = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -212,7 +334,6 @@ const Admission_report = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -233,7 +354,6 @@ const Admission_report = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -268,7 +388,6 @@ const Admission_report = () => {
     },
   ];
 
-  // ✅ URL থেকে active auto-detect
   const getActiveFromPath = () => {
     const currentPath = location.pathname;
     for (const item of menuItems) {
@@ -287,31 +406,28 @@ const Admission_report = () => {
     if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
   }, [activeMenu, activeSubMenu]);
 
-  // Load admin info
-  useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminInfo");
-    if (savedAdmin) setAdminInfo(JSON.parse(savedAdmin));
-    else
-      setAdminInfo({
-        name: user?.displayName || "Admin",
-        email: user?.email || "admin@tarabiyah.com",
-        phone: "01700000000",
-        designation: "Administrator",
-        department: "Administration",
-        joinDate: "January 2024",
-      });
-  }, [user]);
+  // ============================================================
+  // ✅ Compute effective department filter
+  // ============================================================
+  const getEffectiveDept = () => {
+    if (filterMode === "myDept") return currentDept;
+    if (filterMode === "all") return "All";
+    return customDept || currentDept;
+  };
 
   // ============================================================
-  // ✅ Fetch departments list
+  // ✅ Fetch departments
   // ============================================================
   const fetchDepartments = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/departments/all`);
-      const data = await res.json();
+      const data = await safeFetchJSON(`${API_BASE}/api/departments/all`);
       if (data.success) {
-        setDepartments(data.departments || []);
-        console.log("✅ [Departments] Loaded:", data.departments?.length);
+        // Combine backend depts + config depts
+        const configDepts = Object.keys(DEPARTMENT_CONFIGS);
+        const combined = [
+          ...new Set([...(data.departments || []), ...configDepts]),
+        ];
+        setDepartments(combined);
       }
     } catch (err) {
       console.error("❌ Departments fetch error:", err);
@@ -319,26 +435,24 @@ const Admission_report = () => {
   };
 
   // ============================================================
-  // ✅ Fetch admission data from backend (with department filter)
+  // ✅ Fetch admission data
   // ============================================================
   const fetchAdmissionData = async () => {
     try {
       setIsLoading(true);
+      const effectiveDept = getEffectiveDept();
       const deptParam =
-        selectedDepartment && selectedDepartment !== "All"
-          ? `?department=${encodeURIComponent(selectedDepartment)}`
+        effectiveDept && effectiveDept !== "All"
+          ? `?department=${encodeURIComponent(effectiveDept)}`
           : "";
-      const res = await fetch(
+
+      const data = await safeFetchJSON(
         `${API_BASE}/api/admission-report/all${deptParam}`,
       );
-      const data = await res.json();
 
       if (data.success) {
         console.log(
-          "✅ [Admission] Loaded:",
-          data.records?.length,
-          "records | Dept:",
-          selectedDepartment,
+          `✅ [Admission] ${data.records?.length} records | Dept: ${effectiveDept}`,
         );
         setAdmissionRecords(data.records || []);
         setReportData({
@@ -361,15 +475,14 @@ const Admission_report = () => {
     }
   };
 
-  // ✅ Load departments on mount
   useEffect(() => {
     fetchDepartments();
   }, []);
 
-  // ✅ Re-fetch when department changes
   useEffect(() => {
     fetchAdmissionData();
-  }, [selectedDepartment]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterMode, customDept, currentDept]);
 
   const handleLogout = async () => {
     try {
@@ -385,11 +498,6 @@ const Admission_report = () => {
       navigate("/admin-login");
     } catch (err) {
       console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
     }
   };
 
@@ -436,7 +544,7 @@ const Admission_report = () => {
     Swal.fire({
       icon: "success",
       title: "Report Downloading",
-      text: "Admission report is being downloaded as PDF.",
+      text: `${currentDept} admission report is being downloaded.`,
       timer: 1500,
       showConfirmButton: false,
     });
@@ -445,7 +553,7 @@ const Admission_report = () => {
     Swal.fire({
       icon: "success",
       title: "Exporting to Excel",
-      text: "Admission report is being exported to Excel format.",
+      text: `${currentDept} admission report exported.`,
       timer: 1500,
       showConfirmButton: false,
     });
@@ -459,14 +567,17 @@ const Admission_report = () => {
   };
 
   const generateStudentId = () =>
-    `STU${String(admissionRecords.length + 1).padStart(3, "0")}`;
+    `${currentDept.slice(0, 3).toUpperCase()}-${String(admissionRecords.length + 1).padStart(4, "0")}`;
 
+  // ============================================================
+  // ✅ OPEN ADD MODAL — always enabled
+  // ============================================================
   const openAddModal = () => {
     setFormData({
       studentName: "",
       studentId: generateStudentId(),
-      class: "",
-      subject: "",
+      class: DEPT_CLASSES[0] || "",
+      subject: DEPT_COURSES[0] || "",
       applicationDate: new Date().toISOString().split("T")[0],
       status: "Pending",
       parentName: "",
@@ -475,6 +586,7 @@ const Admission_report = () => {
       address: "",
       previousSchool: "",
       notes: "",
+      department: currentDept,
     });
     setShowAddModal(true);
   };
@@ -485,7 +597,7 @@ const Admission_report = () => {
       studentName: record.studentName,
       studentId: record.studentId,
       class: record.class,
-      subject: record.subject,
+      subject: record.subject || record.course || "",
       applicationDate: record.applicationDate,
       status: record.status,
       parentName: record.parentName || "",
@@ -494,6 +606,7 @@ const Admission_report = () => {
       address: record.address || "",
       previousSchool: record.previousSchool || "",
       notes: record.notes || "",
+      department: record.department || currentDept,
     });
     setShowEditModal(true);
   };
@@ -503,9 +616,12 @@ const Admission_report = () => {
     setShowDetailsModal(true);
   };
 
-  // ✅ ADD
+  // ============================================================
+  // ✅ ADD ADMISSION — with department
+  // ============================================================
   const handleAddAdmission = async (e) => {
     e.preventDefault();
+
     if (
       !formData.studentName ||
       !formData.class ||
@@ -531,27 +647,33 @@ const Admission_report = () => {
           phone: formData.parentPhone || "0000000000",
           email: formData.email || "",
           course: formData.subject,
+          department: currentDept, // ✅ department field
           admissionDate: formData.applicationDate,
-          status: formData.status === "Approved" ? "Active" : "Pending",
+          status:
+            formData.status === "Approved"
+              ? "Active"
+              : formData.status === "Rejected"
+                ? "Rejected"
+                : "Pending",
           guardianName: formData.parentName,
           guardianPhone: formData.parentPhone,
           presentAddress: formData.address,
           previousSchool: formData.previousSchool,
           comments: formData.notes,
           studentId: formData.studentId,
+          batch: formData.class,
         }),
       });
       const data = await res.json();
 
       if (data.success) {
         await fetchAdmissionData();
-        await fetchDepartments();
         setShowAddModal(false);
         Swal.fire({
           icon: "success",
-          title: "Admission Added!",
-          text: `${formData.studentName} has been added.`,
-          timer: 1500,
+          title: "✅ Admission Added!",
+          html: `<p><strong>${formData.studentName}</strong></p><p style="font-size:12px;color:#666;">${currentDept} Department</p>`,
+          timer: 1800,
           showConfirmButton: false,
         });
       } else {
@@ -568,9 +690,12 @@ const Admission_report = () => {
     }
   };
 
+  // ============================================================
   // ✅ EDIT
+  // ============================================================
   const handleEditAdmission = async (e) => {
     e.preventDefault();
+
     if (
       !formData.studentName ||
       !formData.class ||
@@ -596,7 +721,9 @@ const Admission_report = () => {
           body: JSON.stringify({
             name: formData.studentName,
             course: formData.subject,
+            department: selectedAdmission.department || currentDept,
             class: formData.class,
+            batch: formData.class,
             admissionDate: formData.applicationDate,
             status:
               formData.status === "Approved"
@@ -620,8 +747,8 @@ const Admission_report = () => {
         setShowEditModal(false);
         Swal.fire({
           icon: "success",
-          title: "Updated!",
-          timer: 1500,
+          title: "✅ Updated!",
+          timer: 1200,
           showConfirmButton: false,
         });
       } else {
@@ -638,7 +765,9 @@ const Admission_report = () => {
     }
   };
 
+  // ============================================================
   // ✅ DELETE
+  // ============================================================
   const handleDeleteAdmission = async (id) => {
     const result = await Swal.fire({
       title: "Delete Admission Record?",
@@ -653,14 +782,13 @@ const Admission_report = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await fetch(`${API_BASE}/api/admin-students/delete/${id}`, {
-        method: "DELETE",
-      });
-      const data = await res.json();
-
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/admin-students/delete/${id}`,
+        { method: "DELETE" },
+      );
       if (data.success) {
         await fetchAdmissionData();
-        Swal.fire("Deleted!", "Admission record has been deleted.", "success");
+        Swal.fire("Deleted!", "Admission record deleted.", "success");
       } else {
         Swal.fire("Failed!", data.message || "Error", "error");
       }
@@ -669,7 +797,9 @@ const Admission_report = () => {
     }
   };
 
+  // ============================================================
   // ✅ APPROVE
+  // ============================================================
   const handleApproveAdmission = async (id) => {
     const result = await Swal.fire({
       title: "Approve Admission?",
@@ -684,19 +814,21 @@ const Admission_report = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await fetch(`${API_BASE}/api/admission-report/status/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "Active" }),
-      });
-      const data = await res.json();
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/admission-report/status/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "Active" }),
+        },
+      );
 
       if (data.success) {
         await fetchAdmissionData();
         Swal.fire({
           icon: "success",
-          title: "Approved!",
-          timer: 1500,
+          title: "✅ Approved!",
+          timer: 1200,
           showConfirmButton: false,
         });
       } else {
@@ -707,7 +839,9 @@ const Admission_report = () => {
     }
   };
 
+  // ============================================================
   // ✅ REJECT
+  // ============================================================
   const handleRejectAdmission = async (id) => {
     const result = await Swal.fire({
       title: "Reject Admission?",
@@ -722,19 +856,21 @@ const Admission_report = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await fetch(`${API_BASE}/api/admission-report/status/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "Rejected" }),
-      });
-      const data = await res.json();
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/admission-report/status/${id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "Rejected" }),
+        },
+      );
 
       if (data.success) {
         await fetchAdmissionData();
         Swal.fire({
           icon: "success",
           title: "Rejected",
-          timer: 1500,
+          timer: 1200,
           showConfirmButton: false,
         });
       } else {
@@ -745,7 +881,9 @@ const Admission_report = () => {
     }
   };
 
-  // ✅ Filtered records (client-side search/filter on top of backend filter)
+  // ============================================================
+  // Client-side filters
+  // ============================================================
   const filteredRecords = admissionRecords.filter((r) => {
     const matchStatus = selectedStatus === "All" || r.status === selectedStatus;
     const matchClass = selectedClass === "All" || r.class === selectedClass;
@@ -762,10 +900,12 @@ const Admission_report = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Admission Report</h1>
+          <h1 className="text-sm font-bold text-gray-800">
+            Admission Report ({currentDept})
+          </h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100"
           >
             {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
@@ -773,12 +913,7 @@ const Admission_report = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm transition-all duration-300 ease-in-out
-            h-full overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -790,7 +925,7 @@ const Admission_report = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {adminInfo.designation}
+                  {adminInfo.department || adminInfo.designation}
                 </p>
               </div>
             </div>
@@ -808,20 +943,14 @@ const Admission_report = () => {
                           toggleSubMenu(item.id);
                           setIsSidebarOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                          isParentActive
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }`}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${isParentActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-gray-600">{item.icon}</span>
                           <span>{item.label}</span>
                         </div>
                         <span
-                          className={`transition-transform ${
-                            expandedMenu === item.id ? "rotate-90" : ""
-                          }`}
+                          className={`transition-transform ${expandedMenu === item.id ? "rotate-90" : ""}`}
                         >
                           <FaArrowRight size={12} />
                         </span>
@@ -833,11 +962,7 @@ const Admission_report = () => {
                               key={sub.id}
                               to={sub.path}
                               onClick={() => setIsSidebarOpen(false)}
-                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                                activeSubMenu === sub.id
-                                  ? "bg-teal-50 text-[#004d4d] font-bold"
-                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                              }`}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${activeSubMenu === sub.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                             >
                               {sub.label}
                             </Link>
@@ -851,11 +976,7 @@ const Admission_report = () => {
                       onClick={() => setIsSidebarOpen(false)}
                     >
                       <button
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                          isParentActive
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }`}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${isParentActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                       >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
@@ -865,7 +986,6 @@ const Admission_report = () => {
                 </div>
               );
             })}
-
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -874,9 +994,8 @@ const Admission_report = () => {
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
           <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
+            <p>©Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 
@@ -893,41 +1012,44 @@ const Admission_report = () => {
           <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaChartLineIcon className="text-blue-600" /> Admission Report
+                <FaChartLineIcon className="text-blue-600" /> Admission Report —
+                <span className="text-teal-700">{DEPT_LABEL}</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Comprehensive admission statistics and analytics
+                {isLoading
+                  ? `Loading ${currentDept} data...`
+                  : `${admissionRecords.length} record${admissionRecords.length !== 1 ? "s" : ""}`}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 onClick={openAddModal}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaPlus size={12} /> Add Admission
               </button>
               <button
                 onClick={downloadReport}
-                className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaFilePdfIcon size={12} /> PDF
               </button>
               <button
                 onClick={exportToExcel}
-                className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaFileExcelIcon size={12} /> Excel
               </button>
               <button
                 onClick={printReport}
-                className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaPrintIcon size={12} /> Print
               </button>
               <button
                 onClick={fetchAdmissionData}
                 disabled={isLoading}
-                className="bg-teal-500 hover:bg-teal-600 disabled:bg-teal-300 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-teal-500 hover:bg-teal-600 disabled:bg-teal-300 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 {isLoading ? (
                   <FaSpinner size={12} className="animate-spin" />
@@ -938,11 +1060,24 @@ const Admission_report = () => {
               </button>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
               >
                 Logout
               </button>
             </div>
+          </div>
+
+          {/* Department Badge */}
+          <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-2 rounded-xl text-xs font-semibold mb-3 flex items-center justify-between">
+            <span>
+              🏫 Showing admission report of:{" "}
+              <span className="font-bold">{currentDept}</span> department
+            </span>
+            {filterMode === "all" && (
+              <span className="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full text-[10px]">
+                ⚠️ Viewing ALL departments
+              </span>
+            )}
           </div>
 
           {/* Backend Warning */}
@@ -954,51 +1089,62 @@ const Admission_report = () => {
                   Backend Not Connected
                 </p>
                 <p className="text-[11px] text-yellow-700 mt-0.5">
-                  Server running on port 5010? Click "Refresh" after starting
-                  backend.
+                  API server is offline. Click "Refresh" after starting backend.
                 </p>
               </div>
             </div>
           )}
 
-          {/* ✅ Department Filter Banner */}
+          {/* Filter Mode Selector */}
           <div className="bg-gradient-to-r from-teal-50 to-blue-50 border border-teal-200 rounded-xl p-3 mb-3">
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex items-center gap-2">
                 <FaBuilding className="text-teal-600 text-lg" />
                 <span className="text-xs font-bold text-teal-800">
-                  Department / Course Filter:
+                  View Mode:
                 </span>
               </div>
-              <select
-                value={selectedDepartment}
-                onChange={(e) => setSelectedDepartment(e.target.value)}
-                className="px-3 py-1.5 text-xs border-2 border-teal-400 rounded-lg bg-white font-semibold text-teal-700 min-w-[200px] focus:outline-none focus:ring-2 focus:ring-teal-500"
-              >
-                <option value="All">
-                  🏫 All Departments ({admissionRecords.length} shown)
-                </option>
-                {departments.map((dept) => (
-                  <option key={dept} value={dept}>
-                    📚 {dept}
-                  </option>
-                ))}
-              </select>
-              {selectedDepartment !== "All" && (
+              <div className="flex gap-2 flex-wrap">
                 <button
-                  onClick={() => setSelectedDepartment("All")}
-                  className="text-xs text-teal-700 hover:text-teal-900 underline font-semibold"
+                  onClick={() => {
+                    setFilterMode("myDept");
+                    setCustomDept("");
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filterMode === "myDept" ? "bg-teal-600 text-white shadow-sm" : "bg-white text-teal-700 border border-teal-300 hover:bg-teal-50"}`}
                 >
-                  ✕ Clear Filter
+                  🏫 My Department ({currentDept})
                 </button>
+                <button
+                  onClick={() => {
+                    setFilterMode("all");
+                    setCustomDept("");
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${filterMode === "all" ? "bg-teal-600 text-white shadow-sm" : "bg-white text-teal-700 border border-teal-300 hover:bg-teal-50"}`}
+                >
+                  🌐 All Departments
+                </button>
+              </div>
+
+              {filterMode === "all" && departments.length > 0 && (
+                <div className="flex items-center gap-2 ml-auto">
+                  <span className="text-[10px] text-teal-600">Or pick:</span>
+                  <select
+                    value={customDept}
+                    onChange={(e) => {
+                      setCustomDept(e.target.value);
+                      setFilterMode("custom");
+                    }}
+                    className="px-2 py-1 text-xs border border-teal-300 rounded-lg bg-white"
+                  >
+                    <option value="">Choose a department</option>
+                    {departments.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               )}
-              <span className="text-[10px] text-teal-600 ml-auto">
-                Showing {admissionRecords.length} student
-                {admissionRecords.length !== 1 ? "s" : ""}
-                {selectedDepartment !== "All"
-                  ? ` in "${selectedDepartment}"`
-                  : " in all departments"}
-              </span>
             </div>
           </div>
 
@@ -1012,7 +1158,7 @@ const Admission_report = () => {
             </div>
           ) : (
             <>
-              {/* Stats Cards */}
+              {/* Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
                   <p className="text-lg font-bold text-blue-600">
@@ -1076,7 +1222,7 @@ const Admission_report = () => {
                     className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
                   >
                     <option value="All">All Classes</option>
-                    {classes.map((c) => (
+                    {DEPT_CLASSES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1100,7 +1246,7 @@ const Admission_report = () => {
               {/* Monthly Chart */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-3">
                 <h4 className="font-semibold text-gray-700 text-sm mb-3">
-                  Monthly Admission Trends
+                  Monthly Admission Trends ({currentDept})
                 </h4>
                 {getFilteredMonthlyData().length === 0 ? (
                   <p className="text-xs text-gray-400 text-center py-4">
@@ -1165,11 +1311,11 @@ const Admission_report = () => {
                 </div>
               </div>
 
-              {/* Class Wise and Gender Wise */}
+              {/* Class Wise and Gender */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
                   <h4 className="font-semibold text-gray-700 text-sm mb-3">
-                    Course Wise Admission
+                    Course Wise Admission ({currentDept})
                   </h4>
                   {reportData.classWiseData.length === 0 ? (
                     <p className="text-xs text-gray-400 text-center py-4">
@@ -1198,9 +1344,7 @@ const Admission_report = () => {
                               <div
                                 className="bg-blue-500 rounded-l-full h-full"
                                 style={{
-                                  width: `${
-                                    (item.applications / maxVal) * 100
-                                  }%`,
+                                  width: `${(item.applications / maxVal) * 100}%`,
                                 }}
                               ></div>
                               <div
@@ -1222,38 +1366,40 @@ const Admission_report = () => {
                     Gender Distribution
                   </h4>
                   <div className="space-y-2">
-                    {reportData.genderData.map((item, index) => {
-                      const totalGender = reportData.genderData.reduce(
-                        (s, g) => s + g.count,
-                        0,
-                      );
-                      const percent =
-                        totalGender > 0
-                          ? Math.round((item.count / totalGender) * 100)
-                          : 0;
-                      return (
-                        <div key={index}>
-                          <div className="flex justify-between text-xs mb-1">
-                            <span className="text-gray-600">{item.gender}</span>
-                            <span className="text-gray-600">
-                              {item.count} ({percent}%)
-                            </span>
+                    {reportData.genderData.length === 0 ? (
+                      <p className="text-xs text-gray-400 text-center py-4">
+                        No gender data
+                      </p>
+                    ) : (
+                      reportData.genderData.map((item, index) => {
+                        const totalGender = reportData.genderData.reduce(
+                          (s, g) => s + g.count,
+                          0,
+                        );
+                        const percent =
+                          totalGender > 0
+                            ? Math.round((item.count / totalGender) * 100)
+                            : 0;
+                        return (
+                          <div key={index}>
+                            <div className="flex justify-between text-xs mb-1">
+                              <span className="text-gray-600">
+                                {item.gender}
+                              </span>
+                              <span className="text-gray-600">
+                                {item.count} ({percent}%)
+                              </span>
+                            </div>
+                            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${item.gender === "Male" ? "bg-blue-500" : item.gender === "Female" ? "bg-pink-500" : "bg-purple-500"}`}
+                                style={{ width: `${percent}%` }}
+                              ></div>
+                            </div>
                           </div>
-                          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${
-                                item.gender === "Male"
-                                  ? "bg-blue-500"
-                                  : item.gender === "Female"
-                                    ? "bg-pink-500"
-                                    : "bg-purple-500"
-                              }`}
-                              style={{ width: `${percent}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </div>
@@ -1261,7 +1407,7 @@ const Admission_report = () => {
               {/* Subject Wise */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 mb-3">
                 <h4 className="font-semibold text-gray-700 text-sm mb-3">
-                  Course / Subject Wise Enrollment
+                  Course / Subject Wise Enrollment ({currentDept})
                 </h4>
                 {reportData.subjectWiseData.length === 0 ? (
                   <p className="text-xs text-gray-400 text-center py-4">
@@ -1300,16 +1446,14 @@ const Admission_report = () => {
                 )}
               </div>
 
-              {/* Admission Records Table */}
+              {/* Table */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
                 <div className="flex items-center justify-between p-3 border-b border-gray-200">
                   <h4 className="font-semibold text-gray-700 text-sm">
                     Admission Records ({filteredRecords.length})
-                    {selectedDepartment !== "All" && (
-                      <span className="ml-2 text-[10px] font-normal text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full">
-                        Filtered: {selectedDepartment}
-                      </span>
-                    )}
+                    <span className="ml-2 text-[10px] font-normal text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full">
+                      {currentDept}
+                    </span>
                   </h4>
                 </div>
                 <div className="overflow-x-auto max-h-96 overflow-y-auto">
@@ -1362,9 +1506,7 @@ const Admission_report = () => {
                             </td>
                             <td className="px-3 py-2">
                               <span
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(
-                                  record.status,
-                                )}`}
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(record.status)}`}
                               >
                                 {getStatusIcon(record.status)}
                                 {record.status}
@@ -1375,7 +1517,7 @@ const Admission_report = () => {
                                 <button
                                   onClick={() => openDetailsModal(record)}
                                   className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
-                                  title="View Details"
+                                  title="View"
                                 >
                                   <FaEye size={12} />
                                 </button>
@@ -1428,12 +1570,13 @@ const Admission_report = () => {
                             className="px-3 py-8 text-center text-gray-500"
                           >
                             <FaUserPlus className="text-4xl text-gray-300 mx-auto mb-2" />
-                            <p>No admission records found</p>
-                            <p className="text-[10px] text-gray-400 mt-1">
-                              {selectedDepartment !== "All"
-                                ? `No students in "${selectedDepartment}"`
-                                : "Try adjusting your filters"}
-                            </p>
+                            <p>No admission records found for {currentDept}</p>
+                            <button
+                              onClick={openAddModal}
+                              className="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
+                            >
+                              + Add First Admission
+                            </button>
                           </td>
                         </tr>
                       )}
@@ -1450,9 +1593,10 @@ const Admission_report = () => {
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlus className="text-blue-600" /> Add Admission Record
+                <FaPlus className="text-blue-600" /> Add Admission —{" "}
+                {currentDept}
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1462,6 +1606,10 @@ const Admission_report = () => {
               </button>
             </div>
             <form onSubmit={handleAddAdmission} className="p-6 space-y-4">
+              <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
+                💡 Adding to <strong>{currentDept}</strong> department
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1474,7 +1622,8 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, studentName: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="Enter student name"
                   />
                 </div>
                 <div>
@@ -1487,10 +1636,12 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, studentId: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="Auto-generated"
                   />
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1502,10 +1653,10 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select</option>
-                    {classes.map((c) => (
+                    <option value="">Select Class</option>
+                    {DEPT_CLASSES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1514,7 +1665,7 @@ const Admission_report = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject *
+                    Course *
                   </label>
                   <select
                     required
@@ -1522,17 +1673,18 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select</option>
-                    {subjects.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
+                    <option value="">Select Course</option>
+                    {DEPT_COURSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Application Date *
@@ -1547,9 +1699,10 @@ const Admission_report = () => {
                       applicationDate: e.target.value,
                     })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
@@ -1559,7 +1712,7 @@ const Admission_report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 >
                   {statuses.map((s) => (
                     <option key={s} value={s}>
@@ -1568,10 +1721,11 @@ const Admission_report = () => {
                   ))}
                 </select>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Parent's Name
+                    Parent Name
                   </label>
                   <input
                     type="text"
@@ -1579,12 +1733,12 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, parentName: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Parent's Phone
+                    Parent Phone
                   </label>
                   <input
                     type="text"
@@ -1592,10 +1746,11 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, parentPhone: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
@@ -1606,9 +1761,10 @@ const Admission_report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Address
@@ -1619,9 +1775,10 @@ const Admission_report = () => {
                     setFormData({ ...formData, address: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Previous School
@@ -1630,14 +1787,12 @@ const Admission_report = () => {
                   type="text"
                   value={formData.previousSchool}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      previousSchool: e.target.value,
-                    })
+                    setFormData({ ...formData, previousSchool: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Notes
@@ -1648,10 +1803,11 @@ const Admission_report = () => {
                     setFormData({ ...formData, notes: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
                   disabled={saving}
@@ -1684,9 +1840,10 @@ const Admission_report = () => {
       {showEditModal && selectedAdmission && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaEdit className="text-yellow-600" /> Edit Admission
+                <FaEdit className="text-yellow-600" /> Edit Admission —{" "}
+                {currentDept}
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1708,7 +1865,7 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, studentName: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1721,10 +1878,11 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, studentId: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1736,9 +1894,9 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, class: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {classes.map((c) => (
+                    {DEPT_CLASSES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1747,7 +1905,7 @@ const Admission_report = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject *
+                    Course *
                   </label>
                   <select
                     required
@@ -1755,16 +1913,17 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, subject: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {subjects.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
+                    {DEPT_COURSES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Application Date *
@@ -1779,9 +1938,10 @@ const Admission_report = () => {
                       applicationDate: e.target.value,
                     })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
@@ -1791,7 +1951,7 @@ const Admission_report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, status: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 >
                   {statuses.map((s) => (
                     <option key={s} value={s}>
@@ -1800,10 +1960,11 @@ const Admission_report = () => {
                   ))}
                 </select>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Parent's Name
+                    Parent Name
                   </label>
                   <input
                     type="text"
@@ -1811,12 +1972,12 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, parentName: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Parent's Phone
+                    Parent Phone
                   </label>
                   <input
                     type="text"
@@ -1824,10 +1985,11 @@ const Admission_report = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, parentPhone: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
@@ -1838,9 +2000,10 @@ const Admission_report = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Address
@@ -1851,9 +2014,10 @@ const Admission_report = () => {
                     setFormData({ ...formData, address: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Previous School
@@ -1862,14 +2026,12 @@ const Admission_report = () => {
                   type="text"
                   value={formData.previousSchool}
                   onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      previousSchool: e.target.value,
-                    })
+                    setFormData({ ...formData, previousSchool: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Notes
@@ -1880,10 +2042,11 @@ const Admission_report = () => {
                     setFormData({ ...formData, notes: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
                   disabled={saving}
@@ -1916,7 +2079,7 @@ const Admission_report = () => {
       {showDetailsModal && selectedAdmission && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <FaInfoCircle className="text-blue-600" /> Admission Details
               </h3>
@@ -1928,7 +2091,7 @@ const Admission_report = () => {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
+              <div className="flex items-center gap-4 pb-4 border-b">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-teal-500 flex items-center justify-center text-white text-xl font-bold flex-shrink-0">
                   {selectedAdmission.studentName?.charAt(0) || "?"}
                 </div>
@@ -1938,9 +2101,7 @@ const Admission_report = () => {
                       {selectedAdmission.studentName}
                     </h2>
                     <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                        selectedAdmission.status,
-                      )}`}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedAdmission.status)}`}
                     >
                       {getStatusIcon(selectedAdmission.status)}
                       {selectedAdmission.status}
@@ -1950,6 +2111,9 @@ const Admission_report = () => {
                     {selectedAdmission.studentId}
                   </p>
                   <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
+                    <span>
+                      🏫 {selectedAdmission.department || currentDept}
+                    </span>
                     <span>📚 {selectedAdmission.class}</span>
                     <span>📖 {selectedAdmission.course}</span>
                     <span>
@@ -1961,13 +2125,13 @@ const Admission_report = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Parent's Name</p>
+                  <p className="text-[10px] text-gray-400">Parent Name</p>
                   <p className="text-sm font-semibold">
                     {selectedAdmission.parentName || "N/A"}
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Parent's Phone</p>
+                  <p className="text-[10px] text-gray-400">Parent Phone</p>
                   <p className="text-sm font-semibold">
                     {selectedAdmission.parentPhone || "N/A"}
                   </p>
@@ -2010,7 +2174,7 @@ const Admission_report = () => {
                 )}
               </div>
 
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t flex-wrap">
                 {selectedAdmission.status === "Pending" && (
                   <>
                     <button

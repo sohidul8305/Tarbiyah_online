@@ -22,11 +22,86 @@ import {
   FaSchool as FaSchoolIcon,
   FaInfoCircle,
   FaSyncAlt,
+  FaBuilding,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
+
+// ============================================================
+// ✅ DEPARTMENT-WISE CONFIG
+// ============================================================
+const DEPARTMENT_CONFIGS = {
+  Elders: {
+    label: "Quran For Elders",
+    courseKeywords: [
+      "qaida nuraniyah",
+      "qaida nooraniya",
+      "qaida noorani",
+      "qaida nurani",
+      "quran nazera",
+      "nazera quran",
+      "quran najera",
+      "najera quran",
+      "bakarah hifz",
+      "bakara hifz",
+      "baqarah hifz",
+      "baqara hifz",
+      "basic tajweed",
+      "quran for elders",
+    ],
+  },
+  "Quran Studies": {
+    label: "Quran Studies",
+    courseKeywords: [
+      "quran studies",
+      "hifzul quran",
+      "tarbiyah quran studies",
+      "hifz",
+    ],
+  },
+  Alimiya: {
+    label: "Alimiya",
+    courseKeywords: [
+      "alimiya",
+      "alimiyah",
+      "dawra",
+      "tafsir",
+      "fiqh",
+      "hadith",
+      "arabic grammar",
+    ],
+  },
+  Diploma: {
+    label: "Diploma",
+    courseKeywords: ["diploma"],
+  },
+};
+
+const getCurrentDepartment = () => {
+  try {
+    const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
+    return info.department || "Elders";
+  } catch {
+    return "Elders";
+  }
+};
+
+const safeFetchJSON = async (url) => {
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+    if (text.trim().startsWith("<")) return { success: false };
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false };
+    }
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+};
 
 const Student_admission = () => {
   const { user, logOut } = useAuth();
@@ -39,9 +114,16 @@ const Student_admission = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "",
+    department: "Elders",
     joinDate: "",
   });
+
+  // ✅ Current department
+  const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
+  const deptConfig =
+    DEPARTMENT_CONFIGS[currentDept] || DEPARTMENT_CONFIGS["Elders"];
+  const DEPT_KEYWORDS = deptConfig.courseKeywords;
+  const DEPT_LABEL = deptConfig.label;
 
   const [admissionRequests, setAdmissionRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,14 +136,15 @@ const Student_admission = () => {
   const [filterPriority, setFilterPriority] = useState("All");
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   // Load admin info
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
       try {
-        setAdminInfo(JSON.parse(savedAdmin));
+        const info = JSON.parse(savedAdmin);
+        setAdminInfo(info);
+        if (info.department) setCurrentDept(info.department);
       } catch (err) {
         console.error(err);
       }
@@ -71,180 +154,265 @@ const Student_admission = () => {
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: "Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
-  // Fetch admissions
-  useEffect(() => {
-    fetchAdmissions();
-  }, []);
+  // ✅ Course check — current department
+  const isDeptCourse = (courseStr) => {
+    if (!courseStr) return false;
+    const p = String(courseStr).toLowerCase().trim();
+    return DEPT_KEYWORDS.some((c) => p.includes(c));
+  };
 
   // ============================================================
-  // ✅ Fetch from 2 API endpoints (Tazweed + Najera) & combine
+  // ✅ Fetch Admissions — department filtered
   // ============================================================
   const fetchAdmissions = async () => {
     try {
       setLoading(true);
       setFetchError(null);
 
-      // ✅ ২টি endpoint একসাথে fetch (Admission Form বাদ)
-      const [tazweedRes, najeraRes] = await Promise.allSettled([
-        fetch(`${API_BASE}/basic-tazweed/all`),
-        fetch(`${API_BASE}/najera-batch/all`),
+      // ✅ ৩টি endpoint: Tazweed + Najera + Regular students (department filtered)
+      const deptParam = encodeURIComponent(currentDept);
+      const [tazweedData, najeraData, studentsData] = await Promise.all([
+        safeFetchJSON(`${API_BASE}/basic-tazweed/all?department=${deptParam}`),
+        safeFetchJSON(`${API_BASE}/najera-batch/all?department=${deptParam}`),
+        safeFetchJSON(`${API_BASE}/students/all?department=${deptParam}`),
       ]);
 
-      // ---------- 1) Basic Tazweed Students ----------
+      // ---------- 1) Basic Tazweed ----------
       let tazweedStudents = [];
-      if (tazweedRes.status === "fulfilled") {
-        try {
-          const d = await tazweedRes.value.json();
-          if (d.success && Array.isArray(d.students)) {
-            tazweedStudents = d.students.map((s) => {
-              const paid = Number(s.paidAmount) || 0;
-              const due = Number(s.dueAmount) || 0;
-              const isPaid = due === 0 && paid > 0;
+      if (tazweedData.success && Array.isArray(tazweedData.students)) {
+        tazweedStudents = tazweedData.students
+          .filter((s) => {
+            const sDept = String(s.department || "")
+              .toLowerCase()
+              .trim();
+            if (sDept && sDept === currentDept.toLowerCase().trim())
+              return true;
+            const course = String(s.course || s.subject || "").toLowerCase();
+            return isDeptCourse(course) || isDeptCourse("basic tajweed");
+          })
+          .map((s) => {
+            const paid = Number(s.paidAmount) || 0;
+            const due = Number(s.dueAmount) || 0;
+            const isPaid = due === 0 && paid > 0;
 
-              let priority = "Medium";
-              if (isPaid) priority = "High";
-              else if (paid === 0) priority = "Low";
+            let priority = "Medium";
+            if (isPaid) priority = "High";
+            else if (paid === 0) priority = "Low";
 
-              return {
-                id: s._id,
-                _id: s._id,
-                source: "Tazweed",
-                sourceLabel: "Basic Tazweed",
-                studentName: s.name || "Unknown",
-                fatherName: "N/A",
-                motherName: "N/A",
-                class: "Basic Tajweed (Level-1)",
-                subject: "Basic Tajweed",
-                phone: s.phone || "",
-                email: "",
-                address: "N/A",
-                dob: "",
-                gender: "N/A",
-                country: s.country || "BD",
-                studentId: s.studentId || "",
-                previousSchool: "N/A",
-                admissionDate: s.createdAt
-                  ? new Date(s.createdAt).toISOString().split("T")[0]
-                  : "N/A",
-                status: "Approved",
-                rawStatus: "Active",
-                paymentStatus: isPaid
-                  ? "Paid"
-                  : paid > 0
-                    ? "Partial"
-                    : "Unpaid",
-                priority: priority,
-                notes: s.comments || "No additional notes",
-                appliedDate: s.createdAt
-                  ? new Date(s.createdAt).toISOString().split("T")[0]
-                  : "N/A",
-                reviewedBy: null,
-                reviewedDate: null,
-                rejectionReason: null,
-                username: "",
-                enrolledCourses: [],
-                paidAmount: paid,
-                courseFee: Number(s.courseFee) || 0,
-                dueAmount: due,
-                scholarshipAmount: Number(s.scholarshipAmount) || 0,
-                paymentMethod: "",
-                transactionId: s.transactionId || "",
-                guardianPhone: s.phone || "",
-                _raw: s,
-              };
-            });
-          }
-        } catch (e) {
-          console.error("Tazweed parse error:", e);
-        }
+            return {
+              id: s._id,
+              _id: s._id,
+              source: "Tazweed",
+              sourceLabel: "Basic Tazweed",
+              studentName: s.name || "Unknown",
+              fatherName: "N/A",
+              motherName: "N/A",
+              class: s.course || "Basic Tajweed (Level-1)",
+              subject: "Basic Tajweed",
+              phone: s.phone || "",
+              email: "",
+              address: "N/A",
+              dob: "",
+              gender: "N/A",
+              country: s.country || "BD",
+              studentId: s.studentId || "",
+              previousSchool: "N/A",
+              admissionDate: s.createdAt
+                ? new Date(s.createdAt).toISOString().split("T")[0]
+                : "N/A",
+              status: "Approved",
+              rawStatus: "Active",
+              paymentStatus: isPaid ? "Paid" : paid > 0 ? "Partial" : "Unpaid",
+              priority,
+              notes: s.comments || "No additional notes",
+              appliedDate: s.createdAt
+                ? new Date(s.createdAt).toISOString().split("T")[0]
+                : "N/A",
+              reviewedBy: null,
+              reviewedDate: null,
+              rejectionReason: null,
+              username: "",
+              enrolledCourses: [],
+              paidAmount: paid,
+              courseFee: Number(s.courseFee) || 0,
+              dueAmount: due,
+              scholarshipAmount: Number(s.scholarshipAmount) || 0,
+              paymentMethod: "",
+              transactionId: s.transactionId || "",
+              guardianPhone: s.phone || "",
+              department: s.department || currentDept,
+              _raw: s,
+            };
+          });
       }
 
-      // ---------- 2) Najera Batch Students ----------
+      // ---------- 2) Najera Batch ----------
       let najeraStudents = [];
-      if (najeraRes.status === "fulfilled") {
-        try {
-          const d = await najeraRes.value.json();
-          if (d.success && Array.isArray(d.students)) {
-            najeraStudents = d.students.map((s) => {
-              const paid = Number(s.paidAmount) || 0;
-              const due = Number(s.dueAmount) || 0;
-              const isPaid = due === 0 && paid > 0;
+      if (najeraData.success && Array.isArray(najeraData.students)) {
+        najeraStudents = najeraData.students
+          .filter((s) => {
+            const sDept = String(s.department || "")
+              .toLowerCase()
+              .trim();
+            if (sDept && sDept === currentDept.toLowerCase().trim())
+              return true;
+            const course = String(s.course || s.subject || "").toLowerCase();
+            return isDeptCourse(course) || isDeptCourse("najera");
+          })
+          .map((s) => {
+            const paid = Number(s.paidAmount) || 0;
+            const due = Number(s.dueAmount) || 0;
+            const isPaid = due === 0 && paid > 0;
 
-              let priority = "Medium";
-              if (isPaid) priority = "High";
-              else if (paid === 0) priority = "Low";
+            let priority = "Medium";
+            if (isPaid) priority = "High";
+            else if (paid === 0) priority = "Low";
 
-              return {
-                id: s._id,
-                _id: s._id,
-                source: "Najera",
-                sourceLabel: "Najera Batch",
-                studentName: s.name || "Unknown",
-                fatherName: "N/A",
-                motherName: "N/A",
-                class: "Quran Nazera",
-                subject: "Quran Nazera",
-                phone: s.phone || "",
-                email: "",
-                address: "N/A",
-                dob: "",
-                gender: "N/A",
-                country: s.country || "BD",
-                studentId: s.studentId || "",
-                previousSchool: "N/A",
-                admissionDate: s.createdAt
-                  ? new Date(s.createdAt).toISOString().split("T")[0]
-                  : "N/A",
-                status: "Approved",
-                rawStatus: "Active",
-                paymentStatus: isPaid
-                  ? "Paid"
-                  : paid > 0
-                    ? "Partial"
-                    : "Unpaid",
-                priority: priority,
-                notes: s.comments || "No additional notes",
-                appliedDate: s.createdAt
-                  ? new Date(s.createdAt).toISOString().split("T")[0]
-                  : "N/A",
-                reviewedBy: null,
-                reviewedDate: null,
-                rejectionReason: null,
-                username: "",
-                enrolledCourses: [],
-                paidAmount: paid,
-                courseFee: Number(s.courseFee) || 0,
-                dueAmount: due,
-                scholarshipAmount: Number(s.scholarshipAmount) || 0,
-                paymentMethod: "",
-                transactionId: s.transactionId || "",
-                guardianPhone: s.phone || "",
-                _raw: s,
-              };
-            });
-          }
-        } catch (e) {
-          console.error("Najera parse error:", e);
-        }
+            return {
+              id: s._id,
+              _id: s._id,
+              source: "Najera",
+              sourceLabel: "Najera Batch",
+              studentName: s.name || "Unknown",
+              fatherName: "N/A",
+              motherName: "N/A",
+              class: s.course || "Quran Nazera",
+              subject: "Quran Nazera",
+              phone: s.phone || "",
+              email: "",
+              address: "N/A",
+              dob: "",
+              gender: "N/A",
+              country: s.country || "BD",
+              studentId: s.studentId || "",
+              previousSchool: "N/A",
+              admissionDate: s.createdAt
+                ? new Date(s.createdAt).toISOString().split("T")[0]
+                : "N/A",
+              status: "Approved",
+              rawStatus: "Active",
+              paymentStatus: isPaid ? "Paid" : paid > 0 ? "Partial" : "Unpaid",
+              priority,
+              notes: s.comments || "No additional notes",
+              appliedDate: s.createdAt
+                ? new Date(s.createdAt).toISOString().split("T")[0]
+                : "N/A",
+              reviewedBy: null,
+              reviewedDate: null,
+              rejectionReason: null,
+              username: "",
+              enrolledCourses: [],
+              paidAmount: paid,
+              courseFee: Number(s.courseFee) || 0,
+              dueAmount: due,
+              scholarshipAmount: Number(s.scholarshipAmount) || 0,
+              paymentMethod: "",
+              transactionId: s.transactionId || "",
+              guardianPhone: s.phone || "",
+              department: s.department || currentDept,
+              _raw: s,
+            };
+          });
       }
 
-      // ✅ Combine and sort (newest first)
-      const combined = [...tazweedStudents, ...najeraStudents].sort((a, b) => {
+      // ---------- 3) Regular students (department) ----------
+      let regularStudents = [];
+      if (studentsData.success && Array.isArray(studentsData.students)) {
+        regularStudents = studentsData.students
+          .filter((s) => {
+            const sDept = String(s.department || "")
+              .toLowerCase()
+              .trim();
+            if (sDept && sDept === currentDept.toLowerCase().trim())
+              return true;
+            return isDeptCourse(s.course);
+          })
+          .map((s) => {
+            const paid = Number(s.paidAmount) || 0;
+            const due = Number(s.dueAmount) || 0;
+            const isPaid = due === 0 && paid > 0;
+
+            let priority = "Medium";
+            if (isPaid) priority = "High";
+            else if (paid === 0) priority = "Low";
+
+            // Map status → CRM-style
+            const rawStatus = s.status || "Pending";
+            let uiStatus = "Pending";
+            if (rawStatus === "Active") uiStatus = "Approved";
+            else if (rawStatus === "Rejected" || rawStatus === "Inactive")
+              uiStatus = "Rejected";
+
+            return {
+              id: s._id,
+              _id: s._id,
+              source: "Admission",
+              sourceLabel: "Admission Form",
+              studentName: s.name || "Unknown",
+              fatherName: s.guardianName || s.fatherName || "N/A",
+              motherName: s.motherName || "N/A",
+              class: s.course || "N/A",
+              subject: s.course || "N/A",
+              phone: s.phone || "",
+              email: s.email || "",
+              address: s.presentAddress || s.address || "N/A",
+              dob: s.dobOrNid || "",
+              gender: s.gender || "N/A",
+              country: s.country || "BD",
+              studentId: s.studentId || s.username || "",
+              previousSchool: s.previousSchool || "N/A",
+              admissionDate: s.admissionDate
+                ? new Date(s.admissionDate).toISOString().split("T")[0]
+                : "N/A",
+              status: uiStatus,
+              rawStatus,
+              paymentStatus:
+                s.paymentStatus ||
+                (isPaid ? "Paid" : paid > 0 ? "Partial" : "Unpaid"),
+              priority,
+              notes: s.comments || "No additional notes",
+              appliedDate: s.admissionDate
+                ? new Date(s.admissionDate).toISOString().split("T")[0]
+                : "N/A",
+              reviewedBy: null,
+              reviewedDate: null,
+              rejectionReason: null,
+              username: s.username || "",
+              enrolledCourses: s.enrolledCourses || [],
+              paidAmount: paid,
+              courseFee: Number(s.courseFee) || 0,
+              dueAmount: due,
+              scholarshipAmount: Number(s.scholarshipAmount) || 0,
+              paymentMethod: s.paymentMethod || "",
+              transactionId: s.transactionId || "",
+              guardianPhone: s.guardianPhone || s.phone || "",
+              department: s.department || currentDept,
+              _raw: s,
+            };
+          });
+      }
+
+      const combined = [
+        ...tazweedStudents,
+        ...najeraStudents,
+        ...regularStudents,
+      ].sort((a, b) => {
         const da = new Date(a._raw?.createdAt || 0).getTime();
         const db = new Date(b._raw?.createdAt || 0).getTime();
         return db - da;
       });
 
       console.log("════════════════════════════════");
-      console.log(`✅ Loaded admission requests:`);
+      console.log(`✅ ${currentDept} admissions:`);
       console.log(`   - Tazweed: ${tazweedStudents.length}`);
       console.log(`   - Najera: ${najeraStudents.length}`);
+      console.log(`   - Regular: ${regularStudents.length}`);
       console.log(`   - Total: ${combined.length}`);
       console.log("════════════════════════════════");
 
@@ -257,13 +425,17 @@ const Student_admission = () => {
     }
   };
 
+  useEffect(() => {
+    fetchAdmissions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
+
   const handleLogout = async () => {
     try {
       await logOut();
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminInfo");
       localStorage.removeItem("adminEmail");
-
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -273,11 +445,6 @@ const Student_admission = () => {
       navigate("/admin-login");
     } catch (err) {
       console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
     }
   };
 
@@ -285,7 +452,6 @@ const Student_admission = () => {
   const toggleSubMenu = (menu) =>
     setActiveSubMenu(activeSubMenu === menu ? null : menu);
 
-  // Sidebar Menu
   const menuItems = [
     {
       id: "profile",
@@ -304,7 +470,6 @@ const Student_admission = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -417,34 +582,23 @@ const Student_admission = () => {
     },
   ];
 
-  // ============================================================
-  // Filter
-  // ============================================================
   const filteredRequests = admissionRequests
     .filter((r) => (sourceFilter === "All" ? true : r.source === sourceFilter))
     .filter((request) => {
+      const s = searchTerm.toLowerCase();
       const matchesSearch =
-        (request.studentName || "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        (request.fatherName || "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        (request.email || "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        (request.studentId || "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
+        !s ||
+        (request.studentName || "").toLowerCase().includes(s) ||
+        (request.fatherName || "").toLowerCase().includes(s) ||
+        (request.email || "").toLowerCase().includes(s) ||
+        (request.studentId || "").toLowerCase().includes(s) ||
         (request.phone || "").includes(searchTerm);
-
       const matchesStatus =
         filterStatus === "All" || request.status === filterStatus;
       const matchesCourse =
         filterCourse === "All" || request.class === filterCourse;
       const matchesPriority =
         filterPriority === "All" || request.priority === filterPriority;
-
       return matchesSearch && matchesStatus && matchesCourse && matchesPriority;
     });
 
@@ -461,11 +615,11 @@ const Student_admission = () => {
     ...new Set(admissionRequests.map((r) => r.priority).filter(Boolean)),
   ];
 
-  // Source counts (Admission বাদ)
   const sourceCounts = {
     All: admissionRequests.length,
     Tazweed: admissionRequests.filter((r) => r.source === "Tazweed").length,
     Najera: admissionRequests.filter((r) => r.source === "Najera").length,
+    Admission: admissionRequests.filter((r) => r.source === "Admission").length,
   };
 
   const getStatusColor = (status) => {
@@ -513,6 +667,8 @@ const Student_admission = () => {
         return "bg-green-100 text-green-700";
       case "Najera":
         return "bg-purple-100 text-purple-700";
+      case "Admission":
+        return "bg-teal-100 text-teal-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
@@ -521,17 +677,6 @@ const Student_admission = () => {
   const openDetailsModal = (request) => {
     setSelectedRequest(request);
     setShowDetailsModal(true);
-  };
-
-  // Bulk approve (Admission Form বাদ, তাই এখন শুধুই রিপোর্ট দেখাবে)
-  const handleBulkApprove = async () => {
-    Swal.fire({
-      icon: "info",
-      title: "No Pending Requests",
-      text: "Tazweed ও Najera Batch এর সব স্টুডেন্ট সর্বদা Approved থাকে।",
-      timer: 1800,
-      showConfirmButton: false,
-    });
   };
 
   const totalRequests = admissionRequests.length;
@@ -549,9 +694,9 @@ const Student_admission = () => {
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
-        <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
+        <div className="md:hidden bg-white border-b p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
           <h1 className="text-sm font-bold text-gray-800">
-            Admission Permission
+            Admission Permission ({currentDept})
           </h1>
           <button
             onClick={toggleSidebar}
@@ -563,11 +708,7 @@ const Student_admission = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -579,7 +720,7 @@ const Student_admission = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {adminInfo.designation}
+                  {adminInfo.department || adminInfo.designation}
                 </p>
               </div>
             </div>
@@ -596,11 +737,7 @@ const Student_admission = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
@@ -626,11 +763,7 @@ const Student_admission = () => {
                               setActiveSubMenu(sub.id);
                               setIsSidebarOpen(false);
                             }}
-                            className={`block px-3 py-1.5 rounded-lg text-xs transition-all ${
-                              activeSubMenu === sub.id
-                                ? "bg-teal-50 text-[#004d4d] font-bold"
-                                : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                            }`}
+                            className={`block px-3 py-1.5 rounded-lg text-xs transition-all ${activeSubMenu === sub.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                           >
                             {sub.label}
                           </Link>
@@ -647,11 +780,7 @@ const Student_admission = () => {
                     }}
                   >
                     <button
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -660,18 +789,16 @@ const Student_admission = () => {
                 )}
               </div>
             ))}
-
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 mt-4 border-t border-gray-200 pt-4"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 mt-4 border-t pt-4"
             >
               <FaSignOutAlt className="text-xl" />
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
-          <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
+          <div className="p-4 text-xs text-gray-400 border-t">
+            <p>©Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 
@@ -683,16 +810,18 @@ const Student_admission = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto pt-16 md:pt-6">
           {/* Top Bar */}
-          <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div className="bg-white p-3 rounded-xl shadow-sm border mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaUserPlus className="text-blue-600" /> Student List —
-                <span className="text-teal-700">All Sources</span>
+                <FaUserPlus className="text-blue-600" /> Admission Permission —
+                <span className="text-teal-700">{DEPT_LABEL}</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Basic Tazweed + Najera Batch ({admissionRequests.length} total)
+                {loading
+                  ? `Loading ${currentDept} data...`
+                  : `${admissionRequests.length} student${admissionRequests.length !== 1 ? "s" : ""}`}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -707,9 +836,6 @@ const Student_admission = () => {
                 />{" "}
                 Refresh
               </button>
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
               <button
                 onClick={handleLogout}
                 className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
@@ -719,12 +845,18 @@ const Student_admission = () => {
             </div>
           </div>
 
-          {/* Source Tabs — Admission Form বাদ */}
+          {/* Dept Badge */}
+          <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-2 rounded-xl text-xs font-semibold mb-3 flex items-center gap-2">
+            <FaBuilding className="text-teal-600" />
+            Showing admissions of:{" "}
+            <span className="font-bold">{currentDept}</span> department
+          </div>
+
+          {/* Source Tabs */}
           <div className="bg-white border rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto">
             {[
               { id: "All", label: "All Students", color: "blue" },
-              { id: "Tazweed", label: "Basic Tazweed", color: "green" },
-              { id: "Najera", label: "Najera Batch", color: "purple" },
+              { id: "Admission", label: "Admission Form", color: "teal" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -735,17 +867,15 @@ const Student_admission = () => {
                       ? "bg-blue-50 text-blue-700 shadow-sm"
                       : tab.color === "green"
                         ? "bg-green-50 text-green-700 shadow-sm"
-                        : "bg-purple-50 text-purple-700 shadow-sm"
+                        : tab.color === "teal"
+                          ? "bg-teal-50 text-teal-700 shadow-sm"
+                          : "bg-purple-50 text-purple-700 shadow-sm"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
                 {tab.label}
                 <span
-                  className={`text-[10px] px-1.5 rounded-full ${
-                    sourceFilter === tab.id
-                      ? "bg-white text-gray-700"
-                      : "bg-gray-200 text-gray-600"
-                  }`}
+                  className={`text-[10px] px-1.5 rounded-full ${sourceFilter === tab.id ? "bg-white text-gray-700" : "bg-gray-200 text-gray-600"}`}
                 >
                   {sourceCounts[tab.id]}
                 </span>
@@ -787,10 +917,10 @@ const Student_admission = () => {
           <div className="bg-white border rounded-xl shadow-sm p-2 mb-3">
             <div className="flex flex-col md:flex-row gap-2">
               <div className="flex-1 relative">
-                <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search students by name/phone/studentId..."
+                  placeholder={`Search ${currentDept} students...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border rounded-lg"
@@ -839,7 +969,7 @@ const Student_admission = () => {
             <div className="bg-white border rounded-xl shadow-sm p-12 text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
               <p className="text-sm text-gray-500 mt-3">
-                Loading admission requests...
+                Loading {currentDept} admissions...
               </p>
             </div>
           ) : fetchError ? (
@@ -855,7 +985,7 @@ const Student_admission = () => {
             </div>
           ) : (
             <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
-              <div className="overflow-x-auto max-h-[calc(100vh-450px)] overflow-y-auto">
+              <div className="overflow-x-auto max-h-[calc(100vh-500px)] overflow-y-auto">
                 <table className="w-full text-xs">
                   <thead className="bg-gray-50 sticky top-0 z-10">
                     <tr>
@@ -910,9 +1040,7 @@ const Student_admission = () => {
                           </td>
                           <td className="px-3 py-2">
                             <span
-                              className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-semibold ${getSourceBadge(
-                                request.source,
-                              )}`}
+                              className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-semibold ${getSourceBadge(request.source)}`}
                             >
                               {request.sourceLabel}
                             </span>
@@ -935,9 +1063,7 @@ const Student_admission = () => {
                           </td>
                           <td className="px-3 py-2">
                             <span
-                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(
-                                request.status,
-                              )}`}
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(request.status)}`}
                             >
                               {getStatusIcon(request.status)}
                               {request.status}
@@ -945,9 +1071,7 @@ const Student_admission = () => {
                           </td>
                           <td className="px-3 py-2 hidden sm:table-cell">
                             <span
-                              className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${getPriorityColor(
-                                request.priority,
-                              )}`}
+                              className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${getPriorityColor(request.priority)}`}
                             >
                               {request.priority}
                             </span>
@@ -972,11 +1096,10 @@ const Student_admission = () => {
                           className="px-3 py-8 text-center text-gray-500"
                         >
                           <FaUserPlus className="text-4xl text-gray-300 mx-auto mb-2" />
-                          <p>No students found</p>
+                          <p>{currentDept} department-এ কোনো student নেই</p>
                           <p className="text-[10px] text-gray-400 mt-1">
-                            {admissionRequests.length === 0
-                              ? "Basic Tazweed বা Najera Batch থেকে student add করুন।"
-                              : "Try adjusting your search or filter"}
+                            Admission Form / Tazweed / Najera থেকে student add
+                            করুন
                           </p>
                         </td>
                       </tr>
@@ -1015,16 +1138,12 @@ const Student_admission = () => {
                       {selectedRequest.studentName}
                     </h2>
                     <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${getSourceBadge(
-                        selectedRequest.source,
-                      )}`}
+                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${getSourceBadge(selectedRequest.source)}`}
                     >
                       {selectedRequest.sourceLabel}
                     </span>
                     <span
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(
-                        selectedRequest.status,
-                      )}`}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColor(selectedRequest.status)}`}
                     >
                       {getStatusIcon(selectedRequest.status)}
                       {selectedRequest.status}
@@ -1042,6 +1161,7 @@ const Student_admission = () => {
                     )}
                     <span>📱 {selectedRequest.phone}</span>
                     <span>📅 Applied: {selectedRequest.appliedDate}</span>
+                    <span>🏫 {selectedRequest.department || currentDept}</span>
                   </div>
                 </div>
               </div>

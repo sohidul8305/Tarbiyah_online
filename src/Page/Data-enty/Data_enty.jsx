@@ -10,8 +10,6 @@ import {
   FaMoneyBillWave,
   FaSignOutAlt,
   FaChartLine,
-  FaCalendarCheck,
-  FaUserTimes,
   FaDatabase,
   FaEye,
   FaEdit,
@@ -20,7 +18,6 @@ import {
   FaPlus,
   FaSave,
   FaArrowRight,
-  FaLayerGroup,
   FaInfoCircle,
   FaPhoneAlt,
   FaCheckCircle,
@@ -30,12 +27,142 @@ import {
   FaWhatsapp,
   FaSyncAlt,
   FaUserGraduate,
+  FaBuilding,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "https://api.tarbiyahonline.com/api";
+const API_BASE = "https://api.tarbiyahonline.com";
+
+// ============================================================
+// ✅ DEPARTMENT-WISE CONFIG
+// ============================================================
+const DEPARTMENT_CONFIGS = {
+  Elders: {
+    label: "Quran For Elders",
+    courses: [
+      "Qaida Noorani (Bangla Medium)",
+      "Qaida Noorani (International)",
+      "Nazera Quran (Bangladeshi)",
+      "Nazera Quran (Expatriate)",
+      "Basic Tajweed (Level-1)",
+      "Bakarah Hifz",
+      "Quran for Elders",
+      "Other",
+    ],
+    courseKeywords: [
+      "qaida nuraniyah",
+      "qaida nooraniya",
+      "qaida noorani",
+      "qaida nurani",
+      "quran nazera",
+      "nazera quran",
+      "quran najera",
+      "najera quran",
+      "bakarah hifz",
+      "bakara hifz",
+      "baqarah hifz",
+      "baqara hifz",
+      "basic tajweed",
+      "quran for elders",
+    ],
+  },
+  "Quran Studies": {
+    label: "Quran Studies",
+    courses: [
+      "Hifzul Quran",
+      "Hifz Revision (One to One) - Bangla Medium",
+      "Hifz Revision (One to One) - International",
+      "Tarbiyah Quran Studies",
+      "Quran Translation",
+      "One-to-One Program",
+      "Other",
+    ],
+    courseKeywords: [
+      "quran studies",
+      "hifzul quran",
+      "tarbiyah quran studies",
+      "hifz",
+    ],
+  },
+  Alimiya: {
+    label: "Alimiya",
+    courses: [
+      "Alimiyah for Kids (Bangla Medium)",
+      "Alimiyah for Kids (English Medium)",
+      "Alimiyah Program (Bangla Version)",
+      "Alimiyah Program (English Version)",
+      "Dawra e Hadith",
+      "Tafsir",
+      "Fiqh",
+      "Hadith",
+      "Arabic Grammar",
+      "Other",
+    ],
+    courseKeywords: [
+      "alimiya",
+      "alimiyah",
+      "dawra",
+      "tafsir",
+      "fiqh",
+      "hadith",
+      "arabic grammar",
+    ],
+  },
+  Diploma: {
+    label: "Diploma",
+    courses: [
+      "Diploma in Islamic Studies",
+      "Diploma in Arabic",
+      "Certificate Course",
+      "Other",
+    ],
+    courseKeywords: ["diploma"],
+  },
+};
+
+// ✅ Elders default CRM entries
+const ELDERS_DEFAULT_CRM = [
+  {
+    _id: "sample-crm-1",
+    student: "Abdullah Rahman",
+    guardian: "Mahmud Rahman",
+    whatsapp: "+880 1712 345678",
+    interested: "Qaida Noorani (Bangla Medium)",
+    status: "Interested",
+    nextFollowUp: "2026-10-15",
+    notes: "Called once, will call again",
+    enteredBy: "Admin",
+    createdAt: "2026-09-20",
+    source: "crm",
+    department: "Elders",
+  },
+];
+
+const getCurrentDepartment = () => {
+  try {
+    const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
+    return info.department || "Elders";
+  } catch {
+    return "Elders";
+  }
+};
+
+const safeFetchJSON = async (url, options = {}) => {
+  try {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    if (text.trim().startsWith("<"))
+      return { success: false, _htmlError: true };
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, _jsonError: true };
+    }
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+};
 
 const Data_enty = () => {
   const { user, logOut } = useAuth();
@@ -49,15 +176,24 @@ const Data_enty = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "",
+    department: "Elders",
     joinDate: "",
   });
 
-  // ✅ Data Sources
+  // ✅ Current department
+  const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
+  const deptConfig =
+    DEPARTMENT_CONFIGS[currentDept] || DEPARTMENT_CONFIGS["Elders"];
+  const DEPT_COURSES = deptConfig.courses;
+  const DEPT_KEYWORDS = deptConfig.courseKeywords;
+  const DEPT_LABEL = deptConfig.label;
+
+  // Data Sources
   const [crmEntries, setCrmEntries] = useState([]);
   const [admissionStudents, setAdmissionStudents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [apiWorking, setApiWorking] = useState(true);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -69,6 +205,7 @@ const Data_enty = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   // Form
   const [formData, setFormData] = useState({
@@ -79,6 +216,7 @@ const Data_enty = () => {
     status: "Interested",
     nextFollowUp: "",
     notes: "",
+    department: "",
   });
 
   // Options
@@ -89,27 +227,6 @@ const Data_enty = () => {
     "Not Interested",
     "Follow-up",
     "Pending",
-  ];
-
-  const interestedOptions = [
-    "Diploma in Islamic Studies",
-    "Alimiyah for Kids (Bangla Medium)",
-    "Alimiyah for Kids (English Medium)",
-    "Alimiyah Program (Bangla Version)",
-    "Alimiyah Program (English Version)",
-    "Qaida Noorani (Bangla Medium)",
-    "Qaida Noorani (International)",
-    "Nazera Quran (Bangladeshi)",
-    "Nazera Quran (Expatriate)",
-    "Hifzul Quran",
-    "Hifz Revision (One to One) - Bangla Medium",
-    "Hifz Revision (One to One) - International",
-    "Basic Tajweed (Level-1)",
-    "Bakarah Hifz",
-    "One-to-One Program",
-    "Tarbiyah Quran Studies",
-    "Quran for Elders",
-    "Other",
   ];
 
   // ============================================
@@ -123,86 +240,148 @@ const Data_enty = () => {
   };
 
   // ============================================
-  // Convert Student → CRM entry shape
+  // Course match — current department
   // ============================================
-  const studentToCrmEntry = (s) => {
-    return {
-      id: s._id || s.id,
-      _id: s._id || s.id,
-      student: s.name || "",
-      guardian: s.guardianName || s.fatherName || "",
-      whatsapp: s.phone || s.guardianPhone || "",
-      interested: s.course || s.class || "",
-      status: mapStudentStatus(s.status),
-      nextFollowUp: s.nextFollowUp
-        ? s.nextFollowUp.split("T")[0]
-        : s.admissionDate
-          ? s.admissionDate.split("T")[0]
-          : "",
-      notes: s.presentAddress || s.address || s.paymentRemarks || "",
-      enteredBy: "Admission Form",
-      createdAt: (s.createdAt || s.admissionDate || "").split("T")[0],
-      source: "admission",
-      isStudent: true,
-      studentId: s._id || s.id,
-      _original: s,
-    };
+  const isDeptCourse = (courseStr) => {
+    if (!courseStr) return false;
+    const p = String(courseStr).toLowerCase().trim();
+    return DEPT_KEYWORDS.some((c) => p.includes(c));
   };
 
   // ============================================
-  // FETCH Admission Students
+  // Convert Student → CRM entry shape
+  // ============================================
+  const studentToCrmEntry = (s) => ({
+    id: s._id || s.id,
+    _id: s._id || s.id,
+    student: s.name || "",
+    guardian: s.guardianName || s.fatherName || "",
+    whatsapp: s.phone || s.guardianPhone || "",
+    interested: s.course || s.class || "",
+    status: mapStudentStatus(s.status),
+    nextFollowUp: s.nextFollowUp
+      ? s.nextFollowUp.split("T")[0]
+      : s.admissionDate
+        ? s.admissionDate.split("T")[0]
+        : "",
+    notes: s.presentAddress || s.address || s.paymentRemarks || "",
+    enteredBy: "Admission Form",
+    createdAt: (s.createdAt || s.admissionDate || "").split("T")[0],
+    source: "admission",
+    isStudent: true,
+    studentId: s._id || s.id,
+    department: s.department || "",
+    _original: s,
+  });
+
+  // ============================================
+  // ✅ FETCH Admission Students — department filtered
   // ============================================
   const fetchAdmissionStudents = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/students/all`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await fetch(
+        `${API_BASE}/api/students/all?department=${encodeURIComponent(currentDept)}`,
+      );
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const data = await res.json();
       const list = data.students || data.data || [];
 
-      const mapped = Array.isArray(list) ? list.map(studentToCrmEntry) : [];
+      // ✅ Frontend fallback filter
+      const filtered = (Array.isArray(list) ? list : []).filter((s) => {
+        const sDept = String(s.department || "")
+          .toLowerCase()
+          .trim();
+        if (sDept && sDept === currentDept.toLowerCase().trim()) return true;
+        return isDeptCourse(s.course);
+      });
+
+      const mapped = filtered.map(studentToCrmEntry);
       setAdmissionStudents(mapped);
+      console.log(
+        `✅ [Admission] ${mapped.length} students for ${currentDept}`,
+      );
     } catch (err) {
       console.warn("⚠️ Could not fetch admission students:", err.message);
       setAdmissionStudents([]);
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
 
   // ============================================
-  // FETCH CRM entries (localStorage)
+  // ✅ FETCH CRM entries — API first, localStorage fallback
   // ============================================
-  const fetchCrmEntries = useCallback(() => {
+  const fetchCrmEntries = useCallback(async () => {
     try {
-      const saved = localStorage.getItem("crmDataEntries");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          const tagged = parsed.map((e) => ({
-            ...e,
-            source: e.source || "crm",
-          }));
-          setCrmEntries(tagged);
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/crm/all?department=${encodeURIComponent(currentDept)}`,
+      );
+
+      if (data.success && Array.isArray(data.entries)) {
+        if (data.entries.length > 0) {
+          setCrmEntries(data.entries);
+          setApiWorking(true);
+          localStorage.setItem(
+            `crm_${currentDept.replace(/\s+/g, "_")}`,
+            JSON.stringify(data.entries),
+          );
+          console.log(
+            `✅ [CRM] ${data.entries.length} entries from API (${currentDept})`,
+          );
           return;
         }
+
+        // API empty → check localStorage
+        const key = `crm_${currentDept.replace(/\s+/g, "_")}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setCrmEntries(parsed);
+              setApiWorking(true);
+              return;
+            }
+          } catch {}
+        }
+
+        setApiWorking(true);
+        setCrmEntries(currentDept === "Elders" ? ELDERS_DEFAULT_CRM : []);
+        return;
       }
-      const sample = [];
-      setCrmEntries(sample);
-      localStorage.setItem("crmDataEntries", JSON.stringify(sample));
-    } catch (e) {
-      console.error("Failed to load CRM entries:", e);
-      setCrmEntries([]);
+
+      throw new Error(data.message || "API failed");
+    } catch (err) {
+      console.warn("⚠️ CRM API failed, using localStorage:", err.message);
+      setApiWorking(false);
+      const key = `crm_${currentDept.replace(/\s+/g, "_")}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setCrmEntries(
+            Array.isArray(parsed) && parsed.length > 0
+              ? parsed
+              : currentDept === "Elders"
+                ? ELDERS_DEFAULT_CRM
+                : [],
+          );
+        } catch {
+          setCrmEntries(currentDept === "Elders" ? ELDERS_DEFAULT_CRM : []);
+        }
+      } else {
+        setCrmEntries(currentDept === "Elders" ? ELDERS_DEFAULT_CRM : []);
+      }
     }
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
 
   const fetchAll = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      fetchCrmEntries();
+      await fetchCrmEntries();
       await fetchAdmissionStudents();
     } catch (err) {
       setError(err.message || "Failed to load data");
@@ -215,65 +394,39 @@ const Data_enty = () => {
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
-      setAdminInfo(JSON.parse(savedAdmin));
+      try {
+        const info = JSON.parse(savedAdmin);
+        setAdminInfo(info);
+        if (info.department) setCurrentDept(info.department);
+      } catch (err) {
+        console.error(err);
+      }
     } else {
       setAdminInfo({
         name: user?.displayName || "Admin",
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Administration",
+        department: "Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
-  // Initial load
+  // Initial load + reload on department change
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
-  // Persist CRM entries
+  // Cache CRM to localStorage
   useEffect(() => {
-    if (crmEntries.length > 0) {
-      localStorage.setItem("crmDataEntries", JSON.stringify(crmEntries));
-    }
-  }, [crmEntries]);
-
-  // Combined list
-  const allEntries = useMemo(() => {
-    return [...admissionStudents, ...crmEntries];
-  }, [admissionStudents, crmEntries]);
-
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminInfo");
-      localStorage.removeItem("adminEmail");
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-      navigate("/admin-login");
-    } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
-    }
-  };
-
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  const toggleSubMenu = (menu) =>
-    setExpandedMenu(expandedMenu === menu ? null : menu);
+    if (!currentDept || crmEntries.length === 0) return;
+    const key = `crm_${currentDept.replace(/\s+/g, "_")}`;
+    localStorage.setItem(key, JSON.stringify(crmEntries));
+  }, [crmEntries, currentDept]);
 
   // ============================================================
-  // ✅ Sidebar Menu Items — সব route সহ (Updated)
+  // Sidebar
   // ============================================================
   const menuItems = [
     {
@@ -293,7 +446,6 @@ const Data_enty = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -352,7 +504,6 @@ const Data_enty = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -373,7 +524,6 @@ const Data_enty = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -408,7 +558,6 @@ const Data_enty = () => {
     },
   ];
 
-  // ✅ URL থেকে active menu/submenu auto-detect
   const getActiveFromPath = () => {
     const currentPath = location.pathname;
     for (const item of menuItems) {
@@ -423,10 +572,31 @@ const Data_enty = () => {
 
   const { menu: activeMenu, sub: activeSubMenu } = getActiveFromPath();
 
-  // ✅ Auto-expand parent of active submenu
   useEffect(() => {
     if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
   }, [activeMenu, activeSubMenu]);
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("adminInfo");
+      localStorage.removeItem("adminEmail");
+      await Swal.fire({
+        icon: "success",
+        title: "Logged Out Successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      navigate("/admin-login");
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setExpandedMenu(expandedMenu === menu ? null : menu);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -465,19 +635,23 @@ const Data_enty = () => {
     }
   };
 
-  const filteredEntries = allEntries.filter((entry) => {
-    const matchesSearch =
-      (entry.student || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (entry.guardian || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (entry.whatsapp || "").includes(searchTerm) ||
-      (entry.interested || "").toLowerCase().includes(searchTerm.toLowerCase());
+  // Combined list
+  const allEntries = useMemo(() => {
+    return [...admissionStudents, ...crmEntries];
+  }, [admissionStudents, crmEntries]);
 
+  const filteredEntries = allEntries.filter((entry) => {
+    const s = searchTerm.toLowerCase();
+    const matchesSearch =
+      !s ||
+      (entry.student || "").toLowerCase().includes(s) ||
+      (entry.guardian || "").toLowerCase().includes(s) ||
+      (entry.whatsapp || "").includes(searchTerm) ||
+      (entry.interested || "").toLowerCase().includes(s);
     const matchesStatus =
       filterStatus === "All" || entry.status === filterStatus;
-
     const matchesSource =
       filterSource === "All" || entry.source === filterSource;
-
     return matchesSearch && matchesStatus && matchesSource;
   });
 
@@ -501,15 +675,19 @@ const Data_enty = () => {
     }
   };
 
+  // ============================================
+  // ✅ OPEN ADD MODAL — always enabled
+  // ============================================
   const openAddModal = () => {
     setFormData({
       student: "",
       guardian: "",
       whatsapp: "",
-      interested: "",
+      interested: DEPT_COURSES[0] || "",
       status: "Interested",
       nextFollowUp: "",
       notes: "",
+      department: currentDept,
     });
     setShowAddModal(true);
   };
@@ -540,6 +718,7 @@ const Data_enty = () => {
       status: entry.status || "Interested",
       nextFollowUp: entry.nextFollowUp || "",
       notes: entry.notes || "",
+      department: entry.department || currentDept,
     });
     setShowEditModal(true);
   };
@@ -549,7 +728,10 @@ const Data_enty = () => {
     setShowDetailsModal(true);
   };
 
-  const handleAddEntry = (e) => {
+  // ============================================
+  // ✅ ADD CRM ENTRY — API first
+  // ============================================
+  const handleAddEntry = async (e) => {
     e.preventDefault();
 
     if (!formData.student || !formData.whatsapp) {
@@ -563,32 +745,63 @@ const Data_enty = () => {
       return;
     }
 
-    const newEntry = {
-      id: Date.now(),
-      student: formData.student,
+    const payload = {
+      department: currentDept,
+      student: formData.student.trim(),
       guardian: formData.guardian || "",
-      whatsapp: formData.whatsapp,
+      whatsapp: formData.whatsapp.trim(),
       interested: formData.interested || "",
       status: formData.status || "Interested",
       nextFollowUp: formData.nextFollowUp || "",
       notes: formData.notes || "",
-      enteredBy: adminInfo.name,
-      createdAt: new Date().toISOString().split("T")[0],
+      enteredBy: adminInfo.name || "Admin",
       source: "crm",
     };
 
-    setCrmEntries([newEntry, ...crmEntries]);
-    setShowAddModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "Data Added!",
-      text: `${formData.student}'s info has been added.`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    try {
+      setSaving(true);
+
+      const data = await safeFetchJSON(`${API_BASE}/api/crm/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      let newEntry;
+      if (data.success && data.entry) {
+        newEntry = data.entry;
+        console.log("✅ Saved to API:", newEntry._id);
+      } else {
+        newEntry = {
+          _id: `LOCAL_${Date.now()}`,
+          ...payload,
+          createdAt: new Date().toISOString().split("T")[0],
+        };
+        console.warn("⚠️ API failed, saved locally");
+      }
+
+      setCrmEntries([newEntry, ...crmEntries]);
+      setShowAddModal(false);
+
+      Swal.fire({
+        icon: "success",
+        title: "✅ CRM Entry Added!",
+        html: `<p><strong>${formData.student}</strong></p><p style="font-size:12px;color:#666;">${currentDept} Department</p>`,
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleEditEntry = (e) => {
+  // ============================================
+  // ✅ EDIT CRM ENTRY
+  // ============================================
+  const handleEditEntry = async (e) => {
     e.preventDefault();
 
     if (!formData.student || !formData.whatsapp) {
@@ -602,31 +815,60 @@ const Data_enty = () => {
       return;
     }
 
-    setCrmEntries(
-      crmEntries.map((entry) =>
-        entry.id === selectedEntry.id
-          ? {
-              ...entry,
-              student: formData.student,
-              guardian: formData.guardian || "",
-              whatsapp: formData.whatsapp,
-              interested: formData.interested || "",
-              status: formData.status,
-              nextFollowUp: formData.nextFollowUp || "",
-              notes: formData.notes || "",
-            }
-          : entry,
-      ),
-    );
-    setShowEditModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "Data Updated!",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    const payload = {
+      ...formData,
+      department: selectedEntry.department || currentDept,
+    };
+
+    try {
+      setSaving(true);
+
+      const isLocalId =
+        String(selectedEntry._id).startsWith("LOCAL_") ||
+        String(selectedEntry._id).startsWith("sample-");
+      let updated;
+
+      if (!isLocalId) {
+        const data = await safeFetchJSON(
+          `${API_BASE}/api/crm/update/${selectedEntry._id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          },
+        );
+        if (data.success && data.entry) {
+          updated = data.entry;
+        } else {
+          updated = { ...selectedEntry, ...payload };
+        }
+      } else {
+        updated = { ...selectedEntry, ...payload };
+      }
+
+      setCrmEntries(
+        crmEntries.map((entry) =>
+          entry._id === selectedEntry._id ? updated : entry,
+        ),
+      );
+      setShowEditModal(false);
+      Swal.fire({
+        icon: "success",
+        title: "✅ Updated!",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
+  // ============================================
+  // ✅ DELETE
+  // ============================================
   const handleDeleteEntry = async (entry) => {
     const isStudent = entry.isStudent;
     const id = entry.id || entry._id;
@@ -647,21 +889,26 @@ const Data_enty = () => {
 
     try {
       if (isStudent) {
-        const res = await fetch(`${API_BASE_URL}/students/delete/${id}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-        });
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok || data.success === false) {
+        const data = await safeFetchJSON(
+          `${API_BASE}/api/students/delete/${id}`,
+          {
+            method: "DELETE",
+          },
+        );
+        if (!data.success)
           throw new Error(data.message || "Could not delete student.");
-        }
-
         setAdmissionStudents(
           admissionStudents.filter((e) => (e.id || e._id) !== id),
         );
       } else {
-        setCrmEntries(crmEntries.filter((e) => e.id !== id));
+        const isLocalId =
+          String(id).startsWith("LOCAL_") || String(id).startsWith("sample-");
+        if (!isLocalId) {
+          await safeFetchJSON(`${API_BASE}/api/crm/delete/${id}`, {
+            method: "DELETE",
+          });
+        }
+        setCrmEntries(crmEntries.filter((e) => e._id !== id));
       }
 
       Swal.fire({
@@ -681,6 +928,7 @@ const Data_enty = () => {
 
   const exportData = () => {
     const headers = [
+      "Department",
       "Student",
       "Guardian",
       "WhatsApp",
@@ -691,6 +939,7 @@ const Data_enty = () => {
       "Source",
     ];
     const rows = allEntries.map((e) => [
+      e.department || currentDept,
       e.student,
       e.guardian,
       e.whatsapp,
@@ -709,13 +958,13 @@ const Data_enty = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `crm-data-${new Date().toISOString().split("T")[0]}.csv`;
+    link.download = `crm-${currentDept.replace(/\s+/g, "_")}-${new Date().toISOString().split("T")[0]}.csv`;
     link.click();
 
     Swal.fire({
       icon: "success",
       title: "Exported!",
-      text: "Data exported as CSV file.",
+      text: `${currentDept} data exported as CSV.`,
       timer: 1500,
       showConfirmButton: false,
     });
@@ -725,23 +974,19 @@ const Data_enty = () => {
   const totalEntries = allEntries.length;
   const admissionCount = admissionStudents.length;
   const crmCount = crmEntries.length;
-  const interestedCount = allEntries.filter(
-    (e) => e.status === "Interested",
-  ).length;
   const enrolledCount = allEntries.filter(
     (e) => e.status === "Enrolled",
   ).length;
   const pendingCount = allEntries.filter((e) => e.status === "Pending").length;
-  const followUpCount = allEntries.filter(
-    (e) => e.status === "Follow-up" || e.status === "Contacted",
-  ).length;
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
-        <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">CRM Data Entry</h1>
+        <div className="md:hidden bg-white border-b p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
+          <h1 className="text-sm font-bold text-gray-800">
+            CRM Data Entry ({currentDept})
+          </h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100"
@@ -752,9 +997,7 @@ const Data_enty = () => {
 
         {/* Sidebar */}
         <aside
-          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -766,7 +1009,7 @@ const Data_enty = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {adminInfo.designation}
+                  {adminInfo.department || adminInfo.designation}
                 </p>
               </div>
             </div>
@@ -775,7 +1018,6 @@ const Data_enty = () => {
           <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => {
               const isParentActive = activeMenu === item.id;
-
               return (
                 <div key={item.id}>
                   {item.subItems ? (
@@ -785,20 +1027,14 @@ const Data_enty = () => {
                           toggleSubMenu(item.id);
                           setIsSidebarOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                          isParentActive
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }`}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${isParentActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-gray-600">{item.icon}</span>
                           <span>{item.label}</span>
                         </div>
                         <span
-                          className={`transition-transform ${
-                            expandedMenu === item.id ? "rotate-90" : ""
-                          }`}
+                          className={`transition-transform ${expandedMenu === item.id ? "rotate-90" : ""}`}
                         >
                           <FaArrowRight size={12} />
                         </span>
@@ -810,11 +1046,7 @@ const Data_enty = () => {
                               key={sub.id}
                               to={sub.path}
                               onClick={() => setIsSidebarOpen(false)}
-                              className={`block px-3 py-1.5 rounded-lg text-xs transition-all ${
-                                activeSubMenu === sub.id
-                                  ? "bg-teal-50 text-[#004d4d] font-bold"
-                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                              }`}
+                              className={`block px-3 py-1.5 rounded-lg text-xs transition-all ${activeSubMenu === sub.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                             >
                               {sub.label}
                             </Link>
@@ -828,11 +1060,7 @@ const Data_enty = () => {
                       onClick={() => setIsSidebarOpen(false)}
                     >
                       <button
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${
-                          isParentActive
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }`}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all ${isParentActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                       >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
@@ -842,18 +1070,16 @@ const Data_enty = () => {
                 </div>
               );
             })}
-
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 mt-4 border-t border-gray-200 pt-4"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 mt-4 border-t pt-4"
             >
               <FaSignOutAlt className="text-xl" />
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
-          <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
+          <div className="p-4 text-xs text-gray-400 border-t">
+            <p>©Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 
@@ -865,15 +1091,21 @@ const Data_enty = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto pt-16 md:pt-6">
           {/* Top Bar */}
-          <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div className="bg-white p-3 rounded-xl shadow-sm border mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
-                <FaDatabase className="text-blue-600" /> CRM Data Entry
+                <FaDatabase className="text-blue-600" /> CRM Data Entry —
+                <span className="text-teal-700">{DEPT_LABEL}</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Manage prospective students & follow-ups
+                {isLoading
+                  ? "Loading..."
+                  : `${totalEntries} lead${totalEntries !== 1 ? "s" : ""}`}
+                {!apiWorking && (
+                  <span className="ml-2 text-yellow-600">⚠️ Offline</span>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -885,7 +1117,7 @@ const Data_enty = () => {
                 <FaSyncAlt
                   size={12}
                   className={isLoading ? "animate-spin" : ""}
-                />
+                />{" "}
                 Refresh
               </button>
               <button
@@ -900,9 +1132,6 @@ const Data_enty = () => {
               >
                 <FaPlus size={12} /> Add Data
               </button>
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
               <button
                 onClick={handleLogout}
                 className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
@@ -910,6 +1139,13 @@ const Data_enty = () => {
                 Logout
               </button>
             </div>
+          </div>
+
+          {/* Dept Badge */}
+          <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-2 rounded-xl text-xs font-semibold mb-3 flex items-center gap-2">
+            <FaBuilding className="text-teal-600" />
+            Showing CRM data of:{" "}
+            <span className="font-bold">{currentDept}</span> department
           </div>
 
           {/* Error Banner */}
@@ -956,10 +1192,10 @@ const Data_enty = () => {
           <div className="bg-white border rounded-xl shadow-sm p-2 mb-3">
             <div className="flex flex-col md:flex-row gap-2">
               <div className="flex-1 relative">
-                <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search student, guardian, WhatsApp..."
+                  placeholder={`Search ${currentDept} leads...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border rounded-lg"
@@ -992,7 +1228,7 @@ const Data_enty = () => {
 
           {/* Table */}
           <div className="bg-white border rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto max-h-[calc(100vh-360px)] overflow-y-auto">
+            <div className="overflow-x-auto max-h-[calc(100vh-500px)] overflow-y-auto">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
@@ -1033,7 +1269,7 @@ const Data_enty = () => {
                         className="px-3 py-10 text-center text-gray-500"
                       >
                         <FaSyncAlt className="text-3xl text-blue-500 mx-auto mb-2 animate-spin" />
-                        <p>Loading CRM data...</p>
+                        <p>Loading {currentDept} CRM data...</p>
                       </td>
                     </tr>
                   ) : filteredEntries.length > 0 ? (
@@ -1125,10 +1361,13 @@ const Data_enty = () => {
                         className="px-3 py-8 text-center text-gray-500"
                       >
                         <FaDatabase className="text-4xl text-gray-300 mx-auto mb-2" />
-                        <p>No CRM data found</p>
-                        <p className="text-[10px] text-gray-400 mt-1">
-                          Click 'Add Data' to add your first entry
-                        </p>
+                        <p>{currentDept} department-এ কোনো CRM data নেই</p>
+                        <button
+                          onClick={openAddModal}
+                          className="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
+                        >
+                          + Add First Lead
+                        </button>
                       </td>
                     </tr>
                   )}
@@ -1147,11 +1386,13 @@ const Data_enty = () => {
               <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                 {showAddModal ? (
                   <>
-                    <FaPlus className="text-blue-600" /> Add CRM Entry
+                    <FaPlus className="text-blue-600" /> Add CRM Entry —{" "}
+                    {currentDept}
                   </>
                 ) : (
                   <>
-                    <FaEdit className="text-yellow-600" /> Edit CRM Entry
+                    <FaEdit className="text-yellow-600" /> Edit CRM Entry —{" "}
+                    {currentDept}
                   </>
                 )}
               </h3>
@@ -1169,6 +1410,10 @@ const Data_enty = () => {
               onSubmit={showAddModal ? handleAddEntry : handleEditEntry}
               className="p-5 space-y-3"
             >
+              <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
+                💡 Adding to <strong>{currentDept}</strong> department
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Student *
@@ -1212,13 +1457,13 @@ const Data_enty = () => {
                     setFormData({ ...formData, whatsapp: e.target.value })
                   }
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
-                  placeholder="+33 6 12 34 56 78"
+                  placeholder="+880 1XXX XXXXXX"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Interested
+                  Interested Course
                 </label>
                 <select
                   value={formData.interested}
@@ -1228,7 +1473,7 @@ const Data_enty = () => {
                   className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Select Course</option>
-                  {interestedOptions.map((c) => (
+                  {DEPT_COURSES.map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>
@@ -1255,7 +1500,6 @@ const Data_enty = () => {
                     ))}
                   </select>
                 </div>
-
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
                     Next Follow-up
@@ -1289,14 +1533,19 @@ const Data_enty = () => {
               <div className="flex gap-3 pt-3 border-t">
                 <button
                   type="submit"
-                  className={`flex-1 ${
-                    showAddModal
-                      ? "bg-blue-600 hover:bg-blue-700"
-                      : "bg-yellow-500 hover:bg-yellow-600"
-                  } text-white py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2`}
+                  disabled={saving}
+                  className={`flex-1 ${showAddModal ? "bg-blue-600 hover:bg-blue-700" : "bg-yellow-500 hover:bg-yellow-600"} disabled:opacity-50 text-white py-2 rounded-lg font-semibold text-sm flex items-center justify-center gap-2`}
                 >
-                  <FaSave size={14} />
-                  {showAddModal ? "Add Entry" : "Update Entry"}
+                  {saving ? (
+                    <>
+                      <FaSyncAlt className="animate-spin" size={14} /> Saving...
+                    </>
+                  ) : (
+                    <>
+                      <FaSave size={14} />{" "}
+                      {showAddModal ? "Add Entry" : "Update Entry"}
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -1354,64 +1603,47 @@ const Data_enty = () => {
 
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
-                  <p className="text-[10px] text-gray-400">Student</p>
+                  <p className="text-[10px] text-gray-400">Department</p>
                   <p className="font-semibold">
-                    {selectedEntry.student || "-"}
+                    {selectedEntry.department || currentDept}
                   </p>
                 </div>
-
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
                   <p className="text-[10px] text-gray-400">Guardian</p>
                   <p className="font-semibold">
                     {selectedEntry.guardian || "-"}
                   </p>
                 </div>
-
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
                   <p className="text-[10px] text-gray-400">WhatsApp</p>
                   <p className="font-semibold font-mono">
                     {selectedEntry.whatsapp || "-"}
                   </p>
                 </div>
-
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
                   <p className="text-[10px] text-gray-400">Interested</p>
                   <p className="font-semibold">
                     {selectedEntry.interested || "-"}
                   </p>
                 </div>
-
-                <div className="bg-gray-50 rounded-lg p-3 col-span-2">
-                  <p className="text-[10px] text-gray-400">Status</p>
-                  <span
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium mt-1 ${getStatusColor(selectedEntry.status)}`}
-                  >
-                    {getStatusIcon(selectedEntry.status)}
-                    {selectedEntry.status}
-                  </span>
-                </div>
-
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
                   <p className="text-[10px] text-gray-400">Next Follow-up</p>
                   <p className="font-semibold">
                     {formatDate(selectedEntry.nextFollowUp)}
                   </p>
                 </div>
-
                 {selectedEntry.notes && (
                   <div className="bg-gray-50 rounded-lg p-3 col-span-2">
                     <p className="text-[10px] text-gray-400">Notes</p>
                     <p className="text-gray-700 mt-1">{selectedEntry.notes}</p>
                   </div>
                 )}
-
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
                   <p className="text-[10px] text-gray-400">Source</p>
                   <p className="text-xs font-semibold">
                     {selectedEntry.isStudent ? "Admission Form" : "CRM Manual"}
                   </p>
                 </div>
-
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
                   <p className="text-[10px] text-gray-400">Entered By / On</p>
                   <p className="text-xs">

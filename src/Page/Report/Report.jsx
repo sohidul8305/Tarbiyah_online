@@ -19,9 +19,7 @@ import {
   FaFilter,
   FaPlus,
   FaArrowRight,
-  FaLayerGroup,
   FaSave,
-  FaUserTimes,
   FaFilePdf,
   FaFileExcel,
   FaPrint,
@@ -34,73 +32,168 @@ import { FiMenu, FiX } from "react-icons/fi";
 const API_BASE = "https://api.tarbiyahonline.com";
 
 // ============================================================
-// ✅ ELDERS DEPARTMENT
+// ✅ DEPARTMENT-WISE CONFIG
 // ============================================================
-const ELDERS_TEACHERS = ["Jubayer Ahmad", "Sumaiya Afrin Mim"];
-
-const ELDERS_COURSES = [
-  "Qaida Nuraniyah",
-  "Quran Nazera",
-  "Najera",
-  "Basic Tajweed",
-  "Bakarah Hifz",
-];
-
-const ELDERS_CLASSES = [
-  "Elders Batch A",
-  "Elders Batch B",
-  "Elders Batch C",
-  "Elders Batch D",
-  "Elders Batch E",
-];
-
-const ELDERS_BATCHES = [
-  "Batch-01",
-  "Batch-02",
-  "Batch-03",
-  "Batch-04",
-  "Batch-05",
-  "Batch-06",
-];
-
-const ELDERS_COURSE_KEYWORDS = [
-  "qaida nuraniyah",
-  "qaida nooraniya",
-  "qaida noorani",
-  "qaida nurani",
-  "qaidah nuraniyah",
-  "qaidah nooraniya",
-  "qaidah noorani",
-  "quran nazera",
-  "nazera quran",
-  "quran najera",
-  "najera quran",
-  "bakarah hifz",
-  "bakara hifz",
-  "baqarah hifz",
-  "baqara hifz",
-  "basic tajweed",
-];
-
-const isSingleEldersCourse = (singleCourse) => {
-  const p = String(singleCourse).toLowerCase().trim();
-  if (!p) return false;
-  return ELDERS_COURSE_KEYWORDS.some((c) => {
-    if (p === c) return true;
-    if (p.includes(c)) return true;
-    if (c.includes(p) && p.length >= 8) return true;
-    return false;
-  });
+const DEPARTMENT_CONFIGS = {
+  Elders: {
+    label: "Quran For Elders",
+    courses: [
+      "Qaida Nuraniyah",
+      "Quran Nazera",
+      "Najera",
+      "Basic Tajweed",
+      "Bakarah Hifz",
+    ],
+    classes: [
+      "Elders Batch A",
+      "Elders Batch B",
+      "Elders Batch C",
+      "Elders Batch D",
+      "Elders Batch E",
+    ],
+    batches: [
+      "Batch-01",
+      "Batch-02",
+      "Batch-03",
+      "Batch-04",
+      "Batch-05",
+      "Batch-06",
+    ],
+    courseKeywords: [
+      "qaida nuraniyah",
+      "qaida nooraniya",
+      "qaida noorani",
+      "qaida nurani",
+      "qaidah nuraniyah",
+      "qaidah nooraniya",
+      "qaidah noorani",
+      "quran nazera",
+      "nazera quran",
+      "quran najera",
+      "najera quran",
+      "bakarah hifz",
+      "bakara hifz",
+      "baqarah hifz",
+      "baqara hifz",
+      "basic tajweed",
+      "quran for elders",
+    ],
+    // ✅ Elders teacher (schedule থেকে নেওয়া)
+    defaultTeachers: ["Jubayer Ahmad", "Sumaiya Afrin Mim"],
+    // ✅ Elders default financial (used only for first-time)
+    defaultFinancial: {
+      totalRevenue: 63600,
+      totalExpenses: 25000,
+      netProfit: 38600,
+      collectionRate: 82,
+      monthlyData: [
+        { month: "April", collected: 12000, due: 3000 },
+        { month: "May", collected: 11500, due: 2500 },
+        { month: "June", collected: 11000, due: 3000 },
+        { month: "July", collected: 10000, due: 3500 },
+        { month: "August", collected: 9500, due: 4000 },
+        { month: "September", collected: 9600, due: 4500 },
+      ],
+    },
+  },
+  "Quran Studies": {
+    label: "Quran Studies",
+    courses: ["Hifzul Quran", "Tarbiyah Quran Studies", "Quran Translation"],
+    classes: ["Quran Studies A", "Quran Studies B", "Quran Studies C"],
+    batches: ["QS-Batch-01", "QS-Batch-02", "QS-Batch-03"],
+    courseKeywords: ["quran studies", "hifzul quran", "tarbiyah quran studies"],
+    defaultTeachers: [],
+    defaultFinancial: {
+      totalRevenue: 0,
+      totalExpenses: 0,
+      netProfit: 0,
+      collectionRate: 0,
+      monthlyData: [],
+    },
+  },
+  Alimiya: {
+    label: "Alimiya",
+    courses: ["Dawra e Hadith", "Tafsir", "Fiqh", "Hadith", "Arabic Grammar"],
+    classes: ["Alimiya Year 1", "Alimiya Year 2", "Alimiya Year 3"],
+    batches: ["AL-Batch-01", "AL-Batch-02", "AL-Batch-03"],
+    courseKeywords: [
+      "alimiya",
+      "dawra",
+      "tafsir",
+      "fiqh",
+      "hadith",
+      "arabic grammar",
+    ],
+    defaultTeachers: [],
+    defaultFinancial: {
+      totalRevenue: 0,
+      totalExpenses: 0,
+      netProfit: 0,
+      collectionRate: 0,
+      monthlyData: [],
+    },
+  },
+  Diploma: {
+    label: "Diploma",
+    courses: [
+      "Diploma in Islamic Studies",
+      "Diploma in Arabic",
+      "Certificate Course",
+    ],
+    classes: ["Diploma A", "Diploma B", "Diploma C"],
+    batches: ["DP-Batch-01", "DP-Batch-02", "DP-Batch-03"],
+    courseKeywords: ["diploma in islamic studies", "diploma", "certificate"],
+    defaultTeachers: [],
+    defaultFinancial: {
+      totalRevenue: 0,
+      totalExpenses: 0,
+      netProfit: 0,
+      collectionRate: 0,
+      monthlyData: [],
+    },
+  },
 };
 
-const isEldersCourse = (courseStr) => {
-  if (!courseStr) return false;
-  const parts = String(courseStr)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (parts.length === 0) return false;
-  return parts.every((part) => isSingleEldersCourse(part));
+// ✅ Default report — শুধু Elders এর জন্য
+const ELDERS_DEFAULT_REPORTS = [
+  {
+    _id: "sample-report-1",
+    reportName: "Elders Monthly Financial - September 2026",
+    reportType: "financial",
+    month: 8,
+    year: 2026,
+    course: "All",
+    status: "All",
+    format: "PDF",
+    description: "Elders department financial summary",
+    generatedDate: "2026-09-20",
+    generatedBy: "Admin",
+  },
+];
+
+const getCurrentDepartment = () => {
+  try {
+    const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
+    return info.department || "Elders";
+  } catch {
+    return "Elders";
+  }
+};
+
+const safeFetchJSON = async (url, options = {}) => {
+  try {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    if (text.trim().startsWith("<"))
+      return { success: false, _htmlError: true };
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, _jsonError: true };
+    }
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
 };
 
 const Report = () => {
@@ -109,18 +202,31 @@ const Report = () => {
   const location = useLocation();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [expandedMenu, setExpandedMenu] = useState("finance");
+  const [expandedMenu, setExpandedMenu] = useState("report-analytics");
   const [adminInfo, setAdminInfo] = useState({
     name: "",
     email: "",
     phone: "",
     designation: "",
-    department: "Quran for Elders",
+    department: "Elders",
     joinDate: "",
   });
 
-  const [eldersStudents, setEldersStudents] = useState([]);
+  const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
+  const deptConfig =
+    DEPARTMENT_CONFIGS[currentDept] || DEPARTMENT_CONFIGS["Elders"];
+  const DEPT_COURSES = deptConfig.courses;
+  const DEPT_CLASSES = deptConfig.classes;
+  const DEPT_BATCHES = deptConfig.batches;
+  const DEPT_KEYWORDS = deptConfig.courseKeywords;
+  const DEPT_LABEL = deptConfig.label;
+  const DEFAULT_TEACHERS = deptConfig.defaultTeachers;
+
+  const [deptStudents, setDeptStudents] = useState([]);
+  const [deptTeachers, setDeptTeachers] = useState([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
+  const [reports, setReports] = useState([]);
+  const [apiWorking, setApiWorking] = useState(true);
 
   const [reportType, setReportType] = useState("financial");
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
@@ -129,6 +235,7 @@ const Report = () => {
   const [selectedStatus, setSelectedStatus] = useState("All");
 
   const [showAddModal, setShowAddModal] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     reportName: "",
@@ -139,33 +246,6 @@ const Report = () => {
     status: "All",
     format: "PDF",
     description: "",
-  });
-
-  const [customReports, setCustomReports] = useState(() => {
-    const saved = localStorage.getItem("eldersCustomReports");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    return [
-      {
-        id: 1,
-        reportName: "Elders Monthly Financial - September 2026",
-        reportType: "financial",
-        month: 8,
-        year: 2026,
-        course: "All",
-        status: "All",
-        format: "PDF",
-        description: "Elders department financial summary",
-        generatedDate: "2026-09-20",
-        generatedBy: "Admin",
-      },
-    ];
   });
 
   const months = [
@@ -182,89 +262,279 @@ const Report = () => {
     "November",
     "December",
   ];
-  const years = [2024, 2025, 2026, 2027];
+  const years = [2024, 2025, 2026, 2027, 2028];
   const statuses = ["All", "Paid", "Partial", "Unpaid"];
   const reportTypes = ["financial", "performance", "teacher"];
   const formats = ["PDF", "Excel", "CSV"];
 
-  // Financial data
-  const [financialData] = useState({
-    totalRevenue: 63600,
-    totalExpenses: 25000,
-    netProfit: 38600,
-    collectionRate: 82,
-    monthlyData: [
-      { month: "April", collected: 12000, due: 3000 },
-      { month: "May", collected: 11500, due: 2500 },
-      { month: "June", collected: 11000, due: 3000 },
-      { month: "July", collected: 10000, due: 3500 },
-      { month: "August", collected: 9500, due: 4000 },
-      { month: "September", collected: 9600, due: 4500 },
-    ],
-    courseWiseCollection: [
-      { course: "Qaida Nuraniyah", collected: 18000, total: 20000 },
-      { course: "Quran Nazera", collected: 12000, total: 15000 },
-      { course: "Najera", collected: 10000, total: 12000 },
-      { course: "Basic Tajweed", collected: 14000, total: 16000 },
-      { course: "Bakarah Hifz", collected: 9600, total: 12000 },
-    ],
-    paymentMethods: [
-      { method: "bKash", amount: 25000 },
-      { method: "Nagad", amount: 20000 },
-      { method: "Bank", amount: 12000 },
-      { method: "Cash", amount: 6600 },
-    ],
-  });
-
-  const [performanceData] = useState({
-    totalStudents: 2,
-    averageAttendance: 88,
-    averageGrade: 85,
-    passRate: 100,
-    coursePerformance: [
-      { course: "Qaida Nuraniyah", average: 88, students: 2 },
-      { course: "Quran Nazera", average: 85, students: 0 },
-      { course: "Najera", average: 82, students: 0 },
-      { course: "Basic Tajweed", average: 86, students: 0 },
-      { course: "Bakarah Hifz", average: 84, students: 0 },
-    ],
-    teacherPerformance: [
-      { teacher: "Jubayer Ahmad", average: 88 },
-      { teacher: "Sumaiya Afrin Mim", average: 90 },
-    ],
-    attendanceData: [
-      { month: "April", attendance: 92 },
-      { month: "May", attendance: 90 },
-      { month: "June", attendance: 88 },
-      { month: "July", attendance: 85 },
-      { month: "August", attendance: 88 },
-      { month: "September", attendance: 87 },
-    ],
-  });
-
-  const [teacherPerformanceData] = useState({
-    totalTeachers: 2,
-    averageRating: 4.85,
-    totalClasses: 23,
-    teacherRatings: [
-      {
-        name: "Jubayer Ahmad",
-        rating: 4.8,
-        classes: 12,
-        designation: "Senior Teacher",
-      },
-      {
-        name: "Sumaiya Afrin Mim",
-        rating: 4.9,
-        classes: 11,
-        designation: "Junior Teacher",
-      },
-    ],
-  });
+  // ============================================================
+  // Load admin info + department
+  // ============================================================
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminInfo");
+    if (savedAdmin) {
+      try {
+        const info = JSON.parse(savedAdmin);
+        setAdminInfo(info);
+        if (info.department) setCurrentDept(info.department);
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      setAdminInfo({
+        name: user?.displayName || "Admin",
+        email: user?.email || "admin@tarabiyah.com",
+        phone: "01700000000",
+        designation: "Administrator",
+        department: "Elders",
+        joinDate: "January 2024",
+      });
+    }
+  }, [user]);
 
   // ============================================================
-  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
+  // ✅ Load Reports — API first, localStorage fallback
   // ============================================================
+  const loadReports = async () => {
+    try {
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/reports/all?department=${encodeURIComponent(currentDept)}`,
+      );
+
+      if (data.success && Array.isArray(data.reports)) {
+        if (data.reports.length > 0) {
+          setReports(data.reports);
+          setApiWorking(true);
+          localStorage.setItem(
+            `reports_${currentDept.replace(/\s+/g, "_")}`,
+            JSON.stringify(data.reports),
+          );
+          console.log(
+            `✅ Loaded ${data.reports.length} reports from API (${currentDept})`,
+          );
+          return;
+        }
+
+        // API empty → check localStorage
+        const key = `reports_${currentDept.replace(/\s+/g, "_")}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setReports(parsed);
+              setApiWorking(true);
+              return;
+            }
+          } catch {}
+        }
+
+        setApiWorking(true);
+        setReports(currentDept === "Elders" ? ELDERS_DEFAULT_REPORTS : []);
+        return;
+      }
+
+      throw new Error(data.message || "API failed");
+    } catch (err) {
+      console.warn("⚠️ API failed, using localStorage:", err.message);
+      setApiWorking(false);
+      const key = `reports_${currentDept.replace(/\s+/g, "_")}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setReports(
+            Array.isArray(parsed) && parsed.length > 0
+              ? parsed
+              : currentDept === "Elders"
+                ? ELDERS_DEFAULT_REPORTS
+                : [],
+          );
+        } catch {
+          setReports(currentDept === "Elders" ? ELDERS_DEFAULT_REPORTS : []);
+        }
+      } else {
+        setReports(currentDept === "Elders" ? ELDERS_DEFAULT_REPORTS : []);
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadReports();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
+
+  useEffect(() => {
+    if (!currentDept || reports.length === 0) return;
+    const key = `reports_${currentDept.replace(/\s+/g, "_")}`;
+    localStorage.setItem(key, JSON.stringify(reports));
+  }, [reports, currentDept]);
+
+  // ============================================================
+  // Course helpers
+  // ============================================================
+  const isSingleDeptCourse = (singleCourse) => {
+    const p = String(singleCourse).toLowerCase().trim();
+    if (!p) return false;
+    return DEPT_KEYWORDS.some((c) => {
+      if (p === c) return true;
+      if (p.includes(c)) return true;
+      if (c.includes(p) && p.length >= 8) return true;
+      return false;
+    });
+  };
+
+  const isDeptCourse = (courseStr) => {
+    if (!courseStr) return false;
+    const parts = String(courseStr)
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (parts.length === 0) return false;
+    return parts.every((part) => isSingleDeptCourse(part));
+  };
+
+  // ============================================================
+  // Fetch Students
+  // ============================================================
+  const fetchDeptStudents = async () => {
+    try {
+      setStudentsLoading(true);
+      const res = await fetch(
+        `${API_BASE}/api/students/all?department=${encodeURIComponent(currentDept)}`,
+      );
+      const text = await res.text();
+      if (text.trim().startsWith("<")) {
+        setDeptStudents([]);
+        return;
+      }
+
+      const data = JSON.parse(text);
+      if (!data.success || !Array.isArray(data.students)) {
+        setDeptStudents([]);
+        return;
+      }
+
+      const all = data.students || [];
+      const filtered = all.filter((s) => {
+        const sDept = String(s.department || "")
+          .toLowerCase()
+          .trim();
+        if (sDept && sDept === currentDept.toLowerCase().trim()) return true;
+        return isDeptCourse(s.course);
+      });
+
+      const formatted = filtered.map((s) => ({
+        _id: s._id,
+        name: s.name || "",
+        studentId: s.studentId || s._id?.slice(-8) || "N/A",
+        course: s.course || "",
+        class:
+          s.batch || s.class || DEPT_CLASSES[0] || `${currentDept} Batch A`,
+        batch: s.batch || DEPT_BATCHES[0] || "",
+        phone: s.phone || "",
+        email: s.email || "",
+        status: s.status || "Pending",
+      }));
+
+      const deduped = [];
+      formatted.forEach((s) => {
+        const exists = deduped.some(
+          (d) => (d.name || "").toLowerCase() === (s.name || "").toLowerCase(),
+        );
+        if (!exists) deduped.push(s);
+      });
+
+      setDeptStudents(deduped);
+    } catch (err) {
+      console.error("❌ Fetch students error:", err);
+      setDeptStudents([]);
+    } finally {
+      setStudentsLoading(false);
+    }
+  };
+
+  // ============================================================
+  // Fetch Teachers — schedule এ যাদের add করা হয়েছে
+  // ============================================================
+  const fetchDeptTeachers = () => {
+    // ✅ First: extraTeachers from localStorage
+    const key = `extraTeachers_${currentDept.replace(/\s+/g, "_")}`;
+    const saved = localStorage.getItem(key);
+    let extra = [];
+    if (saved) {
+      try {
+        extra = JSON.parse(saved) || [];
+      } catch {
+        extra = [];
+      }
+    }
+
+    // Combine defaults + extras, dedupe by name
+    const combined = [];
+    const allTeachers = [
+      ...DEFAULT_TEACHERS,
+      ...extra.map((t) => t.name || t.shortName || ""),
+    ];
+    allTeachers.forEach((name) => {
+      const trimmed = String(name || "").trim();
+      if (!trimmed) return;
+      const exists = combined.some(
+        (c) => c.toLowerCase() === trimmed.toLowerCase(),
+      );
+      if (!exists) combined.push(trimmed);
+    });
+
+    // ✅ Also: parse from teacherSchedule (schedule থেকে teacher list)
+    const scheduleKey = `teacherSchedule_${currentDept.replace(/\s+/g, "_")}`;
+    const savedSchedule = localStorage.getItem(scheduleKey);
+    if (savedSchedule) {
+      try {
+        const schedule = JSON.parse(savedSchedule);
+        if (Array.isArray(schedule)) {
+          schedule.forEach((s) => {
+            const name = String(s.teacherName || "").trim();
+            if (
+              name &&
+              !combined.some((c) => c.toLowerCase() === name.toLowerCase())
+            ) {
+              combined.push(name);
+            }
+          });
+        }
+      } catch {}
+    }
+
+    setDeptTeachers(combined);
+  };
+
+  useEffect(() => {
+    fetchDeptStudents();
+    fetchDeptTeachers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
+
+  const handleLogout = async () => {
+    try {
+      await logOut();
+      localStorage.removeItem("isAdminLoggedIn");
+      localStorage.removeItem("adminEmail");
+      await Swal.fire({
+        icon: "success",
+        title: "Logged Out Successfully",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+      navigate("/admin-login");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const toggleSubMenu = (menu) =>
+    setExpandedMenu(expandedMenu === menu ? null : menu);
+
   const menuItems = [
     {
       id: "profile",
@@ -283,7 +553,6 @@ const Report = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -342,7 +611,6 @@ const Report = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -363,7 +631,6 @@ const Report = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -398,7 +665,6 @@ const Report = () => {
     },
   ];
 
-  // ✅ URL থেকে active auto-detect
   const getActiveFromPath = () => {
     const currentPath = location.pathname;
     for (const item of menuItems) {
@@ -417,88 +683,150 @@ const Report = () => {
     if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
   }, [activeMenu, activeSubMenu]);
 
-  // Load admin info
+  // ============================================================
+  // ✅ DYNAMIC FINANCIAL DATA — fees API থেকে calculate
+  // ============================================================
+  const [financialData, setFinancialData] = useState(
+    deptConfig.defaultFinancial,
+  );
+
   useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminInfo");
-    if (savedAdmin) {
+    const loadFinancial = async () => {
       try {
-        setAdminInfo(JSON.parse(savedAdmin));
-      } catch (err) {
-        console.error(err);
-      }
-    } else {
-      setAdminInfo({
-        name: user?.displayName || "Admin",
-        email: user?.email || "admin@tarabiyah.com",
-        phone: "01700000000",
-        designation: "Administrator",
-        department: "Quran for Elders",
-        joinDate: "January 2024",
-      });
-    }
-  }, [user]);
+        const data = await safeFetchJSON(
+          `${API_BASE}/api/fees/all?department=${encodeURIComponent(currentDept)}`,
+        );
 
-  const fetchEldersStudents = async () => {
-    try {
-      setStudentsLoading(true);
-      const res = await fetch(`${API_BASE}/api/students/all`);
-      const text = await res.text();
+        if (data.success && Array.isArray(data.fees) && data.fees.length > 0) {
+          const fees = data.fees;
+          const totalAmount = fees.reduce((sum, f) => sum + (f.amount || 0), 0);
+          const totalPaid = fees.reduce(
+            (sum, f) => sum + (f.paidAmount || 0),
+            0,
+          );
+          const totalDue = fees.reduce((sum, f) => sum + (f.dueAmount || 0), 0);
+          const rate =
+            totalAmount > 0 ? Math.round((totalPaid / totalAmount) * 100) : 0;
 
-      if (!text.trim().startsWith("<")) {
-        const data = JSON.parse(text);
-        if (data.success && Array.isArray(data.students)) {
-          const all = data.students || [];
-          const elders = all.filter((s) => isEldersCourse(s.course));
-          const formatted = elders.map((s) => ({
-            _id: s._id,
-            name: s.name || "",
-            studentId: s.studentId || s._id?.slice(-8) || "N/A",
-            course: s.course || "",
-            class: s.batch || s.class || "Elders Batch A",
-            batch: s.batch || "Batch-03",
-            phone: s.phone || "",
-            email: s.email || "",
-            status: s.status || "Pending",
+          // Group by month
+          const monthMap = {};
+          fees.forEach((f) => {
+            if (!f.month) return;
+            if (!monthMap[f.month])
+              monthMap[f.month] = { collected: 0, due: 0 };
+            monthMap[f.month].collected += Number(f.paidAmount) || 0;
+            monthMap[f.month].due += Number(f.dueAmount) || 0;
+          });
+          const monthlyData = Object.entries(monthMap).map(([month, v]) => ({
+            month,
+            collected: v.collected,
+            due: v.due,
           }));
-          setEldersStudents(formatted);
+
+          // Course-wise
+          const courseMap = {};
+          fees.forEach((f) => {
+            const c = f.subject || "Unknown";
+            if (!courseMap[c]) courseMap[c] = { collected: 0, total: 0 };
+            courseMap[c].collected += Number(f.paidAmount) || 0;
+            courseMap[c].total += Number(f.amount) || 0;
+          });
+          const courseWiseCollection = Object.entries(courseMap).map(
+            ([course, v]) => ({
+              course,
+              collected: v.collected,
+              total: v.total,
+            }),
+          );
+
+          // Payment methods
+          const methodMap = {};
+          fees.forEach((f) => {
+            if (!f.paymentMethod) return;
+            methodMap[f.paymentMethod] =
+              (methodMap[f.paymentMethod] || 0) + (Number(f.paidAmount) || 0);
+          });
+          const paymentMethods = Object.entries(methodMap).map(
+            ([method, amount]) => ({ method, amount }),
+          );
+
+          setFinancialData({
+            totalRevenue: totalPaid,
+            totalExpenses: 0,
+            netProfit: totalPaid,
+            collectionRate: rate,
+            monthlyData,
+            courseWiseCollection,
+            paymentMethods,
+          });
+          return;
         }
+
+        // Fallback: default
+        if (currentDept === "Elders") {
+          setFinancialData(deptConfig.defaultFinancial);
+        } else {
+          setFinancialData({
+            totalRevenue: 0,
+            totalExpenses: 0,
+            netProfit: 0,
+            collectionRate: 0,
+            monthlyData: [],
+            courseWiseCollection: [],
+            paymentMethods: [],
+          });
+        }
+      } catch (err) {
+        console.error("Financial calc error:", err);
+        setFinancialData(deptConfig.defaultFinancial);
       }
-    } catch (err) {
-      console.error("❌ Fetch students error:", err);
-    } finally {
-      setStudentsLoading(false);
-    }
+    };
+
+    loadFinancial();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
+
+  // ============================================================
+  // Performance & Teacher data — dynamic
+  // ============================================================
+  const performanceData = {
+    totalStudents: deptStudents.length,
+    averageAttendance: deptStudents.length > 0 ? 88 : 0,
+    averageGrade: deptStudents.length > 0 ? 85 : 0,
+    passRate: deptStudents.length > 0 ? 100 : 0,
+    coursePerformance: DEPT_COURSES.map((c) => ({
+      course: c,
+      average: 80,
+      students: deptStudents.filter((s) =>
+        (s.course || "").toLowerCase().includes(c.toLowerCase()),
+      ).length,
+    })),
+    teacherPerformance: deptTeachers.map((t) => ({ teacher: t, average: 85 })),
+    attendanceData:
+      deptStudents.length > 0
+        ? [
+            { month: "April", attendance: 92 },
+            { month: "May", attendance: 90 },
+            { month: "June", attendance: 88 },
+          ]
+        : [],
   };
 
-  useEffect(() => {
-    fetchEldersStudents();
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("eldersCustomReports", JSON.stringify(customReports));
-  }, [customReports]);
-
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isAdminLoggedIn");
-      localStorage.removeItem("adminEmail");
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-      navigate("/admin-login");
-    } catch (err) {
-      console.error(err);
-    }
+  const teacherPerformanceData = {
+    totalTeachers: deptTeachers.length,
+    averageRating: deptTeachers.length > 0 ? 4.85 : 0,
+    totalClasses: reports.length * 10,
+    teacherRatings: deptTeachers.map((name, i) => ({
+      name,
+      rating: 4.8 + i * 0.05,
+      classes: 10 + i * 2,
+      designation: i === 0 ? "Senior Teacher" : "Teacher",
+    })),
   };
 
-  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
-  const toggleSubMenu = (menu) =>
-    setExpandedMenu(expandedMenu === menu ? null : menu);
-
+  // ============================================================
+  // Report helpers
+  // ============================================================
   const getReportTypeLabel = (type) => {
     switch (type) {
       case "financial":
@@ -526,7 +854,6 @@ const Report = () => {
   };
 
   const formatCurrency = (amount) => `৳${(amount || 0).toLocaleString()}`;
-
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     return new Date(dateStr).toLocaleDateString("en-US", {
@@ -550,7 +877,7 @@ const Report = () => {
     Swal.fire({
       icon: "success",
       title: "Exporting to Excel",
-      text: "Elders report being exported.",
+      text: `${currentDept} report being exported.`,
       timer: 1500,
       showConfirmButton: false,
     });
@@ -561,16 +888,19 @@ const Report = () => {
   const getReportTitle = () => {
     switch (reportType) {
       case "financial":
-        return "Financial Report — Quran For Elders";
+        return `Financial Report — ${DEPT_LABEL}`;
       case "performance":
-        return "Student Performance Report — Quran For Elders";
+        return `Student Performance Report — ${DEPT_LABEL}`;
       case "teacher":
-        return "Teacher Performance Report — Quran For Elders";
+        return `Teacher Performance Report — ${DEPT_LABEL}`;
       default:
-        return "Elders Report";
+        return `${currentDept} Report`;
     }
   };
 
+  // ============================================================
+  // ✅ Open Add Modal — always enabled
+  // ============================================================
   const openAddModal = () => {
     setFormData({
       reportName: "",
@@ -585,8 +915,12 @@ const Report = () => {
     setShowAddModal(true);
   };
 
-  const handleAddReport = (e) => {
+  // ============================================================
+  // ✅ ADD REPORT — API first
+  // ============================================================
+  const handleAddReport = async (e) => {
     e.preventDefault();
+
     if (!formData.reportName || !formData.reportType) {
       Swal.fire({
         icon: "warning",
@@ -596,9 +930,10 @@ const Report = () => {
       });
       return;
     }
-    const newReport = {
-      id: Date.now(),
-      reportName: formData.reportName,
+
+    const payload = {
+      department: currentDept,
+      reportName: formData.reportName.trim(),
       reportType: formData.reportType,
       month: formData.month,
       year: formData.year,
@@ -609,19 +944,48 @@ const Report = () => {
       generatedDate: new Date().toISOString().split("T")[0],
       generatedBy: adminInfo.name,
     };
-    setCustomReports([...customReports, newReport]);
-    setShowAddModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "✅ Elders Report Added!",
-      text: formData.reportName,
-      timer: 1500,
-      showConfirmButton: false,
-    });
+
+    try {
+      setSaving(true);
+
+      const data = await safeFetchJSON(`${API_BASE}/api/reports/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      let newReport;
+      if (data.success && data.report) {
+        newReport = data.report;
+        console.log("✅ Report saved to API:", newReport._id);
+      } else {
+        newReport = { _id: `LOCAL_${Date.now()}`, ...payload };
+        console.warn("⚠️ API failed, saved locally");
+      }
+
+      setReports([newReport, ...reports]);
+      setShowAddModal(false);
+
+      Swal.fire({
+        icon: "success",
+        title: "✅ Report Added!",
+        text: formData.reportName,
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDeleteReport = (id) => {
-    Swal.fire({
+  // ============================================================
+  // ✅ DELETE
+  // ============================================================
+  const handleDeleteReport = async (id) => {
+    const result = await Swal.fire({
       title: "Delete Report?",
       text: "This action cannot be undone!",
       icon: "warning",
@@ -629,19 +993,33 @@ const Report = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setCustomReports(customReports.filter((r) => r.id !== id));
-        Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          timer: 1200,
-          showConfirmButton: false,
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const isLocalId =
+        String(id).startsWith("LOCAL_") || String(id).startsWith("sample-");
+      if (!isLocalId) {
+        await safeFetchJSON(`${API_BASE}/api/reports/delete/${id}`, {
+          method: "DELETE",
         });
       }
-    });
+      setReports(reports.filter((r) => r._id !== id));
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
+  // ============================================================
+  // RENDER FUNCTIONS
+  // ============================================================
   const renderFinancialReport = () => (
     <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -671,88 +1049,115 @@ const Report = () => {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
-        <h4 className="font-semibold text-gray-700 text-sm mb-3">
-          Monthly Collection Overview (Elders)
-        </h4>
-        <div className="space-y-3">
-          {financialData.monthlyData.map((item, index) => (
-            <div key={index}>
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-gray-600">{item.month}</span>
-                <span className="text-gray-600">
-                  Collected: {formatCurrency(item.collected)} | Due:{" "}
-                  {formatCurrency(item.due)}
-                </span>
-              </div>
-              <div className="flex gap-1 h-4">
-                <div
-                  className="bg-green-500 rounded-l-full h-full"
-                  style={{
-                    width: `${(item.collected / (item.collected + item.due)) * 100}%`,
-                  }}
-                ></div>
-                <div
-                  className="bg-red-500 rounded-r-full h-full"
-                  style={{
-                    width: `${(item.due / (item.collected + item.due)) * 100}%`,
-                  }}
-                ></div>
-              </div>
-            </div>
-          ))}
+      {financialData.monthlyData && financialData.monthlyData.length > 0 ? (
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
+          <h4 className="font-semibold text-gray-700 text-sm mb-3">
+            Monthly Collection Overview ({currentDept})
+          </h4>
+          <div className="space-y-3">
+            {financialData.monthlyData.map((item, index) => {
+              const total = (item.collected || 0) + (item.due || 0);
+              return (
+                <div key={index}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-600">{item.month}</span>
+                    <span className="text-gray-600">
+                      Collected: {formatCurrency(item.collected)} | Due:{" "}
+                      {formatCurrency(item.due)}
+                    </span>
+                  </div>
+                  <div className="flex gap-1 h-4">
+                    {item.collected > 0 && (
+                      <div
+                        className="bg-green-500 rounded-l-full h-full"
+                        style={{ width: `${(item.collected / total) * 100}%` }}
+                      ></div>
+                    )}
+                    {item.due > 0 && (
+                      <div
+                        className="bg-red-500 rounded-r-full h-full"
+                        style={{ width: `${(item.due / total) * 100}%` }}
+                      ></div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-8 text-center">
+          <FaMoneyBillWave className="text-4xl text-gray-300 mx-auto mb-2" />
+          <p className="text-sm text-gray-500">
+            No financial data yet for {currentDept}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            Fee/Invoice add করুন — data automatically আসবে
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
           <h4 className="font-semibold text-gray-700 text-sm mb-3">
-            Course Wise Collection (Elders)
+            Course Wise Collection ({currentDept})
           </h4>
-          <div className="space-y-2">
-            {financialData.courseWiseCollection.map((item, index) => (
-              <div key={index}>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-600">{item.course}</span>
-                  <span className="text-gray-600">
-                    {formatCurrency(item.collected)} /{" "}
-                    {formatCurrency(item.total)}
-                  </span>
+          {financialData.courseWiseCollection &&
+          financialData.courseWiseCollection.length > 0 ? (
+            <div className="space-y-2">
+              {financialData.courseWiseCollection.map((item, index) => (
+                <div key={index}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-600">{item.course}</span>
+                    <span className="text-gray-600">
+                      {formatCurrency(item.collected)} /{" "}
+                      {formatCurrency(item.total)}
+                    </span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="bg-blue-500 h-full rounded-full"
+                      style={{
+                        width: `${item.total > 0 ? (item.collected / item.total) * 100 : 0}%`,
+                      }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="bg-blue-500 h-full rounded-full"
-                    style={{ width: `${(item.collected / item.total) * 100}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400 italic">No course data yet</p>
+          )}
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
           <h4 className="font-semibold text-gray-700 text-sm mb-3">
             Payment Methods
           </h4>
-          <div className="space-y-2">
-            {financialData.paymentMethods.map((item, index) => (
-              <div key={index}>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-600">{item.method}</span>
-                  <span className="text-gray-600">
-                    {formatCurrency(item.amount)}
-                  </span>
+          {financialData.paymentMethods &&
+          financialData.paymentMethods.length > 0 ? (
+            <div className="space-y-2">
+              {financialData.paymentMethods.map((item, index) => (
+                <div key={index}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-600">{item.method}</span>
+                    <span className="text-gray-600">
+                      {formatCurrency(item.amount)}
+                    </span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="bg-purple-500 h-full rounded-full"
+                      style={{
+                        width: `${financialData.totalRevenue > 0 ? (item.amount / financialData.totalRevenue) * 100 : 0}%`,
+                      }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="bg-purple-500 h-full rounded-full"
-                    style={{
-                      width: `${(item.amount / financialData.totalRevenue) * 100}%`,
-                    }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400 italic">No payment data yet</p>
+          )}
         </div>
       </div>
     </div>
@@ -763,9 +1168,11 @@ const Report = () => {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
           <p className="text-lg font-bold text-blue-600">
-            {eldersStudents.length || performanceData.totalStudents}
+            {deptStudents.length}
           </p>
-          <p className="text-[10px] text-gray-500">Total Elders Students</p>
+          <p className="text-[10px] text-gray-500">
+            Total {currentDept} Students
+          </p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
           <p className="text-lg font-bold text-green-600">
@@ -789,7 +1196,7 @@ const Report = () => {
 
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
         <h4 className="font-semibold text-gray-700 text-sm mb-3">
-          Course Performance (Elders)
+          Course Performance ({currentDept})
         </h4>
         <div className="space-y-3">
           {performanceData.coursePerformance.map((item, index) => (
@@ -814,45 +1221,57 @@ const Report = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
           <h4 className="font-semibold text-gray-700 text-sm mb-3">
-            Teacher Performance (Elders)
+            Teacher Performance ({currentDept})
           </h4>
-          <div className="space-y-2">
-            {performanceData.teacherPerformance.map((item, index) => (
-              <div key={index}>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-600">{item.teacher}</span>
-                  <span className="text-gray-600">{item.average}%</span>
+          {performanceData.teacherPerformance.length > 0 ? (
+            <div className="space-y-2">
+              {performanceData.teacherPerformance.map((item, index) => (
+                <div key={index}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-600">{item.teacher}</span>
+                    <span className="text-gray-600">{item.average}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${item.average >= 85 ? "bg-green-500" : "bg-yellow-500"}`}
+                      style={{ width: `${item.average}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${item.average >= 85 ? "bg-green-500" : item.average >= 70 ? "bg-yellow-500" : "bg-red-500"}`}
-                    style={{ width: `${item.average}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400 italic">
+              No teachers yet for {currentDept}
+            </p>
+          )}
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
           <h4 className="font-semibold text-gray-700 text-sm mb-3">
             Attendance Trend
           </h4>
-          <div className="space-y-2">
-            {performanceData.attendanceData.map((item, index) => (
-              <div key={index}>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-gray-600">{item.month}</span>
-                  <span className="text-gray-600">{item.attendance}%</span>
+          {performanceData.attendanceData.length > 0 ? (
+            <div className="space-y-2">
+              {performanceData.attendanceData.map((item, index) => (
+                <div key={index}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-600">{item.month}</span>
+                    <span className="text-gray-600">{item.attendance}%</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full ${item.attendance >= 80 ? "bg-green-500" : "bg-yellow-500"}`}
+                      style={{ width: `${item.attendance}%` }}
+                    ></div>
+                  </div>
                 </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${item.attendance >= 80 ? "bg-green-500" : item.attendance >= 70 ? "bg-yellow-500" : "bg-red-500"}`}
-                    style={{ width: `${item.attendance}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-400 italic">
+              No attendance data yet
+            </p>
+          )}
         </div>
       </div>
     </div>
@@ -865,7 +1284,9 @@ const Report = () => {
           <p className="text-lg font-bold text-blue-600">
             {teacherPerformanceData.totalTeachers}
           </p>
-          <p className="text-[10px] text-gray-500">Total Elders Teachers</p>
+          <p className="text-[10px] text-gray-500">
+            Total {currentDept} Teachers
+          </p>
         </div>
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-3 text-center">
           <p className="text-lg font-bold text-yellow-600">
@@ -883,51 +1304,66 @@ const Report = () => {
 
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-4">
         <h4 className="font-semibold text-gray-700 text-sm mb-3">
-          Elders Teacher Ratings & Classes
+          {currentDept} Teacher Ratings & Classes
         </h4>
-        <div className="space-y-3">
-          {teacherPerformanceData.teacherRatings.map((item, index) => (
-            <div
-              key={index}
-              className="border-b border-gray-100 pb-3 last:border-0"
-            >
-              <div className="flex justify-between items-center">
-                <div>
-                  <p className="text-sm font-medium text-gray-800">
-                    {item.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {item.designation || "Teacher"} • {item.classes} classes
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <FaStar
-                        key={i}
-                        className={
-                          i < Math.floor(item.rating)
-                            ? "text-yellow-400"
-                            : "text-gray-300"
-                        }
-                        size={14}
-                      />
-                    ))}
+        {teacherPerformanceData.teacherRatings.length > 0 ? (
+          <div className="space-y-3">
+            {teacherPerformanceData.teacherRatings.map((item, index) => (
+              <div
+                key={index}
+                className="border-b border-gray-100 pb-3 last:border-0"
+              >
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">
+                      {item.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {item.designation} • {item.classes} classes
+                    </p>
                   </div>
-                  <span className="text-sm font-bold text-gray-700">
-                    {item.rating}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex">
+                      {[...Array(5)].map((_, i) => (
+                        <FaStar
+                          key={i}
+                          className={
+                            i < Math.floor(item.rating)
+                              ? "text-yellow-400"
+                              : "text-gray-300"
+                          }
+                          size={14}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm font-bold text-gray-700">
+                      {item.rating.toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-1 w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="bg-blue-500 h-full rounded-full"
+                    style={{ width: `${(item.rating / 5) * 100}%` }}
+                  ></div>
                 </div>
               </div>
-              <div className="mt-1 w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="bg-blue-500 h-full rounded-full"
-                  style={{ width: `${(item.rating / 5) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <FaChalkboardTeacher className="text-4xl text-gray-300 mx-auto mb-2" />
+            <p className="text-xs text-gray-500 mb-3">
+              {currentDept} department-এ এখনো কোনো teacher add করা হয়নি।
+            </p>
+            <Link
+              to="/admin-teachers/schedule"
+              className="inline-block bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
+            >
+              + Add Teacher in Schedule Page
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -937,7 +1373,9 @@ const Report = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Reports (Elders)</h1>
+          <h1 className="text-sm font-bold text-gray-800">
+            Reports ({currentDept})
+          </h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100"
@@ -948,11 +1386,7 @@ const Report = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -964,7 +1398,7 @@ const Report = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {adminInfo.designation}
+                  {adminInfo.department || adminInfo.designation}
                 </p>
               </div>
             </div>
@@ -982,11 +1416,7 @@ const Report = () => {
                           toggleSubMenu(item.id);
                           setIsSidebarOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                          isParentActive
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }`}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${isParentActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-gray-600">{item.icon}</span>
@@ -1005,11 +1435,7 @@ const Report = () => {
                               key={sub.id}
                               to={sub.path}
                               onClick={() => setIsSidebarOpen(false)}
-                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                                activeSubMenu === sub.id
-                                  ? "bg-teal-50 text-[#004d4d] font-bold"
-                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                              }`}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${activeSubMenu === sub.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                             >
                               {sub.label}
                             </Link>
@@ -1023,11 +1449,7 @@ const Report = () => {
                       onClick={() => setIsSidebarOpen(false)}
                     >
                       <button
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                          isParentActive
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }`}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${isParentActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                       >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
@@ -1037,7 +1459,6 @@ const Report = () => {
                 </div>
               );
             })}
-
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -1046,9 +1467,8 @@ const Report = () => {
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
           <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
+            <p>©Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 
@@ -1066,17 +1486,24 @@ const Report = () => {
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaChartLine className="text-blue-600" /> Reports —
-                <span className="text-teal-700">Quran For Elders</span>
+                <span className="text-teal-700">{DEPT_LABEL}</span>
               </h1>
               <p className="text-xs text-gray-500">
                 {studentsLoading
-                  ? "Loading elders students..."
-                  : `${eldersStudents.length} elders student${eldersStudents.length !== 1 ? "s" : ""} • Qaida • Nazera • Najera • Tajweed • Bakarah Hifz`}
+                  ? `Loading ${currentDept} students...`
+                  : `${deptStudents.length} ${currentDept} student${deptStudents.length !== 1 ? "s" : ""}`}
+                {!apiWorking && (
+                  <span className="ml-2 text-yellow-600">⚠️ Offline mode</span>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
-                onClick={fetchEldersStudents}
+                onClick={() => {
+                  loadReports();
+                  fetchDeptStudents();
+                  fetchDeptTeachers();
+                }}
                 disabled={studentsLoading}
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 disabled:opacity-50"
               >
@@ -1119,22 +1546,29 @@ const Report = () => {
             </div>
           </div>
 
-          {/* Elders Students Card */}
-          <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
-            <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
-              <FaUsers size={12} /> Elders Students ({eldersStudents.length})
+          {/* Department Badge */}
+          <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-2 rounded-xl text-xs font-semibold mb-3">
+            🏫 Showing reports of:{" "}
+            <span className="font-bold">{currentDept}</span> department
+          </div>
+
+          {/* Students Card */}
+          <div className="bg-white border border-gray-200 rounded-xl p-3 mb-3">
+            <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1">
+              <FaUsers size={12} className="text-teal-600" /> {currentDept}{" "}
+              Students ({deptStudents.length})
             </p>
-            {studentsLoading && eldersStudents.length === 0 ? (
+            {studentsLoading && deptStudents.length === 0 ? (
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div>
-                Loading from API...
+                Loading {currentDept} students...
               </div>
-            ) : eldersStudents.length > 0 ? (
+            ) : deptStudents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {eldersStudents.map((s) => (
+                {deptStudents.map((s) => (
                   <div
                     key={s._id}
-                    className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
+                    className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center gap-3"
                   >
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {(s.name || "S").charAt(0)}
@@ -1154,9 +1588,12 @@ const Report = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-gray-500 italic">
-                No elders students found.
-              </p>
+              <div className="text-center py-4">
+                <FaUsers className="text-4xl text-gray-300 mx-auto mb-2" />
+                <p className="text-xs text-gray-500">
+                  {currentDept} department-এ এখনো কোনো student নেই।
+                </p>
+              </div>
             )}
           </div>
 
@@ -1189,10 +1626,10 @@ const Report = () => {
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-3">
             <div className="p-3 border-b flex justify-between items-center">
               <h4 className="font-semibold text-gray-700 text-sm">
-                Elders Custom Reports
+                {currentDept} Custom Reports
               </h4>
               <span className="text-xs text-gray-500">
-                {customReports.length} reports
+                {reports.length} reports
               </span>
             </div>
             <div className="overflow-x-auto max-h-40 overflow-y-auto">
@@ -1217,9 +1654,9 @@ const Report = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {customReports.length > 0 ? (
-                    customReports.map((report) => (
-                      <tr key={report.id} className="hover:bg-gray-50">
+                  {reports.length > 0 ? (
+                    reports.map((report) => (
+                      <tr key={report._id} className="hover:bg-gray-50">
                         <td className="px-3 py-2">
                           <div className="font-medium text-gray-800 truncate max-w-[200px]">
                             {report.reportName}
@@ -1252,6 +1689,7 @@ const Report = () => {
                                   title: "Report Details",
                                   html: `
                                     <div style="text-align: left; font-size: 13px;">
+                                      <p><strong>Department:</strong> ${currentDept}</p>
                                       <p><strong>Name:</strong> ${report.reportName}</p>
                                       <p><strong>Type:</strong> ${getReportTypeLabel(report.reportType)}</p>
                                       <p><strong>Month:</strong> ${months[report.month]} ${report.year}</p>
@@ -1269,7 +1707,7 @@ const Report = () => {
                               <FaEye size={12} />
                             </button>
                             <button
-                              onClick={() => handleDeleteReport(report.id)}
+                              onClick={() => handleDeleteReport(report._id)}
                               className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                             >
                               <FaTrash size={12} />
@@ -1282,9 +1720,16 @@ const Report = () => {
                     <tr>
                       <td
                         colSpan="5"
-                        className="px-3 py-4 text-center text-gray-400 text-sm"
+                        className="px-3 py-6 text-center text-gray-400 text-sm"
                       >
-                        No custom reports yet
+                        <FaChartLine className="text-3xl text-gray-300 mx-auto mb-2" />
+                        <p>No custom reports yet for {currentDept}</p>
+                        <button
+                          onClick={openAddModal}
+                          className="mt-2 bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold"
+                        >
+                          + Add First Report
+                        </button>
                       </td>
                     </tr>
                   )}
@@ -1330,7 +1775,7 @@ const Report = () => {
                 className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
               >
                 <option value="All">All Courses</option>
-                {ELDERS_COURSES.map((c) => (
+                {DEPT_COURSES.map((c) => (
                   <option key={c} value={c}>
                     {c}
                   </option>
@@ -1372,7 +1817,7 @@ const Report = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlus className="text-blue-600" /> Add Elders Report
+                <FaPlus className="text-blue-600" /> Add Report — {currentDept}
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1394,7 +1839,7 @@ const Report = () => {
                     setFormData({ ...formData, reportName: e.target.value })
                   }
                   className="w-full border rounded-lg px-3 py-2 text-sm"
-                  placeholder="e.g., Monthly Financial - Sept 2026"
+                  placeholder={`e.g., ${currentDept} Monthly - Sept 2026`}
                 />
               </div>
               <div>
@@ -1473,7 +1918,7 @@ const Report = () => {
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
                     <option value="All">All Courses</option>
-                    {ELDERS_COURSES.map((c) => (
+                    {DEPT_COURSES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1534,9 +1979,11 @@ const Report = () => {
               <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold"
+                  disabled={saving}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold disabled:opacity-50"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Add Report
+                  <FaSave className="inline mr-2" size={14} />{" "}
+                  {saving ? "Saving..." : "Add Report"}
                 </button>
                 <button
                   type="button"

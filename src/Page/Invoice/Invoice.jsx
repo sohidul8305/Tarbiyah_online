@@ -21,9 +21,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
   FaArrowRight,
-  FaLayerGroup,
   FaSave,
-  FaUserTimes,
   FaHourglassHalf,
   FaExclamationCircle,
   FaFileInvoice,
@@ -36,90 +34,96 @@ import { FiMenu, FiX } from "react-icons/fi";
 const API_BASE = "https://api.tarbiyahonline.com";
 
 // ============================================================
-// ✅ ELDERS DEPARTMENT
+// ✅ DEPARTMENT CONFIG
 // ============================================================
-const ELDERS_TEACHERS = ["Jubayer Ahmad", "Sumaiya Afrin Mim"];
-
-const ELDERS_COURSES = [
-  "Qaida Nuraniyah",
-  "Quran Nazera",
-  "Najera",
-  "Basic Tajweed",
-  "Bakarah Hifz",
-];
-
-const ELDERS_CLASSES = [
-  "Elders Batch A",
-  "Elders Batch B",
-  "Elders Batch C",
-  "Elders Batch D",
-  "Elders Batch E",
-];
-
-const ELDERS_BATCHES = [
-  "Batch-01",
-  "Batch-02",
-  "Batch-03",
-  "Batch-04",
-  "Batch-05",
-  "Batch-06",
-];
-
-const ELDERS_COURSE_KEYWORDS = [
-  "qaida nuraniyah",
-  "qaida nooraniya",
-  "qaida noorani",
-  "qaida nurani",
-  "qaidah nuraniyah",
-  "qaidah nooraniya",
-  "qaidah noorani",
-  "quran nazera",
-  "nazera quran",
-  "quran najera",
-  "najera quran",
-  "bakarah hifz",
-  "bakara hifz",
-  "baqarah hifz",
-  "baqara hifz",
-  "basic tajweed",
-];
-
-const isSingleEldersCourse = (singleCourse) => {
-  const p = String(singleCourse).toLowerCase().trim();
-  if (!p) return false;
-  return ELDERS_COURSE_KEYWORDS.some((c) => {
-    if (p === c) return true;
-    if (p.includes(c)) return true;
-    if (c.includes(p) && p.length >= 8) return true;
-    return false;
-  });
+const DEPARTMENT_CONFIGS = {
+  Elders: {
+    label: "Quran For Elders",
+    courses: [
+      "Qaida Nuraniyah",
+      "Quran Nazera",
+      "Najera",
+      "Basic Tajweed",
+      "Bakarah Hifz",
+    ],
+    classes: [
+      "Elders Batch A",
+      "Elders Batch B",
+      "Elders Batch C",
+      "Elders Batch D",
+      "Elders Batch E",
+    ],
+    batches: [
+      "Batch-01",
+      "Batch-02",
+      "Batch-03",
+      "Batch-04",
+      "Batch-05",
+      "Batch-06",
+    ],
+    courseKeywords: [
+      "qaida nuraniyah",
+      "qaida nooraniya",
+      "qaida noorani",
+      "qaida nurani",
+      "qaidah nuraniyah",
+      "qaidah nooraniya",
+      "qaidah noorani",
+      "quran nazera",
+      "nazera quran",
+      "quran najera",
+      "najera quran",
+      "bakarah hifz",
+      "bakara hifz",
+      "baqarah hifz",
+      "baqara hifz",
+      "basic tajweed",
+      "quran for elders",
+    ],
+    invoicePrefix: "INV-EL",
+  },
+  "Quran Studies": {
+    label: "Quran Studies",
+    courses: ["Hifzul Quran", "Tarbiyah Quran Studies", "Quran Translation"],
+    classes: ["Quran Studies A", "Quran Studies B", "Quran Studies C"],
+    batches: ["QS-Batch-01", "QS-Batch-02", "QS-Batch-03"],
+    courseKeywords: ["quran studies", "hifzul quran", "tarbiyah quran studies"],
+    invoicePrefix: "INV-QS",
+  },
+  Alimiya: {
+    label: "Alimiya",
+    courses: ["Dawra e Hadith", "Tafsir", "Fiqh", "Hadith", "Arabic Grammar"],
+    classes: ["Alimiya Year 1", "Alimiya Year 2", "Alimiya Year 3"],
+    batches: ["AL-Batch-01", "AL-Batch-02", "AL-Batch-03"],
+    courseKeywords: [
+      "alimiya",
+      "dawra",
+      "tafsir",
+      "fiqh",
+      "hadith",
+      "arabic grammar",
+    ],
+    invoicePrefix: "INV-AL",
+  },
+  Diploma: {
+    label: "Diploma",
+    courses: [
+      "Diploma in Islamic Studies",
+      "Diploma in Arabic",
+      "Certificate Course",
+    ],
+    classes: ["Diploma A", "Diploma B", "Diploma C"],
+    batches: ["DP-Batch-01", "DP-Batch-02", "DP-Batch-03"],
+    courseKeywords: ["diploma in islamic studies", "diploma", "certificate"],
+    invoicePrefix: "INV-DP",
+  },
 };
 
-const isEldersCourse = (courseStr) => {
-  if (!courseStr) return false;
-  const parts = String(courseStr)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  if (parts.length === 0) return false;
-  return parts.every((part) => isSingleEldersCourse(part));
-};
-
-const getPrimaryCourse = (courseStr) => {
-  if (!courseStr) return "";
-  const first = String(courseStr).split(",")[0].trim().toLowerCase();
-  if (first.includes("qaida")) return "Qaida Nuraniyah";
-  if (first.includes("najera") || first.includes("nazera")) return "Najera";
-  if (first.includes("tajweed")) return "Basic Tajweed";
-  if (first.includes("bakarah") || first.includes("bakara"))
-    return "Bakarah Hifz";
-  return "Qaida Nuraniyah";
-};
-
+// ✅ Default invoices — শুধু Elders-এর জন্য
 const ELDERS_DEFAULT_INVOICES = [
   {
-    id: 1,
-    invoiceNumber: "INV-2026-0001",
+    _id: "sample-inv-1",
+    invoiceNumber: "INV-EL-2026-0001",
     studentName: "Omer Faruk",
     studentId: "TET26FB6001",
     class: "Elders Batch A",
@@ -145,8 +149,8 @@ const ELDERS_DEFAULT_INVOICES = [
     total: 5000,
   },
   {
-    id: 2,
-    invoiceNumber: "INV-2026-0002",
+    _id: "sample-inv-2",
+    invoiceNumber: "INV-EL-2026-0002",
     studentName: "Ikramm",
     studentId: "TET26FB6002",
     class: "Elders Batch A",
@@ -173,6 +177,31 @@ const ELDERS_DEFAULT_INVOICES = [
   },
 ];
 
+const getCurrentDepartment = () => {
+  try {
+    const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
+    return info.department || "Elders";
+  } catch {
+    return "Elders";
+  }
+};
+
+const safeFetchJSON = async (url, options = {}) => {
+  try {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    if (text.trim().startsWith("<"))
+      return { success: false, _htmlError: true };
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, _jsonError: true };
+    }
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+};
+
 const Invoice = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
@@ -185,27 +214,24 @@ const Invoice = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "Quran for Elders",
+    department: "Elders",
     joinDate: "",
   });
 
-  const [eldersStudents, setEldersStudents] = useState(
-    ELDERS_STUDENTS_FALLBACK,
-  );
-  const [studentsLoading, setStudentsLoading] = useState(true);
+  const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
+  const deptConfig =
+    DEPARTMENT_CONFIGS[currentDept] || DEPARTMENT_CONFIGS["Elders"];
+  const DEPT_COURSES = deptConfig.courses;
+  const DEPT_CLASSES = deptConfig.classes;
+  const DEPT_BATCHES = deptConfig.batches;
+  const DEPT_KEYWORDS = deptConfig.courseKeywords;
+  const DEPT_LABEL = deptConfig.label;
+  const DEPT_INVOICE_PREFIX = deptConfig.invoicePrefix;
 
-  const [invoices, setInvoices] = useState(() => {
-    const saved = localStorage.getItem("eldersInvoices");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (err) {
-        console.error(err);
-      }
-    }
-    return ELDERS_DEFAULT_INVOICES;
-  });
+  const [deptStudents, setDeptStudents] = useState([]);
+  const [studentsLoading, setStudentsLoading] = useState(true);
+  const [invoices, setInvoices] = useState([]);
+  const [apiWorking, setApiWorking] = useState(true);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
@@ -216,6 +242,7 @@ const Invoice = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     studentName: "",
@@ -247,12 +274,9 @@ const Invoice = () => {
     "November",
     "December",
   ];
-  const years = [2024, 2025, 2026, 2027];
+  const years = [2024, 2025, 2026, 2027, 2028];
   const statuses = ["All", "Paid", "Partial", "Unpaid", "Overdue"];
 
-  // ============================================================
-  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
-  // ============================================================
   const menuItems = [
     {
       id: "profile",
@@ -271,7 +295,6 @@ const Invoice = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -330,7 +353,6 @@ const Invoice = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -351,7 +373,6 @@ const Invoice = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -385,7 +406,7 @@ const Invoice = () => {
       ],
     },
   ];
-  // ✅ URL থেকে active auto-detect
+
   const getActiveFromPath = () => {
     const currentPath = location.pathname;
     for (const item of menuItems) {
@@ -404,12 +425,16 @@ const Invoice = () => {
     if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
   }, [activeMenu, activeSubMenu]);
 
-  // Load admin info
+  // ============================================================
+  // Load admin info + department
+  // ============================================================
   useEffect(() => {
     const savedAdmin = localStorage.getItem("adminInfo");
     if (savedAdmin) {
       try {
-        setAdminInfo(JSON.parse(savedAdmin));
+        const info = JSON.parse(savedAdmin);
+        setAdminInfo(info);
+        if (info.department) setCurrentDept(info.department);
       } catch (err) {
         console.error(err);
       }
@@ -419,69 +444,202 @@ const Invoice = () => {
         email: user?.email || "admin@tarabiyah.com",
         phone: "01700000000",
         designation: "Administrator",
-        department: "Quran for Elders",
+        department: "Elders",
         joinDate: "January 2024",
       });
     }
   }, [user]);
 
-  const fetchEldersStudents = async () => {
+  // ============================================================
+  // ✅ Load Invoices — API first, localStorage fallback
+  // ============================================================
+  const loadInvoices = async () => {
     try {
-      setStudentsLoading(true);
-      let eldersList = [];
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/invoices/all?department=${encodeURIComponent(currentDept)}`,
+      );
 
-      try {
-        const res = await fetch(`${API_BASE}/api/students/all`);
-        const text = await res.text();
-
-        if (!text.trim().startsWith("<")) {
-          const data = JSON.parse(text);
-          if (data.success && Array.isArray(data.students)) {
-            const all = data.students || [];
-            const elders = all.filter((s) => isEldersCourse(s.course));
-
-            elders.forEach((s) => {
-              const formatted = {
-                _id: s._id,
-                name: s.name || "",
-                studentId: s.studentId || s._id?.slice(-8) || "N/A",
-                course: s.course || "",
-                primaryCourse: getPrimaryCourse(s.course),
-                class: s.batch || s.class || "Elders Batch A",
-                batch: s.batch || "Batch-03",
-                phone: s.phone || "",
-                email: s.email || "",
-                courseFee: Number(s.courseFee) || 5000,
-              };
-              const exists = eldersList.some(
-                (e) =>
-                  (e.name || "").toLowerCase() ===
-                  (formatted.name || "").toLowerCase(),
-              );
-              if (!exists) eldersList.push(formatted);
-            });
-          }
+      if (data.success && Array.isArray(data.invoices)) {
+        if (data.invoices.length > 0) {
+          setInvoices(data.invoices);
+          setApiWorking(true);
+          localStorage.setItem(
+            `invoices_${currentDept.replace(/\s+/g, "_")}`,
+            JSON.stringify(data.invoices),
+          );
+          console.log(
+            `✅ Loaded ${data.invoices.length} invoices from API (${currentDept})`,
+          );
+          return;
         }
-      } catch (apiErr) {
-        console.warn("API fetch skipped:", apiErr.message);
+
+        // API empty — check localStorage
+        const key = `invoices_${currentDept.replace(/\s+/g, "_")}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setInvoices(parsed);
+              setApiWorking(true);
+              return;
+            }
+          } catch {}
+        }
+
+        setApiWorking(true);
+        setInvoices(currentDept === "Elders" ? ELDERS_DEFAULT_INVOICES : []);
+        return;
       }
 
-      setEldersStudents(eldersList);
+      throw new Error(data.message || "API failed");
+    } catch (err) {
+      console.warn("⚠️ API failed, using localStorage:", err.message);
+      setApiWorking(false);
+      const key = `invoices_${currentDept.replace(/\s+/g, "_")}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setInvoices(
+            Array.isArray(parsed) && parsed.length > 0
+              ? parsed
+              : currentDept === "Elders"
+                ? ELDERS_DEFAULT_INVOICES
+                : [],
+          );
+        } catch {
+          setInvoices(currentDept === "Elders" ? ELDERS_DEFAULT_INVOICES : []);
+        }
+      } else {
+        setInvoices(currentDept === "Elders" ? ELDERS_DEFAULT_INVOICES : []);
+      }
+    }
+  };
+
+  useEffect(() => {
+    loadInvoices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
+
+  useEffect(() => {
+    if (!currentDept || invoices.length === 0) return;
+    const key = `invoices_${currentDept.replace(/\s+/g, "_")}`;
+    localStorage.setItem(key, JSON.stringify(invoices));
+  }, [invoices, currentDept]);
+
+  // ============================================================
+  // Course helpers
+  // ============================================================
+  const isSingleDeptCourse = (singleCourse) => {
+    const p = String(singleCourse).toLowerCase().trim();
+    if (!p) return false;
+    return DEPT_KEYWORDS.some((c) => {
+      if (p === c) return true;
+      if (p.includes(c)) return true;
+      if (c.includes(p) && p.length >= 8) return true;
+      return false;
+    });
+  };
+
+  const isDeptCourse = (courseStr) => {
+    if (!courseStr) return false;
+    const parts = String(courseStr)
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (parts.length === 0) return false;
+    return parts.every((part) => isSingleDeptCourse(part));
+  };
+
+  const getPrimaryCourse = (courseStr) => {
+    if (!courseStr) return DEPT_COURSES[0] || "";
+    const first = String(courseStr).split(",")[0].trim().toLowerCase();
+    if (first.includes("qaida") || first.includes("noorani"))
+      return "Qaida Nuraniyah";
+    if (first.includes("najera") || first.includes("nazera")) return "Najera";
+    if (first.includes("tajweed")) return "Basic Tajweed";
+    if (
+      first.includes("bakarah") ||
+      first.includes("bakara") ||
+      first.includes("baqarah")
+    )
+      return "Bakarah Hifz";
+    if (first.includes("hifzul") || first.includes("hifz"))
+      return "Hifzul Quran";
+    if (first.includes("dawra")) return "Dawra e Hadith";
+    if (first.includes("tafsir")) return "Tafsir";
+    if (first.includes("fiqh")) return "Fiqh";
+    if (first.includes("hadith")) return "Hadith";
+    if (first.includes("diploma")) return "Diploma in Islamic Studies";
+    return DEPT_COURSES[0] || first;
+  };
+
+  // ============================================================
+  // Fetch Students
+  // ============================================================
+  const fetchDeptStudents = async () => {
+    try {
+      setStudentsLoading(true);
+      const res = await fetch(
+        `${API_BASE}/api/students/all?department=${encodeURIComponent(currentDept)}`,
+      );
+      const text = await res.text();
+      if (text.trim().startsWith("<")) {
+        setDeptStudents([]);
+        return;
+      }
+
+      const data = JSON.parse(text);
+      if (!data.success || !Array.isArray(data.students)) {
+        setDeptStudents([]);
+        return;
+      }
+
+      const all = data.students || [];
+      const filtered = all.filter((s) => {
+        const sDept = String(s.department || "")
+          .toLowerCase()
+          .trim();
+        if (sDept && sDept === currentDept.toLowerCase().trim()) return true;
+        return isDeptCourse(s.course);
+      });
+
+      const formatted = filtered.map((s) => ({
+        _id: s._id,
+        name: s.name || "",
+        studentId: s.studentId || s._id?.slice(-8) || "N/A",
+        course: s.course || "",
+        primaryCourse: getPrimaryCourse(s.course),
+        class:
+          s.batch || s.class || DEPT_CLASSES[0] || `${currentDept} Batch A`,
+        batch: s.batch || DEPT_BATCHES[0] || "",
+        phone: s.phone || "",
+        email: s.email || "",
+        courseFee: Number(s.courseFee) || 5000,
+      }));
+
+      const deduped = [];
+      formatted.forEach((s) => {
+        const exists = deduped.some(
+          (d) => (d.name || "").toLowerCase() === (s.name || "").toLowerCase(),
+        );
+        if (!exists) deduped.push(s);
+      });
+
+      setDeptStudents(deduped);
     } catch (err) {
       console.error("❌ Fetch students error:", err);
-      setEldersStudents([]);
+      setDeptStudents([]);
     } finally {
       setStudentsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchEldersStudents();
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("eldersInvoices", JSON.stringify(invoices));
-  }, [invoices]);
+    fetchDeptStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
 
   const handleLogout = async () => {
     try {
@@ -504,6 +662,9 @@ const Invoice = () => {
   const toggleSubMenu = (menu) =>
     setExpandedMenu(expandedMenu === menu ? null : menu);
 
+  // ============================================================
+  // Status helpers
+  // ============================================================
   const getStatusColor = (status) => {
     switch (status) {
       case "Paid":
@@ -575,20 +736,22 @@ const Invoice = () => {
   const generateInvoiceNumber = () => {
     const year = new Date().getFullYear();
     const count = invoices.length + 1;
-    return `INV-${year}-${String(count).padStart(4, "0")}`;
+    return `${DEPT_INVOICE_PREFIX}-${year}-${String(count).padStart(4, "0")}`;
   };
 
+  // ============================================================
+  // ✅ Open Generate Modal — always enabled
+  // ============================================================
   const openGenerateModal = () => {
-    const first = eldersStudents[0];
     setFormData({
-      studentName: first?.name || "",
-      studentId: first?.studentId || "",
-      class: first?.class || ELDERS_CLASSES[0],
-      batch: first?.batch || "Batch-03",
-      subject: first?.primaryCourse || ELDERS_COURSES[0],
+      studentName: "",
+      studentId: "",
+      class: DEPT_CLASSES[0] || `${currentDept} Batch A`,
+      batch: DEPT_BATCHES[0] || "",
+      subject: DEPT_COURSES[0] || "",
       month: months[new Date().getMonth()],
       year: new Date().getFullYear(),
-      amount: first?.courseFee || 5000,
+      amount: 5000,
       paidAmount: 0,
       issueDate: new Date().toISOString().split("T")[0],
       dueDate: new Date(new Date().setMonth(new Date().getMonth() + 1))
@@ -596,8 +759,8 @@ const Invoice = () => {
         .split("T")[0],
       items: [
         {
-          description: `${first?.primaryCourse || "Monthly"} Fee - ${months[new Date().getMonth()]} ${new Date().getFullYear()}`,
-          amount: first?.courseFee || 5000,
+          description: `${DEPT_COURSES[0] || "Monthly"} Fee - ${months[new Date().getMonth()]} ${new Date().getFullYear()}`,
+          amount: 5000,
         },
       ],
       notes: "",
@@ -606,7 +769,7 @@ const Invoice = () => {
   };
 
   const handleStudentSelect = (studentId) => {
-    const s = eldersStudents.find((st) => st._id === studentId);
+    const s = deptStudents.find((st) => st._id === studentId);
     if (!s) return;
     setFormData((prev) => ({
       ...prev,
@@ -652,8 +815,12 @@ const Invoice = () => {
     setShowEditModal(true);
   };
 
-  const handleGenerateInvoice = (e) => {
+  // ============================================================
+  // ✅ GENERATE INVOICE — API first
+  // ============================================================
+  const handleGenerateInvoice = async (e) => {
     e.preventDefault();
+
     if (
       !formData.studentName ||
       !formData.class ||
@@ -668,26 +835,28 @@ const Invoice = () => {
       });
       return;
     }
-    const paidAmount = formData.paidAmount || 0;
-    const dueAmount = formData.amount - paidAmount;
+
+    const paidAmount = Number(formData.paidAmount) || 0;
+    const dueAmount = Number(formData.amount) - paidAmount;
     const status =
       dueAmount <= 0 ? "Paid" : paidAmount > 0 ? "Partial" : "Unpaid";
-    const newInvoice = {
-      id: Date.now(),
+
+    const payload = {
+      department: currentDept,
       invoiceNumber: generateInvoiceNumber(),
-      studentName: formData.studentName,
-      studentId: formData.studentId,
+      studentName: formData.studentName.trim(),
+      studentId: formData.studentId.trim(),
       class: formData.class,
       batch: formData.batch || "",
       subject: formData.subject || "N/A",
       month: formData.month,
       year: formData.year,
       amount: Number(formData.amount),
-      paidAmount,
+      paidAmount: paidAmount,
       dueAmount,
       status,
       issueDate: formData.issueDate || new Date().toISOString().split("T")[0],
-      dueDate: formData.dueDate,
+      dueDate: formData.dueDate || "",
       paymentDate:
         paidAmount > 0 ? new Date().toISOString().split("T")[0] : null,
       paymentMethod: paidAmount > 0 ? "bKash" : null,
@@ -701,19 +870,49 @@ const Invoice = () => {
       tax: 0,
       total: Number(formData.amount),
     };
-    setInvoices([...invoices, newInvoice]);
-    setShowGenerateModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "✅ Invoice Generated!",
-      text: newInvoice.invoiceNumber,
-      timer: 1500,
-      showConfirmButton: false,
-    });
+
+    try {
+      setSaving(true);
+
+      const data = await safeFetchJSON(`${API_BASE}/api/invoices/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      let newInvoice;
+      if (data.success && data.invoice) {
+        newInvoice = data.invoice;
+        console.log("✅ Invoice saved to API:", newInvoice._id);
+      } else {
+        newInvoice = { _id: `LOCAL_${Date.now()}`, ...payload };
+        console.warn("⚠️ API failed, saved locally");
+      }
+
+      setInvoices([newInvoice, ...invoices]);
+      setShowGenerateModal(false);
+
+      Swal.fire({
+        icon: "success",
+        title: "✅ Invoice Generated!",
+        text: newInvoice.invoiceNumber,
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleEditInvoice = (e) => {
+  // ============================================================
+  // ✅ EDIT INVOICE
+  // ============================================================
+  const handleEditInvoice = async (e) => {
     e.preventDefault();
+
     if (
       !formData.studentName ||
       !formData.class ||
@@ -728,52 +927,76 @@ const Invoice = () => {
       });
       return;
     }
-    const paidAmount = formData.paidAmount || 0;
-    const dueAmount = formData.amount - paidAmount;
+
+    const paidAmount = Number(formData.paidAmount) || 0;
+    const dueAmount = Number(formData.amount) - paidAmount;
     const status =
       dueAmount <= 0 ? "Paid" : paidAmount > 0 ? "Partial" : "Unpaid";
-    setInvoices(
-      invoices.map((inv) =>
-        inv.id === selectedInvoice.id
-          ? {
-              ...inv,
-              studentName: formData.studentName,
-              studentId: formData.studentId,
-              class: formData.class,
-              batch: formData.batch || "",
-              subject: formData.subject || "N/A",
-              month: formData.month,
-              year: formData.year,
-              amount: Number(formData.amount),
-              paidAmount,
-              dueAmount,
-              status,
-              issueDate: formData.issueDate,
-              dueDate: formData.dueDate,
-              paymentDate:
-                paidAmount > 0 ? new Date().toISOString().split("T")[0] : null,
-              paymentMethod: paidAmount > 0 ? "bKash" : null,
-              notes: formData.notes || "",
-              items: formData.items || [
-                { description: "Monthly Tuition Fee", amount: formData.amount },
-              ],
-              subtotal: Number(formData.amount),
-              total: Number(formData.amount),
-            }
-          : inv,
-      ),
-    );
-    setShowEditModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "✅ Updated!",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+
+    const payload = {
+      ...formData,
+      amount: Number(formData.amount),
+      paidAmount,
+      dueAmount,
+      status,
+      paymentDate:
+        paidAmount > 0 ? new Date().toISOString().split("T")[0] : null,
+      paymentMethod: paidAmount > 0 ? "bKash" : null,
+      subtotal: Number(formData.amount),
+      total: Number(formData.amount),
+    };
+
+    try {
+      setSaving(true);
+
+      const isLocalId =
+        String(selectedInvoice._id).startsWith("LOCAL_") ||
+        String(selectedInvoice._id).startsWith("sample-");
+      let updated;
+
+      if (!isLocalId) {
+        const data = await safeFetchJSON(
+          `${API_BASE}/api/invoices/update/${selectedInvoice._id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          },
+        );
+        if (data.success && data.invoice) {
+          updated = data.invoice;
+        } else {
+          updated = { ...selectedInvoice, ...payload, dueAmount, status };
+        }
+      } else {
+        updated = { ...selectedInvoice, ...payload, dueAmount, status };
+      }
+
+      setInvoices(
+        invoices.map((inv) =>
+          inv._id === selectedInvoice._id ? updated : inv,
+        ),
+      );
+      setShowEditModal(false);
+      Swal.fire({
+        icon: "success",
+        title: "✅ Updated!",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDeleteInvoice = (id) => {
-    Swal.fire({
+  // ============================================================
+  // ✅ DELETE
+  // ============================================================
+  const handleDeleteInvoice = async (id) => {
+    const result = await Swal.fire({
       title: "Delete Invoice?",
       text: "This action cannot be undone!",
       icon: "warning",
@@ -781,19 +1004,33 @@ const Invoice = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setInvoices(invoices.filter((inv) => inv.id !== id));
-        Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          timer: 1200,
-          showConfirmButton: false,
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const isLocalId =
+        String(id).startsWith("LOCAL_") || String(id).startsWith("sample-");
+      if (!isLocalId) {
+        await safeFetchJSON(`${API_BASE}/api/invoices/delete/${id}`, {
+          method: "DELETE",
         });
       }
-    });
+      setInvoices(invoices.filter((inv) => inv._id !== id));
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
+  // ============================================================
+  // ✅ MARK AS PAID
+  // ============================================================
   const handleMarkAsPaid = (invoice) => {
     Swal.fire({
       title: "Mark as Paid?",
@@ -803,35 +1040,52 @@ const Invoice = () => {
       confirmButtonColor: "#22c55e",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, mark as paid!",
-    }).then((result) => {
-      if (result.isConfirmed) {
+    }).then(async (result) => {
+      if (!result.isConfirmed) return;
+
+      const payload = {
+        ...invoice,
+        status: "Paid",
+        paidAmount: invoice.amount,
+        dueAmount: 0,
+        paymentDate: new Date().toISOString().split("T")[0],
+        paymentMethod: invoice.paymentMethod || "bKash",
+        transactionId:
+          invoice.transactionId || `TXN${Date.now().toString().slice(-6)}`,
+      };
+
+      try {
+        const isLocalId =
+          String(invoice._id).startsWith("LOCAL_") ||
+          String(invoice._id).startsWith("sample-");
+        if (!isLocalId) {
+          await safeFetchJSON(
+            `${API_BASE}/api/invoices/update/${invoice._id}`,
+            {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            },
+          );
+        }
         setInvoices(
           invoices.map((inv) =>
-            inv.id === invoice.id
-              ? {
-                  ...inv,
-                  status: "Paid",
-                  paidAmount: inv.amount,
-                  dueAmount: 0,
-                  paymentDate: new Date().toISOString().split("T")[0],
-                  paymentMethod: inv.paymentMethod || "bKash",
-                  transactionId:
-                    inv.transactionId ||
-                    `TXN${Date.now().toString().slice(-6)}`,
-                }
-              : inv,
+            inv._id === invoice._id ? { ...inv, ...payload } : inv,
           ),
         );
         Swal.fire({
           icon: "success",
           title: "✅ Marked as Paid!",
-          timer: 1500,
+          timer: 1200,
           showConfirmButton: false,
         });
+      } catch (err) {
+        console.error(err);
       }
     });
   };
 
+  // Item management
   const addItemRow = () => {
     setFormData({
       ...formData,
@@ -887,7 +1141,9 @@ const Invoice = () => {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Invoices (Elders)</h1>
+          <h1 className="text-sm font-bold text-gray-800">
+            Invoices ({currentDept})
+          </h1>
           <button
             onClick={toggleSidebar}
             className="p-2 rounded-lg hover:bg-gray-100"
@@ -898,11 +1154,7 @@ const Invoice = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -914,7 +1166,7 @@ const Invoice = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {adminInfo.designation}
+                  {adminInfo.department || adminInfo.designation}
                 </p>
               </div>
             </div>
@@ -932,11 +1184,7 @@ const Invoice = () => {
                           toggleSubMenu(item.id);
                           setIsSidebarOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                          isParentActive
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }`}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${isParentActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-gray-600">{item.icon}</span>
@@ -955,11 +1203,7 @@ const Invoice = () => {
                               key={sub.id}
                               to={sub.path}
                               onClick={() => setIsSidebarOpen(false)}
-                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                                activeSubMenu === sub.id
-                                  ? "bg-teal-50 text-[#004d4d] font-bold"
-                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                              }`}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${activeSubMenu === sub.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                             >
                               {sub.label}
                             </Link>
@@ -973,11 +1217,7 @@ const Invoice = () => {
                       onClick={() => setIsSidebarOpen(false)}
                     >
                       <button
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                          isParentActive
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }`}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${isParentActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                       >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
@@ -987,7 +1227,6 @@ const Invoice = () => {
                 </div>
               );
             })}
-
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -996,9 +1235,8 @@ const Invoice = () => {
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
           <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
+            <p>©Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 
@@ -1016,17 +1254,23 @@ const Invoice = () => {
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaFileInvoice className="text-blue-600" /> Invoices —
-                <span className="text-teal-700">Quran For Elders</span>
+                <span className="text-teal-700">{DEPT_LABEL}</span>
               </h1>
               <p className="text-xs text-gray-500">
                 {studentsLoading
-                  ? "Loading elders students..."
-                  : `${eldersStudents.length} elders student${eldersStudents.length !== 1 ? "s" : ""} • Qaida • Nazera • Najera • Tajweed • Bakarah Hifz`}
+                  ? `Loading ${currentDept} students...`
+                  : `${deptStudents.length} ${currentDept} student${deptStudents.length !== 1 ? "s" : ""}`}
+                {!apiWorking && (
+                  <span className="ml-2 text-yellow-600">⚠️ Offline mode</span>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
-                onClick={fetchEldersStudents}
+                onClick={() => {
+                  loadInvoices();
+                  fetchDeptStudents();
+                }}
                 disabled={studentsLoading}
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 disabled:opacity-50"
               >
@@ -1051,22 +1295,29 @@ const Invoice = () => {
             </div>
           </div>
 
-          {/* Elders Students Card */}
-          <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
-            <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
-              <FaUsers size={12} /> Elders Students ({eldersStudents.length})
+          {/* Department Badge */}
+          <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-2 rounded-xl text-xs font-semibold mb-3">
+            🏫 Showing invoices of:{" "}
+            <span className="font-bold">{currentDept}</span> department
+          </div>
+
+          {/* Students Card */}
+          <div className="bg-white border border-gray-200 rounded-xl p-3 mb-3">
+            <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1">
+              <FaUsers size={12} className="text-teal-600" /> {currentDept}{" "}
+              Students ({deptStudents.length})
             </p>
-            {studentsLoading && eldersStudents.length === 0 ? (
+            {studentsLoading && deptStudents.length === 0 ? (
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div>
-                Loading from API...
+                Loading {currentDept} students...
               </div>
-            ) : eldersStudents.length > 0 ? (
+            ) : deptStudents.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {eldersStudents.map((s) => (
+                {deptStudents.map((s) => (
                   <div
                     key={s._id}
-                    className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
+                    className="bg-gray-50 border border-gray-200 rounded-lg p-3 flex items-center gap-3"
                   >
                     <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                       {(s.name || "S").charAt(0)}
@@ -1086,9 +1337,18 @@ const Invoice = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-gray-500 italic">
-                No elders students found.
-              </p>
+              <div className="text-center py-4">
+                <FaUsers className="text-4xl text-gray-300 mx-auto mb-2" />
+                <p className="text-xs text-gray-500 mb-3">
+                  {currentDept} department-এ এখনো কোনো student নেই।
+                </p>
+                <button
+                  onClick={openGenerateModal}
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
+                >
+                  + Generate Invoice Manually
+                </button>
+              </div>
             )}
           </div>
 
@@ -1125,7 +1385,7 @@ const Invoice = () => {
                 <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search elders invoices..."
+                  placeholder={`Search ${currentDept} invoices...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -1171,7 +1431,7 @@ const Invoice = () => {
 
           {/* Table */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto max-h-[calc(100vh-500px)] overflow-y-auto">
+            <div className="overflow-x-auto max-h-[calc(100vh-560px)] overflow-y-auto">
               <table className="w-full text-xs">
                 <thead className="bg-gray-50 sticky top-0 z-10">
                   <tr>
@@ -1204,7 +1464,7 @@ const Invoice = () => {
                 <tbody className="divide-y divide-gray-100">
                   {filteredInvoices.length > 0 ? (
                     filteredInvoices.map((invoice, index) => (
-                      <tr key={invoice.id} className="hover:bg-gray-50">
+                      <tr key={invoice._id} className="hover:bg-gray-50">
                         <td className="px-3 py-2 font-medium text-gray-500">
                           {index + 1}
                         </td>
@@ -1274,7 +1534,7 @@ const Invoice = () => {
                               <FaDownload size={12} />
                             </button>
                             <button
-                              onClick={() => handleDeleteInvoice(invoice.id)}
+                              onClick={() => handleDeleteInvoice(invoice._id)}
                               className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                               title="Delete"
                             >
@@ -1291,10 +1551,13 @@ const Invoice = () => {
                         className="px-3 py-8 text-center text-gray-500"
                       >
                         <FaFileInvoice className="text-4xl text-gray-300 mx-auto mb-2" />
-                        <p>No elders invoices found</p>
-                        <p className="text-[10px] text-gray-400 mt-1">
-                          উপরে "Generate Invoice" ক্লিক করে যোগ করুন
-                        </p>
+                        <p>{currentDept} department-এ কোনো invoice নেই</p>
+                        <button
+                          onClick={openGenerateModal}
+                          className="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
+                        >
+                          + Generate First Invoice
+                        </button>
                       </td>
                     </tr>
                   )}
@@ -1311,8 +1574,8 @@ const Invoice = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaFileInvoice className="text-blue-600" /> Generate Elders
-                Invoice
+                <FaFileInvoice className="text-blue-600" /> Generate Invoice —{" "}
+                {currentDept}
               </h3>
               <button
                 onClick={() => setShowGenerateModal(false)}
@@ -1323,31 +1586,32 @@ const Invoice = () => {
             </div>
             <form onSubmit={handleGenerateInvoice} className="p-6 space-y-4">
               <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
-                💡 Student select করলে বাকি information auto-fill হবে
+                💡 Student select করলে auto-fill। অথবা manually নাম type করুন।
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Elders Student *
-                </label>
-                <select
-                  required
-                  value={
-                    eldersStudents.find(
-                      (s) => s.studentId === formData.studentId,
-                    )?._id || ""
-                  }
-                  onChange={(e) => handleStudentSelect(e.target.value)}
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                >
-                  <option value="">Select Student</option>
-                  {eldersStudents.map((s) => (
-                    <option key={s._id} value={s._id}>
-                      {s.name} — {s.course}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {deptStudents.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Select Student (Optional)
+                  </label>
+                  <select
+                    value={
+                      deptStudents.find(
+                        (s) => s.studentId === formData.studentId,
+                      )?._id || ""
+                    }
+                    onChange={(e) => handleStudentSelect(e.target.value)}
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="">-- Manual Entry --</option>
+                    {deptStudents.map((s) => (
+                      <option key={s._id} value={s._id}>
+                        {s.name} — {s.course}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -1358,8 +1622,11 @@ const Invoice = () => {
                     type="text"
                     required
                     value={formData.studentName}
-                    readOnly
-                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
+                    onChange={(e) =>
+                      setFormData({ ...formData, studentName: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="Enter student name"
                   />
                 </div>
                 <div>
@@ -1369,8 +1636,11 @@ const Invoice = () => {
                   <input
                     type="text"
                     value={formData.studentId}
-                    readOnly
-                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
+                    onChange={(e) =>
+                      setFormData({ ...formData, studentId: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="e.g., TAR2648213"
                   />
                 </div>
               </div>
@@ -1418,7 +1688,7 @@ const Invoice = () => {
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {ELDERS_COURSES.map((c) => (
+                    {DEPT_COURSES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1606,10 +1876,11 @@ const Invoice = () => {
               <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold"
+                  disabled={saving}
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold disabled:opacity-50"
                 >
-                  <FaFileInvoice className="inline mr-2" size={14} /> Generate
-                  Invoice
+                  <FaFileInvoice className="inline mr-2" size={14} />{" "}
+                  {saving ? "Generating..." : "Generate Invoice"}
                 </button>
                 <button
                   type="button"
@@ -1630,7 +1901,8 @@ const Invoice = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaEdit className="text-yellow-600" /> Edit Elders Invoice
+                <FaEdit className="text-yellow-600" /> Edit Invoice —{" "}
+                {currentDept}
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1713,7 +1985,7 @@ const Invoice = () => {
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {ELDERS_COURSES.map((c) => (
+                    {DEPT_COURSES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1850,9 +2122,11 @@ const Invoice = () => {
               <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold"
+                  disabled={saving}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold disabled:opacity-50"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Update
+                  <FaSave className="inline mr-2" size={14} />{" "}
+                  {saving ? "Saving..." : "Update"}
                 </button>
                 <button
                   type="button"
@@ -1873,7 +2147,8 @@ const Invoice = () => {
           <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaFileInvoice className="text-blue-600" /> Elders Invoice
+                <FaFileInvoice className="text-blue-600" /> Invoice Details —{" "}
+                {currentDept}
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}

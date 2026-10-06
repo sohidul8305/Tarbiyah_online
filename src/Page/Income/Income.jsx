@@ -11,7 +11,6 @@ import {
   FaSignOutAlt,
   FaChartLine,
   FaCalendarCheck,
-  FaUserTimes,
   FaDatabase,
   FaEye,
   FaEdit,
@@ -20,7 +19,6 @@ import {
   FaPlus,
   FaSave,
   FaArrowRight,
-  FaLayerGroup,
   FaInfoCircle,
   FaExclamationCircle,
   FaHourglassHalf,
@@ -28,9 +26,127 @@ import {
   FaFilePdf as FaFilePdfIcon,
   FaFileExcel as FaFileExcelIcon,
   FaMoneyBillWave as FaMoneyBillWaveIcon,
+  FaSpinner,
+  FaSyncAlt,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
+
+// ✅ FIX: https not http
+const API_BASE = "https://api.tarbiyahonline.com";
+
+// ============================================================
+// ✅ DEPARTMENT-WISE CONFIG
+// ============================================================
+const DEPARTMENT_CONFIGS = {
+  Elders: {
+    label: "Quran For Elders",
+    categories: ["Student Fee", "Admission Fee", "Donation", "Other"],
+    sources: [
+      "Qaida Nuraniyah Fee",
+      "Quran Nazera Fee",
+      "Najera Fee",
+      "Basic Tajweed Fee",
+      "Bakarah Hifz Fee",
+      "Admission Fee",
+      "Donation",
+      "Other",
+    ],
+  },
+  "Quran Studies": {
+    label: "Quran Studies",
+    categories: ["Student Fee", "Admission Fee", "Donation", "Other"],
+    sources: [
+      "Hifzul Quran Fee",
+      "Tarbiyah Quran Studies Fee",
+      "Quran Translation Fee",
+      "Admission Fee",
+      "Donation",
+      "Other",
+    ],
+  },
+  Alimiya: {
+    label: "Alimiya",
+    categories: ["Student Fee", "Admission Fee", "Donation", "Other"],
+    sources: [
+      "Dawra e Hadith Fee",
+      "Tafsir Fee",
+      "Fiqh Fee",
+      "Hadith Fee",
+      "Arabic Grammar Fee",
+      "Admission Fee",
+      "Donation",
+      "Other",
+    ],
+  },
+  Diploma: {
+    label: "Diploma",
+    categories: ["Student Fee", "Admission Fee", "Donation", "Other"],
+    sources: [
+      "Diploma in Islamic Studies Fee",
+      "Diploma in Arabic Fee",
+      "Certificate Course Fee",
+      "Admission Fee",
+      "Donation",
+      "Other",
+    ],
+  },
+};
+
+// ✅ Elders default income (for first-time)
+const ELDERS_DEFAULT_INCOME = [
+  {
+    _id: "sample-inc-1",
+    source: "Monthly Fee - Omer Faruk",
+    category: "Student Fee",
+    amount: 5000,
+    date: "2026-09-05",
+    method: "bKash",
+    status: "Received",
+    description: "Monthly tuition fee for September 2026",
+    receivedBy: "Admin",
+    transactionId: "DGD9CFHU69",
+    department: "Elders",
+  },
+  {
+    _id: "sample-inc-2",
+    source: "Monthly Fee - Ikramm",
+    category: "Student Fee",
+    amount: 3000,
+    date: "2026-09-06",
+    method: "Nagad",
+    status: "Received",
+    description: "Partial payment",
+    receivedBy: "Admin",
+    transactionId: "DGX9PQ45MN",
+    department: "Elders",
+  },
+];
+
+const getCurrentDepartment = () => {
+  try {
+    const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
+    return info.department || "Elders";
+  } catch {
+    return "Elders";
+  }
+};
+
+const safeFetchJSON = async (url, options = {}) => {
+  try {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    if (text.trim().startsWith("<"))
+      return { success: false, _htmlError: true };
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, _jsonError: true };
+    }
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+};
 
 const Income = () => {
   const { user, logOut } = useAuth();
@@ -44,109 +160,23 @@ const Income = () => {
     email: "",
     phone: "",
     designation: "",
-    department: "",
+    department: "Elders",
     joinDate: "",
   });
 
+  // ✅ Current department
+  const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
+  const deptConfig =
+    DEPARTMENT_CONFIGS[currentDept] || DEPARTMENT_CONFIGS["Elders"];
+  const DEPT_CATEGORIES = deptConfig.categories;
+  const DEPT_SOURCES = deptConfig.sources;
+  const DEPT_LABEL = deptConfig.label;
+
   // Income records
-  const [incomeRecords, setIncomeRecords] = useState([
-    {
-      id: 1,
-      source: "Monthly Fee - Ahmed Hasan",
-      category: "Student Fee",
-      amount: 2500,
-      date: "2026-07-01",
-      method: "Bank Transfer",
-      status: "Received",
-      description: "Monthly tuition fee for July 2026",
-      receivedBy: "Admin",
-      transactionId: "TXN001",
-    },
-    {
-      id: 2,
-      source: "Monthly Fee - Fatima Begum",
-      category: "Student Fee",
-      amount: 3000,
-      date: "2026-07-02",
-      method: "bKash",
-      status: "Received",
-      description: "Monthly tuition fee for July 2026",
-      receivedBy: "Admin",
-      transactionId: "TXN002",
-    },
-    {
-      id: 3,
-      source: "Monthly Fee - Mohammad Ali",
-      category: "Student Fee",
-      amount: 2800,
-      date: "2026-07-03",
-      method: "Cash",
-      status: "Received",
-      description: "Monthly tuition fee for July 2026",
-      receivedBy: "Admin",
-      transactionId: "TXN003",
-    },
-    {
-      id: 4,
-      source: "Donation - Anonymous",
-      category: "Donation",
-      amount: 5000,
-      date: "2026-07-05",
-      method: "Bank Transfer",
-      status: "Received",
-      description: "Generous donation from anonymous donor",
-      receivedBy: "Admin",
-      transactionId: "TXN004",
-    },
-    {
-      id: 5,
-      source: "Monthly Fee - Aisha Rahman",
-      category: "Student Fee",
-      amount: 2200,
-      date: "2026-07-06",
-      method: "Nagad",
-      status: "Pending",
-      description: "Monthly tuition fee for July 2026",
-      receivedBy: null,
-      transactionId: null,
-    },
-    {
-      id: 6,
-      source: "Admission Fee - Rahim Uddin",
-      category: "Admission Fee",
-      amount: 500,
-      date: "2026-07-08",
-      method: "Cash",
-      status: "Received",
-      description: "New student admission fee",
-      receivedBy: "Admin",
-      transactionId: "TXN006",
-    },
-    {
-      id: 7,
-      source: "Monthly Fee - Sadia Afrin",
-      category: "Student Fee",
-      amount: 2800,
-      date: "2026-07-10",
-      method: "Bank Transfer",
-      status: "Received",
-      description: "Monthly tuition fee for July 2026",
-      receivedBy: "Admin",
-      transactionId: "TXN007",
-    },
-    {
-      id: 8,
-      source: "Library Fee Collection",
-      category: "Other",
-      amount: 350,
-      date: "2026-07-12",
-      method: "Cash",
-      status: "Received",
-      description: "Library fee collection for July",
-      receivedBy: "Admin",
-      transactionId: "TXN008",
-    },
-  ]);
+  const [incomeRecords, setIncomeRecords] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [apiWorking, setApiWorking] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
@@ -163,14 +193,14 @@ const Income = () => {
     source: "",
     category: "",
     amount: 0,
-    date: "",
+    date: new Date().toISOString().split("T")[0],
     method: "",
-    status: "Pending",
+    status: "Received",
     description: "",
     transactionId: "",
+    department: "",
   });
 
-  const categories = ["Student Fee", "Admission Fee", "Donation", "Other"];
   const methods = [
     "Cash",
     "Bank Transfer",
@@ -183,7 +213,116 @@ const Income = () => {
   const statuses = ["Received", "Pending", "Overdue"];
 
   // ============================================================
-  // ✅ Sidebar Menu Items — সম্পূর্ণ সব route সহ
+  // Load admin info
+  // ============================================================
+  useEffect(() => {
+    const savedAdmin = localStorage.getItem("adminInfo");
+    if (savedAdmin) {
+      try {
+        const info = JSON.parse(savedAdmin);
+        setAdminInfo(info);
+        if (info.department) setCurrentDept(info.department);
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      setAdminInfo({
+        name: user?.displayName || "Admin",
+        email: user?.email || "admin@tarabiyah.com",
+        phone: "01700000000",
+        designation: "Administrator",
+        department: "Elders",
+        joinDate: "January 2024",
+      });
+    }
+  }, [user]);
+
+  // ============================================================
+  // ✅ Load Income — API first, localStorage fallback
+  // ============================================================
+  const loadIncome = async () => {
+    try {
+      setIsLoading(true);
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/income/all?department=${encodeURIComponent(currentDept)}`,
+      );
+
+      if (data.success && Array.isArray(data.incomes)) {
+        if (data.incomes.length > 0) {
+          setIncomeRecords(data.incomes);
+          setApiWorking(true);
+          localStorage.setItem(
+            `income_${currentDept.replace(/\s+/g, "_")}`,
+            JSON.stringify(data.incomes),
+          );
+          console.log(
+            `✅ Loaded ${data.incomes.length} income records from API (${currentDept})`,
+          );
+          return;
+        }
+
+        // API empty → check localStorage
+        const key = `income_${currentDept.replace(/\s+/g, "_")}`;
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              setIncomeRecords(parsed);
+              setApiWorking(true);
+              return;
+            }
+          } catch {}
+        }
+
+        setApiWorking(true);
+        setIncomeRecords(currentDept === "Elders" ? ELDERS_DEFAULT_INCOME : []);
+        return;
+      }
+
+      throw new Error(data.message || "API failed");
+    } catch (err) {
+      console.warn("⚠️ API failed, using localStorage:", err.message);
+      setApiWorking(false);
+      const key = `income_${currentDept.replace(/\s+/g, "_")}`;
+      const saved = localStorage.getItem(key);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setIncomeRecords(
+            Array.isArray(parsed) && parsed.length > 0
+              ? parsed
+              : currentDept === "Elders"
+                ? ELDERS_DEFAULT_INCOME
+                : [],
+          );
+        } catch {
+          setIncomeRecords(
+            currentDept === "Elders" ? ELDERS_DEFAULT_INCOME : [],
+          );
+        }
+      } else {
+        setIncomeRecords(currentDept === "Elders" ? ELDERS_DEFAULT_INCOME : []);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadIncome();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
+
+  // Cache to localStorage
+  useEffect(() => {
+    if (!currentDept || incomeRecords.length === 0) return;
+    const key = `income_${currentDept.replace(/\s+/g, "_")}`;
+    localStorage.setItem(key, JSON.stringify(incomeRecords));
+  }, [incomeRecords, currentDept]);
+
+  // ============================================================
+  // Sidebar
   // ============================================================
   const menuItems = [
     {
@@ -203,7 +342,6 @@ const Income = () => {
           path: "/admin-dashboard/department",
           label: "Department",
         },
-
         {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
@@ -262,7 +400,6 @@ const Income = () => {
         },
       ],
     },
-
     {
       id: "finance",
       path: "/admin-finance",
@@ -283,7 +420,6 @@ const Income = () => {
         { id: "report", path: "/admin-finance/report", label: "Report" },
       ],
     },
-
     {
       id: "report-analytics",
       path: "/admin-reports",
@@ -318,7 +454,6 @@ const Income = () => {
     },
   ];
 
-  // ✅ URL থেকে active auto-detect
   const getActiveFromPath = () => {
     const currentPath = location.pathname;
     for (const item of menuItems) {
@@ -333,30 +468,9 @@ const Income = () => {
 
   const { menu: activeMenu, sub: activeSubMenu } = getActiveFromPath();
 
-  // Auto-expand parent of active submenu
   useEffect(() => {
     if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
   }, [activeMenu, activeSubMenu]);
-
-  // Load admin info
-  useEffect(() => {
-    const savedAdmin = localStorage.getItem("adminInfo");
-    if (savedAdmin) setAdminInfo(JSON.parse(savedAdmin));
-    else
-      setAdminInfo({
-        name: user?.displayName || "Admin",
-        email: user?.email || "admin@tarabiyah.com",
-        phone: "01700000000",
-        designation: "Administrator",
-        department: "Administration",
-        joinDate: "January 2024",
-      });
-  }, [user]);
-
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem("incomeRecords", JSON.stringify(incomeRecords));
-  }, [incomeRecords]);
 
   const handleLogout = async () => {
     try {
@@ -372,11 +486,6 @@ const Income = () => {
       navigate("/admin-login");
     } catch (err) {
       console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
     }
   };
 
@@ -418,18 +527,18 @@ const Income = () => {
         return "bg-purple-100 text-purple-700";
       case "Donation":
         return "bg-green-100 text-green-700";
-      case "Other":
-        return "bg-gray-100 text-gray-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
   };
 
   const filteredRecords = incomeRecords.filter((record) => {
+    const s = searchTerm.toLowerCase();
     const matchesSearch =
-      record.source.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.transactionId?.toLowerCase().includes(searchTerm.toLowerCase());
+      !s ||
+      (record.source || "").toLowerCase().includes(s) ||
+      (record.description || "").toLowerCase().includes(s) ||
+      (record.transactionId || "").toLowerCase().includes(s);
     const matchesStatus =
       filterStatus === "All" || record.status === filterStatus;
     const matchesCategory =
@@ -456,18 +565,21 @@ const Income = () => {
   ];
   const uniqueMethods = ["All", ...new Set(incomeRecords.map((r) => r.method))];
 
-  const totalIncome = incomeRecords.reduce((sum, r) => sum + r.amount, 0);
+  const totalIncome = incomeRecords.reduce(
+    (sum, r) => sum + (Number(r.amount) || 0),
+    0,
+  );
   const totalReceived = incomeRecords
     .filter((r) => r.status === "Received")
-    .reduce((sum, r) => sum + r.amount, 0);
+    .reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
   const totalPending = incomeRecords
     .filter((r) => r.status === "Pending")
-    .reduce((sum, r) => sum + r.amount, 0);
+    .reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
   const totalOverdue = incomeRecords
     .filter((r) => r.status === "Overdue")
-    .reduce((sum, r) => sum + r.amount, 0);
+    .reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
 
-  const formatCurrency = (amount) => `৳${amount.toLocaleString()}`;
+  const formatCurrency = (amount) => `৳${(amount || 0).toLocaleString()}`;
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     return new Date(dateStr).toLocaleDateString("en-US", {
@@ -477,16 +589,20 @@ const Income = () => {
     });
   };
 
+  // ============================================================
+  // ✅ Open Add Modal — always enabled
+  // ============================================================
   const openAddModal = () => {
     setFormData({
       source: "",
-      category: "",
+      category: "Student Fee",
       amount: 0,
       date: new Date().toISOString().split("T")[0],
-      method: "",
-      status: "Pending",
+      method: "Cash",
+      status: "Received",
       description: "",
       transactionId: "",
+      department: currentDept,
     });
     setShowAddModal(true);
   };
@@ -502,6 +618,7 @@ const Income = () => {
       status: record.status,
       description: record.description || "",
       transactionId: record.transactionId || "",
+      department: record.department || currentDept,
     });
     setShowEditModal(true);
   };
@@ -511,8 +628,12 @@ const Income = () => {
     setShowDetailsModal(true);
   };
 
-  const handleAddIncome = (e) => {
+  // ============================================================
+  // ✅ ADD INCOME — API first
+  // ============================================================
+  const handleAddIncome = async (e) => {
     e.preventDefault();
+
     if (
       !formData.source ||
       !formData.category ||
@@ -527,9 +648,10 @@ const Income = () => {
       });
       return;
     }
-    const newRecord = {
-      id: Date.now(),
-      source: formData.source,
+
+    const payload = {
+      department: currentDept,
+      source: formData.source.trim(),
       category: formData.category,
       amount: parseFloat(formData.amount),
       date: formData.date,
@@ -541,19 +663,49 @@ const Income = () => {
         formData.transactionId ||
         `TXN${String(incomeRecords.length + 1).padStart(3, "0")}`,
     };
-    setIncomeRecords([...incomeRecords, newRecord]);
-    setShowAddModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "Income Record Added!",
-      text: `Income of ${formatCurrency(formData.amount)} has been recorded.`,
-      timer: 1500,
-      showConfirmButton: false,
-    });
+
+    try {
+      setSaving(true);
+
+      const data = await safeFetchJSON(`${API_BASE}/api/income/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      let newRecord;
+      if (data.success && data.income) {
+        newRecord = data.income;
+        console.log("✅ Saved to API:", newRecord._id);
+      } else {
+        newRecord = { _id: `LOCAL_${Date.now()}`, ...payload };
+        console.warn("⚠️ API failed, saved locally");
+      }
+
+      setIncomeRecords([newRecord, ...incomeRecords]);
+      setShowAddModal(false);
+
+      Swal.fire({
+        icon: "success",
+        title: "✅ Income Added!",
+        html: `<p><strong>${formData.source}</strong></p><p style="font-size:12px;color:#666;">${formatCurrency(formData.amount)} — ${currentDept}</p>`,
+        timer: 1800,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleEditIncome = (e) => {
+  // ============================================================
+  // ✅ EDIT
+  // ============================================================
+  const handleEditIncome = async (e) => {
     e.preventDefault();
+
     if (
       !formData.source ||
       !formData.category ||
@@ -568,37 +720,63 @@ const Income = () => {
       });
       return;
     }
-    setIncomeRecords(
-      incomeRecords.map((record) =>
-        record.id === selectedIncome.id
-          ? {
-              ...record,
-              source: formData.source,
-              category: formData.category,
-              amount: parseFloat(formData.amount),
-              date: formData.date,
-              method: formData.method || "Cash",
-              status: formData.status,
-              description: formData.description || "",
-              receivedBy:
-                formData.status === "Received" ? adminInfo.name : null,
-              transactionId: formData.transactionId || record.transactionId,
-            }
-          : record,
-      ),
-    );
-    setShowEditModal(false);
-    Swal.fire({
-      icon: "success",
-      title: "Income Record Updated!",
-      text: "Income record has been updated successfully.",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+
+    const payload = {
+      ...formData,
+      amount: parseFloat(formData.amount),
+      department: selectedIncome.department || currentDept,
+      receivedBy: formData.status === "Received" ? adminInfo.name : null,
+    };
+
+    try {
+      setSaving(true);
+
+      const isLocalId =
+        String(selectedIncome._id).startsWith("LOCAL_") ||
+        String(selectedIncome._id).startsWith("sample-");
+      let updated;
+
+      if (!isLocalId) {
+        const data = await safeFetchJSON(
+          `${API_BASE}/api/income/update/${selectedIncome._id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          },
+        );
+        if (data.success && data.income) {
+          updated = data.income;
+        } else {
+          updated = { ...selectedIncome, ...payload };
+        }
+      } else {
+        updated = { ...selectedIncome, ...payload };
+      }
+
+      setIncomeRecords(
+        incomeRecords.map((r) => (r._id === selectedIncome._id ? updated : r)),
+      );
+      setShowEditModal(false);
+      Swal.fire({
+        icon: "success",
+        title: "✅ Updated!",
+        timer: 1200,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error(err);
+      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDeleteIncome = (id) => {
-    Swal.fire({
+  // ============================================================
+  // ✅ DELETE
+  // ============================================================
+  const handleDeleteIncome = async (id) => {
+    const result = await Swal.fire({
       title: "Delete Income Record?",
       text: "This action cannot be undone!",
       icon: "warning",
@@ -606,41 +784,54 @@ const Income = () => {
       confirmButtonColor: "#d33",
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setIncomeRecords(incomeRecords.filter((r) => r.id !== id));
-        Swal.fire("Deleted!", "Income record has been deleted.", "success");
-      }
     });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const isLocalId =
+        String(id).startsWith("LOCAL_") || String(id).startsWith("sample-");
+      if (!isLocalId) {
+        await safeFetchJSON(`${API_BASE}/api/income/delete/${id}`, {
+          method: "DELETE",
+        });
+      }
+      setIncomeRecords(incomeRecords.filter((r) => r._id !== id));
+      Swal.fire("Deleted!", "Income record has been deleted.", "success");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const downloadReport = () =>
     Swal.fire({
       icon: "success",
       title: "Report Downloading",
-      text: "Income report is being downloaded as PDF.",
+      text: `${currentDept} income report is being downloaded.`,
       timer: 1500,
       showConfirmButton: false,
     });
+
   const exportToExcel = () =>
     Swal.fire({
       icon: "success",
       title: "Exporting to Excel",
-      text: "Income report is being exported to Excel format.",
+      text: `${currentDept} income report exported.`,
       timer: 1500,
       showConfirmButton: false,
     });
-  const printReport = () => window.print();
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
         {/* Mobile Header */}
-        <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
-          <h1 className="text-sm font-bold text-gray-800">Income Report</h1>
+        <div className="md:hidden bg-white border-b p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
+          <h1 className="text-sm font-bold text-gray-800">
+            Income Report ({currentDept})
+          </h1>
           <button
             onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100"
           >
             {isSidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
           </button>
@@ -648,12 +839,7 @@ const Income = () => {
 
         {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm transition-all duration-300 ease-in-out
-            h-full overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -665,7 +851,7 @@ const Income = () => {
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-sm truncate">{adminInfo.name}</p>
                 <p className="text-xs opacity-80 truncate">
-                  {adminInfo.designation}
+                  {adminInfo.department || adminInfo.designation}
                 </p>
               </div>
             </div>
@@ -674,7 +860,6 @@ const Income = () => {
           <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-180px)]">
             {menuItems.map((item) => {
               const isParentActive = activeMenu === item.id;
-
               return (
                 <div key={item.id}>
                   {item.subItems ? (
@@ -684,11 +869,7 @@ const Income = () => {
                           toggleSubMenu(item.id);
                           setIsSidebarOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                          isParentActive
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }`}
+                        className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm ${isParentActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                       >
                         <div className="flex items-center gap-3">
                           <span className="text-gray-600">{item.icon}</span>
@@ -707,11 +888,7 @@ const Income = () => {
                               key={sub.id}
                               to={sub.path}
                               onClick={() => setIsSidebarOpen(false)}
-                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${
-                                activeSubMenu === sub.id
-                                  ? "bg-teal-50 text-[#004d4d] font-bold"
-                                  : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"
-                              }`}
+                              className={`block w-full text-left px-3 py-1.5 rounded-lg text-xs transition-all ${activeSubMenu === sub.id ? "bg-teal-50 text-[#004d4d] font-bold" : "text-gray-600 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                             >
                               {sub.label}
                             </Link>
@@ -725,11 +902,7 @@ const Income = () => {
                       onClick={() => setIsSidebarOpen(false)}
                     >
                       <button
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                          isParentActive
-                            ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                        }`}
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm ${isParentActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                       >
                         <span className="text-gray-600">{item.icon}</span>
                         <span>{item.label}</span>
@@ -739,18 +912,16 @@ const Income = () => {
                 </div>
               );
             })}
-
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 mt-4 border-t pt-4"
             >
               <FaSignOutAlt className="text-xl" />
               <span className="text-sm font-medium">Logout</span>
             </button>
           </nav>
-
-          <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
+          <div className="p-4 text-xs text-gray-400 border-t">
+            <p>©Tarbiyah Online Madrasha</p>
           </div>
         </aside>
 
@@ -762,46 +933,66 @@ const Income = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 w-full overflow-auto">
+        <main className="flex-1 p-4 md:p-6 w-full overflow-auto pt-16 md:pt-6">
           {/* Top Bar */}
-          <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-200 mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div className="bg-white p-3 rounded-xl shadow-sm border mb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
             <div>
               <h1 className="text-base font-bold text-gray-800 flex items-center gap-2">
                 <FaMoneyBillWaveIcon className="text-green-600" /> Income Report
+                —<span className="text-teal-700">{DEPT_LABEL}</span>
               </h1>
               <p className="text-xs text-gray-500">
-                Track and manage all income sources
+                {isLoading
+                  ? `Loading ${currentDept} data...`
+                  : `${incomeRecords.length} record${incomeRecords.length !== 1 ? "s" : ""}`}
+                {!apiWorking && (
+                  <span className="ml-2 text-yellow-600">⚠️ Offline</span>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               <button
+                onClick={() => loadIncome()}
+                disabled={isLoading}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 disabled:opacity-50"
+              >
+                <FaSyncAlt
+                  size={12}
+                  className={isLoading ? "animate-spin" : ""}
+                />{" "}
+                Refresh
+              </button>
+              <button
                 onClick={openAddModal}
-                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaPlus size={12} /> Add Income
               </button>
               <button
                 onClick={downloadReport}
-                className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-purple-500 hover:bg-purple-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaFilePdfIcon size={12} /> PDF
               </button>
               <button
                 onClick={exportToExcel}
-                className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-1"
+                className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
               >
                 <FaFileExcelIcon size={12} /> Excel
               </button>
-              <span className="text-xs font-semibold text-gray-700 hidden sm:block">
-                {adminInfo.name}
-              </span>
               <button
                 onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold transition-all shadow-sm"
+                className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
               >
                 Logout
               </button>
             </div>
+          </div>
+
+          {/* Dept Badge */}
+          <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-2 rounded-xl text-xs font-semibold mb-3">
+            🏫 Showing income of:{" "}
+            <span className="font-bold">{currentDept}</span> department
           </div>
 
           {/* Stats */}
@@ -836,13 +1027,13 @@ const Income = () => {
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
             <div className="flex flex-col md:flex-row gap-2">
               <div className="flex-1 relative">
-                <FaSearch className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search by source, description or transaction ID..."
+                  placeholder={`Search ${currentDept} income...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg"
                 />
               </div>
               <div className="flex items-center gap-1 flex-wrap">
@@ -889,135 +1080,146 @@ const Income = () => {
             </div>
           </div>
 
-          {/* Table */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto max-h-[calc(100vh-380px)] overflow-y-auto">
-              <table className="w-full text-xs">
-                <thead className="bg-gray-50 sticky top-0 z-10">
-                  <tr>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      #
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Source
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
-                      Category
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Amount
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
-                      Date
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
-                      Method
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Status
-                    </th>
-                    <th className="px-3 py-2 text-left font-semibold text-gray-600">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredRecords.length > 0 ? (
-                    filteredRecords.map((record, index) => (
-                      <tr
-                        key={record.id}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="px-3 py-2 font-medium text-gray-500">
-                          {index + 1}
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="font-medium text-gray-800 truncate max-w-[150px]">
-                            {record.source}
-                          </div>
-                          <div className="text-[10px] text-gray-400 truncate max-w-[150px]">
-                            {record.transactionId}
-                          </div>
-                        </td>
-                        <td className="px-3 py-2 hidden md:table-cell">
-                          <span
-                            className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${getCategoryColor(record.category)}`}
+          {/* Loading / Table */}
+          {isLoading ? (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-16 text-center">
+              <FaSpinner className="animate-spin text-4xl text-teal-600 mx-auto" />
+              <p className="text-sm text-gray-500 mt-3">
+                Loading {currentDept} income...
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+              <div className="overflow-x-auto max-h-[calc(100vh-440px)] overflow-y-auto">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 sticky top-0 z-10">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                        #
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                        Source
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden md:table-cell">
+                        Category
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                        Amount
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden sm:table-cell">
+                        Date
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600 hidden lg:table-cell">
+                        Method
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                        Status
+                      </th>
+                      <th className="px-3 py-2 text-left font-semibold text-gray-600">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filteredRecords.length > 0 ? (
+                      filteredRecords.map((record, index) => (
+                        <tr key={record._id} className="hover:bg-gray-50">
+                          <td className="px-3 py-2 font-medium text-gray-500">
+                            {index + 1}
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="font-medium text-gray-800 truncate max-w-[150px]">
+                              {record.source}
+                            </div>
+                            <div className="text-[10px] text-gray-400 truncate max-w-[150px]">
+                              {record.transactionId}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2 hidden md:table-cell">
+                            <span
+                              className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium ${getCategoryColor(record.category)}`}
+                            >
+                              {record.category}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2 font-semibold text-gray-700">
+                            {formatCurrency(record.amount)}
+                          </td>
+                          <td className="px-3 py-2 hidden sm:table-cell text-gray-600">
+                            {formatDate(record.date)}
+                          </td>
+                          <td className="px-3 py-2 hidden lg:table-cell text-gray-600">
+                            {record.method}
+                          </td>
+                          <td className="px-3 py-2">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(record.status)}`}
+                            >
+                              {getStatusIcon(record.status)}
+                              {record.status}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2">
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => openDetailsModal(record)}
+                                className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                                title="View"
+                              >
+                                <FaEye size={12} />
+                              </button>
+                              <button
+                                onClick={() => openEditModal(record)}
+                                className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
+                                title="Edit"
+                              >
+                                <FaEdit size={12} />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteIncome(record._id)}
+                                className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                                title="Delete"
+                              >
+                                <FaTrash size={12} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td
+                          colSpan="8"
+                          className="px-3 py-8 text-center text-gray-500"
+                        >
+                          <FaMoneyBillWaveIcon className="text-4xl text-gray-300 mx-auto mb-2" />
+                          <p>
+                            {currentDept} department-এ কোনো income record নেই
+                          </p>
+                          <button
+                            onClick={openAddModal}
+                            className="mt-3 bg-green-600 hover:bg-green-700 text-white text-xs px-4 py-2 rounded-lg font-semibold"
                           >
-                            {record.category}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2 font-semibold text-gray-700">
-                          {formatCurrency(record.amount)}
-                        </td>
-                        <td className="px-3 py-2 hidden sm:table-cell text-gray-600">
-                          {formatDate(record.date)}
-                        </td>
-                        <td className="px-3 py-2 hidden lg:table-cell text-gray-600">
-                          {record.method}
-                        </td>
-                        <td className="px-3 py-2">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${getStatusColor(record.status)}`}
-                          >
-                            {getStatusIcon(record.status)}
-                            {record.status}
-                          </span>
-                        </td>
-                        <td className="px-3 py-2">
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => openDetailsModal(record)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
-                              title="View Details"
-                            >
-                              <FaEye size={12} />
-                            </button>
-                            <button
-                              onClick={() => openEditModal(record)}
-                              className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
-                              title="Edit"
-                            >
-                              <FaEdit size={12} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteIncome(record.id)}
-                              className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-                              title="Delete"
-                            >
-                              <FaTrash size={12} />
-                            </button>
-                          </div>
+                            + Add First Income
+                          </button>
                         </td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="8"
-                        className="px-3 py-8 text-center text-gray-500"
-                      >
-                        <FaMoneyBillWaveIcon className="text-4xl text-gray-300 mx-auto mb-2" />
-                        <p>No income records found</p>
-                        <p className="text-[10px] text-gray-400 mt-1">
-                          Try adjusting your search or filter criteria
-                        </p>
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
         </main>
       </div>
 
-      {/* Add Income Modal */}
+      {/* Add Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaPlus className="text-green-600" /> Add Income Record
+                <FaPlus className="text-green-600" /> Add Income — {currentDept}
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
@@ -1027,6 +1229,10 @@ const Income = () => {
               </button>
             </div>
             <form onSubmit={handleAddIncome} className="p-6 space-y-4">
+              <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
+                💡 Adding income to <strong>{currentDept}</strong> department
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Source *
@@ -1038,10 +1244,17 @@ const Income = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, source: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  placeholder="e.g., Monthly Fee - Ahmed Hasan"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="e.g., Monthly Fee - Student Name"
+                  list="source-suggestions"
                 />
+                <datalist id="source-suggestions">
+                  {DEPT_SOURCES.map((s) => (
+                    <option key={s} value={s} />
+                  ))}
+                </datalist>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1053,10 +1266,9 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Category</option>
-                    {categories.map((c) => (
+                    {DEPT_CATEGORIES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1078,10 +1290,11 @@ const Income = () => {
                         amount: parseFloat(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1094,7 +1307,7 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, date: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1106,9 +1319,8 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, method: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    <option value="">Select Method</option>
                     {methods.map((m) => (
                       <option key={m} value={m}>
                         {m}
@@ -1117,6 +1329,7 @@ const Income = () => {
                   </select>
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1127,7 +1340,7 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
                     {statuses.map((s) => (
                       <option key={s} value={s}>
@@ -1149,11 +1362,12 @@ const Income = () => {
                         transactionId: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                    placeholder="Enter transaction ID"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="Auto-generated if empty"
                   />
                 </div>
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
@@ -1164,16 +1378,26 @@ const Income = () => {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                  placeholder="Add description..."
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                  placeholder="Additional details..."
                 />
               </div>
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-2 rounded-lg font-semibold"
+                  disabled={saving}
+                  className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 disabled:opacity-50 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Add Income
+                  {saving ? (
+                    <>
+                      <FaSpinner className="animate-spin" /> Saving...
+                    </>
+                  ) : (
+                    <>
+                      <FaSave size={14} /> Add Income
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -1188,13 +1412,14 @@ const Income = () => {
         </div>
       )}
 
-      {/* Edit Income Modal */}
+      {/* Edit Modal */}
       {showEditModal && selectedIncome && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <FaEdit className="text-yellow-600" /> Edit Income Record
+                <FaEdit className="text-yellow-600" /> Edit Income —{" "}
+                {currentDept}
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1215,9 +1440,10 @@ const Income = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, source: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1229,9 +1455,9 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
-                    {categories.map((c) => (
+                    {DEPT_CATEGORIES.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1253,10 +1479,11 @@ const Income = () => {
                         amount: parseFloat(e.target.value) || 0,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1269,7 +1496,7 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, date: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
                 <div>
@@ -1281,7 +1508,7 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, method: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
                     {methods.map((m) => (
                       <option key={m} value={m}>
@@ -1291,6 +1518,7 @@ const Income = () => {
                   </select>
                 </div>
               </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1301,7 +1529,7 @@ const Income = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, status: e.target.value })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   >
                     {statuses.map((s) => (
                       <option key={s} value={s}>
@@ -1323,10 +1551,11 @@ const Income = () => {
                         transactionId: e.target.value,
                       })
                     }
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
@@ -1337,15 +1566,25 @@ const Income = () => {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows="2"
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
                 />
               </div>
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 rounded-lg font-semibold"
+                  disabled={saving}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 disabled:opacity-50 text-white py-2 rounded-lg font-semibold flex items-center justify-center gap-2"
                 >
-                  <FaSave className="inline mr-2" size={14} /> Update Income
+                  {saving ? (
+                    <>
+                      <FaSpinner className="animate-spin" /> Updating...
+                    </>
+                  ) : (
+                    <>
+                      <FaSave size={14} /> Update Income
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"
@@ -1364,7 +1603,7 @@ const Income = () => {
       {showDetailsModal && selectedIncome && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <FaInfoCircle className="text-blue-600" /> Income Details
               </h3>
@@ -1376,7 +1615,7 @@ const Income = () => {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+              <div className="flex items-center justify-between pb-4 border-b">
                 <div>
                   <h2 className="text-lg font-bold text-gray-800">
                     {selectedIncome.source}
@@ -1394,14 +1633,18 @@ const Income = () => {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <p className="text-[10px] text-gray-400">Category</p>
+                  <p className="text-[10px] text-gray-400">Department</p>
                   <p className="text-sm font-semibold">
-                    <span
-                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(selectedIncome.category)}`}
-                    >
-                      {selectedIncome.category}
-                    </span>
+                    {selectedIncome.department || currentDept}
                   </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <p className="text-[10px] text-gray-400">Category</p>
+                  <span
+                    className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(selectedIncome.category)}`}
+                  >
+                    {selectedIncome.category}
+                  </span>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-[10px] text-gray-400">Amount</p>
@@ -1438,7 +1681,7 @@ const Income = () => {
                   </p>
                 </div>
               )}
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
+              <div className="flex gap-3 pt-4 border-t">
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
@@ -1451,7 +1694,7 @@ const Income = () => {
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
-                    handleDeleteIncome(selectedIncome.id);
+                    handleDeleteIncome(selectedIncome._id);
                   }}
                   className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
                 >
