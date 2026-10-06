@@ -19,8 +19,6 @@ import {
   FaMoneyBillWave,
   FaChartLine,
   FaDatabase,
-  FaLayerGroup,
-  FaCalendarCheck,
   FaArrowRight,
   FaUserCog,
   FaBuilding,
@@ -28,57 +26,99 @@ import {
   FaGlobe,
   FaSpinner,
   FaLock,
+  FaSyncAlt,
 } from "react-icons/fa";
 import { MdDashboard, MdVerified } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-const API_BASE = "https://api.tarbiyahonline.com"; // ✅ HTTPS
+const API_BASE = "https://api.tarbiyahonline.com";
 
 // ✅ ImgBB API Key
 const IMAGEBB_API_KEY =
   import.meta.env.VITE_IMAGEBB_API_KEY || "8bf6838d246dba2d2f07c95a50b28938";
 
-// ✅ localStorage keys (cache only)
+// ✅ localStorage keys
 const ADMIN_IMAGE_KEY = "adminProfileImage";
+const ADMIN_DEPT_KEY = "adminDepartment";
 const DEFAULT_PROFILE_IMAGE = adminImg;
+
+// ============================================================
+// ✅ DEPARTMENT-WISE DEFAULTS
+// ============================================================
+const DEPARTMENT_CONFIGS = {
+  Elders: {
+    label: "Quran For Elders",
+    designation: "Elders Department Head",
+    bio: "Administrator for the Quran For Elders Department. Managing Qaida, Nazera, Najera, Tajweed, and Bakarah Hifz courses.",
+  },
+  "Quran Studies": {
+    label: "Quran Studies",
+    designation: "Quran Studies Department Head",
+    bio: "Administrator for the Quran Studies Department. Managing Hifzul Quran and Tarbiyah Quran Studies programs.",
+  },
+  Alimiya: {
+    label: "Alimiya",
+    designation: "Alimiya Department Head",
+    bio: "Administrator for the Alimiya Department. Managing Dawra e Hadith, Tafsir, Fiqh, Hadith, and Arabic Grammar.",
+  },
+  Diploma: {
+    label: "Diploma",
+    designation: "Diploma Department Head",
+    bio: "Administrator for the Diploma Department. Managing Diploma in Islamic Studies and Certificate courses.",
+  },
+};
+
+// ✅ Current department helper
+const getCurrentDepartment = () => {
+  try {
+    const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
+    const savedDept = localStorage.getItem(ADMIN_DEPT_KEY);
+    return info.department || savedDept || "Elders";
+  } catch {
+    return "Elders";
+  }
+};
 
 // ✅ ImgBB Upload
 const uploadToImgBB = async (file) => {
-  console.log("🚀 Starting ImgBB upload...");
-
   if (!IMAGEBB_API_KEY) throw new Error("ImgBB API key missing!");
   if (!file) throw new Error("No file provided");
-
-  if (!file.type.startsWith("image/")) {
+  if (!file.type.startsWith("image/"))
     throw new Error("Please select a valid image file.");
-  }
-
-  if (file.size > 5 * 1024 * 1024) {
+  if (file.size > 5 * 1024 * 1024)
     throw new Error("Image size must be less than 5MB.");
-  }
 
   const formData = new FormData();
   formData.append("image", file);
 
   const response = await fetch(
     `https://api.imgbb.com/1/upload?key=${IMAGEBB_API_KEY}`,
-    {
-      method: "POST",
-      body: formData,
-    },
+    { method: "POST", body: formData },
   );
 
   const data = await response.json();
-
-  if (!data.success) {
+  if (!data.success)
     throw new Error(data.error?.message || "ImgBB upload failed");
-  }
 
   const imageUrl = data.data.url || data.data.display_url;
   if (!imageUrl) throw new Error("ImgBB didn't return a valid URL");
-
-  console.log("✅ Image URL:", imageUrl);
   return imageUrl;
+};
+
+const safeFetchJSON = async (url, options = {}) => {
+  try {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    if (text.trim().startsWith("<"))
+      return { success: false, _htmlError: true };
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, _jsonError: true };
+    }
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
 };
 
 // ==================================================
@@ -98,8 +138,10 @@ const Admin_profile = () => {
   const [backendConnected, setBackendConnected] = useState(true);
   const fileInputRef = useRef(null);
 
-  // ✅ adminDepartment — login এর সময় save করা department
-  const [adminDepartment, setAdminDepartment] = useState("");
+  // ✅ adminDepartment — login থেকে আসে, change করা যাবে না
+  const [adminDepartment, setAdminDepartment] = useState(
+    getCurrentDepartment(),
+  );
 
   const [adminInfo, setAdminInfo] = useState({
     name: "",
@@ -117,46 +159,46 @@ const Admin_profile = () => {
   const [editData, setEditData] = useState({});
 
   // ============================================================
-  // ✅ Load admin info: Backend first, fallback to localStorage
-  // ✅ Per-admin isolated by email
+  // ✅ Load admin info — Backend first, fallback to localStorage
   // ============================================================
   useEffect(() => {
     const loadProfile = async () => {
       setIsLoading(true);
 
-      // Get email + department from localStorage (source of truth)
       const savedAdmin = localStorage.getItem("adminInfo");
       const savedImage = localStorage.getItem(ADMIN_IMAGE_KEY) || "";
-      const savedDept = localStorage.getItem("adminDepartment") || "";
+      const savedDept = localStorage.getItem(ADMIN_DEPT_KEY) || "";
 
       let localAdmin = null;
       if (savedAdmin) {
         try {
           localAdmin = JSON.parse(savedAdmin);
         } catch (err) {
-          console.error("Failed to parse adminInfo:", err);
+          console.error(err);
         }
       }
 
-      // ✅ Determine email — this makes each admin's profile separate
+      // ✅ Email — per-admin isolation
       const email =
         localAdmin?.email ||
         user?.email ||
         localStorage.getItem("adminEmail") ||
         "admin@tarabiyah.com";
 
-      // ✅ Determine department — priority: profile > localStorage
-      const department =
-        localAdmin?.department || savedDept || "Administration";
+      // ✅ Department — login-এর
+      const department = localAdmin?.department || savedDept || "Elders";
 
       setAdminDepartment(department);
+      localStorage.setItem(ADMIN_DEPT_KEY, department);
 
-      // ✅ Try backend first — fetch by email (per-admin isolation)
+      const deptConfig =
+        DEPARTMENT_CONFIGS[department] || DEPARTMENT_CONFIGS["Elders"];
+
+      // ✅ Try backend first
       try {
-        const res = await fetch(
+        const data = await safeFetchJSON(
           `${API_BASE}/api/admin-profile/${encodeURIComponent(email)}`,
         );
-        const data = await res.json();
 
         if (data.success && data.profile) {
           console.log("✅ Loaded profile from backend:", data.profile);
@@ -164,11 +206,10 @@ const Admin_profile = () => {
           const merged = {
             ...data.profile,
             email,
-            // ✅ department: profile > login dept > default
-            department: data.profile.department || department,
+            // ✅ department always from login
+            department: adminDepartment || department,
             profileImage:
               data.profile.profileImage ||
-              // per-admin image key
               localStorage.getItem(`adminProfileImage_${email}`) ||
               savedImage ||
               "",
@@ -177,8 +218,9 @@ const Admin_profile = () => {
           setAdminInfo(merged);
           setEditData(merged);
           setAdminDepartment(merged.department);
+          localStorage.setItem(ADMIN_DEPT_KEY, merged.department);
 
-          // Sync to localStorage as cache
+          // Sync to localStorage
           localStorage.setItem("adminInfo", JSON.stringify(merged));
           if (merged.profileImage) {
             localStorage.setItem(ADMIN_IMAGE_KEY, merged.profileImage);
@@ -192,23 +234,21 @@ const Admin_profile = () => {
           setIsLoading(false);
           return;
         }
-
-        console.log("ℹ️ No backend profile, using local data");
         setBackendConnected(true);
       } catch (err) {
         console.warn("⚠️ Backend not reachable:", err.message);
         setBackendConnected(false);
       }
 
-      // Fallback: local data — with department-aware defaults
+      // ✅ Fallback: localStorage with dept-aware defaults
       const fallback = localAdmin || {
         name: user?.displayName || `${department} Admin`,
         email,
         phone: "+880 1700 123456",
-        designation: "Department Head",
+        designation: deptConfig.designation,
         department: department,
         joinDate: "January 2024",
-        bio: `Administrator for the ${department} Department.`,
+        bio: deptConfig.bio,
         address: "40/1, Safe Garden, Mohammadpur - 1207, Dhaka",
         website: "https://tarabiyahonline.com",
         profileImage:
@@ -230,13 +270,14 @@ const Admin_profile = () => {
       setAdminInfo(merged);
       setEditData(merged);
       setAdminDepartment(merged.department);
+      localStorage.setItem(ADMIN_DEPT_KEY, merged.department);
       setIsLoading(false);
     };
 
     loadProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // ✅ Reset image error when URL changes
   const currentImageUrl = isEditing
     ? editData.profileImage
     : adminInfo.profileImage;
@@ -245,18 +286,16 @@ const Admin_profile = () => {
     setImageLoadError(false);
   }, [currentImageUrl]);
 
-  const toggleSubMenu = (menu) => {
+  const toggleSubMenu = (menu) =>
     setActiveSubMenu(activeSubMenu === menu ? null : menu);
-  };
 
   const handleLogout = async () => {
     try {
       await logOut();
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminEmail");
-      localStorage.removeItem("adminDepartment");
-      // ✅ adminInfo & per-admin image preserve থাকে
-
+      localStorage.removeItem(ADMIN_DEPT_KEY);
+      // adminInfo & per-admin image preserve
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -266,19 +305,14 @@ const Admin_profile = () => {
       navigate("/admin-login");
     } catch (err) {
       console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
     }
   };
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
-  // ==================================================
-  // ✅ SIDEBAR MENU ITEMS
-  // ==================================================
+  // ============================================================
+  // Sidebar
+  // ============================================================
   const menuItems = [
     {
       id: "profile",
@@ -409,9 +443,9 @@ const Admin_profile = () => {
     },
   ];
 
-  // ==================================================
+  // ============================================================
   // ✅ SAVE PROFILE — per-admin (email-based)
-  // ==================================================
+  // ============================================================
   const handleEditToggle = async () => {
     if (!isEditing) {
       setEditData({ ...adminInfo });
@@ -421,16 +455,17 @@ const Admin_profile = () => {
 
     setIsSaving(true);
 
-    // ✅ department always from login — cannot be changed by admin
+    // ✅ department always from login — cannot be changed
     const dataToSave = {
       ...editData,
       email: adminInfo.email || editData.email,
       department: adminDepartment || adminInfo.department,
     };
 
-    // ✅ Per-admin localStorage keys
     const email = dataToSave.email;
     localStorage.setItem("adminInfo", JSON.stringify(dataToSave));
+    localStorage.setItem(ADMIN_DEPT_KEY, adminDepartment);
+
     if (dataToSave.profileImage) {
       localStorage.setItem(ADMIN_IMAGE_KEY, dataToSave.profileImage);
       localStorage.setItem(
@@ -445,19 +480,17 @@ const Admin_profile = () => {
 
     // ✅ Send to backend
     try {
-      const res = await fetch(`${API_BASE}/api/admin-profile/save`, {
+      const data = await safeFetchJSON(`${API_BASE}/api/admin-profile/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dataToSave),
       });
-      const data = await res.json();
 
       if (data.success) {
         console.log("✅ Saved to backend:", data.profile);
         setBackendConnected(true);
 
         if (data.profile) {
-          // Ensure department stays from login
           const synced = {
             ...data.profile,
             department: adminDepartment || data.profile.department,
@@ -547,7 +580,6 @@ const Admin_profile = () => {
     try {
       const imageUrl = await uploadToImgBB(file);
 
-      // ✅ Per-admin image save
       setEditData((prev) => ({ ...prev, profileImage: imageUrl }));
       setAdminInfo((prev) => ({ ...prev, profileImage: imageUrl }));
       localStorage.setItem(ADMIN_IMAGE_KEY, imageUrl);
@@ -559,7 +591,7 @@ const Admin_profile = () => {
         icon: "success",
         title: "Image Uploaded!",
         html: `
-          <p>Click <strong>Save</strong> to apply other changes (optional).</p>
+          <p>Click <strong>Save</strong> to apply changes.</p>
           <img src="${imageUrl}" style="max-width: 150px; max-height: 150px; border-radius: 8px; margin-top: 10px; border: 2px solid #004d4d;" />
         `,
         confirmButtonColor: "#004d4d",
@@ -598,9 +630,9 @@ const Admin_profile = () => {
     });
   };
 
-  // ==================================================
+  // ============================================================
   // ✅ DELETE PROFILE
-  // ==================================================
+  // ============================================================
   const handleDeleteProfile = async () => {
     const email = adminInfo.email;
     if (!email) return;
@@ -618,16 +650,16 @@ const Admin_profile = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const res = await fetch(
+      const data = await safeFetchJSON(
         `${API_BASE}/api/admin-profile/delete/${encodeURIComponent(email)}`,
         { method: "DELETE" },
       );
-      const data = await res.json();
 
       if (data.success) {
         localStorage.removeItem("adminInfo");
         localStorage.removeItem(ADMIN_IMAGE_KEY);
         localStorage.removeItem(`adminProfileImage_${email}`);
+        localStorage.removeItem(ADMIN_DEPT_KEY);
 
         await Swal.fire({
           icon: "success",
@@ -647,23 +679,18 @@ const Admin_profile = () => {
       }
     } catch (err) {
       console.error("❌ Delete error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Server Error",
-        text: err.message,
-      });
+      Swal.fire({ icon: "error", title: "Server Error", text: err.message });
     }
   };
 
-  // ==================================================
-  // ✅ LOADING STATE
-  // ==================================================
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <FaSpinner className="animate-spin text-4xl text-[#004d4d] mx-auto" />
-          <p className="text-sm text-gray-600 mt-3">Loading profile...</p>
+          <p className="text-sm text-gray-600 mt-3">
+            Loading {adminDepartment} profile...
+          </p>
         </div>
       </div>
     );
@@ -672,7 +699,7 @@ const Admin_profile = () => {
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Mobile Floating Menu Button */}
+        {/* Mobile Menu Button */}
         <button
           onClick={toggleSidebar}
           className="md:hidden fixed top-4 left-4 z-50 bg-[#004d4d] text-white p-3 rounded-full shadow-lg hover:bg-[#006666] transition-all"
@@ -681,19 +708,10 @@ const Admin_profile = () => {
           {isSidebarOpen ? <FiX size={20} /> : <FiMenu size={20} />}
         </button>
 
-        {/* ==================== Sidebar ==================== */}
+        {/* Sidebar */}
         <aside
-          className={`
-            fixed md:relative z-50
-            w-72 md:w-64 
-            bg-white border-r border-gray-200 
-            shadow-lg md:shadow-sm
-            transition-all duration-300 ease-in-out
-            h-full overflow-hidden flex-shrink-0
-            ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}
-          `}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r shadow-lg md:shadow-sm transition-all duration-300 h-full overflow-hidden flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
         >
-          {/* Sidebar Header */}
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
@@ -727,7 +745,6 @@ const Admin_profile = () => {
             </div>
           </div>
 
-          {/* Nav */}
           <nav className="p-3 space-y-1 overflow-y-auto h-[calc(100vh-140px)]">
             {menuItems.map((item) => (
               <div key={item.id}>
@@ -739,11 +756,7 @@ const Admin_profile = () => {
                         toggleSubMenu(item.id);
                         setIsSidebarOpen(false);
                       }}
-                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
+                      className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                     >
                       <div className="flex items-center gap-3">
                         <span className="text-gray-600">{item.icon}</span>
@@ -782,11 +795,7 @@ const Admin_profile = () => {
                     }}
                   >
                     <button
-                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                        activeMenu === item.id
-                          ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                      }`}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                     >
                       <span className="text-gray-600">{item.icon}</span>
                       <span>{item.label}</span>
@@ -795,7 +804,6 @@ const Admin_profile = () => {
                 )}
               </div>
             ))}
-
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -806,7 +814,6 @@ const Admin_profile = () => {
           </nav>
         </aside>
 
-        {/* Overlay */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -814,10 +821,10 @@ const Admin_profile = () => {
           />
         )}
 
-        {/* ==================== Main Content ==================== */}
+        {/* Main Content */}
         <main className="flex-1 p-4 md:p-6 pt-20 md:pt-6 w-full overflow-auto">
           <div className="space-y-3 max-w-6xl mx-auto">
-            {/* Backend status alert */}
+            {/* Backend status */}
             {!backendConnected && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-3 flex items-start gap-2">
                 <span className="text-yellow-600 text-lg">⚠️</span>
@@ -832,7 +839,7 @@ const Admin_profile = () => {
               </div>
             )}
 
-            {/* ✅ Department Banner */}
+            {/* Department Banner */}
             {adminDepartment && (
               <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white p-3 rounded-xl shadow-sm flex items-center justify-between">
                 <div>
@@ -861,11 +868,7 @@ const Admin_profile = () => {
                   <button
                     onClick={handleEditToggle}
                     disabled={isUploadingImage || isSaving}
-                    className={`${
-                      isEditing
-                        ? "bg-green-500 hover:bg-green-600"
-                        : "bg-white/20 hover:bg-white/30"
-                    } text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm disabled:opacity-50`}
+                    className={`${isEditing ? "bg-green-500 hover:bg-green-600" : "bg-white/20 hover:bg-white/30"} text-white px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-all backdrop-blur-sm disabled:opacity-50`}
                   >
                     {isSaving ? (
                       <>
@@ -894,10 +897,7 @@ const Admin_profile = () => {
                         src={currentImageUrl}
                         alt="profile"
                         className="w-full h-full object-cover rounded-lg"
-                        onError={() => {
-                          console.error("❌ Image failed:", currentImageUrl);
-                          setImageLoadError(true);
-                        }}
+                        onError={() => setImageLoadError(true)}
                         onLoad={() => setImageLoadError(false)}
                       />
                     ) : (
@@ -989,9 +989,8 @@ const Admin_profile = () => {
                             type="email"
                             name="email"
                             value={editData.email || ""}
-                            onChange={handleInputChange}
-                            className="bg-transparent border-none text-xs focus:outline-none w-32"
                             readOnly
+                            className="bg-transparent border-none text-xs focus:outline-none w-32"
                           />
                         </div>
                         <div className="flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-full">
@@ -1026,7 +1025,7 @@ const Admin_profile = () => {
               </div>
             </div>
 
-            {/* Two Column Section */}
+            {/* Info Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
               <div className="lg:col-span-1 space-y-3">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
@@ -1048,7 +1047,7 @@ const Admin_profile = () => {
                   )}
                 </div>
 
-                {/* ✅ Department — READ ONLY (login থেকে আসে) */}
+                {/* Department — READ ONLY */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-3">
                   <h3 className="text-xs font-bold text-gray-800 mb-1.5 flex items-center gap-1.5 border-b pb-1.5">
                     <FaBuilding className="text-teal-600" size={14} />{" "}
@@ -1060,7 +1059,7 @@ const Admin_profile = () => {
                     />
                   </h3>
                   <p className="text-gray-700 text-xs font-medium">
-                    {adminDepartment || adminInfo.department || "N/A"}
+                    {adminDepartment || "N/A"}
                   </p>
                   <p className="text-[10px] text-gray-400 mt-1">
                     🔒 Department login থেকে auto-set — changed করা যাবে না
@@ -1135,14 +1134,14 @@ const Admin_profile = () => {
                     </button>
 
                     <button
-                      onClick={() => {
+                      onClick={() =>
                         Swal.fire({
                           icon: "info",
                           title: "Change Password",
                           text: "This feature is coming soon!",
                           confirmButtonColor: "#004d4d",
-                        });
-                      }}
+                        })
+                      }
                       className="bg-gray-50 hover:bg-gray-100 p-2 rounded-lg border border-gray-200 text-center transition-all"
                     >
                       <div className="text-base">🔒</div>
@@ -1152,14 +1151,14 @@ const Admin_profile = () => {
                     </button>
 
                     <button
-                      onClick={() => {
+                      onClick={() =>
                         Swal.fire({
                           icon: "info",
                           title: "Settings",
                           text: "This feature is coming soon!",
                           confirmButtonColor: "#004d4d",
-                        });
-                      }}
+                        })
+                      }
                       className="bg-gray-50 hover:bg-gray-100 p-2 rounded-lg border border-gray-200 text-center transition-all"
                     >
                       <div className="text-base">⚙️</div>
@@ -1177,6 +1176,31 @@ const Admin_profile = () => {
                         Delete Profile
                       </p>
                     </button>
+                  </div>
+                </div>
+
+                {/* Department Info Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                  <h3 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <FaBuilding className="text-teal-600" /> Department Info
+                  </h3>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <p className="text-[10px] text-gray-400">Department</p>
+                      <p className="font-semibold text-sm">{adminDepartment}</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <p className="text-[10px] text-gray-400">Role</p>
+                      <p className="font-semibold text-sm">Department Admin</p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-3 col-span-2">
+                      <p className="text-[10px] text-gray-400">Permissions</p>
+                      <p className="text-gray-600 mt-1">
+                        Full access to <strong>{adminDepartment}</strong>{" "}
+                        department — students, teachers, courses, fees,
+                        invoices, reports, and CRM.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
