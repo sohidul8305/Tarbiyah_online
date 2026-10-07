@@ -63,7 +63,7 @@ const COURSE_OPTIONS_BY_DEPT = {
     "Hifz Revision",
     "One to One Quran Revision",
   ],
-  Alimiya: ["Alimiya kids ", "Alimiyah program"],
+  Alimiya: ["Alimiyah for Kids", "Alimiyah Program"],
   Diploma: ["Diploma in Islamic Studies"],
 };
 
@@ -390,24 +390,22 @@ const Student_batch = () => {
     },
   ];
 
-  // ============================================================
-  // ✅ STRICT Department Filter — এটা ছাড়া backend ভুল data দিলে merge হবে
-  // ============================================================
-
-  // ✅ Department → course keywords (for old batches without department field)
   const DEPT_COURSE_KEYWORDS = {
     Elders: [
-      "qaida",
-      "nazera",
-      "najera",
-      "bakarah",
-      "tajweed",
-      "quran for elders",
-      "basic tazweed",
+      "qaida nuraniyah",
+      "quran nazera",
+      "bakarah hifz",
+      "basic tajweed",
     ],
-    "Quran Studies": ["quran studies", "hifzul quran", "tarbiyah quran"],
-    Alimiya: ["alimiya", "dawra", "tafsir", "fiqh", "hadith"],
-    Diploma: ["diploma"],
+    "Quran Studies": [
+      "qaida nurani",
+      "nazera quran",
+      "hifzul quran",
+      "hifz revision",
+      "one to one quran revision",
+    ],
+    Alimiya: ["alimiyah for kids", "alimiyah program"],
+    Diploma: ["diploma in islamic studies"],
   };
 
   // ✅ Check: batch টা আমার department এর কিনা
