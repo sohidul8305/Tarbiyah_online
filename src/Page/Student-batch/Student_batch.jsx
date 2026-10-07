@@ -55,16 +55,11 @@ const COURSE_OPTIONS_BY_DEPT = {
     "Quran Nazera",
     "Bakarah Hifz",
     "Basic Tajweed (Level-1)",
+    "Najera",
   ],
-  "Quran Studies": [
-    "Qaida Nurani",
-    "Nazera Quran",
-    "Hifzul Quran",
-    "Hifz Revision",
-    "One to One Quran Revision",
-  ],
-  Alimiya: ["Alimiyah for Kids", "Alimiyah Program"],
-  Diploma: ["Diploma in Islamic Studies"],
+  "Quran Studies": ["Quran Studies", "Hifzul Quran", "Tarbiyah Quran Studies"],
+  Alimiya: ["Alimiya", "Dawra e Hadith", "Tafsir", "Fiqh", "Hadith"],
+  Diploma: ["Diploma in Islamic Studies", "Certificate"],
 };
 
 // ✅ Fallback (department না মিললে এইটা দেখাবে)
@@ -390,22 +385,24 @@ const Student_batch = () => {
     },
   ];
 
+  // ============================================================
+  // ✅ STRICT Department Filter — এটা ছাড়া backend ভুল data দিলে merge হবে
+  // ============================================================
+
+  // ✅ Department → course keywords (for old batches without department field)
   const DEPT_COURSE_KEYWORDS = {
     Elders: [
-      "qaida nuraniyah",
-      "quran nazera",
-      "bakarah hifz",
-      "basic tajweed",
+      "qaida",
+      "nazera",
+      "najera",
+      "bakarah",
+      "tajweed",
+      "quran for elders",
+      "basic tazweed",
     ],
-    "Quran Studies": [
-      "qaida nurani",
-      "nazera quran",
-      "hifzul quran",
-      "hifz revision",
-      "one to one quran revision",
-    ],
-    Alimiya: ["alimiyah for kids", "alimiyah program"],
-    Diploma: ["diploma in islamic studies"],
+    "Quran Studies": ["quran studies", "hifzul quran", "tarbiyah quran"],
+    Alimiya: ["alimiya", "dawra", "tafsir", "fiqh", "hadith"],
+    Diploma: ["diploma"],
   };
 
   // ✅ Check: batch টা আমার department এর কিনা
