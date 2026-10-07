@@ -493,9 +493,6 @@ export const router = createBrowserRouter([
     element: <New_admission />,
   },
 
-  // ==========================================
-  // ২. অথ পেজ (লগইন, রেজিস্টার)
-  // ==========================================
   {
     path: "/login",
     element: <Login />,
