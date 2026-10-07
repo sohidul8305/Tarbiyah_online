@@ -31,7 +31,10 @@ import { FiMenu, FiX } from "react-icons/fi";
 
 const API_BASE = "https://api.tarbiyahonline.com";
 
-// ✅ Department → Meta info (আইকন, রঙ, কোর্স)
+/* ============================================================
+   ✅ Department → Meta info (আইকন, রঙ, কোর্স)
+   প্রতিটা department এর নিজস্ব course list
+============================================================ */
 const DEPARTMENT_META = {
   Elders: {
     icon: <FaGraduationCap className="text-orange-500" />,
@@ -44,24 +47,29 @@ const DEPARTMENT_META = {
       "Quran Nazera",
       "Bakarah Hifz",
       "Basic Tajweed (Level-1)",
-      "Najera",
     ],
   },
   "Quran Studies": {
     icon: <FaBookOpen className="text-purple-500" />,
     color: "bg-purple-500",
     code: "QRN-201",
-    description: "Comprehensive Quran studies program",
+    description: "Comprehensive Quran studies program for all ages",
     head: "Quran Studies Department Head",
-    courses: ["Quran Studies", "Hifzul Quran", "Tarbiyah Quran Studies"],
+    courses: [
+      "Qaida Nurani",
+      "Nazera Quran",
+      "Hifzul Quran",
+      "Hifz Revision",
+      "One to One Quran Revision",
+    ],
   },
   Alimiya: {
     icon: <FaUniversity className="text-blue-500" />,
     color: "bg-blue-500",
     code: "ALM-301",
-    description: "Alimiya program with Dawra, Tafsir, Fiqh, Hadith",
+    description: "Alimiya program for kids and adults",
     head: "Alimiya Department Head",
-    courses: ["Alimiya", "Dawra e Hadith", "Tafsir", "Fiqh", "Hadith"],
+    courses: ["Alimiyah for Kids", "Alimiyah Program"],
   },
   Diploma: {
     icon: <FaGlobe className="text-green-500" />,
@@ -69,7 +77,7 @@ const DEPARTMENT_META = {
     code: "DPL-401",
     description: "Diploma in Islamic Studies",
     head: "Diploma Department Head",
-    courses: ["Diploma in Islamic Studies", "Certificate"],
+    courses: ["Diploma in Islamic Studies"],
   },
 };
 
@@ -136,15 +144,17 @@ const Department = () => {
       const deptParam = encodeURIComponent(adminDepartment);
 
       // Fetch students & teachers for this department
-      const [studentsRes, teachersRes] = await Promise.allSettled([
+      const [studentsRes, teachersRes, batchesRes] = await Promise.allSettled([
         fetch(`${API_BASE}/api/students/all?department=${deptParam}`),
         fetch(
           `${API_BASE}/api/teacher-attendance/stats?department=${deptParam}`,
         ),
+        fetch(`${API_BASE}/api/batches/all?department=${deptParam}`),
       ]);
 
       let studentsCount = 0;
       let teachersCount = 0;
+      let batchList = [];
 
       // Students
       if (studentsRes.status === "fulfilled") {
@@ -170,7 +180,19 @@ const Department = () => {
         }
       }
 
-      // Get meta for this department
+      // Batches (to count students per course)
+      if (batchesRes.status === "fulfilled") {
+        try {
+          const data = await batchesRes.value.json();
+          if (data.success && Array.isArray(data.batches)) {
+            batchList = data.batches;
+          }
+        } catch (e) {
+          console.error("Batches parse error:", e);
+        }
+      }
+
+      // ✅ Get meta for THIS department only
       const meta = DEPARTMENT_META[adminDepartment] || {
         icon: <FaBuilding className="text-blue-500" />,
         color: "bg-blue-500",
@@ -180,7 +202,7 @@ const Department = () => {
         courses: [adminDepartment],
       };
 
-      // Build department object
+      // ✅ Build department object with ONLY this department's courses
       setDepartment({
         id: adminDepartment,
         name: adminDepartment,
@@ -193,18 +215,43 @@ const Department = () => {
         totalTeachers: teachersCount,
         totalCourses: meta.courses.length,
         status: "Active",
-        courses: meta.courses.map((courseName, idx) => ({
-          id: idx + 1,
-          name: courseName,
-          nameEn: courseName,
-          code: `${meta.code}-${String(idx + 1).padStart(3, "0")}`,
-          students: 0,
-          teacher: "—",
-          duration: "—",
-          price: 0,
-          subtitle: "",
-          link: "#",
-        })),
+        courses: meta.courses.map((courseName, idx) => {
+          // ✅ Count students enrolled in this course (from batches)
+          const courseBatches = batchList.filter(
+            (b) => b.course === courseName,
+          );
+          const courseStudents = courseBatches.reduce(
+            (sum, b) => sum + (Number(b.students) || 0),
+            0,
+          );
+          const courseTeachers = [
+            ...new Set(
+              courseBatches
+                .map((b) => b.teacher)
+                .filter(Boolean)
+                .flatMap((t) =>
+                  String(t)
+                    .split(",")
+                    .map((x) => x.trim()),
+                ),
+            ),
+          ];
+
+          return {
+            id: idx + 1,
+            name: courseName,
+            nameEn: courseName,
+            code: `${meta.code}-${String(idx + 1).padStart(3, "0")}`,
+            students: courseStudents,
+            teacher:
+              courseTeachers.length > 0 ? courseTeachers.join(", ") : "—",
+            duration: "—",
+            price: 0,
+            subtitle: "",
+            link: "#",
+            batches: courseBatches.length,
+          };
+        }),
       });
     } catch (err) {
       console.error("❌ Fetch department data error:", err);
@@ -217,6 +264,7 @@ const Department = () => {
     if (adminDepartment) {
       fetchDepartmentData();
     }
+    // eslint-disable-next-line
   }, [adminDepartment]);
 
   const handleLogout = async () => {
@@ -225,6 +273,7 @@ const Department = () => {
       localStorage.removeItem("isAdminLoggedIn");
       localStorage.removeItem("adminEmail");
       localStorage.removeItem("adminDepartment");
+      localStorage.removeItem("adminInfo");
       await Swal.fire({
         icon: "success",
         title: "Logged Out Successfully",
@@ -665,6 +714,23 @@ const Department = () => {
                       </div>
                     </div>
 
+                    {/* ✅ Course preview chips */}
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      {dept.courses.slice(0, 4).map((c, i) => (
+                        <span
+                          key={i}
+                          className="text-[9px] bg-teal-50 text-teal-700 font-semibold px-2 py-0.5 rounded-full border border-teal-200"
+                        >
+                          {c.name}
+                        </span>
+                      ))}
+                      {dept.courses.length > 4 && (
+                        <span className="text-[9px] bg-gray-100 text-gray-600 font-semibold px-2 py-0.5 rounded-full">
+                          +{dept.courses.length - 4} more
+                        </span>
+                      )}
+                    </div>
+
                     <div className="mt-2">
                       <p className="text-[8px] text-gray-400">
                         Head: {dept.head}
@@ -708,7 +774,7 @@ const Department = () => {
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <FaBookOpen className="text-blue-600" />
-                {department.name} - Courses
+                {department.name} - Courses ({department.courses.length})
               </h3>
               <button
                 onClick={() => setShowCoursesModal(false)}
@@ -744,15 +810,16 @@ const Department = () => {
                         <h4 className="font-semibold text-gray-800 text-sm">
                           {course.name}
                         </h4>
-                        <p className="text-xs text-gray-500">
-                          {course.nameEn} • {course.code}
-                        </p>
+                        <p className="text-xs text-gray-500">{course.code}</p>
                       </div>
+                      <span className="text-[10px] bg-teal-50 text-teal-700 font-semibold px-2 py-0.5 rounded-full">
+                        {course.students} students
+                      </span>
                     </div>
 
                     <div className="mt-2 flex items-center gap-4 text-xs text-gray-500 flex-wrap">
                       <span>👨‍🏫 {course.teacher}</span>
-                      <span>⏱️ {course.duration}</span>
+                      <span>📦 {course.batches} batch(es)</span>
                     </div>
                   </div>
                 ))}

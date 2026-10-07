@@ -71,9 +71,6 @@ export const ADMIN_USERS = [
   // 4️⃣ DIPLOMA DEPARTMENT
   // ─────────────────────────────────────────
   {
-    email: "diploma@tarabiyah.com",
-
-    password: "Diploma1&h%",
     profile: {
       name: "Diploma Department Admin",
       email: "diploma@tarabiyah.com",
@@ -81,7 +78,7 @@ export const ADMIN_USERS = [
       designation: "Department Head",
       department: "Diploma",
       joinDate: "January 2024",
-      bio: "Administrator for the Diploma Department.",
+      bio: "Administrator for the Diploma Depar tment.",
       address: "40/1, Safe Garden, Mohammadpur - 1207, Dhaka",
       website: "https://tarabiyahonline.com",
       profileImage: "",

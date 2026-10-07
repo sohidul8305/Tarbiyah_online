@@ -55,11 +55,16 @@ const COURSE_OPTIONS_BY_DEPT = {
     "Quran Nazera",
     "Bakarah Hifz",
     "Basic Tajweed (Level-1)",
-    "Najera",
   ],
-  "Quran Studies": ["Quran Studies", "Hifzul Quran", "Tarbiyah Quran Studies"],
-  Alimiya: ["Alimiya", "Dawra e Hadith", "Tafsir", "Fiqh", "Hadith"],
-  Diploma: ["Diploma in Islamic Studies", "Certificate"],
+  "Quran Studies": [
+    "Qaida Nurani",
+    "Nazera Quran",
+    "Hifzul Quran",
+    "Hifz Revision",
+    "One to One Quran Revision",
+  ],
+  Alimiya: ["Alimiya kids ", "Alimiyah program"],
+  Diploma: ["Diploma in Islamic Studies"],
 };
 
 // ✅ Fallback (department না মিললে এইটা দেখাবে)
