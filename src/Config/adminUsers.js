@@ -71,6 +71,8 @@ export const ADMIN_USERS = [
   // 4️⃣ DIPLOMA DEPARTMENT
   // ─────────────────────────────────────────
   {
+    email: "diploma@tarabiyah.com",
+    password: "Diploma1&h%",
     profile: {
       name: "Diploma Department Admin",
       email: "diploma@tarabiyah.com",
