@@ -50,15 +50,15 @@ const API_URL = "https://api.tarbiyahonline.com";
 
 // ✅ Department → Courses mapping
 const COURSE_OPTIONS_BY_DEPT = {
-  Elders: [
-    "Qaida Nuraniyah",
-    "Quran Nazera",
-    "Bakarah Hifz",
-    "Basic Tajweed (Level-1)",
-    "Najera",
+  Elders: ["Bakarah Hifz", "Basic Tajweed (Level-1)", "Najera"],
+  "Quran Studies": [
+    "Qaida Nurani",
+    "Nazera Quran",
+    "Hifzul Quran",
+    "Hifz Revision",
+    "One to One Quran Revision",
   ],
-  "Quran Studies": ["Quran Studies", "Hifzul Quran", "Tarbiyah Quran Studies"],
-  Alimiya: ["Alimiya", "Dawra e Hadith", "Tafsir", "Fiqh", "Hadith"],
+  Alimiya: ["Alimiyah for Kids", "Alimiyah Program"],
   Diploma: ["Diploma in Islamic Studies", "Certificate"],
 };
 
@@ -71,9 +71,27 @@ const DEFAULT_COURSE_OPTIONS = [
 ];
 
 // ✅ Helper — admin এর department অনুযায়ী courses
+// ✅ Helper — admin এর department অনুযায়ী courses (case & partial-safe)
 const getCourseOptions = (dept) => {
   if (!dept) return DEFAULT_COURSE_OPTIONS;
-  return COURSE_OPTIONS_BY_DEPT[dept] || DEFAULT_COURSE_OPTIONS;
+
+  const d = String(dept).toLowerCase().trim();
+
+  // ✅ Exact match
+  let key = Object.keys(COURSE_OPTIONS_BY_DEPT).find(
+    (k) => k.toLowerCase().trim() === d,
+  );
+
+  // ✅ Partial match (e.g., "Alimiya Department" → "Alimiya")
+  if (!key) {
+    key = Object.keys(COURSE_OPTIONS_BY_DEPT).find(
+      (k) =>
+        d.includes(k.toLowerCase().trim()) ||
+        k.toLowerCase().trim().includes(d),
+    );
+  }
+
+  return key ? COURSE_OPTIONS_BY_DEPT[key] : DEFAULT_COURSE_OPTIONS;
 };
 
 const DAYS = [
