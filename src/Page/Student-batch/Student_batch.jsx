@@ -71,7 +71,6 @@ const DEFAULT_COURSE_OPTIONS = [
 ];
 
 // ✅ Helper — admin এর department অনুযায়ী courses
-// ✅ Helper — admin এর department অনুযায়ী courses (case & partial-safe)
 const getCourseOptions = (dept) => {
   if (!dept) return DEFAULT_COURSE_OPTIONS;
 
@@ -1334,6 +1333,8 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
   /* ---------- Student ---------- */
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState(null);
+  // ✅ Student search state
+  const [studentSearch, setStudentSearch] = useState("");
 
   const [dbVideos, setDbVideos] = useState([]);
   const [loadingVideos, setLoadingVideos] = useState(false);
@@ -1571,6 +1572,22 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
   const materialsList = dbMaterials;
   const videos = dbVideos;
 
+  // ✅ Student search filter (ID / Name / Phone)
+  const filteredStudents = students.filter((stu) => {
+    const term = studentSearch.toLowerCase().trim();
+    if (!term) return true;
+    return (
+      String(stu.name || "")
+        .toLowerCase()
+        .includes(term) ||
+      String(stu.studentId || "")
+        .toLowerCase()
+        .includes(term) ||
+      String(stu.phone || "")
+        .toLowerCase()
+        .includes(term)
+    );
+  });
   const calcPaid = (s) => {
     const fromMonths = (s.paidMonths || []).reduce(
       (sum, p) => sum + Number(p.amount || 0),
@@ -2797,6 +2814,12 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
                   </p>
                   <p className="text-[11px] text-gray-500">
                     Total {students.length} students in this batch
+                    {studentSearch.trim() && (
+                      <span className="text-indigo-600 font-semibold">
+                        {" "}
+                        • Found {filteredStudents.length}
+                      </span>
+                    )}
                   </p>
                 </div>
                 <button
@@ -2805,6 +2828,30 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
                 >
                   <FaUserPlus size={12} /> Add Student
                 </button>
+              </div>
+
+              {/* ✅ Search Box */}
+              <div className="bg-white border border-gray-200 rounded-xl p-3">
+                <div className="relative">
+                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                  <input
+                    type="text"
+                    placeholder="Search by Student ID, Name or Phone..."
+                    value={studentSearch}
+                    onChange={(e) => setStudentSearch(e.target.value)}
+                    className="w-full pl-9 pr-9 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                  {studentSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setStudentSearch("")}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 p-1"
+                      title="Clear"
+                    >
+                      <FiX size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
 
               {loadingDbStudents ? (
@@ -2818,9 +2865,15 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
                   title="No students yet"
                   subtitle="Click 'Add Student' to enroll the first student"
                 />
+              ) : filteredStudents.length === 0 ? (
+                <EmptyState
+                  icon={<FaSearch />}
+                  title="No matching students"
+                  subtitle={`"${studentSearch}" — এর সাথে কোনো student মেলেনি`}
+                />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                  {students.map((stu) => {
+                  {filteredStudents.map((stu) => {
                     const due = calcDue(stu);
                     const paid = calcPaid(stu);
                     return (
