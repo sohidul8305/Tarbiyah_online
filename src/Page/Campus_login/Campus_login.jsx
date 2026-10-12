@@ -197,15 +197,6 @@ const Campus_login = () => {
               {loading ? "Logging in..." : "Login to Campus"}
             </button>
           </form>
-
-          <div className="mt-6 text-center">
-            <Link
-              to="/student-dashboard"
-              className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-[#00a65a]"
-            >
-              <FaArrowLeft className="mr-2" /> Back to Student Dashboard
-            </Link>
-          </div>
         </div>
       </div>
     </div>

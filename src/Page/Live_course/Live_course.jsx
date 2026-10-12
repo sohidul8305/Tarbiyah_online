@@ -61,7 +61,7 @@ const Live_course = () => {
     },
     {
       id: 7,
-      title: language === "bn" ? "কায়দা নুরানী" : " Qaida Nurani",
+      title: language === "bn" ? "কায়দায়ে নূরানিয়্যাহ" : " Qaida Nuraniyah",
       slug: "/course/kids/quida-nurani",
       category: "Live Course",
       image: NuraniyaBannerIMG,
@@ -69,7 +69,7 @@ const Live_course = () => {
     },
     {
       id: 8,
-      title: language === "bn" ? "নাজেরা কুরআন" : "Nazera Quran",
+      title: language === "bn" ? "কুরআন নাজেরা" : "Quran Nazera",
       slug: "/course/kids/nazera",
       category: "Live Course",
       image: NazerakidsImg,
@@ -93,7 +93,10 @@ const Live_course = () => {
     },
     {
       id: 11,
-      title: language === "bn" ? "ওয়ান টু ওয়ান" : "One to One",
+      title:
+        language === "bn"
+          ? "ওয়ান টু ওয়ান কুরআন লার্নিং "
+          : "One to One Quran Learning ",
       slug: "/course/kids/one-to-one",
       category: "Live Course",
       image: OnetoOneImg,
