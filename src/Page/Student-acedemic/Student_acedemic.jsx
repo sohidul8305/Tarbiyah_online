@@ -1,6 +1,7 @@
 // src/Page/Student-acedemic/Student_acedemic.jsx
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
+import Swal from "sweetalert2";
 import {
   FaUser,
   FaUniversity,
@@ -8,16 +9,21 @@ import {
   FaCreditCard,
   FaMoneyBillWave,
   FaGraduationCap,
-  FaCalendarAlt,
-  FaClock,
-  FaVideo,
-  FaFilePdf,
-  FaLink,
-  FaChalkboardTeacher,
-  FaPlay,
   FaSync,
-  FaExternalLinkAlt,
   FaInfoCircle,
+  FaClock,
+  FaChalkboardTeacher,
+  FaLink,
+  FaBookOpen,
+  FaPhone,
+  FaIdCard,
+  FaCalendarAlt,
+  FaFilePdf,
+  FaVideo,
+  FaExternalLinkAlt,
+  FaEnvelope,
+  FaClipboardList,
+  FaBell,
 } from "react-icons/fa";
 import { MdDashboard, MdOutlineQuiz } from "react-icons/md";
 
@@ -25,6 +31,7 @@ const API_BASE = "https://api.tarbiyahonline.com/api";
 
 const StudentAcademic = () => {
   const location = useLocation();
+
   const [studentInfo, setStudentInfo] = useState({
     _id: "",
     name: "Student",
@@ -33,11 +40,13 @@ const StudentAcademic = () => {
     roll: "N/A",
     course: "",
     phone: "",
+    email: "",
+    admissionDate: "",
+    status: "Active",
   });
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [activeTab, setActiveTab] = useState("videos");
   const [fetchError, setFetchError] = useState(null);
   const [studentBatches, setStudentBatches] = useState([]);
 
@@ -56,39 +65,31 @@ const StudentAcademic = () => {
   });
 
   // ============================================================
-  // ✅ Fetch academic data by MULTIPLE identifiers
-  //     useCallback দিয়ে wrap করা — TDZ error হবে না
+  // ✅ Fetch academic data
   // ============================================================
   const fetchAcademicData = useCallback(async (identifiers = {}) => {
     try {
       setFetchError(null);
+      const { id, studentId, phone, name, username } = identifiers;
 
-      const { id, studentId, phone, name, username, course } = identifiers;
-
-      // Build query params
       const params = new URLSearchParams();
       if (id) params.append("id", id);
       if (studentId) params.append("studentId", studentId);
       if (phone) params.append("phone", phone);
       if (name) params.append("name", name);
       if (username) params.append("username", username);
-      if (course) params.append("course", course);
 
       if (params.toString() === "") {
-        console.warn("⚠️ No identifiers to search");
         setLoading(false);
         setRefreshing(false);
         return;
       }
 
       const url = `${API_BASE}/student/my-academic?${params.toString()}`;
-      console.log(`📥 Fetching academic:`, url);
-
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const d = await res.json();
-      console.log("📥 Response:", d);
 
       if (d.success) {
         setAcademicData({
@@ -110,22 +111,10 @@ const StudentAcademic = () => {
           },
         });
         setStudentBatches(d.batches || []);
-
-        console.log(
-          `✅ Loaded — Videos: ${d.stats?.totalVideos}, Classes: ${d.stats?.totalClasses}, Exams: ${d.stats?.totalExams}, Quizzes: ${d.stats?.totalQuizzes}, PDFs: ${d.stats?.totalPdfs}`,
-        );
-
-        // Auto switch to first non-empty tab
-        if (d.videos?.length > 0) setActiveTab("videos");
-        else if (d.classes?.length > 0) setActiveTab("classes");
-        else if (d.materials?.exams?.length > 0) setActiveTab("exams");
-        else if (d.materials?.quizzes?.length > 0) setActiveTab("quizzes");
-        else if (d.materials?.pdfs?.length > 0) setActiveTab("pdfs");
       } else {
         setFetchError(d.message || "Failed to load");
       }
     } catch (e) {
-      console.error("❌ Fetch error:", e);
       setFetchError(e.message || "Failed to load academic data");
     } finally {
       setLoading(false);
@@ -134,13 +123,11 @@ const StudentAcademic = () => {
   }, []);
 
   // ============================================================
-  // ✅ Load student info from localStorage
+  // ✅ Load from localStorage
   // ============================================================
   useEffect(() => {
     const savedInfo = localStorage.getItem("studentInfo");
-
     if (!savedInfo) {
-      console.warn("⚠️ No studentInfo in localStorage");
       setLoading(false);
       return;
     }
@@ -149,12 +136,9 @@ const StudentAcademic = () => {
     try {
       parsed = JSON.parse(savedInfo);
     } catch (e) {
-      console.warn("⚠️ Parse error:", e);
       setLoading(false);
       return;
     }
-
-    console.log("🎯 Student info from localStorage:", parsed);
 
     setStudentInfo({
       _id: parsed._id || "",
@@ -165,16 +149,17 @@ const StudentAcademic = () => {
       roll: parsed.roll || parsed.studentId || "N/A",
       course: parsed.course || parsed.class || "",
       phone: parsed.phone || "",
+      email: parsed.email || "",
+      admissionDate: parsed.admissionDate || parsed.createdAt || "",
+      status: parsed.status || "Active",
     });
 
-    // ✅ Fetch with ALL identifiers
     fetchAcademicData({
       id: parsed._id,
       studentId: parsed.studentId,
       phone: parsed.phone,
       name: parsed.name,
       username: parsed.username,
-      course: parsed.course || parsed.class,
     });
   }, [fetchAcademicData]);
 
@@ -187,12 +172,115 @@ const StudentAcademic = () => {
       phone: parsed.phone,
       name: parsed.name,
       username: parsed.username,
-      course: parsed.course || parsed.class,
     });
   };
 
   // ============================================================
-  // Sidebar Menu
+  // ✅ Derived data
+  // ============================================================
+  const primaryBatch = studentBatches[0] || null;
+
+  const weeklyRoutine = useMemo(() => {
+    const days = [
+      "Saturday",
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+    ];
+    const map = {};
+    days.forEach((d) => (map[d] = []));
+    (academicData.classes || []).forEach((c) => {
+      const day = c.day || "Other";
+      if (!map[day]) map[day] = [];
+      map[day].push(c);
+    });
+    return days
+      .filter((d) => map[d].length > 0)
+      .map((d) => ({ day: d, classes: map[d] }));
+  }, [academicData.classes]);
+
+  const teachersList = useMemo(() => {
+    const set = new Map();
+    (academicData.classes || []).forEach((c) => {
+      const arr = Array.isArray(c.teachers)
+        ? c.teachers
+        : c.teacher
+          ? [c.teacher]
+          : [];
+      arr.forEach((t) => {
+        if (!set.has(t)) set.set(t, { name: t, subjects: new Set() });
+        set.get(t).subjects.add(c.name);
+      });
+    });
+    return Array.from(set.values()).map((t) => ({
+      name: t.name,
+      subjects: Array.from(t.subjects),
+    }));
+  }, [academicData.classes]);
+
+  const recentUploads = useMemo(() => {
+    const items = [];
+    (academicData.videos || []).forEach((v) =>
+      items.push({
+        type: "video",
+        title: v.title,
+        url: v.url,
+        batch: v.batchName,
+        date: v.createdAt || v.date,
+      }),
+    );
+    (academicData.materials?.all || []).forEach((m) =>
+      items.push({
+        type: m.type || "material",
+        title: m.title,
+        url: m.url,
+        date: m.date || m.createdAt,
+      }),
+    );
+    items.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+    return items.slice(0, 6);
+  }, [academicData.videos, academicData.materials]);
+
+  const todayClasses = useMemo(() => {
+    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+    return (academicData.classes || []).filter(
+      (c) => (c.day || "").toLowerCase() === today.toLowerCase(),
+    );
+  }, [academicData.classes]);
+
+  // ============================================================
+  // ✅ Locked content click handler
+  // ============================================================
+  const handleLockedClick = (item) => {
+    Swal.fire({
+      icon: "info",
+      title: "🔒 Campus Login Required",
+      html: `
+        <p style="font-size:14px;color:#444;">
+          <strong>${item.title || "এই content"}</strong> দেখতে হলে
+          Campus-এ login করতে হবে।
+        </p>
+        <p style="font-size:12px;color:#888;margin-top:8px;">
+          Campus Login → Academic → Content
+        </p>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Campus Login",
+      cancelButtonText: "পরে",
+      confirmButtonColor: "#00ADD2",
+      cancelColor: "#9ca3af",
+    }).then((r) => {
+      if (r.isConfirmed) {
+        window.location.href = "/campus-login";
+      }
+    });
+  };
+
+  // ============================================================
+  // ✅ Sidebar menu
   // ============================================================
   const menuItems = [
     {
@@ -233,41 +321,6 @@ const StudentAcademic = () => {
     },
   ];
 
-  const stats = academicData.stats;
-
-  const tabs = [
-    {
-      id: "videos",
-      label: "Class Videos",
-      icon: <FaVideo />,
-      count: stats.totalVideos,
-    },
-    {
-      id: "classes",
-      label: "Class Schedule",
-      icon: <FaCalendarAlt />,
-      count: stats.totalClasses,
-    },
-    {
-      id: "exams",
-      label: "Exams",
-      icon: <FaGraduationCap />,
-      count: stats.totalExams,
-    },
-    {
-      id: "quizzes",
-      label: "Quizzes",
-      icon: <MdOutlineQuiz />,
-      count: stats.totalQuizzes,
-    },
-    {
-      id: "pdfs",
-      label: "PDF Notes",
-      icon: <FaFilePdf />,
-      count: stats.totalPdfs,
-    },
-  ];
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -281,7 +334,7 @@ const StudentAcademic = () => {
 
   return (
     <div className="flex flex-col md:flex-row gap-6">
-      {/* Sidebar */}
+      {/* ==================== SIDEBAR ==================== */}
       <aside className="hidden md:block w-64 bg-white border border-gray-200 rounded-xl shadow-sm h-fit overflow-hidden flex-shrink-0">
         <div className="p-4 bg-gradient-to-r from-[#00ADD2] to-[#00c4e6] text-white">
           <div className="flex items-center gap-3">
@@ -316,373 +369,256 @@ const StudentAcademic = () => {
         </nav>
       </aside>
 
-      {/* Main */}
-      <div className="flex-1">
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-[#00ADD2] to-[#00c4e6] p-6 text-white">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div className="min-w-0">
-                <h2 className="text-2xl font-bold flex items-center gap-2">
-                  <FaGraduationCap /> Academic Information
-                </h2>
-                <p className="text-sm opacity-80">
-                  {studentInfo.name} • {studentInfo.class} • ID:{" "}
+      {/* ==================== MAIN ==================== */}
+      <div className="flex-1 space-y-4 min-w-0">
+        {/* HERO HEADER */}
+        <div className="bg-gradient-to-r from-[#00ADD2] to-[#00c4e6] rounded-xl shadow-sm p-5 text-white">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="min-w-0">
+              <h2 className="text-2xl font-bold flex items-center gap-2">
+                <FaGraduationCap /> Academic Information
+              </h2>
+              <p className="text-sm opacity-90 mt-1">
+                {studentInfo.name} • {studentInfo.class} • ID:{" "}
+                <span className="font-semibold">
                   {studentInfo.studentId || studentInfo.roll}
-                </p>
-              </div>
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm flex items-center gap-2 font-semibold disabled:opacity-50"
-              >
-                <FaSync className={refreshing ? "animate-spin" : ""} />
-                {refreshing ? "Refreshing..." : "Refresh"}
-              </button>
+                </span>
+              </p>
+            </div>
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm flex items-center gap-2 font-semibold disabled:opacity-50 transition"
+            >
+              <FaSync className={refreshing ? "animate-spin" : ""} />
+              {refreshing ? "Refreshing..." : "Refresh"}
+            </button>
+          </div>
+        </div>
+
+        {/* ERROR */}
+        {fetchError && (
+          <div className="bg-red-50 border border-red-200 rounded-xl p-3 flex items-center justify-between">
+            <p className="text-xs text-red-700 font-semibold">
+              ⚠️ {fetchError}
+            </p>
+            <button
+              onClick={handleRefresh}
+              className="text-xs text-red-600 underline font-semibold"
+            >
+              Try again
+            </button>
+          </div>
+        )}
+
+        {/* NO BATCH WARNING */}
+        {studentBatches.length === 0 && !fetchError && !loading && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center">
+            <FaInfoCircle className="text-yellow-600 text-2xl mx-auto mb-1" />
+            <p className="text-sm font-semibold text-yellow-800">
+              You are not assigned to any batch yet
+            </p>
+            <p className="text-xs text-yellow-700 mt-1">
+              Please contact admin to add you to a batch
+            </p>
+          </div>
+        )}
+
+        {/* ACADEMIC PROFILE */}
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-[#00ADD2] text-white px-4 py-2 flex items-center gap-2 text-sm font-bold">
+            <FaUser /> Academic Profile
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-0">
+            <InfoItem
+              icon={<FaUser />}
+              label="Full Name"
+              value={studentInfo.name || "N/A"}
+            />
+            <InfoItem
+              icon={<FaIdCard />}
+              label="Student ID"
+              value={studentInfo.studentId || "N/A"}
+            />
+            <InfoItem
+              icon={<FaBookOpen />}
+              label="Course"
+              value={
+                primaryBatch?.course || studentInfo.course || studentInfo.class
+              }
+            />
+            <InfoItem
+              icon={<FaCalendarAlt />}
+              label="Admission Date"
+              value={
+                studentInfo.admissionDate
+                  ? new Date(studentInfo.admissionDate).toLocaleDateString()
+                  : "N/A"
+              }
+            />
+            <InfoItem
+              icon={<FaGraduationCap />}
+              label="Batch"
+              value={primaryBatch?.name || "N/A"}
+            />
+            <InfoItem
+              icon={<FaChalkboardTeacher />}
+              label="Batch Teacher"
+              value={
+                teachersList.length > 0
+                  ? teachersList.map((t) => t.name).join(", ")
+                  : "N/A"
+              }
+            />
+            <InfoItem
+              icon={<FaPhone />}
+              label="Phone"
+              value={studentInfo.phone || "N/A"}
+            />
+            <InfoItem
+              icon={<FaEnvelope />}
+              label="Email"
+              value={studentInfo.email || "N/A"}
+            />
+          </div>
+        </div>
+
+        {/* TODAY'S CLASS */}
+        {todayClasses.length > 0 && (
+          <div className="bg-white border border-green-300 rounded-xl shadow-sm overflow-hidden">
+            <div className="bg-green-600 text-white px-4 py-2 flex items-center gap-2 text-sm font-bold">
+              <FaBell /> Today&apos;s Class ({todayClasses.length})
+            </div>
+            <div className="p-4 space-y-2">
+              {todayClasses.map((c, i) => (
+                <div
+                  key={c._id || i}
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-green-50 border border-green-100 rounded-lg p-3"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-gray-800 text-sm">{c.name}</p>
+                    <p className="text-xs text-gray-600 flex items-center gap-2 mt-1">
+                      <FaClock className="text-gray-400" />
+                      {c.time}
+                    </p>
+                  </div>
+                  {c.meetingLink && (
+                    <button
+                      onClick={() =>
+                        handleLockedClick({
+                          title: `${c.name} — ${c.time}`,
+                        })
+                      }
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 whitespace-nowrap"
+                    >
+                      <FaLink size={11} /> Join Now
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
+        )}
 
-          {/* Matched Batches */}
-          {studentBatches.length > 0 && (
-            <div className="px-4 py-2 bg-blue-50 border-b border-blue-100 text-xs">
-              <span className="text-gray-600 font-semibold">Your Batch: </span>
-              {studentBatches.map((b, i) => (
-                <span key={b._id || i} className="text-blue-700 font-semibold">
-                  {i > 0 && ", "}
-                  {b.name} ({b.course})
-                </span>
+        {/* TEACHERS */}
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-[#00ADD2] text-white px-4 py-2 flex items-center gap-2 text-sm font-bold">
+            <FaChalkboardTeacher /> Your Teachers ({teachersList.length})
+          </div>
+          {teachersList.length === 0 ? (
+            <div className="p-8 text-center">
+              <FaChalkboardTeacher className="text-4xl text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">
+                No teacher information available
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 p-4">
+              {teachersList.map((t, i) => (
+                <div
+                  key={i}
+                  className="border border-gray-200 rounded-lg p-3 flex items-start gap-3 hover:shadow-md transition"
+                >
+                  <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center font-bold flex-shrink-0">
+                    {t.name?.charAt(0) || "T"}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-gray-800 text-sm truncate">
+                      {t.name}
+                    </p>
+                    <p className="text-[10px] text-gray-500 mt-0.5">
+                      {t.subjects.length > 0
+                        ? t.subjects.join(", ")
+                        : "Teacher"}
+                    </p>
+                  </div>
+                </div>
               ))}
             </div>
           )}
+        </div>
 
-          {/* Error */}
-          {fetchError && (
-            <div className="bg-red-50 border-b border-red-200 p-3 text-center">
-              <p className="text-xs text-red-700 font-semibold">
-                ⚠️ {fetchError}
-              </p>
-              <button
-                onClick={handleRefresh}
-                className="mt-1 text-xs text-red-600 underline"
-              >
-                Try again
-              </button>
-            </div>
-          )}
-
-          {/* No batch warning */}
-          {studentBatches.length === 0 && !fetchError && !loading && (
-            <div className="bg-yellow-50 border-b border-yellow-200 p-4 text-center">
-              <FaInfoCircle className="text-yellow-600 text-2xl mx-auto mb-1" />
-              <p className="text-sm font-semibold text-yellow-800">
-                You are not assigned to any batch yet
-              </p>
-              <p className="text-xs text-yellow-700 mt-1">
-                Please contact admin to add you to a batch
-              </p>
-            </div>
-          )}
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 p-4 bg-gray-50 border-b border-gray-200">
-            <div className="bg-white p-3 rounded-lg shadow-sm border text-center">
-              <p className="text-[10px] text-gray-500 flex items-center justify-center gap-1">
-                <FaVideo className="text-red-600" /> Videos
-              </p>
-              <p className="text-xl font-bold text-red-600">
-                {stats.totalVideos}
-              </p>
-            </div>
-            <div className="bg-white p-3 rounded-lg shadow-sm border text-center">
-              <p className="text-[10px] text-gray-500 flex items-center justify-center gap-1">
-                <FaCalendarAlt className="text-indigo-600" /> Classes
-              </p>
-              <p className="text-xl font-bold text-indigo-600">
-                {stats.totalClasses}
-              </p>
-            </div>
-            <div className="bg-white p-3 rounded-lg shadow-sm border text-center">
-              <p className="text-[10px] text-gray-500 flex items-center justify-center gap-1">
-                <FaGraduationCap className="text-purple-600" /> Exams
-              </p>
-              <p className="text-xl font-bold text-purple-600">
-                {stats.totalExams}
-              </p>
-            </div>
-            <div className="bg-white p-3 rounded-lg shadow-sm border text-center">
-              <p className="text-[10px] text-gray-500 flex items-center justify-center gap-1">
-                <MdOutlineQuiz className="text-blue-600" /> Quizzes
-              </p>
-              <p className="text-xl font-bold text-blue-600">
-                {stats.totalQuizzes}
-              </p>
-            </div>
-            <div className="bg-white p-3 rounded-lg shadow-sm border text-center">
-              <p className="text-[10px] text-gray-500 flex items-center justify-center gap-1">
-                <FaFilePdf className="text-orange-600" /> PDFs
-              </p>
-              <p className="text-xl font-bold text-orange-600">
-                {stats.totalPdfs}
-              </p>
-            </div>
+        {/* RECENT UPLOADS */}
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+          <div className="bg-[#00ADD2] text-white px-4 py-2 flex items-center gap-2 text-sm font-bold">
+            <FaClipboardList /> Recent Uploads
           </div>
-
-          {/* Tabs */}
-          <div className="flex flex-wrap gap-2 p-4 border-b border-gray-200 bg-white">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all ${
-                  activeTab === tab.id
-                    ? "bg-[#00ADD2] text-white shadow-md"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-                <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                    activeTab === tab.id
-                      ? "bg-white/30 text-white"
-                      : "bg-white text-gray-700"
-                  }`}
+          {recentUploads.length === 0 ? (
+            <div className="p-8 text-center">
+              <FaClipboardList className="text-4xl text-gray-300 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">
+                No recent uploads from your batch
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {recentUploads.map((item, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleLockedClick(item)}
+                  className="w-full text-left flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition"
                 >
-                  {tab.count}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Tab Content */}
-          <div className="p-4">
-            {/* VIDEOS */}
-            {activeTab === "videos" && (
-              <div className="space-y-3">
-                {academicData.videos.length === 0 ? (
-                  <EmptyState
-                    icon={<FaVideo />}
-                    title="No videos available yet"
-                    subtitle="Videos uploaded by your teacher will appear here"
-                  />
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {academicData.videos.map((video, i) => (
-                      <a
-                        key={video._id || i}
-                        href={video.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md hover:border-red-300 transition-all flex items-center gap-3"
-                      >
-                        <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <FaPlay className="text-red-600" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-gray-800 text-sm truncate">
-                            {video.title || `Video ${i + 1}`}
-                          </p>
-                          <p className="text-[10px] text-gray-500 truncate">
-                            {video.batchName || video.teacher || ""}
-                          </p>
-                        </div>
-                        <FaExternalLinkAlt
-                          className="text-gray-400 flex-shrink-0"
-                          size={12}
-                        />
-                      </a>
-                    ))}
+                  <div
+                    className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      item.type === "video"
+                        ? "bg-red-100 text-red-600"
+                        : item.type === "pdf"
+                          ? "bg-orange-100 text-orange-600"
+                          : item.type === "quiz"
+                            ? "bg-blue-100 text-blue-600"
+                            : "bg-purple-100 text-purple-600"
+                    }`}
+                  >
+                    {item.type === "video" ? (
+                      <FaVideo />
+                    ) : item.type === "pdf" ? (
+                      <FaFilePdf />
+                    ) : item.type === "quiz" ? (
+                      <MdOutlineQuiz />
+                    ) : (
+                      <FaGraduationCap />
+                    )}
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* CLASSES */}
-            {activeTab === "classes" && (
-              <div className="space-y-3">
-                {academicData.classes.length === 0 ? (
-                  <EmptyState
-                    icon={<FaCalendarAlt />}
-                    title="No classes scheduled"
-                    subtitle="Your batch class schedule will appear here"
-                  />
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {academicData.classes.map((cls, idx) => {
-                      const teachers = Array.isArray(cls.teachers)
-                        ? cls.teachers
-                        : cls.teacher
-                          ? [cls.teacher]
-                          : [];
-                      return (
-                        <div
-                          key={cls._id || idx}
-                          className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all"
-                        >
-                          <div className="flex items-start justify-between gap-3 mb-2">
-                            <div className="min-w-0">
-                              <p className="text-[10px] text-gray-500 uppercase font-bold">
-                                Class
-                              </p>
-                              <p className="font-bold text-gray-800">
-                                {cls.name}
-                              </p>
-                              {cls.batchName && (
-                                <p className="text-[10px] text-gray-400">
-                                  {cls.batchName}
-                                </p>
-                              )}
-                            </div>
-                            <span
-                              className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                                cls.gender === "Female"
-                                  ? "bg-pink-100 text-pink-700"
-                                  : cls.gender === "Male"
-                                    ? "bg-blue-100 text-blue-700"
-                                    : "bg-gray-100 text-gray-700"
-                              }`}
-                            >
-                              {cls.gender || "Mixed"}
-                            </span>
-                          </div>
-
-                          <div className="space-y-1 text-xs text-gray-600">
-                            {/* ⬇️ নতুন যোগ করুন */}
-                            {cls.classNo && (
-                              <p className="flex items-center gap-2">
-                                <FaInfoCircle className="text-gray-400" />
-                                <span>
-                                  Class No:{" "}
-                                  <b className="text-gray-800">{cls.classNo}</b>
-                                </span>
-                              </p>
-                            )}
-                            {cls.classDate && (
-                              <p className="flex items-center gap-2">
-                                <FaCalendarAlt className="text-gray-400" />
-                                <span>
-                                  Date:{" "}
-                                  <b className="text-gray-800">
-                                    {cls.classDate}
-                                  </b>
-                                </span>
-                              </p>
-                            )}
-
-                            {/* পুরনো কোড */}
-
-                            <p className="flex items-center gap-2">
-                              <FaCalendarAlt className="text-gray-400" />
-                              {cls.day}
-                            </p>
-                            <p className="flex items-center gap-2">
-                              <FaClock className="text-gray-400" />
-                              {cls.time}
-                            </p>
-                            {teachers.length > 0 && (
-                              <div className="flex items-start gap-2">
-                                <FaChalkboardTeacher className="text-gray-400 mt-0.5" />
-                                <div className="flex flex-wrap gap-1">
-                                  {teachers.map((t, i) => (
-                                    <span
-                                      key={i}
-                                      className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                                    >
-                                      {t}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          {cls.meetingLink && (
-                            <a
-                              href={cls.meetingLink}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-2"
-                            >
-                              <FaLink size={11} /> Join Class
-                            </a>
-                          )}
-                        </div>
-                      );
-                    })}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-gray-800 text-sm truncate">
+                      {item.title}
+                    </p>
+                    <p className="text-[10px] text-gray-500">
+                      <span className="uppercase font-bold">{item.type}</span>
+                      {item.batch && <> • {item.batch}</>}
+                      {item.date && (
+                        <> • {new Date(item.date).toLocaleDateString()}</>
+                      )}
+                    </p>
                   </div>
-                )}
-              </div>
-            )}
-
-            {/* EXAMS */}
-            {activeTab === "exams" && (
-              <div className="space-y-3">
-                {academicData.materials.exams.length === 0 ? (
-                  <EmptyState
-                    icon={<FaGraduationCap />}
-                    title="No exams published"
-                    subtitle="Your batch exams will appear here"
-                  />
-                ) : (
-                  <div className="space-y-2">
-                    {academicData.materials.exams.map((m, i) => (
-                      <MaterialCard
-                        key={m._id || i}
-                        material={m}
-                        color="purple"
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* QUIZZES */}
-            {activeTab === "quizzes" && (
-              <div className="space-y-3">
-                {academicData.materials.quizzes.length === 0 ? (
-                  <EmptyState
-                    icon={<MdOutlineQuiz />}
-                    title="No quizzes available"
-                    subtitle="Your batch quizzes will appear here"
-                  />
-                ) : (
-                  <div className="space-y-2">
-                    {academicData.materials.quizzes.map((m, i) => (
-                      <MaterialCard
-                        key={m._id || i}
-                        material={m}
-                        color="blue"
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* PDFs */}
-            {activeTab === "pdfs" && (
-              <div className="space-y-3">
-                {academicData.materials.pdfs.length === 0 ? (
-                  <EmptyState
-                    icon={<FaFilePdf />}
-                    title="No PDF notes available"
-                    subtitle="PDF notes will appear here"
-                  />
-                ) : (
-                  <div className="space-y-2">
-                    {academicData.materials.pdfs.map((m, i) => (
-                      <MaterialCard
-                        key={m._id || i}
-                        material={m}
-                        color="orange"
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+                  <span className="text-gray-400 flex-shrink-0 text-xs">
+                    🔒
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -690,63 +626,20 @@ const StudentAcademic = () => {
 };
 
 // ==========================================
-// Reusable Components
+// Reusable: Info Item
 // ==========================================
-const EmptyState = ({ icon, title, subtitle }) => (
-  <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-8 text-center">
-    <div className="text-4xl text-gray-300 flex justify-center mb-2">
+const InfoItem = ({ icon, label, value }) => (
+  <div className="flex items-center gap-3 px-4 py-3 border-b border-r border-gray-100">
+    <div className="w-8 h-8 rounded-lg bg-[#e6f7f9] text-[#00ADD2] flex items-center justify-center flex-shrink-0 text-xs">
       {icon}
     </div>
-    <p className="font-semibold text-gray-700">{title}</p>
-    <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+    <div className="min-w-0 flex-1">
+      <p className="text-[10px] text-gray-500 uppercase font-bold">{label}</p>
+      <p className="text-sm font-semibold text-gray-800 truncate">
+        {value || "N/A"}
+      </p>
+    </div>
   </div>
 );
-
-const MaterialCard = ({ material, color }) => {
-  const colorMap = {
-    purple: { bg: "bg-purple-100", text: "text-purple-600" },
-    blue: { bg: "bg-blue-100", text: "text-blue-600" },
-    orange: { bg: "bg-orange-100", text: "text-orange-600" },
-  };
-  const c = colorMap[color] || colorMap.purple;
-
-  return (
-    <a
-      href={material.url}
-      target="_blank"
-      rel="noreferrer"
-      className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-all flex items-center gap-3"
-    >
-      <div
-        className={`w-10 h-10 ${c.bg} rounded-lg flex items-center justify-center flex-shrink-0`}
-      >
-        {material.type === "pdf" ? (
-          <FaFilePdf className={c.text} />
-        ) : material.type === "quiz" ? (
-          <MdOutlineQuiz className={c.text} />
-        ) : (
-          <FaGraduationCap className={c.text} />
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold text-gray-800 text-sm truncate">
-          {material.title}
-        </p>
-        <p className="text-[10px] text-gray-500 flex gap-2 flex-wrap">
-          <span className="uppercase font-bold">{material.type}</span>
-          {material.date && <span>• {material.date}</span>}
-          {material.marks !== null &&
-            material.marks !== undefined &&
-            material.totalMarks && (
-              <span className="text-green-600 font-bold">
-                • {material.marks}/{material.totalMarks}
-              </span>
-            )}
-        </p>
-      </div>
-      <FaExternalLinkAlt className="text-gray-400 flex-shrink-0" size={12} />
-    </a>
-  );
-};
 
 export default StudentAcademic;
