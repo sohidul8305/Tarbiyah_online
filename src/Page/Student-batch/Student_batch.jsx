@@ -1333,9 +1333,16 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
   /* ---------- Student ---------- */
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [editingStudentId, setEditingStudentId] = useState(null);
+
+  // ✅ Class date filter + search state (নতুন)
+  const [classDateFilter, setClassDateFilter] = useState("All");
+  const [classSearch, setClassSearch] = useState("");
   // ✅ Student search state
   const [studentSearch, setStudentSearch] = useState("");
 
+  // ✅ Custom date range (নতুন)
+  const [classFromDate, setClassFromDate] = useState("");
+  const [classToDate, setClassToDate] = useState("");
   const [dbVideos, setDbVideos] = useState([]);
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [studentForm, setStudentForm] = useState({
@@ -1572,8 +1579,212 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
   const materialsList = dbMaterials;
   const videos = dbVideos;
 
+  // ✅ Class date filter helper (নতুন)
+  // ✅ Class date filter helper — quick chips + custom range
+  const classMatchesDateFilter = (cls) => {
+    const dayNames = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    const now = new Date();
+    const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // 🔹 Custom Date Range (From → To)
+    if (classDateFilter === "Custom") {
+      if (!classFromDate && !classToDate) return true;
+
+      // classDate থাকলে সেটা, না থাকলে day থেকে আজকের date ধরি
+      let clsDate = null;
+      if (cls.classDate) {
+        const cd = new Date(cls.classDate);
+        if (!isNaN(cd.getTime())) clsDate = cd;
+      }
+      if (!clsDate && cls.day) {
+        // day match আজকের? না হলে skip
+        if (cls.day.toLowerCase() !== dayNames[now.getDay()].toLowerCase()) {
+          return false;
+        }
+        clsDate = todayMid;
+      }
+      if (!clsDate) return false;
+
+      const clsDay = new Date(
+        clsDate.getFullYear(),
+        clsDate.getMonth(),
+        clsDate.getDate(),
+      );
+
+      if (classFromDate) {
+        const from = new Date(classFromDate);
+        from.setHours(0, 0, 0, 0);
+        if (clsDay < from) return false;
+      }
+      if (classToDate) {
+        const to = new Date(classToDate);
+        to.setHours(23, 59, 59, 999);
+        if (clsDay > to) return false;
+      }
+      return true;
+    }
+
+    // 🔹 All — সব
+    if (classDateFilter === "All") return true;
+
+    // 🔹 Date থাকলে সেটা দিয়ে
+    if (cls.classDate) {
+      const cd = new Date(cls.classDate);
+      if (!isNaN(cd.getTime())) {
+        const cdDay = new Date(cd.getFullYear(), cd.getMonth(), cd.getDate());
+
+        if (classDateFilter === "Today") {
+          return cdDay.getTime() === todayMid.getTime();
+        }
+        if (classDateFilter === "Week") {
+          const sow = new Date(todayMid);
+          sow.setDate(todayMid.getDate() - ((todayMid.getDay() + 1) % 7));
+          const eow = new Date(sow);
+          eow.setDate(sow.getDate() + 6);
+          eow.setHours(23, 59, 59, 999);
+          return cdDay >= sow && cdDay <= eow;
+        }
+        if (classDateFilter === "Month") {
+          return (
+            cd.getMonth() === now.getMonth() &&
+            cd.getFullYear() === now.getFullYear()
+          );
+        }
+        if (classDateFilter === "Year") {
+          return cd.getFullYear() === now.getFullYear();
+        }
+      }
+    }
+
+    // 🔹 Date নেই — Today fallback by day name
+    if (classDateFilter === "Today" && cls.day) {
+      return cls.day.toLowerCase() === dayNames[now.getDay()].toLowerCase();
+    }
+
+    return false;
+  };
+  // ✅ Combined filter — date + search
+  const filteredClasses = classesList.filter((c) => {
+    if (!classMatchesDateFilter(c)) return false;
+
+    const term = classSearch.toLowerCase().trim();
+    if (!term) return true;
+
+    const teachersArr = Array.isArray(c.teachers)
+      ? c.teachers
+      : c.teacher
+        ? [c.teacher]
+        : [];
+
+    return (
+      String(c.name || "")
+        .toLowerCase()
+        .includes(term) ||
+      String(c.day || "")
+        .toLowerCase()
+        .includes(term) ||
+      String(c.classNo || "")
+        .toLowerCase()
+        .includes(term) ||
+      teachersArr.some((t) => String(t).toLowerCase().includes(term))
+    );
+  });
   // ✅ Student search filter (ID / Name / Phone)
   const filteredStudents = students.filter((stu) => {
+    // ✅ Class date filter helper (নতুন)
+    const classMatchesDateFilter = (cls) => {
+      if (classDateFilter === "All") return true;
+
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const dayNames = [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ];
+
+      // 🔹 classDate থাকলে সেটা দিয়ে filter
+      if (cls.classDate) {
+        const clsDate = new Date(cls.classDate);
+        if (!isNaN(clsDate.getTime())) {
+          const clsDay = new Date(
+            clsDate.getFullYear(),
+            clsDate.getMonth(),
+            clsDate.getDate(),
+          );
+
+          if (classDateFilter === "Today") {
+            return clsDay.getTime() === today.getTime();
+          }
+          if (classDateFilter === "Week") {
+            // সপ্তাহ শুরু = শনিবার (বাংলাদেশ)
+            const startOfWeek = new Date(today);
+            const daysBack = (today.getDay() + 1) % 7;
+            startOfWeek.setDate(today.getDate() - daysBack);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            endOfWeek.setHours(23, 59, 59, 999);
+            return clsDay >= startOfWeek && clsDay <= endOfWeek;
+          }
+          if (classDateFilter === "Month") {
+            return (
+              clsDate.getMonth() === now.getMonth() &&
+              clsDate.getFullYear() === now.getFullYear()
+            );
+          }
+          if (classDateFilter === "Year") {
+            return clsDate.getFullYear() === now.getFullYear();
+          }
+        }
+      }
+
+      // 🔹 classDate না থাকলে — `day` দিয়ে Today fallback
+      if (classDateFilter === "Today" && cls.day) {
+        return cls.day.toLowerCase() === dayNames[now.getDay()].toLowerCase();
+      }
+
+      return false;
+    };
+
+    // ✅ Combined filter — date + search
+    const filteredClasses = classesList.filter((c) => {
+      if (!classMatchesDateFilter(c)) return false;
+
+      const term = classSearch.toLowerCase().trim();
+      if (!term) return true;
+
+      const teachersArr = Array.isArray(c.teachers)
+        ? c.teachers
+        : c.teacher
+          ? [c.teacher]
+          : [];
+
+      return (
+        String(c.name || "")
+          .toLowerCase()
+          .includes(term) ||
+        String(c.day || "")
+          .toLowerCase()
+          .includes(term) ||
+        String(c.classNo || "")
+          .toLowerCase()
+          .includes(term) ||
+        teachersArr.some((t) => String(t).toLowerCase().includes(term))
+      );
+    });
+
     const term = studentSearch.toLowerCase().trim();
     if (!term) return true;
     return (
@@ -2973,10 +3184,20 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
           {/* CLASSES */}
           {section === "classes" && (
             <div className="space-y-4">
+              {/* Top bar */}
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <p className="text-sm font-bold text-gray-800">
                     Classes / Schedule
+                  </p>
+                  <p className="text-[11px] text-gray-500">
+                    Total {classesList.length} classes
+                    {(classDateFilter !== "All" || classSearch.trim()) && (
+                      <span className="text-indigo-600 font-semibold">
+                        {" "}
+                        • Showing {filteredClasses.length}
+                      </span>
+                    )}
                   </p>
                 </div>
                 <button
@@ -2987,15 +3208,144 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
                 </button>
               </div>
 
+              {/* ✅ Date Filter Chips */}
+              <div className="bg-white border border-gray-200 rounded-xl p-3">
+                <p className="text-[11px] font-bold text-gray-600 mb-2 flex items-center gap-1.5">
+                  <FaCalendarCheck className="text-indigo-600" size={11} />{" "}
+                  Filter by Date
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { id: "All", label: "All" },
+                    { id: "Today", label: "Today" },
+                    { id: "Week", label: "This Week" },
+                    { id: "Month", label: "This Month" },
+                    { id: "Year", label: "This Year" },
+                  ].map((f) => {
+                    // count calculate
+                    const prevFilter = classDateFilter;
+                    // এখানে সরাসরি count বের করতে helper use করছি না, একটা mini calc
+                    const now = new Date();
+                    const todayMid = new Date(
+                      now.getFullYear(),
+                      now.getMonth(),
+                      now.getDate(),
+                    );
+                    const dayNames = [
+                      "Sunday",
+                      "Monday",
+                      "Tuesday",
+                      "Wednesday",
+                      "Thursday",
+                      "Friday",
+                      "Saturday",
+                    ];
+                    const count = classesList.filter((c) => {
+                      if (f.id === "All") return true;
+                      if (c.classDate) {
+                        const cd = new Date(c.classDate);
+                        if (isNaN(cd.getTime())) return false;
+                        const cdDay = new Date(
+                          cd.getFullYear(),
+                          cd.getMonth(),
+                          cd.getDate(),
+                        );
+                        if (f.id === "Today")
+                          return cdDay.getTime() === todayMid.getTime();
+                        if (f.id === "Week") {
+                          const sow = new Date(todayMid);
+                          sow.setDate(
+                            todayMid.getDate() - ((todayMid.getDay() + 1) % 7),
+                          );
+                          const eow = new Date(sow);
+                          eow.setDate(sow.getDate() + 6);
+                          eow.setHours(23, 59, 59, 999);
+                          return cdDay >= sow && cdDay <= eow;
+                        }
+                        if (f.id === "Month")
+                          return (
+                            cd.getMonth() === now.getMonth() &&
+                            cd.getFullYear() === now.getFullYear()
+                          );
+                        if (f.id === "Year")
+                          return cd.getFullYear() === now.getFullYear();
+                      }
+                      if (f.id === "Today" && c.day) {
+                        return (
+                          c.day.toLowerCase() ===
+                          dayNames[now.getDay()].toLowerCase()
+                        );
+                      }
+                      return false;
+                    }).length;
+
+                    const active = classDateFilter === f.id;
+                    return (
+                      <button
+                        key={f.id}
+                        onClick={() => setClassDateFilter(f.id)}
+                        className={`px-3 py-1.5 rounded-lg text-[11px] font-bold flex items-center gap-1.5 transition-all border ${
+                          active
+                            ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                            : "bg-white text-gray-700 border-gray-300 hover:border-indigo-400 hover:text-indigo-700"
+                        }`}
+                      >
+                        {f.label}
+                        <span
+                          className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
+                            active ? "bg-white/25" : "bg-gray-100 text-gray-600"
+                          }`}
+                        >
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* ✅ Search input */}
+                <div className="relative mt-3">
+                  <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs" />
+                  <input
+                    type="text"
+                    placeholder="Search by class name, day, teacher or class no..."
+                    value={classSearch}
+                    onChange={(e) => setClassSearch(e.target.value)}
+                    className="w-full pl-9 pr-9 py-2 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                  {classSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setClassSearch("")}
+                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-red-500 p-1"
+                      title="Clear"
+                    >
+                      <FiX size={14} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Class list */}
               {classesList.length === 0 ? (
                 <EmptyState
                   icon={<FaChalkboardTeacher />}
                   title="No classes yet"
                   subtitle="Add a class with Day, Time, Gender & Teachers"
                 />
+              ) : filteredClasses.length === 0 ? (
+                <EmptyState
+                  icon={<FaSearch />}
+                  title="No matching classes"
+                  subtitle={
+                    classSearch.trim()
+                      ? `"${classSearch}" — এর সাথে কোনো class মেলেনি`
+                      : "এই date filter এ কোনো class নেই"
+                  }
+                />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                  {classesList.map((c) => {
+                  {filteredClasses.map((c) => {
                     const attendanceCount = (c.attendance || []).length;
                     const teachersList =
                       Array.isArray(c.teachers) && c.teachers.length > 0
