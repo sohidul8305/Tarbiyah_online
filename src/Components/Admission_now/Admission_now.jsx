@@ -633,16 +633,12 @@ const Admission_now = () => {
               <hr style="margin: 10px 0;">
               <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
                 <p style="font-weight: bold; color: #004d4d; margin-bottom: 8px;">🔑 Your Login Credentials:</p>
-                <p style="font-size: 15px;"><strong>Student ID:</strong> 
-                  <span style="color: #004d4d; font-size: 18px; letter-spacing: 1px; font-family: monospace;">${generatedId}</span>
-                </p>
-                <p><strong>Password:</strong> 
-                  <span style="color: #004d4d; font-family: monospace; font-size: 15px;">${generatedPassword}</span>
-                </p>
-                <p style="font-size: 11px; color: #666; margin-top: 8px;">
-                  ⚠️ এই তথ্য নিরাপদে সংরক্ষণ করুন।<br>
-                  📌 Admin approve করার পর আপনি এগুলো দিয়ে <strong>tarbiyahonline.com/student-login</strong> এ login করতে পারবেন।
-                </p>
+            <p style={{ fontSize: "11px", color: "#666", marginTop: "8px" }}>
+  ⚠️ এই তথ্যগুলো নিরাপদে সংরক্ষণ করুন।
+  <br />
+  📌 Admin কর্তৃক Student ID ও Password দেওয়ার পর, এগুলো ব্যবহার করে
+  <strong> Student Dashboard</strong>-এ লগইন করতে পারবেন।
+</p>
               </div>
             </div>
           `,
