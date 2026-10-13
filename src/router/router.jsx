@@ -177,6 +177,7 @@ import NajeraBatch from "../Page/Admin/NajeraBatch";
 import Student_exam from "../Page/Student_exam/Student_exam";
 import Admin_exam_grad from "../Page/Admin_exam_grad/Admin_exam_grad";
 import PaymentStatus from "../Page/PaymentStatus";
+import StudentAttendance from "../Page/Student/StudentAttendance";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -243,6 +244,10 @@ export const router = createBrowserRouter([
   {
     path: "/course/diploma/details",
     element: <DiplomaDetails></DiplomaDetails>,
+  },
+  {
+    path: "/student-attendance/:identifier",
+    element: <StudentAttendance></StudentAttendance>,
   },
   {
     path: "/dashboard",
