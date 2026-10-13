@@ -616,19 +616,18 @@ const New_admission = () => {
     if (!student) return;
 
     const result = await Swal.fire({
-      title: "Approve Admission?",
       html: `
-        <div style="text-align: left; font-size: 14px;">
-          <p><strong>Student:</strong> ${student.name}</p>
-          <p><strong>Phone:</strong> ${student.phone}</p>
-          <p><strong>Course:</strong> ${student.course}</p>
-          <hr style="margin: 8px 0;">
-          <label style="display:block; font-weight:bold; color:#004d4d; margin-bottom:4px;">Student ID *</label>
-          <input id="swal-studentId" class="swal2-input" style="margin:0; width:100%; font-family:monospace;" value="${student.studentId || generateStudentId()}" />
-          <label style="display:block; font-weight:bold; color:#004d4d; margin:10px 0 4px 0;">Password *</label>
-          <input id="swal-password" class="swal2-input" style="margin:0; width:100%;" value="student123S@" />
-        </div>
-      `,
+    <div style="text-align: left; font-size: 14px; padding-top: 6px;">
+      <p><strong>Student:</strong> ${student.name}</p>
+      <p><strong>Phone:</strong> ${student.phone}</p>
+      <p><strong>Course:</strong> ${student.course}</p>
+      <hr style="margin: 10px 0;">
+      <label style="display:block; font-weight:bold; color:#004d4d; margin-bottom:4px;">Student ID *</label>
+      <input id="swal-studentId" class="swal2-input" style="margin:0; width:100%; font-family:monospace;" value="${student.studentId || generateStudentId()}" />
+      <label style="display:block; font-weight:bold; color:#004d4d; margin:10px 0 4px 0;">Password *</label>
+      <input id="swal-password" class="swal2-input" style="margin:0; width:100%;" value="student123S@" />
+    </div>
+  `,
       icon: "question",
       showCancelButton: true,
       confirmButtonColor: "#22c55e",
@@ -650,7 +649,6 @@ const New_admission = () => {
         return { studentId, password };
       },
     });
-
     if (!result.isConfirmed) return;
 
     const { studentId, password } = result.value;
