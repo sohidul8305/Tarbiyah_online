@@ -83,7 +83,7 @@ const Kids = () => {
     {
       id: "one-to-one",
       title: {
-        en: "One to One Quran Revision ",
+        en: "One-to-One Quran Learning",
         bn: "ওয়ান টু ওয়ান কুরআন রিভিশন ",
       },
       subtitle: {

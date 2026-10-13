@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../Components/Navbar/Navbar";
 import Footer from "../../Components/Navbar/Footer/Footer";
 import { useAuth } from "../../Provider/AuthProvider";
-import { findAdminByCredentials } from "../../Config/adminUsers";
+import { ADMIN_USERS, findAdminByCredentials } from "../../Config/adminUsers";
 import Swal from "sweetalert2";
 
 // ✅ Helper: আগের save করা profile load করে merge করা
@@ -13,7 +13,6 @@ const getSavedProfile = (email) => {
     const saved = localStorage.getItem("adminInfo");
     if (!saved) return null;
     const parsed = JSON.parse(saved);
-    // same admin হলে আগের edited data ফেরত দাও
     if (parsed?.email === email) return parsed;
     return null;
   } catch (err) {
@@ -38,42 +37,45 @@ const AdminLogin = () => {
     e.preventDefault();
     setLoading(true);
 
-    const trimmedEmail = email.trim();
+    const trimmedEmail = email.trim().toLowerCase();
     const trimmedPassword = password.trim();
 
     try {
-      // ✅ STEP 1: predefined admin check (e.g., elders@tarabiyah.com)
-      const predefinedAdmin = findAdminByCredentials(
-        trimmedEmail,
-        trimmedPassword,
+      // ✅ STEP 1: সরাসরি ADMIN_USERS লিস্ট থেকে চেক করি ইমেইলটি আমাদের প্রিডিফাইন্ড অ্যাডমিন কি না
+      const matchedAdmin = ADMIN_USERS.find(
+        (admin) => admin?.email?.toLowerCase().trim() === trimmedEmail,
       );
 
-      if (predefinedAdmin) {
+      // যদি প্রিডিফাইন্ড অ্যাডমিন লিস্টে এই ইমেইল থাকে
+      if (matchedAdmin) {
+        const predefinedAdmin = await findAdminByCredentials(
+          trimmedEmail,
+          trimmedPassword,
+        );
+
+        if (!predefinedAdmin) {
+          // ইমেইল মিলেছে কিন্তু পাসওয়ার্ড ভুল বা অ্যাকাউন্ট ডিজেবল করা
+          throw new Error("Incorrect password or account is disabled.");
+        }
+
         console.log(
           "✅ Predefined Admin Login:",
           predefinedAdmin.profile.email,
         );
 
-        // ✅ আগের save করা profile চেক — থাকলে সেটাই রাখো
         const savedProfile = getSavedProfile(predefinedAdmin.profile.email);
-
         const finalProfile = savedProfile
           ? {
-              ...predefinedAdmin.profile, // predefined critical fields
-              ...savedProfile, // ✅ user-edited fields override
+              ...predefinedAdmin.profile,
+              ...savedProfile,
             }
           : predefinedAdmin.profile;
 
-        console.log(
-          savedProfile
-            ? "♻️ Existing profile restored for predefined admin"
-            : "🆕 New predefined admin — default profile set",
-        );
         localStorage.setItem("adminInfo", JSON.stringify(finalProfile));
         localStorage.removeItem("adminStats");
         localStorage.setItem("isAdminLoggedIn", "true");
         localStorage.setItem("adminEmail", finalProfile.email);
-        localStorage.setItem("adminDepartment", finalProfile.department); // ✅ নতুন লাইন
+        localStorage.setItem("adminDepartment", finalProfile.department);
 
         await Swal.fire({
           icon: "success",
@@ -87,18 +89,16 @@ const AdminLogin = () => {
         return;
       }
 
-      // ✅ STEP 2: Firebase auth (regular admin)
+      // ✅ STEP 2: প্রিডিফাইন্ড অ্যাডমিন না হলে শুধুমাত্র তখন Firebase auth চেক হবে
       const result = await signInUser(trimmedEmail, trimmedPassword);
       const user = result?.user || result;
 
       console.log("✅ Firebase Admin Login:", user?.email);
 
-      // ✅ আগের save করা profile চেক — থাকলে সেটাই ব্যবহার করো
       const savedProfile = getSavedProfile(user?.email);
-
       const defaultAdminInfo = {
         name: user?.displayName || "Admin",
-        email: user?.email || "elders@tarabiyah.com", // 👈 leading space fixed
+        email: user?.email || "",
         phone: "+880 1700 123456",
         designation: "Administrator",
         department: "Administration",
@@ -112,25 +112,17 @@ const AdminLogin = () => {
       const finalProfile = savedProfile
         ? {
             ...defaultAdminInfo,
-            ...savedProfile, // ✅ user-edited fields override
-            // নিশ্চিত করো email & name ঠিক আছে
+            ...savedProfile,
             name: savedProfile.name || user?.displayName || "Admin",
             email: user?.email || savedProfile.email,
           }
         : defaultAdminInfo;
 
-      console.log(
-        savedProfile
-          ? "♻️ Existing Firebase admin profile restored"
-          : "🆕 New Firebase admin — default profile set",
-      );
-
       localStorage.setItem("adminInfo", JSON.stringify(finalProfile));
       localStorage.setItem("adminStats", JSON.stringify({}));
-
       localStorage.setItem("isAdminLoggedIn", "true");
       localStorage.setItem("adminEmail", finalProfile.email);
-      localStorage.setItem("adminDepartment", finalProfile.department); // ✅ নতুন লাইন
+      localStorage.setItem("adminDepartment", finalProfile.department);
 
       await Swal.fire({
         icon: "success",
@@ -145,10 +137,15 @@ const AdminLogin = () => {
       console.error("❌ Admin Login error:", err);
 
       let errorMessage = "Invalid email or password";
-      if (err.code === "auth/user-not-found") {
+      if (err.message.includes("Incorrect password")) {
+        errorMessage = "Incorrect password or account is disabled.";
+      } else if (err.code === "auth/user-not-found") {
         errorMessage =
           "No account found with this email. Please contact admin.";
-      } else if (err.code === "auth/wrong-password") {
+      } else if (
+        err.code === "auth/wrong-password" ||
+        err.code === "auth/invalid-credential"
+      ) {
         errorMessage = "Incorrect password. Please try again.";
       } else if (err.code === "auth/too-many-requests") {
         errorMessage = "Too many attempts. Please try again later.";

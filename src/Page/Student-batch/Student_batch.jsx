@@ -56,7 +56,7 @@ const COURSE_OPTIONS_BY_DEPT = {
     "Nazera Quran",
     "Hifzul Quran",
     "Hifz Revision",
-    "One to One Quran Revision",
+    "One-to-One Quran Learning",
   ],
   Alimiya: ["Alimiyah for Kids", "Alimiyah Program"],
   Diploma: ["Diploma in Islamic Studies", "Certificate"],

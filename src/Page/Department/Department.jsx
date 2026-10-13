@@ -60,7 +60,7 @@ const DEPARTMENT_META = {
       "Nazera Quran",
       "Hifzul Quran",
       "Hifz Revision",
-      "One to One Quran Revision",
+      "One-to-One Quran Learning Program",
     ],
   },
   Alimiya: {
