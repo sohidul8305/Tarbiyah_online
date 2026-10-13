@@ -23,7 +23,6 @@ import {
   FaInfoCircle,
   FaClock as FaClockIcon,
   FaSync,
-  FaBuilding,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -108,15 +107,11 @@ const New_admission = () => {
   }, [user]);
 
   // ============================================================
-  // ✅ Fetch admissions — only if admin is Elders department
-  // কারণ Tazweed + Najera = Elders department
+  // ✅ FIX: Fetch admissions — students collection থেকে সব department এর জন্য
+  //    Elders হলে additional tazweed + najera ও fetch হবে
   // ============================================================
   const fetchAdmissions = async () => {
-    // ✅ Guard: শুধু Elders admin data দেখবে
-    if (!adminDepartment || adminDepartment !== "Elders") {
-      console.log(
-        `⛔ Skipping fetch — admin is "${adminDepartment}", not "Elders"`,
-      );
+    if (!adminDepartment) {
       setAdmissions([]);
       setLoading(false);
       return;
@@ -125,20 +120,82 @@ const New_admission = () => {
     try {
       setLoading(true);
 
-      const [tazweedRes, najeraRes] = await Promise.allSettled([
-        fetch(`${API_BASE}/basic-tazweed/all`),
-        fetch(`${API_BASE}/najera-batch/all`),
-      ]);
+      const allStudents = [];
 
-      // ---------- 1) Basic Tazweed Students ----------
-      let tazweedStudents = [];
-      if (tazweedRes.status === "fulfilled") {
-        try {
-          const d = await tazweedRes.value.json();
-          if (d.success && Array.isArray(d.students)) {
-            tazweedStudents = d.students.map((s) => {
-              const status = resolveStatus(s);
-              return {
+      // ---------- 1) Students collection (Admission Form থেকে আসা) ----------
+      try {
+        const res = await fetch(
+          `${API_BASE}/admission-report/all?department=${encodeURIComponent(
+            adminDepartment,
+          )}`,
+        );
+        const d = await res.json();
+        if (d.success && Array.isArray(d.records)) {
+          const mapped = d.records.map((r) => ({
+            id: r._id,
+            _id: r._id,
+            source: r.department || adminDepartment,
+            sourceLabel: r.department || adminDepartment,
+            name: r.studentName || "",
+            fatherName: r.parentName || "",
+            motherName: "",
+            course: r.course || "",
+            subject: r.subject || r.course || "",
+            class: r.class || r.course || "",
+            phone: r.parentPhone || "",
+            email: r.email || "",
+            address: r.address || "",
+            permanentAddress: "",
+            dobOrNid: "",
+            age: "",
+            gender: r.gender || "",
+            occupation: "",
+            maritalStatus: "",
+            guardianName: r.parentName || "",
+            guardianPhone: r.parentPhone || "",
+            status: r.status || "Pending",
+            rawStatus: r.rawStatus || "Pending",
+            paymentStatus: r.paymentStatus || "Unpaid",
+            paidAmount: r.paidAmount || 0,
+            paymentMethod: "",
+            paymentType: "",
+            transactionId: r.transactionId || "",
+            paymentRemarks: r.notes || "",
+            studentId: r.studentId || "",
+            username: "",
+            roll: "",
+            password: "",
+            batch: r.batch || "",
+            country: r.country || "BD",
+            date: r.applicationDate || "",
+            createdAt: r.applicationDate || "",
+            dueAmount: r.dueAmount || 0,
+            courseFee: 0,
+            scholarshipAmount: 0,
+            raw: r,
+          }));
+          allStudents.push(...mapped);
+          console.log(
+            `✅ Loaded ${mapped.length} students from students collection`,
+          );
+        }
+      } catch (e) {
+        console.error("Students fetch error:", e);
+      }
+
+      // ---------- 2) Elders হলে tazweed + najera ও যোগ করো ----------
+      if (adminDepartment === "Elders") {
+        const [tazweedRes, najeraRes] = await Promise.allSettled([
+          fetch(`${API_BASE}/basic-tazweed/all`),
+          fetch(`${API_BASE}/najera-batch/all`),
+        ]);
+
+        // ---- Basic Tazweed ----
+        if (tazweedRes.status === "fulfilled") {
+          try {
+            const d = await tazweedRes.value.json();
+            if (d.success && Array.isArray(d.students)) {
+              const mapped = d.students.map((s) => ({
                 id: s._id,
                 _id: s._id,
                 source: "Tazweed",
@@ -160,7 +217,7 @@ const New_admission = () => {
                 maritalStatus: "",
                 guardianName: "",
                 guardianPhone: s.phone || "",
-                status,
+                status: resolveStatus(s),
                 rawStatus: s.status || "Pending",
                 paymentStatus:
                   Number(s.dueAmount) === 0
@@ -185,23 +242,20 @@ const New_admission = () => {
                 courseFee: s.courseFee || 0,
                 scholarshipAmount: s.scholarshipAmount || 0,
                 raw: s,
-              };
-            });
+              }));
+              allStudents.push(...mapped);
+            }
+          } catch (e) {
+            console.error("Tazweed parse error:", e);
           }
-        } catch (e) {
-          console.error("Tazweed parse error:", e);
         }
-      }
 
-      // ---------- 2) Najera Batch Students ----------
-      let najeraStudents = [];
-      if (najeraRes.status === "fulfilled") {
-        try {
-          const d = await najeraRes.value.json();
-          if (d.success && Array.isArray(d.students)) {
-            najeraStudents = d.students.map((s) => {
-              const status = resolveStatus(s);
-              return {
+        // ---- Najera Batch ----
+        if (najeraRes.status === "fulfilled") {
+          try {
+            const d = await najeraRes.value.json();
+            if (d.success && Array.isArray(d.students)) {
+              const mapped = d.students.map((s) => ({
                 id: s._id,
                 _id: s._id,
                 source: "Najera",
@@ -223,7 +277,7 @@ const New_admission = () => {
                 maritalStatus: "",
                 guardianName: "",
                 guardianPhone: s.phone || "",
-                status,
+                status: resolveStatus(s),
                 rawStatus: s.status || "Pending",
                 paymentStatus:
                   Number(s.dueAmount) === 0
@@ -248,15 +302,16 @@ const New_admission = () => {
                 courseFee: s.courseFee || 0,
                 scholarshipAmount: s.scholarshipAmount || 0,
                 raw: s,
-              };
-            });
+              }));
+              allStudents.push(...mapped);
+            }
+          } catch (e) {
+            console.error("Najera parse error:", e);
           }
-        } catch (e) {
-          console.error("Najera parse error:", e);
         }
       }
 
-      const combined = [...tazweedStudents, ...najeraStudents].sort((a, b) => {
+      const combined = allStudents.sort((a, b) => {
         const da = new Date(a.createdAt || 0).getTime();
         const db = new Date(b.createdAt || 0).getTime();
         return db - da;
@@ -264,7 +319,7 @@ const New_admission = () => {
 
       setAdmissions(combined);
       console.log(
-        `✅ [${adminDepartment}] Loaded: ${tazweedStudents.length} tazweed + ${najeraStudents.length} najera`,
+        `✅ [${adminDepartment}] Total loaded: ${combined.length} students`,
       );
     } catch (err) {
       console.error("❌ Fetch error:", err);
@@ -454,10 +509,10 @@ const New_admission = () => {
     const term = searchTerm.toLowerCase().trim();
     const matchesSearch =
       !term ||
-      a.name.toLowerCase().includes(term) ||
-      a.phone.includes(searchTerm) ||
-      a.studentId.toLowerCase().includes(term) ||
-      a.course.toLowerCase().includes(term);
+      (a.name || "").toLowerCase().includes(term) ||
+      (a.phone || "").includes(searchTerm) ||
+      (a.studentId || "").toLowerCase().includes(term) ||
+      (a.course || "").toLowerCase().includes(term);
 
     const matchesStatus = filterStatus === "All" || a.status === filterStatus;
     const matchesPayment =
@@ -473,6 +528,17 @@ const New_admission = () => {
   const uniquePayments = [
     "All",
     ...new Set(admissions.map((a) => a.paymentStatus).filter(Boolean)),
+  ];
+
+  // ✅ Dynamic source tabs (depends on department)
+  const sourceTabList = [
+    { id: "All", label: "All Students", color: "blue" },
+    ...(adminDepartment === "Elders"
+      ? [
+          { id: "Tazweed", label: "Basic Tazweed", color: "green" },
+          { id: "Najera", label: "Najera Batch", color: "purple" },
+        ]
+      : []),
   ];
 
   const sourceCounts = {
@@ -516,6 +582,14 @@ const New_admission = () => {
         return "bg-green-100 text-green-700";
       case "Najera":
         return "bg-purple-100 text-purple-700";
+      case "Elders":
+        return "bg-teal-100 text-teal-700";
+      case "Alimiya":
+        return "bg-indigo-100 text-indigo-700";
+      case "Quran Studies":
+        return "bg-orange-100 text-orange-700";
+      case "Diploma":
+        return "bg-pink-100 text-pink-700";
       default:
         return "bg-gray-100 text-gray-700";
     }
@@ -535,7 +609,7 @@ const New_admission = () => {
   };
 
   // ============================================================
-  // Approve
+  // ✅ Approve — handles all sources
   // ============================================================
   const handleApprove = async (id) => {
     const student = admissions.find((a) => a.id === id);
@@ -581,60 +655,88 @@ const New_admission = () => {
 
     const { studentId, password } = result.value;
 
+    // ✅ Elders এর জন্য students/approve, Tazweed/Najera এর জন্য respective endpoints
     try {
-      const res = await fetch(`${API_BASE}/students/approve/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          studentId,
-          password,
-          roll: student.roll || "",
-        }),
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        setAdmissions((prev) =>
-          prev.map((a) =>
-            a.id === id
-              ? {
-                  ...a,
-                  status: "Approved",
-                  rawStatus: "Active",
-                  studentId,
-                  password,
-                }
-              : a,
-          ),
-        );
-
-        Swal.fire({
-          icon: "success",
-          title: "✅ Approved!",
-          html: `
-            <div style="text-align: left;">
-              <p><strong>Name:</strong> ${student.name}</p>
-              <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac; margin-top: 10px;">
-                <p style="font-weight: bold; color: #004d4d; margin-bottom: 6px;">🔑 Login Credentials:</p>
-                <p><strong>Student ID:</strong> <span style="color:#004d4d; font-family:monospace; font-size:16px;">${studentId}</span></p>
-                <p><strong>Password:</strong> <span style="color:#004d4d;">${password}</span></p>
-                <p style="margin-top: 8px; font-size: 11px; color: #666;">📌 এই তথ্য স্টুডেন্টকে জানান।</p>
-              </div>
-            </div>
-          `,
-          confirmButtonColor: "#004d4d",
+      if (student.source === "Tazweed") {
+        // Tazweed collection update
+        const res = await fetch(`${API_BASE}/basic-tazweed/update/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            studentId,
+            password,
+            roll: student.roll || "",
+            status: "Active",
+          }),
         });
-
-        setTimeout(() => fetchAdmissions(), 500);
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || "Failed");
+      } else if (student.source === "Najera") {
+        const res = await fetch(`${API_BASE}/najera-batch/update/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            studentId,
+            password,
+            roll: student.roll || "",
+            status: "Active",
+          }),
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || "Failed");
       } else {
-        Swal.fire({
-          icon: "error",
-          title: "Failed!",
-          text: data.message || "Could not approve.",
+        // ✅ students collection (Admission Form থেকে আসা)
+        const res = await fetch(`${API_BASE}/students/approve/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            studentId,
+            password,
+            roll: student.roll || "",
+          }),
         });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.message || "Failed");
       }
+
+      setAdmissions((prev) =>
+        prev.map((a) =>
+          a.id === id
+            ? {
+                ...a,
+                status: "Approved",
+                rawStatus: "Active",
+                studentId,
+                password,
+              }
+            : a,
+        ),
+      );
+
+      Swal.fire({
+        icon: "success",
+        title: "✅ Approved!",
+        html: `
+          <div style="text-align: left;">
+            <p><strong>Name:</strong> ${student.name}</p>
+            <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac; margin-top: 10px;">
+              <p style="font-weight: bold; color: #004d4d; margin-bottom: 6px;">🔑 Login Credentials:</p>
+              <p><strong>Student ID:</strong> <span style="color:#004d4d; font-family:monospace; font-size:16px;">${studentId}</span></p>
+              <p><strong>Password:</strong> <span style="color:#004d4d;">${password}</span></p>
+              <p style="margin-top: 8px; font-size: 11px; color: #666;">📌 এই তথ্য স্টুডেন্টকে জানান।</p>
+            </div>
+          </div>
+        `,
+        confirmButtonColor: "#004d4d",
+      });
+
+      setTimeout(() => fetchAdmissions(), 500);
     } catch (err) {
-      Swal.fire({ icon: "error", title: "Error", text: err.message });
+      Swal.fire({
+        icon: "error",
+        title: "Failed!",
+        text: err.message || "Could not approve.",
+      });
     }
   };
 
@@ -653,17 +755,28 @@ const New_admission = () => {
     });
     if (!result.isConfirmed) return;
 
-    let rejectUrl = `${API_BASE}/basic-tazweed/update/${id}`;
-    if (student.source === "Najera") {
-      rejectUrl = `${API_BASE}/najera-batch/update/${id}`;
-    }
-
     try {
-      const res = await fetch(rejectUrl, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "Rejected" }),
-      });
+      let res;
+      if (student.source === "Tazweed") {
+        res = await fetch(`${API_BASE}/basic-tazweed/update/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "Rejected" }),
+        });
+      } else if (student.source === "Najera") {
+        res = await fetch(`${API_BASE}/najera-batch/update/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "Rejected" }),
+        });
+      } else {
+        // ✅ students collection (admission-report/status endpoint)
+        res = await fetch(`${API_BASE}/admission-report/status/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: "Rejected" }),
+        });
+      }
       const data = await res.json();
       if (data.success) {
         setAdmissions((prev) =>
@@ -707,13 +820,22 @@ const New_admission = () => {
     });
     if (!result.isConfirmed) return;
 
-    let deleteUrl = `${API_BASE}/basic-tazweed/delete/${id}`;
-    if (student.source === "Najera") {
-      deleteUrl = `${API_BASE}/najera-batch/delete/${id}`;
-    }
-
     try {
-      const res = await fetch(deleteUrl, { method: "DELETE" });
+      let res;
+      if (student.source === "Tazweed") {
+        res = await fetch(`${API_BASE}/basic-tazweed/delete/${id}`, {
+          method: "DELETE",
+        });
+      } else if (student.source === "Najera") {
+        res = await fetch(`${API_BASE}/najera-batch/delete/${id}`, {
+          method: "DELETE",
+        });
+      } else {
+        // ✅ students collection
+        res = await fetch(`${API_BASE}/students/delete/${id}`, {
+          method: "DELETE",
+        });
+      }
       const data = await res.json();
       if (data.success) {
         setAdmissions((prev) => prev.filter((a) => a.id !== id));
@@ -739,11 +861,6 @@ const New_admission = () => {
     setSelectedAdmission(admission);
     setShowDetailsModal(true);
   };
-
-  // ============================================================
-  // ✅ Permission check: only Elders department
-  // ============================================================
-  const isEldersDept = adminDepartment === "Elders";
 
   // ============================================================
   // Render
@@ -890,9 +1007,9 @@ const New_admission = () => {
                 )}
               </h1>
               <p className="text-xs text-gray-500">
-                {isEldersDept
-                  ? "Basic Tazweed এবং Najera Batch এর সব স্টুডেন্ট"
-                  : "শুধু Elders department এই page ব্যবহার করতে পারবে"}
+                {adminDepartment
+                  ? `${adminDepartment} department এর সব স্টুডেন্ট`
+                  : "Department লোড হচ্ছে..."}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -901,7 +1018,7 @@ const New_admission = () => {
               </span>
               <button
                 onClick={fetchAdmissions}
-                disabled={loading || !isEldersDept}
+                disabled={loading}
                 className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 disabled:opacity-50"
               >
                 <FaSync size={10} className={loading ? "animate-spin" : ""} />{" "}
@@ -916,7 +1033,7 @@ const New_admission = () => {
             </div>
           </div>
 
-          {/* ✅ Department banner */}
+          {/* Department banner */}
           {adminDepartment && (
             <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white p-3 rounded-xl shadow-sm mb-3 flex items-center justify-between">
               <div>
@@ -929,24 +1046,18 @@ const New_admission = () => {
             </div>
           )}
 
-          {/* ✅ Non-Elders: Access Denied */}
-          {!isEldersDept ? (
+          {/* ✅ No department case */}
+          {!adminDepartment ? (
             <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-10 text-center">
-              <FaBuilding className="text-6xl text-yellow-500 mx-auto mb-4" />
-
-              <p className="text-sm text-yellow-700 mb-1">
-                <strong>{adminDepartment}</strong>
+              <p className="text-sm text-yellow-700">
+                Department লোড হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন।
               </p>
             </div>
           ) : (
             <>
               {/* Source Tabs */}
               <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto">
-                {[
-                  { id: "All", label: "All Students", color: "blue" },
-                  { id: "Tazweed", label: "Basic Tazweed", color: "green" },
-                  { id: "Najera", label: "Najera Batch", color: "purple" },
-                ].map((tab) => (
+                {sourceTabList.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setSourceFilter(tab.id)}
@@ -968,7 +1079,7 @@ const New_admission = () => {
                           : "bg-gray-200 text-gray-600"
                       }`}
                     >
-                      {sourceCounts[tab.id]}
+                      {sourceCounts[tab.id] || 0}
                     </span>
                   </button>
                 ))}
@@ -978,7 +1089,7 @@ const New_admission = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
                   <p className="text-lg font-bold text-blue-600">
-                    {sourceCounts[sourceFilter]}
+                    {sourceCounts[sourceFilter] || 0}
                   </p>
                   <p className="text-[10px] text-gray-500">
                     {sourceFilter === "All" ? "Total" : sourceFilter}
@@ -1203,7 +1314,7 @@ const New_admission = () => {
                     No Students Found
                   </h3>
                   <p className="text-xs text-gray-500">
-                    Basic Tazweed বা Najera Batch থেকে student add করুন।
+                    {adminDepartment} department এ এখনো কোনো student add হয়নি।
                   </p>
                 </div>
               )}

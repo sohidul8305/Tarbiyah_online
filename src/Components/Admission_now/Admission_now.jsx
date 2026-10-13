@@ -3,6 +3,14 @@ import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 import Swal from "sweetalert2";
 
+// ✅ Department Mapping: Form key → Admin department name
+const DEPARTMENT_MAP = {
+  "islamic-studies": "Diploma",
+  alemiyah: "Alimiya",
+  "quran-studies": "Quran Studies",
+  "quran-elders": "Elders",
+};
+
 const Admission_now = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -44,6 +52,23 @@ const Admission_now = () => {
     rocketNumber: "",
     merchantNumber: "",
     bankAccount: "",
+  });
+
+  // ✅ FIX: Auto-generated Student ID (once per page load)
+  const [generatedId] = useState(() => {
+    const year = new Date().getFullYear().toString().slice(-2);
+    const random = Math.floor(10000 + Math.random() * 90000);
+    return `TAR${year}${random}`;
+  });
+
+  // ✅ FIX: Auto-generated Password (once per page load)
+  const [generatedPassword] = useState(() => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789@#";
+    let pwd = "";
+    for (let i = 0; i < 10; i++) {
+      pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return pwd;
   });
 
   const departments = {
@@ -304,29 +329,79 @@ const Admission_now = () => {
         dateOfBirth: dob,
         age: age,
       });
+    } else {
+      setFormData({
+        ...formData,
+        dateOfBirth: "",
+        age: "",
+      });
     }
   };
 
+  // ============================================================
+  // ✅ FIX: Step-by-Step Validation
+  // ============================================================
+  const validateStep = (currentStep) => {
+    const missing = [];
+
+    if (currentStep === 1) {
+      if (!formData.selectedDepartment) missing.push("Department");
+      if (formData.selectedCourses.length === 0)
+        missing.push("At least 1 Course");
+    }
+
+    if (currentStep === 2) {
+      if (!formData.name?.trim()) missing.push("Full Name");
+      if (!formData.nationalId?.trim())
+        missing.push("National ID / Birth Reg No.");
+      if (!formData.dateOfBirth) missing.push("Date of Birth");
+      if (!formData.phoneNumber?.trim()) missing.push("Phone Number");
+      if (!formData.email?.trim()) missing.push("Email");
+      if (!formData.gender) missing.push("Gender");
+    }
+
+    if (currentStep === 3) {
+      if (!formData.fatherName?.trim()) missing.push("Father's Name");
+      if (!formData.motherName?.trim()) missing.push("Mother's Name");
+      if (!formData.guardianPhone?.trim())
+        missing.push("Guardian's Phone Number");
+      if (!formData.presentAddress?.trim()) missing.push("Present Address");
+      if (!formData.permanentAddress?.trim()) missing.push("Permanent Address");
+    }
+
+    return missing;
+  };
+
   const handleNext = () => {
-    if (step === 1) {
-      if (!formData.selectedDepartment) {
-        Swal.fire({
-          icon: "warning",
-          title: "Department Required!",
-          text: "Please select a department first.",
-          confirmButtonColor: "#00ADD2",
-        });
-        return;
-      }
-      if (formData.selectedCourses.length === 0) {
-        Swal.fire({
-          icon: "warning",
-          title: "Course Required!",
-          text: "Please select at least one course.",
-          confirmButtonColor: "#00ADD2",
-        });
-        return;
-      }
+    const missing = validateStep(step);
+
+    if (missing.length > 0) {
+      Swal.fire({
+        icon: "success",
+        title: "🎉 Admission Completed!",
+        html: `
+    <div style="text-align: left; font-size: 13px;">
+      <p><strong>Name:</strong> ${formData.name}</p>
+      <p><strong>Phone:</strong> ${formData.phoneNumber}</p>
+      <p><strong>Email:</strong> ${formData.email}</p>
+      <p><strong>Department:</strong> ${departmentName}</p>
+      <p><strong>Course:</strong> ${selectedCourseNames.join(", ") || "N/A"}</p>
+      <p><strong>Payment Method:</strong> ${formData.paymentMethod || "N/A"}</p>
+      <p><strong>Transaction ID:</strong> ${formData.transactionId || "N/A"}</p>
+      <p><strong>Payment Status:</strong> ${paymentStatus}</p>
+      <hr style="margin: 12px 0;">
+      <div style="background: #eff6ff; padding: 12px; border-radius: 8px; border: 2px solid #93c5fd;">
+        <p style="color: #1e40af; font-size: 12px; margin: 0;">
+          📌 আপনার আবেদন সফলভাবে জমা হয়েছে। Admin approve করার পর আপনি আপনার <strong>Student ID</strong> এবং <strong>Password</strong> পাবেন।
+        </p>
+      </div>
+    </div>
+  `,
+        confirmButtonColor: "#004d4d",
+        confirmButtonText: "OK",
+        width: 520,
+      });
+      return;
     }
     setStep(step + 1);
   };
@@ -340,14 +415,26 @@ const Admission_now = () => {
   };
 
   // ============================================================
-  // SSLCommerz পেমেন্ট হ্যান্ডলার
+  // SSLCommerz Payment Handler
   // ============================================================
   const handleSSLCommerzPayment = async () => {
-    if (!formData.name || !formData.phoneNumber || !formData.email) {
+    // ✅ Full validation before payment
+    const missing = [
+      ...validateStep(1),
+      ...validateStep(2),
+      ...validateStep(3),
+    ];
+    if (missing.length > 0) {
       Swal.fire({
         icon: "warning",
         title: "Information Incomplete!",
-        text: "Name, Phone Number and Email are required.",
+        html: `
+          <div style="text-align:left; font-size:14px;">
+            <ul style="margin:0 0 0 20px; color:#dc2626;">
+              ${missing.map((m) => `<li>${m}</li>`).join("")}
+            </ul>
+          </div>`,
+        confirmButtonColor: "#00ADD2",
       });
       return;
     }
@@ -362,11 +449,15 @@ const Admission_now = () => {
         })
         .filter(Boolean);
 
-      // SSLCommerz এর জন্য পেলোড (ব্যাকএন্ডে পাঠানো হবে)
+      // ✅ Department name mapping
+      const departmentName =
+        DEPARTMENT_MAP[formData.selectedDepartment] ||
+        formData.selectedDepartment;
+
       const sslPayload = {
         total_amount: totalAmount,
         currency: "BDT",
-        tran_id: "TARBIYAH_" + Date.now(), // ইউনিক ট্রানজেকশন আইডি
+        tran_id: "TARBIYAH_" + Date.now(),
         success_url: `${window.location.origin}/payment/success`,
         fail_url: `${window.location.origin}/payment/fail`,
         cancel_url: `${window.location.origin}/payment/cancel`,
@@ -379,32 +470,34 @@ const Admission_now = () => {
         product_name: selectedCourseNames.join(", ") || "Admission Fee",
         product_category: "Education",
         product_profile: "general",
-        // আপনার স্টুডেন্ট ডাটা (ব্যাকএন্ডে সেভ করার জন্য)
         studentData: {
           name: formData.name,
           email: formData.email,
-          password: generatedPassword, // ✅ Unique auto-generated
-          studentId: generatedId, // ✅ Suggested ID
+          password: generatedPassword,
+          studentId: generatedId,
           phone: formData.phoneNumber,
           course: selectedCourseNames.join(", "),
-          department: formData.selectedDepartment,
+          // ✅ FIX: department যোগ করা হয়েছে
+          department: departmentName,
           fatherName: formData.fatherName,
           motherName: formData.motherName,
           presentAddress: formData.presentAddress,
           permanentAddress: formData.permanentAddress,
           gender: formData.gender,
           age: formData.age,
+          nationalId: formData.nationalId,
+          dateOfBirth: formData.dateOfBirth,
+          guardianPhone: formData.guardianPhone,
+          occupation: formData.occupation,
+          maritalStatus: formData.maritalStatus,
         },
       };
 
-      // ⚠️ আপনার ব্যাকএন্ড API এন্ডপয়েন্ট এখানে বসবে
       const response = await fetch(
         "https://api.tarbiyahonline.com/api/payment/sslcommerz/initiate",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(sslPayload),
         },
       );
@@ -412,7 +505,6 @@ const Admission_now = () => {
       const data = await response.json();
 
       if (data.GatewayPageURL) {
-        // SSLCommerz এর পেমেন্ট পেজে রিডাইরেক্ট
         window.location.href = data.GatewayPageURL;
       } else {
         throw new Error(
@@ -435,25 +527,35 @@ const Admission_now = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // যদি SSLCommerz সিলেক্ট করা থাকে, তবে আলাদা ফাংশন কল হবে
     if (formData.paymentMethod === "ssl") {
       handleSSLCommerzPayment();
+      return;
+    }
+
+    // ✅ Full validation before submit
+    const missing = [
+      ...validateStep(1),
+      ...validateStep(2),
+      ...validateStep(3),
+    ];
+    if (missing.length > 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Information Incomplete!",
+        html: `
+          <div style="text-align:left; font-size:14px;">
+            <ul style="margin:0 0 0 20px; color:#dc2626;">
+              ${missing.map((m) => `<li>${m}</li>`).join("")}
+            </ul>
+          </div>`,
+        confirmButtonColor: "#00ADD2",
+      });
       return;
     }
 
     setLoading(true);
 
     try {
-      if (!formData.name || !formData.phoneNumber || !formData.email) {
-        Swal.fire({
-          icon: "warning",
-          title: "Information Incomplete!",
-          text: "Name, Phone Number and Email are required.",
-        });
-        setLoading(false);
-        return;
-      }
-
       const selectedCourseNames = formData.selectedCourses
         .map((courseId) => {
           const course = getCurrentCourses().find((c) => c.id === courseId);
@@ -466,16 +568,23 @@ const Admission_now = () => {
           ? "Paid"
           : "Unpaid";
 
+      // ✅ Department name mapping
+      const departmentName =
+        DEPARTMENT_MAP[formData.selectedDepartment] ||
+        formData.selectedDepartment;
+
       const payload = {
         name: formData.name,
         email: formData.email,
         phone: formData.phoneNumber,
-        password: generatedPassword, // ✅ Unique
-        studentId: generatedId, // ✅ Suggested
+        password: generatedPassword,
+        studentId: generatedId,
         course:
           selectedCourseNames.join(", ") ||
           formData.selectedDepartment ||
           "Not Specified",
+        // ✅ FIX: department যোগ করা হয়েছে
+        department: departmentName,
         fatherName: formData.fatherName || "",
         motherName: formData.motherName || "",
         guardianName: formData.fatherName || "",
@@ -501,9 +610,7 @@ const Admission_now = () => {
         "https://api.tarbiyahonline.com/api/students/register/student",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         },
       );
@@ -514,30 +621,31 @@ const Admission_now = () => {
           icon: "success",
           title: "🎉 Admission Completed!",
           html: `
-      <div style="text-align: left; font-size: 13px;">
-        <p><strong>Name:</strong> ${formData.name}</p>
-        <p><strong>Phone:</strong> ${formData.phoneNumber}</p>
-        <p><strong>Email:</strong> ${formData.email}</p>
-        <p><strong>Course:</strong> ${selectedCourseNames.join(", ") || "N/A"}</p>
-        <p><strong>Payment Method:</strong> ${formData.paymentMethod || "N/A"}</p>
-        <p><strong>Transaction ID:</strong> ${formData.transactionId || "N/A"}</p>
-        <p><strong>Payment Status:</strong> ${paymentStatus}</p>
-        <hr style="margin: 10px 0;">
-        <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
-          <p style="font-weight: bold; color: #004d4d; margin-bottom: 8px;">🔑 Your Login Credentials:</p>
-          <p style="font-size: 15px;"><strong>Student ID:</strong> 
-            <span style="color: #004d4d; font-size: 18px; letter-spacing: 1px; font-family: monospace;">${generatedId}</span>
-          </p>
-          <p><strong>Password:</strong> 
-            <span style="color: #004d4d; font-family: monospace; font-size: 15px;">${generatedPassword}</span>
-          </p>
-          <p style="font-size: 11px; color: #666; margin-top: 8px;">
-            ⚠️ এই তথ্য নিরাপদে সংরক্ষণ করুন।<br>
-            📌 Admin approve করার পর আপনি এগুলো দিয়ে <strong>tarbiyahonline.com/student-login</strong> এ login করতে পারবেন।
-          </p>
-        </div>
-      </div>
-    `,
+            <div style="text-align: left; font-size: 13px;">
+              <p><strong>Name:</strong> ${formData.name}</p>
+              <p><strong>Phone:</strong> ${formData.phoneNumber}</p>
+              <p><strong>Email:</strong> ${formData.email}</p>
+              <p><strong>Department:</strong> ${departmentName}</p>
+              <p><strong>Course:</strong> ${selectedCourseNames.join(", ") || "N/A"}</p>
+              <p><strong>Payment Method:</strong> ${formData.paymentMethod || "N/A"}</p>
+              <p><strong>Transaction ID:</strong> ${formData.transactionId || "N/A"}</p>
+              <p><strong>Payment Status:</strong> ${paymentStatus}</p>
+              <hr style="margin: 10px 0;">
+              <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
+                <p style="font-weight: bold; color: #004d4d; margin-bottom: 8px;">🔑 Your Login Credentials:</p>
+                <p style="font-size: 15px;"><strong>Student ID:</strong> 
+                  <span style="color: #004d4d; font-size: 18px; letter-spacing: 1px; font-family: monospace;">${generatedId}</span>
+                </p>
+                <p><strong>Password:</strong> 
+                  <span style="color: #004d4d; font-family: monospace; font-size: 15px;">${generatedPassword}</span>
+                </p>
+                <p style="font-size: 11px; color: #666; margin-top: 8px;">
+                  ⚠️ এই তথ্য নিরাপদে সংরক্ষণ করুন।<br>
+                  📌 Admin approve করার পর আপনি এগুলো দিয়ে <strong>tarbiyahonline.com/student-login</strong> এ login করতে পারবেন।
+                </p>
+              </div>
+            </div>
+          `,
           confirmButtonColor: "#004d4d",
           confirmButtonText: "OK",
           width: 550,
@@ -614,15 +722,6 @@ const Admission_now = () => {
         return course || null;
       })
       .filter(Boolean);
-  };
-
-  const getMerchantNumber = () => {
-    if (formData.paymentMethod === "bkash") {
-      return "01841412525";
-    } else if (formData.paymentMethod === "nagod") {
-      return "01841512525";
-    }
-    return "";
   };
 
   return (
@@ -709,7 +808,6 @@ const Admission_now = () => {
                   name="selectedDepartment"
                   value={formData.selectedDepartment}
                   onChange={handleInputChange}
-                  required
                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                 >
                   <option value="">Select Department</option>
@@ -861,7 +959,6 @@ const Admission_now = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
@@ -875,7 +972,6 @@ const Admission_now = () => {
                     name="nationalId"
                     value={formData.nationalId}
                     onChange={handleInputChange}
-                    required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
@@ -889,21 +985,22 @@ const Admission_now = () => {
                     name="dateOfBirth"
                     value={formData.dateOfBirth}
                     onChange={handleDateChange}
-                    required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
-                    Age
+                    Age (Auto from DOB)
                   </label>
+                  {/* ✅ FIX #1: readOnly সরানো — এখন টাইপ করা যাবে */}
                   <input
                     type="text"
                     name="age"
                     value={formData.age}
-                    readOnly
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm bg-gray-50 p-2 border"
+                    onChange={handleInputChange}
+                    placeholder="Auto-calculated or type manually"
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
 
@@ -916,7 +1013,6 @@ const Admission_now = () => {
                     name="phoneNumber"
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
-                    required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
@@ -930,7 +1026,6 @@ const Admission_now = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
@@ -943,7 +1038,6 @@ const Admission_now = () => {
                     name="gender"
                     value={formData.gender}
                     onChange={handleInputChange}
-                    required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   >
                     <option value="">Select Gender</option>
@@ -1012,7 +1106,6 @@ const Admission_now = () => {
                     name="fatherName"
                     value={formData.fatherName}
                     onChange={handleInputChange}
-                    required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
@@ -1026,7 +1119,6 @@ const Admission_now = () => {
                     name="motherName"
                     value={formData.motherName}
                     onChange={handleInputChange}
-                    required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
@@ -1040,7 +1132,6 @@ const Admission_now = () => {
                     name="guardianPhone"
                     value={formData.guardianPhone}
                     onChange={handleInputChange}
-                    required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
@@ -1066,7 +1157,6 @@ const Admission_now = () => {
                     name="presentAddress"
                     value={formData.presentAddress}
                     onChange={handleInputChange}
-                    required
                     rows="2"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
@@ -1080,7 +1170,6 @@ const Admission_now = () => {
                     name="permanentAddress"
                     value={formData.permanentAddress}
                     onChange={handleInputChange}
-                    required
                     rows="2"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
@@ -1147,7 +1236,7 @@ const Admission_now = () => {
                 </ul>
               </div>
 
-              {/* ===== ফি ডিটেইল টেবিল ===== */}
+              {/* Fee Details Table */}
               {formData.selectedCourses.length > 0 && (
                 <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                   <h4 className="font-bold text-[#00ADD2] mb-3">
@@ -1221,7 +1310,6 @@ const Admission_now = () => {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Payment Method */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Payment Method *
@@ -1230,7 +1318,6 @@ const Admission_now = () => {
                     name="paymentMethod"
                     value={formData.paymentMethod}
                     onChange={handleInputChange}
-                    required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   >
                     <option value="">Select Payment Method</option>
@@ -1242,7 +1329,6 @@ const Admission_now = () => {
                   </select>
                 </div>
 
-                {/* Payment Type */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Payment Type *
@@ -1251,7 +1337,6 @@ const Admission_now = () => {
                     name="paymentType"
                     value={formData.paymentType}
                     onChange={handleInputChange}
-                    required
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   >
                     <option value="">Select Payment Type</option>
@@ -1260,7 +1345,6 @@ const Admission_now = () => {
                   </select>
                 </div>
 
-                {/* Merchant Number Display */}
                 {(formData.paymentMethod === "bkash" ||
                   formData.paymentMethod === "nagod") && (
                   <div className="col-span-2">
@@ -1292,7 +1376,6 @@ const Admission_now = () => {
                   </div>
                 )}
 
-                {/* Bank Information */}
                 {formData.paymentMethod === "bank" && (
                   <div className="col-span-2">
                     <div
@@ -1345,7 +1428,6 @@ const Admission_now = () => {
                   </div>
                 )}
 
-                {/* Mobile Number (bKash/Nagad/Rocket) */}
                 {(formData.paymentMethod === "bkash" ||
                   formData.paymentMethod === "nagod" ||
                   formData.paymentMethod === "rocket") && (
@@ -1375,14 +1457,12 @@ const Admission_now = () => {
                             : formData.rocketNumber
                       }
                       onChange={handleInputChange}
-                      required
                       placeholder="01xxxxxxxxx"
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                     />
                   </div>
                 )}
 
-                {/* Amount Paid */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Amount Paid (৳) *
@@ -1392,7 +1472,6 @@ const Admission_now = () => {
                     name="paidAmount"
                     value={formData.paidAmount}
                     onChange={handleInputChange}
-                    required
                     placeholder={
                       calculateTotal() > 0
                         ? `Total: ৳${calculateTotal()}`
@@ -1407,7 +1486,6 @@ const Admission_now = () => {
                   )}
                 </div>
 
-                {/* Transaction ID */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Transaction ID *
@@ -1417,13 +1495,11 @@ const Admission_now = () => {
                     name="transactionId"
                     value={formData.transactionId}
                     onChange={handleInputChange}
-                    required
                     placeholder="Enter transaction ID"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
 
-                {/* Payment Remarks */}
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700">
                     Payment Remarks
@@ -1439,7 +1515,6 @@ const Admission_now = () => {
                 </div>
               </div>
 
-              {/* SSL Commerz */}
               {formData.paymentMethod === "ssl" && (
                 <div
                   className="p-4 rounded-lg border"
@@ -1454,7 +1529,7 @@ const Admission_now = () => {
                   </p>
                   <button
                     type="button"
-                    onClick={handleSSLCommerzPayment} // ✅ এখানে ফাংশন যুক্ত করা হয়েছে
+                    onClick={handleSSLCommerzPayment}
                     disabled={loading}
                     className="mt-2 text-white px-4 py-2 rounded hover:opacity-90 disabled:opacity-50"
                     style={{ backgroundColor: "#00ADD2" }}
@@ -1464,7 +1539,6 @@ const Admission_now = () => {
                 </div>
               )}
 
-              {/* Payment Summary */}
               <div
                 className="p-4 rounded-lg border"
                 style={{ backgroundColor: "#f0f9fa", borderColor: "#00ADD2" }}
@@ -1516,7 +1590,6 @@ const Admission_now = () => {
                 >
                   ← Previous
                 </button>
-                {/* ✅ Main Submit Button also handles SSL */}
                 <button
                   type="submit"
                   disabled={loading}
