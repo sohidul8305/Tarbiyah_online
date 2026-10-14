@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import MadrashaImg from "../../image/madrasha.png";
+import MadrashaImg from "../../image/abasonjpeg.jpeg";
 import ChairmanImg from "../../image/profile.jpg";
 // আপনার তৈরি করা হুকটি সঠিক পাথ থেকে এখানে ইমপোর্ট করুন
 import { useLanguage } from "../../context/useLanguage";
@@ -40,8 +40,8 @@ const Safe_residence = () => {
         bn: "তারবিয়াহ আবাসন প্রকল্প",
       },
       title1: {
-        en: "Where home, mosque, madrasa & playground —",
-        bn: "যেখানে ঘর, মসজিদ, মাদ্রাসা ও খেলার মাঠ —",
+        en: "Where home, mosque, madrasa & playground ",
+        bn: "যেখানে ঘর, মসজিদ, মাদ্রাসা ও খেলার মাঠ",
       },
       title2: { en: "in the same community", bn: "একই কমিউনিটিতে" },
       subtitle: {
@@ -280,20 +280,6 @@ const Safe_residence = () => {
       },
       submit: { en: "Submit", bn: "সাবমিট করুন" },
     },
-    footer: {
-      title: { en: "Tarbiyah Residence", bn: "তারবিয়াহ আবাসন" },
-      desc: {
-        en: "Safe Islamic residence, playground, mosque and madrasa enriched community.",
-        bn: "নিরাপদ দ্বীনি আবাসন, খেলার মাঠ, মসজিদ ও মাদ্রাসা সমৃদ্ধ কমিউনিটি।",
-      },
-      privacy: { en: "Privacy Policy", bn: "প্রাইভেসি পলিসি" },
-      terms: { en: "Terms & Conditions", bn: "শর্তাবলী" },
-      contact: { en: "Contact", bn: "যোগাযোগ" },
-      copyright: {
-        en: `© ${new Date().getFullYear()} Tarbiyah Residence. All rights reserved.`,
-        bn: `© ${new Date().getFullYear()} তারবিয়াহ আবাসন। সর্বস্বত্ব সংরক্ষিত।`,
-      },
-    },
   };
 
   return (
@@ -337,7 +323,6 @@ const Safe_residence = () => {
           <div className="flex-1 w-full flex justify-center relative">
             <div className="relative w-full max-w-lg">
               <div className="absolute inset-0 bg-gradient-to-tr from-teal-600 to-amber-400 rounded-[2rem] transform rotate-3 scale-105 opacity-20 blur-xl"></div>
-              {/* মাদ্রাসা ইমেজ এখানে ব্যবহার করা হয়েছে */}
               <img
                 src={MadrashaImg}
                 alt="Tarbiyah Residence Community"
@@ -377,12 +362,10 @@ const Safe_residence = () => {
       <section className="py-24 px-4 md:px-10 bg-white relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-teal-200 to-transparent"></div>
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
-          {/* Chairman Image */}
           <div className="lg:w-1/3 w-full flex justify-center lg:justify-start relative">
             <div className="relative w-72 h-80 md:w-96 md:h-[450px]">
               <div className="absolute inset-0 bg-gradient-to-br from-teal-600 to-teal-800 rounded-[2rem] transform -rotate-6 scale-105 opacity-10"></div>
               <div className="absolute inset-0 bg-gradient-to-tl from-amber-400 to-amber-600 rounded-[2rem] transform rotate-3 scale-105 opacity-10"></div>
-              {/* চেয়ারম্যান ইমেজ এখানে ব্যবহার করা হয়েছে */}
               <img
                 src={ChairmanImg}
                 alt={t(content.chairman.name)}
@@ -394,7 +377,6 @@ const Safe_residence = () => {
             </div>
           </div>
 
-          {/* Chairman Message */}
           <div className="lg:w-2/3 w-full space-y-8">
             <svg
               className="w-16 h-16 text-teal-100"
@@ -828,43 +810,6 @@ const Safe_residence = () => {
           </form>
         </div>
       </section>
-
-      {/* ================= FOOTER ================= */}
-      <footer className="bg-[#002b33] text-white py-16 px-4 md:px-10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
-          <div className="text-center md:text-left">
-            <h3 className="text-3xl font-bold text-teal-400 mb-3">
-              {t(content.footer.title)}
-            </h3>
-            <p className="text-teal-100/70 text-lg max-w-md">
-              {t(content.footer.desc)}
-            </p>
-          </div>
-          <div className="flex gap-10 text-lg text-teal-100/80">
-            <a
-              href="#"
-              className="hover:text-white transition-colors duration-300"
-            >
-              {t(content.footer.privacy)}
-            </a>
-            <a
-              href="#"
-              className="hover:text-white transition-colors duration-300"
-            >
-              {t(content.footer.terms)}
-            </a>
-            <a
-              href="#"
-              className="hover:text-white transition-colors duration-300"
-            >
-              {t(content.footer.contact)}
-            </a>
-          </div>
-          <p className="text-teal-100/60 text-center md:text-right">
-            {t(content.footer.copyright)}
-          </p>
-        </div>
-      </footer>
     </div>
   );
 };
