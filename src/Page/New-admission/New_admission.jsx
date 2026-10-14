@@ -49,6 +49,18 @@ const generateStudentId = (prefix = "TAR") => {
   return `${prefix}${year}${random}`;
 };
 
+// ✅ Helper: Only show a field if it has a real value
+const hasValue = (v) => {
+  if (v === null || v === undefined) return false;
+  const s = String(v).trim();
+  if (!s) return false;
+  if (s === "N/A" || s === "n/a" || s === "-") return false;
+  if (s === "0" || s === "৳0") return false;
+  return true;
+};
+
+// ✅ Helper: Only show amount if > 0
+const hasAmount = (v) => Number(v) > 0;
 const New_admission = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
@@ -137,30 +149,29 @@ const New_admission = () => {
             source: r.department || adminDepartment,
             sourceLabel: r.department || adminDepartment,
             name: r.studentName || "",
-            fatherName: r.parentName || "",
-            motherName: "",
+            fatherName: r.fatherName || r.parentName || "",
             course: r.course || "",
             subject: r.subject || r.course || "",
             class: r.class || r.course || "",
-            phone: r.parentPhone || "",
+            phone: r.parentPhone || r.guardianPhone || "",
             email: r.email || "",
             address: r.address || "",
-            permanentAddress: "",
-            dobOrNid: "",
-            age: "",
+            permanentAddress: r.permanentAddress || "",
+            dobOrNid: r.dobOrNid || "",
+            age: r.age || "",
             gender: r.gender || "",
-            occupation: "",
-            maritalStatus: "",
+            occupation: r.occupation || "",
+            maritalStatus: r.maritalStatus || "",
             guardianName: r.parentName || "",
-            guardianPhone: r.parentPhone || "",
+            guardianPhone: r.guardianPhone || r.parentPhone || "",
             status: r.status || "Pending",
             rawStatus: r.rawStatus || "Pending",
             paymentStatus: r.paymentStatus || "Unpaid",
             paidAmount: r.paidAmount || 0,
-            paymentMethod: "",
-            paymentType: "",
+            paymentMethod: r.paymentMethod || "",
+            paymentType: r.paymentType || "",
             transactionId: r.transactionId || "",
-            paymentRemarks: r.notes || "",
+            paymentRemarks: r.paymentRemarks || r.notes || "",
             studentId: r.studentId || "",
             username: "",
             roll: "",
@@ -170,8 +181,8 @@ const New_admission = () => {
             date: r.applicationDate || "",
             createdAt: r.applicationDate || "",
             dueAmount: r.dueAmount || 0,
-            courseFee: 0,
-            scholarshipAmount: 0,
+            courseFee: r.courseFee || 0,
+            scholarshipAmount: r.scholarshipAmount || 0,
             raw: r,
           }));
           allStudents.push(...mapped);
@@ -1269,24 +1280,26 @@ const New_admission = () => {
                                 >
                                   <FaEye size={12} />
                                 </button>
-                                {a.status === "Pending" && (
-                                  <>
-                                    <button
-                                      onClick={() => handleApprove(a.id)}
-                                      className="text-green-600 hover:text-green-800 p-0.5"
-                                      title="Approve"
-                                    >
-                                      <FaCheckCircle size={12} />
-                                    </button>
-                                    <button
-                                      onClick={() => handleReject(a.id)}
-                                      className="text-red-600 hover:text-red-800 p-0.5"
-                                      title="Reject"
-                                    >
-                                      <FaTimesCircle size={12} />
-                                    </button>
-                                  </>
-                                )}
+                                {a.status === "Pending" &&
+                                  (a.source === "Tazweed" ||
+                                    a.source === "Najera") && (
+                                    <>
+                                      <button
+                                        onClick={() => handleApprove(a.id)}
+                                        className="text-green-600 hover:text-green-800 p-0.5"
+                                        title="Approve"
+                                      >
+                                        <FaCheckCircle size={12} />
+                                      </button>
+                                      <button
+                                        onClick={() => handleReject(a.id)}
+                                        className="text-red-600 hover:text-red-800 p-0.5"
+                                        title="Reject"
+                                      >
+                                        <FaTimesCircle size={12} />
+                                      </button>
+                                    </>
+                                  )}
                                 <button
                                   onClick={() => handleDelete(a.id)}
                                   className="text-red-600 hover:text-red-800 p-0.5"
@@ -1338,8 +1351,9 @@ const New_admission = () => {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column */}
+                {/* ==================== Left Column ==================== */}
                 <div className="space-y-4">
+                  {/* Header */}
                   <div>
                     <h2 className="text-2xl font-bold text-gray-800">
                       {selectedAdmission.name}
@@ -1355,13 +1369,10 @@ const New_admission = () => {
                       >
                         {selectedAdmission.sourceLabel}
                       </span>
-                      {selectedAdmission.studentId && (
-                        <span className="text-xs font-mono text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                          ID: {selectedAdmission.studentId}
-                        </span>
-                      )}
                     </div>
                   </div>
+
+                  {/* Status */}
                   <div>
                     <p className="text-xs text-gray-500">Status</p>
                     <span
@@ -1373,103 +1384,293 @@ const New_admission = () => {
                       {selectedAdmission.status}
                     </span>
                   </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Batch</p>
-                    <p className="font-semibold">
-                      {selectedAdmission.batch || "N/A"}
-                    </p>
-                  </div>
+
+                  {/* Batch */}
+                  {hasValue(selectedAdmission.batch) && (
+                    <div>
+                      <p className="text-xs text-gray-500">Batch</p>
+                      <p className="font-semibold">{selectedAdmission.batch}</p>
+                    </div>
+                  )}
+
+                  {/* Personal Info */}
+                  {(hasValue(selectedAdmission.fatherName) ||
+                    hasValue(selectedAdmission.motherName) ||
+                    hasValue(selectedAdmission.gender) ||
+                    hasValue(selectedAdmission.age) ||
+                    hasValue(selectedAdmission.occupation) ||
+                    hasValue(selectedAdmission.maritalStatus)) && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-800 mb-3">
+                        👤 Personal Information
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        {hasValue(selectedAdmission.fatherName) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Father's Name</span>
+                            <span className="font-semibold text-right">
+                              {selectedAdmission.fatherName}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.motherName) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Mother's Name</span>
+                            <span className="font-semibold text-right">
+                              {selectedAdmission.motherName}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.gender) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Gender</span>
+                            <span className="font-semibold capitalize">
+                              {selectedAdmission.gender}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.age) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Age</span>
+                            <span className="font-semibold">
+                              {selectedAdmission.age}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.occupation) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Occupation</span>
+                            <span className="font-semibold text-right">
+                              {selectedAdmission.occupation}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.maritalStatus) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">
+                              Marital Status
+                            </span>
+                            <span className="font-semibold capitalize">
+                              {selectedAdmission.maritalStatus}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Right Column */}
+                {/* ==================== Right Column ==================== */}
                 <div className="space-y-4">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-800 mb-3">
-                      Contact Information
-                    </h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Phone</span>
-                        <span className="font-semibold text-right">
-                          {selectedAdmission.phone}
-                        </span>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Country</span>
-                        <span className="font-semibold">
-                          {selectedAdmission.country || "BD"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-800 mb-3">
-                      Payment Details
-                    </h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Status</span>
-                        <span
-                          className={`font-semibold px-2 rounded-full text-xs ${getPaymentColor(
-                            selectedAdmission.paymentStatus,
-                          )}`}
-                        >
-                          {selectedAdmission.paymentStatus}
-                        </span>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Paid</span>
-                        <span className="font-semibold">
-                          ৳
-                          {Number(
-                            selectedAdmission.paidAmount || 0,
-                          ).toLocaleString()}
-                        </span>
-                      </div>
-                      {selectedAdmission.dueAmount !== undefined && (
-                        <div className="flex justify-between gap-2">
-                          <span className="text-gray-500">Due</span>
-                          <span className="font-semibold text-red-600">
-                            ৳
-                            {Number(
-                              selectedAdmission.dueAmount || 0,
-                            ).toLocaleString()}
-                          </span>
-                        </div>
-                      )}
-                      <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Applied Date</span>
-                        <span className="font-semibold">
-                          {selectedAdmission.date || "N/A"}
-                        </span>
+                  {/* Contact Information */}
+                  {(hasValue(selectedAdmission.phone) ||
+                    hasValue(selectedAdmission.guardianPhone) ||
+                    hasValue(selectedAdmission.email) ||
+                    hasValue(selectedAdmission.country) ||
+                    hasValue(selectedAdmission.address)) && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-800 mb-3">
+                        📞 Contact Information
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        {hasValue(selectedAdmission.phone) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Phone</span>
+                            <span className="font-semibold text-right">
+                              {selectedAdmission.phone}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.guardianPhone) &&
+                          selectedAdmission.guardianPhone !==
+                            selectedAdmission.phone && (
+                            <div className="flex justify-between gap-2">
+                              <span className="text-gray-500">
+                                Guardian Phone
+                              </span>
+                              <span className="font-semibold text-right">
+                                {selectedAdmission.guardianPhone}
+                              </span>
+                            </div>
+                          )}
+                        {hasValue(selectedAdmission.email) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Email</span>
+                            <span className="font-semibold text-right break-all">
+                              {selectedAdmission.email}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.country) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Country</span>
+                            <span className="font-semibold">
+                              {selectedAdmission.country}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.address) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Address</span>
+                            <span className="font-semibold text-right text-xs">
+                              {selectedAdmission.address}
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
-                  </div>
+                  )}
 
+                  {/* ============ Payment Details (Conditional) ============ */}
+                  {(hasValue(selectedAdmission.paymentMethod) ||
+                    hasValue(selectedAdmission.paymentType) ||
+                    hasAmount(selectedAdmission.courseFee) ||
+                    hasAmount(selectedAdmission.paidAmount) ||
+                    hasValue(selectedAdmission.transactionId) ||
+                    hasValue(selectedAdmission.paymentRemarks) ||
+                    hasValue(selectedAdmission.paymentStatus)) && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-800 mb-3">
+                        💳 Payment Details
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        {/* Payment Method */}
+                        {hasValue(selectedAdmission.paymentMethod) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">
+                              Payment Method
+                            </span>
+                            <span className="font-semibold capitalize">
+                              {selectedAdmission.paymentMethod}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Payment Type */}
+                        {hasValue(selectedAdmission.paymentType) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Payment Type</span>
+                            <span className="font-semibold capitalize">
+                              {selectedAdmission.paymentType}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Course Fee */}
+                        {hasAmount(selectedAdmission.courseFee) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Course Fee</span>
+                            <span className="font-semibold">
+                              ৳
+                              {Number(
+                                selectedAdmission.courseFee,
+                              ).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Scholarship */}
+                        {hasAmount(selectedAdmission.scholarshipAmount) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Scholarship</span>
+                            <span className="font-semibold text-blue-600">
+                              - ৳
+                              {Number(
+                                selectedAdmission.scholarshipAmount,
+                              ).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Paid Amount */}
+                        {hasAmount(selectedAdmission.paidAmount) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Paid Amount</span>
+                            <span className="font-semibold text-green-600">
+                              ৳
+                              {Number(
+                                selectedAdmission.paidAmount,
+                              ).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Due Amount - only if > 0 */}
+                        {hasAmount(selectedAdmission.dueAmount) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Due Amount</span>
+                            <span className="font-semibold text-red-600">
+                              ৳
+                              {Number(
+                                selectedAdmission.dueAmount,
+                              ).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Transaction ID */}
+                        {hasValue(selectedAdmission.transactionId) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">
+                              Transaction ID
+                            </span>
+                            <span className="font-mono text-xs font-semibold text-blue-600 break-all text-right">
+                              {selectedAdmission.transactionId}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Applied Date */}
+                        {hasValue(selectedAdmission.date) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Applied Date</span>
+                            <span className="font-semibold">
+                              {selectedAdmission.date}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Payment Remarks */}
+                        {hasValue(selectedAdmission.paymentRemarks) && (
+                          <div className="mt-2 pt-2 border-t border-gray-200">
+                            <p className="text-xs text-gray-500 mb-1">
+                              Remarks
+                            </p>
+                            <p className="text-xs text-gray-700 bg-white p-2 rounded border border-gray-100">
+                              {selectedAdmission.paymentRemarks}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
                   <div className="flex gap-2 flex-wrap">
-                    {selectedAdmission.status === "Pending" && (
-                      <>
-                        <button
-                          onClick={() => {
-                            handleApprove(selectedAdmission.id);
-                            setShowDetailsModal(false);
-                          }}
-                          className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
-                        >
-                          <FaCheckCircle className="inline mr-2" /> Approve
-                        </button>
-                        <button
-                          onClick={() => {
-                            handleReject(selectedAdmission.id);
-                            setShowDetailsModal(false);
-                          }}
-                          className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
-                        >
-                          <FaTimesCircle className="inline mr-2" /> Reject
-                        </button>
-                      </>
-                    )}
+                    {selectedAdmission.status === "Pending" &&
+                      (selectedAdmission.source === "Tazweed" ||
+                        selectedAdmission.source === "Najera") && (
+                        <>
+                          <button
+                            onClick={() => {
+                              handleApprove(selectedAdmission.id);
+                              setShowDetailsModal(false);
+                            }}
+                            className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                          >
+                            <FaCheckCircle className="inline mr-2" /> Approve
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleReject(selectedAdmission.id);
+                              setShowDetailsModal(false);
+                            }}
+                            className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                          >
+                            <FaTimesCircle className="inline mr-2" /> Reject
+                          </button>
+                        </>
+                      )}
                     <button
                       onClick={() => setShowDetailsModal(false)}
                       className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
