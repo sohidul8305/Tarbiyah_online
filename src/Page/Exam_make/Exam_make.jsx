@@ -302,16 +302,6 @@ const Exam_make = () => {
         },
 
         {
-          id: "basic-tazweed",
-          path: "/admin-dashboard/basic-tazweed",
-          label: "Basic Tazweed Payment Overview",
-        },
-        {
-          id: "najera-batch",
-          path: "/admin-dashboard/najera-batch",
-          label: "Najera Payment Overview",
-        },
-        {
           id: "new-admission",
           path: "/admin-dashboard/new-admission",
           label: "New Admission",

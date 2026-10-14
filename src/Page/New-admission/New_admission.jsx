@@ -9,7 +9,6 @@ import {
   FaChalkboardTeacher,
   FaMoneyBillWave,
   FaSignOutAlt,
-  FaCalendarCheck,
   FaChartLine,
   FaUserGraduate,
   FaUserPlus,
@@ -30,26 +29,8 @@ import { FiMenu, FiX } from "react-icons/fi";
 const API_BASE = "https://api.tarbiyahonline.com/api";
 
 // ============================================================
-// ✅ Status mapping
-// ============================================================
-const resolveStatus = (s) => {
-  const raw = String(s?.status || "").trim();
-  if (raw === "Active" || raw === "Approved") return "Approved";
-  if (raw === "Rejected" || raw === "Inactive") return "Rejected";
-  if (raw === "Pending") return "Pending";
-  if (Number(s?.dueAmount) === 0 && Number(s?.paidAmount) > 0)
-    return "Approved";
-  return "Pending";
-};
-
-// ✅ Student ID generator
-const generateStudentId = (prefix = "TAR") => {
-  const year = new Date().getFullYear().toString().slice(-2);
-  const random = Math.floor(10000 + Math.random() * 90000);
-  return `${prefix}${year}${random}`;
-};
-
 // ✅ Helper: Only show a field if it has a real value
+// ============================================================
 const hasValue = (v) => {
   if (v === null || v === undefined) return false;
   const s = String(v).trim();
@@ -61,6 +42,7 @@ const hasValue = (v) => {
 
 // ✅ Helper: Only show amount if > 0
 const hasAmount = (v) => Number(v) > 0;
+
 const New_admission = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
@@ -68,9 +50,7 @@ const New_admission = () => {
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [activeSubMenu, setActiveSubMenu] = useState("dashboard");
   const [loading, setLoading] = useState(true);
-  const [sourceFilter, setSourceFilter] = useState("All");
 
-  // ✅ Current admin এর department
   const [adminDepartment, setAdminDepartment] = useState("");
 
   const [adminInfo, setAdminInfo] = useState({
@@ -119,8 +99,7 @@ const New_admission = () => {
   }, [user]);
 
   // ============================================================
-  // ✅ FIX: Fetch admissions — students collection থেকে সব department এর জন্য
-  //    Elders হলে additional tazweed + najera ও fetch হবে
+  // ✅ Fetch Admissions — শুধু students collection (সব department same)
   // ============================================================
   const fetchAdmissions = async () => {
     if (!adminDepartment) {
@@ -134,7 +113,6 @@ const New_admission = () => {
 
       const allStudents = [];
 
-      // ---------- 1) Students collection (Admission Form থেকে আসা) ----------
       try {
         const res = await fetch(
           `${API_BASE}/admission-report/all?department=${encodeURIComponent(
@@ -142,6 +120,7 @@ const New_admission = () => {
           )}`,
         );
         const d = await res.json();
+
         if (d.success && Array.isArray(d.records)) {
           const mapped = d.records.map((r) => ({
             id: r._id,
@@ -150,6 +129,7 @@ const New_admission = () => {
             sourceLabel: r.department || adminDepartment,
             name: r.studentName || "",
             fatherName: r.fatherName || r.parentName || "",
+            motherName: r.motherName || "",
             course: r.course || "",
             subject: r.subject || r.course || "",
             class: r.class || r.course || "",
@@ -173,9 +153,6 @@ const New_admission = () => {
             transactionId: r.transactionId || "",
             paymentRemarks: r.paymentRemarks || r.notes || "",
             studentId: r.studentId || "",
-            username: "",
-            roll: "",
-            password: "",
             batch: r.batch || "",
             country: r.country || "BD",
             date: r.applicationDate || "",
@@ -187,139 +164,11 @@ const New_admission = () => {
           }));
           allStudents.push(...mapped);
           console.log(
-            `✅ Loaded ${mapped.length} students from students collection`,
+            `✅ [${adminDepartment}] Loaded ${mapped.length} students`,
           );
         }
       } catch (e) {
         console.error("Students fetch error:", e);
-      }
-
-      // ---------- 2) Elders হলে tazweed + najera ও যোগ করো ----------
-      if (adminDepartment === "Elders") {
-        const [tazweedRes, najeraRes] = await Promise.allSettled([
-          fetch(`${API_BASE}/basic-tazweed/all`),
-          fetch(`${API_BASE}/najera-batch/all`),
-        ]);
-
-        // ---- Basic Tazweed ----
-        if (tazweedRes.status === "fulfilled") {
-          try {
-            const d = await tazweedRes.value.json();
-            if (d.success && Array.isArray(d.students)) {
-              const mapped = d.students.map((s) => ({
-                id: s._id,
-                _id: s._id,
-                source: "Tazweed",
-                sourceLabel: "Basic Tazweed",
-                name: s.name || "",
-                fatherName: "",
-                motherName: "",
-                course: "Basic Tajweed (Level-1)",
-                subject: "Basic Tajweed (Level-1)",
-                class: "Basic Tajweed (Level-1)",
-                phone: s.phone || "",
-                email: "",
-                address: "",
-                permanentAddress: "",
-                dobOrNid: "",
-                age: "",
-                gender: "",
-                occupation: "",
-                maritalStatus: "",
-                guardianName: "",
-                guardianPhone: s.phone || "",
-                status: resolveStatus(s),
-                rawStatus: s.status || "Pending",
-                paymentStatus:
-                  Number(s.dueAmount) === 0
-                    ? "Paid"
-                    : Number(s.paidAmount) > 0
-                      ? "Partial"
-                      : "Unpaid",
-                paidAmount: s.paidAmount || 0,
-                paymentMethod: "",
-                paymentType: "",
-                transactionId: s.transactionId || "",
-                paymentRemarks: s.comments || "",
-                studentId: s.studentId || "",
-                username: s.username || "",
-                roll: s.roll || "",
-                password: s.password || "",
-                batch: "Basic Tazweed 6th Batch",
-                country: s.country || "BD",
-                date: s.createdAt ? String(s.createdAt).split("T")[0] : "",
-                createdAt: s.createdAt || "",
-                dueAmount: s.dueAmount || 0,
-                courseFee: s.courseFee || 0,
-                scholarshipAmount: s.scholarshipAmount || 0,
-                raw: s,
-              }));
-              allStudents.push(...mapped);
-            }
-          } catch (e) {
-            console.error("Tazweed parse error:", e);
-          }
-        }
-
-        // ---- Najera Batch ----
-        if (najeraRes.status === "fulfilled") {
-          try {
-            const d = await najeraRes.value.json();
-            if (d.success && Array.isArray(d.students)) {
-              const mapped = d.students.map((s) => ({
-                id: s._id,
-                _id: s._id,
-                source: "Najera",
-                sourceLabel: "Najera Batch",
-                name: s.name || "",
-                fatherName: "",
-                motherName: "",
-                course: "Quran Nazera",
-                subject: "Quran Nazera",
-                class: "Quran Nazera",
-                phone: s.phone || "",
-                email: "",
-                address: "",
-                permanentAddress: "",
-                dobOrNid: "",
-                age: "",
-                gender: "",
-                occupation: "",
-                maritalStatus: "",
-                guardianName: "",
-                guardianPhone: s.phone || "",
-                status: resolveStatus(s),
-                rawStatus: s.status || "Pending",
-                paymentStatus:
-                  Number(s.dueAmount) === 0
-                    ? "Paid"
-                    : Number(s.paidAmount) > 0
-                      ? "Partial"
-                      : "Unpaid",
-                paidAmount: s.paidAmount || 0,
-                paymentMethod: "",
-                paymentType: "",
-                transactionId: s.transactionId || "",
-                paymentRemarks: s.comments || "",
-                studentId: s.studentId || "",
-                username: s.username || "",
-                roll: s.roll || "",
-                password: s.password || "",
-                batch: "Najera Batch-02",
-                country: s.country || "BD",
-                date: s.createdAt ? String(s.createdAt).split("T")[0] : "",
-                createdAt: s.createdAt || "",
-                dueAmount: s.dueAmount || 0,
-                courseFee: s.courseFee || 0,
-                scholarshipAmount: s.scholarshipAmount || 0,
-                raw: s,
-              }));
-              allStudents.push(...mapped);
-            }
-          } catch (e) {
-            console.error("Najera parse error:", e);
-          }
-        }
       }
 
       const combined = allStudents.sort((a, b) => {
@@ -329,9 +178,6 @@ const New_admission = () => {
       });
 
       setAdmissions(combined);
-      console.log(
-        `✅ [${adminDepartment}] Total loaded: ${combined.length} students`,
-      );
     } catch (err) {
       console.error("❌ Fetch error:", err);
       Swal.fire({
@@ -344,7 +190,6 @@ const New_admission = () => {
     }
   };
 
-  // ✅ Re-fetch when department changes
   useEffect(() => {
     if (adminDepartment) {
       fetchAdmissions();
@@ -515,8 +360,6 @@ const New_admission = () => {
   // Filtering
   // ============================================================
   const filteredAdmissions = admissions.filter((a) => {
-    if (sourceFilter !== "All" && a.source !== sourceFilter) return false;
-
     const term = searchTerm.toLowerCase().trim();
     const matchesSearch =
       !term ||
@@ -540,23 +383,6 @@ const New_admission = () => {
     "All",
     ...new Set(admissions.map((a) => a.paymentStatus).filter(Boolean)),
   ];
-
-  // ✅ Dynamic source tabs (depends on department)
-  const sourceTabList = [
-    { id: "All", label: "All Students", color: "blue" },
-    ...(adminDepartment === "Elders"
-      ? [
-          { id: "Tazweed", label: "Basic Tazweed", color: "green" },
-          { id: "Najera", label: "Najera Batch", color: "purple" },
-        ]
-      : []),
-  ];
-
-  const sourceCounts = {
-    All: admissions.length,
-    Tazweed: admissions.filter((a) => a.source === "Tazweed").length,
-    Najera: admissions.filter((a) => a.source === "Najera").length,
-  };
 
   // ============================================================
   // Badge helpers
@@ -589,10 +415,6 @@ const New_admission = () => {
 
   const getSourceBadge = (source) => {
     switch (source) {
-      case "Tazweed":
-        return "bg-green-100 text-green-700";
-      case "Najera":
-        return "bg-purple-100 text-purple-700";
       case "Elders":
         return "bg-teal-100 text-teal-700";
       case "Alimiya":
@@ -620,200 +442,8 @@ const New_admission = () => {
   };
 
   // ============================================================
-  // ✅ Approve — handles all sources
+  // Delete
   // ============================================================
-  const handleApprove = async (id) => {
-    const student = admissions.find((a) => a.id === id);
-    if (!student) return;
-
-    const result = await Swal.fire({
-      html: `
-    <div style="text-align: left; font-size: 14px; padding-top: 6px;">
-      <p><strong>Student:</strong> ${student.name}</p>
-      <p><strong>Phone:</strong> ${student.phone}</p>
-      <p><strong>Course:</strong> ${student.course}</p>
-      <hr style="margin: 10px 0;">
-      <label style="display:block; font-weight:bold; color:#004d4d; margin-bottom:4px;">Student ID *</label>
-      <input id="swal-studentId" class="swal2-input" style="margin:0; width:100%; font-family:monospace;" value="${student.studentId || generateStudentId()}" />
-      <label style="display:block; font-weight:bold; color:#004d4d; margin:10px 0 4px 0;">Password *</label>
-      <input id="swal-password" class="swal2-input" style="margin:0; width:100%;" value="student123S@" />
-    </div>
-  `,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#22c55e",
-      cancelButtonColor: "#ef4444",
-      confirmButtonText: "Yes, Approve!",
-      preConfirm: () => {
-        const studentId = document
-          .getElementById("swal-studentId")
-          .value.trim();
-        const password = document.getElementById("swal-password").value.trim();
-        if (!studentId) {
-          Swal.showValidationMessage("Student ID আবশ্যক!");
-          return false;
-        }
-        if (!password) {
-          Swal.showValidationMessage("Password আবশ্যক!");
-          return false;
-        }
-        return { studentId, password };
-      },
-    });
-    if (!result.isConfirmed) return;
-
-    const { studentId, password } = result.value;
-
-    // ✅ Elders এর জন্য students/approve, Tazweed/Najera এর জন্য respective endpoints
-    try {
-      if (student.source === "Tazweed") {
-        // Tazweed collection update
-        const res = await fetch(`${API_BASE}/basic-tazweed/update/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            studentId,
-            password,
-            roll: student.roll || "",
-            status: "Active",
-          }),
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.message || "Failed");
-      } else if (student.source === "Najera") {
-        const res = await fetch(`${API_BASE}/najera-batch/update/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            studentId,
-            password,
-            roll: student.roll || "",
-            status: "Active",
-          }),
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.message || "Failed");
-      } else {
-        // ✅ students collection (Admission Form থেকে আসা)
-        const res = await fetch(`${API_BASE}/students/approve/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            studentId,
-            password,
-            roll: student.roll || "",
-          }),
-        });
-        const data = await res.json();
-        if (!data.success) throw new Error(data.message || "Failed");
-      }
-
-      setAdmissions((prev) =>
-        prev.map((a) =>
-          a.id === id
-            ? {
-                ...a,
-                status: "Approved",
-                rawStatus: "Active",
-                studentId,
-                password,
-              }
-            : a,
-        ),
-      );
-
-      Swal.fire({
-        icon: "success",
-        title: "✅ Approved!",
-        html: `
-          <div style="text-align: left;">
-            <p><strong>Name:</strong> ${student.name}</p>
-            <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac; margin-top: 10px;">
-              <p style="font-weight: bold; color: #004d4d; margin-bottom: 6px;">🔑 Login Credentials:</p>
-              <p><strong>Student ID:</strong> <span style="color:#004d4d; font-family:monospace; font-size:16px;">${studentId}</span></p>
-              <p><strong>Password:</strong> <span style="color:#004d4d;">${password}</span></p>
-              <p style="margin-top: 8px; font-size: 11px; color: #666;">📌 এই তথ্য স্টুডেন্টকে জানান।</p>
-            </div>
-          </div>
-        `,
-        confirmButtonColor: "#004d4d",
-      });
-
-      setTimeout(() => fetchAdmissions(), 500);
-    } catch (err) {
-      Swal.fire({
-        icon: "error",
-        title: "Failed!",
-        text: err.message || "Could not approve.",
-      });
-    }
-  };
-
-  // ✅ Reject
-  const handleReject = async (id) => {
-    const student = admissions.find((a) => a.id === id);
-    if (!student) return;
-
-    const result = await Swal.fire({
-      title: "Reject Admission?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#22c55e",
-      confirmButtonText: "Yes, Reject!",
-    });
-    if (!result.isConfirmed) return;
-
-    try {
-      let res;
-      if (student.source === "Tazweed") {
-        res = await fetch(`${API_BASE}/basic-tazweed/update/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "Rejected" }),
-        });
-      } else if (student.source === "Najera") {
-        res = await fetch(`${API_BASE}/najera-batch/update/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "Rejected" }),
-        });
-      } else {
-        // ✅ students collection (admission-report/status endpoint)
-        res = await fetch(`${API_BASE}/admission-report/status/${id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: "Rejected" }),
-        });
-      }
-      const data = await res.json();
-      if (data.success) {
-        setAdmissions((prev) =>
-          prev.map((a) =>
-            a.id === id
-              ? { ...a, status: "Rejected", rawStatus: "Rejected" }
-              : a,
-          ),
-        );
-        Swal.fire({
-          icon: "success",
-          title: "Rejected!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-        setTimeout(() => fetchAdmissions(), 500);
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Failed!",
-          text: data.message || "Could not reject.",
-        });
-      }
-    } catch (err) {
-      Swal.fire({ icon: "error", title: "Error", text: err.message });
-    }
-  };
-
   const handleDelete = async (id) => {
     const student = admissions.find((a) => a.id === id);
     if (!student) return;
@@ -830,21 +460,9 @@ const New_admission = () => {
     if (!result.isConfirmed) return;
 
     try {
-      let res;
-      if (student.source === "Tazweed") {
-        res = await fetch(`${API_BASE}/basic-tazweed/delete/${id}`, {
-          method: "DELETE",
-        });
-      } else if (student.source === "Najera") {
-        res = await fetch(`${API_BASE}/najera-batch/delete/${id}`, {
-          method: "DELETE",
-        });
-      } else {
-        // ✅ students collection
-        res = await fetch(`${API_BASE}/students/delete/${id}`, {
-          method: "DELETE",
-        });
-      }
+      const res = await fetch(`${API_BASE}/students/delete/${id}`, {
+        method: "DELETE",
+      });
       const data = await res.json();
       if (data.success) {
         setAdmissions((prev) => prev.filter((a) => a.id !== id));
@@ -1055,7 +673,6 @@ const New_admission = () => {
             </div>
           )}
 
-          {/* ✅ No department case */}
           {!adminDepartment ? (
             <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-10 text-center">
               <p className="text-sm text-yellow-700">
@@ -1064,45 +681,13 @@ const New_admission = () => {
             </div>
           ) : (
             <>
-              {/* Source Tabs */}
-              <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-1.5 mb-3 flex gap-1 overflow-x-auto">
-                {sourceTabList.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setSourceFilter(tab.id)}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                      sourceFilter === tab.id
-                        ? tab.color === "blue"
-                          ? "bg-blue-50 text-blue-700 shadow-sm"
-                          : tab.color === "green"
-                            ? "bg-green-50 text-green-700 shadow-sm"
-                            : "bg-purple-50 text-purple-700 shadow-sm"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
-                  >
-                    {tab.label}
-                    <span
-                      className={`text-[10px] px-1.5 rounded-full ${
-                        sourceFilter === tab.id
-                          ? "bg-white text-gray-700"
-                          : "bg-gray-200 text-gray-600"
-                      }`}
-                    >
-                      {sourceCounts[tab.id] || 0}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
               {/* Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
                   <p className="text-lg font-bold text-blue-600">
-                    {sourceCounts[sourceFilter] || 0}
+                    {admissions.length}
                   </p>
-                  <p className="text-[10px] text-gray-500">
-                    {sourceFilter === "All" ? "Total" : sourceFilter}
-                  </p>
+                  <p className="text-[10px] text-gray-500">Total</p>
                 </div>
                 <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
                   <p className="text-lg font-bold text-yellow-600">
@@ -1280,26 +865,6 @@ const New_admission = () => {
                                 >
                                   <FaEye size={12} />
                                 </button>
-                                {a.status === "Pending" &&
-                                  (a.source === "Tazweed" ||
-                                    a.source === "Najera") && (
-                                    <>
-                                      <button
-                                        onClick={() => handleApprove(a.id)}
-                                        className="text-green-600 hover:text-green-800 p-0.5"
-                                        title="Approve"
-                                      >
-                                        <FaCheckCircle size={12} />
-                                      </button>
-                                      <button
-                                        onClick={() => handleReject(a.id)}
-                                        className="text-red-600 hover:text-red-800 p-0.5"
-                                        title="Reject"
-                                      >
-                                        <FaTimesCircle size={12} />
-                                      </button>
-                                    </>
-                                  )}
                                 <button
                                   onClick={() => handleDelete(a.id)}
                                   className="text-red-600 hover:text-red-800 p-0.5"
@@ -1351,9 +916,8 @@ const New_admission = () => {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* ==================== Left Column ==================== */}
+                {/* Left Column */}
                 <div className="space-y-4">
-                  {/* Header */}
                   <div>
                     <h2 className="text-2xl font-bold text-gray-800">
                       {selectedAdmission.name}
@@ -1372,7 +936,6 @@ const New_admission = () => {
                     </div>
                   </div>
 
-                  {/* Status */}
                   <div>
                     <p className="text-xs text-gray-500">Status</p>
                     <span
@@ -1385,7 +948,6 @@ const New_admission = () => {
                     </span>
                   </div>
 
-                  {/* Batch */}
                   {hasValue(selectedAdmission.batch) && (
                     <div>
                       <p className="text-xs text-gray-500">Batch</p>
@@ -1393,7 +955,6 @@ const New_admission = () => {
                     </div>
                   )}
 
-                  {/* Personal Info */}
                   {(hasValue(selectedAdmission.fatherName) ||
                     hasValue(selectedAdmission.motherName) ||
                     hasValue(selectedAdmission.gender) ||
@@ -1460,9 +1021,8 @@ const New_admission = () => {
                   )}
                 </div>
 
-                {/* ==================== Right Column ==================== */}
+                {/* Right Column */}
                 <div className="space-y-4">
-                  {/* Contact Information */}
                   {(hasValue(selectedAdmission.phone) ||
                     hasValue(selectedAdmission.guardianPhone) ||
                     hasValue(selectedAdmission.email) ||
@@ -1521,7 +1081,7 @@ const New_admission = () => {
                     </div>
                   )}
 
-                  {/* ============ Payment Details (Conditional) ============ */}
+                  {/* Payment Details */}
                   {(hasValue(selectedAdmission.paymentMethod) ||
                     hasValue(selectedAdmission.paymentType) ||
                     hasAmount(selectedAdmission.courseFee) ||
@@ -1534,7 +1094,6 @@ const New_admission = () => {
                         💳 Payment Details
                       </h4>
                       <div className="space-y-2 text-sm">
-                        {/* Payment Method */}
                         {hasValue(selectedAdmission.paymentMethod) && (
                           <div className="flex justify-between gap-2">
                             <span className="text-gray-500">
@@ -1546,7 +1105,6 @@ const New_admission = () => {
                           </div>
                         )}
 
-                        {/* Payment Type */}
                         {hasValue(selectedAdmission.paymentType) && (
                           <div className="flex justify-between gap-2">
                             <span className="text-gray-500">Payment Type</span>
@@ -1556,7 +1114,6 @@ const New_admission = () => {
                           </div>
                         )}
 
-                        {/* Course Fee */}
                         {hasAmount(selectedAdmission.courseFee) && (
                           <div className="flex justify-between gap-2">
                             <span className="text-gray-500">Course Fee</span>
@@ -1569,7 +1126,6 @@ const New_admission = () => {
                           </div>
                         )}
 
-                        {/* Scholarship */}
                         {hasAmount(selectedAdmission.scholarshipAmount) && (
                           <div className="flex justify-between gap-2">
                             <span className="text-gray-500">Scholarship</span>
@@ -1582,7 +1138,6 @@ const New_admission = () => {
                           </div>
                         )}
 
-                        {/* Paid Amount */}
                         {hasAmount(selectedAdmission.paidAmount) && (
                           <div className="flex justify-between gap-2">
                             <span className="text-gray-500">Paid Amount</span>
@@ -1595,7 +1150,6 @@ const New_admission = () => {
                           </div>
                         )}
 
-                        {/* Due Amount - only if > 0 */}
                         {hasAmount(selectedAdmission.dueAmount) && (
                           <div className="flex justify-between gap-2">
                             <span className="text-gray-500">Due Amount</span>
@@ -1608,7 +1162,6 @@ const New_admission = () => {
                           </div>
                         )}
 
-                        {/* Transaction ID */}
                         {hasValue(selectedAdmission.transactionId) && (
                           <div className="flex justify-between gap-2">
                             <span className="text-gray-500">
@@ -1620,7 +1173,6 @@ const New_admission = () => {
                           </div>
                         )}
 
-                        {/* Applied Date */}
                         {hasValue(selectedAdmission.date) && (
                           <div className="flex justify-between gap-2">
                             <span className="text-gray-500">Applied Date</span>
@@ -1630,7 +1182,6 @@ const New_admission = () => {
                           </div>
                         )}
 
-                        {/* Payment Remarks */}
                         {hasValue(selectedAdmission.paymentRemarks) && (
                           <div className="mt-2 pt-2 border-t border-gray-200">
                             <p className="text-xs text-gray-500 mb-1">
@@ -1645,32 +1196,8 @@ const New_admission = () => {
                     </div>
                   )}
 
-                  {/* Action Buttons */}
+                  {/* Only Close Button */}
                   <div className="flex gap-2 flex-wrap">
-                    {selectedAdmission.status === "Pending" &&
-                      (selectedAdmission.source === "Tazweed" ||
-                        selectedAdmission.source === "Najera") && (
-                        <>
-                          <button
-                            onClick={() => {
-                              handleApprove(selectedAdmission.id);
-                              setShowDetailsModal(false);
-                            }}
-                            className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
-                          >
-                            <FaCheckCircle className="inline mr-2" /> Approve
-                          </button>
-                          <button
-                            onClick={() => {
-                              handleReject(selectedAdmission.id);
-                              setShowDetailsModal(false);
-                            }}
-                            className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
-                          >
-                            <FaTimesCircle className="inline mr-2" /> Reject
-                          </button>
-                        </>
-                      )}
                     <button
                       onClick={() => setShowDetailsModal(false)}
                       className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
