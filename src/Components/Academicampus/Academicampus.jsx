@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import {
   FaBuilding,
@@ -10,20 +10,12 @@ import {
   FaSignInAlt,
 } from "react-icons/fa";
 import { MdSupportAgent } from "react-icons/md";
+// আপনার তৈরি করা হুকটি সঠিক পাথ থেকে এখানে ইমপোর্ট করুন
+import { useLanguage } from "../../context/useLanguage";
 
 const Campus = ({ onLogin }) => {
-  const [language, setLanguage] = useState(
-    () => localStorage.getItem("language") || "en",
-  );
-
-  // ল্যাঙ্গুয়েজ চেঞ্জ লিসেনার
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setLanguage(localStorage.getItem("language") || "en");
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+  // useLanguage হুক ব্যবহার করে সরাসরি language এবং t নিয়ে নিচ্ছি
+  const { language } = useLanguage();
 
   const content = {
     en: {

@@ -178,6 +178,8 @@ import Student_exam from "../Page/Student_exam/Student_exam";
 import Admin_exam_grad from "../Page/Admin_exam_grad/Admin_exam_grad";
 import PaymentStatus from "../Page/PaymentStatus";
 import StudentAttendance from "../Page/Student/StudentAttendance";
+import Safe_residence from "../Page/Safe_residence/Safe_residence";
+import Tarbiyah_online from "../Page/Tarbiyah_online/Tarbiyah_online";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -215,6 +217,11 @@ export const router = createBrowserRouter([
       { path: "support", element: <Support /> },
 
       { path: "/donate", element: <Donate /> },
+      { path: "/safe-residence", element: <Safe_residence></Safe_residence> },
+      {
+        path: "/tarbiyah-online",
+        element: <Tarbiyah_online></Tarbiyah_online>,
+      },
 
       {
         path: "/enroll/bangla-version",

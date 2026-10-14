@@ -47,6 +47,9 @@ const Navbar = () => {
       campus: "Campus",
       classRoutine: "Class Routine",
       noticeBoard: "Notice Board",
+      otherActivities: "Other Activities",
+      safeResidence: "Safe Islamic Residence",
+      tarbiyahOnline: "Tarbiyah Shop",
     },
     bn: {
       address: "৪০/১, সাফা গার্ডেন সাতমসজিদ হাউজিং মোহাম্মদপুর ঢাকা-১২০৭",
@@ -86,6 +89,9 @@ const Navbar = () => {
       campus: "ক্যাম্পাস",
       classRoutine: "ক্লাস রুটিন",
       noticeBoard: "নোটিশ বোর্ড",
+      otherActivities: "অন্যান্য কার্যক্রম",
+      safeResidence: "নিরাপদ দীনি আবাসন",
+      tarbiyahOnline: "তারবিয়াহ শপ ",
     },
   };
 
@@ -93,7 +99,7 @@ const Navbar = () => {
     localStorage.setItem("language", language);
     document.documentElement.lang = language;
 
-    // পুরো ওয়েবসাইটের অন্যান্য কম্পোনেন্টগুলোকে ভাষা পরিবর্তনের সিগন্যাল পাঠানোর জন্য
+    // পুরো ওয়েবসাইটের অন্যান্য কম্পোনেন্টগুলোকে ভাষা পরিবর্তনের সিগন্যাল পাঠানোর জন্য
     window.dispatchEvent(new Event("languageChange"));
   }, [language]);
 
@@ -267,6 +273,27 @@ const Navbar = () => {
                 className="block px-4 py-2 hover:bg-gray-100"
               >
                 {t.support}
+              </Link>
+            </div>
+          </div>
+
+          {/* Other Activities Dropdown (NEW) */}
+          <div className="relative group cursor-pointer">
+            <span className="flex items-center gap-1">
+              {t.otherActivities} ▾
+            </span>
+            <div className="absolute top-full left-0 w-60 bg-white shadow-xl rounded-md hidden group-hover:block z-50 p-2">
+              <Link
+                to="/safe-residence"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                {t.safeResidence}
+              </Link>
+              <Link
+                to="/tarbiyah-online"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                {t.tarbiyahOnline}
               </Link>
             </div>
           </div>
@@ -485,6 +512,29 @@ const Navbar = () => {
                 className="block py-1 hover:text-teal-700"
               >
                 {t.noticeBoard}
+              </Link>
+            </div>
+          </div>
+
+          {/* Other Activities (Mobile) - NEW */}
+          <div className="py-1">
+            <span className="block text-gray-500 text-xs uppercase mb-1">
+              {t.otherActivities}
+            </span>
+            <div className="pl-4 space-y-2 font-normal text-sm">
+              <Link
+                to="/safe-residence"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-1 hover:text-teal-700"
+              >
+                {t.safeResidence}
+              </Link>
+              <Link
+                to="/tarbiyah-online"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-1 hover:text-teal-700"
+              >
+                {t.tarbiyahOnline}
               </Link>
             </div>
           </div>
