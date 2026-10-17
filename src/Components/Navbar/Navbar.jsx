@@ -50,6 +50,8 @@ const Navbar = () => {
       otherActivities: "Other Activities",
       safeResidence: "Safe Islamic Residence",
       tarbiyahOnline: "Tarbiyah Shop",
+      zaytuna: "Zaytuna Education",
+      quranicGenius: "Quranic Genius",
     },
     bn: {
       address: "৪০/১, সাফা গার্ডেন সাতমসজিদ হাউজিং মোহাম্মদপুর ঢাকা-১২০৭",
@@ -91,7 +93,9 @@ const Navbar = () => {
       noticeBoard: "নোটিশ বোর্ড",
       otherActivities: "অন্যান্য কার্যক্রম",
       safeResidence: "নিরাপদ দীনি আবাসন",
-      tarbiyahOnline: "তারবিয়াহ শপ ",
+      tarbiyahOnline: "তারবিয়াহ শপ",
+      zaytuna: "জায়তুনা এডুকেশন",
+      quranicGenius: "কুরআনিক জিনিয়াস",
     },
   };
 
@@ -277,7 +281,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Other Activities Dropdown (NEW) */}
+          {/* Other Activities Dropdown */}
           <div className="relative group cursor-pointer">
             <span className="flex items-center gap-1">
               {t.otherActivities} ▾
@@ -295,6 +299,23 @@ const Navbar = () => {
               >
                 {t.tarbiyahOnline}
               </Link>
+              {/* নতুন ২টি এক্সটার্নাল লিংক */}
+              <a
+                href="https://zaytunaeducation.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                {t.zaytuna}
+              </a>
+              <a
+                href="https://www.quranicgenius.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block px-4 py-2 hover:bg-gray-100"
+              >
+                {t.quranicGenius}
+              </a>
             </div>
           </div>
 
@@ -516,7 +537,7 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Other Activities (Mobile) - NEW */}
+          {/* Other Activities (Mobile) */}
           <div className="py-1">
             <span className="block text-gray-500 text-xs uppercase mb-1">
               {t.otherActivities}
@@ -536,6 +557,25 @@ const Navbar = () => {
               >
                 {t.tarbiyahOnline}
               </Link>
+              {/* নতুন ২টি এক্সটার্নাল লিংক মোবাইল মেনুতে */}
+              <a
+                href="https://zaytunaeducation.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-1 hover:text-teal-700"
+              >
+                {t.zaytuna}
+              </a>
+              <a
+                href="https://www.quranicgenius.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block py-1 hover:text-teal-700"
+              >
+                {t.quranicGenius}
+              </a>
             </div>
           </div>
 

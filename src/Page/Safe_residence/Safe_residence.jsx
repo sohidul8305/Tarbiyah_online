@@ -12,7 +12,8 @@ const Safe_residence = () => {
     mobile: "",
     email: "",
     size: "",
-    paymentPlan: "",
+    propertyType: "", // নতুন ফিল্ড
+    paymentMethod: "", // নতুন ফিল্ড
     message: "",
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -262,17 +263,39 @@ const Safe_residence = () => {
       email: { en: "Email", bn: "ইমেইল" },
       emailPl: { en: "example@email.com", bn: "example@email.com" },
       size: { en: "Preferred Size *", bn: "পছন্দের সাইজ *" },
-      sizeSelect: { en: "Select", bn: "সিলেক্ট করুন" },
+      sizeSelect: {
+        en: "Type or Select size",
+        bn: "সাইজ টাইপ করুন বা সিলেক্ট করুন",
+      },
+      size3: { en: "3 Katha", bn: "৩ কাঠা" },
       size5: { en: "5 Katha", bn: "৫ কাঠা" },
       size10: { en: "10 Katha", bn: "১০ কাঠা" },
+      sizeShotangsho5: { en: "5 Shotangsho", bn: "৫ শতাংশ" },
+      sizeShotangsho10: { en: "10 Shotangsho", bn: "১০ শতাংশ" },
       sizeFlat1200: { en: "Flat (1200 sqft)", bn: "ফ্লাট (১২০০ বর্গফুট)" },
       sizeFlat1500: { en: "Flat (1500 sqft)", bn: "ফ্লাট (১৫০০ বর্গফুট)" },
-      plan: { en: "Payment Plan *", bn: "পেমেন্ট প্ল্যান *" },
-      planSelect: { en: "Select", bn: "সিলেক্ট করুন" },
-      planOneTime: { en: "One-time Payment", bn: "এককালীন পেমেন্ট" },
-      planInstallment: { en: "Installment Payment", bn: "কিস্তিতে পেমেন্ট" },
-      planLand: { en: "Land Only", bn: "শুধু জমি" },
-      planFlat: { en: "Flat Only", bn: "শুধু ফ্লাট" },
+
+      // নতুন দুটি ফিল্ডের লেবেল
+      propertyType: {
+        en: "What do you want to buy? *",
+        bn: "আপনি কী কিনতে চান? *",
+      },
+      propertyTypeSelect: {
+        en: "Type or Select property",
+        bn: "সম্পত্তি টাইপ করুন বা সিলেক্ট করুন",
+      },
+      propLand: { en: "Land Only", bn: "শুধু জমি" },
+      propFlat: { en: "Flat Only", bn: "শুধু ফ্লাট" },
+      propBoth: { en: "Flat & Land (Both)", bn: "ফ্লাট ও জমি (উভয়)" },
+
+      paymentMethod: { en: "Payment Method *", bn: "পেমেন্ট পদ্ধতি *" },
+      paymentMethodSelect: {
+        en: "Type or Select method",
+        bn: "পেমেন্ট পদ্ধতি টাইপ করুন বা সিলেক্ট করুন",
+      },
+      methodOneTime: { en: "One-time Payment", bn: "এককালীন পেমেন্ট" },
+      methodInstallment: { en: "Installment Payment", bn: "কিস্তিতে পেমেন্ট" },
+
       message: { en: "Your Message (Optional)", bn: "আপনার বার্তা (ঐচ্ছিক)" },
       messagePl: {
         en: "Write your question or comment here...",
@@ -733,45 +756,70 @@ const Safe_residence = () => {
                 <label className="block text-sm font-bold text-slate-700 mb-3">
                   {t(content.form.size)}
                 </label>
-                <select
+                <input
+                  type="text"
                   name="size"
                   required
+                  list="sizeOptions"
                   value={formData.size}
                   onChange={handleChange}
-                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#004d5a] focus:bg-white transition-all duration-300 text-lg appearance-none cursor-pointer"
-                >
-                  <option value="">{t(content.form.sizeSelect)}</option>
-                  <option value="5 katha">{t(content.form.size5)}</option>
-                  <option value="10 katha">{t(content.form.size10)}</option>
-                  <option value="flat 1200 sqft">
-                    {t(content.form.sizeFlat1200)}
-                  </option>
-                  <option value="flat 1500 sqft">
-                    {t(content.form.sizeFlat1500)}
-                  </option>
-                </select>
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#004d5a] focus:bg-white transition-all duration-300 text-lg"
+                  placeholder={t(content.form.sizeSelect)}
+                />
+                <datalist id="sizeOptions">
+                  <option value={t(content.form.size3)} />
+                  <option value={t(content.form.size5)} />
+                  <option value={t(content.form.size10)} />
+                  <option value={t(content.form.sizeShotangsho5)} />
+                  <option value={t(content.form.sizeShotangsho10)} />
+                  <option value={t(content.form.sizeFlat1200)} />
+                  <option value={t(content.form.sizeFlat1500)} />
+                </datalist>
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-bold text-slate-700 mb-3">
-                {t(content.form.plan)}
-              </label>
-              <select
-                name="paymentPlan"
-                required
-                value={formData.paymentPlan}
-                onChange={handleChange}
-                className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#004d5a] focus:bg-white transition-all duration-300 text-lg appearance-none cursor-pointer"
-              >
-                <option value="">{t(content.form.planSelect)}</option>
-                <option value="one-time">{t(content.form.planOneTime)}</option>
-                <option value="installment">
-                  {t(content.form.planInstallment)}
-                </option>
-                <option value="land">{t(content.form.planLand)}</option>
-                <option value="flat">{t(content.form.planFlat)}</option>
-              </select>
+            {/* নতুন দুটি আলাদা ফিল্ড */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-3">
+                  {t(content.form.propertyType)}
+                </label>
+                <input
+                  type="text"
+                  name="propertyType"
+                  required
+                  list="propertyTypeOptions"
+                  value={formData.propertyType}
+                  onChange={handleChange}
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#004d5a] focus:bg-white transition-all duration-300 text-lg"
+                  placeholder={t(content.form.propertyTypeSelect)}
+                />
+                <datalist id="propertyTypeOptions">
+                  <option value={t(content.form.propLand)} />
+                  <option value={t(content.form.propFlat)} />
+                  <option value={t(content.form.propBoth)} />
+                </datalist>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-3">
+                  {t(content.form.paymentMethod)}
+                </label>
+                <input
+                  type="text"
+                  name="paymentMethod"
+                  required
+                  list="paymentMethodOptions"
+                  value={formData.paymentMethod}
+                  onChange={handleChange}
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#004d5a] focus:bg-white transition-all duration-300 text-lg"
+                  placeholder={t(content.form.paymentMethodSelect)}
+                />
+                <datalist id="paymentMethodOptions">
+                  <option value={t(content.form.methodOneTime)} />
+                  <option value={t(content.form.methodInstallment)} />
+                </datalist>
+              </div>
             </div>
 
             <div>
