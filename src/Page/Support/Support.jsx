@@ -20,7 +20,7 @@ const Support = () => {
         "We are here to help you. Reach out to us through any of the channels below or send us a message.",
       helpCenter: "Help & Support Center",
       phoneLabel: "Phone / Hotline:",
-      phone: "+880 1234-567890",
+      phone: "+8801841-514545",
       emailLabel: "Email Support:",
       email: "info@tarbiyahonline.com",
       addressLabel: "Office Address:",

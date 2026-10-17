@@ -12,8 +12,9 @@ const Safe_residence = () => {
     mobile: "",
     email: "",
     size: "",
-    propertyType: "", // নতুন ফিল্ড
-    paymentMethod: "", // নতুন ফিল্ড
+    propertyType: "",
+    paymentMethod: "",
+    budget: "", // নতুন বাজেট ফিল্ড
     message: "",
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -275,7 +276,6 @@ const Safe_residence = () => {
       sizeFlat1200: { en: "Flat (1200 sqft)", bn: "ফ্লাট (১২০০ বর্গফুট)" },
       sizeFlat1500: { en: "Flat (1500 sqft)", bn: "ফ্লাট (১৫০০ বর্গফুট)" },
 
-      // নতুন দুটি ফিল্ডের লেবেল
       propertyType: {
         en: "What do you want to buy? *",
         bn: "আপনি কী কিনতে চান? *",
@@ -295,6 +295,10 @@ const Safe_residence = () => {
       },
       methodOneTime: { en: "One-time Payment", bn: "এককালীন পেমেন্ট" },
       methodInstallment: { en: "Installment Payment", bn: "কিস্তিতে পেমেন্ট" },
+
+      // নতুন বাজেট ফিল্ডের ট্রান্সলেশন
+      budget: { en: "Your Budget (BDT) *", bn: "আপনার বাজেট (টাকা) *" },
+      budgetPl: { en: "e.g., 50,00,000", bn: "উদাহরণ: ৫০,০০,০০০" },
 
       message: { en: "Your Message (Optional)", bn: "আপনার বার্তা (ঐচ্ছিক)" },
       messagePl: {
@@ -778,8 +782,8 @@ const Safe_residence = () => {
               </div>
             </div>
 
-            {/* নতুন দুটি আলাদা ফিল্ড */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Property Type, Payment Method এবং Budget এর জন্য ৩ কলামের গ্রিড */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-3">
                   {t(content.form.propertyType)}
@@ -819,6 +823,22 @@ const Safe_residence = () => {
                   <option value={t(content.form.methodOneTime)} />
                   <option value={t(content.form.methodInstallment)} />
                 </datalist>
+              </div>
+
+              {/* নতুন বাজেট ফিল্ড */}
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-3">
+                  {t(content.form.budget)}
+                </label>
+                <input
+                  type="text"
+                  name="budget"
+                  required
+                  value={formData.budget}
+                  onChange={handleChange}
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#004d5a] focus:bg-white transition-all duration-300 text-lg"
+                  placeholder={t(content.form.budgetPl)}
+                />
               </div>
             </div>
 
