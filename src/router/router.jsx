@@ -38,7 +38,6 @@ import StudentLogin from "../Page/Login/StudentLogin";
 
 // ===== ড্যাশবোর্ড পেজ =====
 import StudentDashboard from "../Page/Student/StudentDashboard";
-import TeacherDashboard from "../Page/Dashboard/TeacherDashboard";
 // import AdminDashboard from "../Page/Dashboard/AdminDashboard";
 import AdminDashboard from "../Page/Admin/AdminDashboard";
 
@@ -180,6 +179,9 @@ import PaymentStatus from "../Page/PaymentStatus";
 import StudentAttendance from "../Page/Student/StudentAttendance";
 import Safe_residence from "../Page/Safe_residence/Safe_residence";
 import Tarbiyah_online from "../Page/Tarbiyah_online/Tarbiyah_online";
+import Teacher_routine from "../Page/Teacher_routine/Teacher_routine";
+import Teacher_payment from "../Page/Teacher_payment/Teacher_payment";
+import TeacherDashboard from "../Page/Dashboard/TeacherDashboard";
 
 // Course_kids_tajweed_enrollbnagla.jsx;
 //
@@ -439,7 +441,6 @@ export const router = createBrowserRouter([
   { path: "student-acedemic", element: <Student_acedemic /> },
   { path: "online-payment", element: <Online_payment /> },
   { path: "due-payment", element: <Due_payment /> },
-  { path: "teacher-profile", element: <Teacher_profile /> },
   { path: "/teacher-courses", element: <Teacher_courses /> },
   { path: "/teacher-classes", element: <Teacher_classes /> },
   { path: "/teacher-homework", element: <Teacher_homework /> },
@@ -541,6 +542,29 @@ export const router = createBrowserRouter([
   {
     path: "/admin-notification",
     element: <Admin_notification />,
+  },
+
+  // ... Routes এর ভেতরে
+  {
+    path: "/teacher-login",
+    element: <TeacherLogin />,
+  },
+  // ✅ এই ৪টি রাউটের জন্যই শুধু TeacherDashboard থাকবে
+  {
+    path: "/teacher-dashboard",
+    element: <TeacherDashboard />,
+  },
+  {
+    path: "/teacher-profile",
+    element: <TeacherDashboard />,
+  },
+  {
+    path: "/teacher-routine",
+    element: <TeacherDashboard />,
+  },
+  {
+    path: "/teacher-payment",
+    element: <TeacherDashboard />,
   },
 
   // student dashboard routes

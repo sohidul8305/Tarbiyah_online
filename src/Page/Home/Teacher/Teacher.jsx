@@ -1,9 +1,10 @@
+// src/Page/Teacher/TeacherLogin.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../Provider/AuthProvider";
 import Swal from "sweetalert2";
-import Footer from "../../../Components/Navbar/Footer/Footer";
+import { useAuth } from "../../../Provider/AuthProvider";
 import Navbar from "../../../Components/Navbar/Navbar";
+import Footer from "../../../Components/Navbar/Footer/Footer";
 
 const TeacherLogin = () => {
   const auth = useAuth() || {};
@@ -23,26 +24,41 @@ const TeacherLogin = () => {
     setLoading(true);
     setError("");
 
-    console.log("📝 Attempting Teacher login with:", email);
+    const cleanEmail = email.trim();
 
     try {
-      await signInUser(email.trim(), password.trim());
+      await signInUser(cleanEmail, password.trim());
 
-      console.log("✅ Teacher Login successful!");
+      // ✅ localStorage flags সেট করুন
+      localStorage.setItem("isTeacherLoggedIn", "true");
+      localStorage.setItem("teacherEmail", cleanEmail);
+
+      // teacherInfo না থাকলে minimal একটা তৈরি করুন
+      const existingInfo = localStorage.getItem("teacherInfo");
+      if (!existingInfo) {
+        localStorage.setItem(
+          "teacherInfo",
+          JSON.stringify({
+            name: auth.user?.displayName || cleanEmail.split("@")[0],
+            email: cleanEmail,
+            designation: "Teacher",
+            department: "",
+          }),
+        );
+      }
 
       await Swal.fire({
         icon: "success",
         title: "Login Successful! 🎉",
         text: "Welcome Teacher!",
-        timer: 1500,
+        timer: 1200,
         showConfirmButton: false,
       });
 
-      navigate("/teacher-dashboard");
+      // ✅ Dashboard-এ redirect
+      navigate("/teacher-dashboard", { replace: true });
     } catch (err) {
       console.error("❌ Teacher Login error:", err);
-      console.error("❌ Error code:", err.code);
-      console.error("❌ Error message:", err.message);
 
       let errorMessage = "Invalid email or password. Please try again.";
 
@@ -84,7 +100,7 @@ const TeacherLogin = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
-      <Navbar></Navbar>
+      <Navbar />
       <div className="flex-grow flex items-center justify-center p-4 sm:p-6 lg:p-8">
         <div className="bg-white/85 backdrop-blur-sm p-6 sm:p-8 md:p-12 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
           <div className="text-center mb-8">
@@ -248,7 +264,7 @@ const TeacherLogin = () => {
           </form>
         </div>
       </div>
-      <Footer></Footer>
+      <Footer />
     </div>
   );
 };

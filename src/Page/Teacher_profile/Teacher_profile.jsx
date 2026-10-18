@@ -1,6 +1,5 @@
-// src/Page/Teacher/TeacherProfile.jsx
+// src/Page/Teacher_profile/Teacher_profile.jsx
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import {
   FaChalkboardTeacher,
   FaBookOpen,
@@ -9,10 +8,6 @@ import {
   FaGraduationCap,
   FaAward,
   FaCheckCircle,
-  FaGlobe,
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
   FaEdit,
   FaUserGraduate,
   FaCalendarAlt,
@@ -20,208 +15,202 @@ import {
   FaSave,
   FaTimes,
   FaCamera,
-  FaUser,
-  FaBook,
-  FaTasks,
-  FaBell,
-  FaUsers,
-  FaCalendarCheck,
-  FaMoneyBillWave,
-  FaSignOutAlt,
-  FaPlay,
-  FaPen,
   FaSpinner,
-  FaBars,
+  FaPlus,
 } from "react-icons/fa";
-import {
-  MdDashboard,
-  MdAssignment,
-  MdGrade,
-  MdQuiz,
-  MdVerified,
-} from "react-icons/md";
+import { MdVerified } from "react-icons/md";
 import Swal from "sweetalert2";
 import { useAuth } from "../../Provider/AuthProvider";
-import axios from "axios";
 
-const API_URL = "http://api.tarbiyahonline.com";
+const API_BASE =
+  (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
+  (typeof window !== "undefined" && window.location.hostname === "localhost"
+    ? "http://localhost:5000"
+    : "https://api.tarbiyahonline.com");
 
 const TeacherProfile = () => {
-  const { user, logOut } = useAuth();
-  const navigate = useNavigate();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeMenu, setActiveMenu] = useState("profile");
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // ✅ ডিফল্ট ইমেইল (হার্ডকোড)
-  const DEFAULT_EMAIL = "teacher@example.com";
+  const teacherEmail =
+    user?.email ||
+    (typeof window !== "undefined" && localStorage.getItem("teacherEmail")) ||
+    "";
 
-  const [teacher, setTeacher] = useState({
-    name: "",
+  // ✅ খালি প্রোফাইল টেমপ্লেট (ডামি ডেটা সরানো হয়েছে)
+  const buildEmptyProfile = () => ({
+    name: user?.displayName || "",
     title: "",
-    email: "",
+    email: teacherEmail || "",
     phone: "",
     bio: "",
     joinDate: "",
-    totalStudents: "",
-    totalCourses: "",
-    rating: "",
+    totalStudents: "0",
+    totalCourses: "0",
+    rating: "0",
+    photo: "",
+    department: "",
+    address: "",
     education: [],
     expertise: [],
     courses: [],
     achievements: [],
-    photo: "",
   });
 
-  const [editData, setEditData] = useState({ ...teacher });
+  const [teacher, setTeacher] = useState(buildEmptyProfile);
+  const [editData, setEditData] = useState(buildEmptyProfile);
 
-  // ✅ Load profile - email না থাকলেও কাজ করবে
+  const mapBackendToLocal = (profile, defaults) => ({
+    name: profile.name || defaults.name,
+    title: profile.designation || profile.title || defaults.title,
+    email: profile.email || defaults.email,
+    phone: profile.phone || defaults.phone,
+    bio: profile.bio || defaults.bio,
+    joinDate: profile.joinDate || defaults.joinDate,
+    photo: profile.profileImage || profile.photo || "",
+    department: profile.department || "",
+    address: profile.address || "",
+    totalStudents: profile.totalStudents || "0",
+    totalCourses: profile.totalCourses || "0",
+    rating: profile.rating || "0",
+    education: Array.isArray(profile.education) ? profile.education : [],
+    expertise: Array.isArray(profile.expertise) ? profile.expertise : [],
+    courses: Array.isArray(profile.courses) ? profile.courses : [],
+    achievements: Array.isArray(profile.achievements)
+      ? profile.achievements
+      : [],
+  });
+
+  const mapLocalToBackend = (data) => ({
+    email: data.email,
+    name: data.name,
+    phone: data.phone,
+    designation: data.title,
+    department: data.department || "",
+    joinDate: data.joinDate,
+    bio: data.bio,
+    address: data.address || "",
+    profileImage: data.photo || "",
+    totalStudents: data.totalStudents,
+    totalCourses: data.totalCourses,
+    rating: data.rating,
+    education: data.education,
+    expertise: data.expertise,
+    courses: data.courses,
+    achievements: data.achievements,
+  });
+
   useEffect(() => {
-    const savedTeacher = localStorage.getItem("teacherInfo");
-    if (savedTeacher) {
-      try {
-        const teacherData = JSON.parse(savedTeacher);
-        console.log("📥 Loaded from localStorage:", teacherData);
-        setTeacher(teacherData);
-        setEditData(teacherData);
-        return;
-      } catch (error) {
-        console.error("❌ Error parsing teacherInfo:", error);
+    const loadProfile = async () => {
+      setIsLoading(true);
+      const defaults = buildEmptyProfile();
+
+      if (teacherEmail) {
+        try {
+          const res = await fetch(
+            `${API_BASE}/api/teacher-profile/${encodeURIComponent(teacherEmail)}`,
+          );
+
+          if (res.status === 404) {
+            // ✅ নতুন টিচার: কোনো প্রোফাইল নেই, তাই সরাসরি এডিট মোড অন করব
+            setTeacher(defaults);
+            setEditData(defaults);
+            setIsEditing(true);
+            setIsLoading(false);
+            return;
+          }
+
+          const data = await res.json();
+          if (data.success && data.profile) {
+            const merged = mapBackendToLocal(data.profile, defaults);
+            setTeacher(merged);
+            setEditData(merged);
+            localStorage.setItem("teacherInfo", JSON.stringify(merged));
+            setIsLoading(false);
+            return;
+          }
+        } catch (err) {
+          console.error("⚠️ Backend profile fetch failed:", err);
+        }
       }
+
+      // Fallback (যদি সার্ভার ডাউন থাকে)
+      const saved = localStorage.getItem("teacherInfo");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setTeacher(parsed);
+          setEditData(parsed);
+          setIsLoading(false);
+          return;
+        } catch (e) {}
+      }
+
+      setTeacher(defaults);
+      setEditData(defaults);
+      setIsEditing(true); // ডেটা না পেলে এডিট মোড অন
+      setIsLoading(false);
+    };
+
+    loadProfile();
+  }, [teacherEmail]);
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    const email = editData.email || teacherEmail;
+
+    if (!email) {
+      Swal.fire({
+        icon: "error",
+        title: "Email missing",
+        text: "Please login again.",
+      });
+      setIsSaving(false);
+      return;
     }
 
-    // ❌ localStorage এ না থাকলে ডিফল্ট ডেটা দেখান
-    setDefaultProfile();
-  }, []);
+    if (!editData.name.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Name is required",
+        text: "Please enter your name to create the profile.",
+      });
+      setIsSaving(false);
+      return;
+    }
 
-  // ✅ ডিফল্ট প্রোফাইল
-  const setDefaultProfile = () => {
-    const defaultData = {
-      name: "শায়খ ড. মাওলানা মুহাম্মদ আব্দুল্লাহ",
-      title: "প্রধান উস্তাদ ও বিভাগীয় প্রধান - তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
-      email: DEFAULT_EMAIL,
-      phone: "+৮৮০ ১৭০০ ১২৩৪৫৬",
-      bio: "আল-আজহার বিশ্ববিদ্যালয় থেকে হাদিস ও শরিয়াহর ওপর উচ্চতর ডিগ্রি অর্জন করেছেন। দীর্ঘ ১৫ বছরেরও বেশি সময় ধরে কওমি মাদরাসা এবং অনলাইন প্ল্যাটফর্মে ইসলামিক স্টাডিজ ও আরবি ভাষা শিক্ষাদানে নিয়োজিত আছেন।",
-      joinDate: "জানুয়ারি ২০২০",
-      totalStudents: "১৫০+",
-      totalCourses: "৮টি",
-      rating: "৪.৯",
-      photo: "",
-      education: [
-        {
-          degree: "পিএইচডি (Hadith & Islamic Studies)",
-          institution: "আল-আজহার বিশ্ববিদ্যালয়, মিসর",
-          year: "২০১৮",
-        },
-        {
-          degree: "মাস্টার্স (Tafseer & Quranic Sciences)",
-          institution: "ইসলামী বিশ্ববিদ্যালয়, কুষ্টিয়া",
-          year: "২০১২",
-        },
-        {
-          degree: "দাওরায়ে হাদিস (তাকমীল)",
-          institution: "জামিয়া আরামিয়া দারুল উলুম",
-          year: "২০০৯",
-        },
-      ],
-      expertise: [
-        "হাদিস শাস্ত্র",
-        "উসূলে ফিকহ",
-        "আরবি ব্যাকরণ (নাহু-সরফ)",
-        "তাফসিরুল কুরআন",
-      ],
-      courses: [
-        {
-          title: "তারবিয়াহ আলেমিয়াহ প্রোগ্রাম",
-          students: "৪৫ জন",
-          duration: "৪ বছর",
-          icon: "📚",
-        },
-        {
-          title: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
-          students: "৬০ জন",
-          duration: "১ বছর",
-          icon: "🎓",
-        },
-        {
-          title: "কুরআন ফর এল্ডারস",
-          students: "২৫ জন",
-          duration: "৬ মাস",
-          icon: "📖",
-        },
-      ],
-      achievements: [
-        "বেস্ট অনলাইন শিক্ষক পুরস্কার ২০২৩",
-        "হাদিস গবেষণায় স্বর্ণপদক - ২০১৮",
-        "শিক্ষাক্ষেত্রে অবদানের জন্য সম্মাননা - ২০২১",
-      ],
-    };
-    setTeacher(defaultData);
-    setEditData(defaultData);
-    localStorage.setItem("teacherInfo", JSON.stringify(defaultData));
-  };
+    const mergedLocal = { ...editData, email };
 
-  // ✅ Save Profile - সরাসরি update হবে
-  const handleSaveProfile = async () => {
     try {
-      setIsSaving(true);
+      const res = await fetch(`${API_BASE}/api/teacher-profile/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(mapLocalToBackend(mergedLocal)),
+      });
+      const data = await res.json();
 
-      // ✅ Email verification ছাড়া সরাসরি update
-      const email = DEFAULT_EMAIL;
-
-      console.log("📤 Saving profile for:", email);
-      console.log("📤 Data:", editData);
-
-      // ✅ সরাসরি API call
-      const response = await axios.put(
-        `${API_URL}/api/teacher/profile/${encodeURIComponent(email)}`,
-        editData,
-      );
-
-      console.log("📥 Response:", response.data);
-
-      if (response.data.success) {
-        setTeacher(editData);
+      if (data.success) {
+        setTeacher(mergedLocal);
+        setEditData(mergedLocal);
+        localStorage.setItem("teacherInfo", JSON.stringify(mergedLocal));
         setIsEditing(false);
-        localStorage.setItem("teacherInfo", JSON.stringify(editData));
-
         Swal.fire({
           icon: "success",
-          title: "✅ প্রোফাইল আপডেট হয়েছে!",
-          text: "আপনার প্রোফাইল সফলভাবে আপডেট করা হয়েছে।",
-          timer: 2000,
+          title: "✅ প্রোফাইল তৈরি/আপডেট হয়েছে!",
+          timer: 1500,
           showConfirmButton: false,
         });
       } else {
-        // ❌ API fail করলেও localStorage এ সেভ করুন
-        setTeacher(editData);
-        setIsEditing(false);
-        localStorage.setItem("teacherInfo", JSON.stringify(editData));
-
-        Swal.fire({
-          icon: "success",
-          title: "✅ প্রোফাইল আপডেট হয়েছে!",
-          text: "আপনার প্রোফাইল লোকালি আপডেট করা হয়েছে।",
-          timer: 2000,
-          showConfirmButton: false,
-        });
+        throw new Error(data.message || "Failed to save");
       }
-    } catch (error) {
-      console.error("❌ Error saving profile:", error);
-
-      // ❌ Error আসলেও localStorage এ সেভ করুন
-      setTeacher(editData);
-      setIsEditing(false);
-      localStorage.setItem("teacherInfo", JSON.stringify(editData));
-
+    } catch (err) {
+      console.error("❌ Backend save error:", err);
       Swal.fire({
-        icon: "success",
-        title: "✅ প্রোফাইল আপডেট হয়েছে!",
-        text: "আপনার প্রোফাইল সফলভাবে আপডেট করা হয়েছে।",
-        timer: 2000,
-        showConfirmButton: false,
+        icon: "error",
+        title: "Error",
+        text: "Failed to save to server. Check your connection.",
       });
     } finally {
       setIsSaving(false);
@@ -229,15 +218,24 @@ const TeacherProfile = () => {
   };
 
   const handleEditToggle = () => {
-    if (isEditing) {
-      handleSaveProfile();
-    } else {
+    if (isEditing) handleSaveProfile();
+    else {
       setEditData({ ...teacher });
       setIsEditing(true);
     }
   };
 
   const handleCancelEdit = () => {
+    // যদি প্রোফাইলে নাম না থাকে, তার মানে সে নতুন। তাকে ক্যানসেল করতে দিলে খালি পেইজ দেখাবে।
+    if (!teacher.name) {
+      Swal.fire({
+        icon: "info",
+        title: "Profile is empty",
+        text: "Please create your profile to continue.",
+        confirmButtonColor: "#004d4d",
+      });
+      return;
+    }
     setIsEditing(false);
     setEditData({ ...teacher });
   };
@@ -247,12 +245,12 @@ const TeacherProfile = () => {
     setEditData({ ...editData, [name]: value });
   };
 
+  // --- Education Handlers ---
   const handleEducationChange = (index, field, value) => {
-    const newEducation = [...editData.education];
-    newEducation[index] = { ...newEducation[index], [field]: value };
-    setEditData({ ...editData, education: newEducation });
+    const next = [...editData.education];
+    next[index] = { ...next[index], [field]: value };
+    setEditData({ ...editData, education: next });
   };
-
   const addEducation = () => {
     setEditData({
       ...editData,
@@ -262,827 +260,651 @@ const TeacherProfile = () => {
       ],
     });
   };
-
   const removeEducation = (index) => {
-    const newEducation = editData.education.filter((_, i) => i !== index);
-    setEditData({ ...editData, education: newEducation });
-  };
-
-  const handleExpertiseChange = (index, value) => {
-    const newExpertise = [...editData.expertise];
-    newExpertise[index] = value;
-    setEditData({ ...editData, expertise: newExpertise });
-  };
-
-  const addExpertise = () => {
     setEditData({
       ...editData,
-      expertise: [...editData.expertise, ""],
+      education: editData.education.filter((_, i) => i !== index),
     });
   };
 
+  // --- Expertise Handlers ---
+  const handleExpertiseChange = (index, value) => {
+    const next = [...editData.expertise];
+    next[index] = value;
+    setEditData({ ...editData, expertise: next });
+  };
+  const addExpertise = () => {
+    setEditData({ ...editData, expertise: [...editData.expertise, ""] });
+  };
   const removeExpertise = (index) => {
-    const newExpertise = editData.expertise.filter((_, i) => i !== index);
-    setEditData({ ...editData, expertise: newExpertise });
+    setEditData({
+      ...editData,
+      expertise: editData.expertise.filter((_, i) => i !== index),
+    });
   };
 
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      localStorage.removeItem("isTeacherLoggedIn");
-      localStorage.removeItem("teacherInfo");
-      localStorage.removeItem("teacherEmail");
-
-      await Swal.fire({
-        icon: "success",
-        title: "Logged Out Successfully",
-        timer: 1200,
-        showConfirmButton: false,
-      });
-      navigate("/teacher-login");
-    } catch (err) {
-      console.error("Logout error:", err);
-      Swal.fire({
-        icon: "error",
-        title: "Logout Failed",
-        text: "Please try again",
-      });
-    }
+  // --- Achievements Handlers ---
+  const handleAchievementChange = (index, value) => {
+    const next = [...editData.achievements];
+    next[index] = value;
+    setEditData({ ...editData, achievements: next });
+  };
+  const addAchievement = () => {
+    setEditData({ ...editData, achievements: [...editData.achievements, ""] });
+  };
+  const removeAchievement = (index) => {
+    setEditData({
+      ...editData,
+      achievements: editData.achievements.filter((_, i) => i !== index),
+    });
   };
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+  // --- Courses Handlers ---
+  const handleCourseChange = (index, field, value) => {
+    const next = [...editData.courses];
+    next[index] = { ...next[index], [field]: value };
+    setEditData({ ...editData, courses: next });
+  };
+  const addCourse = () => {
+    setEditData({
+      ...editData,
+      courses: [
+        ...editData.courses,
+        { title: "", students: "", duration: "", icon: "📚" },
+      ],
+    });
+  };
+  const removeCourse = (index) => {
+    setEditData({
+      ...editData,
+      courses: editData.courses.filter((_, i) => i !== index),
+    });
   };
 
-  const menuItems = [
-    {
-      id: "dashboard",
-      path: "/teacher-dashboard",
-      icon: <MdDashboard className="text-xl" />,
-      label: "Dashboard",
-    },
-    {
-      id: "profile",
-      path: "/teacher-profile",
-      icon: <FaUser className="text-xl" />,
-      label: "Profile",
-    },
-    {
-      id: "courses",
-      path: "/teacher-courses",
-      icon: <FaBook className="text-xl" />,
-      label: "My Courses",
-    },
-    {
-      id: "classes",
-      path: "/teacher-classes",
-      icon: <FaChalkboardTeacher className="text-xl" />,
-      label: "My Classes",
-    },
-    {
-      id: "homework",
-      path: "/teacher-homework",
-      icon: <FaTasks className="text-xl" />,
-      label: "Homework",
-    },
-    {
-      id: "notifications",
-      path: "/teacher-notifications",
-      icon: <FaBell className="text-xl" />,
-      label: "Notification",
-    },
-    {
-      id: "students",
-      path: "/teacher-students",
-      icon: <FaUsers className="text-xl" />,
-      label: "Student Progress",
-    },
-    {
-      id: "results",
-      path: "/teacher-results",
-      icon: <FaAward className="text-xl" />,
-      label: "Exam Result",
-    },
-    {
-      id: "leave",
-      path: "/teacher-leave",
-      icon: <FaCalendarCheck className="text-xl" />,
-      label: "Leave KP",
-    },
-    {
-      id: "salary",
-      path: "/teacher-salary",
-      icon: <FaMoneyBillWave className="text-xl" />,
-      label: "Salary Overview",
-    },
-    {
-      id: "videos",
-      path: "/teacher-videos",
-      icon: <FaPlay className="text-xl" />,
-      label: "Video Upload",
-    },
-    {
-      id: "assignments",
-      path: "/teacher-assignments",
-      icon: <MdAssignment className="text-xl" />,
-      label: "Assignments",
-    },
-    {
-      id: "quizzes",
-      path: "/teacher-quizzes",
-      icon: <MdQuiz className="text-xl" />,
-      label: "Quizzes",
-    },
-    {
-      id: "short-questions",
-      path: "/teacher-short-questions",
-      icon: <FaPen className="text-xl" />,
-      label: "Short Questions",
-    },
-  ];
+  const handlePhotoChange = () => {
+    Swal.fire({
+      title: "প্রোফাইল ছবি আপডেট",
+      input: "url",
+      inputLabel: "ছবির URL লিখুন",
+      inputPlaceholder: "https://example.com/photo.jpg",
+      showCancelButton: true,
+      confirmButtonColor: "#004d4d",
+      confirmButtonText: "সেট করুন",
+      cancelButtonText: "বাতিল",
+      inputValidator: (url) => {
+        if (!url) return "URL প্রয়োজন!";
+      },
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        setEditData({ ...editData, photo: result.value });
+      }
+    });
+  };
 
   const renderStars = (rating) => {
-    const stars = [];
-    const numRating = parseFloat(rating) || 0;
-    const fullStars = Math.floor(numRating);
-    const hasHalfStar = numRating % 1 >= 0.5;
-
-    for (let i = 1; i <= 5; i++) {
-      if (i <= fullStars) {
-        stars.push(
-          <span key={i} className="text-yellow-400">
-            ★
-          </span>,
-        );
-      } else if (i === fullStars + 1 && hasHalfStar) {
-        stars.push(
-          <span key={i} className="text-yellow-400">
-            ☆
-          </span>,
-        );
-      } else {
-        stars.push(
-          <span key={i} className="text-gray-300">
-            ★
-          </span>,
-        );
-      }
-    }
-    return stars;
+    const num = parseFloat(rating) || 0;
+    return [1, 2, 3, 4, 5].map((i) => (
+      <span
+        key={i}
+        className={i <= Math.round(num) ? "text-yellow-400" : "text-gray-300"}
+      >
+        ★
+      </span>
+    ));
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <FaSpinner className="text-4xl text-teal-600 animate-spin mx-auto" />
-          <p className="mt-4 text-gray-600">প্রোফাইল লোড হচ্ছে...</p>
-        </div>
+      <div className="bg-white rounded-xl p-8 text-center text-gray-500 border border-gray-200 mt-6">
+        <FaSpinner className="text-4xl text-teal-600 animate-spin mx-auto" />
+        <p className="mt-4 text-gray-600">প্রোফাইল লোড হচ্ছে...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div className="flex flex-1 overflow-hidden relative">
-        {/* Mobile Header */}
-        <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center">
-          <h1 className="text-sm font-bold text-gray-800">Teacher Profile</h1>
+    <div className="space-y-6 pb-6">
+      {/* Header Banner */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] h-32 md:h-40 relative">
           <button
-            onClick={toggleSidebar}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            onClick={handleEditToggle}
+            disabled={isSaving}
+            className={`absolute top-4 right-4 ${
+              isEditing
+                ? "bg-green-500 hover:bg-green-600"
+                : "bg-white/20 hover:bg-white/30"
+            } text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all backdrop-blur-sm ${
+              isSaving ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            {isSidebarOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+            {isSaving ? (
+              <FaSpinner className="animate-spin" />
+            ) : isEditing ? (
+              <FaSave />
+            ) : (
+              <FaEdit />
+            )}
+            {isSaving
+              ? "সেভ হচ্ছে..."
+              : isEditing
+                ? "সেভ করুন"
+                : "এডিট প্রোফাইল"}
           </button>
+
+          {isEditing && !isSaving && teacher.name && (
+            <button
+              onClick={handleCancelEdit}
+              className="absolute top-4 right-40 bg-red-500/80 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all backdrop-blur-sm"
+            >
+              <FaTimes /> বাতিল
+            </button>
+          )}
         </div>
 
-        {/* Sidebar */}
-        <aside
-          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-all duration-300 ease-in-out h-full overflow-y-auto flex-shrink-0 ${isSidebarOpen ? "left-0" : "-left-72 md:left-0"}`}
-        >
-          <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <span className="text-xl font-bold">
-                  {teacher.name?.charAt(0) || "T"}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm truncate">{teacher.name}</p>
-                <p className="text-xs opacity-80 truncate">
-                  {teacher.title?.split("-")[0] || "Teacher"}
-                </p>
-              </div>
+        <div className="px-6 md:px-8 pb-6 relative flex flex-col md:flex-row items-center md:items-end gap-6 -mt-16 md:-mt-12">
+          <div className="relative">
+            <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl bg-white p-1.5 shadow-lg border-4 border-white flex items-center justify-center text-6xl bg-teal-50">
+              {teacher.photo ? (
+                <img
+                  src={teacher.photo}
+                  alt={teacher.name || "Teacher"}
+                  className="w-full h-full rounded-xl object-cover"
+                />
+              ) : (
+                <span>👨‍🏫</span>
+              )}
             </div>
-          </div>
-
-          <nav className="p-3 space-y-1">
-            {menuItems.map((item) => (
-              <Link
-                key={item.id}
-                to={item.path}
-                onClick={() => {
-                  setActiveMenu(item.id);
-                  setIsSidebarOpen(false);
-                }}
-              >
-                <button
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${activeMenu === item.id ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
-                >
-                  <span className="text-gray-600">{item.icon}</span>
-                  <span>{item.label}</span>
-                </button>
-              </Link>
-            ))}
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
-            >
-              <FaSignOutAlt className="text-xl" />
-              <span className="text-sm font-medium">Logout</span>
-            </button>
-          </nav>
-          <div className="p-4 text-xs text-gray-400 border-t border-gray-100">
-            <p>Tarbiyah Online Madrasha</p>
-          </div>
-        </aside>
-
-        {isSidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-40 md:hidden"
-            onClick={() => setIsSidebarOpen(false)}
-          />
-        )}
-
-        {/* Main Content */}
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto w-full">
-          {/* Top Bar */}
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div>
-              <h1 className="text-lg font-bold text-gray-800">
-                Teacher Profile
-              </h1>
-              <p className="text-sm text-gray-500">
-                View and manage your profile information
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-gray-700 hidden sm:block">
-                {teacher.name}
-              </span>
+            {isEditing && (
               <button
-                onClick={handleLogout}
-                className="bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-lg font-bold transition-all shadow-sm"
+                onClick={handlePhotoChange}
+                className="absolute bottom-0 right-0 bg-teal-600 text-white p-1.5 rounded-full border-2 border-white hover:bg-teal-700 transition-all"
+                title="Change Photo"
               >
-                Logout
+                <FaCamera className="text-xs" />
               </button>
-            </div>
+            )}
           </div>
 
-          {/* Profile Content */}
-          <div className="space-y-6 pb-6">
-            {/* Profile Header */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] h-32 md:h-40 relative">
-                <button
-                  onClick={handleEditToggle}
-                  disabled={isSaving}
-                  className={`absolute top-4 right-4 ${isEditing ? "bg-green-500 hover:bg-green-600" : "bg-white/20 hover:bg-white/30"} text-white px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all backdrop-blur-sm ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
-                >
-                  {isSaving ? (
-                    <FaSpinner className="animate-spin" />
-                  ) : isEditing ? (
-                    <FaSave />
-                  ) : (
-                    <FaEdit />
-                  )}
-                  {isSaving
-                    ? "সেভ হচ্ছে..."
-                    : isEditing
-                      ? "সেভ করুন"
-                      : "এডিট প্রোফাইল"}
-                </button>
-                {isEditing && !isSaving && (
-                  <button
-                    onClick={handleCancelEdit}
-                    className="absolute top-4 right-36 bg-red-500/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all backdrop-blur-sm"
-                  >
-                    <FaTimes /> বাতিল
-                  </button>
+          <div className="text-center md:text-left flex-grow">
+            {isEditing ? (
+              <input
+                type="text"
+                name="name"
+                placeholder="আপনার নাম লিখুন *"
+                value={editData.name || ""}
+                onChange={handleInputChange}
+                className="text-2xl md:text-3xl font-bold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1 w-full max-w-md focus:ring-2 focus:ring-teal-500"
+              />
+            ) : (
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+                  {teacher.name || "New Teacher"}
+                </h1>
+                {teacher.name && (
+                  <MdVerified className="text-blue-500 text-xl" />
                 )}
               </div>
+            )}
 
-              <div className="px-6 md:px-8 pb-6 relative flex flex-col md:flex-row items-center md:items-end gap-6 -mt-16 md:-mt-12">
-                <div className="relative">
-                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl bg-white p-1.5 shadow-lg border-4 border-white flex items-center justify-center text-6xl bg-teal-50">
-                    {teacher.photo ? (
-                      <img
-                        src={teacher.photo}
-                        alt={teacher.name}
-                        className="w-full h-full rounded-xl object-cover"
-                      />
-                    ) : (
-                      <span>👨‍🏫</span>
-                    )}
+            {isEditing ? (
+              <input
+                type="text"
+                name="title"
+                placeholder="আপনার পদবি / ডেজিগনেশন লিখুন (যেমন: সিনিয়র শিক্ষক)"
+                value={editData.title || ""}
+                onChange={handleInputChange}
+                className="text-[#004d4d] font-medium text-sm md:text-base bg-gray-50 border border-gray-300 rounded-lg px-3 py-1 w-full max-w-md mt-1 focus:ring-2 focus:ring-teal-500"
+              />
+            ) : (
+              <p className="text-[#004d4d] font-medium text-sm md:text-base mt-1">
+                {teacher.title || "শিক্ষক"}
+              </p>
+            )}
+
+            <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-3 text-sm text-gray-500">
+              {isEditing ? (
+                <>
+                  <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full border border-gray-300">
+                    <FaEnvelope className="text-teal-600" />
+                    <input
+                      type="email"
+                      name="email"
+                      value={editData.email || ""}
+                      readOnly
+                      className="bg-transparent border-none text-sm focus:outline-none w-48 text-gray-500 cursor-not-allowed"
+                    />
                   </div>
-                  {isEditing && (
-                    <button
-                      onClick={() => {
-                        Swal.fire({
-                          title: "প্রোফাইল ছবি আপডেট",
-                          input: "url",
-                          inputLabel: "ছবির URL লিখুন",
-                          inputPlaceholder: "https://example.com/photo.jpg",
-                          showCancelButton: true,
-                          confirmButtonColor: "#004d4d",
-                          confirmButtonText: "আপডেট করুন",
-                          cancelButtonText: "বাতিল",
-                          preConfirm: async (url) => {
-                            if (!url) {
-                              Swal.showValidationMessage("URL প্রয়োজন!");
-                              return;
-                            }
-                            setEditData({ ...editData, photo: url });
-                            setTeacher({ ...teacher, photo: url });
-                            localStorage.setItem(
-                              "teacherInfo",
-                              JSON.stringify({ ...teacher, photo: url }),
-                            );
-                            Swal.fire({
-                              icon: "success",
-                              title: "ছবি আপডেট হয়েছে!",
-                              timer: 1500,
-                              showConfirmButton: false,
-                            });
-                          },
-                        });
-                      }}
-                      className="absolute bottom-0 right-0 bg-teal-600 text-white p-1.5 rounded-full border-2 border-white hover:bg-teal-700 transition-all"
-                    >
-                      <FaCamera className="text-xs" />
-                    </button>
-                  )}
-                </div>
-
-                <div className="text-center md:text-left flex-grow">
-                  {isEditing ? (
+                  <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full border border-gray-300">
+                    <FaPhoneAlt className="text-teal-600" />
                     <input
                       type="text"
-                      name="name"
-                      value={editData.name || ""}
+                      name="phone"
+                      placeholder="ফোন নম্বর"
+                      value={editData.phone || ""}
                       onChange={handleInputChange}
-                      className="text-2xl md:text-3xl font-bold text-gray-800 bg-gray-50 border border-gray-300 rounded-lg px-3 py-1 w-full max-w-md"
+                      className="bg-transparent border-none text-sm focus:outline-none w-36"
                     />
-                  ) : (
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                      <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-                        {teacher.name}
-                      </h1>
-                      <MdVerified className="text-blue-500 text-xl" />
-                    </div>
-                  )}
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="title"
-                      value={editData.title || ""}
-                      onChange={handleInputChange}
-                      className="text-[#004d4d] font-medium text-sm md:text-base bg-gray-50 border border-gray-300 rounded-lg px-3 py-1 w-full max-w-md mt-1"
-                    />
-                  ) : (
-                    <p className="text-[#004d4d] font-medium text-sm md:text-base mt-1">
-                      {teacher.title}
-                    </p>
-                  )}
-                  <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-3 text-sm text-gray-500">
-                    {isEditing ? (
-                      <>
-                        <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full">
-                          <FaEnvelope className="text-teal-600" />
-                          <input
-                            type="email"
-                            name="email"
-                            value={editData.email || ""}
-                            onChange={handleInputChange}
-                            className="bg-transparent border-none text-sm focus:outline-none w-40"
-                          />
-                        </div>
-                        <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full">
-                          <FaPhoneAlt className="text-teal-600" />
-                          <input
-                            type="text"
-                            name="phone"
-                            value={editData.phone || ""}
-                            onChange={handleInputChange}
-                            className="bg-transparent border-none text-sm focus:outline-none w-32"
-                          />
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <span className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full">
-                          <FaEnvelope className="text-teal-600" />{" "}
-                          {teacher.email}
-                        </span>
-                        <span className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full">
-                          <FaPhoneAlt className="text-teal-600" />{" "}
-                          {teacher.phone}
-                        </span>
-                        <span className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full">
-                          <FaCalendarAlt className="text-teal-600" /> জয়েন:{" "}
-                          {teacher.joinDate}
-                        </span>
-                      </>
-                    )}
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                {
-                  label: "মোট শিক্ষার্থী",
-                  value: teacher.totalStudents,
-                  icon: <FaUserGraduate />,
-                  color: "blue",
-                },
-                {
-                  label: "মোট কোর্স",
-                  value: teacher.totalCourses,
-                  icon: <FaBookOpen />,
-                  color: "green",
-                },
-                {
-                  label: "অভিজ্ঞতা",
-                  value: "১৫+ বছর",
-                  icon: <FaClock />,
-                  color: "purple",
-                },
-                {
-                  label: "রেটিং",
-                  value: teacher.rating,
-                  icon: renderStars(parseFloat(teacher.rating)),
-                  color: "yellow",
-                },
-              ].map((stat, index) => (
-                <div
-                  key={index}
-                  className={`bg-${stat.color}-50 p-4 rounded-xl shadow-sm border border-${stat.color}-100 hover:shadow-md transition-all`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={`text-${stat.color}-600 text-xl`}>
-                      {stat.icon}
+                </>
+              ) : (
+                <>
+                  {teacher.email && (
+                    <span className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full">
+                      <FaEnvelope className="text-teal-600" /> {teacher.email}
                     </span>
-                    <span className="text-xl font-bold text-gray-800">
-                      {typeof stat.value === "string" &&
-                      stat.value.includes("★")
-                        ? ""
-                        : stat.value}
+                  )}
+                  {teacher.phone && (
+                    <span className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full">
+                      <FaPhoneAlt className="text-teal-600" /> {teacher.phone}
                     </span>
-                  </div>
-                  {typeof stat.value === "string" &&
-                    stat.value.includes("★") && (
-                      <div className="text-sm mt-1">{stat.value}</div>
-                    )}
-                  <p className="text-xs text-gray-600 mt-1 font-medium">
-                    {stat.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column */}
-              <div className="lg:col-span-1 space-y-6">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2 border-b pb-2">
-                    <span className="text-teal-600">📝</span> সংক্ষিপ্ত পরিচিতি
-                  </h3>
-                  {isEditing ? (
-                    <textarea
-                      name="bio"
-                      value={editData.bio || ""}
-                      onChange={handleInputChange}
-                      rows="6"
-                      className="w-full text-gray-600 text-sm leading-relaxed bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                    />
-                  ) : (
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      {teacher.bio}
-                    </p>
                   )}
-                </div>
-
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2 border-b pb-2">
-                    <span className="text-teal-600">🎯</span> বিশেষজ্ঞতা
-                  </h3>
-                  {isEditing ? (
-                    <div className="space-y-2">
-                      {editData.expertise?.map((item, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            value={item}
-                            onChange={(e) =>
-                              handleExpertiseChange(index, e.target.value)
-                            }
-                            className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                          />
-                          <button
-                            onClick={() => removeExpertise(index)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            <FaTimes />
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        onClick={addExpertise}
-                        className="text-teal-600 hover:text-teal-700 text-sm font-semibold"
-                      >
-                        + যোগ করুন
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {teacher.expertise?.map((item, index) => (
-                        <span
-                          key={index}
-                          className="bg-teal-50 text-[#004d4d] text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-teal-100"
-                        >
-                          <FaCheckCircle className="text-xs text-teal-600" />{" "}
-                          {item}
-                        </span>
-                      ))}
-                    </div>
+                  {teacher.joinDate && (
+                    <span className="flex items-center gap-1.5 bg-gray-50 px-3 py-1 rounded-full">
+                      <FaCalendarAlt className="text-teal-600" /> জয়েন:{" "}
+                      {teacher.joinDate}
+                    </span>
                   )}
-                </div>
-
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2 border-b pb-2">
-                    <span className="text-yellow-500">🏆</span> অর্জনসমূহ
-                  </h3>
-                  <div className="space-y-2">
-                    {teacher.achievements?.map((achievement, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-2 p-2 bg-yellow-50 rounded-lg border border-yellow-100"
-                      >
-                        <span className="text-yellow-500 text-lg">⭐</span>
-                        <span className="text-sm text-gray-700">
-                          {achievement}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2 border-b pb-2">
-                    <span className="text-blue-600">🌐</span> সামাজিক যোগাযোগ
-                  </h3>
-                  <div className="flex gap-3">
-                    {[
-                      { icon: <FaGlobe />, color: "blue", label: "ওয়েবসাইট" },
-                      {
-                        icon: <FaFacebook />,
-                        color: "blue-700",
-                        label: "ফেসবুক",
-                      },
-                      {
-                        icon: <FaTwitter />,
-                        color: "blue-400",
-                        label: "টুইটার",
-                      },
-                      {
-                        icon: <FaLinkedin />,
-                        color: "blue-600",
-                        label: "লিঙ্কডইন",
-                      },
-                    ].map((social, index) => (
-                      <button
-                        key={index}
-                        className={`bg-${social.color}/10 text-${social.color} p-2.5 rounded-lg hover:bg-${social.color}/20 transition-all border border-${social.color}/20`}
-                        title={social.label}
-                      >
-                        {social.icon}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column */}
-              <div className="lg:col-span-2 space-y-6">
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
-                    <FaGraduationCap className="text-teal-600 text-xl" />{" "}
-                    শিক্ষাগত যোগ্যতা
-                  </h3>
-                  <div className="space-y-4">
-                    {isEditing ? (
-                      <>
-                        {editData.education?.map((edu, index) => (
-                          <div
-                            key={index}
-                            className="p-4 rounded-xl bg-gray-50 border border-gray-200"
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <h4 className="font-bold text-gray-800 text-sm">
-                                শিক্ষা #{index + 1}
-                              </h4>
-                              <button
-                                onClick={() => removeEducation(index)}
-                                className="text-red-500 hover:text-red-700"
-                              >
-                                <FaTimes />
-                              </button>
-                            </div>
-                            <div className="space-y-2">
-                              <input
-                                type="text"
-                                placeholder="ডিগ্রী"
-                                value={edu.degree}
-                                onChange={(e) =>
-                                  handleEducationChange(
-                                    index,
-                                    "degree",
-                                    e.target.value,
-                                  )
-                                }
-                                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
-                              />
-                              <input
-                                type="text"
-                                placeholder="প্রতিষ্ঠান"
-                                value={edu.institution}
-                                onChange={(e) =>
-                                  handleEducationChange(
-                                    index,
-                                    "institution",
-                                    e.target.value,
-                                  )
-                                }
-                                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
-                              />
-                              <input
-                                type="text"
-                                placeholder="সাল"
-                                value={edu.year}
-                                onChange={(e) =>
-                                  handleEducationChange(
-                                    index,
-                                    "year",
-                                    e.target.value,
-                                  )
-                                }
-                                className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm"
-                              />
-                            </div>
-                          </div>
-                        ))}
-                        <button
-                          onClick={addEducation}
-                          className="text-teal-600 hover:text-teal-700 text-sm font-semibold"
-                        >
-                          + নতুন শিক্ষা যোগ করুন
-                        </button>
-                      </>
-                    ) : (
-                      teacher.education?.map((edu, index) => (
-                        <div
-                          key={index}
-                          className="flex items-start gap-4 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-100 hover:shadow-md transition-all"
-                        >
-                          <div className="p-3 bg-teal-100 text-teal-700 rounded-xl shadow-sm">
-                            <FaAward className="text-xl" />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-gray-800 text-sm md:text-base">
-                              {edu.degree}
-                            </h4>
-                            <p className="text-gray-600 text-sm mt-0.5">
-                              {edu.institution}
-                            </p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className="inline-block text-xs font-semibold bg-teal-100 text-teal-800 px-2.5 py-0.5 rounded-full">
-                                📅 {edu.year}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
-                    <FaChalkboardTeacher className="text-teal-600 text-xl" />{" "}
-                    পরিচালিত কোর্সসমূহ
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {teacher.courses?.map((course, index) => (
-                      <div
-                        key={index}
-                        className="p-4 rounded-xl border border-gray-100 bg-gradient-to-br from-gray-50 to-white hover:shadow-md transition-all group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="text-3xl">{course.icon}</span>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-gray-800 text-sm group-hover:text-teal-700 transition-colors">
-                              {course.title}
-                            </h4>
-                            <div className="flex justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
-                              <span className="flex items-center gap-1">
-                                <FaUserGraduate className="text-teal-600" />{" "}
-                                {course.students}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <FaClock className="text-teal-600" />{" "}
-                                {course.duration}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-teal-50 to-teal-100/50 rounded-2xl border border-teal-200 p-6">
-                  <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <span className="text-teal-600">⚡</span> দ্রুত কর্ম
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {[
-                      {
-                        label: "প্রোফাইল সম্পাদনা",
-                        icon: "✏️",
-                        color: "blue",
-                        action: handleEditToggle,
-                      },
-                      {
-                        label: "পাসওয়ার্ড পরিবর্তন",
-                        icon: "🔒",
-                        color: "red",
-                        action: () => {
-                          Swal.fire({
-                            icon: "info",
-                            title: "পাসওয়ার্ড পরিবর্তন",
-                            text: "এই ফিচারটি শীঘ্রই আসছে!",
-                            confirmButtonColor: "#004d4d",
-                          });
-                        },
-                      },
-                      {
-                        label: "সেটিংস",
-                        icon: "⚙️",
-                        color: "gray",
-                        action: () => {
-                          Swal.fire({
-                            icon: "info",
-                            title: "সেটিংস",
-                            text: "এই ফিচারটি শীঘ্রই আসছে!",
-                            confirmButtonColor: "#004d4d",
-                          });
-                        },
-                      },
-                      {
-                        label: "সাপোর্ট",
-                        icon: "💬",
-                        color: "green",
-                        action: () => {
-                          Swal.fire({
-                            icon: "info",
-                            title: "সাপোর্ট",
-                            text: "এই ফিচারটি শীঘ্রই আসছে!",
-                            confirmButtonColor: "#004d4d",
-                          });
-                        },
-                      },
-                    ].map((item, index) => (
-                      <button
-                        key={index}
-                        onClick={item.action}
-                        className={`bg-${item.color}-50 hover:bg-${item.color}-100 p-3 rounded-lg border border-${item.color}-100 text-center transition-all`}
-                      >
-                        <div className="text-2xl">{item.icon}</div>
-                        <p className="text-xs font-medium text-gray-700 mt-1">
-                          {item.label}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                </>
+              )}
             </div>
           </div>
-        </main>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          {
+            label: "মোট শিক্ষার্থী",
+            value: teacher.totalStudents || "0",
+            icon: <FaUserGraduate />,
+            bg: "bg-blue-50",
+            border: "border-blue-100",
+            color: "text-blue-600",
+          },
+          {
+            label: "মোট কোর্স",
+            value: teacher.totalCourses || "0",
+            icon: <FaBookOpen />,
+            bg: "bg-green-50",
+            border: "border-green-100",
+            color: "text-green-600",
+          },
+          {
+            label: "অভিজ্ঞতা",
+            value: "শীঘ্রই",
+            icon: <FaClock />,
+            bg: "bg-purple-50",
+            border: "border-purple-100",
+            color: "text-purple-600",
+          },
+          {
+            label: "রেটিং",
+            value: teacher.rating || "0",
+            icon: <span className="text-yellow-500">★</span>,
+            bg: "bg-yellow-50",
+            border: "border-yellow-100",
+            color: "text-yellow-600",
+            showStars: true,
+          },
+        ].map((stat, i) => (
+          <div
+            key={i}
+            className={`${stat.bg} p-4 rounded-xl shadow-sm border ${stat.border} hover:shadow-md transition-all`}
+          >
+            <div className="flex items-center justify-between">
+              <span className={`${stat.color} text-xl`}>{stat.icon}</span>
+              <span className="text-lg font-bold text-gray-800">
+                {stat.value}
+              </span>
+            </div>
+            {stat.showStars && (
+              <div className="text-sm mt-1">{renderStars(teacher.rating)}</div>
+            )}
+            <p className="text-xs text-gray-600 mt-1 font-medium">
+              {stat.label}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column (Bio, Expertise, Achievements) */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Bio */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2 border-b pb-2">
+              <span className="text-teal-600">📝</span> সংক্ষিপ্ত পরিচিতি
+            </h3>
+            {isEditing ? (
+              <textarea
+                name="bio"
+                placeholder="আপনার সম্পর্কে সংক্ষেপে লিখুন..."
+                value={editData.bio || ""}
+                onChange={handleInputChange}
+                rows="5"
+                className="w-full text-gray-600 text-sm leading-relaxed bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              />
+            ) : (
+              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
+                {teacher.bio || "কোনো পরিচিতি যোগ করা হয়নি।"}
+              </p>
+            )}
+          </div>
+
+          {/* Expertise */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2 border-b pb-2">
+              <span className="text-teal-600">🎯</span> বিশেষজ্ঞতা
+            </h3>
+            {isEditing ? (
+              <div className="space-y-2">
+                {editData.expertise?.map((item, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="যেমন: হাদিস শাস্ত্র"
+                      value={item}
+                      onChange={(e) =>
+                        handleExpertiseChange(index, e.target.value)
+                      }
+                      className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-teal-500"
+                    />
+                    <button
+                      onClick={() => removeExpertise(index)}
+                      className="text-red-500 hover:text-red-700 p-1"
+                    >
+                      <FaTimes />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={addExpertise}
+                  className="text-teal-600 hover:text-teal-700 text-sm font-semibold flex items-center gap-1 mt-2"
+                >
+                  <FaPlus size={12} /> নতুন স্কিল যোগ করুন
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {teacher.expertise?.length > 0 ? (
+                  teacher.expertise.map((item, index) => (
+                    <span
+                      key={index}
+                      className="bg-teal-50 text-[#004d4d] text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-teal-100"
+                    >
+                      <FaCheckCircle className="text-xs text-teal-600" /> {item}
+                    </span>
+                  ))
+                ) : (
+                  <p className="text-gray-400 text-sm">
+                    কোনো স্কিল যোগ করা হয়নি।
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Achievements */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2 border-b pb-2">
+              <span className="text-yellow-500">🏆</span> অর্জনসমূহ
+            </h3>
+            {isEditing ? (
+              <div className="space-y-2">
+                {editData.achievements?.map((achieve, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="যেমন: বেস্ট টিচার অ্যাওয়ার্ড ২০২৪"
+                      value={achieve}
+                      onChange={(e) =>
+                        handleAchievementChange(index, e.target.value)
+                      }
+                      className="flex-1 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-yellow-500"
+                    />
+                    <button
+                      onClick={() => removeAchievement(index)}
+                      className="text-red-500 hover:text-red-700 p-1"
+                    >
+                      <FaTimes />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={addAchievement}
+                  className="text-yellow-600 hover:text-yellow-700 text-sm font-semibold flex items-center gap-1 mt-2"
+                >
+                  <FaPlus size={12} /> নতুন অর্জন যোগ করুন
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {teacher.achievements?.length > 0 ? (
+                  teacher.achievements.map((achievement, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 p-2 bg-yellow-50 rounded-lg border border-yellow-100"
+                    >
+                      <span className="text-yellow-500 text-lg">⭐</span>
+                      <span className="text-sm text-gray-700">
+                        {achievement}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-400 text-sm">
+                    কোনো অর্জন যোগ করা হয়নি।
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column (Education, Courses) */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Education */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
+              <FaGraduationCap className="text-teal-600 text-xl" /> শিক্ষাগত
+              যোগ্যতা
+            </h3>
+            <div className="space-y-4">
+              {isEditing ? (
+                <>
+                  {editData.education?.map((edu, index) => (
+                    <div
+                      key={index}
+                      className="p-4 rounded-xl bg-gray-50 border border-gray-200 relative"
+                    >
+                      <button
+                        onClick={() => removeEducation(index)}
+                        className="absolute top-3 right-3 text-red-500 hover:text-red-700"
+                      >
+                        <FaTimes />
+                      </button>
+                      <h4 className="font-bold text-gray-800 text-sm mb-3">
+                        শিক্ষা #{index + 1}
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <input
+                          type="text"
+                          placeholder="ডিগ্রী (যেমন: কামিল)"
+                          value={edu.degree}
+                          onChange={(e) =>
+                            handleEducationChange(
+                              index,
+                              "degree",
+                              e.target.value,
+                            )
+                          }
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500"
+                        />
+                        <input
+                          type="text"
+                          placeholder="প্রতিষ্ঠান"
+                          value={edu.institution}
+                          onChange={(e) =>
+                            handleEducationChange(
+                              index,
+                              "institution",
+                              e.target.value,
+                            )
+                          }
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500"
+                        />
+                        <input
+                          type="text"
+                          placeholder="সাল (যেমন: ২০২০)"
+                          value={edu.year}
+                          onChange={(e) =>
+                            handleEducationChange(index, "year", e.target.value)
+                          }
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-500"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    onClick={addEducation}
+                    className="text-teal-600 hover:text-teal-700 text-sm font-semibold flex items-center gap-1"
+                  >
+                    <FaPlus size={12} /> নতুন শিক্ষা যোগ করুন
+                  </button>
+                </>
+              ) : teacher.education?.length > 0 ? (
+                teacher.education.map((edu, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-4 p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-100 hover:shadow-md transition-all"
+                  >
+                    <div className="p-3 bg-teal-100 text-teal-700 rounded-xl shadow-sm">
+                      <FaAward className="text-xl" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-gray-800 text-sm md:text-base">
+                        {edu.degree}
+                      </h4>
+                      <p className="text-gray-600 text-sm mt-0.5">
+                        {edu.institution}
+                      </p>
+                      <span className="inline-block text-xs font-semibold bg-teal-100 text-teal-800 px-2.5 py-0.5 rounded-full mt-2">
+                        📅 {edu.year}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400 text-sm">
+                  কোনো শিক্ষাগত তথ্য যোগ করা হয়নি।
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Courses */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2 border-b pb-2">
+              <FaChalkboardTeacher className="text-teal-600 text-xl" /> পরিচালিত
+              কোর্সসমূহ
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {isEditing ? (
+                <>
+                  {editData.courses?.map((course, index) => (
+                    <div
+                      key={index}
+                      className="p-4 rounded-xl border border-gray-200 bg-gray-50 relative"
+                    >
+                      <button
+                        onClick={() => removeCourse(index)}
+                        className="absolute top-3 right-3 text-red-500 hover:text-red-700"
+                      >
+                        <FaTimes />
+                      </button>
+                      <div className="space-y-2 mt-2">
+                        <input
+                          type="text"
+                          placeholder="কোর্সের নাম (যেমন: তাজবীদ)"
+                          value={course.title}
+                          onChange={(e) =>
+                            handleCourseChange(index, "title", e.target.value)
+                          }
+                          className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-teal-500"
+                        />
+                        <input
+                          type="text"
+                          placeholder="শিক্ষার্থী সংখ্যা"
+                          value={course.students}
+                          onChange={(e) =>
+                            handleCourseChange(
+                              index,
+                              "students",
+                              e.target.value,
+                            )
+                          }
+                          className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-teal-500"
+                        />
+                        <input
+                          type="text"
+                          placeholder="সময়কাল (যেমন: ৬ মাস)"
+                          value={course.duration}
+                          onChange={(e) =>
+                            handleCourseChange(
+                              index,
+                              "duration",
+                              e.target.value,
+                            )
+                          }
+                          className="w-full border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-teal-500"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    onClick={addCourse}
+                    className="text-teal-600 hover:text-teal-700 text-sm font-semibold flex items-center justify-center gap-1 border-2 border-dashed border-teal-300 rounded-xl p-4 hover:bg-teal-50 transition-all"
+                  >
+                    <FaPlus size={14} /> নতুন কোর্স যোগ করুন
+                  </button>
+                </>
+              ) : teacher.courses?.length > 0 ? (
+                teacher.courses.map((course, index) => (
+                  <div
+                    key={index}
+                    className="p-4 rounded-xl border border-gray-100 bg-gradient-to-br from-gray-50 to-white hover:shadow-md transition-all group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl">{course.icon || "📚"}</span>
+                      <div className="flex-1">
+                        <h4 className="font-bold text-gray-800 text-sm group-hover:text-teal-700 transition-colors">
+                          {course.title}
+                        </h4>
+                        <div className="flex justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
+                          <span className="flex items-center gap-1">
+                            <FaUserGraduate className="text-teal-600" />{" "}
+                            {course.students}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <FaClock className="text-teal-600" />{" "}
+                            {course.duration}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-400 text-sm col-span-full">
+                  কোনো কোর্সের তথ্য যোগ করা হয়নি।
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
