@@ -414,9 +414,14 @@ const ProfileTab = ({ teacherInfo }) => {
       );
     }
 
-    const apiKey =
-      import.meta.env.VITE_IMAGEBB_API_KEY ||
-      "e9a81b482753e6d60c3868b8c598b1d8";
+    const apiKey = import.meta.env.VITE_IMAGEBB_API_KEY;
+    if (!apiKey) {
+      return Swal.fire({
+        icon: "error",
+        title: "ImgBB API Key Missing",
+        text: "VITE_IMAGEBB_API_KEY environment variable set করুন।",
+      });
+    }
 
     Swal.fire({
       title: "Uploading Image...",
@@ -431,16 +436,12 @@ const ProfileTab = ({ teacherInfo }) => {
 
       const response = await fetch(
         `https://api.imgbb.com/1/upload?key=${apiKey}`,
-        {
-          method: "POST",
-          body: formData,
-        },
+        { method: "POST", body: formData },
       );
 
       const result = await response.json();
 
       if (result.success) {
-        // ✅ Functional state update (সবচেয়ে নিরাপদ পদ্ধতি)
         setEditData((prev) => ({ ...prev, photo: result.data.url }));
         Swal.close();
         Swal.fire({
@@ -454,19 +455,12 @@ const ProfileTab = ({ teacherInfo }) => {
       }
     } catch (error) {
       console.error("ImgBB Error:", error);
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditData((prev) => ({ ...prev, photo: reader.result }));
-        Swal.close();
-        Swal.fire({
-          icon: "success",
-          title: "Image Uploaded (Local Mode)!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      };
-      reader.readAsDataURL(file);
+      Swal.close();
+      Swal.fire({
+        icon: "error",
+        title: "Image Upload Failed",
+        text: "ImgBB API key check করুন অথবা অন্য ছবি দিয়ে try করুন।",
+      });
     }
   };
 
@@ -536,9 +530,9 @@ const ProfileTab = ({ teacherInfo }) => {
         <div className="px-6 pb-6 relative flex flex-col md:flex-row items-center md:items-end gap-6 -mt-16 md:-mt-12">
           <div className="relative">
             <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl bg-white p-1.5 shadow-lg border-4 border-white flex items-center justify-center text-6xl bg-teal-50 overflow-hidden">
-              {data.photo ? (
+              {(isEditing ? editData.photo : data.photo) ? (
                 <img
-                  src={data.photo}
+                  src={isEditing ? editData.photo : data.photo}
                   alt="Profile"
                   className="w-full h-full object-cover rounded-xl"
                 />
