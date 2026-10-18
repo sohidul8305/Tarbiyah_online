@@ -234,7 +234,7 @@ const TeacherDashboard = () => {
 };
 
 /* ============================================================
-   TAB 1: TEACHER MANAGEMENT (CRUD)
+   TAB 1: TEACHER MANAGEMENT (PROFILE CRUD)
    ============================================================ */
 const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
   const [teachers, setTeachers] = useState([]);
@@ -615,7 +615,6 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
                   />
                 </div>
 
-                {/* স্যালারি ইনপুট */}
                 <div>
                   <label className="text-sm font-semibold text-gray-700">
                     Base Salary (৳)
@@ -1093,45 +1092,265 @@ const RoutineTab = () => {
 };
 
 /* ============================================================
-   TAB 3: PAYMENT COMPONENT
+   TAB 3: PAYMENT COMPONENT (Select Teacher -> Manage Salary)
    ============================================================ */
 const PaymentTab = ({ teacherInfo }) => {
+  const [teachers, setTeachers] = useState([]);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
+
+  // মোডালের জন্য আলাদা স্টেট
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [modalTeacher, setModalTeacher] = useState(null);
+  const [modalAmount, setModalAmount] = useState("");
+  const [isFetchingSalary, setIsFetchingSalary] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [calcData, setCalcData] = useState(null);
-  const email = (teacherInfo.email || "").toLowerCase().trim();
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
+  const defaultMonthStr = `${currentYear}-${String(currentMonth).padStart(2, "0")}`;
 
+  const [formData, setFormData] = useState({
+    month: defaultMonthStr,
+    method: "bKash",
+    date: new Date().toISOString().split("T")[0],
+    status: "Paid",
+  });
+
+  // ১. প্রথমে সব টিচারের লিস্ট নিয়ে আসা
   useEffect(() => {
-    const fetchP = async () => {
-      if (!email) {
-        setLoading(false);
-        return;
-      }
+    const fetchTeachers = async () => {
       try {
-        const res = await fetch(
-          `${API_BASE}/api/teacher-profile/${encodeURIComponent(email)}`,
-        );
+        const res = await fetch(`${API_BASE}/api/teacher-profiles/all`);
         const data = await res.json();
-        setProfile(data.success ? data.profile : null);
-
-        // অটো স্যালারি ক্যালকুলেটর API কল করা
-        const calcRes = await fetch(
-          `${API_BASE}/api/teacher-salary/calculate/${encodeURIComponent(email)}?month=${currentMonth}&year=${currentYear}`,
-        );
-        const calcResult = await calcRes.json();
-        if (calcResult.success) setCalcData(calcResult);
+        if (data.success) setTeachers(data.profiles || []);
       } catch (e) {
-        console.error(e);
+        console.error("Error fetching teachers:", e);
       } finally {
         setLoading(false);
       }
     };
-    fetchP();
-  }, [email, currentMonth, currentYear]);
+    fetchTeachers();
+  }, []);
 
+  // ২. টিচার সিলেক্ট করলে তার প্রোফাইল এবং স্যালারি ক্যালকুলেশন আনা (মেইন পেজের জন্য)
+  const fetchProfileAndSalary = async () => {
+    if (!selectedTeacher) return;
+    setLoading(true);
+    setErrorMsg("");
+    const email = selectedTeacher.email;
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/teacher-profile/${encodeURIComponent(email)}`,
+      );
+      const data = await res.json();
+      setProfile(data.success ? data.profile : null);
+
+      const calcRes = await fetch(
+        `${API_BASE}/api/teacher-salary/calculate/${encodeURIComponent(email)}?month=${currentMonth}&year=${currentYear}`,
+      );
+      const calcResult = await calcRes.json();
+
+      if (calcResult.success) {
+        setCalcData(calcResult);
+      } else {
+        setErrorMsg(calcResult.message || "Failed to calculate salary");
+        setCalcData(null);
+      }
+    } catch (e) {
+      console.error(e);
+      setErrorMsg("Network error. Check backend connection.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfileAndSalary();
+  }, [selectedTeacher]);
+
+  // ৩. মোডালে টিচার চেঞ্জ করলে অটোমেটিক স্যালারি আনা
+  const handleModalTeacherChange = async (e) => {
+    const email = e.target.value;
+    const teacher = teachers.find((t) => t.email === email);
+    setModalTeacher(teacher);
+
+    if (!teacher) {
+      setModalAmount("");
+      return;
+    }
+
+    setIsFetchingSalary(true);
+    try {
+      const calcRes = await fetch(
+        `${API_BASE}/api/teacher-salary/calculate/${encodeURIComponent(email)}?month=${currentMonth}&year=${currentYear}`,
+      );
+      const calcResult = await calcRes.json();
+
+      if (calcResult.success) {
+        setModalAmount(calcResult.netPayable || ""); // অটো এমাউন্ট বসে যাবে
+      } else {
+        setModalAmount("");
+      }
+    } catch (error) {
+      console.error(error);
+      setModalAmount("");
+    } finally {
+      setIsFetchingSalary(false);
+    }
+  };
+
+  // ৪. পেমেন্ট সাবমিট করা
+  const handleAddPayment = async (e) => {
+    e.preventDefault();
+    if (!modalTeacher)
+      return Swal.fire("Warning", "টিচার সিলেক্ট করুন!", "warning");
+    if (!modalAmount || Number(modalAmount) <= 0)
+      return Swal.fire("Warning", "সঠিক পরিমাণ দিন!", "warning");
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/teacher-profile/${encodeURIComponent(modalTeacher.email)}/payment`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            month: formData.month,
+            amount: Number(modalAmount),
+            method: formData.method,
+            date: formData.date,
+            status: formData.status,
+          }),
+        },
+      );
+
+      const resData = await res.json();
+      if (!res.ok || !resData.success)
+        throw new Error(resData.message || "Failed to add payment");
+
+      Swal.fire({
+        icon: "success",
+        title: "Payment Added!",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      setShowAddModal(false);
+
+      // যদি বর্তমানে ওই টিচারের পেজেই থাকে, তবে পেজ রিফ্রেশ করবো
+      if (selectedTeacher && selectedTeacher.email === modalTeacher.email) {
+        fetchProfileAndSalary();
+      }
+    } catch (err) {
+      Swal.fire("Error", err.message, "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // মোডাল ওপেন করার ফাংশন
+  const openAddModal = (teacher = null) => {
+    setModalTeacher(teacher || (teachers.length > 0 ? teachers[0] : null));
+    if (teacher) {
+      // যদি কার্ড থেকে ক্লিক করা হয়, তবে সেই টিচারের স্যালারি আনি
+      setTimeout(() => {
+        document
+          .getElementById("teacherSelect")
+          ?.dispatchEvent(new Event("change", { bubbles: true }));
+        document.getElementById("teacherSelect").value = teacher.email;
+        handleModalTeacherChange({ target: { value: teacher.email } });
+      }, 100);
+    }
+    setShowAddModal(true);
+  };
+
+  // টিচার লিস্ট ভিউ
+  if (loading && !selectedTeacher) {
+    return (
+      <div className="text-center p-10">
+        <FaSpinner className="animate-spin text-4xl text-teal-600 mx-auto" />
+      </div>
+    );
+  }
+
+  if (!selectedTeacher) {
+    return (
+      <div className="space-y-6 pb-10">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">
+              Select Teacher for Payment
+            </h2>
+            <p className="text-sm text-gray-500">
+              Click on a teacher to view their salary details or add payment.
+            </p>
+          </div>
+          <button
+            onClick={() => openAddModal()}
+            className="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 shadow-md"
+          >
+            <FaPlus /> Add Payment
+          </button>
+        </div>
+
+        {teachers.length === 0 ? (
+          <div className="bg-white p-10 rounded-xl shadow-sm border border-gray-200 text-center">
+            <FaUser className="text-6xl text-gray-300 mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-gray-700">
+              No Teachers Added
+            </h3>
+            <p className="text-gray-500">
+              Go to the Profile tab to add teachers first.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {teachers.map((teacher) => (
+              <div
+                key={teacher._id}
+                onClick={() => setSelectedTeacher(teacher)}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-teal-400 cursor-pointer transition-all flex flex-col"
+              >
+                <div className="h-20 bg-teal-50 relative"></div>
+                <div className="px-6 pb-6 -mt-10 flex flex-col items-center text-center relative z-10">
+                  <div className="w-20 h-20 rounded-full bg-white shadow border-4 border-white overflow-hidden mb-3">
+                    {teacher.profileImage ? (
+                      <img
+                        src={teacher.profileImage}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-teal-100 flex items-center justify-center text-2xl text-teal-700 font-bold">
+                        {teacher.name?.charAt(0) || "T"}
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    {teacher.name}
+                  </h3>
+                  <p className="text-sm text-teal-600 font-semibold mb-1">
+                    {teacher.designation || "Teacher"}
+                  </p>
+                  <p className="text-xs text-gray-500 mb-4">{teacher.email}</p>
+                  <button className="w-full bg-teal-50 text-teal-700 font-bold py-2 rounded-lg hover:bg-teal-100 transition-colors">
+                    Manage Salary
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // নির্দিষ্ট টিচারের পেমেন্ট ভিউ
   const info = profile?.paymentInfo || {
     totalSalary: 0,
     dueSalary: 0,
@@ -1149,120 +1368,303 @@ const PaymentTab = ({ teacherInfo }) => {
       .filter((p) => p.status !== "Paid")
       .reduce((s, p) => s + Number(p.amount || 0), 0);
 
-  if (loading)
-    return (
-      <p className="text-center p-10 text-teal-600 font-bold">Loading...</p>
-    );
-
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-bold text-gray-800">Payment & Due</h2>
+    <div className="space-y-6 pb-10">
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => {
+              setSelectedTeacher(null);
+              setProfile(null);
+              setCalcData(null);
+            }}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition-colors"
+          >
+            <FaTimes size={18} />
+          </button>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              {selectedTeacher.name}'s Salary
+            </h2>
+            <p className="text-sm text-gray-500">
+              {selectedTeacher.designation} | {selectedTeacher.email}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => openAddModal(selectedTeacher)}
+          className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-md transition-all w-full md:w-auto justify-center"
+        >
+          <FaPlus /> Add Payment
+        </button>
+      </div>
 
-      {/* ✅ Auto-Calculated Salary */}
-      {/* ✅ Auto-Calculated Salary */}
-      {calcData ? (
-        <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 shadow-sm">
-          <h3 className="font-bold text-teal-800 mb-2">
-            Auto-Calculated Salary for {currentMonth}/{currentYear}
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <p className="text-gray-600">Base Salary</p>
-              <p className="font-bold text-gray-800">
-                ৳{calcData.breakdown.baseSalary}
+      {loading ? (
+        <div className="text-center p-10">
+          <FaSpinner className="animate-spin text-4xl text-teal-600 mx-auto" />
+        </div>
+      ) : (
+        <>
+          {/* Auto-Calculated Salary Box */}
+          {calcData ? (
+            <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 shadow-sm">
+              <h3 className="font-bold text-teal-800 mb-2">
+                Auto-Calculated Salary for {currentMonth}/{currentYear}
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-600">Base Salary</p>
+                  <p className="font-bold text-gray-800">
+                    ৳{calcData.breakdown.baseSalary}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-600">
+                    Class Earnings ({calcData.breakdown.attendedClasses}{" "}
+                    classes)
+                  </p>
+                  <p className="font-bold text-green-600">
+                    + ৳{calcData.breakdown.classEarnings}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-600">
+                    Absent Deduction ({calcData.breakdown.absentDays} days)
+                  </p>
+                  <p className="font-bold text-red-600">
+                    - ৳{calcData.breakdown.attendanceDeduction}
+                  </p>
+                </div>
+                <div className="bg-teal-100 p-2 rounded-lg">
+                  <p className="text-teal-800 font-semibold">Net Payable</p>
+                  <p className="font-bold text-xl text-teal-900">
+                    ৳{calcData.netPayable}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+              <strong>⚠️ Salary calculation failed.</strong> <br />
+              {errorMsg}
+            </div>
+          )}
+
+          {/* স্ট্যাটাস কার্ড */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-white border rounded-xl p-6 text-center shadow-sm">
+              <p className="text-sm text-gray-500">Total Paid (All Time)</p>
+              <p className="text-2xl font-bold text-green-600">
+                ৳{paid.toLocaleString()}
               </p>
             </div>
-            <div>
-              <p className="text-gray-600">
-                Class Earnings ({calcData.breakdown.attendedClasses} classes)
-              </p>
-              <p className="font-bold text-green-600">
-                + ৳{calcData.breakdown.classEarnings}
+            <div className="bg-white border rounded-xl p-6 text-center shadow-sm">
+              <p className="text-sm text-gray-500">Total Due</p>
+              <p className="text-2xl font-bold text-red-600">
+                ৳{due.toLocaleString()}
               </p>
             </div>
-            <div>
-              <p className="text-gray-600">
-                Absent Deduction ({calcData.breakdown.absentDays} days)
-              </p>
-              <p className="font-bold text-red-600">
-                - ৳{calcData.breakdown.attendanceDeduction}
-              </p>
-            </div>
-            <div className="bg-teal-100 p-2 rounded-lg">
-              <p className="text-teal-800 font-semibold">Net Payable</p>
-              <p className="font-bold text-xl text-teal-900">
-                ৳{calcData.netPayable}
+            <div className="bg-white border rounded-xl p-6 text-center shadow-sm">
+              <p className="text-sm text-gray-500">Last Payment Date</p>
+              <p className="text-lg font-bold text-blue-600">
+                {history[0]?.date || "N/A"}
               </p>
             </div>
           </div>
-        </div>
-      ) : (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
-          <strong>⚠️ Salary calculation failed.</strong> Please ensure you have
-          saved Base Salary in the teacher profile, and the backend server is
-          running.
-        </div>
+
+          {/* পেমেন্ট হিস্ট্রি টেবিল */}
+          <div className="bg-white border rounded-xl overflow-hidden shadow-sm">
+            <div className="p-4 border-b bg-gray-50 font-bold">
+              Payment History
+            </div>
+            {history.length === 0 ? (
+              <p className="p-6 text-center text-gray-500">
+                No payment records yet.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left whitespace-nowrap">
+                  <thead className="bg-gray-50 text-gray-600 border-b">
+                    <tr>
+                      <th className="p-3">Month</th>
+                      <th className="p-3">Amount</th>
+                      <th className="p-3">Date</th>
+                      <th className="p-3">Method</th>
+                      <th className="p-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {history.map((p, i) => (
+                      <tr key={i} className="border-b hover:bg-gray-50">
+                        <td className="p-3">{p.month}</td>
+                        <td className="p-3 font-semibold text-teal-700">
+                          ৳{Number(p.amount).toLocaleString()}
+                        </td>
+                        <td className="p-3">{p.date}</td>
+                        <td className="p-3 text-gray-500">
+                          {p.method || "Cash"}
+                        </td>
+                        <td className="p-3">
+                          <span
+                            className={`px-2 py-1 rounded text-xs font-semibold ${p.status === "Paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+                          >
+                            {p.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white border rounded-xl p-6 text-center shadow-sm">
-          <p className="text-sm text-gray-500">Total Paid (All Time)</p>
-          <p className="text-2xl font-bold text-green-600">
-            ৳{paid.toLocaleString()}
-          </p>
-        </div>
-        <div className="bg-white border rounded-xl p-6 text-center shadow-sm">
-          <p className="text-sm text-gray-500">Total Due</p>
-          <p className="text-2xl font-bold text-red-600">
-            ৳{due.toLocaleString()}
-          </p>
-        </div>
-        <div className="bg-white border rounded-xl p-6 text-center shadow-sm">
-          <p className="text-sm text-gray-500">Last Payment Date</p>
-          <p className="text-lg font-bold text-blue-600">
-            {history[0]?.date || "N/A"}
-          </p>
-        </div>
-      </div>
+      {/* ✅ Add Payment Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+          <form
+            onSubmit={handleAddPayment}
+            className="bg-white rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl"
+          >
+            <div className="flex justify-between items-center border-b pb-2">
+              <h3 className="font-bold text-lg text-gray-800">Add Payment</h3>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="text-gray-400 hover:text-red-500"
+              >
+                <FaTimes />
+              </button>
+            </div>
 
-      <div className="bg-white border rounded-xl overflow-hidden shadow-sm">
-        <div className="p-4 border-b bg-gray-50 font-bold">Payment History</div>
-        {history.length === 0 ? (
-          <p className="p-6 text-center text-gray-500">
-            No payment records yet. Salary will be calculated automatically as
-            you add classes and mark attendance.
-          </p>
-        ) : (
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-600">
-              <tr>
-                <th className="p-3">Month</th>
-                <th className="p-3">Amount</th>
-                <th className="p-3">Date</th>
-                <th className="p-3">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map((p, i) => (
-                <tr key={i} className="border-b">
-                  <td className="p-3">{p.month}</td>
-                  <td className="p-3 font-semibold">
-                    ৳{Number(p.amount).toLocaleString()}
-                  </td>
-                  <td className="p-3">{p.date}</td>
-                  <td className="p-3">
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${p.status === "Paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
-                    >
-                      {p.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+            <div className="grid grid-cols-2 gap-4">
+              {/* টিচার সিলেক্ট ড্রপডাউন */}
+              <div className="col-span-2">
+                <label className="text-xs font-bold text-gray-700">
+                  Select Teacher *
+                </label>
+                <select
+                  id="teacherSelect"
+                  required
+                  value={modalTeacher?.email || ""}
+                  onChange={handleModalTeacherChange}
+                  className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-teal-500 outline-none font-semibold text-gray-800"
+                >
+                  <option value="" disabled>
+                    -- Select a Teacher --
+                  </option>
+                  {teachers.map((t) => (
+                    <option key={t._id} value={t.email}>
+                      {t.name} ({t.designation})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="col-span-2">
+                <label className="text-xs font-bold text-gray-700">
+                  Month (YYYY-MM) *
+                </label>
+                <input
+                  type="month"
+                  required
+                  value={formData.month}
+                  onChange={(e) =>
+                    setFormData({ ...formData, month: e.target.value })
+                  }
+                  className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-teal-500 outline-none"
+                />
+              </div>
+
+              <div className="col-span-2">
+                <label className="text-xs font-bold text-gray-700">
+                  Amount (৳) *
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    required
+                    placeholder={
+                      isFetchingSalary ? "Calculating..." : "e.g. 10000"
+                    }
+                    value={modalAmount}
+                    onChange={(e) => setModalAmount(e.target.value)}
+                    className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-teal-500 outline-none pr-10"
+                  />
+                  {isFetchingSalary && (
+                    <FaSpinner className="animate-spin absolute right-3 top-4 text-teal-600" />
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-700">
+                  Payment Method
+                </label>
+                <select
+                  value={formData.method}
+                  onChange={(e) =>
+                    setFormData({ ...formData, method: e.target.value })
+                  }
+                  className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-teal-500 outline-none"
+                >
+                  <option value="bKash">bKash</option>
+                  <option value="Nagad">Nagad</option>
+                  <option value="Bank">Bank Transfer</option>
+                  <option value="Cash">Cash</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-700">Date</label>
+                <input
+                  type="date"
+                  required
+                  value={formData.date}
+                  onChange={(e) =>
+                    setFormData({ ...formData, date: e.target.value })
+                  }
+                  className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-teal-500 outline-none"
+                />
+              </div>
+
+              <div className="col-span-2">
+                <label className="text-xs font-bold text-gray-700">
+                  Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                  }
+                  className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-teal-500 outline-none"
+                >
+                  <option value="Paid">Paid</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Partial">Partial</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-4 pt-4 border-t">
+              <button
+                type="submit"
+                disabled={isSubmitting || isFetchingSalary}
+                className="flex-1 bg-teal-600 text-white py-2.5 rounded-lg font-bold hover:bg-teal-700 shadow-md flex justify-center items-center gap-2"
+              >
+                {isSubmitting ? (
+                  <FaSpinner className="animate-spin" />
+                ) : (
+                  <FaSave />
+                )}{" "}
+                Save Payment
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
