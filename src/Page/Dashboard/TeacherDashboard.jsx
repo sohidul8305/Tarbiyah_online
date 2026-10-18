@@ -1,5 +1,5 @@
 // src/Page/Teacher/TeacherDashboard.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
@@ -12,18 +12,11 @@ import {
   FaTrash,
   FaLink,
   FaEnvelope,
-  FaPhoneAlt,
-  FaGraduationCap,
-  FaAward,
-  FaCheckCircle,
   FaEdit,
-  FaUserGraduate,
-  FaClock,
   FaSave,
   FaTimes,
   FaCamera,
   FaSpinner,
-  FaBookOpen,
   FaPlus,
   FaBuilding,
 } from "react-icons/fa";
@@ -31,11 +24,37 @@ import { FiMenu, FiX } from "react-icons/fi";
 import { MdVerified } from "react-icons/md";
 
 const API_BASE =
-  (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
+  import.meta.env?.VITE_API_URL ||
   (typeof window !== "undefined" && window.location.hostname === "localhost"
-    ? "http://localhost:5000"
+    ? "http://localhost:5010"
     : "https://api.tarbiyahonline.com");
 
+/* ============================================================
+   HELPER: Safe localStorage read
+   ============================================================ */
+const safeRead = (key) => {
+  try {
+    return localStorage.getItem(key) || "";
+  } catch {
+    return "";
+  }
+};
+const safeWrite = (key, value) => {
+  try {
+    localStorage.setItem(key, value);
+  } catch {}
+};
+const safeReadJSON = (key) => {
+  try {
+    return JSON.parse(localStorage.getItem(key) || "{}");
+  } catch {
+    return {};
+  }
+};
+
+/* ============================================================
+   MAIN DASHBOARD
+   ============================================================ */
 const TeacherDashboard = () => {
   const { user, logOut } = useAuth();
   const navigate = useNavigate();
@@ -43,35 +62,56 @@ const TeacherDashboard = () => {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [teacherInfo, setTeacherInfo] = useState({
+    _id: "",
     name: "",
     email: "",
-    designation: "",
+    designation: "Teacher",
   });
 
   const currentPath = location.pathname;
 
-  useEffect(() => {
-    const savedTeacher = localStorage.getItem("teacherInfo");
-    const savedEmail = localStorage.getItem("teacherEmail");
+  /* ------------------------------------------------------------
+     REFRESH teacher info from localStorage + Firebase auth
+     - Firebase user বদলালে stale data clear করবে
+     - _id track করবে
+     ------------------------------------------------------------ */
+  const refreshTeacherInfo = useCallback(() => {
+    const authEmail = (user?.email || "").toLowerCase().trim();
+    const savedEmail = (safeRead("teacherEmail") || "").toLowerCase().trim();
+    const savedTeacherRaw = safeRead("teacherInfo");
 
-    if (savedTeacher) {
-      try {
-        const parsed = JSON.parse(savedTeacher);
-        setTeacherInfo({
-          name: parsed.name || user?.displayName || "Teacher",
-          email: parsed.email || savedEmail || user?.email || "",
-          designation: parsed.designation || "Teacher",
-        });
-      } catch (err) {}
-    } else {
-      setTeacherInfo({
-        name: user?.displayName || "Teacher",
-        email: savedEmail || user?.email || "",
-        designation: "Teacher",
-      });
+    // ⚠️ Stale data detection: Firebase user ≠ localStorage email
+    if (authEmail && savedEmail && authEmail !== savedEmail) {
+      console.warn(
+        "⚠️ User changed! Firebase:",
+        authEmail,
+        "| Stored:",
+        savedEmail,
+        "→ clearing stale data",
+      );
+      localStorage.removeItem("teacherInfo");
+      localStorage.removeItem("teacherEmail");
+      safeWrite("teacherEmail", authEmail);
     }
+
+    const storedInfo = safeReadJSON("teacherInfo");
+    const finalEmail = authEmail || savedEmail || "";
+
+    setTeacherInfo({
+      _id: storedInfo._id || "",
+      name: storedInfo.name || user?.displayName || "Teacher",
+      email: storedInfo.email || finalEmail,
+      designation: storedInfo.designation || "Teacher",
+    });
   }, [user]);
 
+  useEffect(() => {
+    refreshTeacherInfo();
+  }, [refreshTeacherInfo]);
+
+  /* ------------------------------------------------------------
+     LOGOUT — clear ALL teacher-specific data
+     ------------------------------------------------------------ */
   const handleLogout = async () => {
     try {
       await logOut();
@@ -125,7 +165,7 @@ const TeacherDashboard = () => {
       </div>
 
       <div className="flex flex-grow relative overflow-hidden">
-        {/* ================= SIDEBAR ================= */}
+        {/* SIDEBAR */}
         <aside
           className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-transform duration-300 h-screen md:h-auto overflow-y-auto ${
             isSidebarOpen
@@ -179,7 +219,6 @@ const TeacherDashboard = () => {
           </nav>
         </aside>
 
-        {/* Overlay for mobile */}
         {isSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -187,7 +226,7 @@ const TeacherDashboard = () => {
           />
         )}
 
-        {/* ================= MAIN CONTENT ================= */}
+        {/* MAIN CONTENT */}
         <main className="flex-grow p-4 md:p-6 overflow-y-auto h-screen w-full">
           <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex justify-between items-center">
             <div>
@@ -208,7 +247,10 @@ const TeacherDashboard = () => {
 
           {(currentPath === "/teacher-profile" ||
             currentPath === "/teacher-dashboard") && (
-            <ProfileTab teacherInfo={teacherInfo} />
+            <ProfileTab
+              teacherInfo={teacherInfo}
+              onProfileUpdate={refreshTeacherInfo}
+            />
           )}
           {currentPath === "/teacher-routine" && (
             <RoutineTab teacherInfo={teacherInfo} />
@@ -222,186 +264,166 @@ const TeacherDashboard = () => {
   );
 };
 
-/* ==========================================
-   TAB 1: PROFILE COMPONENT
-   ========================================== */
-const ProfileTab = ({ teacherInfo }) => {
-  const { user } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
+/* ============================================================
+   PROFILE TAB
+   ============================================================ */
+/* ============================================================
+   TAB 1: TEACHER MANAGEMENT (CRUD LIST)
+   ============================================================ */
+const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
+  const [teachers, setTeachers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editId, setEditId] = useState(null); // null = Add mode, otherwise Edit mode
 
-  const initialEmail = teacherInfo.email || user?.email || "";
-
-  const buildEmptyProfile = () => ({
+  const [formData, setFormData] = useState({
     name: "",
     email: "",
     title: "",
     department: "",
-    className: "",
     phone: "",
     bio: "",
     photo: "",
-    education: [],
-    expertise: [],
-    courses: [],
-    achievements: [],
-    totalStudents: "0",
-    totalCourses: "0",
-    rating: "0",
-    joinDate: "",
   });
 
-  const [data, setData] = useState(buildEmptyProfile);
-  const [editData, setEditData] = useState(buildEmptyProfile);
-
-  const fetchProfile = async () => {
-    if (!initialEmail) {
-      setIsLoading(false);
-      setIsEditing(true);
-      return;
-    }
-
+  // ✅ Fetch All Teachers
+  const fetchAllTeachers = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(
-        `${API_BASE}/api/teacher-profile/${encodeURIComponent(initialEmail)}`,
-      );
-      if (res.status === 404) {
-        setData({ ...buildEmptyProfile(), email: initialEmail });
-        setEditData({ ...buildEmptyProfile(), email: initialEmail });
-      } else {
-        const resData = await res.json();
-        if (resData.success && resData.profile) {
-          const p = resData.profile;
-          const merged = {
-            name: p.name || "",
-            email: p.email || initialEmail,
-            title: p.designation || "",
-            department: p.department || "",
-            className: p.className || "",
-            phone: p.phone || "",
-            bio: p.bio || "",
-            photo: p.profileImage || "",
-            education: p.education || [],
-            expertise: p.expertise || [],
-            courses: p.courses || [],
-            achievements: p.achievements || [],
-            totalStudents: p.totalStudents || "0",
-            totalCourses: p.totalCourses || "0",
-            rating: p.rating || "0",
-            joinDate: p.joinDate || "",
-          };
-          setData(merged);
-          setEditData(merged);
-        }
+      const res = await fetch(`${API_BASE}/api/teacher-profiles/all`);
+      const resData = await res.json();
+      if (resData.success) {
+        setTeachers(resData.profiles || []);
       }
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching teachers:", err);
+      Swal.fire("Error", "Failed to load teachers list", "error");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchProfile();
-  }, [initialEmail]);
+    fetchAllTeachers();
+  }, []);
 
-  const handleSave = async () => {
-    if (!editData.name.trim()) {
-      return Swal.fire({ icon: "warning", title: "Teacher Name is required" });
-    }
-    if (!editData.email.trim()) {
-      return Swal.fire({ icon: "warning", title: "Email is required" });
+  // ✅ Open Form for Add
+  const handleAddNew = () => {
+    setEditId(null);
+    setFormData({
+      name: "",
+      email: "",
+      title: "Teacher",
+      department: "",
+      phone: "",
+      bio: "",
+      photo: "",
+    });
+    setShowForm(true);
+  };
+
+  // ✅ Open Form for Edit
+  const handleEdit = (teacher) => {
+    setEditId(teacher._id);
+    setFormData({
+      name: teacher.name || "",
+      email: teacher.email || "",
+      title: teacher.designation || "",
+      department: teacher.department || "",
+      phone: teacher.phone || "",
+      bio: teacher.bio || "",
+      photo: teacher.profileImage || "",
+    });
+    setShowForm(true);
+  };
+
+  // ✅ Save (Add or Update)
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!formData.name.trim() || !formData.email.trim()) {
+      return Swal.fire("Warning", "Name and Email are required", "warning");
     }
 
     setIsSaving(true);
     try {
+      // Find original email if editing
+      const existing = teachers.find((t) => t._id === editId);
+      const originalEmail = existing ? existing.email : formData.email;
+
       const res = await fetch(`${API_BASE}/api/teacher-profile/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: editData.email,
-          originalEmail: data.email || initialEmail,
-          name: editData.name,
-          designation: editData.title,
-          department: editData.department,
-          className: editData.className,
-          phone: editData.phone,
-          bio: editData.bio,
-          profileImage: editData.photo,
-          education: editData.education,
-          expertise: editData.expertise,
-          courses: editData.courses,
-          achievements: editData.achievements,
-          totalStudents: editData.totalStudents,
-          totalCourses: editData.totalCourses,
-          rating: editData.rating,
+          email: formData.email.toLowerCase().trim(),
+          originalEmail: originalEmail,
+          name: formData.name.trim(),
+          designation: formData.title,
+          department: formData.department,
+          phone: formData.phone,
+          bio: formData.bio,
+          profileImage: formData.photo,
         }),
       });
-      const resData = await res.json();
-      if (resData.success) {
-        setData(editData);
-        setIsEditing(false);
-        const storedInfo = JSON.parse(
-          localStorage.getItem("teacherInfo") || "{}",
-        );
-        localStorage.setItem(
-          "teacherInfo",
-          JSON.stringify({
-            ...storedInfo,
-            email: editData.email,
-            name: editData.name,
-          }),
-        );
-        localStorage.setItem("teacherEmail", editData.email);
 
-        Swal.fire({
-          icon: "success",
-          title: "Profile Saved!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
+      const resData = await res.json();
+
+      if (!res.ok || !resData.success) {
+        throw new Error(resData.message || "Failed to save");
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: editId ? "Teacher Updated!" : "Teacher Added!",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      setShowForm(false);
+      fetchAllTeachers(); // Refresh list
+
+      // If editing the currently logged-in teacher, update sidebar
+      if (onProfileUpdate && formData.email === teacherInfo.email) {
+        onProfileUpdate();
       }
     } catch (err) {
-      Swal.fire({ icon: "error", title: "Failed to save profile" });
+      Swal.fire("Error", err.message, "error");
     } finally {
       setIsSaving(false);
     }
   };
 
-  const handleDelete = async () => {
-    const result = await Swal.fire({
+  // ✅ Delete Teacher
+  const handleDelete = async (id, name) => {
+    const confirm = await Swal.fire({
       title: "Are you sure?",
-      text: "This will permanently delete your profile!",
+      text: `You are about to delete "${name}"'s profile. This cannot be undone!`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       confirmButtonText: "Yes, delete it!",
     });
 
-    if (result.isConfirmed) {
-      try {
-        const emailToDelete = data.email || initialEmail;
-        const res = await fetch(
-          `${API_BASE}/api/teacher-profile/delete/${encodeURIComponent(emailToDelete)}`,
-          {
-            method: "DELETE",
-          },
-        );
-        if (res.ok) {
-          setData(buildEmptyProfile());
-          setEditData(buildEmptyProfile());
-          setIsEditing(false);
-          Swal.fire("Deleted!", "Your profile has been deleted.", "success");
-        }
-      } catch (err) {
-        Swal.fire("Error", "Failed to delete profile", "error");
+    if (!confirm.isConfirmed) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/api/teacher-profile/by-id/${id}`, {
+        method: "DELETE",
+      });
+      const resData = await res.json();
+
+      if (!res.ok || !resData.success) {
+        throw new Error(resData.message || "Failed to delete");
       }
+
+      Swal.fire("Deleted!", "Teacher profile has been deleted.", "success");
+      fetchAllTeachers(); // Refresh list
+    } catch (err) {
+      Swal.fire("Error", err.message, "error");
     }
   };
 
-  // ✅ Image Upload ফাংশন (ImgBB API Key সহ + Base64 Fallback)
+  // ✅ Image Upload
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -415,287 +437,286 @@ const ProfileTab = ({ teacherInfo }) => {
     }
 
     const apiKey = import.meta.env.VITE_IMAGEBB_API_KEY;
-    if (!apiKey) {
-      return Swal.fire({
-        icon: "error",
-        title: "ImgBB API Key Missing",
-        text: "VITE_IMAGEBB_API_KEY environment variable set করুন।",
-      });
-    }
+    if (!apiKey) return Swal.fire("Error", "ImgBB API Key Missing", "error");
 
     Swal.fire({
       title: "Uploading Image...",
-      text: "Please wait while we upload your profile picture.",
       allowOutsideClick: false,
       didOpen: () => Swal.showLoading(),
     });
 
     try {
-      const formData = new FormData();
-      formData.append("image", file);
-
+      const data = new FormData();
+      data.append("image", file);
       const response = await fetch(
         `https://api.imgbb.com/1/upload?key=${apiKey}`,
-        { method: "POST", body: formData },
+        {
+          method: "POST",
+          body: data,
+        },
       );
-
       const result = await response.json();
 
       if (result.success) {
-        setEditData((prev) => ({ ...prev, photo: result.data.url }));
+        setFormData((prev) => ({ ...prev, photo: result.data.url }));
         Swal.close();
-        Swal.fire({
-          icon: "success",
-          title: "Image Uploaded!",
-          timer: 1500,
-          showConfirmButton: false,
-        });
       } else {
-        throw new Error(result.error?.message || "Upload failed");
+        throw new Error("Upload failed");
       }
     } catch (error) {
-      console.error("ImgBB Error:", error);
       Swal.close();
-      Swal.fire({
-        icon: "error",
-        title: "Image Upload Failed",
-        text: "ImgBB API key check করুন অথবা অন্য ছবি দিয়ে try করুন।",
-      });
+      Swal.fire("Error", "Image Upload Failed", "error");
     }
   };
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="text-center p-10">
         <FaSpinner className="animate-spin text-4xl text-teal-600 mx-auto" />
+        <p className="mt-2 text-gray-500">Loading Teachers...</p>
       </div>
     );
-
-  const isNewProfile = !data.name;
+  }
 
   return (
     <div className="space-y-6 pb-10">
       {/* Header Banner */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
-        <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] h-32 md:h-40 relative flex items-center justify-end px-6 gap-3">
-          {!isEditing ? (
-            <div className="flex gap-2">
-              {isNewProfile ? (
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-lg animate-pulse"
-                >
-                  <FaPlus /> Add Teacher Profile
-                </button>
-              ) : (
-                <>
+      <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] rounded-2xl p-6 text-white flex justify-between items-center shadow-md">
+        <div>
+          <h2 className="text-2xl font-bold">Teacher Management</h2>
+          <p className="text-sm opacity-80">
+            Manage all teacher profiles (CRUD)
+          </p>
+        </div>
+        <button
+          onClick={handleAddNew}
+          className="bg-green-500 hover:bg-green-600 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-lg transition-all"
+        >
+          <FaPlus /> Add New Teacher
+        </button>
+      </div>
+
+      {/* Teachers Grid */}
+      {/* Teachers Grid */}
+      {teachers.length === 0 ? (
+        <div className="bg-white p-10 rounded-xl shadow-sm border border-gray-200 text-center">
+          <FaUser className="text-6xl text-gray-300 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-gray-700">No Teachers Found</h3>
+          <p className="text-gray-500">
+            Click "Add New Teacher" to create one.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {teachers.map((teacher) => (
+            <div
+              key={teacher._id}
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all flex flex-col"
+            >
+              {/* 👇 উপরের ব্যাকগ্রাউন্ড কালার (h-24) */}
+              <div className="h-24 bg-teal-50 relative">
+                {/* Actions (Edit/Delete) */}
+                <div className="absolute top-3 right-3 flex gap-2 z-20">
                   <button
-                    onClick={() => setIsEditing(true)}
-                    className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all"
+                    onClick={() => handleEdit(teacher)}
+                    className="bg-white text-blue-600 p-2 rounded-full shadow hover:bg-blue-50"
+                    title="Edit"
                   >
-                    <FaEdit /> Edit Profile
+                    <FaEdit size={14} />
                   </button>
                   <button
-                    onClick={handleDelete}
-                    className="bg-red-500/80 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all"
+                    onClick={() => handleDelete(teacher._id, teacher.name)}
+                    className="bg-white text-red-600 p-2 rounded-full shadow hover:bg-red-50"
+                    title="Delete"
                   >
-                    <FaTrash /> Delete
+                    <FaTrash size={14} />
                   </button>
-                </>
-              )}
+                </div>
+              </div>
+
+              {/* 👇 ছবি এবং টেক্সট এরিয়া (relative z-10 যোগ করা হয়েছে) */}
+              <div className="px-6 pb-6 -mt-12 flex flex-col items-center text-center relative z-10">
+                {/* Avatar / Image */}
+                <div className="w-24 h-24 rounded-full bg-white shadow-md border-4 border-white overflow-hidden mb-3">
+                  {teacher.profileImage ? (
+                    <img
+                      src={teacher.profileImage}
+                      alt={teacher.name}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center text-3xl text-gray-400 font-bold rounded-full">
+                      {teacher.name?.charAt(0) || "T"}
+                    </div>
+                  )}
+                </div>
+
+                <h3 className="text-lg font-bold text-gray-800 flex items-center gap-1">
+                  {teacher.name} <MdVerified className="text-blue-500" />
+                </h3>
+                <p className="text-sm text-teal-600 font-semibold mb-1">
+                  {teacher.designation || "Teacher"}
+                </p>
+                <p className="text-xs text-gray-500 mb-3">{teacher.email}</p>
+
+                <div className="w-full bg-gray-50 rounded-lg p-3 text-sm text-left space-y-1">
+                  <p className="text-gray-600 flex items-center gap-2">
+                    <FaBuilding className="text-gray-400" />{" "}
+                    {teacher.department || "No Dept"}
+                  </p>
+                  <p className="text-gray-600 flex items-center gap-2">
+                    <FaEnvelope className="text-gray-400" />{" "}
+                    {teacher.phone || "No Phone"}
+                  </p>
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="flex gap-2">
+          ))}
+        </div>
+      )}
+
+      {/* Add / Edit Modal Form */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="bg-gray-50 p-4 border-b flex justify-between items-center">
+              <h3 className="font-bold text-lg text-gray-800">
+                {editId ? "Edit Teacher Profile" : "Add New Teacher"}
+              </h3>
+              <button
+                onClick={() => setShowForm(false)}
+                className="text-gray-400 hover:text-red-500"
+              >
+                <FaTimes size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4">
+              {/* Photo Upload */}
+              <div className="flex justify-center mb-4">
+                <div className="relative">
+                  <div className="w-24 h-24 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
+                    {formData.photo ? (
+                      <img
+                        src={formData.photo}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <FaCamera className="text-gray-400 text-2xl" />
+                    )}
+                  </div>
+                  <label className="absolute bottom-0 right-0 bg-teal-600 text-white p-1.5 rounded-full cursor-pointer hover:bg-teal-700">
+                    <FaCamera size={12} />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleImageUpload}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">
+                    Designation
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) =>
+                      setFormData({ ...formData, title: e.target.value })
+                    }
+                    className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">
+                    Department
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.department}
+                    onChange={(e) =>
+                      setFormData({ ...formData, department: e.target.value })
+                    }
+                    className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    Phone
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-sm font-semibold text-gray-700">
+                    Bio
+                  </label>
+                  <textarea
+                    rows="3"
+                    value={formData.bio}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bio: e.target.value })
+                    }
+                    className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-50 border-t flex justify-end gap-2">
+              <button
+                onClick={() => setShowForm(false)}
+                className="px-4 py-2 rounded-lg font-bold text-gray-600 bg-gray-200 hover:bg-gray-300"
+              >
+                Cancel
+              </button>
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all"
+                className="px-4 py-2 rounded-lg font-bold text-white bg-teal-600 hover:bg-teal-700 flex items-center gap-2"
               >
                 {isSaving ? <FaSpinner className="animate-spin" /> : <FaSave />}{" "}
-                Save Profile
+                Save Teacher
               </button>
-              <button
-                onClick={() => {
-                  setIsEditing(false);
-                  setEditData(data);
-                }}
-                className="bg-gray-500/80 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition-all"
-              >
-                <FaTimes /> Cancel
-              </button>
-            </div>
-          )}
-        </div>
-
-        <div className="px-6 pb-6 relative flex flex-col md:flex-row items-center md:items-end gap-6 -mt-16 md:-mt-12">
-          <div className="relative">
-            <div className="w-28 h-28 md:w-32 md:h-32 rounded-2xl bg-white p-1.5 shadow-lg border-4 border-white flex items-center justify-center text-6xl bg-teal-50 overflow-hidden">
-              {(isEditing ? editData.photo : data.photo) ? (
-                <img
-                  src={isEditing ? editData.photo : data.photo}
-                  alt="Profile"
-                  className="w-full h-full object-cover rounded-xl"
-                />
-              ) : (
-                <span>👨‍🏫</span>
-              )}
-            </div>
-
-            {isEditing && (
-              <label className="absolute bottom-0 right-0 bg-teal-600 text-white p-2 rounded-full border-2 border-white hover:bg-teal-700 cursor-pointer">
-                <FaCamera size={12} />
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-              </label>
-            )}
-          </div>
-
-          <div className="text-center md:text-left flex-grow w-full">
-            {isEditing ? (
-              <input
-                type="text"
-                placeholder="Teacher Name *"
-                value={editData.name}
-                onChange={(e) =>
-                  setEditData({ ...editData, name: e.target.value })
-                }
-                className="text-2xl font-bold border-b-2 border-teal-500 outline-none w-full max-w-md bg-transparent mb-1"
-              />
-            ) : (
-              <div className="flex items-center justify-center md:justify-start gap-2 mb-1">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-                  {data.name || "No Profile Created"}
-                </h1>
-                {data.name && <MdVerified className="text-blue-500" />}
-              </div>
-            )}
-
-            <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-3 text-sm text-gray-500">
-              <span className="flex items-center gap-1.5 bg-gray-100 px-3 py-1 rounded-full">
-                <FaEnvelope className="text-teal-600" />{" "}
-                {data.email || "No Email Set"}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Details Section */}
-      {(isEditing || !isNewProfile) && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2">
-            Profile Details
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* ✅ Email Field */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                <FaEnvelope className="inline mr-1 text-teal-600" /> Your Email
-                Address
-              </label>
-              {isEditing ? (
-                <input
-                  type="email"
-                  placeholder="your.email@example.com"
-                  value={editData.email}
-                  onChange={(e) =>
-                    setEditData({ ...editData, email: e.target.value })
-                  }
-                  className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
-                />
-              ) : (
-                <p className="text-gray-800 font-semibold bg-gray-50 p-2 rounded-lg">
-                  {data.email || "Not set"}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Designation / Title
-              </label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  placeholder="e.g. Senior Teacher"
-                  value={editData.title}
-                  onChange={(e) =>
-                    setEditData({ ...editData, title: e.target.value })
-                  }
-                  className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
-                />
-              ) : (
-                <p className="text-gray-800 font-semibold bg-gray-50 p-2 rounded-lg">
-                  {data.title || "Not set"}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                <FaBuilding className="inline mr-1 text-teal-600" /> Department
-              </label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  placeholder="e.g. Islamic Studies"
-                  value={editData.department}
-                  onChange={(e) =>
-                    setEditData({ ...editData, department: e.target.value })
-                  }
-                  className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
-                />
-              ) : (
-                <p className="text-gray-800 font-semibold bg-gray-50 p-2 rounded-lg">
-                  {data.department || "Not set"}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number
-              </label>
-              {isEditing ? (
-                <input
-                  type="text"
-                  placeholder="+880 1..."
-                  value={editData.phone}
-                  onChange={(e) =>
-                    setEditData({ ...editData, phone: e.target.value })
-                  }
-                  className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
-                />
-              ) : (
-                <p className="text-gray-800 font-semibold bg-gray-50 p-2 rounded-lg">
-                  {data.phone || "Not set"}
-                </p>
-              )}
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Biography / About
-              </label>
-              {isEditing ? (
-                <textarea
-                  placeholder="Write something about yourself..."
-                  value={editData.bio}
-                  onChange={(e) =>
-                    setEditData({ ...editData, bio: e.target.value })
-                  }
-                  rows="3"
-                  className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
-                />
-              ) : (
-                <p className="text-gray-800 bg-gray-50 p-3 rounded-lg min-h-[60px] whitespace-pre-wrap">
-                  {data.bio || "No bio added yet."}
-                </p>
-              )}
             </div>
           </div>
         </div>
@@ -703,10 +724,9 @@ const ProfileTab = ({ teacherInfo }) => {
     </div>
   );
 };
-
-/* ==========================================
-   TAB 2: ROUTINE COMPONENT
-   ========================================== */
+/* ============================================================
+   ROUTINE TAB — unchanged (works via email)
+   ============================================================ */
 const RoutineTab = ({ teacherInfo }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -720,7 +740,7 @@ const RoutineTab = ({ teacherInfo }) => {
     link: "",
   });
 
-  const email = teacherInfo.email || "";
+  const email = (teacherInfo.email || "").toLowerCase().trim();
   const days = [
     "Saturday",
     "Sunday",
@@ -731,7 +751,11 @@ const RoutineTab = ({ teacherInfo }) => {
     "Friday",
   ];
 
-  const fetchProfile = async () => {
+  const fetchProfile = useCallback(async () => {
+    if (!email) {
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch(
         `${API_BASE}/api/teacher-profile/${encodeURIComponent(email)}`,
@@ -743,11 +767,11 @@ const RoutineTab = ({ teacherInfo }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [email]);
 
   useEffect(() => {
     fetchProfile();
-  }, [email]);
+  }, [fetchProfile]);
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -760,34 +784,32 @@ const RoutineTab = ({ teacherInfo }) => {
           body: JSON.stringify(form),
         },
       );
-      if ((await res.json()).success) {
-        fetchProfile();
-        setShowAdd(false);
-        setForm({
-          day: "Saturday",
-          subject: "",
-          class: "",
-          time: "",
-          room: "",
-          link: "",
-        });
+      const resData = await res.json();
+      if (!res.ok || !resData.success) {
+        throw new Error(resData.message || `Error ${res.status}`);
       }
+      fetchProfile();
+      setShowAdd(false);
+      setForm({
+        day: "Saturday",
+        subject: "",
+        class: "",
+        time: "",
+        room: "",
+        link: "",
+      });
     } catch (e) {
-      Swal.fire("Error", "Network issue", "error");
+      Swal.fire("Error", e.message || "Network issue", "error");
     }
   };
 
   const handleDelete = async (id) => {
-    if (
-      !(
-        await Swal.fire({
-          title: "Delete?",
-          icon: "warning",
-          showCancelButton: true,
-        })
-      ).isConfirmed
-    )
-      return;
+    const confirm = await Swal.fire({
+      title: "Delete?",
+      icon: "warning",
+      showCancelButton: true,
+    });
+    if (!confirm.isConfirmed) return;
     try {
       await fetch(
         `${API_BASE}/api/teacher-profile/${encodeURIComponent(email)}/schedule/${id}`,
@@ -802,7 +824,7 @@ const RoutineTab = ({ teacherInfo }) => {
   const schedule = profile?.classSchedule || [];
   const grouped = {};
   days.forEach((d) => (grouped[d] = []));
-  schedule.forEach((s) => grouped[s.day].push(s));
+  schedule.forEach((s) => grouped[s.day]?.push(s));
 
   return (
     <div className="space-y-6">
@@ -853,6 +875,7 @@ const RoutineTab = ({ teacherInfo }) => {
                           <a
                             href={c.link}
                             target="_blank"
+                            rel="noreferrer"
                             className="text-xs text-teal-600 mt-1 inline-block"
                           >
                             <FaLink /> Join
@@ -943,16 +966,20 @@ const RoutineTab = ({ teacherInfo }) => {
   );
 };
 
-/* ==========================================
-   TAB 3: PAYMENT COMPONENT
-   ========================================== */
+/* ============================================================
+   PAYMENT TAB — unchanged
+   ============================================================ */
 const PaymentTab = ({ teacherInfo }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const email = teacherInfo.email || "";
+  const email = (teacherInfo.email || "").toLowerCase().trim();
 
   useEffect(() => {
     const fetchP = async () => {
+      if (!email) {
+        setLoading(false);
+        return;
+      }
       try {
         const res = await fetch(
           `${API_BASE}/api/teacher-profile/${encodeURIComponent(email)}`,
@@ -960,6 +987,7 @@ const PaymentTab = ({ teacherInfo }) => {
         const data = await res.json();
         setProfile(data.success ? data.profile : null);
       } catch (e) {
+        console.error(e);
       } finally {
         setLoading(false);
       }
@@ -1035,7 +1063,11 @@ const PaymentTab = ({ teacherInfo }) => {
                   <td className="p-3">{p.date}</td>
                   <td className="p-3">
                     <span
-                      className={`px-2 py-1 rounded text-xs ${p.status === "Paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
+                      className={`px-2 py-1 rounded text-xs ${
+                        p.status === "Paid"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
                     >
                       {p.status}
                     </span>
