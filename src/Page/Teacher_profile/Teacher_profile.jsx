@@ -25,7 +25,7 @@ import { useAuth } from "../../Provider/AuthProvider";
 const API_BASE =
   (typeof process !== "undefined" && process.env?.REACT_APP_API_URL) ||
   (typeof window !== "undefined" && window.location.hostname === "localhost"
-    ? "http://localhost:5000"
+    ? "http://api.tarbiyahonline.com"
     : "https://api.tarbiyahonline.com");
 
 const TeacherProfile = () => {

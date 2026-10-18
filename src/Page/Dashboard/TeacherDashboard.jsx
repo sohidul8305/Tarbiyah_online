@@ -70,25 +70,11 @@ const TeacherDashboard = () => {
 
   const currentPath = location.pathname;
 
-  /* ------------------------------------------------------------
-     REFRESH teacher info from localStorage + Firebase auth
-     - Firebase user বদলালে stale data clear করবে
-     - _id track করবে
-     ------------------------------------------------------------ */
   const refreshTeacherInfo = useCallback(() => {
     const authEmail = (user?.email || "").toLowerCase().trim();
     const savedEmail = (safeRead("teacherEmail") || "").toLowerCase().trim();
-    const savedTeacherRaw = safeRead("teacherInfo");
 
-    // ⚠️ Stale data detection: Firebase user ≠ localStorage email
     if (authEmail && savedEmail && authEmail !== savedEmail) {
-      console.warn(
-        "⚠️ User changed! Firebase:",
-        authEmail,
-        "| Stored:",
-        savedEmail,
-        "→ clearing stale data",
-      );
       localStorage.removeItem("teacherInfo");
       localStorage.removeItem("teacherEmail");
       safeWrite("teacherEmail", authEmail);
@@ -109,9 +95,6 @@ const TeacherDashboard = () => {
     refreshTeacherInfo();
   }, [refreshTeacherInfo]);
 
-  /* ------------------------------------------------------------
-     LOGOUT — clear ALL teacher-specific data
-     ------------------------------------------------------------ */
   const handleLogout = async () => {
     try {
       await logOut();
@@ -153,7 +136,6 @@ const TeacherDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Mobile Header */}
       <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center">
         <h1 className="text-sm font-bold text-gray-800">Teacher Panel</h1>
         <button
@@ -165,13 +147,8 @@ const TeacherDashboard = () => {
       </div>
 
       <div className="flex flex-grow relative overflow-hidden">
-        {/* SIDEBAR */}
         <aside
-          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-transform duration-300 h-screen md:h-auto overflow-y-auto ${
-            isSidebarOpen
-              ? "translate-x-0"
-              : "-translate-x-full md:translate-x-0"
-          }`}
+          className={`fixed md:relative z-50 w-72 md:w-64 bg-white border-r border-gray-200 shadow-lg md:shadow-sm transition-transform duration-300 h-screen md:h-auto overflow-y-auto ${isSidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}
         >
           <div className="p-4 bg-gradient-to-r from-[#004d4d] to-[#006666] text-white">
             <div className="flex items-center gap-3">
@@ -197,18 +174,13 @@ const TeacherDashboard = () => {
                   key={item.id}
                   to={item.path}
                   onClick={() => setIsSidebarOpen(false)}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${
-                    isActive
-                      ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"
-                  }`}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all text-sm ${isActive ? "bg-teal-50 text-[#004d4d] font-bold shadow-sm" : "text-gray-700 hover:bg-gray-50 hover:text-[#004d4d]"}`}
                 >
                   <span className="text-lg">{item.icon}</span>
                   <span>{item.label}</span>
                 </Link>
               );
             })}
-
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 transition-all mt-4 border-t border-gray-200 pt-4"
@@ -226,7 +198,6 @@ const TeacherDashboard = () => {
           />
         )}
 
-        {/* MAIN CONTENT */}
         <main className="flex-grow p-4 md:p-6 overflow-y-auto h-screen w-full">
           <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex justify-between items-center">
             <div>
@@ -252,9 +223,7 @@ const TeacherDashboard = () => {
               onProfileUpdate={refreshTeacherInfo}
             />
           )}
-          {currentPath === "/teacher-routine" && (
-            <RoutineTab teacherInfo={teacherInfo} />
-          )}
+          {currentPath === "/teacher-routine" && <RoutineTab />}
           {currentPath === "/teacher-payment" && (
             <PaymentTab teacherInfo={teacherInfo} />
           )}
@@ -265,17 +234,14 @@ const TeacherDashboard = () => {
 };
 
 /* ============================================================
-   PROFILE TAB
-   ============================================================ */
-/* ============================================================
-   TAB 1: TEACHER MANAGEMENT (CRUD LIST)
+   TAB 1: TEACHER MANAGEMENT (CRUD)
    ============================================================ */
 const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
   const [teachers, setTeachers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [editId, setEditId] = useState(null); // null = Add mode, otherwise Edit mode
+  const [editId, setEditId] = useState(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -283,21 +249,19 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
     title: "",
     department: "",
     phone: "",
+    baseSalary: "",
+    perClassRate: "",
     bio: "",
     photo: "",
   });
 
-  // ✅ Fetch All Teachers
   const fetchAllTeachers = async () => {
     setIsLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/teacher-profiles/all`);
       const resData = await res.json();
-      if (resData.success) {
-        setTeachers(resData.profiles || []);
-      }
+      if (resData.success) setTeachers(resData.profiles || []);
     } catch (err) {
-      console.error("Error fetching teachers:", err);
       Swal.fire("Error", "Failed to load teachers list", "error");
     } finally {
       setIsLoading(false);
@@ -308,7 +272,6 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
     fetchAllTeachers();
   }, []);
 
-  // ✅ Open Form for Add
   const handleAddNew = () => {
     setEditId(null);
     setFormData({
@@ -317,13 +280,14 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
       title: "Teacher",
       department: "",
       phone: "",
+      baseSalary: "",
+      perClassRate: "",
       bio: "",
       photo: "",
     });
     setShowForm(true);
   };
 
-  // ✅ Open Form for Edit
   const handleEdit = (teacher) => {
     setEditId(teacher._id);
     setFormData({
@@ -334,11 +298,12 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
       phone: teacher.phone || "",
       bio: teacher.bio || "",
       photo: teacher.profileImage || "",
+      baseSalary: teacher.baseSalary || "",
+      perClassRate: teacher.perClassRate || "",
     });
     setShowForm(true);
   };
 
-  // ✅ Save (Add or Update)
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.email.trim()) {
@@ -347,7 +312,6 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
 
     setIsSaving(true);
     try {
-      // Find original email if editing
       const existing = teachers.find((t) => t._id === editId);
       const originalEmail = existing ? existing.email : formData.email;
 
@@ -363,14 +327,14 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
           phone: formData.phone,
           bio: formData.bio,
           profileImage: formData.photo,
+          baseSalary: Number(formData.baseSalary) || 0,
+          perClassRate: Number(formData.perClassRate) || 0,
         }),
       });
 
       const resData = await res.json();
-
-      if (!res.ok || !resData.success) {
+      if (!res.ok || !resData.success)
         throw new Error(resData.message || "Failed to save");
-      }
 
       Swal.fire({
         icon: "success",
@@ -378,14 +342,10 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
         timer: 1500,
         showConfirmButton: false,
       });
-
       setShowForm(false);
-      fetchAllTeachers(); // Refresh list
-
-      // If editing the currently logged-in teacher, update sidebar
-      if (onProfileUpdate && formData.email === teacherInfo.email) {
+      fetchAllTeachers();
+      if (onProfileUpdate && formData.email === teacherInfo.email)
         onProfileUpdate();
-      }
     } catch (err) {
       Swal.fire("Error", err.message, "error");
     } finally {
@@ -393,17 +353,14 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
     }
   };
 
-  // ✅ Delete Teacher
   const handleDelete = async (id, name) => {
     const confirm = await Swal.fire({
       title: "Are you sure?",
-      text: `You are about to delete "${name}"'s profile. This cannot be undone!`,
+      text: `Delete "${name}"'s profile?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
     });
-
     if (!confirm.isConfirmed) return;
 
     try {
@@ -411,30 +368,24 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
         method: "DELETE",
       });
       const resData = await res.json();
-
-      if (!res.ok || !resData.success) {
+      if (!res.ok || !resData.success)
         throw new Error(resData.message || "Failed to delete");
-      }
-
       Swal.fire("Deleted!", "Teacher profile has been deleted.", "success");
-      fetchAllTeachers(); // Refresh list
+      fetchAllTeachers();
     } catch (err) {
       Swal.fire("Error", err.message, "error");
     }
   };
 
-  // ✅ Image Upload
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 2 * 1024 * 1024)
       return Swal.fire(
         "Warning",
         "File size should be less than 2MB",
         "warning",
       );
-    }
 
     const apiKey = import.meta.env.VITE_IMAGEBB_API_KEY;
     if (!apiKey) return Swal.fire("Error", "ImgBB API Key Missing", "error");
@@ -450,37 +401,28 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
       data.append("image", file);
       const response = await fetch(
         `https://api.imgbb.com/1/upload?key=${apiKey}`,
-        {
-          method: "POST",
-          body: data,
-        },
+        { method: "POST", body: data },
       );
       const result = await response.json();
-
       if (result.success) {
         setFormData((prev) => ({ ...prev, photo: result.data.url }));
         Swal.close();
-      } else {
-        throw new Error("Upload failed");
-      }
+      } else throw new Error("Upload failed");
     } catch (error) {
       Swal.close();
       Swal.fire("Error", "Image Upload Failed", "error");
     }
   };
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <div className="text-center p-10">
         <FaSpinner className="animate-spin text-4xl text-teal-600 mx-auto" />
-        <p className="mt-2 text-gray-500">Loading Teachers...</p>
       </div>
     );
-  }
 
   return (
     <div className="space-y-6 pb-10">
-      {/* Header Banner */}
       <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] rounded-2xl p-6 text-white flex justify-between items-center shadow-md">
         <div>
           <h2 className="text-2xl font-bold">Teacher Management</h2>
@@ -496,8 +438,6 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
         </button>
       </div>
 
-      {/* Teachers Grid */}
-      {/* Teachers Grid */}
       {teachers.length === 0 ? (
         <div className="bg-white p-10 rounded-xl shadow-sm border border-gray-200 text-center">
           <FaUser className="text-6xl text-gray-300 mx-auto mb-3" />
@@ -513,30 +453,23 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
               key={teacher._id}
               className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all flex flex-col"
             >
-              {/* 👇 উপরের ব্যাকগ্রাউন্ড কালার (h-24) */}
               <div className="h-24 bg-teal-50 relative">
-                {/* Actions (Edit/Delete) */}
                 <div className="absolute top-3 right-3 flex gap-2 z-20">
                   <button
                     onClick={() => handleEdit(teacher)}
                     className="bg-white text-blue-600 p-2 rounded-full shadow hover:bg-blue-50"
-                    title="Edit"
                   >
                     <FaEdit size={14} />
                   </button>
                   <button
                     onClick={() => handleDelete(teacher._id, teacher.name)}
                     className="bg-white text-red-600 p-2 rounded-full shadow hover:bg-red-50"
-                    title="Delete"
                   >
                     <FaTrash size={14} />
                   </button>
                 </div>
               </div>
-
-              {/* 👇 ছবি এবং টেক্সট এরিয়া (relative z-10 যোগ করা হয়েছে) */}
               <div className="px-6 pb-6 -mt-12 flex flex-col items-center text-center relative z-10">
-                {/* Avatar / Image */}
                 <div className="w-24 h-24 rounded-full bg-white shadow-md border-4 border-white overflow-hidden mb-3">
                   {teacher.profileImage ? (
                     <img
@@ -550,7 +483,6 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
                     </div>
                   )}
                 </div>
-
                 <h3 className="text-lg font-bold text-gray-800 flex items-center gap-1">
                   {teacher.name} <MdVerified className="text-blue-500" />
                 </h3>
@@ -558,7 +490,6 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
                   {teacher.designation || "Teacher"}
                 </p>
                 <p className="text-xs text-gray-500 mb-3">{teacher.email}</p>
-
                 <div className="w-full bg-gray-50 rounded-lg p-3 text-sm text-left space-y-1">
                   <p className="text-gray-600 flex items-center gap-2">
                     <FaBuilding className="text-gray-400" />{" "}
@@ -575,7 +506,6 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
         </div>
       )}
 
-      {/* Add / Edit Modal Form */}
       {showForm && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -590,9 +520,7 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
                 <FaTimes size={20} />
               </button>
             </div>
-
             <div className="p-6 overflow-y-auto space-y-4">
-              {/* Photo Upload */}
               <div className="flex justify-center mb-4">
                 <div className="relative">
                   <div className="w-24 h-24 rounded-full bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
@@ -686,6 +614,37 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
                     className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
                   />
                 </div>
+
+                {/* স্যালারি ইনপুট */}
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">
+                    Base Salary (৳)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 10000"
+                    value={formData.baseSalary || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, baseSalary: e.target.value })
+                    }
+                    className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-semibold text-gray-700">
+                    Per Class Rate (৳)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 200"
+                    value={formData.perClassRate || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, perClassRate: e.target.value })
+                    }
+                    className="w-full border p-2 rounded-lg outline-none focus:border-teal-500"
+                  />
+                </div>
+
                 <div className="col-span-2">
                   <label className="text-sm font-semibold text-gray-700">
                     Bio
@@ -701,7 +660,6 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
                 </div>
               </div>
             </div>
-
             <div className="p-4 bg-gray-50 border-t flex justify-end gap-2">
               <button
                 onClick={() => setShowForm(false)}
@@ -724,10 +682,13 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
     </div>
   );
 };
+
 /* ============================================================
-   ROUTINE TAB — unchanged (works via email)
+   TAB 2: ROUTINE COMPONENT 
    ============================================================ */
-const RoutineTab = ({ teacherInfo }) => {
+const RoutineTab = () => {
+  const [teachers, setTeachers] = useState([]);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -740,7 +701,6 @@ const RoutineTab = ({ teacherInfo }) => {
     link: "",
   });
 
-  const email = (teacherInfo.email || "").toLowerCase().trim();
   const days = [
     "Saturday",
     "Sunday",
@@ -751,33 +711,43 @@ const RoutineTab = ({ teacherInfo }) => {
     "Friday",
   ];
 
-  const fetchProfile = useCallback(async () => {
-    if (!email) {
-      setLoading(false);
-      return;
-    }
+  useEffect(() => {
+    const fetchTeachers = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/teacher-profiles/all`);
+        const data = await res.json();
+        if (data.success) setTeachers(data.profiles || []);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTeachers();
+  }, []);
+
+  const fetchProfile = async () => {
+    if (!selectedTeacher) return;
     try {
       const res = await fetch(
-        `${API_BASE}/api/teacher-profile/${encodeURIComponent(email)}`,
+        `${API_BASE}/api/teacher-profile/${encodeURIComponent(selectedTeacher.email)}`,
       );
       const data = await res.json();
       setProfile(data.success ? data.profile : null);
     } catch (e) {
       console.error(e);
-    } finally {
-      setLoading(false);
     }
-  }, [email]);
+  };
 
   useEffect(() => {
     fetchProfile();
-  }, [fetchProfile]);
+  }, [selectedTeacher]);
 
   const handleAdd = async (e) => {
     e.preventDefault();
     try {
       const res = await fetch(
-        `${API_BASE}/api/teacher-profile/${encodeURIComponent(email)}/schedule`,
+        `${API_BASE}/api/teacher-profile/${encodeURIComponent(selectedTeacher.email)}/schedule`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -785,9 +755,14 @@ const RoutineTab = ({ teacherInfo }) => {
         },
       );
       const resData = await res.json();
-      if (!res.ok || !resData.success) {
-        throw new Error(resData.message || `Error ${res.status}`);
-      }
+      if (!res.ok || !resData.success) throw new Error(resData.message);
+
+      Swal.fire({
+        icon: "success",
+        title: "Class Added!",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       fetchProfile();
       setShowAdd(false);
       setForm({
@@ -799,27 +774,98 @@ const RoutineTab = ({ teacherInfo }) => {
         link: "",
       });
     } catch (e) {
-      Swal.fire("Error", e.message || "Network issue", "error");
+      Swal.fire("Error", e.message || "Failed to add class", "error");
     }
   };
 
   const handleDelete = async (id) => {
     const confirm = await Swal.fire({
-      title: "Delete?",
+      title: "Delete this class?",
       icon: "warning",
       showCancelButton: true,
     });
     if (!confirm.isConfirmed) return;
     try {
       await fetch(
-        `${API_BASE}/api/teacher-profile/${encodeURIComponent(email)}/schedule/${id}`,
+        `${API_BASE}/api/teacher-profile/${encodeURIComponent(selectedTeacher.email)}/schedule/${id}`,
         { method: "DELETE" },
       );
       fetchProfile();
     } catch (e) {
-      Swal.fire("Error", "Network issue", "error");
+      Swal.fire("Error", "Failed to delete", "error");
     }
   };
+
+  if (loading)
+    return (
+      <div className="text-center p-10">
+        <FaSpinner className="animate-spin text-4xl text-teal-600 mx-auto" />
+      </div>
+    );
+
+  if (!selectedTeacher) {
+    return (
+      <div className="space-y-6 pb-10">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h2 className="text-xl font-bold text-gray-800">
+            Select Teacher for Routine
+          </h2>
+          <p className="text-sm text-gray-500">
+            Click on a teacher to view or manually add their 7-day class
+            routine.
+          </p>
+        </div>
+        {teachers.length === 0 ? (
+          <div className="bg-white p-10 rounded-xl shadow-sm border border-gray-200 text-center">
+            <FaUser className="text-6xl text-gray-300 mx-auto mb-3" />
+            <h3 className="text-lg font-bold text-gray-700">
+              No Teachers Added
+            </h3>
+            <p className="text-gray-500">
+              Go to the Profile tab to add teachers first.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {teachers.map((teacher) => (
+              <div
+                key={teacher._id}
+                onClick={() => setSelectedTeacher(teacher)}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-teal-400 cursor-pointer transition-all flex flex-col"
+              >
+                <div className="h-20 bg-teal-50 relative"></div>
+                <div className="px-6 pb-6 -mt-10 flex flex-col items-center text-center relative z-10">
+                  <div className="w-20 h-20 rounded-full bg-white shadow border-4 border-white overflow-hidden mb-3">
+                    {teacher.profileImage ? (
+                      <img
+                        src={teacher.profileImage}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-teal-100 flex items-center justify-center text-2xl text-teal-700 font-bold">
+                        {teacher.name?.charAt(0) || "T"}
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">
+                    {teacher.name}
+                  </h3>
+                  <p className="text-sm text-teal-600 font-semibold mb-1">
+                    {teacher.designation || "Teacher"}
+                  </p>
+                  <p className="text-xs text-gray-500 mb-4">{teacher.email}</p>
+                  <button className="w-full bg-teal-50 text-teal-700 font-bold py-2 rounded-lg hover:bg-teal-100 transition-colors">
+                    Manage Routine
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   const schedule = profile?.classSchedule || [];
   const grouped = {};
@@ -827,47 +873,89 @@ const RoutineTab = ({ teacherInfo }) => {
   schedule.forEach((s) => grouped[s.day]?.push(s));
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-bold text-gray-800">Class Routine</h2>
-          <p className="text-sm text-gray-500">Your weekly schedule</p>
+    <div className="space-y-6 pb-10">
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => {
+              setSelectedTeacher(null);
+              setProfile(null);
+            }}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition-colors"
+          >
+            <FaTimes size={18} />
+          </button>
+          <div>
+            <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              {selectedTeacher.name}'s Routine
+            </h2>
+            <p className="text-sm text-gray-500">
+              {selectedTeacher.designation} | {selectedTeacher.email}
+            </p>
+          </div>
         </div>
         <button
           onClick={() => setShowAdd(true)}
-          className="bg-teal-600 text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2"
+          className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-md transition-all w-full md:w-auto justify-center"
         >
-          <FaPlusCircle /> Add Class
+          <FaPlusCircle /> Add Class Manually
         </button>
       </div>
 
-      {loading ? (
-        <p>Loading...</p>
+      {schedule.length === 0 ? (
+        <div className="bg-white p-10 rounded-xl shadow-sm border border-gray-200 text-center">
+          <FaCalendarAlt className="text-5xl text-gray-300 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-gray-700">No Classes Yet</h3>
+          <p className="text-gray-500">
+            Click "Add Class Manually" to start building the routine.
+          </p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {days.map(
             (day) =>
               grouped[day].length > 0 && (
                 <div
                   key={day}
-                  className="bg-white border rounded-xl shadow-sm overflow-hidden"
+                  className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden flex flex-col"
                 >
-                  <div className="bg-teal-800 text-white px-4 py-2 font-bold text-sm">
-                    {day}
+                  <div className="bg-teal-800 text-white px-4 py-2 font-bold text-sm flex justify-between items-center">
+                    <span>{day}</span>
+                    <span className="bg-teal-700 text-xs px-2 py-1 rounded-full">
+                      {grouped[day].length} Classes
+                    </span>
                   </div>
-                  <div className="p-3 space-y-2">
+                  <div className="p-3 space-y-3 flex-grow bg-gray-50/50">
                     {grouped[day].map((c, i) => (
                       <div
                         key={i}
-                        className="bg-gray-50 p-3 rounded-lg border relative"
+                        className="bg-white p-3 rounded-lg border border-gray-200 relative group shadow-sm"
                       >
-                        <p className="font-bold text-sm">{c.subject}</p>
-                        <p className="text-xs text-gray-600">
-                          {c.class} • {c.time}
+                        <p className="font-bold text-sm text-gray-800 pr-6">
+                          {c.subject}
+                        </p>
+                        <p className="text-xs text-gray-600 mt-2">
+                          <span className="font-semibold text-teal-600">
+                            Class:
+                          </span>{" "}
+                          {c.class} <br />
+                          <span className="font-semibold text-teal-600">
+                            Time:
+                          </span>{" "}
+                          {c.time}
+                          {c.room && (
+                            <>
+                              <br />
+                              <span className="font-semibold text-teal-600">
+                                Room:
+                              </span>{" "}
+                              {c.room}
+                            </>
+                          )}
                         </p>
                         <button
                           onClick={() => handleDelete(c._id)}
-                          className="absolute top-2 right-2 text-red-500"
+                          className="absolute top-2 right-2 text-gray-300 hover:text-red-500 transition-colors bg-white rounded-full p-1"
                         >
                           <FaTrash size={12} />
                         </button>
@@ -876,9 +964,9 @@ const RoutineTab = ({ teacherInfo }) => {
                             href={c.link}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-xs text-teal-600 mt-1 inline-block"
+                            className="text-xs text-blue-600 font-semibold mt-3 flex items-center gap-1 hover:underline bg-blue-50 p-1.5 rounded"
                           >
-                            <FaLink /> Join
+                            <FaLink size={10} /> Join Meeting
                           </a>
                         )}
                       </div>
@@ -891,74 +979,112 @@ const RoutineTab = ({ teacherInfo }) => {
       )}
 
       {showAdd && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
           <form
             onSubmit={handleAdd}
-            className="bg-white rounded-xl p-6 w-full max-w-md space-y-3"
+            className="bg-white rounded-2xl p-6 w-full max-w-md space-y-4 shadow-2xl"
           >
-            <h3 className="font-bold text-lg">Add Class</h3>
-            <select
-              value={form.day}
-              onChange={(e) => setForm({ ...form, day: e.target.value })}
-              className="w-full border p-2 rounded"
-            >
-              {days.map((d) => (
-                <option key={d}>{d}</option>
-              ))}
-            </select>
-            <input
-              type="text"
-              placeholder="Subject"
-              required
-              value={form.subject}
-              onChange={(e) => setForm({ ...form, subject: e.target.value })}
-              className="w-full border p-2 rounded"
-            />
-            <input
-              type="text"
-              placeholder="Class"
-              required
-              value={form.class}
-              onChange={(e) => setForm({ ...form, class: e.target.value })}
-              className="w-full border p-2 rounded"
-            />
-            <input
-              type="text"
-              placeholder="Time"
-              required
-              value={form.time}
-              onChange={(e) => setForm({ ...form, time: e.target.value })}
-              className="w-full border p-2 rounded"
-            />
-            <input
-              type="text"
-              placeholder="Room"
-              value={form.room}
-              onChange={(e) => setForm({ ...form, room: e.target.value })}
-              className="w-full border p-2 rounded"
-            />
-            <input
-              type="url"
-              placeholder="Meeting Link"
-              value={form.link}
-              onChange={(e) => setForm({ ...form, link: e.target.value })}
-              className="w-full border p-2 rounded"
-            />
-            <div className="flex gap-2 mt-4">
-              <button
-                type="submit"
-                className="flex-1 bg-teal-600 text-white py-2 rounded font-bold"
-              >
-                Save
-              </button>
+            <div className="flex justify-between items-center border-b pb-2">
+              <h3 className="font-bold text-lg text-gray-800">
+                Add Class for {selectedTeacher.name}
+              </h3>
               <button
                 type="button"
                 onClick={() => setShowAdd(false)}
-                className="flex-1 bg-gray-200 py-2 rounded font-bold"
+                className="text-gray-400 hover:text-red-500"
               >
-                Cancel
+                <FaTimes />
               </button>
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <label className="text-xs font-bold text-gray-700">
+                  Select Day *
+                </label>
+                <select
+                  value={form.day}
+                  onChange={(e) => setForm({ ...form, day: e.target.value })}
+                  className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-teal-500 outline-none"
+                >
+                  {days.map((d) => (
+                    <option key={d} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-span-2">
+                <label className="text-xs font-bold text-gray-700">
+                  Subject Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={form.subject}
+                  onChange={(e) =>
+                    setForm({ ...form, subject: e.target.value })
+                  }
+                  className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-teal-500 outline-none"
+                  placeholder="e.g. Quran Studies"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-700">
+                  Class / Batch *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={form.class}
+                  onChange={(e) => setForm({ ...form, class: e.target.value })}
+                  className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-teal-500 outline-none"
+                  placeholder="e.g. Batch A"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-700">
+                  Time *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={form.time}
+                  onChange={(e) => setForm({ ...form, time: e.target.value })}
+                  className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-teal-500 outline-none"
+                  placeholder="e.g. 10:00 AM"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-700">
+                  Room (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={form.room}
+                  onChange={(e) => setForm({ ...form, room: e.target.value })}
+                  className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-teal-500 outline-none"
+                  placeholder="e.g. Room 101"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-700">
+                  Meeting Link (Optional)
+                </label>
+                <input
+                  type="url"
+                  value={form.link}
+                  onChange={(e) => setForm({ ...form, link: e.target.value })}
+                  className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-teal-500 outline-none"
+                  placeholder="https://zoom.us/..."
+                />
+              </div>
+            </div>
+            <button
+              type="submit"
+              className="w-full bg-teal-600 text-white py-2.5 rounded-lg font-bold hover:bg-teal-700 shadow-md mt-4"
+            >
+              Save Class
+            </button>
           </form>
         </div>
       )}
@@ -967,12 +1093,16 @@ const RoutineTab = ({ teacherInfo }) => {
 };
 
 /* ============================================================
-   PAYMENT TAB — unchanged
+   TAB 3: PAYMENT COMPONENT
    ============================================================ */
 const PaymentTab = ({ teacherInfo }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [calcData, setCalcData] = useState(null);
   const email = (teacherInfo.email || "").toLowerCase().trim();
+
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
 
   useEffect(() => {
     const fetchP = async () => {
@@ -986,6 +1116,13 @@ const PaymentTab = ({ teacherInfo }) => {
         );
         const data = await res.json();
         setProfile(data.success ? data.profile : null);
+
+        // অটো স্যালারি ক্যালকুলেটর API কল করা
+        const calcRes = await fetch(
+          `${API_BASE}/api/teacher-salary/calculate/${encodeURIComponent(email)}?month=${currentMonth}&year=${currentYear}`,
+        );
+        const calcResult = await calcRes.json();
+        if (calcResult.success) setCalcData(calcResult);
       } catch (e) {
         console.error(e);
       } finally {
@@ -993,7 +1130,7 @@ const PaymentTab = ({ teacherInfo }) => {
       }
     };
     fetchP();
-  }, [email]);
+  }, [email, currentMonth, currentYear]);
 
   const info = profile?.paymentInfo || {
     totalSalary: 0,
@@ -1012,15 +1149,64 @@ const PaymentTab = ({ teacherInfo }) => {
       .filter((p) => p.status !== "Paid")
       .reduce((s, p) => s + Number(p.amount || 0), 0);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <p className="text-center p-10 text-teal-600 font-bold">Loading...</p>
+    );
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold text-gray-800">Payment & Due</h2>
 
+      {/* ✅ Auto-Calculated Salary */}
+      {/* ✅ Auto-Calculated Salary */}
+      {calcData ? (
+        <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 shadow-sm">
+          <h3 className="font-bold text-teal-800 mb-2">
+            Auto-Calculated Salary for {currentMonth}/{currentYear}
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <p className="text-gray-600">Base Salary</p>
+              <p className="font-bold text-gray-800">
+                ৳{calcData.breakdown.baseSalary}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-600">
+                Class Earnings ({calcData.breakdown.attendedClasses} classes)
+              </p>
+              <p className="font-bold text-green-600">
+                + ৳{calcData.breakdown.classEarnings}
+              </p>
+            </div>
+            <div>
+              <p className="text-gray-600">
+                Absent Deduction ({calcData.breakdown.absentDays} days)
+              </p>
+              <p className="font-bold text-red-600">
+                - ৳{calcData.breakdown.attendanceDeduction}
+              </p>
+            </div>
+            <div className="bg-teal-100 p-2 rounded-lg">
+              <p className="text-teal-800 font-semibold">Net Payable</p>
+              <p className="font-bold text-xl text-teal-900">
+                ৳{calcData.netPayable}
+              </p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+          <strong>⚠️ Salary calculation failed.</strong> Please ensure you have
+          saved Base Salary in the teacher profile, and the backend server is
+          running.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white border rounded-xl p-6 text-center shadow-sm">
-          <p className="text-sm text-gray-500">Total Paid</p>
+          <p className="text-sm text-gray-500">Total Paid (All Time)</p>
           <p className="text-2xl font-bold text-green-600">
             ৳{paid.toLocaleString()}
           </p>
@@ -1032,7 +1218,7 @@ const PaymentTab = ({ teacherInfo }) => {
           </p>
         </div>
         <div className="bg-white border rounded-xl p-6 text-center shadow-sm">
-          <p className="text-sm text-gray-500">Last Payment</p>
+          <p className="text-sm text-gray-500">Last Payment Date</p>
           <p className="text-lg font-bold text-blue-600">
             {history[0]?.date || "N/A"}
           </p>
@@ -1042,7 +1228,10 @@ const PaymentTab = ({ teacherInfo }) => {
       <div className="bg-white border rounded-xl overflow-hidden shadow-sm">
         <div className="p-4 border-b bg-gray-50 font-bold">Payment History</div>
         {history.length === 0 ? (
-          <p className="p-6 text-center text-gray-500">No records yet.</p>
+          <p className="p-6 text-center text-gray-500">
+            No payment records yet. Salary will be calculated automatically as
+            you add classes and mark attendance.
+          </p>
         ) : (
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 text-gray-600">
@@ -1063,11 +1252,7 @@ const PaymentTab = ({ teacherInfo }) => {
                   <td className="p-3">{p.date}</td>
                   <td className="p-3">
                     <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        p.status === "Paid"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
+                      className={`px-2 py-1 rounded text-xs ${p.status === "Paid" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}
                     >
                       {p.status}
                     </span>
