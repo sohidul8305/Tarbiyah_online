@@ -131,7 +131,7 @@ const TeacherCourses = () => {
     } else {
       setTeacherInfo({
         name: user?.displayName || "Ustadh Ahmad",
-        email: user?.email || "teacher@tarabiyah.com",
+        email: user?.email || "",
         phone: "01700000000",
         designation: "Senior Teacher",
         department: "Islamic Studies",

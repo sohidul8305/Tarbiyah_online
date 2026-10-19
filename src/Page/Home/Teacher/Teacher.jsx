@@ -114,9 +114,7 @@ const TeacherLogin = () => {
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
               Teacher Login
             </h2>
-            <p className="text-xs text-gray-400 mt-2">
-              Demo: teacher@tarabiyah.com
-            </p>
+            <p className="text-xs text-gray-400 mt-2"></p>
           </div>
 
           {error && (
