@@ -498,11 +498,6 @@ const Student_admission = () => {
           path: "/admin-students/profile",
           label: "Student Profile",
         },
-        {
-          id: "admission-permission",
-          path: "/admin-students/admission",
-          label: "Admission Permission",
-        },
       ],
     },
     {
