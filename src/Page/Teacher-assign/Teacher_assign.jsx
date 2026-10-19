@@ -35,7 +35,7 @@ import { FiMenu, FiX } from "react-icons/fi";
 const API_BASE = "https://api.tarbiyahonline.com";
 
 // ============================================================
-// ✅ Department → Subjects / Classes / Batches / Keywords
+// ✅ Department → Subjects / Batches / Keywords
 // ============================================================
 const DEPARTMENT_DATA = {
   Elders: {
@@ -45,13 +45,6 @@ const DEPARTMENT_DATA = {
       "Quran Nazera",
       "Bakarah Hifz",
       "Basic Tajweed (Level-1)",
-    ],
-    classes: [
-      "Elders Batch A",
-      "Elders Batch B",
-      "Elders Batch C",
-      "Qaida Nurani Batch",
-      "Bakarah Hifz Batch",
     ],
     batches: [
       "Basic Tazweed 6th Batch",
@@ -74,21 +67,18 @@ const DEPARTMENT_DATA = {
   "Quran Studies": {
     label: "Quran Studies",
     subjects: ["Quran Studies", "Hifzul Quran", "Tarbiyah Quran Studies"],
-    classes: ["Quran Studies Batch A", "Quran Studies Batch B"],
     batches: ["Quran Studies Batch-01", "Quran Studies Batch-02"],
     keywords: ["quran studies", "hifzul quran", "tarbiyah quran"],
   },
   Alimiya: {
     label: "Alimiya",
     subjects: ["Alimiya", "Dawra e Hadith", "Tafsir", "Fiqh", "Hadith"],
-    classes: ["Alimiya Batch A", "Alimiya Batch B"],
     batches: ["Alimiya Batch-01", "Alimiya Batch-02"],
     keywords: ["alimiya", "dawra", "tafsir", "fiqh", "hadith"],
   },
   Diploma: {
     label: "Diploma",
     subjects: ["Diploma in Islamic Studies", "Certificate"],
-    classes: ["Diploma Batch A", "Diploma Batch B"],
     batches: ["Diploma Batch-01", "Diploma Batch-02"],
     keywords: ["diploma"],
   },
@@ -97,7 +87,6 @@ const DEPARTMENT_DATA = {
 const DEFAULT_DEPT_DATA = {
   label: "General",
   subjects: ["General"],
-  classes: ["General Batch"],
   batches: ["General Batch-01"],
   keywords: [],
 };
@@ -134,7 +123,6 @@ const Teacher_assign = () => {
   const [activeMenu, setActiveMenu] = useState("teacher-management");
   const [activeSubMenu, setActiveSubMenu] = useState("teacher-assign");
 
-  // ✅ Current admin এর department
   const [adminDepartment, setAdminDepartment] = useState("");
 
   const [adminInfo, setAdminInfo] = useState({
@@ -150,20 +138,16 @@ const Teacher_assign = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // ✅ Teachers — no hardcoded fallback (department-based)
   const [availableTeachers, setAvailableTeachers] = useState([]);
   const [teachersLoading, setTeachersLoading] = useState(false);
 
   const [teacherInput, setTeacherInput] = useState("");
   const [showTeacherSuggestions, setShowTeacherSuggestions] = useState(false);
   const [filteredTeachers, setFilteredTeachers] = useState([]);
-  const [addingQuickTeacher, setAddingQuickTeacher] = useState(false);
   const inputRef = useRef(null);
 
-  // ✅ Department-specific data
   const deptData = getDeptData(adminDepartment);
   const subjects = deptData.subjects;
-  const classes = deptData.classes;
   const batches = deptData.batches;
 
   const availableDays = [
@@ -179,7 +163,6 @@ const Teacher_assign = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterSubject, setFilterSubject] = useState("All");
-  const [filterClass, setFilterClass] = useState("All");
 
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -189,21 +172,20 @@ const Teacher_assign = () => {
   const [submitting, setSubmitting] = useState(false);
   const [submittingTeacher, setSubmittingTeacher] = useState(false);
 
+  // ✅ Room + Class বাদ
   const initialFormData = {
     teacherId: "",
     teacherName: "",
     subject: "",
-    class: "",
     batch: "",
     days: [],
     time: "",
-    room: "",
     status: "Pending",
     studentsCount: 0,
     rating: 0,
   };
 
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState({ ...initialFormData });
 
   const [newTeacherData, setNewTeacherData] = useState({
     name: "",
@@ -248,7 +230,6 @@ const Teacher_assign = () => {
     }
   }, [user]);
 
-  // ✅ Update newTeacherData default specialization when department ready
   useEffect(() => {
     if (deptData.subjects.length > 0) {
       setNewTeacherData((prev) => ({
@@ -263,23 +244,41 @@ const Teacher_assign = () => {
   // ✅ Check: assignment belongs to my department?
   // ============================================================
   const assignmentBelongsToMyDept = (a) => {
+    // Super admin / no dept restriction
     if (!adminDepartment || adminDepartment === "All") return true;
 
     const target = adminDepartment.toLowerCase().trim();
     const aDept = String(a.department || "")
       .toLowerCase()
       .trim();
-    if (aDept) return aDept === target;
 
-    // Fallback: keyword match
+    // ✅ 1. If assignment has NO department → show it (legacy data / save bug)
+    if (!aDept) {
+      console.log(
+        `⚠️ Assignment "${a.teacherName}" has no department — allowing`,
+      );
+      return true;
+    }
+
+    // ✅ 2. Exact match
+    if (aDept === target) return true;
+
+    // ✅ 3. Partial match (e.g., "elders" ⊂ "quran for elders")
+    if (target.includes(aDept) || aDept.includes(target)) return true;
+
+    // ✅ 4. Keyword fallback (only if dept field truly doesn't match)
     const keywords = deptData.keywords || [];
-    if (keywords.length === 0) return false;
+    if (keywords.length > 0) {
+      const combined =
+        `${a.teacherName || ""} ${a.subject || ""} ${a.batch || ""}`.toLowerCase();
+      if (keywords.some((kw) => combined.includes(kw))) return true;
+    }
 
-    const combined =
-      `${a.teacherName || ""} ${a.subject || ""} ${a.class || ""} ${a.batch || ""}`.toLowerCase();
-    return keywords.some((kw) => combined.includes(kw));
+    console.log(
+      `❌ Dropped "${a.teacherName}": dept="${aDept}" vs target="${target}"`,
+    );
+    return false;
   };
-
   // ============================================================
   // ✅ Check: teacher belongs to my department?
   // ============================================================
@@ -291,7 +290,6 @@ const Teacher_assign = () => {
       .toLowerCase()
       .trim();
     if (tDept) {
-      // Match "Quran For Elders" to "Elders" etc.
       if (tDept === target) return true;
       if (target === "elders" && tDept.includes("elder")) return true;
       if (target.includes(tDept)) return true;
@@ -307,23 +305,39 @@ const Teacher_assign = () => {
   };
 
   // ============================================================
-  // ✅ Fetch assignments — department filtered
+  // ✅ Fetch assignments
   // ============================================================
   const fetchAssignments = async () => {
     try {
-      const data = await safeFetchJSON(`${API_BASE}/api/teacher-assign/all`);
+      // ✅ Cache busting — browser/proxy cache bypass
+      const url = `${API_BASE}/api/teacher-assign/all?_t=${Date.now()}`;
+      const data = await safeFetchJSON(url, { cache: "no-store" });
+
+      console.log("═══════════════════════════════════");
+      console.log("📥 GET /api/teacher-assign/all");
+      console.log("   Admin dept:", adminDepartment);
+      console.log("   Response:", data);
 
       if (data.success && Array.isArray(data.assignments)) {
-        // ✅ Frontend safety filter
+        console.log(`📦 Total from server: ${data.assignments.length}`);
+        data.assignments.forEach((a, i) => {
+          console.log(
+            `   ${i + 1}. teacher="${a.teacherName}" | dept="${a.department || "(empty)"}" | subject="${a.subject}"`,
+          );
+        });
+
         const filtered = data.assignments.filter((a) =>
           assignmentBelongsToMyDept(a),
         );
 
-        setAssignments(filtered);
         console.log(
-          `✅ [${adminDepartment}] Assignments: ${filtered.length}/${data.assignments.length}`,
+          `✅ After filter for "${adminDepartment}": ${filtered.length}`,
         );
+        console.log("═══════════════════════════════════");
+
+        setAssignments(filtered);
       } else {
+        console.warn("⚠️ API failed:", data);
         setAssignments([]);
       }
     } catch (err) {
@@ -333,7 +347,7 @@ const Teacher_assign = () => {
   };
 
   // ============================================================
-  // ✅ Fetch teachers — department filtered (no hardcoded fallback)
+  // ✅ Fetch teachers
   // ============================================================
   const fetchTeachers = async () => {
     if (!adminDepartment) {
@@ -347,7 +361,6 @@ const Teacher_assign = () => {
 
       let teachers = [];
 
-      // Fetch from API
       const data = await safeFetchJSON(
         `${API_BASE}/api/teacher-attendance/teachers`,
       );
@@ -358,9 +371,6 @@ const Teacher_assign = () => {
 
       console.log(
         `✅ [${adminDepartment}] Teachers loaded: ${teachers.length}`,
-      );
-      teachers.forEach((t) =>
-        console.log("   →", t.name, "|", t.designation || ""),
       );
 
       setAvailableTeachers(teachers);
@@ -374,7 +384,6 @@ const Teacher_assign = () => {
     }
   };
 
-  // ✅ Re-fetch when department changes
   useEffect(() => {
     if (!adminDepartment) return;
     fetchAssignments();
@@ -548,12 +557,11 @@ const Teacher_assign = () => {
       (a.teacherName || "").toLowerCase().includes(s) ||
       (a.teacherId || "").toLowerCase().includes(s) ||
       (a.subject || "").toLowerCase().includes(s) ||
-      (a.class || "").toLowerCase().includes(s);
+      (a.batch || "").toLowerCase().includes(s);
     const matchesStatus = filterStatus === "All" || a.status === filterStatus;
     const matchesSubject =
       filterSubject === "All" || a.subject === filterSubject;
-    const matchesClass = filterClass === "All" || a.class === filterClass;
-    return matchesSearch && matchesStatus && matchesSubject && matchesClass;
+    return matchesSearch && matchesStatus && matchesSubject;
   });
 
   const uniqueStatuses = [
@@ -563,10 +571,6 @@ const Teacher_assign = () => {
   const uniqueSubjects = [
     "All",
     ...new Set(assignments.map((a) => a.subject).filter(Boolean)),
-  ];
-  const uniqueClasses = [
-    "All",
-    ...new Set(assignments.map((a) => a.class).filter(Boolean)),
   ];
 
   const getStatusColor = (status) => {
@@ -664,14 +668,6 @@ const Teacher_assign = () => {
         return exists ? prev : [...prev, newT];
       });
 
-      setTeacherInput(newT.name);
-      setFormData((prev) => ({
-        ...prev,
-        teacherId: newT.id || newT._id,
-        teacherName: newT.name,
-        subject: prev.subject || newT.specialization,
-      }));
-
       setShowAddTeacherModal(false);
       setNewTeacherData({
         name: "",
@@ -703,7 +699,7 @@ const Teacher_assign = () => {
   };
 
   const openAssignModal = () => {
-    setFormData(initialFormData);
+    setFormData({ ...initialFormData });
     setTeacherInput("");
     setShowTeacherSuggestions(false);
     setFilteredTeachers(availableTeachers);
@@ -716,11 +712,9 @@ const Teacher_assign = () => {
       teacherId: a.teacherId || "",
       teacherName: a.teacherName || "",
       subject: a.subject || "",
-      class: a.class || "",
       batch: a.batch || "",
       days: a.days || [],
       time: a.time || "",
-      room: a.room || "",
       status: a.status || "Pending",
       studentsCount: a.studentsCount || 0,
       rating: a.rating || 0,
@@ -734,69 +728,86 @@ const Teacher_assign = () => {
     setShowDetailsModal(true);
   };
 
-  // Assign
+  // ============================================================
+  // ✅ ASSIGN TEACHER
+  // ============================================================
   const handleAssignTeacher = async (e) => {
     e.preventDefault();
 
-    if (!formData.teacherId) {
+    const teacherName = (formData.teacherName || "").trim();
+    if (!teacherName) {
       Swal.fire({
         icon: "warning",
-        title: "Teacher Required!",
-        text: "Please select a teacher.",
+        title: "Teacher Name Required!",
+        text: "অনুগ্রহ করে Teacher এর নাম লিখুন অথবা card থেকে select করুন।",
         timer: 1800,
         showConfirmButton: false,
       });
       return;
     }
 
-    if (
-      !formData.subject ||
-      !formData.class ||
-      !formData.days.length ||
-      !formData.time
-    ) {
+    if (!formData.subject || !formData.days.length || !formData.time) {
       Swal.fire({
         icon: "warning",
         title: "Please fill all required fields",
-        text: "Subject, Class, Days, and Time are required.",
+        text: "Subject, Days, and Time are required.",
         timer: 1800,
         showConfirmButton: false,
       });
       return;
+    }
+
+    let resolvedTeacherId = formData.teacherId;
+    if (!resolvedTeacherId) {
+      const match = availableTeachers.find(
+        (t) => (t.name || "").toLowerCase() === teacherName.toLowerCase(),
+      );
+      resolvedTeacherId = match ? match.id || match._id : "T_" + Date.now();
     }
 
     try {
       setSubmitting(true);
 
-      const newAssignment = {
-        _id: "LOCAL_" + Date.now(),
-        ...formData,
+      const payload = {
+        teacherId: resolvedTeacherId,
+        teacherName,
+        subject: formData.subject,
+        batch: formData.batch || "",
+        days: formData.days,
+        time: formData.time,
+        status: formData.status,
+        studentsCount: Number(formData.studentsCount) || 0,
+        rating: formData.rating || 0,
         department: adminDepartment,
-        assignedDate: new Date().toISOString().split("T")[0],
       };
 
+      let savedAssignment = null;
       try {
         const data = await safeFetchJSON(
           `${API_BASE}/api/teacher-assign/create`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ...formData,
-              department: adminDepartment,
-            }),
+            body: JSON.stringify(payload),
           },
         );
         if (data.success && data.assignment) {
-          newAssignment._id = data.assignment._id || newAssignment._id;
+          savedAssignment = data.assignment;
         }
       } catch (err) {
-        console.warn("API assign failed, saving locally");
+        console.warn("API assign failed, saving locally:", err.message);
       }
+
+      const newAssignment = savedAssignment || {
+        _id: "LOCAL_" + Date.now(),
+        ...payload,
+        assignedDate: new Date().toISOString().split("T")[0],
+        createdAt: new Date().toISOString(),
+      };
 
       setAssignments((prev) => [newAssignment, ...prev]);
       setShowAssignModal(false);
-      setFormData(initialFormData);
+      setFormData({ ...initialFormData });
       setTeacherInput("");
 
       Swal.fire({
@@ -806,8 +817,8 @@ const Teacher_assign = () => {
           <div style="text-align:left">
             <p><strong>Teacher:</strong> ${newAssignment.teacherName}</p>
             <p><strong>Subject:</strong> ${newAssignment.subject}</p>
-            <p><strong>Class:</strong> ${newAssignment.class}</p>
-            <p><strong>Days:</strong> ${newAssignment.days.join(", ")}</p>
+            <p><strong>Batch:</strong> ${newAssignment.batch || "N/A"}</p>
+            <p><strong>Days:</strong> ${(newAssignment.days || []).join(", ")}</p>
             <p><strong>Time:</strong> ${newAssignment.time}</p>
             <p style="margin-top:8px; color:#004d4d;"><strong>Department:</strong> ${adminDepartment}</p>
           </div>
@@ -823,16 +834,13 @@ const Teacher_assign = () => {
     }
   };
 
-  // Edit
+  // ============================================================
+  // ✅ EDIT ASSIGNMENT
+  // ============================================================
   const handleEditAssignment = async (e) => {
     e.preventDefault();
 
-    if (
-      !formData.subject ||
-      !formData.class ||
-      !formData.days.length ||
-      !formData.time
-    ) {
+    if (!formData.subject || !formData.days.length || !formData.time) {
       Swal.fire({
         icon: "warning",
         title: "Please fill all required fields",
@@ -845,27 +853,33 @@ const Teacher_assign = () => {
     try {
       setSubmitting(true);
 
+      const payload = {
+        teacherName: formData.teacherName,
+        subject: formData.subject,
+        batch: formData.batch || "",
+        days: formData.days,
+        time: formData.time,
+        status: formData.status,
+        studentsCount: Number(formData.studentsCount) || 0,
+        department: adminDepartment,
+      };
+
       try {
         await safeFetchJSON(
           `${API_BASE}/api/teacher-assign/update/${selectedAssignment._id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ...formData,
-              department: adminDepartment,
-            }),
+            body: JSON.stringify(payload),
           },
         );
       } catch (err) {
-        console.warn("API update failed, updating locally");
+        console.warn("API update failed, updating locally:", err.message);
       }
 
       setAssignments((prev) =>
         prev.map((a) =>
-          a._id === selectedAssignment._id
-            ? { ...a, ...formData, department: adminDepartment }
-            : a,
+          a._id === selectedAssignment._id ? { ...a, ...payload } : a,
         ),
       );
 
@@ -886,7 +900,9 @@ const Teacher_assign = () => {
     }
   };
 
-  // Delete
+  // ============================================================
+  // ✅ DELETE ASSIGNMENT
+  // ============================================================
   const handleDeleteAssignment = async (id) => {
     const result = await Swal.fire({
       title: "Remove Assignment?",
@@ -905,7 +921,7 @@ const Teacher_assign = () => {
         method: "DELETE",
       });
     } catch (err) {
-      console.warn("API delete failed, deleting locally");
+      console.warn("API delete failed, deleting locally:", err.message);
     }
 
     setAssignments((prev) => prev.filter((a) => a._id !== id));
@@ -1116,7 +1132,6 @@ const Teacher_assign = () => {
             </div>
           </div>
 
-          {/* ✅ Department banner */}
           {adminDepartment && (
             <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white p-3 rounded-xl shadow-sm mb-3 flex items-center justify-between">
               <div>
@@ -1161,7 +1176,7 @@ const Teacher_assign = () => {
             </div>
           </div>
 
-          {/* ✅ Available Teachers — department-based, no hardcoded */}
+          {/* Available Teachers */}
           <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
             <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
               <FaUserTie size={12} /> Available {adminDepartment} Teachers (
@@ -1228,7 +1243,7 @@ const Teacher_assign = () => {
                 <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                 <input
                   type="text"
-                  placeholder="Search by teacher, subject or class..."
+                  placeholder="Search by teacher, subject or batch..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-7 pr-2 py-1 text-xs border rounded-lg"
@@ -1254,17 +1269,6 @@ const Teacher_assign = () => {
                   {uniqueSubjects.map((s) => (
                     <option key={s} value={s}>
                       {s}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={filterClass}
-                  onChange={(e) => setFilterClass(e.target.value)}
-                  className="px-1.5 py-1 text-xs border rounded-lg"
-                >
-                  {uniqueClasses.map((c) => (
-                    <option key={c} value={c}>
-                      {c}
                     </option>
                   ))}
                 </select>
@@ -1312,6 +1316,7 @@ const Teacher_assign = () => {
                       </div>
                     </div>
 
+                    {/* ✅ Class বাদ, Batch শুধু */}
                     <div className="mt-2 grid grid-cols-2 gap-1 text-[10px]">
                       <div>
                         <p className="text-gray-400">Subject</p>
@@ -1320,19 +1325,21 @@ const Teacher_assign = () => {
                         </p>
                       </div>
                       <div>
-                        <p className="text-gray-400">Class</p>
-                        <p className="font-medium text-gray-700">{a.class}</p>
-                      </div>
-                      <div>
                         <p className="text-gray-400">Batch</p>
                         <p className="font-medium text-gray-700 truncate">
-                          {a.batch}
+                          {a.batch || "N/A"}
                         </p>
                       </div>
                       <div>
                         <p className="text-gray-400">Students</p>
                         <p className="font-medium text-gray-700">
                           {a.studentsCount || 0}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400">Time</p>
+                        <p className="font-medium text-gray-700 truncate">
+                          {a.time}
                         </p>
                       </div>
                     </div>
@@ -1352,9 +1359,6 @@ const Teacher_assign = () => {
                             +{a.days.length - 3}
                           </span>
                         )}
-                      </div>
-                      <div className="text-[10px] text-gray-500">
-                        <FaClock className="inline mr-0.5" size={10} /> {a.time}
                       </div>
                     </div>
 
@@ -1405,7 +1409,9 @@ const Teacher_assign = () => {
         </main>
       </div>
 
-      {/* ASSIGN MODAL */}
+      {/* ============================================================ */}
+      {/* ✅ ASSIGN MODAL — Teacher Name + Subject + Batch + Time + Days */}
+      {/* ============================================================ */}
       {showAssignModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -1426,76 +1432,96 @@ const Teacher_assign = () => {
               </button>
             </div>
             <form onSubmit={handleAssignTeacher} className="p-6 space-y-4">
-              {/* Teacher selection */}
+              {/* Teacher Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Teacher *
+                  Teacher Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.teacherName}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFormData((prev) => ({
+                      ...prev,
+                      teacherName: val,
+                    }));
+                    setTeacherInput(val);
+                  }}
+                  className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-teal-400 focus:border-teal-400"
+                  placeholder="e.g., Ustadh Ahmad Raza"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">
+                  💡 নাম লিখুন অথবা নিচের card থেকে teacher select করুন
+                </p>
+              </div>
+
+              {/* Existing teachers */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Or Select from Existing Teachers
                 </label>
                 {availableTeachers.length === 0 ? (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs text-yellow-800">
                     কোনো teacher নেই। আগে "Add Teacher" বাটন দিয়ে teacher যোগ
-                    করুন।
+                    করুন। অথবা উপরে নাম লিখে assign করুন।
                   </div>
                 ) : (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
-                      {availableTeachers.map((t, idx) => {
-                        const isSelected =
-                          formData.teacherId === (t.id || t._id);
-                        return (
-                          <button
-                            key={t._id || t.id || idx}
-                            type="button"
-                            onClick={() => {
-                              setFormData((prev) => ({
-                                ...prev,
-                                teacherId: t.id || t._id,
-                                teacherName: t.name,
-                                subject: prev.subject || t.specialization || "",
-                              }));
-                              setTeacherInput(t.name);
-                            }}
-                            className={`p-3 rounded-lg border-2 text-left transition-all flex items-center gap-2 ${
-                              isSelected
-                                ? "border-teal-500 bg-teal-50 shadow-sm"
-                                : "border-gray-200 hover:border-teal-300 hover:bg-gray-50"
-                            }`}
-                          >
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                              {(t.name || "T").charAt(0)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-bold text-gray-800 truncate">
-                                {t.name}
-                              </p>
-                              <p className="text-[10px] text-gray-500 truncate">
-                                {t.designation || "Teacher"}
-                              </p>
-                              <p className="text-[10px] text-teal-600 truncate">
-                                {t.subject || adminDepartment}
-                              </p>
-                            </div>
-                            {isSelected && (
-                              <FaCheckCircle
-                                className="text-teal-500"
-                                size={16}
-                              />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <p className="text-[10px] text-gray-400">
-                      💡 আরো teacher add করতে "Add Teacher" button ব্যবহার করুন
-                    </p>
-                  </>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                    {availableTeachers.map((t, idx) => {
+                      const isSelected = formData.teacherId === (t.id || t._id);
+                      return (
+                        <button
+                          key={t._id || t.id || idx}
+                          type="button"
+                          onClick={() => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              teacherId: t.id || t._id,
+                              teacherName: t.name,
+                              subject: prev.subject || t.specialization || "",
+                            }));
+                            setTeacherInput(t.name);
+                          }}
+                          className={`p-3 rounded-lg border-2 text-left transition-all flex items-center gap-2 ${
+                            isSelected
+                              ? "border-teal-500 bg-teal-50 shadow-sm"
+                              : "border-gray-200 hover:border-teal-300 hover:bg-gray-50"
+                          }`}
+                        >
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                            {(t.name || "T").charAt(0)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold text-gray-800 truncate">
+                              {t.name}
+                            </p>
+                            <p className="text-[10px] text-gray-500 truncate">
+                              {t.designation || "Teacher"}
+                            </p>
+                            <p className="text-[10px] text-teal-600 truncate">
+                              {t.subject || adminDepartment}
+                            </p>
+                          </div>
+                          {isSelected && (
+                            <FaCheckCircle
+                              className="text-teal-500"
+                              size={16}
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
 
+              {/* ✅ Subject + Batch */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject *
+                    Subject <span className="text-red-500">*</span>
                   </label>
                   <select
                     required
@@ -1515,66 +1541,31 @@ const Teacher_assign = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
-                  </label>
-                  <select
-                    required
-                    value={formData.class}
-                    onChange={(e) =>
-                      setFormData({ ...formData, class: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option value="">Select Class</option>
-                    {classes.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Batch
                   </label>
-                  <select
+                  <input
+                    type="text"
+                    list="batch-suggestions-assign"
                     value={formData.batch}
                     onChange={(e) =>
                       setFormData({ ...formData, batch: e.target.value })
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option value="">Select Batch</option>
-                    {batches.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Room
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.room}
-                    onChange={(e) =>
-                      setFormData({ ...formData, room: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                    placeholder="e.g., Room 201"
+                    placeholder="Type or select batch..."
                   />
+                  <datalist id="batch-suggestions-assign">
+                    {batches.map((b) => (
+                      <option key={b} value={b} />
+                    ))}
+                  </datalist>
                 </div>
               </div>
 
+              {/* ✅ Time + Students */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Time *
+                    Time <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -1606,9 +1597,28 @@ const Teacher_assign = () => {
                 </div>
               </div>
 
+              {/* ✅ Status */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) =>
+                    setFormData({ ...formData, status: e.target.value })
+                  }
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+
+              {/* Days */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Days *
+                  Days <span className="text-red-500">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {availableDays.map((day) => (
@@ -1633,27 +1643,10 @@ const Teacher_assign = () => {
                 )}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
-                </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value })
-                  }
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
-              </div>
-
               <div className="flex gap-3 pt-4 border-t">
                 <button
                   type="submit"
-                  disabled={submitting || availableTeachers.length === 0}
+                  disabled={submitting}
                   className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-2 rounded-lg font-semibold disabled:opacity-50"
                 >
                   <FaUserPlus className="inline mr-2" size={14} />
@@ -1672,7 +1665,9 @@ const Teacher_assign = () => {
         </div>
       )}
 
-      {/* EDIT MODAL */}
+      {/* ============================================================ */}
+      {/* ✅ EDIT MODAL — Class + Room বাদ */}
+      {/* ============================================================ */}
       {showEditModal && selectedAssignment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -1691,13 +1686,16 @@ const Teacher_assign = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Teacher
+                    Teacher Name
                   </label>
                   <input
                     type="text"
-                    disabled
                     value={formData.teacherName}
-                    className="w-full border rounded-lg px-3 py-2 text-sm bg-gray-50"
+                    onChange={(e) =>
+                      setFormData({ ...formData, teacherName: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="Teacher name"
                   />
                 </div>
                 <div>
@@ -1713,45 +1711,24 @@ const Teacher_assign = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Subject *
-                  </label>
-                  <select
-                    required
-                    value={formData.subject}
-                    onChange={(e) =>
-                      setFormData({ ...formData, subject: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    {subjects.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Class *
-                  </label>
-                  <select
-                    required
-                    value={formData.class}
-                    onChange={(e) =>
-                      setFormData({ ...formData, class: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    {classes.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Subject <span className="text-red-500">*</span>
+                </label>
+                <select
+                  required
+                  value={formData.subject}
+                  onChange={(e) =>
+                    setFormData({ ...formData, subject: e.target.value })
+                  }
+                  className="w-full border rounded-lg px-3 py-2 text-sm"
+                >
+                  {subjects.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1759,39 +1736,25 @@ const Teacher_assign = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Batch
                   </label>
-                  <select
+                  <input
+                    type="text"
+                    list="batch-suggestions-edit"
                     value={formData.batch}
                     onChange={(e) =>
                       setFormData({ ...formData, batch: e.target.value })
                     }
                     className="w-full border rounded-lg px-3 py-2 text-sm"
-                  >
-                    {batches.map((b) => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Room
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.room}
-                    onChange={(e) =>
-                      setFormData({ ...formData, room: e.target.value })
-                    }
-                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                    placeholder="Type or select batch..."
                   />
+                  <datalist id="batch-suggestions-edit">
+                    {batches.map((b) => (
+                      <option key={b} value={b} />
+                    ))}
+                  </datalist>
                 </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Time *
+                    Time <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -1803,6 +1766,9 @@ const Teacher_assign = () => {
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Students
@@ -1819,11 +1785,27 @@ const Teacher_assign = () => {
                     className="w-full border rounded-lg px-3 py-2 text-sm"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) =>
+                      setFormData({ ...formData, status: e.target.value })
+                    }
+                    className="w-full border rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Days *
+                  Days <span className="text-red-500">*</span>
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {availableDays.map((day) => (
@@ -1841,23 +1823,6 @@ const Teacher_assign = () => {
                     </button>
                   ))}
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Status
-                </label>
-                <select
-                  value={formData.status}
-                  onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value })
-                  }
-                  className="w-full border rounded-lg px-3 py-2 text-sm"
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
               </div>
 
               <div className="flex gap-3 pt-4 border-t">
@@ -1882,7 +1847,9 @@ const Teacher_assign = () => {
         </div>
       )}
 
-      {/* DETAILS MODAL */}
+      {/* ============================================================ */}
+      {/* ✅ DETAILS MODAL — Class + Room বাদ */}
+      {/* ============================================================ */}
       {showDetailsModal && selectedAssignment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -1920,8 +1887,7 @@ const Teacher_assign = () => {
                   </p>
                   <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
                     <span>📚 {selectedAssignment.subject}</span>
-                    <span>🏫 {selectedAssignment.class}</span>
-                    <span>📦 {selectedAssignment.batch}</span>
+                    <span>📦 {selectedAssignment.batch || "N/A"}</span>
                   </div>
                 </div>
               </div>
@@ -1942,12 +1908,6 @@ const Teacher_assign = () => {
                       <span className="text-gray-500">Time</span>
                       <span className="font-medium">
                         {selectedAssignment.time}
-                      </span>
-                    </div>
-                    <div className="flex justify-between border-b pb-1">
-                      <span className="text-gray-500">Room</span>
-                      <span className="font-medium">
-                        {selectedAssignment.room || "N/A"}
                       </span>
                     </div>
                   </div>
@@ -1971,9 +1931,9 @@ const Teacher_assign = () => {
                       </span>
                     </div>
                     <div className="flex justify-between border-b pb-1">
-                      <span className="text-gray-500">Class</span>
+                      <span className="text-gray-500">Batch</span>
                       <span className="font-medium">
-                        {selectedAssignment.class}
+                        {selectedAssignment.batch || "N/A"}
                       </span>
                     </div>
                   </div>
