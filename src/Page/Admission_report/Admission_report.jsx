@@ -34,7 +34,6 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-// ✅ FIX: https not http
 const API_BASE = "https://api.tarbiyahonline.com";
 
 // ============================================================
@@ -149,7 +148,6 @@ const Admission_report = () => {
     joinDate: "",
   });
 
-  // ✅ Current department
   const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
   const deptConfig =
     DEPARTMENT_CONFIGS[currentDept] || DEPARTMENT_CONFIGS["Elders"];
@@ -165,8 +163,7 @@ const Admission_report = () => {
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // ✅ Department filter — default = current dept
-  const [filterMode, setFilterMode] = useState("myDept"); // "myDept" | "all" | "custom"
+  const [filterMode, setFilterMode] = useState("myDept");
   const [customDept, setCustomDept] = useState("");
   const [departments, setDepartments] = useState([]);
 
@@ -189,10 +186,9 @@ const Admission_report = () => {
     address: "",
     previousSchool: "",
     notes: "",
-    department: "", // ✅ new field
+    department: "",
   });
 
-  // ✅ Dynamic states
   const [isLoading, setIsLoading] = useState(true);
   const [backendConnected, setBackendConnected] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -401,9 +397,6 @@ const Admission_report = () => {
     if (activeSubMenu && activeMenu) setExpandedMenu(activeMenu);
   }, [activeMenu, activeSubMenu]);
 
-  // ============================================================
-  // ✅ Compute effective department filter
-  // ============================================================
   const getEffectiveDept = () => {
     if (filterMode === "myDept") return currentDept;
     if (filterMode === "all") return "All";
@@ -411,13 +404,12 @@ const Admission_report = () => {
   };
 
   // ============================================================
-  // ✅ Fetch departments
+  // Fetch departments
   // ============================================================
   const fetchDepartments = async () => {
     try {
       const data = await safeFetchJSON(`${API_BASE}/api/departments/all`);
       if (data.success) {
-        // Combine backend depts + config depts
         const configDepts = Object.keys(DEPARTMENT_CONFIGS);
         const combined = [
           ...new Set([...(data.departments || []), ...configDepts]),
@@ -430,7 +422,7 @@ const Admission_report = () => {
   };
 
   // ============================================================
-  // ✅ Fetch admission data
+  // Fetch admission data
   // ============================================================
   const fetchAdmissionData = async () => {
     try {
@@ -565,7 +557,7 @@ const Admission_report = () => {
     `${currentDept.slice(0, 3).toUpperCase()}-${String(admissionRecords.length + 1).padStart(4, "0")}`;
 
   // ============================================================
-  // ✅ OPEN ADD MODAL — always enabled
+  // OPEN ADD MODAL
   // ============================================================
   const openAddModal = () => {
     setFormData({
@@ -612,7 +604,7 @@ const Admission_report = () => {
   };
 
   // ============================================================
-  // ✅ ADD ADMISSION — with department
+  // ADD ADMISSION
   // ============================================================
   const handleAddAdmission = async (e) => {
     e.preventDefault();
@@ -642,7 +634,7 @@ const Admission_report = () => {
           phone: formData.parentPhone || "0000000000",
           email: formData.email || "",
           course: formData.subject,
-          department: currentDept, // ✅ department field
+          department: currentDept,
           admissionDate: formData.applicationDate,
           status:
             formData.status === "Approved"
@@ -686,7 +678,7 @@ const Admission_report = () => {
   };
 
   // ============================================================
-  // ✅ EDIT
+  // EDIT
   // ============================================================
   const handleEditAdmission = async (e) => {
     e.preventDefault();
@@ -708,33 +700,49 @@ const Admission_report = () => {
 
     setSaving(true);
     try {
-      const res = await fetch(
-        `${API_BASE}/api/admin-students/update/${selectedAdmission._id}`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: formData.studentName,
-            course: formData.subject,
-            department: selectedAdmission.department || currentDept,
-            class: formData.class,
-            batch: formData.class,
-            admissionDate: formData.applicationDate,
-            status:
-              formData.status === "Approved"
-                ? "Active"
-                : formData.status === "Rejected"
-                  ? "Rejected"
-                  : "Pending",
-            guardianName: formData.parentName,
-            guardianPhone: formData.parentPhone,
-            email: formData.email,
-            presentAddress: formData.address,
-            previousSchool: formData.previousSchool,
-            comments: formData.notes,
-          }),
-        },
-      );
+      const source = selectedAdmission._source || "students";
+
+      let endpoint, body;
+      if (source === "batch_students") {
+        endpoint = `${API_BASE}/api/batch-students/update/${selectedAdmission._id}`;
+        body = {
+          name: formData.studentName,
+          course: formData.subject,
+          department: selectedAdmission.department || currentDept,
+          phone: formData.parentPhone,
+          notes: formData.notes,
+          admissionDate: formData.applicationDate,
+        };
+      } else {
+        endpoint = `${API_BASE}/api/admin-students/update/${selectedAdmission._id}`;
+        body = {
+          name: formData.studentName,
+          course: formData.subject,
+          department: selectedAdmission.department || currentDept,
+          class: formData.class,
+          batch: formData.class,
+          admissionDate: formData.applicationDate,
+          status:
+            formData.status === "Approved"
+              ? "Active"
+              : formData.status === "Rejected"
+                ? "Rejected"
+                : "Pending",
+          guardianName: formData.parentName,
+          guardianPhone: formData.parentPhone,
+          email: formData.email,
+          presentAddress: formData.address,
+          previousSchool: formData.previousSchool,
+          comments: formData.notes,
+        };
+      }
+
+      const res = await fetch(endpoint, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
       const data = await res.json();
 
       if (data.success) {
@@ -761,9 +769,9 @@ const Admission_report = () => {
   };
 
   // ============================================================
-  // ✅ DELETE
+  // DELETE
   // ============================================================
-  const handleDeleteAdmission = async (id) => {
+  const handleDeleteAdmission = async (id, source = "students") => {
     const result = await Swal.fire({
       title: "Delete Admission Record?",
       text: "This action cannot be undone!",
@@ -777,10 +785,13 @@ const Admission_report = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const data = await safeFetchJSON(
-        `${API_BASE}/api/admin-students/delete/${id}`,
-        { method: "DELETE" },
-      );
+      const endpoint =
+        source === "batch_students"
+          ? `${API_BASE}/api/batch-students/delete/${id}`
+          : `${API_BASE}/api/admin-students/delete/${id}`;
+
+      const data = await safeFetchJSON(endpoint, { method: "DELETE" });
+
       if (data.success) {
         await fetchAdmissionData();
         Swal.fire("Deleted!", "Admission record deleted.", "success");
@@ -793,7 +804,7 @@ const Admission_report = () => {
   };
 
   // ============================================================
-  // ✅ APPROVE
+  // APPROVE
   // ============================================================
   const handleApproveAdmission = async (id) => {
     const result = await Swal.fire({
@@ -835,7 +846,7 @@ const Admission_report = () => {
   };
 
   // ============================================================
-  // ✅ REJECT
+  // REJECT
   // ============================================================
   const handleRejectAdmission = async (id) => {
     const result = await Swal.fire({
@@ -889,6 +900,14 @@ const Admission_report = () => {
       (r.course || "").toLowerCase().includes(searchTerm.toLowerCase());
     return matchStatus && matchClass && matchSearch;
   });
+
+  // ✅ Dynamic classes — real data থেকে
+  const dynamicClasses = [
+    ...new Set([
+      ...admissionRecords.map((r) => r.class).filter(Boolean),
+      ...DEPT_CLASSES,
+    ]),
+  ];
 
   return (
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
@@ -1217,7 +1236,7 @@ const Admission_report = () => {
                     className="px-2 py-1 text-xs border border-gray-300 rounded-lg"
                   >
                     <option value="All">All Classes</option>
-                    {DEPT_CLASSES.map((c) => (
+                    {dynamicClasses.map((c) => (
                       <option key={c} value={c}>
                         {c}
                       </option>
@@ -1486,8 +1505,17 @@ const Admission_report = () => {
                               {index + 1}
                             </td>
                             <td className="px-3 py-2">
-                              <div className="font-medium text-gray-800">
+                              <div className="font-medium text-gray-800 flex items-center gap-1 flex-wrap">
                                 {record.studentName}
+                                {record._source === "batch_students" ? (
+                                  <span className="text-[8px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-full font-semibold">
+                                    Batch
+                                  </span>
+                                ) : (
+                                  <span className="text-[8px] bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded-full font-semibold">
+                                    Admission
+                                  </span>
+                                )}
                               </div>
                               <div className="text-[10px] text-gray-400">
                                 {record.studentId}
@@ -1516,28 +1544,32 @@ const Admission_report = () => {
                                 >
                                   <FaEye size={12} />
                                 </button>
-                                {record.status === "Pending" && (
-                                  <>
-                                    <button
-                                      onClick={() =>
-                                        handleApproveAdmission(record._id)
-                                      }
-                                      className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
-                                      title="Approve"
-                                    >
-                                      <FaCheckCircleIcon size={12} />
-                                    </button>
-                                    <button
-                                      onClick={() =>
-                                        handleRejectAdmission(record._id)
-                                      }
-                                      className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-                                      title="Reject"
-                                    >
-                                      <FaTimesCircleIcon size={12} />
-                                    </button>
-                                  </>
-                                )}
+
+                                {/* ✅ Approve/Reject — শুধু students collection-এ */}
+                                {record.status === "Pending" &&
+                                  record._source !== "batch_students" && (
+                                    <>
+                                      <button
+                                        onClick={() =>
+                                          handleApproveAdmission(record._id)
+                                        }
+                                        className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
+                                        title="Approve"
+                                      >
+                                        <FaCheckCircleIcon size={12} />
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          handleRejectAdmission(record._id)
+                                        }
+                                        className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
+                                        title="Reject"
+                                      >
+                                        <FaTimesCircleIcon size={12} />
+                                      </button>
+                                    </>
+                                  )}
+
                                 <button
                                   onClick={() => openEditModal(record)}
                                   className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
@@ -1545,9 +1577,14 @@ const Admission_report = () => {
                                 >
                                   <FaEdit size={12} />
                                 </button>
+
+                                {/* ✅ Delete — _source pass করুন */}
                                 <button
                                   onClick={() =>
-                                    handleDeleteAdmission(record._id)
+                                    handleDeleteAdmission(
+                                      record._id,
+                                      record._source,
+                                    )
                                   }
                                   className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
                                   title="Delete"
@@ -2101,6 +2138,16 @@ const Admission_report = () => {
                       {getStatusIcon(selectedAdmission.status)}
                       {selectedAdmission.status}
                     </span>
+                    {/* ✅ Source badge */}
+                    {selectedAdmission._source === "batch_students" ? (
+                      <span className="text-[9px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">
+                        🎓 Batch Student
+                      </span>
+                    ) : (
+                      <span className="text-[9px] bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full font-semibold">
+                        📝 Admission Form
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-gray-500">
                     {selectedAdmission.studentId}
@@ -2170,28 +2217,31 @@ const Admission_report = () => {
               </div>
 
               <div className="flex gap-3 pt-4 border-t flex-wrap">
-                {selectedAdmission.status === "Pending" && (
-                  <>
-                    <button
-                      onClick={() => {
-                        setShowDetailsModal(false);
-                        handleApproveAdmission(selectedAdmission._id);
-                      }}
-                      className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
-                    >
-                      <FaCheckCircleIcon className="inline mr-2" /> Approve
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowDetailsModal(false);
-                        handleRejectAdmission(selectedAdmission._id);
-                      }}
-                      className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
-                    >
-                      <FaTimesCircleIcon className="inline mr-2" /> Reject
-                    </button>
-                  </>
-                )}
+                {/* ✅ Approve/Reject — শুধু students collection-এ */}
+                {selectedAdmission.status === "Pending" &&
+                  selectedAdmission._source !== "batch_students" && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setShowDetailsModal(false);
+                          handleApproveAdmission(selectedAdmission._id);
+                        }}
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                      >
+                        <FaCheckCircleIcon className="inline mr-2" /> Approve
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowDetailsModal(false);
+                          handleRejectAdmission(selectedAdmission._id);
+                        }}
+                        className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                      >
+                        <FaTimesCircleIcon className="inline mr-2" /> Reject
+                      </button>
+                    </>
+                  )}
+
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
@@ -2201,6 +2251,7 @@ const Admission_report = () => {
                 >
                   <FaEdit className="inline mr-2" /> Edit
                 </button>
+
                 <button
                   onClick={() => setShowDetailsModal(false)}
                   className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
