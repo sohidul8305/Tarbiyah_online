@@ -172,6 +172,7 @@ const Invoice = () => {
 
   const [deptStudents, setDeptStudents] = useState([]);
   const [studentsLoading, setStudentsLoading] = useState(true);
+  const [hiddenStudentIds, setHiddenStudentIds] = useState([]);
   const [invoices, setInvoices] = useState([]);
   const [apiWorking, setApiWorking] = useState(true);
 
@@ -217,7 +218,6 @@ const Invoice = () => {
     "December",
   ];
   const years = [2024, 2025, 2026, 2027, 2028];
-  const statuses = ["All", "Paid", "Partial", "Unpaid", "Overdue"];
 
   const menuItems = [
     {
@@ -388,21 +388,54 @@ const Invoice = () => {
   }, [user]);
 
   // ============================================================
-  // ✅ Load Invoices — API first, localStorage fallback
+  // ✅ Load Invoices — API first
   // ============================================================
   const loadInvoices = async () => {
     try {
+      // ─── STEP 1: batch_students থেকে valid student IDs বের করি ───
+      const cleanDept = currentDept.toLowerCase().trim();
+      let validStudentIds = new Set();
+
+      try {
+        const batchData = await safeFetchJSON(
+          `${API_BASE}/api/batch-students/all`,
+        );
+        if (batchData.success && Array.isArray(batchData.students)) {
+          batchData.students.forEach((s) => {
+            const sDept = String(s.department || "")
+              .toLowerCase()
+              .trim();
+            const matchDept = sDept
+              ? sDept === cleanDept
+              : isDeptCourse(s.course); // পুরনো student — course দিয়ে
+            if (matchDept && s.studentId) {
+              validStudentIds.add(String(s.studentId).trim());
+            }
+          });
+        }
+        console.log(
+          `✅ Valid batch_students for ${currentDept}: ${validStudentIds.size}`,
+        );
+      } catch (e) {
+        console.warn("⚠️ batch_students fetch failed:", e.message);
+      }
+
+      // ─── STEP 2: invoices fetch ───
       const data = await safeFetchJSON(
         `${API_BASE}/api/invoices/all?department=${encodeURIComponent(currentDept)}`,
       );
 
       if (data.success && Array.isArray(data.invoices)) {
-        // ✅ Sample invoice বাদ দিন
-        const realInvoices = data.invoices.filter(
-          (inv) =>
-            !String(inv._id || "").startsWith("sample-") &&
-            !String(inv._id || "").startsWith("LOCAL_"),
-        );
+        const realInvoices = data.invoices.filter((inv) => {
+          // sample/LOCAL বাদ
+          if (String(inv._id || "").startsWith("sample-")) return false;
+          if (String(inv._id || "").startsWith("LOCAL_")) return false;
+
+          // ✅ Only those whose studentId is in a real batch_student
+          const sid = String(inv.studentId || "").trim();
+          if (!sid) return false;
+          return validStudentIds.has(sid);
+        });
 
         setInvoices(realInvoices);
         setApiWorking(true);
@@ -413,39 +446,19 @@ const Invoice = () => {
         );
 
         console.log(
-          `✅ Loaded ${realInvoices.length} invoices from API (${currentDept})`,
+          `✅ Loaded ${realInvoices.length} invoices (filtered for real students) for ${currentDept}`,
         );
         return;
       }
 
       throw new Error(data.message || "API failed");
     } catch (err) {
-      console.warn("⚠️ API failed, using localStorage:", err.message);
+      console.warn("⚠️ API failed:", err.message);
       setApiWorking(false);
-
-      const key = `invoices_${currentDept.replace(/\s+/g, "_")}`;
-      const saved = localStorage.getItem(key);
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) {
-            const realInvoices = parsed.filter(
-              (inv) =>
-                !String(inv._id || "").startsWith("sample-") &&
-                !String(inv._id || "").startsWith("LOCAL_"),
-            );
-            setInvoices(realInvoices);
-            return;
-          }
-        } catch {
-          /* ignore */
-        }
-      }
-
-      // ✅ Sample fallback নেই — খালি থাকবে
       setInvoices([]);
     }
   };
+
   useEffect(() => {
     loadInvoices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -505,45 +518,25 @@ const Invoice = () => {
   };
 
   // ============================================================
-  // Fetch Students
+  // ✅ Fetch ONLY Batch Students (LMS-added) — hidden excluded
   // ============================================================
   const fetchDeptStudents = async () => {
     try {
       setStudentsLoading(true);
       const cleanDept = currentDept.toLowerCase().trim();
 
-      const [admissionData, batchData] = await Promise.all([
-        safeFetchJSON(
-          `${API_BASE}/api/students/all?department=${encodeURIComponent(currentDept)}`,
-        ),
-        safeFetchJSON(`${API_BASE}/api/batch-students/all`),
-      ]);
-
-      // 1️⃣ Admission students — শুধু APPROVED (Active) নিন
-      let admissionStudents = [];
-      if (admissionData.success && Array.isArray(admissionData.students)) {
-        admissionStudents = admissionData.students.filter((s) => {
-          // ✅ APPROVED কিনা চেক — Pending/Rejected বাদ
-          const isApproved =
-            s.status === "Active" || (s.approvedAt && s.approvedAt !== null);
-
-          if (!isApproved) {
-            console.log(
-              `⏭️ Skipped (not approved): ${s.name} — status="${s.status}"`,
-            );
-            return false;
-          }
-
-          // ✅ Department filter
-          const sDept = String(s.department || "")
-            .toLowerCase()
-            .trim();
-          if (sDept && sDept === cleanDept) return true;
-          return isDeptCourse(s.course);
-        });
+      let hiddenIds = [];
+      try {
+        const key = `hidden_batch_students_${currentDept.replace(/\s+/g, "_")}`;
+        hiddenIds = JSON.parse(localStorage.getItem(key) || "[]");
+      } catch {
+        hiddenIds = [];
       }
 
-      // 2️⃣ Batch students (LMS-এ add করা — সবসময় admin-added)
+      const batchData = await safeFetchJSON(
+        `${API_BASE}/api/batch-students/all`,
+      );
+
       let batchStudents = [];
       if (batchData.success && Array.isArray(batchData.students)) {
         batchStudents = batchData.students.filter((s) => {
@@ -555,7 +548,9 @@ const Invoice = () => {
         });
       }
 
-      const format = (s) => ({
+      const visible = batchStudents.filter((s) => !hiddenIds.includes(s._id));
+
+      const formatted = visible.map((s) => ({
         _id: s._id,
         name: s.name || "",
         studentId: s.studentId || s._id?.slice(-8) || "N/A",
@@ -567,28 +562,12 @@ const Invoice = () => {
         phone: s.phone || "",
         email: s.email || "",
         courseFee: Number(s.courseFee) || Number(s.monthlyFee) || 5000,
-      });
-
-      const formatted = [
-        ...admissionStudents.map(format),
-        ...batchStudents.map(format),
-      ];
-
-      // 3️⃣ Dedupe
-      const seen = new Set();
-      const deduped = formatted.filter((s) => {
-        const key = String(s.studentId || s.name || s._id).toLowerCase();
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
+      }));
 
       console.log(
-        `✅ [${currentDept}] Approved students: ${deduped.length} ` +
-          `(admission: ${admissionStudents.length}, batch: ${batchStudents.length})`,
+        `✅ [${currentDept}] Visible: ${formatted.length} / ${batchStudents.length} total (${hiddenIds.length} hidden)`,
       );
-
-      setDeptStudents(deduped);
+      setDeptStudents(formatted);
     } catch (err) {
       console.error("❌ Fetch students error:", err);
       setDeptStudents([]);
@@ -596,10 +575,144 @@ const Invoice = () => {
       setStudentsLoading(false);
     }
   };
+
+  // ✅ Load hidden IDs when dept changes + fetch students
   useEffect(() => {
+    if (!currentDept) return;
+    try {
+      const key = `hidden_batch_students_${currentDept.replace(/\s+/g, "_")}`;
+      const saved = localStorage.getItem(key);
+      setHiddenStudentIds(saved ? JSON.parse(saved) : []);
+    } catch {
+      setHiddenStudentIds([]);
+    }
     fetchDeptStudents();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDept]);
+
+  // ============================================================
+  // ✅ Hide / Restore old students (DB-তে থাকবে, শুধু এই page-এ লুকাবে)
+  // ============================================================
+  const handleHideStudent = (studentId, studentName) => {
+    const key = `hidden_batch_students_${currentDept.replace(/\s+/g, "_")}`;
+    const current = [...hiddenStudentIds, studentId];
+    localStorage.setItem(key, JSON.stringify(current));
+    setHiddenStudentIds(current);
+    setDeptStudents((prev) => prev.filter((s) => s._id !== studentId));
+
+    Swal.fire({
+      icon: "success",
+      title: "🚫 Hidden!",
+      text: `${studentName} এই page থেকে সরানো হলো (DB-তে আছে)`,
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  };
+
+  // ✅ REAL DELETE — student + তার invoices সব ডিলিট
+  const handleDeleteStudent = async (studentId, studentName) => {
+    const result = await Swal.fire({
+      title: "Delete Student?",
+      html: `
+      <p><strong>${studentName}</strong> কে permanently delete করবেন?</p>
+      <p style="color:#dc2626; font-size:12px; margin-top:8px;">
+        ⚠️ Student এবং তার সব invoice database থেকে ডিলিট হয়ে যাবে!
+      </p>`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Yes, delete!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      // 1️⃣ Student delete from batch_students
+      const delRes = await safeFetchJSON(
+        `${API_BASE}/api/batch-students/delete/${studentId}`,
+        { method: "DELETE" },
+      );
+
+      if (!delRes.success) {
+        throw new Error(delRes.message || "Failed to delete student");
+      }
+
+      // 2️⃣ Related invoices delete
+      const relatedInvoices = invoices.filter(
+        (inv) =>
+          String(inv.studentId) === String(studentId) ||
+          String(inv.studentName) === String(studentName),
+      );
+
+      let deletedInvCount = 0;
+      for (const inv of relatedInvoices) {
+        const isLocal =
+          String(inv._id).startsWith("LOCAL_") ||
+          String(inv._id).startsWith("sample-");
+        if (!isLocal) {
+          try {
+            const r = await safeFetchJSON(
+              `${API_BASE}/api/invoices/delete/${inv._id}`,
+              { method: "DELETE" },
+            );
+            if (r.success) deletedInvCount++;
+          } catch (e) {
+            console.warn("Invoice delete failed:", e.message);
+          }
+        } else {
+          deletedInvCount++;
+        }
+      }
+
+      // 3️⃣ Local state update
+      setDeptStudents((prev) => prev.filter((s) => s._id !== studentId));
+      setInvoices((prev) =>
+        prev.filter(
+          (inv) =>
+            String(inv.studentId) !== String(studentId) &&
+            String(inv.studentName) !== String(studentName),
+        ),
+      );
+
+      // 4️⃣ Hidden list থেকে বাদ
+      const hiddenKey = `hidden_batch_students_${currentDept.replace(/\s+/g, "_")}`;
+      const updatedHidden = hiddenStudentIds.filter((id) => id !== studentId);
+      localStorage.setItem(hiddenKey, JSON.stringify(updatedHidden));
+      setHiddenStudentIds(updatedHidden);
+
+      Swal.fire({
+        icon: "success",
+        title: "✅ Deleted!",
+        html: `<p><strong>${studentName}</strong> এবং ${deletedInvCount} invoice ডিলিট হয়েছে</p>`,
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      console.error("Delete error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Delete Failed!",
+        text: err.message,
+      });
+    }
+  };
+
+  const handleRestoreHidden = async () => {
+    const key = `hidden_batch_students_${currentDept.replace(/\s+/g, "_")}`;
+    localStorage.removeItem(key);
+    setHiddenStudentIds([]);
+    await fetchDeptStudents();
+
+    Swal.fire({
+      icon: "info",
+      title: "Restored",
+      text: "সব hidden student আবার দেখানো হচ্ছে",
+      timer: 1400,
+      showConfirmButton: false,
+    });
+  };
 
   const handleLogout = async () => {
     try {
@@ -699,9 +812,6 @@ const Invoice = () => {
     return `${DEPT_INVOICE_PREFIX}-${year}-${String(count).padStart(4, "0")}`;
   };
 
-  // ============================================================
-  // ✅ Open Generate Modal — always enabled
-  // ============================================================
   const openGenerateModal = () => {
     setFormData({
       studentName: "",
@@ -776,7 +886,7 @@ const Invoice = () => {
   };
 
   // ============================================================
-  // ✅ GENERATE INVOICE — API first
+  // ✅ GENERATE INVOICE
   // ============================================================
   const handleGenerateInvoice = async (e) => {
     e.preventDefault();
@@ -1263,10 +1373,26 @@ const Invoice = () => {
 
           {/* Students Card */}
           <div className="bg-white border border-gray-200 rounded-xl p-3 mb-3">
-            <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1">
-              <FaUsers size={12} className="text-teal-600" /> {currentDept}{" "}
-              Students ({deptStudents.length})
-            </p>
+            <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+              <p className="text-xs font-bold text-gray-700 flex items-center gap-1">
+                <FaUsers size={12} className="text-teal-600" /> {currentDept}{" "}
+                Students ({deptStudents.length})
+                {hiddenStudentIds.length > 0 && (
+                  <span className="text-[10px] text-gray-400 font-normal">
+                    ({hiddenStudentIds.length} hidden)
+                  </span>
+                )}
+              </p>
+              {hiddenStudentIds.length > 0 && (
+                <button
+                  onClick={handleRestoreHidden}
+                  className="text-[10px] text-orange-600 hover:text-orange-800 font-semibold underline flex items-center gap-1"
+                >
+                  🔄 Show {hiddenStudentIds.length} hidden
+                </button>
+              )}
+            </div>
+
             {studentsLoading && deptStudents.length === 0 ? (
               <div className="flex items-center gap-2 text-xs text-gray-500">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-teal-600"></div>
@@ -1293,6 +1419,13 @@ const Invoice = () => {
                         {s.course}
                       </p>
                     </div>
+                    <button
+                      onClick={() => handleDeleteStudent(s._id, s.name)}
+                      className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 flex-shrink-0 transition-all border border-red-200 hover:border-red-400"
+                      title="Delete student permanently"
+                    >
+                      <FaTrash size={13} />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -1301,6 +1434,10 @@ const Invoice = () => {
                 <FaUsers className="text-4xl text-gray-300 mx-auto mb-2" />
                 <p className="text-xs text-gray-500 mb-3">
                   {currentDept} department-এ এখনো কোনো student নেই।
+                  <br />
+                  <span className="text-[10px]">
+                    Student Management → Batch → Open LMS → Add Student
+                  </span>
                 </p>
                 <button
                   onClick={openGenerateModal}
