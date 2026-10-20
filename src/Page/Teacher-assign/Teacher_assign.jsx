@@ -1190,66 +1190,6 @@ const Teacher_assign = () => {
             </div>
           </div>
 
-          {/* Available Teachers */}
-          <div className="bg-teal-50 border border-teal-200 rounded-xl p-3 mb-3">
-            <p className="text-xs font-bold text-teal-800 mb-2 flex items-center gap-1">
-              <FaUserTie size={12} /> Available {adminDepartment} Teachers (
-              {availableTeachers.length})
-            </p>
-            {teachersLoading ? (
-              <p className="text-xs text-gray-500 italic">
-                Loading teachers...
-              </p>
-            ) : availableTeachers.length === 0 ? (
-              <p className="text-xs text-gray-500 italic">
-                এই department এ এখনো কোনো teacher add করা হয়নি। উপরে "Add
-                Teacher" বাটন ব্যবহার করুন।
-              </p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                {availableTeachers.map((t, idx) => (
-                  <div
-                    key={t._id || t.id || idx}
-                    className="bg-white border border-teal-200 rounded-lg p-3 flex items-center gap-3"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                      {(t.name || "T").charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-gray-800 truncate">
-                        {t.name}
-                      </p>
-                      <p className="text-[10px] text-gray-500 truncate">
-                        {t.designation || "Teacher"} •{" "}
-                        {t.subject || t.department || adminDepartment}
-                      </p>
-                      {t.phone && (
-                        <p className="text-[10px] text-gray-400 truncate">
-                          📱 {t.phone}
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => {
-                        setFormData({
-                          ...initialFormData,
-                          teacherId: t.id || t._id,
-                          teacherName: t.name,
-                          subject: t.specialization || "",
-                        });
-                        setTeacherInput(t.name);
-                        setShowAssignModal(true);
-                      }}
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 whitespace-nowrap"
-                    >
-                      <FaPlusCircle size={10} /> Assign
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
           {/* Filters */}
           <div className="bg-white border rounded-xl shadow-sm p-2 mb-3">
             <div className="flex flex-col md:flex-row gap-2">
