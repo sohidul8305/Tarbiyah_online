@@ -1,5 +1,5 @@
 // src/Page/Admin/Income.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
@@ -28,11 +28,11 @@ import {
   FaMoneyBillWave as FaMoneyBillWaveIcon,
   FaSpinner,
   FaSyncAlt,
+  FaLayerGroup,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-// ✅ FIX: https not http
 const API_BASE = "https://api.tarbiyahonline.com";
 
 // ============================================================
@@ -93,36 +93,6 @@ const DEPARTMENT_CONFIGS = {
   },
 };
 
-// ✅ Elders default income (for first-time)
-const ELDERS_DEFAULT_INCOME = [
-  {
-    _id: "sample-inc-1",
-    source: "Monthly Fee - Omer Faruk",
-    category: "Student Fee",
-    amount: 5000,
-    date: "2026-09-05",
-    method: "bKash",
-    status: "Received",
-    description: "Monthly tuition fee for September 2026",
-    receivedBy: "Admin",
-    transactionId: "DGD9CFHU69",
-    department: "Elders",
-  },
-  {
-    _id: "sample-inc-2",
-    source: "Monthly Fee - Ikramm",
-    category: "Student Fee",
-    amount: 3000,
-    date: "2026-09-06",
-    method: "Nagad",
-    status: "Received",
-    description: "Partial payment",
-    receivedBy: "Admin",
-    transactionId: "DGX9PQ45MN",
-    department: "Elders",
-  },
-];
-
 const getCurrentDepartment = () => {
   try {
     const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
@@ -164,7 +134,6 @@ const Income = () => {
     joinDate: "",
   });
 
-  // ✅ Current department
   const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
   const deptConfig =
     DEPARTMENT_CONFIGS[currentDept] || DEPARTMENT_CONFIGS["Elders"];
@@ -178,12 +147,16 @@ const Income = () => {
   const [apiWorking, setApiWorking] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterCategory, setFilterCategory] = useState("All");
   const [filterMethod, setFilterMethod] = useState("All");
   const [filterDate, setFilterDate] = useState("");
+  const [filterBatch, setFilterBatch] = useState("All"); // ✅ NEW
+  const [filterSourceType, setFilterSourceType] = useState("All"); // ✅ All / Manual / Batch
 
+  // Modals
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
@@ -238,7 +211,7 @@ const Income = () => {
   }, [user]);
 
   // ============================================================
-  // ✅ Load Income — API first, localStorage fallback
+  // Load Income (merged: manual + batch)
   // ============================================================
   const loadIncome = async () => {
     try {
@@ -248,61 +221,33 @@ const Income = () => {
       );
 
       if (data.success && Array.isArray(data.incomes)) {
-        if (data.incomes.length > 0) {
-          setIncomeRecords(data.incomes);
-          setApiWorking(true);
-          localStorage.setItem(
-            `income_${currentDept.replace(/\s+/g, "_")}`,
-            JSON.stringify(data.incomes),
-          );
-          console.log(
-            `✅ Loaded ${data.incomes.length} income records from API (${currentDept})`,
-          );
-          return;
-        }
-
-        // API empty → check localStorage
-        const key = `income_${currentDept.replace(/\s+/g, "_")}`;
-        const saved = localStorage.getItem(key);
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setIncomeRecords(parsed);
-              setApiWorking(true);
-              return;
-            }
-          } catch {}
-        }
-
+        setIncomeRecords(data.incomes);
         setApiWorking(true);
-        setIncomeRecords(currentDept === "Elders" ? ELDERS_DEFAULT_INCOME : []);
+        localStorage.setItem(
+          `income_${currentDept.replace(/\s+/g, "_")}`,
+          JSON.stringify(data.incomes),
+        );
+        console.log(
+          `✅ Loaded ${data.incomes.length} records (manual: ${data.manualCount}, batch: ${data.batchCount})`,
+        );
         return;
       }
 
       throw new Error(data.message || "API failed");
     } catch (err) {
-      console.warn("⚠️ API failed, using localStorage:", err.message);
+      console.warn("⚠️ API failed:", err.message);
       setApiWorking(false);
       const key = `income_${currentDept.replace(/\s+/g, "_")}`;
       const saved = localStorage.getItem(key);
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          setIncomeRecords(
-            Array.isArray(parsed) && parsed.length > 0
-              ? parsed
-              : currentDept === "Elders"
-                ? ELDERS_DEFAULT_INCOME
-                : [],
-          );
+          setIncomeRecords(Array.isArray(parsed) ? parsed : []);
         } catch {
-          setIncomeRecords(
-            currentDept === "Elders" ? ELDERS_DEFAULT_INCOME : [],
-          );
+          setIncomeRecords([]);
         }
       } else {
-        setIncomeRecords(currentDept === "Elders" ? ELDERS_DEFAULT_INCOME : []);
+        setIncomeRecords([]);
       }
     } finally {
       setIsLoading(false);
@@ -314,7 +259,6 @@ const Income = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDept]);
 
-  // Cache to localStorage
   useEffect(() => {
     if (!currentDept || incomeRecords.length === 0) return;
     const key = `income_${currentDept.replace(/\s+/g, "_")}`;
@@ -527,13 +471,19 @@ const Income = () => {
     }
   };
 
+  // ============================================================
+  // Client-side filters
+  // ============================================================
   const filteredRecords = incomeRecords.filter((record) => {
     const s = searchTerm.toLowerCase();
     const matchesSearch =
       !s ||
       (record.source || "").toLowerCase().includes(s) ||
       (record.description || "").toLowerCase().includes(s) ||
-      (record.transactionId || "").toLowerCase().includes(s);
+      (record.transactionId || "").toLowerCase().includes(s) ||
+      (record.batchName || "").toLowerCase().includes(s) ||
+      (record.studentName || "").toLowerCase().includes(s);
+
     const matchesStatus =
       filterStatus === "All" || record.status === filterStatus;
     const matchesCategory =
@@ -541,25 +491,43 @@ const Income = () => {
     const matchesMethod =
       filterMethod === "All" || record.method === filterMethod;
     const matchesDate = !filterDate || record.date === filterDate;
+    const matchesBatch =
+      filterBatch === "All" || record.batchName === filterBatch;
+    const matchesSourceType =
+      filterSourceType === "All" ||
+      (filterSourceType === "Batch" && record.isBatchIncome) ||
+      (filterSourceType === "Manual" && !record.isBatchIncome);
+
     return (
       matchesSearch &&
       matchesStatus &&
       matchesCategory &&
       matchesMethod &&
-      matchesDate
+      matchesDate &&
+      matchesBatch &&
+      matchesSourceType
     );
   });
 
+  // Unique dropdown values
   const uniqueStatuses = [
     "All",
-    ...new Set(incomeRecords.map((r) => r.status)),
+    ...new Set(incomeRecords.map((r) => r.status).filter(Boolean)),
   ];
   const uniqueCategories = [
     "All",
-    ...new Set(incomeRecords.map((r) => r.category)),
+    ...new Set(incomeRecords.map((r) => r.category).filter(Boolean)),
   ];
-  const uniqueMethods = ["All", ...new Set(incomeRecords.map((r) => r.method))];
+  const uniqueMethods = [
+    "All",
+    ...new Set(incomeRecords.map((r) => r.method).filter(Boolean)),
+  ];
+  const uniqueBatches = [
+    "All",
+    ...new Set(incomeRecords.map((r) => r.batchName).filter(Boolean)),
+  ];
 
+  // Stats
   const totalIncome = incomeRecords.reduce(
     (sum, r) => sum + (Number(r.amount) || 0),
     0,
@@ -574,6 +542,39 @@ const Income = () => {
     .filter((r) => r.status === "Overdue")
     .reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
 
+  const batchIncomeTotal = incomeRecords
+    .filter((r) => r.isBatchIncome)
+    .reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+
+  // ============================================================
+  // ✅ Batch-wise summary
+  // ============================================================
+  const batchSummary = useMemo(() => {
+    const map = {};
+    incomeRecords
+      .filter((r) => r.isBatchIncome && r.batchName)
+      .forEach((r) => {
+        const key = r.batchName;
+        if (!map[key]) {
+          map[key] = {
+            batchName: key,
+            totalIncome: 0,
+            studentSet: new Set(),
+            payments: 0,
+          };
+        }
+        map[key].totalIncome += Number(r.amount) || 0;
+        if (r.studentName) map[key].studentSet.add(r.studentName);
+        map[key].payments++;
+      });
+    return Object.values(map).map((b) => ({
+      batchName: b.batchName,
+      totalIncome: b.totalIncome,
+      studentCount: b.studentSet.size,
+      payments: b.payments,
+    }));
+  }, [incomeRecords]);
+
   const formatCurrency = (amount) => `৳${(amount || 0).toLocaleString()}`;
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
@@ -585,7 +586,7 @@ const Income = () => {
   };
 
   // ============================================================
-  // ✅ Open Add Modal — always enabled
+  // Open Add Modal
   // ============================================================
   const openAddModal = () => {
     setFormData({
@@ -603,6 +604,15 @@ const Income = () => {
   };
 
   const openEditModal = (record) => {
+    if (record.isBatchIncome) {
+      Swal.fire({
+        icon: "info",
+        title: "Batch Income",
+        html: `এই record টি auto-generated।<br/>Student: <strong>${record.studentName}</strong><br/>Batch: <strong>${record.batchName}</strong><br/><br/>পরিবর্তন করতে <b>Student Management → Batch</b> এ যান।`,
+        confirmButtonColor: "#004d4d",
+      });
+      return;
+    }
     setSelectedIncome(record);
     setFormData({
       source: record.source,
@@ -624,11 +634,10 @@ const Income = () => {
   };
 
   // ============================================================
-  // ✅ ADD INCOME — API first
+  // ADD INCOME
   // ============================================================
   const handleAddIncome = async (e) => {
     e.preventDefault();
-
     if (
       !formData.source ||
       !formData.category ||
@@ -661,7 +670,6 @@ const Income = () => {
 
     try {
       setSaving(true);
-
       const data = await safeFetchJSON(`${API_BASE}/api/income/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -671,10 +679,8 @@ const Income = () => {
       let newRecord;
       if (data.success && data.income) {
         newRecord = data.income;
-        console.log("✅ Saved to API:", newRecord._id);
       } else {
         newRecord = { _id: `LOCAL_${Date.now()}`, ...payload };
-        console.warn("⚠️ API failed, saved locally");
       }
 
       setIncomeRecords([newRecord, ...incomeRecords]);
@@ -696,11 +702,10 @@ const Income = () => {
   };
 
   // ============================================================
-  // ✅ EDIT
+  // EDIT
   // ============================================================
   const handleEditIncome = async (e) => {
     e.preventDefault();
-
     if (
       !formData.source ||
       !formData.category ||
@@ -725,7 +730,6 @@ const Income = () => {
 
     try {
       setSaving(true);
-
       const isLocalId =
         String(selectedIncome._id).startsWith("LOCAL_") ||
         String(selectedIncome._id).startsWith("sample-");
@@ -768,9 +772,20 @@ const Income = () => {
   };
 
   // ============================================================
-  // ✅ DELETE
+  // DELETE
   // ============================================================
   const handleDeleteIncome = async (id) => {
+    const record = incomeRecords.find((r) => r._id === id);
+    if (record?.isBatchIncome) {
+      Swal.fire({
+        icon: "info",
+        title: "Batch Income",
+        html: `এই record টি auto-generated।<br/>মুছতে চাইলে <b>Student Management → Batch</b> এ গিয়ে student delete করুন।`,
+        confirmButtonColor: "#004d4d",
+      });
+      return;
+    }
+
     const result = await Swal.fire({
       title: "Delete Income Record?",
       text: "This action cannot be undone!",
@@ -780,7 +795,6 @@ const Income = () => {
       cancelButtonColor: "#6b7280",
       confirmButtonText: "Yes, delete it!",
     });
-
     if (!result.isConfirmed) return;
 
     try {
@@ -792,7 +806,7 @@ const Income = () => {
         });
       }
       setIncomeRecords(incomeRecords.filter((r) => r._id !== id));
-      Swal.fire("Deleted!", "Income record has been deleted.", "success");
+      Swal.fire("Deleted!", "Income record deleted.", "success");
     } catch (err) {
       console.error(err);
     }
@@ -822,7 +836,7 @@ const Income = () => {
         {/* Mobile Header */}
         <div className="md:hidden bg-white border-b p-3 flex justify-between items-center w-full absolute top-0 left-0 z-40">
           <h1 className="text-sm font-bold text-gray-800">
-            Income Report ({currentDept})
+            Income ({currentDept})
           </h1>
           <button
             onClick={toggleSidebar}
@@ -939,7 +953,7 @@ const Income = () => {
               <p className="text-xs text-gray-500">
                 {isLoading
                   ? `Loading ${currentDept} data...`
-                  : `${incomeRecords.length} record${incomeRecords.length !== 1 ? "s" : ""}`}
+                  : `${incomeRecords.length} record${incomeRecords.length !== 1 ? "s" : ""} (manual + batch)`}
                 {!apiWorking && (
                   <span className="ml-2 text-yellow-600">⚠️ Offline</span>
                 )}
@@ -954,7 +968,7 @@ const Income = () => {
                 <FaSyncAlt
                   size={12}
                   className={isLoading ? "animate-spin" : ""}
-                />{" "}
+                />
                 Refresh
               </button>
               <button
@@ -987,11 +1001,12 @@ const Income = () => {
           {/* Dept Badge */}
           <div className="bg-teal-50 border border-teal-200 text-teal-800 px-4 py-2 rounded-xl text-xs font-semibold mb-3">
             🏫 Showing income of:{" "}
-            <span className="font-bold">{currentDept}</span> department
+            <span className="font-bold">{currentDept}</span> — manual + batch
+            enrollment fees
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-blue-600">
                 {formatCurrency(totalIncome)}
@@ -1016,7 +1031,49 @@ const Income = () => {
               </p>
               <p className="text-[10px] text-gray-500">Overdue</p>
             </div>
+            <div className="bg-white border border-indigo-200 rounded-xl shadow-sm p-2 text-center">
+              <p className="text-lg font-bold text-indigo-600">
+                {formatCurrency(batchIncomeTotal)}
+              </p>
+              <p className="text-[10px] text-gray-500">From Batch Fees</p>
+            </div>
           </div>
+
+          {/* ✅ Batch-wise summary */}
+          {batchSummary.length > 0 && (
+            <div className="bg-white border border-indigo-200 rounded-xl shadow-sm p-3 mb-3">
+              <div className="flex items-center gap-2 mb-2">
+                <FaLayerGroup className="text-indigo-600" />
+                <h4 className="font-semibold text-gray-700 text-sm">
+                  Batch-wise Income Summary
+                </h4>
+                <span className="text-[10px] text-gray-400">
+                  ({batchSummary.length} batches)
+                </span>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {batchSummary.map((b, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setFilterBatch(b.batchName)}
+                    className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-lg p-2 text-left hover:border-indigo-400 transition"
+                  >
+                    <p className="text-[10px] font-bold text-indigo-800 truncate">
+                      {b.batchName}
+                    </p>
+                    <p className="text-sm font-bold text-indigo-600 mt-0.5">
+                      {formatCurrency(b.totalIncome)}
+                    </p>
+                    <p className="text-[9px] text-gray-500">
+                      👥 {b.studentCount} student
+                      {b.studentCount !== 1 ? "s" : ""} • {b.payments} payment
+                      {b.payments !== 1 ? "s" : ""}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Filters */}
           <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2 mb-3">
@@ -1038,6 +1095,30 @@ const Income = () => {
                   onChange={(e) => setFilterDate(e.target.value)}
                   className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg"
                 />
+                {/* ✅ Source type */}
+                <select
+                  value={filterSourceType}
+                  onChange={(e) => setFilterSourceType(e.target.value)}
+                  className="px-1.5 py-1 text-xs border border-gray-300 rounded-lg font-semibold"
+                >
+                  <option value="All">All Sources</option>
+                  <option value="Manual">✍️ Manual</option>
+                  <option value="Batch">🎓 Batch Fees</option>
+                </select>
+                {/* ✅ Batch filter */}
+                {uniqueBatches.length > 1 && (
+                  <select
+                    value={filterBatch}
+                    onChange={(e) => setFilterBatch(e.target.value)}
+                    className="px-1.5 py-1 text-xs border border-indigo-300 rounded-lg bg-indigo-50 font-semibold"
+                  >
+                    {uniqueBatches.map((b) => (
+                      <option key={b} value={b}>
+                        {b === "All" ? "All Batches" : b}
+                      </option>
+                    ))}
+                  </select>
+                )}
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
@@ -1075,7 +1156,7 @@ const Income = () => {
             </div>
           </div>
 
-          {/* Loading / Table */}
+          {/* Table */}
           {isLoading ? (
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-16 text-center">
               <FaSpinner className="animate-spin text-4xl text-teal-600 mx-auto" />
@@ -1085,7 +1166,7 @@ const Income = () => {
             </div>
           ) : (
             <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-              <div className="overflow-x-auto max-h-[calc(100vh-440px)] overflow-y-auto">
+              <div className="overflow-x-auto max-h-[calc(100vh-500px)] overflow-y-auto">
                 <table className="w-full text-xs">
                   <thead className="bg-gray-50 sticky top-0 z-10">
                     <tr>
@@ -1118,16 +1199,24 @@ const Income = () => {
                   <tbody className="divide-y divide-gray-100">
                     {filteredRecords.length > 0 ? (
                       filteredRecords.map((record, index) => (
-                        <tr key={record._id} className="hover:bg-gray-50">
+                        <tr
+                          key={record._id}
+                          className={`hover:bg-gray-50 ${record.isBatchIncome ? "bg-indigo-50/20" : ""}`}
+                        >
                           <td className="px-3 py-2 font-medium text-gray-500">
                             {index + 1}
                           </td>
                           <td className="px-3 py-2">
-                            <div className="font-medium text-gray-800 truncate max-w-[150px]">
+                            <div className="font-medium text-gray-800 truncate max-w-[180px] flex items-center gap-1 flex-wrap">
                               {record.source}
+                              {record.isBatchIncome && (
+                                <span className="text-[8px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-full font-bold">
+                                  Batch
+                                </span>
+                              )}
                             </div>
-                            <div className="text-[10px] text-gray-400 truncate max-w-[150px]">
-                              {record.transactionId}
+                            <div className="text-[10px] text-gray-400 truncate max-w-[180px]">
+                              {record.transactionId || record.batchName || "-"}
                             </div>
                           </td>
                           <td className="px-3 py-2 hidden md:table-cell">
@@ -1165,15 +1254,33 @@ const Income = () => {
                               </button>
                               <button
                                 onClick={() => openEditModal(record)}
-                                className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
-                                title="Edit"
+                                disabled={record.isBatchIncome}
+                                className={`p-1 rounded ${
+                                  record.isBatchIncome
+                                    ? "text-gray-300 cursor-not-allowed"
+                                    : "text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50"
+                                }`}
+                                title={
+                                  record.isBatchIncome
+                                    ? "Batch income — edit from Student Batch page"
+                                    : "Edit"
+                                }
                               >
                                 <FaEdit size={12} />
                               </button>
                               <button
                                 onClick={() => handleDeleteIncome(record._id)}
-                                className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50"
-                                title="Delete"
+                                disabled={record.isBatchIncome}
+                                className={`p-1 rounded ${
+                                  record.isBatchIncome
+                                    ? "text-gray-300 cursor-not-allowed"
+                                    : "text-red-600 hover:text-red-800 hover:bg-red-50"
+                                }`}
+                                title={
+                                  record.isBatchIncome
+                                    ? "Batch income — delete from Student Batch page"
+                                    : "Delete"
+                                }
                               >
                                 <FaTrash size={12} />
                               </button>
@@ -1225,7 +1332,8 @@ const Income = () => {
             </div>
             <form onSubmit={handleAddIncome} className="p-6 space-y-4">
               <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-700">
-                💡 Adding income to <strong>{currentDept}</strong> department
+                💡 Adding manual income to <strong>{currentDept}</strong>. Batch
+                enrollment fees auto-add হবে।
               </div>
 
               <div>
@@ -1240,7 +1348,7 @@ const Income = () => {
                     setFormData({ ...formData, source: e.target.value })
                   }
                   className="w-full border rounded-lg px-3 py-2 text-sm"
-                  placeholder="e.g., Monthly Fee - Student Name"
+                  placeholder="e.g., Donation, Event Fee"
                   list="source-suggestions"
                 />
                 <datalist id="source-suggestions">
@@ -1496,7 +1604,7 @@ const Income = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Payment Method
+                    Method
                   </label>
                   <select
                     value={formData.method}
@@ -1577,7 +1685,7 @@ const Income = () => {
                     </>
                   ) : (
                     <>
-                      <FaSave size={14} /> Update Income
+                      <FaSave size={14} /> Update
                     </>
                   )}
                 </button>
@@ -1611,13 +1719,18 @@ const Income = () => {
             </div>
             <div className="p-6 space-y-4">
               <div className="flex items-center justify-between pb-4 border-b">
-                <div>
-                  <h2 className="text-lg font-bold text-gray-800">
+                <div className="min-w-0 flex-1">
+                  <h2 className="text-base font-bold text-gray-800 truncate">
                     {selectedIncome.source}
                   </h2>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs text-gray-500 mt-0.5">
                     {selectedIncome.transactionId}
                   </p>
+                  {selectedIncome.isBatchIncome && (
+                    <span className="inline-block mt-1 text-[9px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-bold">
+                      🎓 Auto from Batch Enrollment
+                    </span>
+                  )}
                 </div>
                 <span
                   className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedIncome.status)}`}
@@ -1626,6 +1739,7 @@ const Income = () => {
                   {selectedIncome.status}
                 </span>
               </div>
+
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-[10px] text-gray-400">Department</p>
@@ -1667,7 +1781,25 @@ const Income = () => {
                     </p>
                   </div>
                 )}
+
+                {/* ✅ Batch info */}
+                {selectedIncome.isBatchIncome && (
+                  <>
+                    <div className="bg-indigo-50 rounded-lg p-3 col-span-2">
+                      <p className="text-[10px] text-indigo-500">Batch</p>
+                      <p className="text-sm font-bold text-indigo-800">
+                        {selectedIncome.batchName}
+                      </p>
+                      <p className="text-[10px] text-gray-500 mt-1">
+                        👤 Student: <b>{selectedIncome.studentName}</b>
+                        {selectedIncome.studentId &&
+                          ` (${selectedIncome.studentId})`}
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
+
               {selectedIncome.description && (
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-[10px] text-gray-400">Description</p>
@@ -1676,13 +1808,19 @@ const Income = () => {
                   </p>
                 </div>
               )}
+
               <div className="flex gap-3 pt-4 border-t">
                 <button
                   onClick={() => {
                     setShowDetailsModal(false);
                     openEditModal(selectedIncome);
                   }}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                  disabled={selectedIncome.isBatchIncome}
+                  className={`flex-1 px-4 py-2 rounded-lg font-semibold text-sm ${
+                    selectedIncome.isBatchIncome
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-yellow-500 hover:bg-yellow-600 text-white"
+                  }`}
                 >
                   <FaEdit className="inline mr-2" /> Edit
                 </button>
@@ -1691,7 +1829,12 @@ const Income = () => {
                     setShowDetailsModal(false);
                     handleDeleteIncome(selectedIncome._id);
                   }}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                  disabled={selectedIncome.isBatchIncome}
+                  className={`flex-1 px-4 py-2 rounded-lg font-semibold text-sm ${
+                    selectedIncome.isBatchIncome
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-red-600 hover:bg-red-700 text-white"
+                  }`}
                 >
                   <FaTrash className="inline mr-2" /> Delete
                 </button>
