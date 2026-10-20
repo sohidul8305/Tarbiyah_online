@@ -28,6 +28,7 @@ import {
   FaSyncAlt,
   FaUserGraduate,
   FaBuilding,
+  FaLayerGroup,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -121,24 +122,6 @@ const DEPARTMENT_CONFIGS = {
   },
 };
 
-// ✅ Elders default CRM entries
-const ELDERS_DEFAULT_CRM = [
-  {
-    _id: "sample-crm-1",
-    student: "Abdullah Rahman",
-    guardian: "Mahmud Rahman",
-    whatsapp: "+880 1712 345678",
-    interested: "Qaida Noorani (Bangla Medium)",
-    status: "Interested",
-    nextFollowUp: "2026-10-15",
-    notes: "Called once, will call again",
-    enteredBy: "Admin",
-    createdAt: "2026-09-20",
-    source: "crm",
-    department: "Elders",
-  },
-];
-
 const getCurrentDepartment = () => {
   try {
     const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
@@ -180,7 +163,6 @@ const Data_enty = () => {
     joinDate: "",
   });
 
-  // ✅ Current department
   const [currentDept, setCurrentDept] = useState(getCurrentDepartment());
   const deptConfig =
     DEPARTMENT_CONFIGS[currentDept] || DEPARTMENT_CONFIGS["Elders"];
@@ -188,9 +170,11 @@ const Data_enty = () => {
   const DEPT_KEYWORDS = deptConfig.courseKeywords;
   const DEPT_LABEL = deptConfig.label;
 
-  // Data Sources
+  // ✅ Data sources
   const [crmEntries, setCrmEntries] = useState([]);
   const [admissionStudents, setAdmissionStudents] = useState([]);
+  const [batchStudents, setBatchStudents] = useState([]); // ✅ NEW
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [apiWorking, setApiWorking] = useState(true);
@@ -207,7 +191,6 @@ const Data_enty = () => {
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  // Form
   const [formData, setFormData] = useState({
     student: "",
     guardian: "",
@@ -219,7 +202,6 @@ const Data_enty = () => {
     department: "",
   });
 
-  // Options
   const statusOptions = [
     "Interested",
     "Contacted",
@@ -230,7 +212,7 @@ const Data_enty = () => {
   ];
 
   // ============================================
-  // Map student status → CRM status
+  // Helpers
   // ============================================
   const mapStudentStatus = (studentStatus) => {
     if (studentStatus === "Active") return "Enrolled";
@@ -239,18 +221,13 @@ const Data_enty = () => {
     return "Interested";
   };
 
-  // ============================================
-  // Course match — current department
-  // ============================================
   const isDeptCourse = (courseStr) => {
     if (!courseStr) return false;
     const p = String(courseStr).toLowerCase().trim();
     return DEPT_KEYWORDS.some((c) => p.includes(c));
   };
 
-  // ============================================
-  // Convert Student → CRM entry shape
-  // ============================================
+  // Student → CRM entry shape
   const studentToCrmEntry = (s) => ({
     id: s._id || s.id,
     _id: s._id || s.id,
@@ -274,21 +251,43 @@ const Data_enty = () => {
     _original: s,
   });
 
+  // ✅ Batch student → CRM entry shape
+  const batchStudentToCrmEntry = (s) => ({
+    id: s._id,
+    _id: s._id,
+    student: s.name || "",
+    guardian: "",
+    whatsapp: s.phone || "",
+    interested: s.course || "",
+    status: "Enrolled",
+    nextFollowUp: "",
+    notes: s.notes || s.scholarshipNote || "",
+    enteredBy: "Batch Enrollment",
+    createdAt: s.admissionDate
+      ? String(s.admissionDate).split("T")[0]
+      : s.createdAt
+        ? String(s.createdAt).split("T")[0]
+        : "",
+    source: "batch",
+    isBatchStudent: true,
+    batchId: s.batchId,
+    department: s.department || "",
+    _original: s,
+  });
+
   // ============================================
-  // ✅ FETCH Admission Students — department filtered
+  // ✅ FETCH: Admission students
   // ============================================
   const fetchAdmissionStudents = useCallback(async () => {
     try {
       const res = await fetch(
         `${API_BASE}/api/students/all?department=${encodeURIComponent(currentDept)}`,
       );
-
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
       const data = await res.json();
       const list = data.students || data.data || [];
 
-      // ✅ Frontend fallback filter
       const filtered = (Array.isArray(list) ? list : []).filter((s) => {
         const sDept = String(s.department || "")
           .toLowerCase()
@@ -310,7 +309,32 @@ const Data_enty = () => {
   }, [currentDept]);
 
   // ============================================
-  // ✅ FETCH CRM entries — API first, localStorage fallback
+  // ✅ FETCH: Batch students (NEW)
+  // ============================================
+  const fetchBatchStudents = useCallback(async () => {
+    try {
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/batch-students/all?department=${encodeURIComponent(currentDept)}`,
+      );
+
+      if (data.success && Array.isArray(data.students)) {
+        const mapped = data.students.map(batchStudentToCrmEntry);
+        setBatchStudents(mapped);
+        console.log(
+          `✅ [Batch] ${mapped.length} batch students for ${currentDept}`,
+        );
+      } else {
+        setBatchStudents([]);
+      }
+    } catch (err) {
+      console.warn("⚠️ Could not fetch batch students:", err.message);
+      setBatchStudents([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentDept]);
+
+  // ============================================
+  // ✅ FETCH: CRM entries
   // ============================================
   const fetchCrmEntries = useCallback(async () => {
     try {
@@ -319,35 +343,15 @@ const Data_enty = () => {
       );
 
       if (data.success && Array.isArray(data.entries)) {
-        if (data.entries.length > 0) {
-          setCrmEntries(data.entries);
-          setApiWorking(true);
-          localStorage.setItem(
-            `crm_${currentDept.replace(/\s+/g, "_")}`,
-            JSON.stringify(data.entries),
-          );
-          console.log(
-            `✅ [CRM] ${data.entries.length} entries from API (${currentDept})`,
-          );
-          return;
-        }
-
-        // API empty → check localStorage
-        const key = `crm_${currentDept.replace(/\s+/g, "_")}`;
-        const saved = localStorage.getItem(key);
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setCrmEntries(parsed);
-              setApiWorking(true);
-              return;
-            }
-          } catch {}
-        }
-
+        setCrmEntries(data.entries);
         setApiWorking(true);
-        setCrmEntries(currentDept === "Elders" ? ELDERS_DEFAULT_CRM : []);
+        localStorage.setItem(
+          `crm_${currentDept.replace(/\s+/g, "_")}`,
+          JSON.stringify(data.entries),
+        );
+        console.log(
+          `✅ [CRM] ${data.entries.length} entries from API (${currentDept})`,
+        );
         return;
       }
 
@@ -360,18 +364,12 @@ const Data_enty = () => {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          setCrmEntries(
-            Array.isArray(parsed) && parsed.length > 0
-              ? parsed
-              : currentDept === "Elders"
-                ? ELDERS_DEFAULT_CRM
-                : [],
-          );
+          setCrmEntries(Array.isArray(parsed) ? parsed : []);
         } catch {
-          setCrmEntries(currentDept === "Elders" ? ELDERS_DEFAULT_CRM : []);
+          setCrmEntries([]);
         }
       } else {
-        setCrmEntries(currentDept === "Elders" ? ELDERS_DEFAULT_CRM : []);
+        setCrmEntries([]);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -381,14 +379,17 @@ const Data_enty = () => {
     try {
       setIsLoading(true);
       setError(null);
-      await fetchCrmEntries();
-      await fetchAdmissionStudents();
+      await Promise.all([
+        fetchCrmEntries(),
+        fetchAdmissionStudents(),
+        fetchBatchStudents(),
+      ]);
     } catch (err) {
       setError(err.message || "Failed to load data");
     } finally {
       setIsLoading(false);
     }
-  }, [fetchCrmEntries, fetchAdmissionStudents]);
+  }, [fetchCrmEntries, fetchAdmissionStudents, fetchBatchStudents]);
 
   // Load admin info
   useEffect(() => {
@@ -413,12 +414,11 @@ const Data_enty = () => {
     }
   }, [user]);
 
-  // Initial load + reload on department change
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
-  // Cache CRM to localStorage
+  // Cache CRM
   useEffect(() => {
     if (!currentDept || crmEntries.length === 0) return;
     const key = `crm_${currentDept.replace(/\s+/g, "_")}`;
@@ -630,10 +630,10 @@ const Data_enty = () => {
     }
   };
 
-  // Combined list
+  // ✅ Combined list — 3 sources
   const allEntries = useMemo(() => {
-    return [...admissionStudents, ...crmEntries];
-  }, [admissionStudents, crmEntries]);
+    return [...admissionStudents, ...batchStudents, ...crmEntries];
+  }, [admissionStudents, batchStudents, crmEntries]);
 
   const filteredEntries = allEntries.filter((entry) => {
     const s = searchTerm.toLowerCase();
@@ -670,9 +670,6 @@ const Data_enty = () => {
     }
   };
 
-  // ============================================
-  // ✅ OPEN ADD MODAL — always enabled
-  // ============================================
   const openAddModal = () => {
     setFormData({
       student: "",
@@ -691,15 +688,27 @@ const Data_enty = () => {
     if (entry.isStudent) {
       Swal.fire({
         icon: "info",
-        title: "Student Record",
-        text: "This is an admission student. Edit from Student Management page.",
-        timer: 2500,
-        showConfirmButton: true,
+        title: "Admission Student",
+        text: "Edit from Student Management page.",
         confirmButtonText: "Go to Student Management",
         showCancelButton: true,
         cancelButtonText: "Cancel",
       }).then((res) => {
         if (res.isConfirmed) navigate("/admin-students/add");
+      });
+      return;
+    }
+
+    if (entry.isBatchStudent) {
+      Swal.fire({
+        icon: "info",
+        title: "Batch Student",
+        html: `এই student টি batch enrollment থেকে এসেছে।<br/>Edit করতে <b>Student Management → Batch → Open LMS</b> এ যান।`,
+        confirmButtonText: "Go to Batch Management",
+        showCancelButton: true,
+        cancelButtonText: "Cancel",
+      }).then((res) => {
+        if (res.isConfirmed) navigate("/admin-students/batch");
       });
       return;
     }
@@ -724,11 +733,10 @@ const Data_enty = () => {
   };
 
   // ============================================
-  // ✅ ADD CRM ENTRY — API first
+  // ADD CRM ENTRY
   // ============================================
   const handleAddEntry = async (e) => {
     e.preventDefault();
-
     if (!formData.student || !formData.whatsapp) {
       Swal.fire({
         icon: "warning",
@@ -755,7 +763,6 @@ const Data_enty = () => {
 
     try {
       setSaving(true);
-
       const data = await safeFetchJSON(`${API_BASE}/api/crm/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -765,14 +772,12 @@ const Data_enty = () => {
       let newEntry;
       if (data.success && data.entry) {
         newEntry = data.entry;
-        console.log("✅ Saved to API:", newEntry._id);
       } else {
         newEntry = {
           _id: `LOCAL_${Date.now()}`,
           ...payload,
           createdAt: new Date().toISOString().split("T")[0],
         };
-        console.warn("⚠️ API failed, saved locally");
       }
 
       setCrmEntries([newEntry, ...crmEntries]);
@@ -793,17 +798,13 @@ const Data_enty = () => {
     }
   };
 
-  // ============================================
-  // ✅ EDIT CRM ENTRY
-  // ============================================
+  // EDIT CRM ENTRY
   const handleEditEntry = async (e) => {
     e.preventDefault();
-
     if (!formData.student || !formData.whatsapp) {
       Swal.fire({
         icon: "warning",
         title: "Required Fields Missing",
-        text: "Student name and WhatsApp number are required.",
         timer: 2000,
         showConfirmButton: false,
       });
@@ -817,7 +818,6 @@ const Data_enty = () => {
 
     try {
       setSaving(true);
-
       const isLocalId =
         String(selectedEntry._id).startsWith("LOCAL_") ||
         String(selectedEntry._id).startsWith("sample-");
@@ -862,17 +862,24 @@ const Data_enty = () => {
   };
 
   // ============================================
-  // ✅ DELETE
+  // ✅ DELETE (3 sources supported)
   // ============================================
   const handleDeleteEntry = async (entry) => {
-    const isStudent = entry.isStudent;
     const id = entry.id || entry._id;
+    const isStudent = entry.isStudent;
+    const isBatchStudent = entry.isBatchStudent;
 
     const result = await Swal.fire({
-      title: isStudent ? `Delete Student "${entry.student}"?` : "Delete Entry?",
+      title: isStudent
+        ? `Delete Student "${entry.student}"?`
+        : isBatchStudent
+          ? `Delete Batch Student "${entry.student}"?`
+          : "Delete CRM Entry?",
       text: isStudent
-        ? "This will permanently delete the student record!"
-        : "This action cannot be undone!",
+        ? "This will permanently delete the admission student!"
+        : isBatchStudent
+          ? "This will permanently delete the batch student + their payments!"
+          : "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -883,26 +890,29 @@ const Data_enty = () => {
     if (!result.isConfirmed) return;
 
     try {
+      let endpoint;
       if (isStudent) {
-        const data = await safeFetchJSON(
-          `${API_BASE}/api/students/delete/${id}`,
-          {
-            method: "DELETE",
-          },
-        );
-        if (!data.success)
-          throw new Error(data.message || "Could not delete student.");
-        setAdmissionStudents(
-          admissionStudents.filter((e) => (e.id || e._id) !== id),
-        );
+        endpoint = `${API_BASE}/api/students/delete/${id}`;
+      } else if (isBatchStudent) {
+        endpoint = `${API_BASE}/api/batch-students/delete/${id}`;
       } else {
         const isLocalId =
           String(id).startsWith("LOCAL_") || String(id).startsWith("sample-");
-        if (!isLocalId) {
-          await safeFetchJSON(`${API_BASE}/api/crm/delete/${id}`, {
-            method: "DELETE",
-          });
-        }
+        endpoint = isLocalId ? null : `${API_BASE}/api/crm/delete/${id}`;
+      }
+
+      if (endpoint) {
+        const data = await safeFetchJSON(endpoint, { method: "DELETE" });
+        if (!data.success) throw new Error(data.message || "Delete failed");
+      }
+
+      if (isStudent) {
+        setAdmissionStudents(
+          admissionStudents.filter((e) => (e.id || e._id) !== id),
+        );
+      } else if (isBatchStudent) {
+        setBatchStudents(batchStudents.filter((e) => (e.id || e._id) !== id));
+      } else {
         setCrmEntries(crmEntries.filter((e) => e._id !== id));
       }
 
@@ -924,6 +934,7 @@ const Data_enty = () => {
   const exportData = () => {
     const headers = [
       "Department",
+      "Source",
       "Student",
       "Guardian",
       "WhatsApp",
@@ -931,10 +942,14 @@ const Data_enty = () => {
       "Status",
       "Next Follow-up",
       "Notes",
-      "Source",
     ];
     const rows = allEntries.map((e) => [
       e.department || currentDept,
+      e.isStudent
+        ? "Admission"
+        : e.isBatchStudent
+          ? "Batch Enrollment"
+          : "CRM Manual",
       e.student,
       e.guardian,
       e.whatsapp,
@@ -942,7 +957,6 @@ const Data_enty = () => {
       e.status,
       e.nextFollowUp,
       e.notes,
-      e.source,
     ]);
 
     const csvContent = [headers, ...rows]
@@ -968,6 +982,7 @@ const Data_enty = () => {
   // Stats
   const totalEntries = allEntries.length;
   const admissionCount = admissionStudents.length;
+  const batchCount = batchStudents.length; // ✅
   const crmCount = crmEntries.length;
   const enrolledCount = allEntries.filter(
     (e) => e.status === "Enrolled",
@@ -1097,7 +1112,7 @@ const Data_enty = () => {
               <p className="text-xs text-gray-500">
                 {isLoading
                   ? "Loading..."
-                  : `${totalEntries} lead${totalEntries !== 1 ? "s" : ""}`}
+                  : `${totalEntries} lead${totalEntries !== 1 ? "s" : ""} (admission + batch + crm)`}
                 {!apiWorking && (
                   <span className="ml-2 text-yellow-600">⚠️ Offline</span>
                 )}
@@ -1143,7 +1158,6 @@ const Data_enty = () => {
             <span className="font-bold">{currentDept}</span> department
           </div>
 
-          {/* Error Banner */}
           {error && (
             <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-xs rounded-lg p-2 mb-3 flex items-center justify-between">
               <span>⚠️ {error}</span>
@@ -1166,14 +1180,12 @@ const Data_enty = () => {
               <p className="text-[10px] text-gray-500">From Admission</p>
             </div>
             <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-purple-600">{crmCount}</p>
-              <p className="text-[10px] text-gray-500">CRM Manual</p>
+              <p className="text-lg font-bold text-indigo-600">{batchCount}</p>
+              <p className="text-[10px] text-gray-500">Batch Enrolled</p>
             </div>
             <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
-              <p className="text-lg font-bold text-green-600">
-                {enrolledCount}
-              </p>
-              <p className="text-[10px] text-gray-500">Enrolled</p>
+              <p className="text-lg font-bold text-purple-600">{crmCount}</p>
+              <p className="text-[10px] text-gray-500">CRM Manual</p>
             </div>
             <div className="bg-white border rounded-xl shadow-sm p-2 text-center">
               <p className="text-lg font-bold text-orange-600">
@@ -1200,11 +1212,12 @@ const Data_enty = () => {
                 <select
                   value={filterSource}
                   onChange={(e) => setFilterSource(e.target.value)}
-                  className="px-1.5 py-1 text-xs border rounded-lg"
+                  className="px-1.5 py-1 text-xs border rounded-lg font-semibold"
                 >
                   <option value="All">All Sources</option>
-                  <option value="admission">Admission Form</option>
-                  <option value="crm">CRM Manual</option>
+                  <option value="admission">🎓 Admission Form</option>
+                  <option value="batch">📚 Batch Enrollment</option>
+                  <option value="crm">✍️ CRM Manual</option>
                 </select>
                 <select
                   value={filterStatus}
@@ -1273,7 +1286,7 @@ const Data_enty = () => {
                       return (
                         <tr
                           key={`${entry.source}-${rowId}`}
-                          className="hover:bg-gray-50"
+                          className={`hover:bg-gray-50 ${entry.isBatchStudent ? "bg-indigo-50/20" : ""}`}
                         >
                           <td className="px-3 py-2 text-gray-500">
                             {index + 1}
@@ -1282,6 +1295,10 @@ const Data_enty = () => {
                             {entry.isStudent ? (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-teal-100 text-teal-700">
                                 <FaUserGraduate size={9} /> Admission
+                              </span>
+                            ) : entry.isBatchStudent ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-indigo-100 text-indigo-700">
+                                <FaLayerGroup size={9} /> Batch
                               </span>
                             ) : (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-purple-100 text-purple-700">
@@ -1332,7 +1349,11 @@ const Data_enty = () => {
                                 onClick={() => openEditModal(entry)}
                                 className="text-yellow-600 hover:text-yellow-800 p-1 rounded hover:bg-yellow-50"
                                 title={
-                                  entry.isStudent ? "View Student" : "Edit"
+                                  entry.isStudent
+                                    ? "Manage Student"
+                                    : entry.isBatchStudent
+                                      ? "Manage Batch"
+                                      : "Edit"
                                 }
                               >
                                 <FaEdit size={12} />
@@ -1570,6 +1591,11 @@ const Data_enty = () => {
                     Admission
                   </span>
                 )}
+                {selectedEntry.isBatchStudent && (
+                  <span className="text-[10px] bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-semibold">
+                    Batch
+                  </span>
+                )}
               </h3>
               <button
                 onClick={() => setShowDetailsModal(false)}
@@ -1636,7 +1662,11 @@ const Data_enty = () => {
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
                   <p className="text-[10px] text-gray-400">Source</p>
                   <p className="text-xs font-semibold">
-                    {selectedEntry.isStudent ? "Admission Form" : "CRM Manual"}
+                    {selectedEntry.isStudent
+                      ? "📝 Admission Form"
+                      : selectedEntry.isBatchStudent
+                        ? "📚 Batch Enrollment"
+                        : "✍️ CRM Manual"}
                   </p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3 col-span-2">
@@ -1648,12 +1678,12 @@ const Data_enty = () => {
                 </div>
               </div>
 
-              <div className="flex gap-2 pt-3 border-t">
+              <div className="flex gap-2 pt-3 border-t flex-wrap">
                 <a
                   href={`https://wa.me/${(selectedEntry.whatsapp || "").replace(/[^0-9]/g, "")}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-semibold text-sm text-center flex items-center justify-center gap-1"
+                  className="flex-1 min-w-[100px] bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg font-semibold text-sm text-center flex items-center justify-center gap-1"
                 >
                   <FaWhatsapp /> WhatsApp
                 </a>
@@ -1662,14 +1692,16 @@ const Data_enty = () => {
                     setShowDetailsModal(false);
                     openEditModal(selectedEntry);
                   }}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg font-semibold text-sm"
+                  className="flex-1 min-w-[100px] bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg font-semibold text-sm"
                 >
                   <FaEdit className="inline mr-1" />
-                  {selectedEntry.isStudent ? "Manage" : "Edit"}
+                  {selectedEntry.isStudent || selectedEntry.isBatchStudent
+                    ? "Manage"
+                    : "Edit"}
                 </button>
                 <button
                   onClick={() => setShowDetailsModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-lg font-semibold text-sm"
+                  className="flex-1 min-w-[100px] bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-lg font-semibold text-sm"
                 >
                   Close
                 </button>
