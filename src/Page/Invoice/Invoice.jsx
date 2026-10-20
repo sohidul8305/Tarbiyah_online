@@ -119,64 +119,6 @@ const DEPARTMENT_CONFIGS = {
   },
 };
 
-// ✅ Default invoices — শুধু Elders-এর জন্য
-const ELDERS_DEFAULT_INVOICES = [
-  {
-    _id: "sample-inv-1",
-    invoiceNumber: "INV-EL-2026-0001",
-    studentName: "Omer Faruk",
-    studentId: "TET26FB6001",
-    class: "Elders Batch A",
-    batch: "Batch-03",
-    subject: "Qaida Nuraniyah",
-    month: "September",
-    year: 2026,
-    amount: 5000,
-    paidAmount: 5000,
-    dueAmount: 0,
-    status: "Paid",
-    issueDate: "2026-09-01",
-    dueDate: "2026-09-30",
-    paymentDate: "2026-09-05",
-    paymentMethod: "bKash",
-    transactionId: "DGD9CFHU69",
-    notes: "Paid in full",
-    items: [
-      { description: "Qaida Nuraniyah - Monthly Fee (Sep 2026)", amount: 5000 },
-    ],
-    subtotal: 5000,
-    tax: 0,
-    total: 5000,
-  },
-  {
-    _id: "sample-inv-2",
-    invoiceNumber: "INV-EL-2026-0002",
-    studentName: "Ikramm",
-    studentId: "TET26FB6002",
-    class: "Elders Batch A",
-    batch: "Batch-03",
-    subject: "Qaida Nuraniyah",
-    month: "September",
-    year: 2026,
-    amount: 5000,
-    paidAmount: 3000,
-    dueAmount: 2000,
-    status: "Partial",
-    issueDate: "2026-09-01",
-    dueDate: "2026-09-30",
-    paymentDate: "2026-09-06",
-    paymentMethod: "Nagad",
-    transactionId: "DGX9PQ45MN",
-    notes: "Partial payment - remaining due",
-    items: [
-      { description: "Qaida Nuraniyah - Monthly Fee (Sep 2026)", amount: 5000 },
-    ],
-    subtotal: 5000,
-    tax: 0,
-    total: 5000,
-  },
-];
-
 const getCurrentDepartment = () => {
   try {
     const info = JSON.parse(localStorage.getItem("adminInfo") || "{}");
@@ -455,35 +397,24 @@ const Invoice = () => {
       );
 
       if (data.success && Array.isArray(data.invoices)) {
-        if (data.invoices.length > 0) {
-          setInvoices(data.invoices);
-          setApiWorking(true);
-          localStorage.setItem(
-            `invoices_${currentDept.replace(/\s+/g, "_")}`,
-            JSON.stringify(data.invoices),
-          );
-          console.log(
-            `✅ Loaded ${data.invoices.length} invoices from API (${currentDept})`,
-          );
-          return;
-        }
+        // ✅ Sample invoice বাদ দিন
+        const realInvoices = data.invoices.filter(
+          (inv) =>
+            !String(inv._id || "").startsWith("sample-") &&
+            !String(inv._id || "").startsWith("LOCAL_"),
+        );
 
-        // API empty — check localStorage
-        const key = `invoices_${currentDept.replace(/\s+/g, "_")}`;
-        const saved = localStorage.getItem(key);
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              setInvoices(parsed);
-              setApiWorking(true);
-              return;
-            }
-          } catch {}
-        }
-
+        setInvoices(realInvoices);
         setApiWorking(true);
-        setInvoices(currentDept === "Elders" ? ELDERS_DEFAULT_INVOICES : []);
+
+        localStorage.setItem(
+          `invoices_${currentDept.replace(/\s+/g, "_")}`,
+          JSON.stringify(realInvoices),
+        );
+
+        console.log(
+          `✅ Loaded ${realInvoices.length} invoices from API (${currentDept})`,
+        );
         return;
       }
 
@@ -491,27 +422,30 @@ const Invoice = () => {
     } catch (err) {
       console.warn("⚠️ API failed, using localStorage:", err.message);
       setApiWorking(false);
+
       const key = `invoices_${currentDept.replace(/\s+/g, "_")}`;
       const saved = localStorage.getItem(key);
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          setInvoices(
-            Array.isArray(parsed) && parsed.length > 0
-              ? parsed
-              : currentDept === "Elders"
-                ? ELDERS_DEFAULT_INVOICES
-                : [],
-          );
+          if (Array.isArray(parsed)) {
+            const realInvoices = parsed.filter(
+              (inv) =>
+                !String(inv._id || "").startsWith("sample-") &&
+                !String(inv._id || "").startsWith("LOCAL_"),
+            );
+            setInvoices(realInvoices);
+            return;
+          }
         } catch {
-          setInvoices(currentDept === "Elders" ? ELDERS_DEFAULT_INVOICES : []);
+          /* ignore */
         }
-      } else {
-        setInvoices(currentDept === "Elders" ? ELDERS_DEFAULT_INVOICES : []);
       }
+
+      // ✅ Sample fallback নেই — খালি থাকবে
+      setInvoices([]);
     }
   };
-
   useEffect(() => {
     loadInvoices();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -576,31 +510,52 @@ const Invoice = () => {
   const fetchDeptStudents = async () => {
     try {
       setStudentsLoading(true);
-      const res = await fetch(
-        `${API_BASE}/api/students/all?department=${encodeURIComponent(currentDept)}`,
-      );
-      const text = await res.text();
-      if (text.trim().startsWith("<")) {
-        setDeptStudents([]);
-        return;
+      const cleanDept = currentDept.toLowerCase().trim();
+
+      const [admissionData, batchData] = await Promise.all([
+        safeFetchJSON(
+          `${API_BASE}/api/students/all?department=${encodeURIComponent(currentDept)}`,
+        ),
+        safeFetchJSON(`${API_BASE}/api/batch-students/all`),
+      ]);
+
+      // 1️⃣ Admission students — শুধু APPROVED (Active) নিন
+      let admissionStudents = [];
+      if (admissionData.success && Array.isArray(admissionData.students)) {
+        admissionStudents = admissionData.students.filter((s) => {
+          // ✅ APPROVED কিনা চেক — Pending/Rejected বাদ
+          const isApproved =
+            s.status === "Active" || (s.approvedAt && s.approvedAt !== null);
+
+          if (!isApproved) {
+            console.log(
+              `⏭️ Skipped (not approved): ${s.name} — status="${s.status}"`,
+            );
+            return false;
+          }
+
+          // ✅ Department filter
+          const sDept = String(s.department || "")
+            .toLowerCase()
+            .trim();
+          if (sDept && sDept === cleanDept) return true;
+          return isDeptCourse(s.course);
+        });
       }
 
-      const data = JSON.parse(text);
-      if (!data.success || !Array.isArray(data.students)) {
-        setDeptStudents([]);
-        return;
+      // 2️⃣ Batch students (LMS-এ add করা — সবসময় admin-added)
+      let batchStudents = [];
+      if (batchData.success && Array.isArray(batchData.students)) {
+        batchStudents = batchData.students.filter((s) => {
+          const sDept = String(s.department || "")
+            .toLowerCase()
+            .trim();
+          if (sDept && sDept === cleanDept) return true;
+          return isDeptCourse(s.course);
+        });
       }
 
-      const all = data.students || [];
-      const filtered = all.filter((s) => {
-        const sDept = String(s.department || "")
-          .toLowerCase()
-          .trim();
-        if (sDept && sDept === currentDept.toLowerCase().trim()) return true;
-        return isDeptCourse(s.course);
-      });
-
-      const formatted = filtered.map((s) => ({
+      const format = (s) => ({
         _id: s._id,
         name: s.name || "",
         studentId: s.studentId || s._id?.slice(-8) || "N/A",
@@ -611,16 +566,27 @@ const Invoice = () => {
         batch: s.batch || DEPT_BATCHES[0] || "",
         phone: s.phone || "",
         email: s.email || "",
-        courseFee: Number(s.courseFee) || 5000,
-      }));
-
-      const deduped = [];
-      formatted.forEach((s) => {
-        const exists = deduped.some(
-          (d) => (d.name || "").toLowerCase() === (s.name || "").toLowerCase(),
-        );
-        if (!exists) deduped.push(s);
+        courseFee: Number(s.courseFee) || Number(s.monthlyFee) || 5000,
       });
+
+      const formatted = [
+        ...admissionStudents.map(format),
+        ...batchStudents.map(format),
+      ];
+
+      // 3️⃣ Dedupe
+      const seen = new Set();
+      const deduped = formatted.filter((s) => {
+        const key = String(s.studentId || s.name || s._id).toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      console.log(
+        `✅ [${currentDept}] Approved students: ${deduped.length} ` +
+          `(admission: ${admissionStudents.length}, batch: ${batchStudents.length})`,
+      );
 
       setDeptStudents(deduped);
     } catch (err) {
@@ -630,7 +596,6 @@ const Invoice = () => {
       setStudentsLoading(false);
     }
   };
-
   useEffect(() => {
     fetchDeptStudents();
     // eslint-disable-next-line react-hooks/exhaustive-deps
