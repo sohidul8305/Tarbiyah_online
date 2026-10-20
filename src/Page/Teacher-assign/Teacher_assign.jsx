@@ -646,26 +646,17 @@ const Teacher_assign = () => {
         },
       );
 
-      let newT;
-      if (data.success && data.teacher) {
-        newT = data.teacher;
-      } else {
-        newT = {
-          _id: "LOCAL_" + Date.now(),
-          id: "LOCAL_" + Date.now(),
-          ...newTeacherData,
-          subject: deptData.label,
-          department: adminDepartment,
-          status: "Active",
-        };
+      if (!data.success || !data.teacher) {
+        throw new Error(data.message || "Teacher save failed");
       }
 
       setAvailableTeachers((prev) => {
         const exists = prev.some(
           (t) =>
-            (t.name || "").toLowerCase() === (newT.name || "").toLowerCase(),
+            (t.name || "").toLowerCase() ===
+            (data.teacher.name || "").toLowerCase(),
         );
-        return exists ? prev : [...prev, newT];
+        return exists ? prev : [...prev, data.teacher];
       });
 
       setShowAddTeacherModal(false);
@@ -692,7 +683,11 @@ const Teacher_assign = () => {
       });
     } catch (err) {
       console.error("Add Teacher:", err);
-      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+      Swal.fire({
+        icon: "error",
+        title: "Add Teacher Failed!",
+        text: err.message,
+      });
     } finally {
       setSubmittingTeacher(false);
     }
@@ -730,6 +725,9 @@ const Teacher_assign = () => {
 
   // ============================================================
   // ✅ ASSIGN TEACHER
+  // ============================================================
+  // ============================================================
+  // ✅ ASSIGN TEACHER — with proper API persistence
   // ============================================================
   const handleAssignTeacher = async (e) => {
     e.preventDefault();
@@ -778,34 +776,29 @@ const Teacher_assign = () => {
         status: formData.status,
         studentsCount: Number(formData.studentsCount) || 0,
         rating: formData.rating || 0,
-        department: adminDepartment,
+        department: adminDepartment, // ⬅️ critical for filter
       };
 
-      let savedAssignment = null;
-      try {
-        const data = await safeFetchJSON(
-          `${API_BASE}/api/teacher-assign/create`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          },
-        );
-        if (data.success && data.assignment) {
-          savedAssignment = data.assignment;
-        }
-      } catch (err) {
-        console.warn("API assign failed, saving locally:", err.message);
+      console.log("📤 POST /api/teacher-assign/create", payload);
+
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/teacher-assign/create`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      console.log("📥 Response:", data);
+
+      // ❌ API fail হলে user-কে দেখান — silent fallback নয়
+      if (!data.success || !data.assignment) {
+        throw new Error(data.message || "Server did not save the assignment");
       }
 
-      const newAssignment = savedAssignment || {
-        _id: "LOCAL_" + Date.now(),
-        ...payload,
-        assignedDate: new Date().toISOString().split("T")[0],
-        createdAt: new Date().toISOString(),
-      };
-
-      setAssignments((prev) => [newAssignment, ...prev]);
+      // ✅ Server-returned assignment-ই use করুন (real _id সহ)
+      setAssignments((prev) => [data.assignment, ...prev]);
       setShowAssignModal(false);
       setFormData({ ...initialFormData });
       setTeacherInput("");
@@ -814,21 +807,29 @@ const Teacher_assign = () => {
         icon: "success",
         title: "✅ Teacher Assigned!",
         html: `
-          <div style="text-align:left">
-            <p><strong>Teacher:</strong> ${newAssignment.teacherName}</p>
-            <p><strong>Subject:</strong> ${newAssignment.subject}</p>
-            <p><strong>Batch:</strong> ${newAssignment.batch || "N/A"}</p>
-            <p><strong>Days:</strong> ${(newAssignment.days || []).join(", ")}</p>
-            <p><strong>Time:</strong> ${newAssignment.time}</p>
-            <p style="margin-top:8px; color:#004d4d;"><strong>Department:</strong> ${adminDepartment}</p>
-          </div>
-        `,
+        <div style="text-align:left">
+          <p><strong>Teacher:</strong> ${data.assignment.teacherName}</p>
+          <p><strong>Subject:</strong> ${data.assignment.subject}</p>
+          <p><strong>Batch:</strong> ${data.assignment.batch || "N/A"}</p>
+          <p><strong>Days:</strong> ${(data.assignment.days || []).join(", ")}</p>
+          <p><strong>Time:</strong> ${data.assignment.time}</p>
+          <p style="margin-top:8px; color:#004d4d;"><strong>Department:</strong> ${adminDepartment}</p>
+        </div>
+      `,
         timer: 2500,
         confirmButtonColor: "#004d4d",
       });
+
+      // ✅ Server থেকে re-fetch — ১০০% confirm persistence
+      setTimeout(() => fetchAssignments(), 500);
     } catch (err) {
-      console.error("Assign:", err);
-      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+      console.error("❌ Assign save failed:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Save Failed!",
+        text:
+          err.message + " — Assignment saved হয়নি, refresh দিলে হারিয়ে যাবে।",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -864,25 +865,26 @@ const Teacher_assign = () => {
         department: adminDepartment,
       };
 
-      try {
-        await safeFetchJSON(
-          `${API_BASE}/api/teacher-assign/update/${selectedAssignment._id}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          },
-        );
-      } catch (err) {
-        console.warn("API update failed, updating locally:", err.message);
-      }
-
-      setAssignments((prev) =>
-        prev.map((a) =>
-          a._id === selectedAssignment._id ? { ...a, ...payload } : a,
-        ),
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/teacher-assign/update/${selectedAssignment._id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        },
       );
 
+      if (!data.success) {
+        throw new Error(data.message || "Update failed");
+      }
+
+      const updated = data.assignment
+        ? { ...selectedAssignment, ...data.assignment }
+        : { ...selectedAssignment, ...payload };
+
+      setAssignments((prev) =>
+        prev.map((a) => (a._id === selectedAssignment._id ? updated : a)),
+      );
       setShowEditModal(false);
       setSelectedAssignment(null);
 
@@ -894,12 +896,15 @@ const Teacher_assign = () => {
       });
     } catch (err) {
       console.error("Update:", err);
-      Swal.fire({ icon: "error", title: "Error!", text: err.message });
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed!",
+        text: err.message,
+      });
     } finally {
       setSubmitting(false);
     }
   };
-
   // ============================================================
   // ✅ DELETE ASSIGNMENT
   // ============================================================
@@ -917,21 +922,30 @@ const Teacher_assign = () => {
     if (!result.isConfirmed) return;
 
     try {
-      await safeFetchJSON(`${API_BASE}/api/teacher-assign/delete/${id}`, {
-        method: "DELETE",
+      const data = await safeFetchJSON(
+        `${API_BASE}/api/teacher-assign/delete/${id}`,
+        { method: "DELETE" },
+      );
+
+      if (!data.success) {
+        throw new Error(data.message || "Delete failed");
+      }
+
+      setAssignments((prev) => prev.filter((a) => a._id !== id));
+      Swal.fire({
+        icon: "success",
+        title: "Removed!",
+        timer: 1200,
+        showConfirmButton: false,
       });
     } catch (err) {
-      console.warn("API delete failed, deleting locally:", err.message);
+      console.error("Delete:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Delete Failed!",
+        text: err.message,
+      });
     }
-
-    setAssignments((prev) => prev.filter((a) => a._id !== id));
-
-    Swal.fire({
-      icon: "success",
-      title: "Removed!",
-      timer: 1200,
-      showConfirmButton: false,
-    });
   };
 
   const renderStars = (rating) => {
