@@ -99,7 +99,7 @@ const New_admission = () => {
   }, [user]);
 
   // ============================================================
-  // ✅ Fetch Admissions — শুধু students collection (সব department same)
+  // ✅ Fetch Admissions
   // ============================================================
   const fetchAdmissions = async () => {
     if (!adminDepartment) {
@@ -139,13 +139,10 @@ const New_admission = () => {
             permanentAddress: r.permanentAddress || "",
             dobOrNid: r.dobOrNid || "",
             age: r.age || "",
-            batchType: r.batchType || "",
-            batchSchedule: r.batchSchedule || "",
-            studentImage: r.studentImage || "",
             gender: r.gender || "",
             occupation: r.occupation || "",
             maritalStatus: r.maritalStatus || "",
-            guardianName: r.parentName || "",
+            guardianName: r.parentName || r.guardianName || "",
             guardianPhone: r.guardianPhone || r.parentPhone || "",
             status: r.status || "Pending",
             rawStatus: r.rawStatus || "Pending",
@@ -158,9 +155,11 @@ const New_admission = () => {
             studentId: r.studentId || "",
             batch: r.batch || "",
             country: r.country || "BD",
+            // ✅ NEW: Quran Studies Batch Info
             batchType: r.batchType || "",
             batchSchedule: r.batchSchedule || "",
-            studentImage: r.studentImage || "",
+            // ✅ FIX: paymentScreenshot (studentImage বাদ)
+            paymentScreenshot: r.paymentScreenshot || "",
             date: r.applicationDate || "",
             createdAt: r.applicationDate || "",
             dueAmount: r.dueAmount || 0,
@@ -903,7 +902,7 @@ const New_admission = () => {
       {/* Details Modal */}
       {showDetailsModal && selectedAdmission && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
               <h3 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <FaUserGraduate className="text-blue-600" /> Admission Details
@@ -917,8 +916,9 @@ const New_admission = () => {
             </div>
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left Column */}
+                {/* ========== LEFT COLUMN ========== */}
                 <div className="space-y-4">
+                  {/* Header */}
                   <div>
                     <h2 className="text-2xl font-bold text-gray-800">
                       {selectedAdmission.name}
@@ -934,32 +934,35 @@ const New_admission = () => {
                       >
                         {selectedAdmission.sourceLabel}
                       </span>
+                      <span
+                        className={`text-[10px] px-2 py-1 rounded-full font-semibold inline-flex items-center gap-1 ${getStatusColor(
+                          selectedAdmission.status,
+                        )}`}
+                      >
+                        {getStatusIcon(selectedAdmission.status)}{" "}
+                        {selectedAdmission.status}
+                      </span>
                     </div>
                   </div>
 
-                  <div>
-                    <p className="text-xs text-gray-500">Status</p>
-                    <span
-                      className={`text-sm px-2 py-1 rounded-full inline-flex items-center gap-1 ${getStatusColor(
-                        selectedAdmission.status,
-                      )}`}
-                    >
-                      {getStatusIcon(selectedAdmission.status)}{" "}
-                      {selectedAdmission.status}
-                    </span>
-                  </div>
-
-                  {hasValue(selectedAdmission.batch) && (
-                    <div>
-                      <p className="text-xs text-gray-500">Batch</p>
-                      <p className="font-semibold">{selectedAdmission.batch}</p>
+                  {/* Student ID */}
+                  {hasValue(selectedAdmission.studentId) && (
+                    <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                      <p className="text-xs text-blue-600 font-semibold">
+                        Student ID
+                      </p>
+                      <p className="font-mono font-bold text-sm text-blue-800">
+                        {selectedAdmission.studentId}
+                      </p>
                     </div>
                   )}
 
+                  {/* Personal Info */}
                   {(hasValue(selectedAdmission.fatherName) ||
                     hasValue(selectedAdmission.motherName) ||
                     hasValue(selectedAdmission.gender) ||
                     hasValue(selectedAdmission.age) ||
+                    hasValue(selectedAdmission.dobOrNid) ||
                     hasValue(selectedAdmission.occupation) ||
                     hasValue(selectedAdmission.maritalStatus)) && (
                     <div className="bg-gray-50 rounded-lg p-4">
@@ -999,6 +1002,16 @@ const New_admission = () => {
                             </span>
                           </div>
                         )}
+                        {hasValue(selectedAdmission.dobOrNid) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">
+                              NID / Birth Reg
+                            </span>
+                            <span className="font-semibold text-right break-all">
+                              {selectedAdmission.dobOrNid}
+                            </span>
+                          </div>
+                        )}
                         {hasValue(selectedAdmission.occupation) && (
                           <div className="flex justify-between gap-2">
                             <span className="text-gray-500">Occupation</span>
@@ -1020,67 +1033,14 @@ const New_admission = () => {
                       </div>
                     </div>
                   )}
-                </div>
-                {/* ✅ NEW: Quran Studies Batch Schedule */}
-                {hasValue(selectedAdmission.batchType) && (
-                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                    <h4 className="font-semibold text-gray-800 mb-3">
-                      🕐 Batch Schedule
-                    </h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Batch Type</span>
-                        <span className="font-semibold capitalize">
-                          {selectedAdmission.batchType}
-                        </span>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <span className="text-gray-500">Days</span>
-                        <span className="font-semibold">
-                          {selectedAdmission.batchType === "regular"
-                            ? "Tuesday to Friday"
-                            : "Saturday & Sunday"}
-                        </span>
-                      </div>
-                      {hasValue(selectedAdmission.batchSchedule) && (
-                        <div className="flex justify-between gap-2">
-                          <span className="text-gray-500">
-                            Time (Bangladesh)
-                          </span>
-                          <span className="font-semibold text-right">
-                            {selectedAdmission.batchSchedule}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
 
-                {/* ✅ NEW: Student Photo */}
-                {hasValue(selectedAdmission.studentImage) && (
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <h4 className="font-semibold text-gray-800 mb-3">
-                      📸 Student Photo
-                    </h4>
-                    <div className="flex justify-center">
-                      <img
-                        src={selectedAdmission.studentImage}
-                        alt={selectedAdmission.name}
-                        className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300 shadow-sm"
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 text-center mt-2">
-                      Used for certificate
-                    </p>
-                  </div>
-                )}
-                {/* Right Column */}
-                <div className="space-y-4">
+                  {/* Contact Info */}
                   {(hasValue(selectedAdmission.phone) ||
                     hasValue(selectedAdmission.guardianPhone) ||
                     hasValue(selectedAdmission.email) ||
                     hasValue(selectedAdmission.country) ||
-                    hasValue(selectedAdmission.address)) && (
+                    hasValue(selectedAdmission.address) ||
+                    hasValue(selectedAdmission.permanentAddress)) && (
                     <div className="bg-gray-50 rounded-lg p-4">
                       <h4 className="font-semibold text-gray-800 mb-3">
                         📞 Contact Information
@@ -1124,132 +1084,34 @@ const New_admission = () => {
                         )}
                         {hasValue(selectedAdmission.address) && (
                           <div className="flex justify-between gap-2">
-                            <span className="text-gray-500">Address</span>
+                            <span className="text-gray-500">
+                              Present Address
+                            </span>
                             <span className="font-semibold text-right text-xs">
                               {selectedAdmission.address}
                             </span>
                           </div>
                         )}
+                        {hasValue(selectedAdmission.permanentAddress) &&
+                          selectedAdmission.permanentAddress !==
+                            selectedAdmission.address && (
+                            <div className="flex justify-between gap-2">
+                              <span className="text-gray-500">
+                                Permanent Address
+                              </span>
+                              <span className="font-semibold text-right text-xs">
+                                {selectedAdmission.permanentAddress}
+                              </span>
+                            </div>
+                          )}
                       </div>
                     </div>
                   )}
+                </div>
 
-                  {/* Payment Details */}
-                  {(hasValue(selectedAdmission.paymentMethod) ||
-                    hasValue(selectedAdmission.paymentType) ||
-                    hasAmount(selectedAdmission.courseFee) ||
-                    hasAmount(selectedAdmission.paidAmount) ||
-                    hasValue(selectedAdmission.transactionId) ||
-                    hasValue(selectedAdmission.paymentRemarks) ||
-                    hasValue(selectedAdmission.paymentStatus)) && (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <h4 className="font-semibold text-gray-800 mb-3">
-                        💳 Payment Details
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        {hasValue(selectedAdmission.paymentMethod) && (
-                          <div className="flex justify-between gap-2">
-                            <span className="text-gray-500">
-                              Payment Method
-                            </span>
-                            <span className="font-semibold capitalize">
-                              {selectedAdmission.paymentMethod}
-                            </span>
-                          </div>
-                        )}
-
-                        {hasValue(selectedAdmission.paymentType) && (
-                          <div className="flex justify-between gap-2">
-                            <span className="text-gray-500">Payment Type</span>
-                            <span className="font-semibold capitalize">
-                              {selectedAdmission.paymentType}
-                            </span>
-                          </div>
-                        )}
-
-                        {hasAmount(selectedAdmission.courseFee) && (
-                          <div className="flex justify-between gap-2">
-                            <span className="text-gray-500">Course Fee</span>
-                            <span className="font-semibold">
-                              ৳
-                              {Number(
-                                selectedAdmission.courseFee,
-                              ).toLocaleString()}
-                            </span>
-                          </div>
-                        )}
-
-                        {hasAmount(selectedAdmission.scholarshipAmount) && (
-                          <div className="flex justify-between gap-2">
-                            <span className="text-gray-500">Scholarship</span>
-                            <span className="font-semibold text-blue-600">
-                              - ৳
-                              {Number(
-                                selectedAdmission.scholarshipAmount,
-                              ).toLocaleString()}
-                            </span>
-                          </div>
-                        )}
-
-                        {hasAmount(selectedAdmission.paidAmount) && (
-                          <div className="flex justify-between gap-2">
-                            <span className="text-gray-500">Paid Amount</span>
-                            <span className="font-semibold text-green-600">
-                              ৳
-                              {Number(
-                                selectedAdmission.paidAmount,
-                              ).toLocaleString()}
-                            </span>
-                          </div>
-                        )}
-
-                        {hasAmount(selectedAdmission.dueAmount) && (
-                          <div className="flex justify-between gap-2">
-                            <span className="text-gray-500">Due Amount</span>
-                            <span className="font-semibold text-red-600">
-                              ৳
-                              {Number(
-                                selectedAdmission.dueAmount,
-                              ).toLocaleString()}
-                            </span>
-                          </div>
-                        )}
-
-                        {hasValue(selectedAdmission.transactionId) && (
-                          <div className="flex justify-between gap-2">
-                            <span className="text-gray-500">
-                              Transaction ID
-                            </span>
-                            <span className="font-mono text-xs font-semibold text-blue-600 break-all text-right">
-                              {selectedAdmission.transactionId}
-                            </span>
-                          </div>
-                        )}
-
-                        {hasValue(selectedAdmission.date) && (
-                          <div className="flex justify-between gap-2">
-                            <span className="text-gray-500">Applied Date</span>
-                            <span className="font-semibold">
-                              {selectedAdmission.date}
-                            </span>
-                          </div>
-                        )}
-
-                        {hasValue(selectedAdmission.paymentRemarks) && (
-                          <div className="mt-2 pt-2 border-t border-gray-200">
-                            <p className="text-xs text-gray-500 mb-1">
-                              Remarks
-                            </p>
-                            <p className="text-xs text-gray-700 bg-white p-2 rounded border border-gray-100">
-                              {selectedAdmission.paymentRemarks}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* ✅ NEW: Batch Schedule */}
+                {/* ========== RIGHT COLUMN ========== */}
+                <div className="space-y-4">
+                  {/* Batch Schedule */}
                   {hasValue(selectedAdmission.batchType) && (
                     <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                       <h4 className="font-semibold text-gray-800 mb-3">
@@ -1284,26 +1146,162 @@ const New_admission = () => {
                     </div>
                   )}
 
-                  {/* ✅ NEW: Student Photo */}
-                  {hasValue(selectedAdmission.studentImage) && (
+                  {/* Payment Details */}
+                  {(hasValue(selectedAdmission.paymentMethod) ||
+                    hasValue(selectedAdmission.paymentType) ||
+                    hasAmount(selectedAdmission.courseFee) ||
+                    hasAmount(selectedAdmission.paidAmount) ||
+                    hasValue(selectedAdmission.transactionId) ||
+                    hasValue(selectedAdmission.paymentRemarks) ||
+                    hasValue(selectedAdmission.paymentStatus)) && (
                     <div className="bg-gray-50 rounded-lg p-4">
                       <h4 className="font-semibold text-gray-800 mb-3">
-                        📸 Student Photo
+                        💳 Payment Details
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        {hasValue(selectedAdmission.paymentMethod) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">
+                              Payment Method
+                            </span>
+                            <span className="font-semibold capitalize">
+                              {selectedAdmission.paymentMethod}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.paymentType) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Payment Type</span>
+                            <span className="font-semibold capitalize">
+                              {selectedAdmission.paymentType}
+                            </span>
+                          </div>
+                        )}
+                        {hasAmount(selectedAdmission.courseFee) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Course Fee</span>
+                            <span className="font-semibold">
+                              ৳
+                              {Number(
+                                selectedAdmission.courseFee,
+                              ).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        {hasAmount(selectedAdmission.scholarshipAmount) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Scholarship</span>
+                            <span className="font-semibold text-blue-600">
+                              - ৳
+                              {Number(
+                                selectedAdmission.scholarshipAmount,
+                              ).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        {hasAmount(selectedAdmission.paidAmount) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Paid Amount</span>
+                            <span className="font-semibold text-green-600">
+                              ৳
+                              {Number(
+                                selectedAdmission.paidAmount,
+                              ).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        {hasAmount(selectedAdmission.dueAmount) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Due Amount</span>
+                            <span className="font-semibold text-red-600">
+                              ৳
+                              {Number(
+                                selectedAdmission.dueAmount,
+                              ).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.transactionId) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">
+                              Transaction ID
+                            </span>
+                            <span className="font-mono text-xs font-semibold text-blue-600 break-all text-right">
+                              {selectedAdmission.transactionId}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.date) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">Applied Date</span>
+                            <span className="font-semibold">
+                              {selectedAdmission.date}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.paymentStatus) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">
+                              Payment Status
+                            </span>
+                            <span
+                              className={`font-semibold px-2 py-0.5 rounded text-xs ${getPaymentColor(
+                                selectedAdmission.paymentStatus,
+                              )}`}
+                            >
+                              {selectedAdmission.paymentStatus}
+                            </span>
+                          </div>
+                        )}
+                        {hasValue(selectedAdmission.paymentRemarks) && (
+                          <div className="mt-2 pt-2 border-t border-gray-200">
+                            <p className="text-xs text-gray-500 mb-1">
+                              Remarks
+                            </p>
+                            <p className="text-xs text-gray-700 bg-white p-2 rounded border border-gray-100">
+                              {selectedAdmission.paymentRemarks}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ✅ Payment Screenshot (Payment Proof) */}
+                  {hasValue(selectedAdmission.paymentScreenshot) && (
+                    <div className="bg-green-50 rounded-lg p-4 border-2 border-green-300">
+                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center justify-between">
+                        <span>💳 Payment Screenshot</span>
+                        <a
+                          href={selectedAdmission.paymentScreenshot}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-semibold"
+                        >
+                          🔍 Full View
+                        </a>
                       </h4>
                       <div className="flex justify-center">
-                        <img
-                          src={selectedAdmission.studentImage}
-                          alt={selectedAdmission.name}
-                          className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300 shadow-sm"
-                        />
+                        <a
+                          href={selectedAdmission.paymentScreenshot}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Click to open full size"
+                        >
+                          <img
+                            src={selectedAdmission.paymentScreenshot}
+                            alt="Payment Proof"
+                            className="max-w-full max-h-64 object-contain rounded-lg border-2 border-green-400 shadow-md cursor-pointer hover:shadow-lg transition"
+                          />
+                        </a>
                       </div>
-                      <p className="text-xs text-gray-500 text-center mt-2">
-                        Used for certificate
+                      <p className="text-xs text-green-700 text-center mt-2 font-medium">
+                        ✓ Click image to view full size
                       </p>
                     </div>
                   )}
 
-                  {/* Only Close Button */}
+                  {/* Close Button */}
                   <div className="flex gap-2 flex-wrap">
                     <button
                       onClick={() => setShowDetailsModal(false)}

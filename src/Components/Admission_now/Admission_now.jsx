@@ -29,7 +29,6 @@ const Admission_now = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
 
-  // ✅ FIX: single formData (আগে দ্বিতীয় useState সব মুছে দিচ্ছিলো)
   const [formData, setFormData] = useState({
     // Personal Information
     name: "",
@@ -57,12 +56,12 @@ const Admission_now = () => {
     selectedDepartment: "",
     selectedCourses: [],
 
-    // ✅ NEW: Quran Studies Batch Schedule
+    // ✅ Quran Studies Batch Schedule
     batchType: "",
     batchSchedule: "",
 
-    // ✅ NEW: Student Photo (certificate)
-    studentImage: "",
+    // ✅ Payment Screenshot (required for offline)
+    paymentScreenshot: "",
 
     // Payment Information
     paymentMethod: "",
@@ -320,7 +319,6 @@ const Admission_now = () => {
         ...formData,
         selectedDepartment: value,
         selectedCourses: firstCourse ? [firstCourse.id] : [],
-        // Reset batch fields when department changes
         batchType: "",
         batchSchedule: "",
       });
@@ -364,7 +362,7 @@ const Admission_now = () => {
     }
   };
 
-  // ✅ NEW: Image upload with canvas compression
+  // ✅ Image upload with canvas compression
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -410,7 +408,10 @@ const Admission_now = () => {
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
         const compressed = canvas.toDataURL("image/jpeg", 0.8);
-        setFormData((prev) => ({ ...prev, studentImage: compressed }));
+        setFormData((prev) => ({
+          ...prev,
+          paymentScreenshot: compressed,
+        }));
       };
       img.src = reader.result;
     };
@@ -418,7 +419,7 @@ const Admission_now = () => {
   };
 
   // ============================================================
-  // ✅ FIXED: validateStep with new fields
+  // ✅ validateStep — FIXED (duplicate lines removed)
   // ============================================================
   const validateStep = (currentStep) => {
     const missing = [];
@@ -427,7 +428,6 @@ const Admission_now = () => {
       if (!formData.selectedDepartment) missing.push("Department");
       if (formData.selectedCourses.length === 0)
         missing.push("At least 1 Course");
-      // ✅ NEW: Quran Studies → batch + schedule
       if (formData.selectedDepartment === "quran-studies") {
         if (!formData.batchType) missing.push("Batch Type (Regular/Overseas)");
         if (!formData.batchSchedule) missing.push("Time Slot");
@@ -442,9 +442,6 @@ const Admission_now = () => {
       if (!formData.phoneNumber?.trim()) missing.push("Phone Number");
       if (!formData.email?.trim()) missing.push("Email");
       if (!formData.gender) missing.push("Gender");
-      // ✅ NEW: Student Photo বাধ্যতামূলক
-      if (!formData.studentImage)
-        missing.push("Student Photo (for certificate)");
     }
 
     if (currentStep === 3) {
@@ -456,12 +453,12 @@ const Admission_now = () => {
       if (!formData.permanentAddress?.trim()) missing.push("Permanent Address");
     }
 
-    // ✅ NEW: Step 4 payment validation (non-SSL)
     if (currentStep === 4) {
       if (!formData.paymentMethod) missing.push("Payment Method");
       if (formData.paymentMethod !== "ssl") {
         if (!formData.paidAmount) missing.push("Paid Amount");
         if (!formData.transactionId?.trim()) missing.push("Transaction ID");
+        if (!formData.paymentScreenshot) missing.push("Payment Screenshot");
       }
     }
 
@@ -469,7 +466,7 @@ const Admission_now = () => {
   };
 
   // ============================================================
-  // ✅ FIXED: handleNext — এখন crash করবে না
+  // handleNext — warning UI
   // ============================================================
   const handleNext = () => {
     const missing = validateStep(step);
@@ -491,6 +488,7 @@ const Admission_now = () => {
       });
       return;
     }
+
     setStep(step + 1);
   };
 
@@ -500,6 +498,28 @@ const Admission_now = () => {
 
   const getCurrentCourses = () => {
     return departments[formData.selectedDepartment]?.courses || [];
+  };
+
+  const calculateTotal = () => {
+    let total = 0;
+    const currentCourses = getCurrentCourses();
+    formData.selectedCourses.forEach((courseId) => {
+      const course = currentCourses.find((c) => c.id === courseId);
+      if (course) {
+        total += course.price || course.totalOneTime || 0;
+      }
+    });
+    return total;
+  };
+
+  const getSelectedCourseDetails = () => {
+    const currentCourses = getCurrentCourses();
+    return formData.selectedCourses
+      .map((courseId) => {
+        const course = currentCourses.find((c) => c.id === courseId);
+        return course || null;
+      })
+      .filter(Boolean);
   };
 
   // ============================================================
@@ -564,11 +584,9 @@ const Admission_now = () => {
           phone: formData.phoneNumber,
           course: selectedCourseNames.join(", "),
           department: departmentName,
-          // ✅ NEW fields
           batchType: formData.batchType || "",
           batchSchedule: formData.batchSchedule || "",
-          studentImage: formData.studentImage || "",
-          // Personal
+          paymentScreenshot: formData.paymentScreenshot || "",
           fatherName: formData.fatherName,
           motherName: formData.motherName,
           presentAddress: formData.presentAddress,
@@ -615,7 +633,7 @@ const Admission_now = () => {
   };
 
   // ============================================================
-  // ✅ FIXED: handleSubmit — non-SSL-এর জন্য Step 4 validation যোগ
+  // handleSubmit
   // ============================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -625,7 +643,6 @@ const Admission_now = () => {
       return;
     }
 
-    // ✅ Full validation including step 4 (non-SSL)
     const missing = [
       ...validateStep(1),
       ...validateStep(2),
@@ -677,11 +694,9 @@ const Admission_now = () => {
           formData.selectedDepartment ||
           "Not Specified",
         department: departmentName,
-        // ✅ NEW fields
         batchType: formData.batchType || "",
         batchSchedule: formData.batchSchedule || "",
-        studentImage: formData.studentImage || "",
-        // Personal
+        paymentScreenshot: formData.paymentScreenshot || "",
         fatherName: formData.fatherName || "",
         motherName: formData.motherName || "",
         guardianName: formData.fatherName || "",
@@ -772,7 +787,7 @@ const Admission_now = () => {
           selectedCourses: [],
           batchType: "",
           batchSchedule: "",
-          studentImage: "",
+          paymentScreenshot: "",
           paymentMethod: "",
           paymentType: "",
           transactionId: "",
@@ -805,28 +820,6 @@ const Admission_now = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const calculateTotal = () => {
-    let total = 0;
-    const currentCourses = getCurrentCourses();
-    formData.selectedCourses.forEach((courseId) => {
-      const course = currentCourses.find((c) => c.id === courseId);
-      if (course) {
-        total += course.price || course.totalOneTime || 0;
-      }
-    });
-    return total;
-  };
-
-  const getSelectedCourseDetails = () => {
-    const currentCourses = getCurrentCourses();
-    return formData.selectedCourses
-      .map((courseId) => {
-        const course = currentCourses.find((c) => c.id === courseId);
-        return course || null;
-      })
-      .filter(Boolean);
   };
 
   return (
@@ -957,7 +950,7 @@ const Admission_now = () => {
                 </div>
               )}
 
-              {/* ✅ NEW: Quran Studies Batch Schedule */}
+              {/* ✅ Quran Studies Batch Schedule */}
               {formData.selectedDepartment === "quran-studies" && (
                 <div
                   className="mt-6 p-4 rounded-lg border-2"
@@ -1261,34 +1254,6 @@ const Admission_now = () => {
                 </div>
               </div>
 
-              {/* ✅ NEW: Student Photo Upload */}
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Student Photo (for Certificate) *
-                </label>
-                <div className="flex items-center gap-4">
-                  {formData.studentImage && (
-                    <img
-                      src={formData.studentImage}
-                      alt="Preview"
-                      className="w-24 h-24 object-cover rounded-lg border-2 border-gray-300"
-                    />
-                  )}
-                  <div className="flex-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#e6f7f9] file:text-[#00ADD2] hover:file:bg-[#cceff4]"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Max 5MB • JPG, PNG • Photo will be used for your
-                      certificate
-                    </p>
-                  </div>
-                </div>
-              </div>
-
               <div className="flex justify-between mt-6">
                 <button
                   type="button"
@@ -1457,7 +1422,8 @@ const Admission_now = () => {
                   </li>
                   <li>You can also pay via Bank Transfer.</li>
                   <li className="text-red-600 font-bold">
-                    Transaction ID is mandatory for offline payments.
+                    Transaction ID & Payment Screenshot are mandatory for
+                    offline payments.
                   </li>
                 </ul>
               </div>
@@ -1712,22 +1678,190 @@ const Admission_now = () => {
                   )}
                 </div>
 
+                {/* ✅ Payment Proof — Transaction ID + Screenshot (Combined) */}
                 {formData.paymentMethod !== "ssl" && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Transaction ID *
+                  <div className="col-span-2">
+                    <label className="block text-sm font-bold text-gray-800 mb-3">
+                      📎 Payment Proof{" "}
+                      <span className="text-red-600 font-semibold">*</span>
                     </label>
-                    <input
-                      type="text"
-                      name="transactionId"
-                      value={formData.transactionId}
-                      onChange={handleInputChange}
-                      placeholder="Enter transaction ID"
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Required for offline payments
-                    </p>
+
+                    {/* Instruction Card */}
+                    <div className="rounded-xl overflow-hidden border-2 border-[#00ADD2] shadow-sm mb-4">
+                      <div
+                        className="px-4 py-2.5 flex items-center gap-2"
+                        style={{ backgroundColor: "#00ADD2" }}
+                      >
+                        <span className="text-white text-lg">🧾</span>
+                        <p className="text-white font-bold text-sm">
+                          {formData.paymentMethod === "bkash"
+                            ? "bKash Payment Proof"
+                            : formData.paymentMethod === "nagod"
+                              ? "Nagad Payment Proof"
+                              : formData.paymentMethod === "rocket"
+                                ? "Rocket Payment Proof"
+                                : formData.paymentMethod === "bank"
+                                  ? "Bank Transfer Proof"
+                                  : "Payment Proof"}
+                        </p>
+                      </div>
+
+                      <div className="p-4 bg-[#f0f9fa]">
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          পেমেন্ট সফলভাবে সম্পন্ন করার পর, আপনার{" "}
+                          <strong className="text-[#00ADD2]">
+                            {formData.paymentMethod === "bkash"
+                              ? "bKash"
+                              : formData.paymentMethod === "nagod"
+                                ? "Nagad"
+                                : formData.paymentMethod === "rocket"
+                                  ? "Rocket"
+                                  : formData.paymentMethod === "bank"
+                                    ? "ব্যাংক"
+                                    : "পেমেন্ট"}
+                          </strong>{" "}
+                          এর <strong>Transaction Success Screen</strong> এর একটি
+                          স্ক্রিনশট নিয়ে এখানে আপলোড করুন।
+                        </p>
+
+                        <div className="mt-3 p-3 bg-white rounded-lg border border-[#b3e5ec]">
+                          <p className="text-xs font-bold text-gray-700 mb-2">
+                            ✅ স্ক্রিনশটে অবশ্যই যা যা দৃশ্যমান থাকতে হবে:
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div className="flex items-center gap-1.5 text-xs text-gray-700 bg-green-50 px-2 py-1.5 rounded-md border border-green-200">
+                              <span className="text-green-600 font-bold">
+                                ✓
+                              </span>
+                              <span>
+                                <strong>Amount</strong> (৳)
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs text-gray-700 bg-green-50 px-2 py-1.5 rounded-md border border-green-200">
+                              <span className="text-green-600 font-bold">
+                                ✓
+                              </span>
+                              <span>
+                                <strong>Transaction ID</strong>
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs text-gray-700 bg-green-50 px-2 py-1.5 rounded-md border border-green-200">
+                              <span className="text-green-600 font-bold">
+                                ✓
+                              </span>
+                              <span>
+                                <strong>Date / Time</strong>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <p className="text-xs text-red-600 mt-2 flex items-start gap-1">
+                          <span>⚠️</span>
+                          <span>
+                            স্ক্রিনশট ও Transaction ID ছাড়া আপনার আবেদন{" "}
+                            <strong>গ্রহণ করা হবে না</strong>।
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* ✅ 1️⃣ Transaction ID Field */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-bold text-gray-800 mb-2">
+                        🔑 Transaction ID{" "}
+                        <span className="text-red-600">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="transactionId"
+                        value={formData.transactionId}
+                        onChange={handleInputChange}
+                        placeholder="e.g. 8N7A5B2X9K (পেমেন্ট SMS বা App থেকে নিন)"
+                        className="w-full rounded-lg border-2 border-gray-300 px-4 py-2.5 text-sm focus:border-[#00ADD2] focus:ring-2 focus:ring-[#00ADD2]/30 transition"
+                      />
+                      <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                        <span>💡</span>
+                        <span>
+                          পেমেন্ট সফল হওয়ার পর SMS বা App-এ যে{" "}
+                          <strong>Transaction ID</strong> পেয়েছেন সেটি এখানে
+                          দিন
+                        </span>
+                      </p>
+                    </div>
+
+                    {/* ✅ 2️⃣ Payment Screenshot Upload */}
+                    <div>
+                      <label className="block text-sm font-bold text-gray-800 mb-2">
+                        📸 Payment Screenshot{" "}
+                        <span className="text-red-600">*</span>
+                      </label>
+
+                      <div className="flex flex-col sm:flex-row items-start gap-4">
+                        {formData.paymentScreenshot ? (
+                          <div className="relative flex-shrink-0">
+                            <img
+                              src={formData.paymentScreenshot}
+                              alt="Payment Preview"
+                              className="w-36 h-36 object-cover rounded-lg border-2 border-green-500 shadow-md"
+                            />
+                            <div className="absolute -top-2 -left-2 bg-green-500 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold shadow-md">
+                              ✓
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  paymentScreenshot: "",
+                                }))
+                              }
+                              className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-7 h-7 flex items-center justify-center text-sm font-bold shadow-md transition"
+                              title="Remove"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : (
+                          <div
+                            className="w-36 h-36 flex-shrink-0 rounded-lg border-2 border-dashed flex flex-col items-center justify-center text-center p-2"
+                            style={{
+                              borderColor: "#00ADD2",
+                              backgroundColor: "#f0f9fa",
+                            }}
+                          >
+                            <span className="text-3xl text-[#00ADD2]">📷</span>
+                            <p className="text-[10px] text-gray-500 mt-1">
+                              No image yet
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="flex-1 w-full">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            className="block w-full text-sm text-gray-600 file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-[#00ADD2] file:text-white hover:file:bg-[#008ba8] file:cursor-pointer cursor-pointer border border-gray-300 rounded-lg p-1"
+                          />
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                              📁 JPG / PNG
+                            </span>
+                            <span className="text-[10px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                              📦 Max 5MB
+                            </span>
+                          </div>
+
+                          {formData.paymentScreenshot && (
+                            <p className="text-xs text-green-600 mt-2 font-semibold flex items-center gap-1">
+                              <span>✓</span>
+                              <span>Screenshot uploaded successfully!</span>
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
