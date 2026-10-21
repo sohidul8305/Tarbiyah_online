@@ -53,6 +53,25 @@ const safeReadJSON = (key) => {
 };
 
 /* ============================================================
+   DEFAULT KPI CONFIG (backend-এ না থাকলে fallback)
+   ============================================================ */
+const DEFAULT_KPI_CONFIG = {
+  studentProgress: 30,
+  classQuality: 25,
+  attendance: 20,
+  punctuality: 15,
+  professionalDev: 10,
+};
+
+const KPI_LABELS = {
+  studentProgress: "Student Progress",
+  classQuality: "Class Quality",
+  attendance: "Attendance",
+  punctuality: "Punctuality",
+  professionalDev: "Professional Dev",
+};
+
+/* ============================================================
    MAIN DASHBOARD
    ============================================================ */
 const TeacherDashboard = () => {
@@ -251,6 +270,7 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
     phone: "",
     baseSalary: "",
     perClassRate: "",
+    bonusPool: "", // ⬅️ KPI BONUS POOL
     bio: "",
     photo: "",
   });
@@ -282,6 +302,7 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
       phone: "",
       baseSalary: "",
       perClassRate: "",
+      bonusPool: "", // ⬅️ RESET
       bio: "",
       photo: "",
     });
@@ -300,6 +321,7 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
       photo: teacher.profileImage || "",
       baseSalary: teacher.baseSalary || "",
       perClassRate: teacher.perClassRate || "",
+      bonusPool: teacher.bonusPool || "", // ⬅️ POPULATE
     });
     setShowForm(true);
   };
@@ -329,6 +351,7 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
           profileImage: formData.photo,
           baseSalary: Number(formData.baseSalary) || 0,
           perClassRate: Number(formData.perClassRate) || 0,
+          bonusPool: Number(formData.bonusPool) || 0, // ⬅️ SEND
         }),
       });
 
@@ -499,6 +522,11 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
                     <FaEnvelope className="text-gray-400" />{" "}
                     {teacher.phone || "No Phone"}
                   </p>
+                  {Number(teacher.bonusPool) > 0 && (
+                    <p className="text-purple-700 flex items-center gap-2 font-semibold">
+                      🎯 KPI Pool: ৳{Number(teacher.bonusPool).toLocaleString()}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -644,6 +672,26 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
                   />
                 </div>
 
+                {/* 🎯 KPI BONUS POOL INPUT */}
+                <div className="col-span-2 bg-purple-50 border border-purple-200 rounded-lg p-3">
+                  <label className="text-sm font-semibold text-purple-800 flex items-center gap-1">
+                    🎯 KPI Bonus Pool (৳)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 10000"
+                    value={formData.bonusPool || ""}
+                    onChange={(e) =>
+                      setFormData({ ...formData, bonusPool: e.target.value })
+                    }
+                    className="w-full border p-2 rounded-lg outline-none focus:border-purple-500 mt-1"
+                  />
+                  <p className="text-xs text-purple-600 mt-1">
+                    100% KPI score হলে এই পরিমাণ বোনাস পাবেন (score অনুপাতে
+                    কমবে)
+                  </p>
+                </div>
+
                 <div className="col-span-2">
                   <label className="text-sm font-semibold text-gray-700">
                     Bio
@@ -683,7 +731,7 @@ const ProfileTab = ({ teacherInfo, onProfileUpdate }) => {
 };
 
 /* ============================================================
-   TAB 2: ROUTINE COMPONENT 
+   TAB 2: ROUTINE COMPONENT
    ============================================================ */
 const RoutineTab = () => {
   const [teachers, setTeachers] = useState([]);
@@ -1092,18 +1140,27 @@ const RoutineTab = () => {
 };
 
 /* ============================================================
-   TAB 3: PAYMENT COMPONENT (Select Teacher -> Manage Salary)
+   TAB 3: PAYMENT COMPONENT (Select Teacher -> Manage Salary + KPI)
    ============================================================ */
 const PaymentTab = ({ teacherInfo }) => {
   const [teachers, setTeachers] = useState([]);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
 
-  // মোডালের জন্য আলাদা স্টেট
+  // Payment modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [modalTeacher, setModalTeacher] = useState(null);
   const [modalAmount, setModalAmount] = useState("");
   const [isFetchingSalary, setIsFetchingSalary] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 🎯 KPI Modal state
+  const [showKpiModal, setShowKpiModal] = useState(false);
+  const [kpiScores, setKpiScores] = useState({});
+  const [kpiMonth, setKpiMonth] = useState("");
+  const [kpiNotes, setKpiNotes] = useState("");
+  const [kpiConfig, setKpiConfig] = useState(DEFAULT_KPI_CONFIG);
+  const [isSavingKpi, setIsSavingKpi] = useState(false);
+  const [isLoadingKpi, setIsLoadingKpi] = useState(false);
 
   const [profile, setProfile] = useState(null);
   const [calcData, setCalcData] = useState(null);
@@ -1121,7 +1178,7 @@ const PaymentTab = ({ teacherInfo }) => {
     status: "Paid",
   });
 
-  // ১. প্রথমে সব টিচারের লিস্ট নিয়ে আসা
+  // 1. Fetch all teachers
   useEffect(() => {
     const fetchTeachers = async () => {
       try {
@@ -1137,7 +1194,7 @@ const PaymentTab = ({ teacherInfo }) => {
     fetchTeachers();
   }, []);
 
-  // ২. টিচার সিলেক্ট করলে তার প্রোফাইল এবং স্যালারি ক্যালকুলেশন আনা (মেইন পেজের জন্য)
+  // 2. Fetch profile + salary calculation
   const fetchProfileAndSalary = async () => {
     if (!selectedTeacher) return;
     setLoading(true);
@@ -1158,6 +1215,9 @@ const PaymentTab = ({ teacherInfo }) => {
 
       if (calcResult.success) {
         setCalcData(calcResult);
+        if (calcResult.breakdown?.kpiConfig) {
+          setKpiConfig(calcResult.breakdown.kpiConfig);
+        }
       } else {
         setErrorMsg(calcResult.message || "Failed to calculate salary");
         setCalcData(null);
@@ -1172,9 +1232,10 @@ const PaymentTab = ({ teacherInfo }) => {
 
   useEffect(() => {
     fetchProfileAndSalary();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTeacher]);
 
-  // ৩. মোডালে টিচার চেঞ্জ করলে অটোমেটিক স্যালারি আনা
+  // 3. Modal teacher change → auto-fetch salary
   const handleModalTeacherChange = async (e) => {
     const email = e.target.value;
     const teacher = teachers.find((t) => t.email === email);
@@ -1193,7 +1254,7 @@ const PaymentTab = ({ teacherInfo }) => {
       const calcResult = await calcRes.json();
 
       if (calcResult.success) {
-        setModalAmount(calcResult.netPayable || ""); // অটো এমাউন্ট বসে যাবে
+        setModalAmount(calcResult.netPayable || "");
       } else {
         setModalAmount("");
       }
@@ -1205,7 +1266,7 @@ const PaymentTab = ({ teacherInfo }) => {
     }
   };
 
-  // ৪. পেমেন্ট সাবমিট করা
+  // 4. Submit payment
   const handleAddPayment = async (e) => {
     e.preventDefault();
     if (!modalTeacher)
@@ -1242,7 +1303,6 @@ const PaymentTab = ({ teacherInfo }) => {
       });
       setShowAddModal(false);
 
-      // যদি বর্তমানে ওই টিচারের পেজেই থাকে, তবে পেজ রিফ্রেশ করবো
       if (selectedTeacher && selectedTeacher.email === modalTeacher.email) {
         fetchProfileAndSalary();
       }
@@ -1253,23 +1313,143 @@ const PaymentTab = ({ teacherInfo }) => {
     }
   };
 
-  // মোডাল ওপেন করার ফাংশন
+  // 5. Open Add Payment modal
   const openAddModal = (teacher = null) => {
-    setModalTeacher(teacher || (teachers.length > 0 ? teachers[0] : null));
-    if (teacher) {
-      // যদি কার্ড থেকে ক্লিক করা হয়, তবে সেই টিচারের স্যালারি আনি
+    const initial = teacher || (teachers.length > 0 ? teachers[0] : null);
+    setModalTeacher(initial);
+    setShowAddModal(true);
+
+    if (initial) {
+      // auto-fetch salary for pre-selected teacher
       setTimeout(() => {
-        document
-          .getElementById("teacherSelect")
-          ?.dispatchEvent(new Event("change", { bubbles: true }));
-        document.getElementById("teacherSelect").value = teacher.email;
-        handleModalTeacherChange({ target: { value: teacher.email } });
+        handleModalTeacherChange({ target: { value: initial.email } });
       }, 100);
     }
-    setShowAddModal(true);
   };
 
-  // টিচার লিস্ট ভিউ
+  /* ─── 🎯 KPI HANDLERS ─── */
+
+  const handleOpenKpiModal = async () => {
+    if (!selectedTeacher) return;
+
+    setKpiMonth(defaultMonthStr);
+    setIsLoadingKpi(true);
+    setShowKpiModal(true);
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/teacher-kpi/scores/${encodeURIComponent(selectedTeacher.email)}?month=${defaultMonthStr}`,
+      );
+      const data = await res.json();
+
+      const config = data.config || DEFAULT_KPI_CONFIG;
+      setKpiConfig(config);
+
+      if (data.success && data.scores.length > 0) {
+        setKpiScores(data.scores[0].scores || {});
+        setKpiNotes(data.scores[0].notes || "");
+      } else {
+        // default all 0
+        const defaults = {};
+        Object.keys(config).forEach((k) => (defaults[k] = 0));
+        setKpiScores(defaults);
+        setKpiNotes("");
+      }
+    } catch (e) {
+      console.warn("Failed to fetch KPI:", e);
+      const defaults = {};
+      Object.keys(DEFAULT_KPI_CONFIG).forEach((k) => (defaults[k] = 0));
+      setKpiScores(defaults);
+      setKpiConfig(DEFAULT_KPI_CONFIG);
+    } finally {
+      setIsLoadingKpi(false);
+    }
+  };
+
+  const handleKpiMonthChange = async (newMonth) => {
+    setKpiMonth(newMonth);
+    if (!selectedTeacher) return;
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/teacher-kpi/scores/${encodeURIComponent(selectedTeacher.email)}?month=${newMonth}`,
+      );
+      const data = await res.json();
+      const config = data.config || DEFAULT_KPI_CONFIG;
+      setKpiConfig(config);
+
+      if (data.success && data.scores.length > 0) {
+        setKpiScores(data.scores[0].scores || {});
+        setKpiNotes(data.scores[0].notes || "");
+      } else {
+        const defaults = {};
+        Object.keys(config).forEach((k) => (defaults[k] = 0));
+        setKpiScores(defaults);
+        setKpiNotes("");
+      }
+    } catch (e) {
+      console.warn("Failed to load KPI for month:", e);
+    }
+  };
+
+  const handleSaveKpi = async () => {
+    if (!selectedTeacher) return;
+
+    setIsSavingKpi(true);
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/teacher-kpi/set-scores/${encodeURIComponent(selectedTeacher.email)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            month: kpiMonth,
+            scores: kpiScores,
+            notes: kpiNotes,
+          }),
+        },
+      );
+
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.message);
+
+      Swal.fire({
+        icon: "success",
+        title: `KPI Score: ${data.kpiScore}%`,
+        text: "KPI scores saved successfully!",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      setShowKpiModal(false);
+      fetchProfileAndSalary(); // refresh salary calculation
+    } catch (err) {
+      Swal.fire("Error", err.message, "error");
+    } finally {
+      setIsSavingKpi(false);
+    }
+  };
+
+  // Live preview calculation for KPI modal
+  const calculatePreviewKpi = () => {
+    if (!kpiConfig) return 0;
+    let totalWeight = 0;
+    let weighted = 0;
+    Object.entries(kpiConfig).forEach(([key, weight]) => {
+      const w = Number(weight) || 0;
+      const s = Number(kpiScores[key]) || 0;
+      totalWeight += w;
+      weighted += w * s;
+    });
+    return totalWeight > 0 ? Math.round(weighted / totalWeight) : 0;
+  };
+
+  const previewKpiScore = calculatePreviewKpi();
+  const previewBonus = Math.round(
+    ((Number(selectedTeacher?.bonusPool) || 0) * previewKpiScore) / 100,
+  );
+
+  // Teacher list view
   if (loading && !selectedTeacher) {
     return (
       <div className="text-center p-10">
@@ -1338,6 +1518,11 @@ const PaymentTab = ({ teacherInfo }) => {
                     {teacher.designation || "Teacher"}
                   </p>
                   <p className="text-xs text-gray-500 mb-4">{teacher.email}</p>
+                  {Number(teacher.bonusPool) > 0 && (
+                    <p className="text-xs text-purple-600 font-bold mb-3">
+                      🎯 KPI Pool: ৳{Number(teacher.bonusPool).toLocaleString()}
+                    </p>
+                  )}
                   <button className="w-full bg-teal-50 text-teal-700 font-bold py-2 rounded-lg hover:bg-teal-100 transition-colors">
                     Manage Salary
                   </button>
@@ -1350,7 +1535,7 @@ const PaymentTab = ({ teacherInfo }) => {
     );
   }
 
-  // নির্দিষ্ট টিচারের পেমেন্ট ভিউ
+  // Specific teacher payment view
   const info = profile?.paymentInfo || {
     totalSalary: 0,
     dueSalary: 0,
@@ -1391,12 +1576,20 @@ const PaymentTab = ({ teacherInfo }) => {
             </p>
           </div>
         </div>
-        <button
-          onClick={() => openAddModal(selectedTeacher)}
-          className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-md transition-all w-full md:w-auto justify-center"
-        >
-          <FaPlus /> Add Payment
-        </button>
+        <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+          <button
+            onClick={handleOpenKpiModal}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-md transition-all w-full md:w-auto justify-center"
+          >
+            🎯 Set KPI Scores
+          </button>
+          <button
+            onClick={() => openAddModal(selectedTeacher)}
+            className="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 shadow-md transition-all w-full md:w-auto justify-center"
+          >
+            <FaPlus /> Add Payment
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -1442,6 +1635,61 @@ const PaymentTab = ({ teacherInfo }) => {
                   </p>
                 </div>
               </div>
+
+              {/* 🎯 KPI BONUS BREAKDOWN */}
+              {Number(calcData.breakdown.bonusPool) > 0 && (
+                <div className="mt-4 bg-purple-50 border border-purple-200 rounded-lg p-3">
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-purple-800 font-bold flex items-center gap-1">
+                      🎯 KPI Performance Bonus
+                    </p>
+                    <p className="font-bold text-purple-900 text-sm">
+                      {calcData.breakdown.kpiScore}% × ৳
+                      {calcData.breakdown.bonusPool} ={" "}
+                      <span className="text-green-700">
+                        +৳{calcData.breakdown.kpiBonus}
+                      </span>
+                    </p>
+                  </div>
+
+                  {calcData.breakdown.hasKpiRecord &&
+                    calcData.breakdown.kpiBreakdown && (
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-2 mt-2 text-xs">
+                        {Object.entries(calcData.breakdown.kpiBreakdown).map(
+                          ([key, val]) => (
+                            <div
+                              key={key}
+                              className="bg-white rounded p-2 border border-purple-100"
+                            >
+                              <p className="text-gray-600 text-[10px] truncate">
+                                {KPI_LABELS[key] || key}
+                              </p>
+                              <p className="font-bold text-purple-700">
+                                {val.score}
+                                <span className="text-gray-400">
+                                  /{val.weight}
+                                </span>
+                              </p>
+                            </div>
+                          ),
+                        )}
+                      </div>
+                    )}
+
+                  {!calcData.breakdown.hasKpiRecord && (
+                    <p className="text-xs text-orange-600 bg-orange-50 p-2 rounded mt-2">
+                      ⚠️ এই মাসের KPI score এখনো সেট হয়নি — "Set KPI Scores"
+                      বাটনে ক্লিক করুন।
+                    </p>
+                  )}
+
+                  {calcData.breakdown.kpiNotes && (
+                    <p className="text-xs text-purple-600 mt-2 italic">
+                      📝 {calcData.breakdown.kpiNotes}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
@@ -1450,7 +1698,7 @@ const PaymentTab = ({ teacherInfo }) => {
             </div>
           )}
 
-          {/* স্ট্যাটাস কার্ড */}
+          {/* Status cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white border rounded-xl p-6 text-center shadow-sm">
               <p className="text-sm text-gray-500">Total Paid (All Time)</p>
@@ -1472,7 +1720,7 @@ const PaymentTab = ({ teacherInfo }) => {
             </div>
           </div>
 
-          {/* পেমেন্ট হিস্ট্রি টেবিল */}
+          {/* Payment history table */}
           <div className="bg-white border rounded-xl overflow-hidden shadow-sm">
             <div className="p-4 border-b bg-gray-50 font-bold">
               Payment History
@@ -1540,7 +1788,6 @@ const PaymentTab = ({ teacherInfo }) => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {/* টিচার সিলেক্ট ড্রপডাউন */}
               <div className="col-span-2">
                 <label className="text-xs font-bold text-gray-700">
                   Select Teacher *
@@ -1652,7 +1899,7 @@ const PaymentTab = ({ teacherInfo }) => {
               <button
                 type="submit"
                 disabled={isSubmitting || isFetchingSalary}
-                className="flex-1 bg-teal-600 text-white py-2.5 rounded-lg font-bold hover:bg-teal-700 shadow-md flex justify-center items-center gap-2"
+                className="flex-1 bg-teal-600 text-white py-2.5 rounded-lg font-bold hover:bg-teal-700 shadow-md flex justify-center items-center gap-2 disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <FaSpinner className="animate-spin" />
@@ -1663,6 +1910,147 @@ const PaymentTab = ({ teacherInfo }) => {
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* 🎯 KPI Scores Modal */}
+      {showKpiModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center border-b pb-2 mb-4">
+              <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
+                🎯 Set KPI — {selectedTeacher.name}
+              </h3>
+              <button
+                onClick={() => setShowKpiModal(false)}
+                className="text-gray-400 hover:text-red-500"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <label className="text-xs font-bold text-gray-700">Month *</label>
+              <input
+                type="month"
+                value={kpiMonth}
+                onChange={(e) => handleKpiMonthChange(e.target.value)}
+                className="w-full border p-2.5 rounded-lg mt-1 bg-gray-50 focus:border-purple-500 outline-none"
+              />
+            </div>
+
+            {isLoadingKpi ? (
+              <div className="text-center p-6">
+                <FaSpinner className="animate-spin text-2xl text-purple-600 mx-auto" />
+                <p className="text-sm text-gray-500 mt-2">
+                  Loading KPI data...
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {Object.entries(kpiConfig || DEFAULT_KPI_CONFIG).map(
+                  ([key, weight]) => (
+                    <div key={key}>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="text-sm font-semibold text-gray-700">
+                          {KPI_LABELS[key] || key}
+                        </label>
+                        <span className="text-xs text-purple-600 font-semibold">
+                          Weight: {weight}%
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={kpiScores[key] || 0}
+                          onChange={(e) =>
+                            setKpiScores({
+                              ...kpiScores,
+                              [key]: Number(e.target.value),
+                            })
+                          }
+                          className="flex-1 accent-purple-600"
+                        />
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={kpiScores[key] || 0}
+                          onChange={(e) =>
+                            setKpiScores({
+                              ...kpiScores,
+                              [key]: Number(e.target.value) || 0,
+                            })
+                          }
+                          className="w-16 border p-1.5 rounded-lg text-center font-bold bg-gray-50 focus:border-purple-500 outline-none"
+                        />
+                      </div>
+                    </div>
+                  ),
+                )}
+
+                <div>
+                  <label className="text-xs font-bold text-gray-700">
+                    Notes (optional)
+                  </label>
+                  <textarea
+                    rows="2"
+                    value={kpiNotes}
+                    onChange={(e) => setKpiNotes(e.target.value)}
+                    placeholder="e.g. ক্লাসের মান ভালো ছিল..."
+                    className="w-full border p-2 rounded-lg mt-1 bg-gray-50 outline-none focus:border-purple-500"
+                  />
+                </div>
+
+                {/* Live Preview */}
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                  <p className="text-sm text-purple-800 font-semibold">
+                    Live Preview:
+                  </p>
+                  <div className="flex justify-between items-center mt-1">
+                    <span className="text-purple-700 text-sm">
+                      KPI Score:
+                      <span className="font-bold text-purple-900 ml-1">
+                        {previewKpiScore}%
+                      </span>
+                    </span>
+                    {Number(selectedTeacher?.bonusPool) > 0 ? (
+                      <span className="text-green-700 text-sm font-bold">
+                        Bonus: ৳{previewBonus.toLocaleString()}
+                        <span className="text-purple-600 text-xs ml-1">
+                          (Pool: ৳
+                          {Number(selectedTeacher.bonusPool).toLocaleString()})
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="text-xs text-orange-600">
+                        Bonus Pool সেট করা নেই
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-4 mt-4 border-t">
+              <button
+                onClick={() => setShowKpiModal(false)}
+                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2.5 rounded-lg font-bold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveKpi}
+                disabled={isSavingKpi || isLoadingKpi}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-lg font-bold disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSavingKpi ? <FaSpinner className="animate-spin" /> : "💾"}{" "}
+                Save KPI
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
