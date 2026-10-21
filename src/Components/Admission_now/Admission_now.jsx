@@ -11,9 +11,25 @@ const DEPARTMENT_MAP = {
   "quran-elders": "Elders",
 };
 
+// ✅ Batch Schedule Constants (Quran Studies only) — OUTSIDE component
+const BATCH_SCHEDULES = {
+  regular: {
+    label: "Regular Batch",
+    days: "Tuesday to Friday",
+    slots: ["6:00 AM - 8:00 AM", "6:00 PM - 8:00 PM", "9:00 PM - 11:00 PM"],
+  },
+  overseas: {
+    label: "Overseas Batch",
+    days: "Saturday & Sunday",
+    slots: ["2:00 PM - 4:00 PM", "7:00 PM - 9:00 PM"],
+  },
+};
+
 const Admission_now = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+
+  // ✅ FIX: single formData (আগে দ্বিতীয় useState সব মুছে দিচ্ছিলো)
   const [formData, setFormData] = useState({
     // Personal Information
     name: "",
@@ -41,6 +57,13 @@ const Admission_now = () => {
     selectedDepartment: "",
     selectedCourses: [],
 
+    // ✅ NEW: Quran Studies Batch Schedule
+    batchType: "",
+    batchSchedule: "",
+
+    // ✅ NEW: Student Photo (certificate)
+    studentImage: "",
+
     // Payment Information
     paymentMethod: "",
     paymentType: "",
@@ -54,14 +77,14 @@ const Admission_now = () => {
     bankAccount: "",
   });
 
-  // ✅ FIX: Auto-generated Student ID (once per page load)
+  // ✅ Auto-generated Student ID
   const [generatedId] = useState(() => {
     const year = new Date().getFullYear().toString().slice(-2);
     const random = Math.floor(10000 + Math.random() * 90000);
     return `TAR${year}${random}`;
   });
 
-  // ✅ FIX: Auto-generated Password (once per page load)
+  // ✅ Auto-generated Password
   const [generatedPassword] = useState(() => {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789@#";
     let pwd = "";
@@ -297,6 +320,9 @@ const Admission_now = () => {
         ...formData,
         selectedDepartment: value,
         selectedCourses: firstCourse ? [firstCourse.id] : [],
+        // Reset batch fields when department changes
+        batchType: "",
+        batchSchedule: "",
       });
     } else {
       setFormData({
@@ -338,8 +364,61 @@ const Admission_now = () => {
     }
   };
 
+  // ✅ NEW: Image upload with canvas compression
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid File",
+        text: "Please select an image file",
+      });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      Swal.fire({
+        icon: "warning",
+        title: "File Too Large",
+        text: "Max 5MB allowed",
+      });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const maxSize = 400;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxSize) {
+            height = (height * maxSize) / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width = (width * maxSize) / height;
+            height = maxSize;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressed = canvas.toDataURL("image/jpeg", 0.8);
+        setFormData((prev) => ({ ...prev, studentImage: compressed }));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   // ============================================================
-  // ✅ FIX: Step-by-Step Validation
+  // ✅ FIXED: validateStep with new fields
   // ============================================================
   const validateStep = (currentStep) => {
     const missing = [];
@@ -348,6 +427,11 @@ const Admission_now = () => {
       if (!formData.selectedDepartment) missing.push("Department");
       if (formData.selectedCourses.length === 0)
         missing.push("At least 1 Course");
+      // ✅ NEW: Quran Studies → batch + schedule
+      if (formData.selectedDepartment === "quran-studies") {
+        if (!formData.batchType) missing.push("Batch Type (Regular/Overseas)");
+        if (!formData.batchSchedule) missing.push("Time Slot");
+      }
     }
 
     if (currentStep === 2) {
@@ -358,6 +442,9 @@ const Admission_now = () => {
       if (!formData.phoneNumber?.trim()) missing.push("Phone Number");
       if (!formData.email?.trim()) missing.push("Email");
       if (!formData.gender) missing.push("Gender");
+      // ✅ NEW: Student Photo বাধ্যতামূলক
+      if (!formData.studentImage)
+        missing.push("Student Photo (for certificate)");
     }
 
     if (currentStep === 3) {
@@ -369,37 +456,38 @@ const Admission_now = () => {
       if (!formData.permanentAddress?.trim()) missing.push("Permanent Address");
     }
 
+    // ✅ NEW: Step 4 payment validation (non-SSL)
+    if (currentStep === 4) {
+      if (!formData.paymentMethod) missing.push("Payment Method");
+      if (formData.paymentMethod !== "ssl") {
+        if (!formData.paidAmount) missing.push("Paid Amount");
+        if (!formData.transactionId?.trim()) missing.push("Transaction ID");
+      }
+    }
+
     return missing;
   };
 
+  // ============================================================
+  // ✅ FIXED: handleNext — এখন crash করবে না
+  // ============================================================
   const handleNext = () => {
     const missing = validateStep(step);
 
     if (missing.length > 0) {
       Swal.fire({
-        icon: "success",
-        title: "🎉 Admission Completed!",
+        icon: "warning",
+        title: "Information Incomplete!",
         html: `
-    <div style="text-align: left; font-size: 13px;">
-      <p><strong>Name:</strong> ${formData.name}</p>
-      <p><strong>Phone:</strong> ${formData.phoneNumber}</p>
-      <p><strong>Email:</strong> ${formData.email}</p>
-      <p><strong>Department:</strong> ${departmentName}</p>
-      <p><strong>Course:</strong> ${selectedCourseNames.join(", ") || "N/A"}</p>
-      <p><strong>Payment Method:</strong> ${formData.paymentMethod || "N/A"}</p>
-      <p><strong>Transaction ID:</strong> ${formData.transactionId || "N/A"}</p>
-      <p><strong>Payment Status:</strong> ${paymentStatus}</p>
-      <hr style="margin: 12px 0;">
-      <div style="background: #eff6ff; padding: 12px; border-radius: 8px; border: 2px solid #93c5fd;">
-        <p style="color: #1e40af; font-size: 12px; margin: 0;">
-          📌 আপনার আবেদন সফলভাবে জমা হয়েছে। Admin approve করার পর আপনি আপনার <strong>Student ID</strong> এবং <strong>Password</strong> পাবেন।
-        </p>
-      </div>
-    </div>
-  `,
-        confirmButtonColor: "#004d4d",
-        confirmButtonText: "OK",
-        width: 520,
+          <div style="text-align:left; font-size:14px;">
+            <p style="margin-bottom:8px; font-weight:bold; color:#dc2626;">
+              অনুগ্রহ করে এই তথ্যগুলো পূরণ করুন:
+            </p>
+            <ul style="margin:0 0 0 20px; color:#dc2626;">
+              ${missing.map((m) => `<li>${m}</li>`).join("")}
+            </ul>
+          </div>`,
+        confirmButtonColor: "#00ADD2",
       });
       return;
     }
@@ -418,7 +506,6 @@ const Admission_now = () => {
   // SSLCommerz Payment Handler
   // ============================================================
   const handleSSLCommerzPayment = async () => {
-    // ✅ Full validation before payment
     const missing = [
       ...validateStep(1),
       ...validateStep(2),
@@ -449,7 +536,6 @@ const Admission_now = () => {
         })
         .filter(Boolean);
 
-      // ✅ Department name mapping
       const departmentName =
         DEPARTMENT_MAP[formData.selectedDepartment] ||
         formData.selectedDepartment;
@@ -477,8 +563,12 @@ const Admission_now = () => {
           studentId: generatedId,
           phone: formData.phoneNumber,
           course: selectedCourseNames.join(", "),
-          // ✅ FIX: department যোগ করা হয়েছে
           department: departmentName,
+          // ✅ NEW fields
+          batchType: formData.batchType || "",
+          batchSchedule: formData.batchSchedule || "",
+          studentImage: formData.studentImage || "",
+          // Personal
           fatherName: formData.fatherName,
           motherName: formData.motherName,
           presentAddress: formData.presentAddress,
@@ -524,6 +614,9 @@ const Admission_now = () => {
     }
   };
 
+  // ============================================================
+  // ✅ FIXED: handleSubmit — non-SSL-এর জন্য Step 4 validation যোগ
+  // ============================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -532,11 +625,12 @@ const Admission_now = () => {
       return;
     }
 
-    // ✅ Full validation before submit
+    // ✅ Full validation including step 4 (non-SSL)
     const missing = [
       ...validateStep(1),
       ...validateStep(2),
       ...validateStep(3),
+      ...validateStep(4),
     ];
     if (missing.length > 0) {
       Swal.fire({
@@ -568,7 +662,6 @@ const Admission_now = () => {
           ? "Paid"
           : "Unpaid";
 
-      // ✅ Department name mapping
       const departmentName =
         DEPARTMENT_MAP[formData.selectedDepartment] ||
         formData.selectedDepartment;
@@ -583,8 +676,12 @@ const Admission_now = () => {
           selectedCourseNames.join(", ") ||
           formData.selectedDepartment ||
           "Not Specified",
-        // ✅ FIX: department যোগ করা হয়েছে
         department: departmentName,
+        // ✅ NEW fields
+        batchType: formData.batchType || "",
+        batchSchedule: formData.batchSchedule || "",
+        studentImage: formData.studentImage || "",
+        // Personal
         fatherName: formData.fatherName || "",
         motherName: formData.motherName || "",
         guardianName: formData.fatherName || "",
@@ -627,18 +724,27 @@ const Admission_now = () => {
               <p><strong>Email:</strong> ${formData.email}</p>
               <p><strong>Department:</strong> ${departmentName}</p>
               <p><strong>Course:</strong> ${selectedCourseNames.join(", ") || "N/A"}</p>
+              ${
+                formData.batchType
+                  ? `<p><strong>Batch:</strong> ${
+                      BATCH_SCHEDULES[formData.batchType]?.label
+                    } (${formData.batchSchedule})</p>`
+                  : ""
+              }
               <p><strong>Payment Method:</strong> ${formData.paymentMethod || "N/A"}</p>
               <p><strong>Transaction ID:</strong> ${formData.transactionId || "N/A"}</p>
               <p><strong>Payment Status:</strong> ${paymentStatus}</p>
               <hr style="margin: 10px 0;">
               <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
-                <p style="font-weight: bold; color: #004d4d; margin-bottom: 8px;">🔑 Your Login Credentials:</p>
-            <p style={{ fontSize: "11px", color: "#666", marginTop: "8px" }}>
-  ⚠️ এই তথ্যগুলো নিরাপদে সংরক্ষণ করুন।
-  <br />
-  📌 Admin কর্তৃক Student ID ও Password দেওয়ার পর, এগুলো ব্যবহার করে
-  <strong> Student Dashboard</strong>-এ লগইন করতে পারবেন।
-</p>
+                <p style="font-weight: bold; color: #004d4d; margin-bottom: 8px;">
+                  🔑 Your Login Credentials:
+                </p>
+                <p style="font-size: 11px; color: #666; margin-top: 8px;">
+                  ⚠️ এই তথ্যগুলো নিরাপদে সংরক্ষণ করুন।
+                  <br />
+                  📌 Admin কর্তৃক Student ID ও Password দেওয়ার পর, এগুলো ব্যবহার করে
+                  <strong> Student Dashboard</strong>-এ লগইন করতে পারবেন।
+                </p>
               </div>
             </div>
           `,
@@ -664,6 +770,9 @@ const Admission_now = () => {
           maritalStatus: "",
           selectedDepartment: "",
           selectedCourses: [],
+          batchType: "",
+          batchSchedule: "",
+          studentImage: "",
           paymentMethod: "",
           paymentType: "",
           transactionId: "",
@@ -743,46 +852,24 @@ const Admission_now = () => {
 
         {/* Progress Steps */}
         <div className="flex justify-between mb-8">
-          <div
-            className={`flex-1 text-center ${step >= 1 ? "text-[#00ADD2]" : "text-gray-400"}`}
-          >
+          {[
+            { n: 1, label: "Course Selection" },
+            { n: 2, label: "Personal Info" },
+            { n: 3, label: "Family & Address" },
+            { n: 4, label: "Payment" },
+          ].map((s) => (
             <div
-              className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${step >= 1 ? "bg-[#00ADD2] text-white" : "bg-gray-300"}`}
+              key={s.n}
+              className={`flex-1 text-center ${step >= s.n ? "text-[#00ADD2]" : "text-gray-400"}`}
             >
-              1
+              <div
+                className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${step >= s.n ? "bg-[#00ADD2] text-white" : "bg-gray-300"}`}
+              >
+                {s.n}
+              </div>
+              <span className="text-sm">{s.label}</span>
             </div>
-            <span className="text-sm">Course Selection</span>
-          </div>
-          <div
-            className={`flex-1 text-center ${step >= 2 ? "text-[#00ADD2]" : "text-gray-400"}`}
-          >
-            <div
-              className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${step >= 2 ? "bg-[#00ADD2] text-white" : "bg-gray-300"}`}
-            >
-              2
-            </div>
-            <span className="text-sm">Personal Info</span>
-          </div>
-          <div
-            className={`flex-1 text-center ${step >= 3 ? "text-[#00ADD2]" : "text-gray-400"}`}
-          >
-            <div
-              className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${step >= 3 ? "bg-[#00ADD2] text-white" : "bg-gray-300"}`}
-            >
-              3
-            </div>
-            <span className="text-sm">Family & Address</span>
-          </div>
-          <div
-            className={`flex-1 text-center ${step >= 4 ? "text-[#00ADD2]" : "text-gray-400"}`}
-          >
-            <div
-              className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${step >= 4 ? "bg-[#00ADD2] text-white" : "bg-gray-300"}`}
-            >
-              4
-            </div>
-            <span className="text-sm">Payment</span>
-          </div>
+          ))}
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -867,6 +954,119 @@ const Admission_now = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* ✅ NEW: Quran Studies Batch Schedule */}
+              {formData.selectedDepartment === "quran-studies" && (
+                <div
+                  className="mt-6 p-4 rounded-lg border-2"
+                  style={{
+                    backgroundColor: "#f0f9fa",
+                    borderColor: "#00ADD2",
+                  }}
+                >
+                  <h3
+                    className="font-semibold text-lg mb-1"
+                    style={{ color: "#00ADD2" }}
+                  >
+                    🕐 Batch Schedule Selection
+                  </h3>
+                  <p className="text-xs text-gray-600 mb-4">
+                    All times are in <strong>Bangladesh Time (BST)</strong>.
+                    Please select your preferred batch and time slot.
+                  </p>
+
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Batch Type *
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {Object.entries(BATCH_SCHEDULES).map(([key, batch]) => (
+                        <label
+                          key={key}
+                          className="flex items-center gap-2 p-3 border-2 rounded-lg cursor-pointer hover:bg-white transition"
+                          style={{
+                            borderColor:
+                              formData.batchType === key
+                                ? "#00ADD2"
+                                : "#d1d5db",
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="batchType"
+                            value={key}
+                            checked={formData.batchType === key}
+                            onChange={(e) => {
+                              setFormData({
+                                ...formData,
+                                batchType: e.target.value,
+                                batchSchedule: "",
+                              });
+                            }}
+                            className="h-4 w-4"
+                          />
+                          <div>
+                            <p className="font-semibold text-sm">
+                              {batch.label}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {batch.days}
+                            </p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {formData.batchType && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Select Time Slot (Bangladesh Time) *
+                      </label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {BATCH_SCHEDULES[formData.batchType].slots.map(
+                          (slot) => (
+                            <label
+                              key={slot}
+                              className="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-white transition"
+                              style={{
+                                borderColor:
+                                  formData.batchSchedule === slot
+                                    ? "#00ADD2"
+                                    : "#d1d5db",
+                              }}
+                            >
+                              <input
+                                type="radio"
+                                name="batchSchedule"
+                                value={slot}
+                                checked={formData.batchSchedule === slot}
+                                onChange={handleInputChange}
+                                className="h-4 w-4"
+                              />
+                              <span className="text-sm">{slot}</span>
+                            </label>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {formData.batchType && formData.batchSchedule && (
+                    <div
+                      className="mt-3 p-2 rounded-lg"
+                      style={{ backgroundColor: "#e6f7f9" }}
+                    >
+                      <p className="text-xs">
+                        <strong>Selected:</strong>{" "}
+                        {BATCH_SCHEDULES[formData.batchType].label} •{" "}
+                        {BATCH_SCHEDULES[formData.batchType].days} •{" "}
+                        {formData.batchSchedule}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -989,7 +1189,6 @@ const Admission_now = () => {
                   <label className="block text-sm font-medium text-gray-700">
                     Age (Auto from DOB)
                   </label>
-                  {/* ✅ FIX #1: readOnly সরানো — এখন টাইপ করা যাবে */}
                   <input
                     type="text"
                     name="age"
@@ -1059,6 +1258,34 @@ const Admission_now = () => {
                     <option value="divorced">Divorced</option>
                     <option value="widowed">Widowed</option>
                   </select>
+                </div>
+              </div>
+
+              {/* ✅ NEW: Student Photo Upload */}
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Student Photo (for Certificate) *
+                </label>
+                <div className="flex items-center gap-4">
+                  {formData.studentImage && (
+                    <img
+                      src={formData.studentImage}
+                      alt="Preview"
+                      className="w-24 h-24 object-cover rounded-lg border-2 border-gray-300"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#e6f7f9] file:text-[#00ADD2] hover:file:bg-[#cceff4]"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Max 5MB • JPG, PNG • Photo will be used for your
+                      certificate
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -1229,6 +1456,9 @@ const Admission_now = () => {
                     </span>
                   </li>
                   <li>You can also pay via Bank Transfer.</li>
+                  <li className="text-red-600 font-bold">
+                    Transaction ID is mandatory for offline payments.
+                  </li>
                 </ul>
               </div>
 
@@ -1482,19 +1712,24 @@ const Admission_now = () => {
                   )}
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Transaction ID *
-                  </label>
-                  <input
-                    type="text"
-                    name="transactionId"
-                    value={formData.transactionId}
-                    onChange={handleInputChange}
-                    placeholder="Enter transaction ID"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
-                  />
-                </div>
+                {formData.paymentMethod !== "ssl" && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Transaction ID *
+                    </label>
+                    <input
+                      type="text"
+                      name="transactionId"
+                      value={formData.transactionId}
+                      onChange={handleInputChange}
+                      placeholder="Enter transaction ID"
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Required for offline payments
+                    </p>
+                  </div>
+                )}
 
                 <div className="col-span-2">
                   <label className="block text-sm font-medium text-gray-700">
@@ -1556,6 +1791,15 @@ const Admission_now = () => {
                       : "-"}
                   </span>
                 </div>
+                {formData.batchType && (
+                  <div className="flex justify-between">
+                    <span>Batch:</span>
+                    <span className="font-semibold">
+                      {BATCH_SCHEDULES[formData.batchType]?.label} (
+                      {formData.batchSchedule})
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Payment Method:</span>
                   <span className="font-semibold">

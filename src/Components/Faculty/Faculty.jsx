@@ -1,7 +1,7 @@
 import React from "react";
 import { useLanguage } from "../../context/useLanguage";
 import ProfessorImg from "../../image/profile.jpg";
-import MujahidImg from "../../image/Mujahid.png";
+import MujahidImg from "../../image/Mujahidustad.jpeg";
 import AbunumanImg from "../../image/Abunoman.jpg";
 import SalmanImg from "../../image/salman.png";
 import Jaber from "../../image/jubair.png";

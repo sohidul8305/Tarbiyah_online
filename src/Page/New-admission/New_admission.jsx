@@ -139,6 +139,9 @@ const New_admission = () => {
             permanentAddress: r.permanentAddress || "",
             dobOrNid: r.dobOrNid || "",
             age: r.age || "",
+            batchType: r.batchType || "",
+            batchSchedule: r.batchSchedule || "",
+            studentImage: r.studentImage || "",
             gender: r.gender || "",
             occupation: r.occupation || "",
             maritalStatus: r.maritalStatus || "",
@@ -155,6 +158,9 @@ const New_admission = () => {
             studentId: r.studentId || "",
             batch: r.batch || "",
             country: r.country || "BD",
+            batchType: r.batchType || "",
+            batchSchedule: r.batchSchedule || "",
+            studentImage: r.studentImage || "",
             date: r.applicationDate || "",
             createdAt: r.applicationDate || "",
             dueAmount: r.dueAmount || 0,
@@ -1015,7 +1021,59 @@ const New_admission = () => {
                     </div>
                   )}
                 </div>
+                {/* ✅ NEW: Quran Studies Batch Schedule */}
+                {hasValue(selectedAdmission.batchType) && (
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <h4 className="font-semibold text-gray-800 mb-3">
+                      🕐 Batch Schedule
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between gap-2">
+                        <span className="text-gray-500">Batch Type</span>
+                        <span className="font-semibold capitalize">
+                          {selectedAdmission.batchType}
+                        </span>
+                      </div>
+                      <div className="flex justify-between gap-2">
+                        <span className="text-gray-500">Days</span>
+                        <span className="font-semibold">
+                          {selectedAdmission.batchType === "regular"
+                            ? "Tuesday to Friday"
+                            : "Saturday & Sunday"}
+                        </span>
+                      </div>
+                      {hasValue(selectedAdmission.batchSchedule) && (
+                        <div className="flex justify-between gap-2">
+                          <span className="text-gray-500">
+                            Time (Bangladesh)
+                          </span>
+                          <span className="font-semibold text-right">
+                            {selectedAdmission.batchSchedule}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
+                {/* ✅ NEW: Student Photo */}
+                {hasValue(selectedAdmission.studentImage) && (
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-800 mb-3">
+                      📸 Student Photo
+                    </h4>
+                    <div className="flex justify-center">
+                      <img
+                        src={selectedAdmission.studentImage}
+                        alt={selectedAdmission.name}
+                        className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300 shadow-sm"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 text-center mt-2">
+                      Used for certificate
+                    </p>
+                  </div>
+                )}
                 {/* Right Column */}
                 <div className="space-y-4">
                   {(hasValue(selectedAdmission.phone) ||
@@ -1188,6 +1246,60 @@ const New_admission = () => {
                           </div>
                         )}
                       </div>
+                    </div>
+                  )}
+
+                  {/* ✅ NEW: Batch Schedule */}
+                  {hasValue(selectedAdmission.batchType) && (
+                    <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                      <h4 className="font-semibold text-gray-800 mb-3">
+                        🕐 Batch Schedule
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between gap-2">
+                          <span className="text-gray-500">Batch Type</span>
+                          <span className="font-semibold capitalize">
+                            {selectedAdmission.batchType}
+                          </span>
+                        </div>
+                        <div className="flex justify-between gap-2">
+                          <span className="text-gray-500">Days</span>
+                          <span className="font-semibold">
+                            {selectedAdmission.batchType === "regular"
+                              ? "Tuesday to Friday"
+                              : "Saturday & Sunday"}
+                          </span>
+                        </div>
+                        {hasValue(selectedAdmission.batchSchedule) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">
+                              Time (Bangladesh)
+                            </span>
+                            <span className="font-semibold text-right">
+                              {selectedAdmission.batchSchedule}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ✅ NEW: Student Photo */}
+                  {hasValue(selectedAdmission.studentImage) && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-800 mb-3">
+                        📸 Student Photo
+                      </h4>
+                      <div className="flex justify-center">
+                        <img
+                          src={selectedAdmission.studentImage}
+                          alt={selectedAdmission.name}
+                          className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300 shadow-sm"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 text-center mt-2">
+                        Used for certificate
+                      </p>
                     </div>
                   )}
 

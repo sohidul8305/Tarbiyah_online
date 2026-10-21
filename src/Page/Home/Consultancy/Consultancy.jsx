@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import professorImg from "../../../image/profile.jpg";
 import HossainImg from "../../../image/Hridoy-Ustaz-01.png";
 import MamunImg from "../../../image/Abdullahmanun.jpg";
-import Mujahudul from "../../../image/Mujahid.png";
+import Mujahudul from "../../../image/Mujahidustad.jpeg";
 
 const Appointment = () => {
   const [formData, setFormData] = useState({
