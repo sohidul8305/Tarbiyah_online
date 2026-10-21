@@ -589,15 +589,23 @@ const Admission_now = () => {
           paymentScreenshot: formData.paymentScreenshot || "",
           fatherName: formData.fatherName,
           motherName: formData.motherName,
+          guardianName: formData.fatherName || "",
           presentAddress: formData.presentAddress,
           permanentAddress: formData.permanentAddress,
           gender: formData.gender,
           age: formData.age,
           nationalId: formData.nationalId,
+          dobOrNid: formData.nationalId || "",
           dateOfBirth: formData.dateOfBirth,
           guardianPhone: formData.guardianPhone,
           occupation: formData.occupation,
           maritalStatus: formData.maritalStatus,
+          country: "BD",
+          // ✅ Payment fields
+          courseFee: calculateTotal(),
+          paymentType: "online",
+          paymentMethod: "SSLCommerz",
+          paymentRemarks: formData.paymentRemarks || "",
         },
       };
 

@@ -140,6 +140,7 @@ const New_admission = () => {
             dobOrNid: r.dobOrNid || "",
             age: r.age || "",
             gender: r.gender || "",
+            paymentScreenshot: r.paymentScreenshot || "",
             occupation: r.occupation || "",
             maritalStatus: r.maritalStatus || "",
             guardianName: r.parentName || r.guardianName || "",
