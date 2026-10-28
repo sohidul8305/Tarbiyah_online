@@ -889,7 +889,7 @@ const New_admission = () => {
                     No Students Found
                   </h3>
                   <p className="text-xs text-gray-500">
-                    {adminDepartment} department এ এখনো কোনো student add হয়নি।
+                    {adminDepartment} department এ এখনো কোনো student add হয়নি
                   </p>
                 </div>
               )}
