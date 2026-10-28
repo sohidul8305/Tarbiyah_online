@@ -608,7 +608,7 @@ const ImamNabawiDetails = () => {
             </div>
 
             {/* Right Sidebar - 1 Column */}
-            <div className="space-y-4 -mt-[305px]">
+            <div className="space-y-4 mt-200">
               {/* Video Thumbnail (Promo) */}
               <a
                 href="https://youtu.be/6gMZDMTMEDk?si=YtR0LQ690HuOS-Sd"

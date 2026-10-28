@@ -18,8 +18,16 @@ const PaymentStatus = () => {
   const isCancel = location.pathname.includes("cancel");
 
   useEffect(() => {
-    // পেজ লোড হওয়ার সাথে সাথে সুইট অ্যালার্ট দেখানো (অপশনাল)
     if (isSuccess) {
+      // ⬇️ এই ৮ লাইন কোড এখানে বসাবেন ⬇️
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({
+        event: "purchase",
+        transaction_id: tranId || "unknown_tran_id",
+        value: 12000,
+        currency: "BDT",
+      });
+      // ⬆️ এখান পর্যন্ত ⬆️
       Swal.fire({
         icon: "success",
         title: "পেমেন্ট সফল!",

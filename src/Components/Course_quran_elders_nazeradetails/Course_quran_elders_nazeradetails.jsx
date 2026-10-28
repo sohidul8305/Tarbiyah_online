@@ -74,7 +74,16 @@ const Course_quran_elders_nazeradetails = () => {
   const [openSemester, setOpenSemester] = useState(0);
   const [activeTab, setActiveTab] = useState("info");
   const [openFaq, setOpenFaq] = useState(null);
-
+  // ⬇️ ঠিক এখানে নিচের ৮ লাইন কোড বসাবেন ⬇️
+  useEffect(() => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "ViewContent",
+      course_name: "Tarbiyah Elders Najera ", // আপনার কোর্সের নাম
+      course_id: "qs3", // আপনার সুবিধামতো আইডি
+    });
+  }, []);
+  // ⬆️ এখান পর্যন্ত ⬆️
   const toggleSemester = (index) => {
     setOpenSemester(openSemester === index ? null : index);
   };

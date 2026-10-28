@@ -74,7 +74,16 @@ const Course_quran_elders_tajweed = () => {
   const [openSemester, setOpenSemester] = useState(0);
   const [activeTab, setActiveTab] = useState("info");
   const [openFaq, setOpenFaq] = useState(null);
-
+  // ⬇️ ঠিক এখানে নিচের ৮ লাইন কোড বসাবেন ⬇️
+  useEffect(() => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "ViewContent",
+      course_name: "Tarbiyah Basic Tajweed Najera ",
+      course_id: "qs3",
+    });
+  }, []);
+  // ⬆️ এখান পর্যন্ত ⬆️
   const toggleSemester = (index) => {
     setOpenSemester(openSemester === index ? null : index);
   };

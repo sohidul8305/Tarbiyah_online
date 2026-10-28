@@ -74,7 +74,16 @@ const HifzRevisionDetails = () => {
   const [showMore, setShowMore] = useState(false);
   const [openAccordion, setOpenAccordion] = useState(null);
   const [openFaq, setOpenFaq] = useState(null);
-
+  // ⬇️ ঠিক এখানে নিচের ৮ লাইন কোড বসাবেন ⬇️
+  useEffect(() => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "ViewContent",
+      course_name: "ONLINE QURAN TARTIB HIFZ REVISION", // আপনার কোর্সের নাম
+      course_id: "qs3", // আপনার সুবিধামতো আইডি
+    });
+  }, []);
+  // ⬆️ এখান পর্যন্ত ⬆️
   const toggleAccordion = (index) => {
     setOpenAccordion(openAccordion === index ? null : index);
   };

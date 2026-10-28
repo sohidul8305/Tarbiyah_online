@@ -9,6 +9,7 @@ const DEPARTMENT_MAP = {
   alemiyah: "Alimiya",
   "quran-studies": "Quran Studies",
   "quran-elders": "Elders",
+  "recorded-courses": "Diploma", // 👈 নতুন লাইন
 };
 
 // ✅ Batch Schedule Constants (Quran Studies only) — OUTSIDE component
@@ -291,6 +292,37 @@ const Admission_now = () => {
           totalOneTime: 6000,
           discount: 500,
           price: 5500,
+        },
+      ],
+    },
+
+    "recorded-courses": {
+      name: "Recorded Courses",
+      courses: [
+        {
+          id: "rc-hadith-40",
+          name: "Imam Nabawi's 40 Hadiths",
+          duration: "42 Sessions • Self-Paced",
+          admissionFee: 0,
+          monthlyFee: 0,
+          totalOneTime: 1000,
+          discount: 3000,
+          price: 1000,
+          originalPrice: 4000,
+          isRecorded: true,
+          isComingSoon: false,
+        },
+        {
+          id: "rc-surah-mulk",
+          name: "Surah Mulk Hifz Course",
+          duration: "Coming Soon",
+          admissionFee: 0,
+          monthlyFee: 0,
+          totalOneTime: 0,
+          discount: 0,
+          price: 0,
+          isRecorded: true,
+          isComingSoon: true,
         },
       ],
     },
@@ -737,6 +769,15 @@ const Admission_now = () => {
 
       const data = await response.json();
       if (data.success) {
+        // ⬇️ এই ৮ লাইন কোড এখানে বসাবেন ⬇️
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: "generate_lead",
+          form_id: "admission_form",
+          lead_type: "admission",
+          course_name: selectedCourseNames.join(", ") || departmentName,
+        });
+        // ⬆️ এখান পর্যন্ত ⬆️
         Swal.fire({
           icon: "success",
           title: "🎉 Admission Completed!",
@@ -901,6 +942,7 @@ const Admission_now = () => {
                   <option value="alemiyah">Tarbiyah Alimiyah</option>
                   <option value="quran-studies">Tarbiyah Quran Studies</option>
                   <option value="quran-elders">Quran for Elders</option>
+                  <option value="recorded-courses">Recorded Courses</option>
                 </select>
               </div>
 
@@ -919,7 +961,13 @@ const Admission_now = () => {
                         className="border rounded-lg p-4 hover:shadow-md transition"
                         style={{ borderColor: "#00ADD2" }}
                       >
-                        <label className="flex items-start space-x-3 cursor-pointer">
+                        <label
+                          className={`flex items-start space-x-3 ${
+                            course.isComingSoon
+                              ? "cursor-not-allowed opacity-60"
+                              : "cursor-pointer"
+                          }`}
+                        >
                           <input
                             type="checkbox"
                             value={course.id}
@@ -927,25 +975,55 @@ const Admission_now = () => {
                               course.id,
                             )}
                             onChange={handleInputChange}
-                            className="mt-1 h-4 w-4 focus:ring-[#00ADD2] border-gray-300 rounded"
+                            disabled={course.isComingSoon}
+                            className="mt-1 h-4 w-4 focus:ring-[#00ADD2] border-gray-300 rounded disabled:opacity-50"
                             style={{ color: "#00ADD2" }}
                           />
                           <div className="flex-1">
-                            <h4 className="font-semibold text-gray-800">
+                            <h4 className="font-semibold text-gray-800 flex items-center flex-wrap gap-1">
                               {course.name}
+                              {course.isComingSoon && (
+                                <span className="text-[9px] bg-orange-500 text-white px-2 py-0.5 rounded-full font-bold">
+                                  Coming Soon
+                                </span>
+                              )}
                             </h4>
-                            <div className="flex justify-between mt-1">
+
+                            <div className="flex justify-between items-center mt-1">
                               <span className="text-xs text-gray-500">
                                 Duration: {course.duration}
                               </span>
-                              <span
-                                className="text-sm font-medium"
-                                style={{ color: "#00ADD2" }}
-                              >
-                                ৳{course.price?.toLocaleString() || 0}
-                              </span>
+
+                              {course.isComingSoon ? (
+                                <span className="text-xs text-orange-600 font-bold">
+                                  খুব শীঘ্রই জানানো হবে
+                                </span>
+                              ) : (
+                                <div className="text-right">
+                                  {course.originalPrice > course.price && (
+                                    <span className="text-xs text-gray-400 line-through mr-1">
+                                      ৳{course.originalPrice.toLocaleString()}
+                                    </span>
+                                  )}
+                                  <span
+                                    className="text-sm font-bold"
+                                    style={{ color: "#00ADD2" }}
+                                  >
+                                    ৳{course.price.toLocaleString()}
+                                  </span>
+                                  {course.originalPrice > course.price && (
+                                    <p className="text-[10px] text-green-600 font-semibold">
+                                      🎉 Website Launch Offer — Save ৳
+                                      {(
+                                        course.originalPrice - course.price
+                                      ).toLocaleString()}
+                                    </p>
+                                  )}
+                                </div>
+                              )}
                             </div>
-                            {course.discount > 0 && (
+
+                            {course.discount > 0 && !course.isComingSoon && (
                               <div className="text-xs text-green-600 mt-1">
                                 Save ৳{course.discount} on one-time payment
                               </div>
@@ -1045,6 +1123,7 @@ const Admission_now = () => {
                                 value={slot}
                                 checked={formData.batchSchedule === slot}
                                 onChange={handleInputChange}
+                                disabled={course.isComingSoon}
                                 className="h-4 w-4"
                               />
                               <span className="text-sm">{slot}</span>

@@ -27,8 +27,6 @@ import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
-
-// ============================================================
 // ✅ Helper: Only show a field if it has a real value
 // ============================================================
 const hasValue = (v) => {

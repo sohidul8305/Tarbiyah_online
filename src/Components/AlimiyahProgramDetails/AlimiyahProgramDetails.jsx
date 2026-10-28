@@ -72,7 +72,16 @@ const AlimiyahProgramDetails = () => {
   const [openSemester, setOpenSemester] = useState(0);
   const [activeTab, setActiveTab] = useState("info");
   const [openFaq, setOpenFaq] = useState(null);
-
+  // ⬇️ এই ৮ লাইন কোড এখানে বসাবেন ⬇️
+  useEffect(() => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "ViewContent",
+      course_name: "Alimiyah Program ",
+      course_id: "al1", // (আপনার সুবিধামতো আইডি দিতে পারেন)
+    });
+  }, []);
+  // ⬆️ এখান পর্যন্ত ⬆️
   const toggleSemester = (index) => {
     setOpenSemester(openSemester === index ? null : index);
   };

@@ -75,7 +75,15 @@ const DiplomaDetails = () => {
 
   const [openSemester, setOpenSemester] = useState(0);
   const [activeTab, setActiveTab] = useState("info");
-
+  // ⬇️ এই ৭ লাইন কোড বসাবেন ⬇️
+  useEffect(() => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: "ViewContent",
+      course_name: "Diploma in Islamic Studies",
+    });
+  }, []);
+  // ⬆️ এখান পর্যন্ত ⬆️
   const toggleSemester = (index) => {
     setOpenSemester(openSemester === index ? null : index);
   };
