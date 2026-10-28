@@ -27,6 +27,12 @@ import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
+
+// ✅ Helper: check if ID is real (not pending_xxx)
+const isRealId = (id) =>
+  !!id && !String(id).toLowerCase().startsWith("pending_");
+
+// ============================================================
 // ✅ Helper: Only show a field if it has a real value
 // ============================================================
 const hasValue = (v) => {
@@ -64,8 +70,18 @@ const New_admission = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterPayment, setFilterPayment] = useState("All");
+
+  // ✅ Modal state (শুধু একবার declare)
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedAdmission, setSelectedAdmission] = useState(null);
+
+  // ✅ Approve form state
+  const [approveForm, setApproveForm] = useState({
+    studentId: "",
+    password: "",
+    roll: "",
+  });
+  const [approving, setApproving] = useState(false);
 
   // ============================================================
   // ✅ Load admin info + department
@@ -154,11 +170,8 @@ const New_admission = () => {
             studentId: r.studentId || "",
             batch: r.batch || "",
             country: r.country || "BD",
-            // ✅ NEW: Quran Studies Batch Info
             batchType: r.batchType || "",
             batchSchedule: r.batchSchedule || "",
-            // ✅ FIX: paymentScreenshot (studentImage বাদ)
-            paymentScreenshot: r.paymentScreenshot || "",
             date: r.applicationDate || "",
             createdAt: r.applicationDate || "",
             dueAmount: r.dueAmount || 0,
@@ -226,6 +239,155 @@ const New_admission = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const toggleSubMenu = (menu) =>
     setActiveSubMenu(activeSubMenu === menu ? null : menu);
+
+  // ============================================================
+  // ✅ Generate Student ID
+  // ============================================================
+  const generateStudentId = () => {
+    const year = new Date().getFullYear().toString().slice(-2);
+    const random = Math.floor(10000 + Math.random() * 90000);
+    return `TAR${year}${random}`;
+  };
+
+  // ============================================================
+  // ✅ Open Details Modal (pre-fill approve form)
+  // ============================================================
+  const openDetailsModal = async (admission) => {
+    setSelectedAdmission(admission);
+
+    const isPendingId = !isRealId(admission.studentId);
+
+    // ✅ Default values দিয়ে form সেট করি
+    setApproveForm({
+      studentId: isPendingId ? generateStudentId() : admission.studentId,
+      password: "student123S@",
+      roll: "",
+    });
+    setShowDetailsModal(true);
+
+    // ✅ Approved হলে backend থেকে real password fetch করি
+    if (admission.status === "Approved") {
+      try {
+        const res = await fetch(`${API_BASE}/students/details/${admission.id}`);
+        const data = await res.json();
+        if (data.success && data.student) {
+          setApproveForm((prev) => ({
+            ...prev,
+            studentId: data.student.studentId || prev.studentId,
+            password: data.student.password || prev.password,
+            roll: data.student.roll || prev.roll,
+          }));
+        }
+      } catch (err) {
+        console.warn("⚠️ Could not fetch student credentials:", err.message);
+        // Silent fail — modal আগের values দিয়েই দেখাবে
+      }
+    }
+  };
+  // ============================================================
+  // ✅ Approve Student Handler
+  // ============================================================
+  const handleApprove = async () => {
+    if (!approveForm.studentId || !approveForm.studentId.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Student ID আবশ্যক!",
+        text: "অনুগ্রহ করে একটি Student ID দিন।",
+      });
+      return;
+    }
+    if (!approveForm.password || !approveForm.password.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Password আবশ্যক!",
+        text: "অনুগ্রহ করে একটি password দিন।",
+      });
+      return;
+    }
+
+    setApproving(true);
+    try {
+      const res = await fetch(
+        `${API_BASE}/students/approve/${selectedAdmission.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            studentId: approveForm.studentId.trim(),
+            password: approveForm.password.trim(),
+            roll: approveForm.roll.trim(),
+          }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Local state update
+        setAdmissions((prev) =>
+          prev.map((a) =>
+            a.id === selectedAdmission.id
+              ? {
+                  ...a,
+                  status: "Approved",
+                  rawStatus: "Active",
+                  studentId: approveForm.studentId.trim(),
+                }
+              : a,
+          ),
+        );
+
+        Swal.fire({
+          icon: "success",
+          title: "✅ Student Approved!",
+          html: `
+            <div style="text-align: left; font-size: 13px;">
+              <p><strong>Name:</strong> ${selectedAdmission.name}</p>
+              <hr style="margin: 8px 0;" />
+              <div style="background: #f0fdf4; padding: 12px; border-radius: 8px; border: 2px solid #86efac;">
+                <p style="font-weight: bold; color: #004d4d; margin-bottom: 6px;">
+                  🔑 Login Credentials:
+                </p>
+                <p style="font-size: 15px;">
+                  <strong>Student ID:</strong>
+                  <span style="color: #004d4d; font-size: 18px; letter-spacing: 1px; font-family: monospace;">
+                    ${approveForm.studentId}
+                  </span>
+                </p>
+                <p><strong>Password:</strong>
+                  <span style="color: #004d4d;">${approveForm.password}</span>
+                </p>
+                <p style="margin-top: 8px; font-size: 11px; color: #666;">
+                  📌 এই তথ্য স্টুডেন্টকে দিন — সে এটা দিয়ে লগইন করে
+                  <strong>My Academic</strong>-এ ভিডিও দেখতে পারবে।
+                </p>
+              </div>
+            </div>
+          `,
+          confirmButtonColor: "#004d4d",
+        });
+
+        setShowDetailsModal(false);
+        setSelectedAdmission(null);
+        setApproveForm({ studentId: "", password: "", roll: "" });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: data.message || "Could not approve student.",
+        });
+      }
+    } catch (err) {
+      console.error("❌ Approve error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Network Error",
+        text: err.message,
+      });
+    } finally {
+      setApproving(false);
+    }
+  };
 
   // ============================================================
   // Sidebar Menu
@@ -481,11 +643,6 @@ const New_admission = () => {
     } catch (err) {
       Swal.fire({ icon: "error", title: "Error", text: err.message });
     }
-  };
-
-  const openDetailsModal = (admission) => {
-    setSelectedAdmission(admission);
-    setShowDetailsModal(true);
   };
 
   // ============================================================
@@ -812,7 +969,7 @@ const New_admission = () => {
                               </p>
                             </td>
                             <td className="px-3 py-2">
-                              {a.studentId ? (
+                              {isRealId(a.studentId) ? (
                                 <span className="text-[10px] font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
                                   {a.studentId}
                                 </span>
@@ -944,18 +1101,60 @@ const New_admission = () => {
                     </div>
                   </div>
 
-                  {/* Student ID */}
-                  {hasValue(selectedAdmission.studentId) && (
-                    <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                      <p className="text-xs text-blue-600 font-semibold">
-                        Student ID
-                      </p>
-                      <p className="font-mono font-bold text-sm text-blue-800">
-                        {selectedAdmission.studentId}
+                  {/* ✅ Student ID — শুধু APPROVED হলে দেখাবে (real TAR ID থাকলে) */}
+                  {/* ✅ Already Approved — Login Credentials সহ */}
+                  {selectedAdmission.status === "Approved" && (
+                    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-4 border-2 border-blue-300">
+                      <h4 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
+                        ✅ Already Approved
+                      </h4>
+
+                      <div className="bg-white rounded-lg p-3 space-y-2 border border-blue-200">
+                        {/* Student ID */}
+                        {isRealId(selectedAdmission.studentId) && (
+                          <div className="flex justify-between gap-2 items-center">
+                            <span className="text-xs text-gray-500 font-semibold">
+                              🆔 Student ID
+                            </span>
+                            <span className="font-mono font-bold text-sm text-blue-800 bg-blue-50 px-2 py-0.5 rounded select-all">
+                              {selectedAdmission.studentId}
+                            </span>
+                          </div>
+                        )}
+
+                        {/* Password */}
+                        <div className="flex justify-between gap-2 items-center">
+                          <span className="text-xs text-gray-500 font-semibold">
+                            🔑 Password
+                          </span>
+                          <span className="font-mono font-bold text-sm text-blue-800 bg-blue-50 px-2 py-0.5 rounded select-all">
+                            {approveForm.password || "—"}
+                          </span>
+                        </div>
+
+                        {/* Roll (optional) */}
+                        {approveForm.roll && (
+                          <div className="flex justify-between gap-2 items-center">
+                            <span className="text-xs text-gray-500 font-semibold">
+                              🎫 Roll
+                            </span>
+                            <span className="font-mono font-bold text-sm text-blue-800">
+                              {approveForm.roll}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      <p className="text-[10px] text-blue-600 mt-2 flex items-start gap-1">
+                        <span>📌</span>
+                        <span>
+                          এই তথ্য স্টুডেন্টকে দিন — সে{" "}
+                          <strong>Student ID / Phone + Password</strong> দিয়ে
+                          এই পেজে লগইন করে ভিডিও দেখতে পারবে।
+                        </span>
                       </p>
                     </div>
                   )}
-
                   {/* Personal Info */}
                   {(hasValue(selectedAdmission.fatherName) ||
                     hasValue(selectedAdmission.motherName) ||
@@ -994,7 +1193,10 @@ const New_admission = () => {
                           </div>
                         )}
                         {hasValue(selectedAdmission.age) && (
-                          <div className="flex justify-between gap-2">
+                          <div
+                            className="flex justify-between g
+                          ap-2"
+                          >
                             <span className="text-gray-500">Age</span>
                             <span className="font-semibold">
                               {selectedAdmission.age}
@@ -1266,7 +1468,7 @@ const New_admission = () => {
                     </div>
                   )}
 
-                  {/* ✅ Payment Screenshot (Payment Proof) */}
+                  {/* ✅ Payment Screenshot */}
                   {hasValue(selectedAdmission.paymentScreenshot) && (
                     <div className="bg-green-50 rounded-lg p-4 border-2 border-green-300">
                       <h4 className="font-semibold text-gray-800 mb-3 flex items-center justify-between">
@@ -1296,6 +1498,105 @@ const New_admission = () => {
                       </div>
                       <p className="text-xs text-green-700 text-center mt-2 font-medium">
                         ✓ Click image to view full size
+                      </p>
+                    </div>
+                  )}
+
+                  {/* ✅ Approve Section (Pending হলে দেখাবে) */}
+                  {selectedAdmission.status !== "Approved" && (
+                    <div className="bg-green-50 rounded-lg p-4 border-2 border-green-300">
+                      <h4 className="font-bold text-green-800 mb-3 flex items-center gap-2">
+                        ✅ Approve Student
+                      </h4>
+
+                      {/* Student ID — একমাত্র input এখানে */}
+                      <div className="mb-3">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">
+                          Student ID <span className="text-red-500">*</span>
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={approveForm.studentId}
+                            onChange={(e) =>
+                              setApproveForm({
+                                ...approveForm,
+                                studentId: e.target.value,
+                              })
+                            }
+                            placeholder="e.g., TAR2648213"
+                            className="flex-1 px-3 py-2 border rounded-lg text-sm font-mono focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                          />
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setApproveForm({
+                                ...approveForm,
+                                studentId: generateStudentId(),
+                              })
+                            }
+                            className="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold rounded-lg whitespace-nowrap"
+                          >
+                            🎲 Auto
+                          </button>
+                        </div>
+                        <p className="text-[10px] text-gray-500 mt-1">
+                          এই ID দিয়ে student login করবে
+                        </p>
+                      </div>
+
+                      {/* Password */}
+                      <div className="mb-3">
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">
+                          Password <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={approveForm.password}
+                          onChange={(e) =>
+                            setApproveForm({
+                              ...approveForm,
+                              password: e.target.value,
+                            })
+                          }
+                          placeholder="Enter password"
+                          className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        />
+                        <p className="text-[10px] text-gray-500 mt-1">
+                          Default: <strong>student123S@</strong>
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={handleApprove}
+                        disabled={approving}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg font-bold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {approving ? (
+                          <>
+                            <span className="animate-spin">⏳</span>{" "}
+                            Approving...
+                          </>
+                        ) : (
+                          <>✅ Approve & Activate</>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* ✅ Already Approved — real TAR ID থাকলে দেখাবে */}
+                  {selectedAdmission.status === "Approved" && (
+                    <div className="bg-blue-50 rounded-lg p-3 border border-blue-300">
+                      <p className="text-xs text-blue-800 font-semibold flex items-center gap-2 flex-wrap">
+                        ✅ Already Approved
+                        {isRealId(selectedAdmission.studentId) && (
+                          <span className="font-mono bg-white px-2 py-0.5 rounded">
+                            {selectedAdmission.studentId}
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-[10px] text-blue-600 mt-1">
+                        Student now has access to all enrolled course videos.
                       </p>
                     </div>
                   )}

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-// Swiper and required modules (only for FAQ, no testimonials)
+import Swal from "sweetalert2";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -29,14 +29,45 @@ import {
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 
+const API_BASE = "https://api.tarbiyahonline.com/api";
+
+// ✅ YouTube ID extract helper
+const extractYoutubeId = (url) => {
+  if (!url) return "";
+  const match = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([^&?/]+)/,
+  );
+  return match ? match[1] : "";
+};
+
+// ✅ YouTube thumbnail URL — maxres (16:9) with hq fallback
+const getYoutubeThumb = (url, quality = "maxresdefault") => {
+  const id = extractYoutubeId(url);
+  if (!id) return "";
+  return `https://img.youtube.com/vi/${id}/${quality}.jpg`;
+};
+
+// ✅ Image with automatic fallback (maxres → hqdefault)
+const YoutubeThumbImg = ({ url, alt, className }) => (
+  <img
+    src={getYoutubeThumb(url, "maxresdefault")}
+    alt={alt}
+    className={className}
+    onError={(e) => {
+      if (!e.target.dataset.fallback) {
+        e.target.dataset.fallback = "true";
+        e.target.src = getYoutubeThumb(url, "hqdefault");
+      }
+    }}
+  />
+);
+
 // Import banner image
 import chollisCoverImg from "../../image/40radiscover.jpg";
-
-// Import instructor image (you can replace with actual image)
 import ProfessorImg from "../../image/profile.jpg";
 
 // --- Language Hook ---
-import { useState as useStateHook, useEffect } from "react";
+import { useState as useStateHook } from "react";
 
 export const useLanguage = () => {
   const [language, setLanguage] = useStateHook(
@@ -59,7 +90,6 @@ export const useLanguage = () => {
 
   return { language, t };
 };
-// -----------------------------------------------
 
 const ImamNabawiDetails = () => {
   const { t } = useLanguage();
@@ -67,6 +97,103 @@ const ImamNabawiDetails = () => {
   const [openSemester, setOpenSemester] = useState(0);
   const [activeTab, setActiveTab] = useState("info");
   const [openFaq, setOpenFaq] = useState(null);
+
+  // ✅ Login state — now accepts ID or Phone
+  const [loginIdentifier, setLoginIdentifier] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loggedStudent, setLoggedStudent] = useState(null);
+  const [courseVideos, setCourseVideos] = useState([]);
+
+  // Load from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("recorded_student");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setLoggedStudent(parsed.student);
+        setCourseVideos(parsed.videos || []);
+      } catch (e) {
+        console.error("Parse error:", e);
+      }
+    }
+  }, []);
+
+  // ✅ Login handler — sends identifier (works with both old & new backend)
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if (!loginIdentifier.trim() || !loginPassword.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "সব ঘর পূরণ করুন",
+        text: "Student ID / Phone এবং পাসওয়ার্ড দিন।",
+      });
+      return;
+    }
+
+    setLoginLoading(true);
+    try {
+      const idValue = loginIdentifier.trim();
+      const res = await fetch(`${API_BASE}/recorded-course/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          // Send as multiple fields for backward compat
+          identifier: idValue,
+          phone: idValue,
+          studentId: idValue,
+          password: loginPassword.trim(),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setLoggedStudent(data.student);
+        setCourseVideos(data.videos || []);
+        localStorage.setItem(
+          "recorded_student",
+          JSON.stringify({ student: data.student, videos: data.videos }),
+        );
+
+        Swal.fire({
+          icon: "success",
+          title: "লগইন সফল! 🎉",
+          text: `${data.totalVideos} টি ভিডিও পাওয়া গেছে।`,
+          timer: 1800,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "লগইন ব্যর্থ",
+          text: data.message || "আবার চেষ্টা করুন।",
+        });
+      }
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Network Error",
+        text: err.message,
+      });
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setLoggedStudent(null);
+    setCourseVideos([]);
+    setLoginIdentifier("");
+    setLoginPassword("");
+    localStorage.removeItem("recorded_student");
+    Swal.fire({
+      icon: "success",
+      title: "লগআউট সফল",
+      timer: 1200,
+      showConfirmButton: false,
+    });
+  };
 
   const toggleSemester = (index) => {
     setOpenSemester(openSemester === index ? null : index);
@@ -76,18 +203,16 @@ const ImamNabawiDetails = () => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
-  // --- Instructor ---
   const instructors = [
     {
       id: 1,
-      name: t({ en: "Shaykh Mokhtar Ahmad", bn: "শায়খ মোখতার আহমদ" }),
+      name: t({ en: "Shaykh Mokhtar Ahmad", bn: "শায়খ মোখতার আহমদ" }),
       title: t({ en: "Senior Instructor", bn: "সিনিয়র শিক্ষক" }),
       subtitle: t({ en: "Hadith & Quran", bn: "হাদিস ও কুরআন" }),
       image: ProfessorImg,
     },
   ];
 
-  // --- Course Details (exactly as provided) ---
   const courseDetails = {
     title: t({
       en: "Imam Nabawi's 40 Hadiths Course",
@@ -98,8 +223,8 @@ const ImamNabawiDetails = () => {
       bn: "ইমাম নববীর ৪০ হাদিসের রেকর্ডেড কোর্স",
     }),
     description: t({
-      en: "Imam Nawawi's collection of 40 Hadiths presents the core teachings of Islam—belief, worship, character, ethics, and daily life—in a concise yet profound manner. In this recorded course, each hadith is explained with Arabic text, word meanings, translation, commentary, and practical application in an easy and clear style. The course is designed for self‑paced learning from anywhere, at any time.",
-      bn: "ইমাম নববী (রহ.) সংকলিত ৪০ হাদিস ইসলামের মৌলিক শিক্ষা, আকীদাহ, ইবাদত, আখলাক, চরিত্র গঠন এবং দৈনন্দিন জীবনের গুরুত্বপূর্ণ বিষয়গুলোকে সংক্ষিপ্ত অথচ গভীরভাবে তুলে ধরেছে। এই রেকর্ডেড কোর্সে প্রতিটি হাদিসের আরবি পাঠ, শব্দার্থ, অনুবাদ, ব্যাখ্যা, শিক্ষা ও বাস্তব জীবনে প্রয়োগ সহজ ও প্রাঞ্জলভাবে উপস্থাপন করা হবে। নিজের সুবিধামতো সময়ে, যেকোনো স্থান থেকে, ধাপে ধাপে ৪০ হাদিস অধ্যয়ন করার জন্য কোর্সটি বিশেষভাবে সাজানো হয়েছে।",
+      en: "Imam Nawawi's collection of 40 Hadiths presents the core teachings of Islam—belief, worship, character, ethics, and daily life—in a concise yet profound manner. In this recorded course, each hadith is explained with Arabic text, word meanings, translation, commentary, and practical application in an easy and clear style. The course is designed for self-paced learning from anywhere, at any time.",
+      bn: "ইমাম নববী (রহ.) সংকলিত ৪০ হাদিস ইসলামের মৌলিক শিক্ষা, আকীদাহ, ইবাদত, আখলাক, চরিত্র গঠন এবং দৈনন্দিন জীবনের গুরুত্বপূর্ণ বিষয়গুলোকে সংক্ষিপ্ত অথচ গভীরভাবে তুলে ধরেছে। এই রেকর্ডেড কোর্সে প্রতিটি হাদিসের আরবি পাঠ, শব্দার্থ, অনুবাদ, ব্যাখ্যা, শিক্ষা ও বাস্তব জীবনে প্রয়োগ সহজ ও প্রাঞ্জলভাবে উপস্থাপন করা হবে। নিজের সুবিধামতো সময়ে, যেকোনো স্থান থেকে, ধাপে ধাপে ৪০ হাদিস অধ্যয়ন করার জন্য কোর্সটি বিশেষভাবে সাজানো হয়েছে।",
     }),
     objectives: [
       t({
@@ -112,11 +237,11 @@ const ImamNabawiDetails = () => {
       }),
       t({
         en: "Develop a clear understanding of fundamental Islamic topics",
-        bn: "ইসলামের মৌলিক বিষয়গুলো সম্পর্কে সুস্পষ্ট ধারণা লাভ করবেন",
+        bn: "ইসলামের মৌলিক বিষয়গুলো সম্পর্কে সুস্পষ্ট ধারণা লাভ করবেন",
       }),
       t({
         en: "Receive practical guidance on implementing Hadith teachings in daily life",
-        bn: "দৈনন্দিন জীবনে হাদিসের শিক্ষা বাস্তবায়নের দিকনির্দেশনা পাবেন",
+        bn: "দৈনন্দিন জীবনে হাদিসের শিক্ষা বাস্তবায়নের দিকনির্দেশনা পাবেন",
       }),
       t({
         en: "Gain deep insight into faith, worship, and character",
@@ -124,29 +249,29 @@ const ImamNabawiDetails = () => {
       }),
       t({
         en: "Apply Islamic teachings in family, society, and personal life",
-        bn: "পরিবার, সমাজ ও ব্যক্তিজীবনে ইসলামের শিক্ষা প্রয়োগ করতে পারবেন",
+        bn: "পরিবার, সমাজ ও ব্যক্তিজীবনে ইসলামের শিক্ষা প্রয়োগ করতে পারবেন",
       }),
     ],
     targetAudience: [
       t({
         en: "Those who want to start studying Hadith",
-        bn: "যারা হাদিস অধ্যয়ন শুরু করতে চান",
+        bn: "যারা হাদিস অধ্যয়ন শুরু করতে চান",
       }),
       t({
         en: "Those interested in learning the fundamentals of Islam",
-        bn: "যারা ইসলামের মৌলিক বিষয়গুলো জানতে আগ্রহী",
+        bn: "যারা ইসলামের মৌলিক বিষয়গুলো জানতে আগ্রহী",
       }),
       t({
         en: "Students, employees, businessmen, and general learners",
-        bn: "ছাত্র, চাকরিজীবী, ব্যবসায়ী ও সাধারণ শিক্ষার্থী",
+        bn: "ছাত্র, চাকরিজীবী, ব্যবসায়ী ও সাধারণ শিক্ষার্থী",
       }),
       t({
         en: "Those who prefer recorded classes at their own pace",
-        bn: "যারা নিজের সুবিধামতো সময়ে রেকর্ডেড ক্লাস করতে চান",
+        bn: "যারা নিজের সুবিধামতো সময়ে রেকর্ডেড ক্লাস করতে চান",
       }),
       t({
         en: "Those who wish to apply Hadith teachings in family and society",
-        bn: "যারা পরিবার ও সমাজে হাদিসের শিক্ষা বাস্তবায়ন করতে চান",
+        bn: "যারা পরিবার ও সমাজে হাদিসের শিক্ষা বাস্তবায়ন করতে চান",
       }),
     ],
     feeStructure: {
@@ -155,7 +280,7 @@ const ImamNabawiDetails = () => {
         bn: "কোর্স ফি: ৳২,০০০ মাত্র",
       }),
       oneTime: {
-        title: t({ en: "One‑Time Payment", bn: "এককালীন পেমেন্ট" }),
+        title: t({ en: "One-Time Payment", bn: "এককালীন পেমেন্ট" }),
         description: t({
           en: "Pay the full course fee and get lifetime access + certificate.",
           bn: "সম্পূর্ণ কোর্স ফি প্রদান করুন এবং লাইফটাইম অ্যাক্সেস + সার্টিফিকেট পান।",
@@ -168,11 +293,11 @@ const ImamNabawiDetails = () => {
       t({ en: "Lifetime access", bn: "লাইফটাইম অ্যাক্সেস" }),
       t({
         en: "Study at your own convenience",
-        bn: "নিজের সুবিধামতো সময়ে অধ্যয়নের সুযোগ",
+        bn: "নিজের সুবিধামতো সময়ে অধ্যয়নের সুযোগ",
       }),
       t({
         en: "Explanation and necessary discussion of each Hadith",
-        bn: "প্রতিটি হাদিসের ব্যাখ্যা ও প্রয়োজনীয় আলোচনা",
+        bn: "প্রতিটি হাদিসের ব্যাখ্যা ও প্রয়োজনীয় আলোচনা",
       }),
       t({
         en: "Access from mobile, tablet, and computer",
@@ -190,28 +315,28 @@ const ImamNabawiDetails = () => {
       }),
     })),
     extraObjectivesNote: t({
-      en: "This is a self‑paced recorded course with lifetime access.",
-      bn: "এটি একটি স্ব-গতির রেকর্ডেড কোর্স যার লাইফটাইম অ্যাক্সেস রয়েছে।",
+      en: "This is a self-paced recorded course with lifetime access.",
+      bn: "এটি একটি স্ব-গতির রেকর্ডেড কোর্স যার লাইফটাইম অ্যাক্সেস রয়েছে।",
     }),
   };
 
-  // Why This Course – single paragraph (no features grid)
   const whyDescription = t({
     en: "Imam Nabawi's 40 Hadiths is not just a collection of hadiths; it is a concise and rich curriculum of the fundamental teachings of Islam. Through this course, you will be able to learn the teachings of Hadith in easy language and find ways to implement them in your own life.",
-    bn: "ইমাম নববীর ৪০ হাদিস শুধু একটি হাদিস সংকলন নয়; বরং ইসলামের মৌলিক শিক্ষার একটি সংক্ষিপ্ত ও সমৃদ্ধ পাঠ্যক্রম। এই কোর্সের মাধ্যমে আপনি সহজ ভাষায় হাদিসের শিক্ষা জানতে পারবেন এবং তা নিজের জীবনে বাস্তবায়নের পথ খুঁজে পাবেন।",
+    bn: "ইমাম নববীর ৪০ হাদিস শুধু একটি হাদিস সংকলন নয়; বরং ইসলামের মৌলিক শিক্ষার একটি সংক্ষিপ্ত ও সমৃদ্ধ পাঠ্যক্রম। এই কোর্সের মাধ্যমে আপনি সহজ ভাষায় হাদিসের শিক্ষা জানতে পারবেন এবং তা নিজের জীবনে বাস্তবায়নের পথ খুঁজে পাবেন।",
   });
 
-  // Video Gallery – only the promo video
   const videoGallery = [
     {
       id: 1,
       title: t({ en: "Promo Video", bn: "প্রোমো ভিডিও" }),
-      thumbnail: "https://img.youtube.com/vi/6gMZDMTMEDk/hqdefault.jpg",
+      thumbnail: getYoutubeThumb(
+        "https://youtu.be/6gMZDMTMEDk",
+        "maxresdefault",
+      ),
       url: "https://youtu.be/6gMZDMTMEDk?si=YtR0LQ690HuOS-Sd",
     },
   ];
 
-  // FAQ Data (you can modify as needed)
   const faqs = [
     {
       question: t({
@@ -220,7 +345,7 @@ const ImamNabawiDetails = () => {
       }),
       answer: t({
         en: "Yes, it is designed for all levels, especially for those who want to start studying Hadith.",
-        bn: "হ্যাঁ, এটি সকল স্তরের জন্য তৈরি, বিশেষ করে যারা হাদিস অধ্যয়ন শুরু করতে চান।",
+        bn: "হ্যাঁ, এটি সকল স্তরের জন্য তৈরি, বিশেষ করে যারা হাদিস অধ্যয়ন শুরু করতে চান।",
       }),
     },
     {
@@ -236,7 +361,7 @@ const ImamNabawiDetails = () => {
     {
       question: t({
         en: "Is there any certificate after completion?",
-        bn: "সমাপ্তির পর কোনো সার্টিফিকেট দেওয়া হয়?",
+        bn: "সমাপ্তির পর কোনো সার্টিফিকেট দেওয়া হয়?",
       }),
       answer: t({
         en: "Yes, you will receive a certificate upon completing the course.",
@@ -291,7 +416,7 @@ const ImamNabawiDetails = () => {
             className="w-full max-w-3xl h-24 sm:h-60 md:h-60 object-cover object-top rounded-2xl border border-gray-100 ml-8 mr-72 -mt-6"
           />
 
-          {/* Course Info Section - Below Banner */}
+          {/* Course Info Section */}
           <div className="ml-8 mr-72">
             <div className="flex items-center justify-between py-3">
               <div className="flex items-center gap-4">
@@ -314,7 +439,6 @@ const ImamNabawiDetails = () => {
               {courseDetails.title}
             </h1>
 
-            {/* Tabs */}
             <div className="flex items-center gap-6 border-b border-gray-200">
               <button
                 onClick={() => setActiveTab("info")}
@@ -352,11 +476,10 @@ const ImamNabawiDetails = () => {
             )}
           </div>
 
-          {/* Main Content Layout: Left 2 Columns, Right 1 Column */}
+          {/* Main Content */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* 1. ABOUT COURSE */}
+              {/* ABOUT COURSE */}
               <div className="p-8 mt-10">
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
                   {t({ en: "ABOUT COURSE", bn: "কোর্স সম্পর্কে" })}
@@ -369,7 +492,7 @@ const ImamNabawiDetails = () => {
                 </p>
               </div>
 
-              {/* 2. WHAT YOU WILL GAIN */}
+              {/* WHAT YOU WILL GAIN */}
               <div className="bg-white rounded-3xl p-8 space-y-4 shadow-sm">
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
                   {t({ en: "WHAT YOU WILL GAIN", bn: "আপনি কী পাবেন" })}
@@ -392,7 +515,7 @@ const ImamNabawiDetails = () => {
                 </p>
               </div>
 
-              {/* 3. Ready To Apply Your Course (keep this) */}
+              {/* Ready To Apply */}
               <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-3xl p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                   <h3 className="text-xl font-bold text-[#002b2b]">
@@ -415,7 +538,7 @@ const ImamNabawiDetails = () => {
                 </Link>
               </div>
 
-              {/* 4. TARGET AUDIENCE */}
+              {/* TARGET AUDIENCE */}
               <div>
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
                   {t({ en: "TARGET AUDIENCE", bn: "লক্ষ্য দর্শক" })}
@@ -433,7 +556,7 @@ const ImamNabawiDetails = () => {
                 </div>
               </div>
 
-              {/* 5. MATERIALS INCLUDED */}
+              {/* MATERIALS INCLUDED */}
               <div>
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
                   {t({ en: "MATERIALS INCLUDED", bn: "অন্তর্ভুক্ত উপকরণ" })}
@@ -448,46 +571,175 @@ const ImamNabawiDetails = () => {
                 </div>
               </div>
 
-              {/* 6. COURSE CURRICULUM (40 Hadiths) */}
-              <div>
-                <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
-                  {t({ en: "COURSE CURRICULUM", bn: "কোর্স পাঠ্যসূচি" })}
-                </h2>
-                <div className="border border-gray-300 rounded-sm">
-                  {courseDetails.curriculum.map((sem, index) => (
-                    <div
-                      key={index}
-                      className="border-b border-gray-300 last:border-b-0 overflow-hidden"
-                    >
-                      <button
-                        onClick={() => toggleSemester(index)}
-                        className="w-full flex items-center justify-between p-3 bg-white hover:bg-gray-50 text-left font-medium text-[#002b2b] transition-colors text-sm"
-                      >
-                        <span className="flex items-center gap-2">
-                          <span className="text-[#00ADD2] text-xs">
-                            {openSemester === index ? (
-                              <FaChevronUp />
-                            ) : (
-                              <FaChevronDown />
-                            )}
-                          </span>
-                          {sem.title}
-                        </span>
-                      </button>
-                      {openSemester === index && (
-                        <div className="p-4 bg-gray-50 border-t border-gray-200 text-xs text-gray-600">
-                          {t({
-                            en: "Detailed lesson plan for this Hadith will be provided.",
-                            bn: "এই হাদিসের বিস্তারিত পাঠ পরিকল্পনা এখানে দেওয়া হবে।",
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+              {/* COURSE VIDEOS — Login + Videos */}
+              <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border-2 border-teal-100">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-1 h-8 bg-[#00ADD2] rounded-full"></div>
+                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                    {t({
+                      en: "Course Videos (42 Sessions)",
+                      bn: "কোর্স ভিডিও (৪২ সেশন)",
+                    })}
+                  </h2>
                 </div>
+
+                {!loggedStudent ? (
+                  // ─── LOGIN FORM ───
+                  <div className="max-w-md mx-auto">
+                    <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-6 border-2 border-teal-200 shadow-sm">
+                      <div className="text-center mb-5">
+                        <div className="w-16 h-16 bg-[#002b2b] rounded-full mx-auto flex items-center justify-center mb-3">
+                          <FaPlayCircle className="text-3xl text-white" />
+                        </div>
+                        <h3 className="font-bold text-[#002b2b] text-lg mb-1">
+                          🔐{" "}
+                          {t({
+                            en: "Login to watch videos",
+                            bn: "ভিডিও দেখতে লগইন করুন",
+                          })}
+                        </h3>
+                        <p className="text-xs text-gray-600">
+                          {t({
+                            en: "Use your Student ID or phone number + password provided by admin",
+                            bn: "এডমিন দেওয়া Student ID বা ফোন নম্বর ও পাসওয়ার্ড দিয়ে লগইন করুন",
+                          })}
+                        </p>
+                      </div>
+
+                      <form onSubmit={handleLogin} className="space-y-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">
+                            🆔{" "}
+                            {t({
+                              en: "Student ID / Phone Number",
+                              bn: "Student ID / ফোন নম্বর",
+                            })}
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g., TAR2648213 or 01944709900"
+                            value={loginIdentifier}
+                            onChange={(e) => setLoginIdentifier(e.target.value)}
+                            className="w-full px-4 py-2.5 border-2 border-teal-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">
+                            🔑 {t({ en: "Password", bn: "পাসওয়ার্ড" })}
+                          </label>
+                          <input
+                            type="password"
+                            placeholder="Enter password"
+                            value={loginPassword}
+                            onChange={(e) => setLoginPassword(e.target.value)}
+                            className="w-full px-4 py-2.5 border-2 border-teal-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={loginLoading}
+                          className="w-full bg-[#002b2b] hover:bg-teal-900 text-white font-bold py-3 rounded-lg disabled:opacity-50 transition"
+                        >
+                          {loginLoading ? "⏳ লোড হচ্ছে..." : "🚀 লগইন করুন"}
+                        </button>
+                      </form>
+
+                      <div className="mt-4 pt-4 border-t border-teal-200 text-center">
+                        <p className="text-[11px] text-gray-500">
+                          {t({
+                            en: "Not enrolled yet?",
+                            bn: "এখনো enroll করেননি?",
+                          })}{" "}
+                          <Link
+                            to="/admission-now"
+                            className="text-[#00ADD2] font-bold hover:underline"
+                          >
+                            {t({ en: "Enroll Now", bn: "এখনই enroll করুন" })}
+                          </Link>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // ─── VIDEO GRID ───
+                  <>
+                    <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white rounded-xl p-4 mb-5 flex justify-between items-center flex-wrap gap-3">
+                      <div>
+                        <p className="text-sm font-bold">
+                          👋 {t({ en: "Welcome", bn: "স্বাগতম" })},{" "}
+                          {loggedStudent.name}
+                        </p>
+                        <p className="text-xs opacity-90 mt-0.5">
+                          🆔 {loggedStudent.studentId || "-"} • 📱{" "}
+                          {loggedStudent.phone} • 🎬 {courseVideos.length}{" "}
+                          {t({ en: "Videos", bn: "ভিডিও" })}
+                        </p>
+                      </div>
+                      <button
+                        onClick={handleLogout}
+                        className="bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-lg font-bold transition"
+                      >
+                        Logout
+                      </button>
+                    </div>
+
+                    {courseVideos.length === 0 ? (
+                      <div className="text-center py-10">
+                        <FaPlayCircle className="text-6xl text-gray-300 mx-auto mb-3" />
+                        <p className="text-sm text-gray-500">
+                          {t({
+                            en: "Videos are being uploaded. Please check back soon.",
+                            bn: "ভিডিও এখনো যোগ করা হয়নি। শীঘ্রই জানানো হবে।",
+                          })}
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {courseVideos.map((video, index) => (
+                          <a
+                            key={video._id || index}
+                            href={video.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100"
+                          >
+                            {/* ✅ 16:9 thumbnail — same height as video */}
+                            <div className="relative aspect-video bg-gray-200 overflow-hidden">
+                              <YoutubeThumbImg
+                                url={video.url}
+                                alt={video.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                                <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
+                                  <FaPlayCircle className="text-3xl" />
+                                </div>
+                              </div>
+                              <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                                {index + 1}
+                              </div>
+                            </div>
+                            <div className="p-3 bg-white">
+                              <p className="text-sm font-semibold text-[#002b2b] truncate">
+                                {video.title}
+                              </p>
+                              <p className="text-[10px] text-gray-500 mt-0.5">
+                                ▶{" "}
+                                {t({
+                                  en: "Click to watch",
+                                  bn: "দেখতে ক্লিক করুন",
+                                })}
+                              </p>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
 
-              {/* 7. COURSE FEE */}
+              {/* COURSE FEE */}
               <div>
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
                   {t({ en: "COURSE FEE", bn: "কোর্স ফি" })}
@@ -515,9 +767,7 @@ const ImamNabawiDetails = () => {
                 </div>
               </div>
 
-              {/* ========== LAST SECTIONS ========== */}
-
-              {/* 1. Why This Course? (paragraph only) */}
+              {/* Why This Course? */}
               <div className="bg-white rounded-3xl shadow-xl p-6 md:p-12 border border-gray-100">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl md:text-4xl font-bold mb-3 text-[#00ADD2]">
@@ -530,7 +780,7 @@ const ImamNabawiDetails = () => {
                 </p>
               </div>
 
-              {/* 2. Video Gallery */}
+              {/* ✅ VIDEO GALLERY — same structure as Course Videos */}
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
@@ -545,31 +795,35 @@ const ImamNabawiDetails = () => {
                       href={video.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300"
+                      className="group block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100"
                     >
-                      <div className="relative h-48 bg-gray-200">
-                        <img
-                          src={video.thumbnail}
+                      <div className="relative aspect-video bg-gray-200 overflow-hidden">
+                        <YoutubeThumbImg
+                          url={video.url}
                           alt={video.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
-                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors flex items-center justify-center">
-                          <div className="w-14 h-14 bg-[#008080] rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
+                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                          <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
                             <FaPlayCircle className="text-3xl" />
                           </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
-                          <p className="text-white text-sm font-semibold">
-                            {video.title}
-                          </p>
-                        </div>
+                      </div>
+                      <div className="p-3 bg-white">
+                        <p className="text-sm font-semibold text-[#002b2b] truncate">
+                          {video.title}
+                        </p>
+                        <p className="text-[10px] text-gray-500 mt-0.5">
+                          ▶{" "}
+                          {t({ en: "Click to watch", bn: "দেখতে ক্লিক করুন" })}
+                        </p>
                       </div>
                     </a>
                   ))}
                 </div>
               </div>
 
-              {/* 3. FAQ */}
+              {/* FAQ */}
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
@@ -607,28 +861,23 @@ const ImamNabawiDetails = () => {
               </div>
             </div>
 
-            {/* Right Sidebar - 1 Column */}
+            {/* Right Sidebar */}
             <div className="space-y-4 mt-200">
-              {/* Video Thumbnail (Promo) */}
+              {/* ✅ Sidebar Promo Thumbnail — 16:9 */}
               <a
                 href="https://youtu.be/6gMZDMTMEDk?si=YtR0LQ690HuOS-Sd"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer"
+                className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer aspect-video"
               >
-                <img
-                  src="https://img.youtube.com/vi/6gMZDMTMEDk/hqdefault.jpg"
+                <YoutubeThumbImg
+                  url="https://youtu.be/6gMZDMTMEDk"
                   alt={t({ en: "Course Video", bn: "কোর্স ভিডিও" })}
-                  className="w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-colors group-hover:bg-black/40">
-                  <div className="w-12 h-12 bg-[#008080] rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
-                    <svg
-                      className="w-6 h-6 fill-current translate-x-0.5"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
+                  <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
+                    <FaPlayCircle className="text-2xl" />
                   </div>
                 </div>
               </a>
@@ -660,8 +909,6 @@ const ImamNabawiDetails = () => {
                     </button>
                   </Link>
                 </div>
-
-                {/* Prospectus button removed as requested */}
 
                 <div className="space-y-3 text-left px-1 text-[#002b2b]">
                   <div className="flex items-center gap-2 text-[15px]">
