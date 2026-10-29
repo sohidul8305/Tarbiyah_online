@@ -25,6 +25,7 @@ import {
   FaHeadset,
   FaShieldAlt,
   FaTimes,
+  FaLock,
 } from "react-icons/fa";
 
 import Footer from "../Navbar/Footer/Footer";
@@ -67,7 +68,50 @@ import ProfessorImg from "../../image/profile.jpg";
 
 import { useState as useStateHook } from "react";
 
+// ✅ ৪২টি ভিডিওর ডামি লিস্ট (মডিউল দেখানোর জন্য)
+const HADITH_40_VIDEOS = Array.from({ length: 42 }, (_, i) => ({
+  title: `Session ${i + 1}`,
+  url: `https://youtu.be/dummy_video_${i + 1}`,
+}));
+
+// ✅ ৮টি মডিউলের টাইটেল (English & Bangla)
+const MODULE_TITLES = [
+  {
+    en: "01. Intention, Faith & Fundamentals of Islam",
+    bn: "০১. নিয়ত, ঈমান ও ইসলামের মৌলিক পক্ষ",
+  },
+  {
+    en: "02. Taqwa & Self-Purification",
+    bn: "০২. তাকওয়া ও আত্মশুদ্ধি",
+  },
+  {
+    en: "03. Worship & Obedience to Allah",
+    bn: "০৩. ইবাদত ও আল্লাহর আনুগত্য",
+  },
+  {
+    en: "04. Halal-Haram & Shariah Rulings",
+    bn: "০৪. হালাল-হারাম ও শরীয়তের বিধান",
+  },
+  {
+    en: "05. Good Character & Self-Control",
+    bn: "০৫. উত্তম চরিত্র ও আত্মসংযম",
+  },
+  {
+    en: "06. Human Rights & Social Responsibility",
+    bn: "০৬. মানুষের অধিকার ও সামাজিক দায়িত্ব",
+  },
+  {
+    en: "07. Welfare, Justice & Reform",
+    bn: "০৭. কল্যাণ, ন্যায়বিচার ও সংস্কার",
+  },
+  {
+    en: "08. Allah's Mercy & the Hereafter",
+    bn: "০৮. আল্লাহর রহমত ও পরকাল",
+  },
+];
+
 export const useLanguage = () => {
+  // ✅ ডিফল্ট ভাষা ইংরেজি ("en") করে দেওয়া হয়েছে
   const [language, setLanguage] = useStateHook(
     () => localStorage.getItem("language") || "en",
   );
@@ -96,6 +140,9 @@ const ImamNabawiDetails = () => {
   const [activeTab, setActiveTab] = useState("info");
   const [openFaq, setOpenFaq] = useState(null);
 
+  // ✅ মডিউল ওপেন/ক্লোজ স্টেট
+  const [openModule, setOpenModule] = useState(0);
+
   // Login state
   const [loginIdentifier, setLoginIdentifier] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
@@ -110,7 +157,7 @@ const ImamNabawiDetails = () => {
   const [isWindowFocused, setIsWindowFocused] = useState(true);
   const [showSecurityWarning, setShowSecurityWarning] = useState(false);
 
-  // ✅ সিকিউরিটি ইফেক্ট (প্লেয়ারে ক্লিক করলে লক হবে না)
+  // ✅ সিকিউরিটি ইফেক্ট
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -159,8 +206,11 @@ const ImamNabawiDetails = () => {
 
         Swal.fire({
           icon: "warning",
-          title: "সতর্কতা!",
-          text: "ভিডিও কন্টেন্ট স্ক্রিনশট বা রেকর্ড করা কঠোরভাবে নিষিদ্ধ।",
+          title: t({ en: "Warning!", bn: "সতর্কতা!" }),
+          text: t({
+            en: "Video content screenshot or recording is strictly prohibited.",
+            bn: "ভিডিও কন্টেন্ট স্ক্রিনশট বা রেকর্ড করা কঠোরভাবে নিষিদ্ধ।",
+          }),
           timer: 2000,
           showConfirmButton: false,
         });
@@ -178,7 +228,7 @@ const ImamNabawiDetails = () => {
       window.removeEventListener("focus", handleFocus);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [activeVideo]);
+  }, [activeVideo, t]);
 
   useEffect(() => {
     const saved = localStorage.getItem("recorded_student");
@@ -198,8 +248,11 @@ const ImamNabawiDetails = () => {
     if (!loginIdentifier.trim() || !loginPassword.trim()) {
       Swal.fire({
         icon: "warning",
-        title: "সব ঘর পূরণ করুন",
-        text: "Student ID / Phone এবং পাসওয়ার্ড দিন।",
+        title: t({ en: "Fill all fields", bn: "সব ঘর পূরণ করুন" }),
+        text: t({
+          en: "Please enter Student ID / Phone and Password.",
+          bn: "Student ID / Phone এবং পাসওয়ার্ড দিন।",
+        }),
       });
       return;
     }
@@ -240,22 +293,27 @@ const ImamNabawiDetails = () => {
 
         Swal.fire({
           icon: "success",
-          title: "লগইন সফল! 🎉",
-          text: `${data.totalVideos} টি ভিডিও পাওয়া গেছে।`,
+          title: t({ en: "Login Successful! 🎉", bn: "লগইন সফল! 🎉" }),
+          text: t({
+            en: `${data.totalVideos} videos found.`,
+            bn: `${data.totalVideos} টি ভিডিও পাওয়া গেছে।`,
+          }),
           timer: 1800,
           showConfirmButton: false,
         });
       } else {
         Swal.fire({
           icon: "error",
-          title: "লগইন ব্যর্থ",
-          text: data.message || "আবার চেষ্টা করুন।",
+          title: t({ en: "Login Failed", bn: "লগইন ব্যর্থ" }),
+          text:
+            data.message ||
+            t({ en: "Please try again.", bn: "আবার চেষ্টা করুন।" }),
         });
       }
     } catch (err) {
       Swal.fire({
         icon: "error",
-        title: "Network Error",
+        title: t({ en: "Network Error", bn: "নেটওয়ার্ক সমস্যা" }),
         text: err.message,
       });
     } finally {
@@ -271,7 +329,7 @@ const ImamNabawiDetails = () => {
     localStorage.removeItem("recorded_student");
     Swal.fire({
       icon: "success",
-      title: "লগআউট সফল",
+      title: t({ en: "Logout Successful", bn: "লগআউট সফল" }),
       timer: 1200,
       showConfirmButton: false,
     });
@@ -281,14 +339,34 @@ const ImamNabawiDetails = () => {
     setOpenFaq(openFaq === index ? null : index);
   };
 
+  // ✅ লকড ভিডিওতে ক্লিক করলে যা হবে
+  const handleLockedVideoClick = () => {
+    Swal.fire({
+      icon: "info",
+      title: t({ en: "Video is Locked!", bn: "ভিডিও লক করা আছে!" }),
+      text: t({
+        en: "After enrolling, you can watch the videos from the student dashboard.",
+        bn: "কোর্সে এনরোল করার পর স্টুডেন্ট ড্যাশবোর্ড থেকে ভিডিওগুলো দেখতে পারবেন।",
+      }),
+      confirmButtonText: t({ en: "Enroll Now", bn: "এনরোল করুন" }),
+      confirmButtonColor: "#007a91",
+      showCancelButton: true,
+      cancelButtonText: t({ en: "Later", bn: "পরে দেখব" }),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/admission-now";
+      }
+    });
+  };
+
   const instructors = [
     {
       id: 1,
       name: t({
-        en: "Instructor professor Mokhter Ahmad Chairman <br> Tarbiyah Education Network",
-        bn: "ইনস্ট্রাক্টর প্রফেসর মোখতার আহমাদ, চেয়ারম্যান,<br> তারবিয়াহ এডুকেশন নেটওয়ার্ক",
+        en: "Instructor  <br> Shaykh Mokhter Ahmad Chairman <br> Tarbiyah Education Network",
+        bn: "ইনস্ট্রাক্টর শায়খ মোখতার আহমাদ, চেয়ারম্যান,<br> তারবিয়াহ এডুকেশন নেটওয়ার্ক",
       }),
-      title: t({ en: "Senior Instructor", bn: "সিনিয়র শিক্ষক" }),
+
       subtitle: t({ en: "Hadith & Quran", bn: "হাদিস ও কুরআন" }),
       image: ProfessorImg,
     },
@@ -363,8 +441,8 @@ const ImamNabawiDetails = () => {
       oneTime: {
         title: t({ en: "One-Time Payment", bn: "এককালীন পেমেন্ট" }),
         description: t({
-          en: "Pay the full course fee and get lifetime access ",
-          bn: "সম্পূর্ণ কোর্স ফি প্রদান করুন এবং লাইফটাইম অ্যাক্সেস",
+          en: "Pay the full course fee and get lifetime access.",
+          bn: "সম্পূর্ণ কোর্স ফি প্রদান করুন এবং লাইফটাইম অ্যাক্সেস পান।",
         }),
         offer: "৳1,000",
         originalPrice: "৳4,000",
@@ -413,7 +491,7 @@ const ImamNabawiDetails = () => {
     },
   ];
 
-  // ✅ FAQ: English Default, Bangla on Switch
+  // ✅ FAQ (Default English, switches to Bangla)
   const faqs = [
     {
       question: t({
@@ -484,6 +562,17 @@ const ImamNabawiDetails = () => {
     },
   ];
 
+  // ✅ মডিউল তৈরি করা
+  const groupedModules = MODULE_TITLES.map((module, index) => {
+    const start = index * 5;
+    const end = index === 7 ? 42 : start + 5;
+    return {
+      moduleId: index,
+      title: t(module),
+      videos: HADITH_40_VIDEOS.slice(start, end),
+    };
+  });
+
   return (
     <div
       className="min-h-screen bg-[#f8fafc] select-none font-sans"
@@ -498,11 +587,10 @@ const ImamNabawiDetails = () => {
           >
             <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium text-sm md:text-base">
-              Back to Course Page
+              {t({ en: "Back to Course Page", bn: "কোর্স পেজে ফিরে যান" })}
             </span>
           </Link>
 
-          {/* Responsive Grid Layout with items-start to prevent sidebar stretching */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {/* LEFT COLUMN */}
             <div className="lg:col-span-2 space-y-8">
@@ -521,11 +609,15 @@ const ImamNabawiDetails = () => {
                   <div className="flex items-center gap-4">
                     <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200 hover:shadow-md">
                       <FaShare className="text-sm" />{" "}
-                      <span className="text-xs font-semibold">Share</span>
+                      <span className="text-xs font-semibold">
+                        {t({ en: "Share", bn: "শেয়ার" })}
+                      </span>
                     </button>
                     <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200 hover:shadow-md">
                       <FaBookmark className="text-sm" />{" "}
-                      <span className="text-xs font-semibold">Wishlist</span>
+                      <span className="text-xs font-semibold">
+                        {t({ en: "Wishlist", bn: "উইশলিস্ট" })}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -543,7 +635,8 @@ const ImamNabawiDetails = () => {
                         : "border-transparent text-gray-500 hover:text-[#002b2b]"
                     }`}
                   >
-                    <FaInfoCircle /> <span>Course Info</span>
+                    <FaInfoCircle />{" "}
+                    <span>{t({ en: "Course Info", bn: "কোর্স তথ্য" })}</span>
                   </button>
                   <button
                     onClick={() => setActiveTab("reviews")}
@@ -553,7 +646,8 @@ const ImamNabawiDetails = () => {
                         : "border-transparent text-gray-500 hover:text-[#002b2b]"
                     }`}
                   >
-                    <FaCommentDots /> <span>Reviews</span>
+                    <FaCommentDots />{" "}
+                    <span>{t({ en: "Reviews", bn: "রিভিউ" })}</span>
                   </button>
                 </div>
 
@@ -561,7 +655,10 @@ const ImamNabawiDetails = () => {
                   <div className="mt-4 p-8 bg-white rounded-2xl shadow-sm border border-gray-100 text-center">
                     <FaCommentDots className="text-4xl text-gray-300 mx-auto mb-3" />
                     <p className="text-gray-500 text-sm font-medium">
-                      No reviews yet. Be the first to review!
+                      {t({
+                        en: "No reviews yet. Be the first to review!",
+                        bn: "এখনো কোনো রিভিউ নেই। প্রথম রিভিউ দিন!",
+                      })}
                     </p>
                   </div>
                 )}
@@ -570,7 +667,7 @@ const ImamNabawiDetails = () => {
               <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4 flex items-center gap-2">
                   <span className="w-1.5 h-6 bg-[#00ADD2] rounded-full inline-block"></span>
-                  ABOUT COURSE
+                  {t({ en: "ABOUT COURSE", bn: "কোর্স সম্পর্কে" })}
                 </h2>
                 <h3 className="text-lg font-bold text-[#007a91] mb-3">
                   {courseDetails.subtitle}
@@ -583,7 +680,7 @@ const ImamNabawiDetails = () => {
               <div className="bg-white rounded-2xl p-6 md:p-8 space-y-5 shadow-sm border border-gray-100">
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4 flex items-center gap-2">
                   <span className="w-1.5 h-6 bg-[#00ADD2] rounded-full inline-block"></span>
-                  WHAT YOU WILL GAIN
+                  {t({ en: "WHAT YOU WILL GAIN", bn: "আপনি কী পাবেন" })}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {courseDetails.objectives.map((objective, index) => (
@@ -606,15 +703,21 @@ const ImamNabawiDetails = () => {
               <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md">
                 <div>
                   <h3 className="text-xl md:text-2xl font-bold text-[#002b2b]">
-                    Ready To Apply Your Course
+                    {t({
+                      en: "Ready To Apply Your Course",
+                      bn: "আপনার কোর্সে আবেদন করতে প্রস্তুত",
+                    })}
                   </h3>
                   <p className="text-gray-600 text-sm mt-2 font-medium">
-                    Enroll now and start your structured learning journey.
+                    {t({
+                      en: "Enroll now and start your structured learning journey.",
+                      bn: "এখনই এনরোল করুন এবং আপনার শেখার যাত্রা শুরু করুন।",
+                    })}
                   </p>
                 </div>
                 <Link to="/admission-now" className="w-full sm:w-auto">
                   <button className="w-full bg-[#002b2b] hover:bg-teal-900 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
-                    Start Now
+                    {t({ en: "Start Now", bn: "এখনই শুরু করুন" })}
                   </button>
                 </Link>
               </div>
@@ -622,7 +725,7 @@ const ImamNabawiDetails = () => {
               <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4 flex items-center gap-2">
                   <span className="w-1.5 h-6 bg-[#00ADD2] rounded-full inline-block"></span>
-                  TARGET AUDIENCE
+                  {t({ en: "TARGET AUDIENCE", bn: "লক্ষ্য দর্শক" })}
                 </h2>
                 <div className="space-y-3">
                   {courseDetails.targetAudience.map((feature, index) => (
@@ -640,7 +743,7 @@ const ImamNabawiDetails = () => {
               <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4 flex items-center gap-2">
                   <span className="w-1.5 h-6 bg-[#00ADD2] rounded-full inline-block"></span>
-                  MATERIALS INCLUDED
+                  {t({ en: "MATERIALS INCLUDED", bn: "অন্তর্ভুক্ত উপকরণ" })}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4 text-sm">
                   {courseDetails.materials.map((item, index) => (
@@ -655,11 +758,97 @@ const ImamNabawiDetails = () => {
                 </div>
               </div>
 
+              {/* ✅ NEW: COURSE MODULES & VIDEOS (LOCKED) */}
+              <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border-2 border-teal-100 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-teal-50 rounded-bl-full -z-0 opacity-50"></div>
+
+                <div className="flex items-center gap-3 mb-6 relative z-10">
+                  <div className="w-1.5 h-8 bg-[#00ADD2] rounded-full"></div>
+                  <h2 className="text-xl md:text-2xl font-bold text-[#00ADD2]">
+                    {t({
+                      en: "Course Modules & Videos",
+                      bn: "কোর্স মডিউল ও ভিডিও",
+                    })}
+                  </h2>
+                </div>
+
+                <div className="space-y-4 relative z-10">
+                  {groupedModules.map((module, mIndex) => (
+                    <div
+                      key={mIndex}
+                      className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm"
+                    >
+                      {/* Module Header */}
+                      <button
+                        onClick={() =>
+                          setOpenModule(openModule === mIndex ? null : mIndex)
+                        }
+                        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-[#e6f7f9] transition-colors text-left"
+                      >
+                        <span className="font-bold text-[#002b2b] text-sm md:text-[15px]">
+                          {module.title}
+                        </span>
+                        <span className="text-[#00ADD2]">
+                          {openModule === mIndex ? (
+                            <FaChevronUp />
+                          ) : (
+                            <FaChevronDown />
+                          )}
+                        </span>
+                      </button>
+
+                      {/* Module Videos (Locked) */}
+                      {openModule === mIndex && (
+                        <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-white border-t border-gray-100">
+                          {module.videos.map((video, index) => (
+                            <div
+                              key={video._id || index}
+                              onClick={handleLockedVideoClick}
+                              className="group block overflow-hidden rounded-xl shadow-sm border border-gray-100 cursor-pointer bg-white relative"
+                            >
+                              <div className="relative aspect-video bg-gray-200 overflow-hidden">
+                                <div className="w-full h-full flex items-center justify-center bg-gray-800">
+                                  <FaPlayCircle className="text-4xl text-gray-600" />
+                                </div>
+
+                                {/* Lock Overlay */}
+                                <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-colors flex flex-col items-center justify-center">
+                                  <FaLock className="text-white text-2xl mb-2" />
+                                  <span className="text-white text-[10px] font-bold bg-red-600 px-2 py-0.5 rounded-full">
+                                    {t({ en: "LOCKED", bn: "লকড" })}
+                                  </span>
+                                </div>
+
+                                <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                                  {video.title.replace("Session ", "")}
+                                </div>
+                              </div>
+                              <div className="p-3">
+                                <p className="text-sm font-semibold text-[#002b2b] truncate">
+                                  {video.title}
+                                </p>
+                                <p className="text-[10px] text-gray-500 mt-0.5 flex items-center gap-1">
+                                  <FaLock className="text-red-500" />{" "}
+                                  {t({
+                                    en: "Enroll to watch",
+                                    bn: "দেখতে এনরোল করুন",
+                                  })}
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* COURSE FEE */}
               <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4 flex items-center gap-2">
                   <span className="w-1.5 h-6 bg-[#00ADD2] rounded-full inline-block"></span>
-                  COURSE FEE
+                  {t({ en: "COURSE FEE", bn: "কোর্স ফি" })}
                 </h2>
                 <div className="space-y-3 text-sm">
                   <div className="flex items-start gap-3">
@@ -675,7 +864,10 @@ const ImamNabawiDetails = () => {
                           {courseDetails.feeStructure.oneTime.title}
                         </h3>
                         <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase animate-pulse">
-                          Website Launch Offer
+                          {t({
+                            en: "Website Launch Offer",
+                            bn: "ওয়েবসাইট লঞ্চ অফার",
+                          })}
                         </span>
                       </div>
                       <p className="text-sm text-gray-600 leading-relaxed max-w-lg">
@@ -702,7 +894,7 @@ const ImamNabawiDetails = () => {
                 </div>
                 <div className="text-center mb-6 relative z-10">
                   <h2 className="text-2xl md:text-3xl font-bold mb-3 text-yellow-400">
-                    Why This Course?
+                    {t({ en: "Why This Course?", bn: "কেন এই কোর্স?" })}
                   </h2>
                   <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
                 </div>
@@ -716,7 +908,7 @@ const ImamNabawiDetails = () => {
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1.5 h-8 bg-yellow-500 rounded-full"></div>
                   <h2 className="text-xl md:text-2xl font-bold text-[#00ADD2]">
-                    Video Gallery
+                    {t({ en: "Video Gallery", bn: "ভিডিও গ্যালারি" })}
                   </h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
@@ -743,8 +935,8 @@ const ImamNabawiDetails = () => {
                           {video.title}
                         </p>
                         <p className="text-[10px] text-gray-500 mt-1 font-medium flex items-center gap-1">
-                          <FaPlayCircle className="text-[#00ADD2]" /> Click to
-                          watch
+                          <FaPlayCircle className="text-[#00ADD2]" />{" "}
+                          {t({ en: "Click to watch", bn: "দেখতে ক্লিক করুন" })}
                         </p>
                       </div>
                     </div>
@@ -757,7 +949,7 @@ const ImamNabawiDetails = () => {
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1.5 h-8 bg-yellow-500 rounded-full"></div>
                   <h2 className="text-xl md:text-2xl font-bold text-[#00ADD2]">
-                    FAQ
+                    {t({ en: "FAQ", bn: "প্রায়শই জিজ্ঞাসিত প্রশ্ন" })}
                   </h2>
                 </div>
                 <div className="space-y-4">
@@ -827,13 +1019,13 @@ const ImamNabawiDetails = () => {
 
                 <div className="bg-white rounded-2xl p-6 shadow-xl border-t-4 border-[#007a91]">
                   <h1 className="text-xl md:text-2xl font-extrabold text-[#007a91] mb-6 text-center tracking-wide">
-                    ENROLL NOW
+                    {t({ en: "ENROLL NOW", bn: "এখনই নিবন্ধন করুন" })}
                   </h1>
 
                   {/* Price Highlight */}
                   <div className="bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-xl p-4 mb-6 text-center shadow-inner">
                     <p className="text-xs text-green-700 font-bold uppercase tracking-wider mb-1">
-                      Special Discount
+                      {t({ en: "Special Discount", bn: "বিশেষ ডিসকাউন্ট" })}
                     </p>
                     <div className="flex items-center justify-center gap-3">
                       <span className="text-gray-400 line-through text-lg">
@@ -848,15 +1040,15 @@ const ImamNabawiDetails = () => {
                   <div className="flex items-center justify-center mb-6 relative">
                     <Link to="/admission-now" className="w-1/2">
                       <button className="w-full bg-[#007a91] hover:bg-[#006a7e] text-white font-bold py-3.5 text-xs md:text-sm rounded-l-xl transition-all shadow-md">
-                        Bangla
+                        {t({ en: "Bangla", bn: "বাংলা" })}
                       </button>
                     </Link>
                     <div className="absolute w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center text-[#002b2b] font-bold shadow-md z-10 text-[10px] md:text-xs border-2 border-gray-100">
-                      Or
+                      {t({ en: "Or", bn: "অথবা" })}
                     </div>
                     <Link to="/admission-now" className="w-1/2">
                       <button className="w-full bg-[#003d3d] hover:bg-[#002b2b] text-white font-bold py-3.5 text-xs md:text-sm rounded-r-xl transition-all shadow-md">
-                        English
+                        {t({ en: "English", bn: "ইংরেজি" })}
                       </button>
                     </Link>
                   </div>
@@ -864,21 +1056,24 @@ const ImamNabawiDetails = () => {
                   <div className="space-y-4 text-left px-1 text-[#002b2b] bg-gray-50 p-4 rounded-xl border border-gray-100">
                     <div className="flex items-center justify-between text-sm md:text-base border-b border-gray-200 pb-2">
                       <span className="font-medium text-gray-500 flex items-center gap-2">
-                        <FaBook className="text-gray-400" /> Course Level:
+                        <FaBook className="text-gray-400" />{" "}
+                        {t({ en: "Course Level:", bn: "কোর্স লেভেল:" })}
                       </span>{" "}
                       <span className="font-bold text-[#007a91]">
-                        All Levels
+                        {t({ en: "All Levels", bn: "সকলের জন্য" })}
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-sm md:text-base border-b border-gray-200 pb-2">
                       <span className="font-medium text-gray-500 flex items-center gap-2">
-                        <FaUserTie className="text-gray-400" /> Enrolled:
+                        <FaUserTie className="text-gray-400" />{" "}
+                        {t({ en: "Enrolled:", bn: "এনরোল্ড:" })}
                       </span>{" "}
                       <span className="font-bold text-green-600">180+</span>
                     </div>
                     <div className="flex items-center justify-between text-sm md:text-base">
                       <span className="font-medium text-gray-500 flex items-center gap-2">
-                        <FaInfoCircle className="text-gray-400" /> Updated:
+                        <FaInfoCircle className="text-gray-400" />{" "}
+                        {t({ en: "Updated:", bn: "আপডেট:" })}
                       </span>{" "}
                       <span className="font-bold">09/07/2026</span>
                     </div>
@@ -887,7 +1082,8 @@ const ImamNabawiDetails = () => {
 
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                   <h3 className="text-lg font-bold text-[#002b2b] mb-4 border-b pb-2 flex items-center gap-2">
-                    <FaUserTie className="text-[#00ADD2]" /> Faculty
+                    <FaUserTie className="text-[#00ADD2]" />{" "}
+                    {t({ en: "Faculty", bn: "অনুষদ" })}
                   </h3>
                   <div className="space-y-4">
                     {instructors.map((instructor) => (
@@ -901,7 +1097,6 @@ const ImamNabawiDetails = () => {
                           className="w-16 h-16 rounded-full object-cover border-2 border-yellow-400 flex-shrink-0 shadow-sm"
                         />
                         <div className="overflow-hidden">
-                          {/* dangerouslySetInnerHTML for <br> tag support */}
                           <h4
                             className="font-bold text-sm text-[#002b2b] leading-tight"
                             dangerouslySetInnerHTML={{
@@ -922,7 +1117,7 @@ const ImamNabawiDetails = () => {
         </div>
       </div>
 
-      {/* ✅ ভিডিও প্লেয়ার মোডাল (পপআপ) with Security */}
+      {/* ✅ ভিডিও প্লেয়ার মোডাল (প্রোমো ভিডিওর জন্য) */}
       {activeVideo && (
         <div
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn"
@@ -959,11 +1154,13 @@ const ImamNabawiDetails = () => {
                 <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/70 text-white p-4 text-center backdrop-blur-md">
                   <FaShieldAlt className="text-7xl text-red-500 mb-6 animate-pulse" />
                   <h2 className="text-3xl font-bold mb-3">
-                    ভিডিও লক করা হয়েছে!
+                    {t({ en: "Video Locked!", bn: "ভিডিও লক করা হয়েছে!" })}
                   </h2>
                   <p className="text-base max-w-md text-gray-300 leading-relaxed">
-                    আপনি অন্য ট্যাবে গেছেন বা স্ক্রিন রেকর্ডিং টুল ওপেন করেছেন।
-                    ভিডিও দেখতে অনুগ্রহ করে এই ট্যাবে ফিরে আসুন।
+                    {t({
+                      en: "You switched tabs or opened a screen recording tool. Please return to this tab to watch the video.",
+                      bn: "আপনি অন্য ট্যাবে গেছেন বা স্ক্রিন রেকর্ডিং টুল ওপেন করেছেন। ভিডিও দেখতে অনুগ্রহ করে এই ট্যাবে ফিরে আসুন।",
+                    })}
                   </p>
                 </div>
               )}
@@ -986,7 +1183,8 @@ const ImamNabawiDetails = () => {
                 {activeVideo.title}
               </h3>
               <div className="flex items-center gap-1.5 text-xs text-gray-400 font-semibold bg-gray-800 px-3 py-1 rounded-full">
-                <FaShieldAlt className="text-green-500" /> Protected Content
+                <FaShieldAlt className="text-green-500" />{" "}
+                {t({ en: "Protected Content", bn: "সুরক্ষিত কন্টেন্ট" })}
               </div>
             </div>
           </div>
