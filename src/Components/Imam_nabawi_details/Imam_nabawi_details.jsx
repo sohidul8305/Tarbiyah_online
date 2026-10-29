@@ -24,7 +24,7 @@ import {
   FaAngleDoubleRight,
   FaHeadset,
   FaShieldAlt,
-  FaTimes, // ✅ নতুন আইকন যোগ করা হয়েছে মোডাল ক্লোজের জন্য
+  FaTimes,
 } from "react-icons/fa";
 
 import Footer from "../Navbar/Footer/Footer";
@@ -103,10 +103,85 @@ const ImamNabawiDetails = () => {
   const [loggedStudent, setLoggedStudent] = useState(null);
   const [courseVideos, setCourseVideos] = useState([]);
 
-  // ✅ নতুন স্টেট: ভিডিও প্লেয়ার মোডালের জন্য
+  // ✅ ভিডিও প্লেয়ার স্টেট
   const [activeVideo, setActiveVideo] = useState(null);
 
-  // Load from localStorage on mount
+  // ✅ সিকিউরিটি স্টেট
+  const [isWindowFocused, setIsWindowFocused] = useState(true);
+  const [showSecurityWarning, setShowSecurityWarning] = useState(false);
+
+  // ✅ সিকিউরিটি ইফেক্ট (প্লেয়ারে ক্লিক করলে লক হবে না)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setIsWindowFocused(false);
+        if (activeVideo) setShowSecurityWarning(true);
+      } else {
+        setIsWindowFocused(true);
+        setShowSecurityWarning(false);
+      }
+    };
+
+    const handleBlur = () => {
+      setTimeout(() => {
+        // ইউজার ভিডিও প্লেয়ারে ক্লিক করলে লক হবে না
+        if (
+          document.activeElement &&
+          document.activeElement.tagName === "IFRAME"
+        ) {
+          return;
+        }
+        setIsWindowFocused(false);
+        if (activeVideo) setShowSecurityWarning(true);
+      }, 200);
+    };
+
+    const handleFocus = () => {
+      setIsWindowFocused(true);
+      setShowSecurityWarning(false);
+    };
+
+    const handleKeyDown = (e) => {
+      if (
+        e.key === "PrintScreen" ||
+        (e.metaKey && e.shiftKey && ["3", "4", "5"].includes(e.key)) ||
+        (e.ctrlKey && e.shiftKey && ["S", "s"].includes(e.key)) ||
+        (e.ctrlKey && e.key === "p") ||
+        e.key === "F12"
+      ) {
+        e.preventDefault();
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(
+              "Screenshot Blocked by Security Policy!",
+            );
+          }
+        } catch (err) {}
+
+        Swal.fire({
+          icon: "warning",
+          title: "সতর্কতা!",
+          text: "ভিডিও কন্টেন্ট স্ক্রিনশট বা রেকর্ড করা কঠোরভাবে নিষিদ্ধ।",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleBlur);
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleBlur);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [activeVideo]);
+
+  // ✅ লোকাল স্টোরেজ থেকে লগইন ডাটা লোড
   useEffect(() => {
     const saved = localStorage.getItem("recorded_student");
     if (saved) {
@@ -135,7 +210,7 @@ const ImamNabawiDetails = () => {
     try {
       const idValue = loginIdentifier.trim();
 
-      // ✅ ডিভাইস আইডি জেনারেট বা লোকাল স্টোরেজ থেকে নেওয়া (এটিই মিসিং ছিল)
+      // ডিভাইস আইডি তৈরি বা রিট্রিভ করা
       let deviceId = localStorage.getItem("tarbiyah_device_id");
       if (!deviceId) {
         deviceId =
@@ -153,7 +228,7 @@ const ImamNabawiDetails = () => {
           phone: idValue,
           studentId: idValue,
           password: loginPassword.trim(),
-          deviceId: deviceId, // ✅ এখন এটি কাজ করবে
+          deviceId: deviceId,
         }),
       });
 
@@ -206,10 +281,6 @@ const ImamNabawiDetails = () => {
     });
   };
 
-  const toggleSemester = (index) => {
-    setOpenSemester(openSemester === index ? null : index);
-  };
-
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
   };
@@ -234,8 +305,8 @@ const ImamNabawiDetails = () => {
       bn: "ইমাম নববীর ৪০ হাদিসের রেকর্ডেড কোর্স",
     }),
     description: t({
-      en: "Imam Nawawi's collection of 40 Hadiths presents the core teachings of Islam...",
-      bn: "ইমাম নববী (রহ.) সংকলিত ৪০ হাদিস ইসলামের মৌলিক শিক্ষা...",
+      en: "Imam Nawawi's collection of 40 Hadiths presents the core teachings of Islam—belief, worship, character, ethics, and daily life—in a concise yet profound manner. In this recorded course, each hadith is explained with Arabic text, word meanings, translation, commentary, and practical application in an easy and clear style. The course is designed for self-paced learning from anywhere, at any time.",
+      bn: "ইমাম নববী (রহ.) সংকলিত ৪০ হাদিস ইসলামের মৌলিক শিক্ষা, আকীদাহ, ইবাদত, আখলাক, চরিত্র গঠন এবং দৈনন্দিন জীবনের গুরুত্বপূর্ণ বিষয়গুলোকে সংক্ষিপ্ত অথচ গভীরভাবে তুলে ধরেছে। এই রেকর্ডেড কোর্সে প্রতিটি হাদিসের আরবি পাঠ, শব্দার্থ, অনুবাদ, ব্যাখ্যা, শিক্ষা ও বাস্তব জীবনে প্রয়োগ সহজ ও প্রাঞ্জলভাবে উপস্থাপন করা হবে। নিজের সুবিধামতো সময়ে, যেকোনো স্থান থেকে, ধাপে ধাপে ৪০ হাদিস অধ্যয়ন করার জন্য কোর্সটি বিশেষভাবে সাজানো হয়েছে।",
     }),
     objectives: [
       t({
@@ -326,8 +397,8 @@ const ImamNabawiDetails = () => {
   };
 
   const whyDescription = t({
-    en: "Imam Nabawi's 40 Hadiths is not just a collection of hadiths; it is a concise and rich curriculum of the fundamental teachings of Islam.",
-    bn: "ইমাম নববীর ৪০ হাদিস শুধু একটি হাদিস সংকলন নয়; বরং ইসলামের মৌলিক শিক্ষার একটি সংক্ষিপ্ত ও সমৃদ্ধ পাঠ্যক্রম।",
+    en: "Imam Nabawi's 40 Hadiths is not just a collection of hadiths; it is a concise and rich curriculum of the fundamental teachings of Islam. Through this course, you will be able to learn the teachings of Hadith in easy language and find ways to implement them in your own life.",
+    bn: "ইমাম নববীর ৪০ হাদিস শুধু একটি হাদিস সংকলন নয়; বরং ইসলামের মৌলিক শিক্ষার একটি সংক্ষিপ্ত ও সমৃদ্ধ পাঠ্যক্রম। এই কোর্সের মাধ্যমে আপনি সহজ ভাষায় হাদিসের শিক্ষা জানতে পারবেন এবং তা নিজের জীবনে বাস্তবায়নের পথ খুঁজে পাবেন।",
   });
 
   const videoGallery = [
@@ -373,10 +444,9 @@ const ImamNabawiDetails = () => {
   ];
 
   return (
-    // ✅ onContextMenu={(e) => e.preventDefault()} ডান ক্লিক ব্লক করার জন্য
     <div
       className="min-h-screen bg-gradient-to-b from-gray-50 to-white select-none"
-      onContextMenu={(e) => e.preventDefault()}
+      onContextMenu={(e) => e.preventDefault()} // ✅ ডান ক্লিক ব্লক
     >
       <Navbar />
       <div className="py-8 px-4 sm:px-6 lg:px-8">
@@ -392,6 +462,7 @@ const ImamNabawiDetails = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* LEFT COLUMN */}
             <div className="lg:col-span-2 space-y-6">
+              {/* ব্যানার ইমেজ (ভিডিওর সাথে সমান 16:9) */}
               <div className="w-full aspect-video rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
                 <img
                   src={chollisCoverImg}
@@ -621,7 +692,6 @@ const ImamNabawiDetails = () => {
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {courseVideos.map((video, index) => (
-                          // ✅ onClick={() => setActiveVideo(video)} দিয়ে প্লেয়ার ওপেন করা হবে
                           <div
                             key={video._id || index}
                             onClick={() => setActiveVideo(video)}
@@ -873,14 +943,13 @@ const ImamNabawiDetails = () => {
       {activeVideo && (
         <div
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setActiveVideo(null)} // বাইরে ক্লিক করলে বন্ধ হবে
+          onClick={() => setActiveVideo(null)}
         >
           <div
             className="relative w-full max-w-5xl bg-black rounded-xl overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()} // ভেতরে ক্লিক করলে বন্ধ হবে না
-            onContextMenu={(e) => e.preventDefault()} // ডান ক্লিক বন্ধ
+            onClick={(e) => e.stopPropagation()}
+            onContextMenu={(e) => e.preventDefault()}
           >
-            {/* ক্লোজ বাটন */}
             <button
               onClick={() => setActiveVideo(null)}
               className="absolute top-2 right-2 z-20 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full cursor-pointer shadow-lg"
@@ -888,34 +957,55 @@ const ImamNabawiDetails = () => {
               <FaTimes />
             </button>
 
-            <div className="relative aspect-video w-full bg-black">
-              {/* ✅ ইউটিউব এমবেড ইফ্রেম */}
-              <iframe
-                src={`https://www.youtube.com/embed/${extractYoutubeId(activeVideo.url)}?autoplay=1&modestbranding=1&rel=0&showinfo=0`}
-                title={activeVideo.title}
-                className="w-full h-full border-none pointer-events-auto"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                disablePictureInPicture
-                controlsList="nodownload"
-              ></iframe>
+            <div className="relative aspect-video w-full bg-black overflow-hidden">
+              {/* সিকিউরিটি ফিল্টার */}
+              <div
+                className={`w-full h-full transition-all duration-300 ${!isWindowFocused || showSecurityWarning ? "blur-2xl brightness-50 pointer-events-none" : ""}`}
+              >
+                <iframe
+                  src={`https://www.youtube.com/embed/${extractYoutubeId(activeVideo.url)}?autoplay=1&modestbranding=1&rel=0&showinfo=0`}
+                  title={activeVideo.title}
+                  className="w-full h-full border-none pointer-events-auto"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  disablePictureInPicture
+                  controlsList="nodownload"
+                ></iframe>
+              </div>
 
-              {/* ✅ ওয়াটারমার্ক (স্ক্রিন রেকর্ডিং ডিটারেন্ট) */}
-              <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 opacity-30 select-none z-10">
-                <div className="text-right text-white font-mono text-sm md:text-xl font-bold tracking-widest drop-shadow-md">
+              {/* সিকিউরিটি ওভারলে */}
+              {(!isWindowFocused || showSecurityWarning) && (
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/60 text-white p-4 text-center">
+                  <FaShieldAlt className="text-6xl text-red-500 mb-4 animate-pulse" />
+                  <h2 className="text-2xl font-bold mb-2">
+                    ভিডিও লক করা হয়েছে!
+                  </h2>
+                  <p className="text-sm max-w-md">
+                    আপনি অন্য ট্যাবে গেছেন বা স্ক্রিন রেকর্ডিং টুল ওপেন করেছেন।
+                    ভিডিও দেখতে অনুগ্রহ করে এই ট্যাবে ফিরে আসুন।
+                  </p>
+                </div>
+              )}
+
+              {/* মুভিং ওয়াটারমার্ক */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-10 opacity-30">
+                <div className="absolute top-1/4 left-1/4 text-white font-mono text-xl font-bold tracking-widest drop-shadow-md animate-[ping_4s_ease-in-out_infinite]">
                   ID: {loggedStudent?.studentId || "STUDENT"}
                 </div>
-                <div className="text-left text-white font-mono text-sm md:text-xl font-bold tracking-widest drop-shadow-md">
+                <div className="absolute bottom-1/4 right-1/4 text-white font-mono text-xl font-bold tracking-widest drop-shadow-md animate-[bounce_5s_infinite]">
                   PHONE: {loggedStudent?.phone || "01XXXXXXXXX"}
                 </div>
-                <div className="text-center text-white font-mono text-xs md:text-md font-bold drop-shadow-md">
-                  ⚠️ Unauthorized recording is strictly prohibited.
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/50 font-bold text-4xl rotate-12">
+                  Tarbiyah Academy
                 </div>
               </div>
             </div>
 
-            <div className="p-4 bg-gray-900 text-white">
+            <div className="p-4 bg-gray-900 text-white flex justify-between items-center">
               <h3 className="font-bold text-lg">{activeVideo.title}</h3>
+              <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                <FaShieldAlt /> Protected Content
+              </div>
             </div>
           </div>
         </div>
