@@ -1596,7 +1596,7 @@ const New_admission = () => {
                         )}
                       </p>
                       <p className="text-[10px] text-blue-600 mt-1">
-                        Student now has access to all enrolled course videos.
+                        Student now has access to all enrolled course video.
                       </p>
                     </div>
                   )}
