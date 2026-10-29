@@ -24,6 +24,7 @@ import {
   FaAngleDoubleRight,
   FaHeadset,
   FaShieldAlt,
+  FaTimes, // ✅ নতুন আইকন যোগ করা হয়েছে মোডাল ক্লোজের জন্য
 } from "react-icons/fa";
 
 import Footer from "../Navbar/Footer/Footer";
@@ -40,14 +41,13 @@ const extractYoutubeId = (url) => {
   return match ? match[1] : "";
 };
 
-// ✅ YouTube thumbnail URL — maxres (16:9) with hq fallback
+// ✅ YouTube thumbnail URL
 const getYoutubeThumb = (url, quality = "maxresdefault") => {
   const id = extractYoutubeId(url);
   if (!id) return "";
   return `https://img.youtube.com/vi/${id}/${quality}.jpg`;
 };
 
-// ✅ Image with automatic fallback (maxres → hqdefault)
 const YoutubeThumbImg = ({ url, alt, className }) => (
   <img
     src={getYoutubeThumb(url, "maxresdefault")}
@@ -62,11 +62,9 @@ const YoutubeThumbImg = ({ url, alt, className }) => (
   />
 );
 
-// Import banner image
 import chollisCoverImg from "../../image/40radiscover.jpg";
 import ProfessorImg from "../../image/profile.jpg";
 
-// --- Language Hook ---
 import { useState as useStateHook } from "react";
 
 export const useLanguage = () => {
@@ -98,12 +96,15 @@ const ImamNabawiDetails = () => {
   const [activeTab, setActiveTab] = useState("info");
   const [openFaq, setOpenFaq] = useState(null);
 
-  // ✅ Login state — now accepts ID or Phone
+  // Login state
   const [loginIdentifier, setLoginIdentifier] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [loggedStudent, setLoggedStudent] = useState(null);
   const [courseVideos, setCourseVideos] = useState([]);
+
+  // ✅ নতুন স্টেট: ভিডিও প্লেয়ার মোডালের জন্য
+  const [activeVideo, setActiveVideo] = useState(null);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -119,7 +120,6 @@ const ImamNabawiDetails = () => {
     }
   }, []);
 
-  // ✅ Login handler
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!loginIdentifier.trim() || !loginPassword.trim()) {
@@ -134,6 +134,17 @@ const ImamNabawiDetails = () => {
     setLoginLoading(true);
     try {
       const idValue = loginIdentifier.trim();
+
+      // ✅ ডিভাইস আইডি জেনারেট বা লোকাল স্টোরেজ থেকে নেওয়া (এটিই মিসিং ছিল)
+      let deviceId = localStorage.getItem("tarbiyah_device_id");
+      if (!deviceId) {
+        deviceId =
+          "DEV-" +
+          Math.random().toString(36).substring(2, 15) +
+          Math.random().toString(36).substring(2, 15);
+        localStorage.setItem("tarbiyah_device_id", deviceId);
+      }
+
       const res = await fetch(`${API_BASE}/recorded-course/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -142,6 +153,7 @@ const ImamNabawiDetails = () => {
           phone: idValue,
           studentId: idValue,
           password: loginPassword.trim(),
+          deviceId: deviceId, // ✅ এখন এটি কাজ করবে
         }),
       });
 
@@ -212,7 +224,6 @@ const ImamNabawiDetails = () => {
     },
   ];
 
-  // ✅ কোর্স ফি ১০০০ করা হয়েছে
   const courseDetails = {
     title: t({
       en: "Imam Nabawi's 40 Hadiths Course",
@@ -223,8 +234,8 @@ const ImamNabawiDetails = () => {
       bn: "ইমাম নববীর ৪০ হাদিসের রেকর্ডেড কোর্স",
     }),
     description: t({
-      en: "Imam Nawawi's collection of 40 Hadiths presents the core teachings of Islam—belief, worship, character, ethics, and daily life—in a concise yet profound manner. In this recorded course, each hadith is explained with Arabic text, word meanings, translation, commentary, and practical application in an easy and clear style. The course is designed for self-paced learning from anywhere, at any time.",
-      bn: "ইমাম নববী (রহ.) সংকলিত ৪০ হাদিস ইসলামের মৌলিক শিক্ষা, আকীদাহ, ইবাদত, আখলাক, চরিত্র গঠন এবং দৈনন্দিন জীবনের গুরুত্বপূর্ণ বিষয়গুলোকে সংক্ষিপ্ত অথচ গভীরভাবে তুলে ধরেছে। এই রেকর্ডেড কোর্সে প্রতিটি হাদিসের আরবি পাঠ, শব্দার্থ, অনুবাদ, ব্যাখ্যা, শিক্ষা ও বাস্তব জীবনে প্রয়োগ সহজ ও প্রাঞ্জলভাবে উপস্থাপন করা হবে। নিজের সুবিধামতো সময়ে, যেকোনো স্থান থেকে, ধাপে ধাপে ৪০ হাদিস অধ্যয়ন করার জন্য কোর্সটি বিশেষভাবে সাজানো হয়েছে।",
+      en: "Imam Nawawi's collection of 40 Hadiths presents the core teachings of Islam...",
+      bn: "ইমাম নববী (রহ.) সংকলিত ৪০ হাদিস ইসলামের মৌলিক শিক্ষা...",
     }),
     objectives: [
       t({
@@ -308,12 +319,6 @@ const ImamNabawiDetails = () => {
         bn: "কোর্স সম্পন্নকারীদের জন্য সার্টিফিকেট",
       }),
     ],
-    curriculum: Array.from({ length: 40 }, (_, i) => ({
-      title: t({
-        en: `Hadith ${i + 1}: Lesson ${i + 1}`,
-        bn: `হাদিস ${i + 1}: লেসন ${i + 1}`,
-      }),
-    })),
     extraObjectivesNote: t({
       en: "This is a self-paced recorded course with lifetime access.",
       bn: "এটি একটি স্ব-গতির রেকর্ডেড কোর্স যার লাইফটাইম অ্যাক্সেস রয়েছে।",
@@ -321,8 +326,8 @@ const ImamNabawiDetails = () => {
   };
 
   const whyDescription = t({
-    en: "Imam Nabawi's 40 Hadiths is not just a collection of hadiths; it is a concise and rich curriculum of the fundamental teachings of Islam. Through this course, you will be able to learn the teachings of Hadith in easy language and find ways to implement them in your own life.",
-    bn: "ইমাম নববীর ৪০ হাদিস শুধু একটি হাদিস সংকলন নয়; বরং ইসলামের মৌলিক শিক্ষার একটি সংক্ষিপ্ত ও সমৃদ্ধ পাঠ্যক্রম। এই কোর্সের মাধ্যমে আপনি সহজ ভাষায় হাদিসের শিক্ষা জানতে পারবেন এবং তা নিজের জীবনে বাস্তবায়নের পথ খুঁজে পাবেন।",
+    en: "Imam Nabawi's 40 Hadiths is not just a collection of hadiths; it is a concise and rich curriculum of the fundamental teachings of Islam.",
+    bn: "ইমাম নববীর ৪০ হাদিস শুধু একটি হাদিস সংকলন নয়; বরং ইসলামের মৌলিক শিক্ষার একটি সংক্ষিপ্ত ও সমৃদ্ধ পাঠ্যক্রম।",
   });
 
   const videoGallery = [
@@ -345,7 +350,7 @@ const ImamNabawiDetails = () => {
       }),
       answer: t({
         en: "Yes, it is designed for all levels, especially for those who want to start studying Hadith.",
-        bn: "হ্যাঁ, এটি সকল স্তরের জন্য তৈরি, বিশেষ করে যারা হাদিস অধ্যয়ন শুরু করতে চান।",
+        bn: "হ্যাঁ, এটি সকল স্তরের জন্য তৈরি।",
       }),
     },
     {
@@ -359,30 +364,7 @@ const ImamNabawiDetails = () => {
       }),
     },
     {
-      question: t({
-        en: "Is there any certificate after completion?",
-        bn: "সমাপ্তির পর কোনো সার্টিফিকেট দেওয়া হয়?",
-      }),
-      answer: t({
-        en: "Yes, you will receive a certificate upon completing the course.",
-        bn: "হ্যাঁ, কোর্স শেষে আপনাকে একটি সার্টিফিকেট প্রদান করা হবে।",
-      }),
-    },
-    {
-      question: t({
-        en: "Can I access the course on mobile?",
-        bn: "আমি কি মোবাইলে কোর্স অ্যাক্সেস করতে পারব?",
-      }),
-      answer: t({
-        en: "Yes, you can access from mobile, tablet, or computer.",
-        bn: "হ্যাঁ, আপনি মোবাইল, ট্যাব বা কম্পিউটার থেকে অ্যাক্সেস করতে পারবেন।",
-      }),
-    },
-    {
-      question: t({
-        en: "What is the fee structure?",
-        bn: "ফি কাঠামো কী?",
-      }),
+      question: t({ en: "What is the fee structure?", bn: "ফি কাঠামো কী?" }),
       answer: t({
         en: "The total course fee is ৳1,000 only, which gives lifetime access and certificate.",
         bn: "মোট কোর্স ফি মাত্র ৳১,০০০, যা লাইফটাইম অ্যাক্সেস ও সার্টিফিকেট প্রদান করে।",
@@ -391,52 +373,43 @@ const ImamNabawiDetails = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    // ✅ onContextMenu={(e) => e.preventDefault()} ডান ক্লিক ব্লক করার জন্য
+    <div
+      className="min-h-screen bg-gradient-to-b from-gray-50 to-white select-none"
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <Navbar />
       <div className="py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          {/* Back Button */}
           <Link
             to="/course/kids"
             className="inline-flex items-center gap-2 text-[#002b2b] hover:text-yellow-600 mb-6 transition-colors group"
           >
             <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">
-              {t({ en: "Back to Course Page", bn: "কোর্স পেজে ফিরে যান" })}
-            </span>
+            <span className="font-medium">Back to Course Page</span>
           </Link>
 
-          {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* ================= LEFT COLUMN (2/3 width) ================= */}
+            {/* LEFT COLUMN */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Hero Banner (এখন ভিডিওর সমান 16:9 অনুপাতে থাকবে) */}
               <div className="w-full aspect-video rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
                 <img
                   src={chollisCoverImg}
-                  alt={t({
-                    en: "Imam Nabawi 40 Hadiths Banner",
-                    bn: "ইমাম নববীর ৪০ হাদিস ব্যানার",
-                  })}
-                  className="w-full h-full object-cover object-top"
+                  alt="Banner"
+                  className="w-full h-full object-cover object-top pointer-events-none"
                 />
               </div>
 
-              {/* Course Info Section */}
               <div>
                 <div className="flex items-center justify-between py-3">
                   <div className="flex items-center gap-4">
                     <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
-                      <FaShare className="text-lg" />
-                      <span className="font-medium">
-                        {t({ en: "Share", bn: "শেয়ার" })}
-                      </span>
+                      <FaShare className="text-lg" />{" "}
+                      <span className="font-medium">Share</span>
                     </button>
                     <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
-                      <FaBookmark className="text-lg" />
-                      <span className="font-medium">
-                        {t({ en: "Wishlist", bn: "উইশলিস্ট" })}
-                      </span>
+                      <FaBookmark className="text-lg" />{" "}
+                      <span className="font-medium">Wishlist</span>
                     </button>
                   </div>
                 </div>
@@ -445,7 +418,6 @@ const ImamNabawiDetails = () => {
                   {courseDetails.title}
                 </h1>
 
-                {/* Tabs */}
                 <div className="flex items-center gap-6 border-b border-gray-200">
                   <button
                     onClick={() => setActiveTab("info")}
@@ -455,8 +427,7 @@ const ImamNabawiDetails = () => {
                         : "border-transparent text-gray-500 hover:text-[#002b2b]"
                     }`}
                   >
-                    <FaInfoCircle />
-                    <span>{t({ en: "Course Info", bn: "কোর্স তথ্য" })}</span>
+                    <FaInfoCircle /> <span>Course Info</span>
                   </button>
                   <button
                     onClick={() => setActiveTab("reviews")}
@@ -466,27 +437,22 @@ const ImamNabawiDetails = () => {
                         : "border-transparent text-gray-500 hover:text-[#002b2b]"
                     }`}
                   >
-                    <FaCommentDots />
-                    <span>{t({ en: "Reviews", bn: "রিভিউ" })}</span>
+                    <FaCommentDots /> <span>Reviews</span>
                   </button>
                 </div>
 
                 {activeTab === "reviews" && (
                   <div className="mt-4 p-4 bg-gray-50 rounded-xl">
                     <p className="text-gray-500 text-center">
-                      {t({
-                        en: "No reviews yet. Be the first to review!",
-                        bn: "এখনো কোনো রিভিউ নেই। প্রথম রিভিউ দিন!",
-                      })}
+                      No reviews yet. Be the first to review!
                     </p>
                   </div>
                 )}
               </div>
 
-              {/* ABOUT COURSE */}
               <div className="pt-4">
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
-                  {t({ en: "ABOUT COURSE", bn: "কোর্স সম্পর্কে" })}
+                  ABOUT COURSE
                 </h2>
                 <h3 className="text-lg font-bold text-[#007a91] mb-2">
                   {courseDetails.subtitle}
@@ -496,16 +462,15 @@ const ImamNabawiDetails = () => {
                 </p>
               </div>
 
-              {/* WHAT YOU WILL GAIN */}
               <div className="bg-white rounded-3xl p-8 space-y-4 shadow-sm">
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
-                  {t({ en: "WHAT YOU WILL GAIN", bn: "আপনি কী পাবেন" })}
+                  WHAT YOU WILL GAIN
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {courseDetails.objectives.map((objective, index) => (
                     <div
                       key={index}
-                      className="flex items-start gap-3 p-1 rounded-xl transition-colors"
+                      className="flex items-start gap-3 p-1 rounded-xl"
                     >
                       <FaAngleDoubleRight className="text-[#00ADD2] text-base flex-shrink-0 mt-1" />
                       <span className="text-gray-700 text-sm font-medium">
@@ -519,33 +484,25 @@ const ImamNabawiDetails = () => {
                 </p>
               </div>
 
-              {/* Ready To Apply */}
               <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-3xl p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                   <h3 className="text-xl font-bold text-[#002b2b]">
-                    {t({
-                      en: "Ready To Apply Your Course",
-                      bn: "আপনার কোর্সে আবেদন করতে প্রস্তুত",
-                    })}
+                    Ready To Apply Your Course
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    {t({
-                      en: "Enroll now and start your structured learning journey.",
-                      bn: "এখনই এনরোল করুন এবং আপনার শেখার যাত্রা শুরু করুন।",
-                    })}
+                    Enroll now and start your structured learning journey.
                   </p>
                 </div>
                 <Link to="/admission-now">
                   <button className="bg-[#002b2b] hover:bg-teal-900 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all">
-                    {t({ en: "Start Now", bn: "এখনই শুরু করুন" })}
+                    Start Now
                   </button>
                 </Link>
               </div>
 
-              {/* TARGET AUDIENCE */}
               <div>
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
-                  {t({ en: "TARGET AUDIENCE", bn: "লক্ষ্য দর্শক" })}
+                  TARGET AUDIENCE
                 </h2>
                 <div className="space-y-2">
                   {courseDetails.targetAudience.map((feature, index) => (
@@ -560,10 +517,9 @@ const ImamNabawiDetails = () => {
                 </div>
               </div>
 
-              {/* MATERIALS INCLUDED */}
               <div>
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
-                  {t({ en: "MATERIALS INCLUDED", bn: "অন্তর্ভুক্ত উপকরণ" })}
+                  MATERIALS INCLUDED
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4 text-sm">
                   {courseDetails.materials.map((item, index) => (
@@ -575,20 +531,16 @@ const ImamNabawiDetails = () => {
                 </div>
               </div>
 
-              {/* COURSE VIDEOS — Login + Videos */}
+              {/* COURSE VIDEOS */}
               <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border-2 border-teal-100">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-[#00ADD2] rounded-full"></div>
                   <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    {t({
-                      en: "Course Videos (42 Sessions)",
-                      bn: "কোর্স ভিডিও (৪২ সেশন)",
-                    })}
+                    Course Videos (42 Sessions)
                   </h2>
                 </div>
 
                 {!loggedStudent ? (
-                  // ─── LOGIN FORM ───
                   <div className="max-w-md mx-auto">
                     <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-6 border-2 border-teal-200 shadow-sm">
                       <div className="text-center mb-5">
@@ -596,28 +548,17 @@ const ImamNabawiDetails = () => {
                           <FaPlayCircle className="text-3xl text-white" />
                         </div>
                         <h3 className="font-bold text-[#002b2b] text-lg mb-1">
-                          🔐{" "}
-                          {t({
-                            en: "Login to watch videos",
-                            bn: "ভিডিও দেখতে লগইন করুন",
-                          })}
+                          🔐 Login to watch videos
                         </h3>
                         <p className="text-xs text-gray-600">
-                          {t({
-                            en: "Use your Student ID or password provided by admin",
-                            bn: "এডমিন দেওয়া Student ID বা পাসওয়ার্ড দিয়ে লগইন করুন",
-                          })}
+                          Use your Student ID + password provided by admin
                         </p>
                       </div>
 
                       <form onSubmit={handleLogin} className="space-y-3">
                         <div>
                           <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            🆔{" "}
-                            {t({
-                              en: "Student ID ",
-                              bn: "স্টুডেন্ট আইডি",
-                            })}
+                            🆔 Student ID
                           </label>
                           <input
                             type="text"
@@ -629,7 +570,7 @@ const ImamNabawiDetails = () => {
                         </div>
                         <div>
                           <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            🔑 {t({ en: "Password", bn: "পাসওয়ার্ড" })}
+                            🔑 Password
                           </label>
                           <input
                             type="password"
@@ -647,36 +588,19 @@ const ImamNabawiDetails = () => {
                           {loginLoading ? "⏳ লোড হচ্ছে..." : "🚀 লগইন করুন"}
                         </button>
                       </form>
-
-                      <div className="mt-4 pt-4 border-t border-teal-200 text-center">
-                        <p className="text-[11px] text-gray-500">
-                          {t({
-                            en: "Not enrolled yet?",
-                            bn: "এখনো enroll করেননি?",
-                          })}{" "}
-                          <Link
-                            to="/admission-now"
-                            className="text-[#00ADD2] font-bold hover:underline"
-                          >
-                            {t({ en: "Enroll Now", bn: "এখনই enroll করুন" })}
-                          </Link>
-                        </p>
-                      </div>
                     </div>
                   </div>
                 ) : (
-                  // ─── VIDEO GRID ───
                   <>
                     <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white rounded-xl p-4 mb-5 flex justify-between items-center flex-wrap gap-3">
                       <div>
                         <p className="text-sm font-bold">
-                          👋 {t({ en: "Welcome", bn: "স্বাগতম" })},{" "}
-                          {loggedStudent.name}
+                          👋 স্বাগতম, {loggedStudent.name}
                         </p>
                         <p className="text-xs opacity-90 mt-0.5">
                           🆔 {loggedStudent.studentId || "-"} • 📱{" "}
                           {loggedStudent.phone} • 🎬 {courseVideos.length}{" "}
-                          {t({ en: "Videos", bn: "ভিডিও" })}
+                          Videos
                         </p>
                       </div>
                       <button
@@ -691,28 +615,23 @@ const ImamNabawiDetails = () => {
                       <div className="text-center py-10">
                         <FaPlayCircle className="text-6xl text-gray-300 mx-auto mb-3" />
                         <p className="text-sm text-gray-500">
-                          {t({
-                            en: "Videos are being uploaded. Please check back soon.",
-                            bn: "ভিডিও এখনো যোগ করা হয়নি। শীঘ্রই জানানো হবে।",
-                          })}
+                          Videos are being uploaded. Please check back soon.
                         </p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {courseVideos.map((video, index) => (
-                          <a
+                          // ✅ onClick={() => setActiveVideo(video)} দিয়ে প্লেয়ার ওপেন করা হবে
+                          <div
                             key={video._id || index}
-                            href={video.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100"
+                            onClick={() => setActiveVideo(video)}
+                            className="group block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer"
                           >
-                            {/* ✅ 16:9 thumbnail — same height as video */}
                             <div className="relative aspect-video bg-gray-200 overflow-hidden">
                               <YoutubeThumbImg
                                 url={video.url}
                                 alt={video.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
                               />
                               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                                 <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
@@ -728,14 +647,10 @@ const ImamNabawiDetails = () => {
                                 {video.title}
                               </p>
                               <p className="text-[10px] text-gray-500 mt-0.5">
-                                ▶{" "}
-                                {t({
-                                  en: "Click to watch",
-                                  bn: "দেখতে ক্লিক করুন",
-                                })}
+                                ▶ Click to watch
                               </p>
                             </div>
-                          </a>
+                          </div>
                         ))}
                       </div>
                     )}
@@ -746,7 +661,7 @@ const ImamNabawiDetails = () => {
               {/* COURSE FEE */}
               <div>
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
-                  {t({ en: "COURSE FEE", bn: "কোর্স ফি" })}
+                  COURSE FEE
                 </h2>
                 <div className="space-y-3 text-sm">
                   <div className="flex items-start gap-3">
@@ -775,7 +690,7 @@ const ImamNabawiDetails = () => {
               <div className="bg-white rounded-3xl shadow-xl p-6 md:p-12 border border-gray-100">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl md:text-4xl font-bold mb-3 text-[#00ADD2]">
-                    {t({ en: "Why This Course?", bn: "কেন এই কোর্স?" })}
+                    Why This Course?
                   </h2>
                   <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
                 </div>
@@ -789,23 +704,21 @@ const ImamNabawiDetails = () => {
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
                   <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    {t({ en: "Video Gallery", bn: "ভিডিও গ্যালারি" })}
+                    Video Gallery
                   </h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {videoGallery.map((video) => (
-                    <a
+                    <div
                       key={video.id}
-                      href={video.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100"
+                      onClick={() => setActiveVideo(video)}
+                      className="group block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer"
                     >
                       <div className="relative aspect-video bg-gray-200 overflow-hidden">
                         <YoutubeThumbImg
                           url={video.url}
                           alt={video.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
                         />
                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                           <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
@@ -818,11 +731,10 @@ const ImamNabawiDetails = () => {
                           {video.title}
                         </p>
                         <p className="text-[10px] text-gray-500 mt-0.5">
-                          ▶{" "}
-                          {t({ en: "Click to watch", bn: "দেখতে ক্লিক করুন" })}
+                          ▶ Click to watch
                         </p>
                       </div>
-                    </a>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -831,9 +743,7 @@ const ImamNabawiDetails = () => {
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    {t({ en: "FAQ", bn: "প্রায়শই জিজ্ঞাসিত প্রশ্ন" })}
-                  </h2>
+                  <h2 className="text-2xl font-bold text-[#00ADD2]">FAQ</h2>
                 </div>
                 <div className="space-y-4">
                   {faqs.map((faq, index) => (
@@ -865,89 +775,74 @@ const ImamNabawiDetails = () => {
               </div>
             </div>
 
-            {/* ================= RIGHT SIDEBAR (1/3 width) ================= */}
+            {/* RIGHT SIDEBAR */}
             <div className="space-y-6">
-              {/* ✅ Promo Video Thumbnail (ব্যানারের সাথে সমান উচ্চতায় থাকবে) */}
-              <a
-                href="https://youtu.be/6gMZDMTMEDk?si=YtR0LQ690HuOS-Sd"
-                target="_blank"
-                rel="noopener noreferrer"
+              <div
+                onClick={() => setActiveVideo(videoGallery[0])}
                 className="block relative group overflow-hidden rounded-2xl shadow-sm border border-gray-100 cursor-pointer aspect-video"
               >
                 <YoutubeThumbImg
                   url="https://youtu.be/6gMZDMTMEDk"
-                  alt={t({ en: "Course Video", bn: "কোর্স ভিডিও" })}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  alt="Promo"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 pointer-events-none"
                 />
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-colors group-hover:bg-black/40">
                   <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
                     <FaPlayCircle className="text-3xl" />
                   </div>
                 </div>
-              </a>
+              </div>
 
-              {/* Pricing & Enrollment Card */}
               <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-[#007a91]">
                 <h1 className="text-2xl font-bold text-[#007a91] mb-6">
-                  {t({ en: "ENROLL NOW", bn: "এখনই নিবন্ধন করুন" })}
+                  ENROLL NOW
                 </h1>
-
                 <div className="flex items-center justify-center mb-6 relative">
                   <Link
                     to="/course/kids/quidaelders/enrollbnagla"
                     className="w-1/2"
                   >
                     <button className="w-full bg-[#007a91] text-white font-bold py-3 text-xs rounded-l-md hover:opacity-90 transition">
-                      {t({ en: "Bangla Version", bn: "বাংলা ভার্সন" })}
+                      Bangla Version
                     </button>
                   </Link>
                   <div className="absolute w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#002b2b] font-medium shadow-md z-10 text-[10px]">
-                    {t({ en: "Or", bn: "অথবা" })}
+                    Or
                   </div>
                   <Link
                     to="/enroll/quidaelders/english-version"
                     className="w-1/2"
                   >
                     <button className="w-full bg-[#003d3d] text-white font-bold py-3 text-xs rounded-r-md hover:opacity-90 transition">
-                      {t({ en: "English Version", bn: "ইংরেজি ভার্সন" })}
+                      English Version
                     </button>
                   </Link>
                 </div>
-
                 <div className="space-y-3 text-left px-1 text-[#002b2b]">
                   <div className="flex items-center gap-2 text-[15px]">
-                    <span className="font-medium">
-                      {t({ en: "Course Level:", bn: "কোর্স লেভেল:" })}
-                    </span>
-                    <span className="font-bold">
-                      {t({ en: "All Levels", bn: "সকলের জন্য" })}
-                    </span>
+                    <span className="font-medium">Course Level:</span>{" "}
+                    <span className="font-bold">All Levels</span>
                   </div>
                   <div className="flex items-center gap-2 text-[15px]">
-                    <span className="font-medium">
-                      {t({ en: "Enrolled:", bn: "এনরোল্ড:" })}
-                    </span>
+                    <span className="font-medium">Enrolled:</span>{" "}
                     <span className="font-bold">180</span>
                   </div>
                   <div className="flex items-center gap-2 text-[15px]">
-                    <span className="font-medium">
-                      {t({ en: "Last Updated:", bn: "শেষ আপডেট:" })}
-                    </span>
+                    <span className="font-medium">Last Updated:</span>{" "}
                     <span className="font-bold">09/07/2026</span>
                   </div>
                 </div>
               </div>
 
-              {/* Faculty List */}
               <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                 <h3 className="text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
-                  {t({ en: "Faculty", bn: "অনুষদ" })}
+                  Faculty
                 </h3>
                 <div className="space-y-4">
                   {instructors.map((instructor) => (
                     <div
                       key={instructor.id}
-                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-none"
+                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 border-b border-gray-100 last:border-none"
                     >
                       <img
                         src={instructor.image}
@@ -961,11 +856,9 @@ const ImamNabawiDetails = () => {
                         <p className="text-xs text-gray-600 truncate">
                           {instructor.title}
                         </p>
-                        {instructor.subtitle && (
-                          <p className="text-[11px] text-gray-500 truncate">
-                            {instructor.subtitle}
-                          </p>
-                        )}
+                        <p className="text-[11px] text-gray-500 truncate">
+                          {instructor.subtitle}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -975,6 +868,59 @@ const ImamNabawiDetails = () => {
           </div>
         </div>
       </div>
+
+      {/* ✅ ভিডিও প্লেয়ার মোডাল (পপআপ) */}
+      {activeVideo && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setActiveVideo(null)} // বাইরে ক্লিক করলে বন্ধ হবে
+        >
+          <div
+            className="relative w-full max-w-5xl bg-black rounded-xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()} // ভেতরে ক্লিক করলে বন্ধ হবে না
+            onContextMenu={(e) => e.preventDefault()} // ডান ক্লিক বন্ধ
+          >
+            {/* ক্লোজ বাটন */}
+            <button
+              onClick={() => setActiveVideo(null)}
+              className="absolute top-2 right-2 z-20 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full cursor-pointer shadow-lg"
+            >
+              <FaTimes />
+            </button>
+
+            <div className="relative aspect-video w-full bg-black">
+              {/* ✅ ইউটিউব এমবেড ইফ্রেম */}
+              <iframe
+                src={`https://www.youtube.com/embed/${extractYoutubeId(activeVideo.url)}?autoplay=1&modestbranding=1&rel=0&showinfo=0`}
+                title={activeVideo.title}
+                className="w-full h-full border-none pointer-events-auto"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                disablePictureInPicture
+                controlsList="nodownload"
+              ></iframe>
+
+              {/* ✅ ওয়াটারমার্ক (স্ক্রিন রেকর্ডিং ডিটারেন্ট) */}
+              <div className="absolute inset-0 pointer-events-none flex flex-col justify-between p-4 opacity-30 select-none z-10">
+                <div className="text-right text-white font-mono text-sm md:text-xl font-bold tracking-widest drop-shadow-md">
+                  ID: {loggedStudent?.studentId || "STUDENT"}
+                </div>
+                <div className="text-left text-white font-mono text-sm md:text-xl font-bold tracking-widest drop-shadow-md">
+                  PHONE: {loggedStudent?.phone || "01XXXXXXXXX"}
+                </div>
+                <div className="text-center text-white font-mono text-xs md:text-md font-bold drop-shadow-md">
+                  ⚠️ Unauthorized recording is strictly prohibited.
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-900 text-white">
+              <h3 className="font-bold text-lg">{activeVideo.title}</h3>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
