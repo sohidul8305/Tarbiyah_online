@@ -119,7 +119,7 @@ const ImamNabawiDetails = () => {
     }
   }, []);
 
-  // ✅ Login handler — sends identifier (works with both old & new backend)
+  // ✅ Login handler
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!loginIdentifier.trim() || !loginPassword.trim()) {
@@ -138,7 +138,6 @@ const ImamNabawiDetails = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // Send as multiple fields for backward compat
           identifier: idValue,
           phone: idValue,
           studentId: idValue,
@@ -213,6 +212,7 @@ const ImamNabawiDetails = () => {
     },
   ];
 
+  // ✅ কোর্স ফি ১০০০ করা হয়েছে
   const courseDetails = {
     title: t({
       en: "Imam Nabawi's 40 Hadiths Course",
@@ -276,8 +276,8 @@ const ImamNabawiDetails = () => {
     ],
     feeStructure: {
       monthly: t({
-        en: "Course Fee: ৳2,000 only",
-        bn: "কোর্স ফি: ৳২,০০০ মাত্র",
+        en: "Course Fee: ৳1,000 only",
+        bn: "কোর্স ফি: ৳১,০০০ মাত্র",
       }),
       oneTime: {
         title: t({ en: "One-Time Payment", bn: "এককালীন পেমেন্ট" }),
@@ -285,7 +285,7 @@ const ImamNabawiDetails = () => {
           en: "Pay the full course fee and get lifetime access + certificate.",
           bn: "সম্পূর্ণ কোর্স ফি প্রদান করুন এবং লাইফটাইম অ্যাক্সেস + সার্টিফিকেট পান।",
         }),
-        offer: "৳২,০০০",
+        offer: "৳১,০০০",
       },
     },
     materials: [
@@ -384,8 +384,8 @@ const ImamNabawiDetails = () => {
         bn: "ফি কাঠামো কী?",
       }),
       answer: t({
-        en: "The total course fee is ৳2,000 only, which gives lifetime access and certificate.",
-        bn: "মোট কোর্স ফি মাত্র ৳২,০০০, যা লাইফটাইম অ্যাক্সেস ও সার্টিফিকেট প্রদান করে।",
+        en: "The total course fee is ৳1,000 only, which gives lifetime access and certificate.",
+        bn: "মোট কোর্স ফি মাত্র ৳১,০০০, যা লাইফটাইম অ্যাক্সেস ও সার্টিফিকেট প্রদান করে।",
       }),
     },
   ];
@@ -406,81 +406,85 @@ const ImamNabawiDetails = () => {
             </span>
           </Link>
 
-          {/* Hero Banner */}
-          <img
-            src={chollisCoverImg}
-            alt={t({
-              en: "Imam Nabawi 40 Hadiths Banner",
-              bn: "ইমাম নববীর ৪০ হাদিস ব্যানার",
-            })}
-            className="w-full max-w-3xl h-24 sm:h-60 md:h-60 object-cover object-top rounded-2xl border border-gray-100 ml-8 mr-72 -mt-6"
-          />
-
-          {/* Course Info Section */}
-          <div className="ml-8 mr-72">
-            <div className="flex items-center justify-between py-3">
-              <div className="flex items-center gap-4">
-                <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
-                  <FaShare className="text-lg" />
-                  <span className="font-medium">
-                    {t({ en: "Share", bn: "শেয়ার" })}
-                  </span>
-                </button>
-                <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
-                  <FaBookmark className="text-lg" />
-                  <span className="font-medium">
-                    {t({ en: "Wishlist", bn: "উইশলিস্ট" })}
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            <h1 className="text-2xl font-bold text-[#007a91] mb-3 uppercase">
-              {courseDetails.title}
-            </h1>
-
-            <div className="flex items-center gap-6 border-b border-gray-200">
-              <button
-                onClick={() => setActiveTab("info")}
-                className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all ${
-                  activeTab === "info"
-                    ? "border-[#002b2b] text-[#002b2b] font-semibold"
-                    : "border-transparent text-gray-500 hover:text-[#002b2b]"
-                }`}
-              >
-                <FaInfoCircle />
-                <span>{t({ en: "Course Info", bn: "কোর্স তথ্য" })}</span>
-              </button>
-              <button
-                onClick={() => setActiveTab("reviews")}
-                className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all ${
-                  activeTab === "reviews"
-                    ? "border-[#002b2b] text-[#002b2b] font-semibold"
-                    : "border-transparent text-gray-500 hover:text-[#002b2b]"
-                }`}
-              >
-                <FaCommentDots />
-                <span>{t({ en: "Reviews", bn: "রিভিউ" })}</span>
-              </button>
-            </div>
-
-            {activeTab === "reviews" && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-xl">
-                <p className="text-gray-500 text-center">
-                  {t({
-                    en: "No reviews yet. Be the first to review!",
-                    bn: "এখনো কোনো রিভিউ নেই। প্রথম রিভিউ দিন!",
-                  })}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Main Content */}
+          {/* Main Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* ================= LEFT COLUMN (2/3 width) ================= */}
             <div className="lg:col-span-2 space-y-6">
+              {/* Hero Banner (এখন ভিডিওর সমান 16:9 অনুপাতে থাকবে) */}
+              <div className="w-full aspect-video rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+                <img
+                  src={chollisCoverImg}
+                  alt={t({
+                    en: "Imam Nabawi 40 Hadiths Banner",
+                    bn: "ইমাম নববীর ৪০ হাদিস ব্যানার",
+                  })}
+                  className="w-full h-full object-cover object-top"
+                />
+              </div>
+
+              {/* Course Info Section */}
+              <div>
+                <div className="flex items-center justify-between py-3">
+                  <div className="flex items-center gap-4">
+                    <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
+                      <FaShare className="text-lg" />
+                      <span className="font-medium">
+                        {t({ en: "Share", bn: "শেয়ার" })}
+                      </span>
+                    </button>
+                    <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
+                      <FaBookmark className="text-lg" />
+                      <span className="font-medium">
+                        {t({ en: "Wishlist", bn: "উইশলিস্ট" })}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <h1 className="text-2xl font-bold text-[#007a91] mb-3 uppercase">
+                  {courseDetails.title}
+                </h1>
+
+                {/* Tabs */}
+                <div className="flex items-center gap-6 border-b border-gray-200">
+                  <button
+                    onClick={() => setActiveTab("info")}
+                    className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all ${
+                      activeTab === "info"
+                        ? "border-[#002b2b] text-[#002b2b] font-semibold"
+                        : "border-transparent text-gray-500 hover:text-[#002b2b]"
+                    }`}
+                  >
+                    <FaInfoCircle />
+                    <span>{t({ en: "Course Info", bn: "কোর্স তথ্য" })}</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("reviews")}
+                    className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all ${
+                      activeTab === "reviews"
+                        ? "border-[#002b2b] text-[#002b2b] font-semibold"
+                        : "border-transparent text-gray-500 hover:text-[#002b2b]"
+                    }`}
+                  >
+                    <FaCommentDots />
+                    <span>{t({ en: "Reviews", bn: "রিভিউ" })}</span>
+                  </button>
+                </div>
+
+                {activeTab === "reviews" && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                    <p className="text-gray-500 text-center">
+                      {t({
+                        en: "No reviews yet. Be the first to review!",
+                        bn: "এখনো কোনো রিভিউ নেই। প্রথম রিভিউ দিন!",
+                      })}
+                    </p>
+                  </div>
+                )}
+              </div>
+
               {/* ABOUT COURSE */}
-              <div className="p-8 mt-10">
+              <div className="pt-4">
                 <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
                   {t({ en: "ABOUT COURSE", bn: "কোর্স সম্পর্কে" })}
                 </h2>
@@ -600,8 +604,8 @@ const ImamNabawiDetails = () => {
                         </h3>
                         <p className="text-xs text-gray-600">
                           {t({
-                            en: "Use your Student ID or phone number + password provided by admin",
-                            bn: "এডমিন দেওয়া Student ID বা ফোন নম্বর ও পাসওয়ার্ড দিয়ে লগইন করুন",
+                            en: "Use your Student ID or password provided by admin",
+                            bn: "এডমিন দেওয়া Student ID বা পাসওয়ার্ড দিয়ে লগইন করুন",
                           })}
                         </p>
                       </div>
@@ -611,13 +615,13 @@ const ImamNabawiDetails = () => {
                           <label className="block text-xs font-semibold text-gray-700 mb-1">
                             🆔{" "}
                             {t({
-                              en: "Student ID / Phone Number",
-                              bn: "Student ID / ফোন নম্বর",
+                              en: "Student ID ",
+                              bn: "স্টুডেন্ট আইডি",
                             })}
                           </label>
                           <input
                             type="text"
-                            placeholder="e.g., TAR2648213 or 01944709900"
+                            placeholder="e.g., ID"
                             value={loginIdentifier}
                             onChange={(e) => setLoginIdentifier(e.target.value)}
                             className="w-full px-4 py-2.5 border-2 border-teal-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
@@ -780,7 +784,7 @@ const ImamNabawiDetails = () => {
                 </p>
               </div>
 
-              {/* ✅ VIDEO GALLERY — same structure as Course Videos */}
+              {/* VIDEO GALLERY */}
               <div className="bg-white rounded-3xl p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
@@ -861,14 +865,14 @@ const ImamNabawiDetails = () => {
               </div>
             </div>
 
-            {/* Right Sidebar */}
-            <div className="space-y-4 mt-200">
-              {/* ✅ Sidebar Promo Thumbnail — 16:9 */}
+            {/* ================= RIGHT SIDEBAR (1/3 width) ================= */}
+            <div className="space-y-6">
+              {/* ✅ Promo Video Thumbnail (ব্যানারের সাথে সমান উচ্চতায় থাকবে) */}
               <a
                 href="https://youtu.be/6gMZDMTMEDk?si=YtR0LQ690HuOS-Sd"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer aspect-video"
+                className="block relative group overflow-hidden rounded-2xl shadow-sm border border-gray-100 cursor-pointer aspect-video"
               >
                 <YoutubeThumbImg
                   url="https://youtu.be/6gMZDMTMEDk"
@@ -876,15 +880,15 @@ const ImamNabawiDetails = () => {
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-colors group-hover:bg-black/40">
-                  <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
-                    <FaPlayCircle className="text-2xl" />
+                  <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
+                    <FaPlayCircle className="text-3xl" />
                   </div>
                 </div>
               </a>
 
               {/* Pricing & Enrollment Card */}
-              <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-[#007a91] -mt-6">
-                <h1 className="text-2xl font-bold text-[#007a91] mb-10">
+              <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-[#007a91]">
+                <h1 className="text-2xl font-bold text-[#007a91] mb-6">
                   {t({ en: "ENROLL NOW", bn: "এখনই নিবন্ধন করুন" })}
                 </h1>
 
@@ -935,7 +939,7 @@ const ImamNabawiDetails = () => {
               </div>
 
               {/* Faculty List */}
-              <div className="bg-white rounded-3xl">
+              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
                 <h3 className="text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
                   {t({ en: "Faculty", bn: "অনুষদ" })}
                 </h3>
