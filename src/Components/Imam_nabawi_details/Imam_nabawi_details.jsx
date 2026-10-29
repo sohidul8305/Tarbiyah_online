@@ -124,7 +124,6 @@ const ImamNabawiDetails = () => {
 
     const handleBlur = () => {
       setTimeout(() => {
-        // ইউজার ভিডিও প্লেয়ারে ক্লিক করলে লক হবে না
         if (
           document.activeElement &&
           document.activeElement.tagName === "IFRAME"
@@ -181,7 +180,6 @@ const ImamNabawiDetails = () => {
     };
   }, [activeVideo]);
 
-  // ✅ লোকাল স্টোরেজ থেকে লগইন ডাটা লোড
   useEffect(() => {
     const saved = localStorage.getItem("recorded_student");
     if (saved) {
@@ -209,8 +207,6 @@ const ImamNabawiDetails = () => {
     setLoginLoading(true);
     try {
       const idValue = loginIdentifier.trim();
-
-      // ডিভাইস আইডি তৈরি বা রিট্রিভ করা
       let deviceId = localStorage.getItem("tarbiyah_device_id");
       if (!deviceId) {
         deviceId =
@@ -288,7 +284,10 @@ const ImamNabawiDetails = () => {
   const instructors = [
     {
       id: 1,
-      name: t({ en: "Shaykh Mokhtar Ahmad", bn: "শায়খ মোখতার আহমদ" }),
+      name: t({
+        en: "Instructor professor Mokhter Ahmad Chairman <br> Tarbiyah Education Network",
+        bn: "ইনস্ট্রাক্টর প্রফেসর মোখতার আহমাদ, চেয়ারম্যান,<br> তারবিয়াহ এডুকেশন নেটওয়ার্ক",
+      }),
       title: t({ en: "Senior Instructor", bn: "সিনিয়র শিক্ষক" }),
       subtitle: t({ en: "Hadith & Quran", bn: "হাদিস ও কুরআন" }),
       image: ProfessorImg,
@@ -364,10 +363,11 @@ const ImamNabawiDetails = () => {
       oneTime: {
         title: t({ en: "One-Time Payment", bn: "এককালীন পেমেন্ট" }),
         description: t({
-          en: "Pay the full course fee and get lifetime access + certificate.",
-          bn: "সম্পূর্ণ কোর্স ফি প্রদান করুন এবং লাইফটাইম অ্যাক্সেস + সার্টিফিকেট পান।",
+          en: "Pay the full course fee and get lifetime access ",
+          bn: "সম্পূর্ণ কোর্স ফি প্রদান করুন এবং লাইফটাইম অ্যাক্সেস",
         }),
-        offer: "৳১,০০০",
+        offer: "৳1,000",
+        originalPrice: "৳4,000",
       },
     },
     materials: [
@@ -413,15 +413,56 @@ const ImamNabawiDetails = () => {
     },
   ];
 
+  // ✅ FAQ: English Default, Bangla on Switch
   const faqs = [
     {
       question: t({
-        en: "Is this course suitable for beginners?",
-        bn: "এই কোর্সটি কি শিক্ষানবিসদের জন্য উপযোগী?",
+        en: "Do you want to learn the fundamental aspects of the religion sequentially?",
+        bn: "দ্বীনের মৌলিক বিষয়গুলো ধারাবাহিকভাবে শিখতে চান?",
       }),
       answer: t({
-        en: "Yes, it is designed for all levels, especially for those who want to start studying Hadith.",
-        bn: "হ্যাঁ, এটি সকল স্তরের জন্য তৈরি।",
+        en: "Yes, this course is an excellent platform to learn the fundamental aspects of Islam sequentially and systematically.",
+        bn: "হ্যাঁ, এই কোর্সটি দ্বীনের মৌলিক বিষয়গুলো ধারাবাহিকভাবে শেখার জন্য একটি চমৎকার প্ল্যাটফর্ম।",
+      }),
+    },
+    {
+      question: t({
+        en: "Do you want to understand the teachings of Hadith and apply them in your own life?",
+        bn: "হাদিসের শিক্ষা বুঝে নিজের জীবনে কাজে লাগাতে চান?",
+      }),
+      answer: t({
+        en: "Absolutely. The explanation of each Hadith and its practical application in real life are discussed in detail here.",
+        bn: "অবশ্যই। প্রতিটি হাদিসের ব্যাখ্যা ও বাস্তব জীবনে তার প্রয়োগ এখানে বিস্তারিত আলোচনা করা হয়েছে।",
+      }),
+    },
+    {
+      question: t({
+        en: "Comprehend relevant teachings regarding Faith, Intention, Worship, Character, and Mutual Behavior.",
+        bn: "ঈমান, নিয়ত, ইবাদত, আখলাক ও পারস্পরিক আচরণ বিষয়ে প্রাসঙ্গিক শিক্ষা অনুধাবন।",
+      }),
+      answer: t({
+        en: "This course provides deep and relevant Islamic knowledge on these specific topics.",
+        bn: "এই কোর্সে এসব বিষয়ে গভীর ও প্রাসঙ্গিক ইসলামি জ্ঞান প্রদান করা হবে।",
+      }),
+    },
+    {
+      question: t({
+        en: "Create awareness about applying the teachings of Hadith in daily life.",
+        bn: "দৈনন্দিন জীবনে হাদিসের শিক্ষা প্রয়োগের বিষয়ে সচেতনতা তৈরি।",
+      }),
+      answer: t({
+        en: "The course will make you conscious and inspired to apply the teachings of Hadith in your everyday life.",
+        bn: "কোর্সটি আপনাকে দৈনন্দিন জীবনে হাদিসের শিক্ষা প্রয়োগে সচেতন ও উদ্বুদ্ধ করবে।",
+      }),
+    },
+    {
+      question: t({
+        en: "Inspiration to develop a habit of regularly acquiring Islamic knowledge.",
+        bn: "নিয়মিত ইসলামি জ্ঞান অর্জনের একটি অধ্যয়ন-অভ্যাস গড়ে তোলার অনুপ্রেরণা।",
+      }),
+      answer: t({
+        en: "This course will inspire you to build a consistent habit of studying and practicing Islamic knowledge.",
+        bn: "নিয়মিত ইসলামি জ্ঞান চর্চার অভ্যাস গড়ে তুলতে এই কোর্সটি আপনাকে অনুপ্রাণিত করবে।",
       }),
     },
     {
@@ -445,56 +486,60 @@ const ImamNabawiDetails = () => {
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-b from-gray-50 to-white select-none"
-      onContextMenu={(e) => e.preventDefault()} // ✅ ডান ক্লিক ব্লক
+      className="min-h-screen bg-[#f8fafc] select-none font-sans"
+      onContextMenu={(e) => e.preventDefault()}
     >
       <Navbar />
-      <div className="py-8 px-4 sm:px-6 lg:px-8">
+      <div className="py-6 md:py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <Link
             to="/course/kids"
-            className="inline-flex items-center gap-2 text-[#002b2b] hover:text-yellow-600 mb-6 transition-colors group"
+            className="inline-flex items-center gap-2 text-[#002b2b] hover:text-yellow-600 mb-6 transition-colors group bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200"
           >
             <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back to Course Page</span>
+            <span className="font-medium text-sm md:text-base">
+              Back to Course Page
+            </span>
           </Link>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Responsive Grid Layout with items-start to prevent sidebar stretching */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             {/* LEFT COLUMN */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* ব্যানার ইমেজ (ভিডিওর সাথে সমান 16:9) */}
-              <div className="w-full aspect-video rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+            <div className="lg:col-span-2 space-y-8">
+              {/* Hero Banner */}
+              <div className="w-full aspect-video rounded-2xl overflow-hidden border border-gray-100 shadow-lg relative group">
                 <img
                   src={chollisCoverImg}
                   alt="Banner"
-                  className="w-full h-full object-cover object-top pointer-events-none"
+                  className="w-full h-full object-cover object-top pointer-events-none group-hover:scale-105 transition-transform duration-700"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60"></div>
               </div>
 
               <div>
-                <div className="flex items-center justify-between py-3">
+                <div className="flex flex-wrap items-center justify-between py-3 gap-2">
                   <div className="flex items-center gap-4">
-                    <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
-                      <FaShare className="text-lg" />{" "}
-                      <span className="font-medium">Share</span>
+                    <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200 hover:shadow-md">
+                      <FaShare className="text-sm" />{" "}
+                      <span className="text-xs font-semibold">Share</span>
                     </button>
-                    <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
-                      <FaBookmark className="text-lg" />{" "}
-                      <span className="font-medium">Wishlist</span>
+                    <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-gray-200 hover:shadow-md">
+                      <FaBookmark className="text-sm" />{" "}
+                      <span className="text-xs font-semibold">Wishlist</span>
                     </button>
                   </div>
                 </div>
 
-                <h1 className="text-2xl font-bold text-[#007a91] mb-3 uppercase">
+                <h1 className="text-2xl md:text-4xl font-extrabold text-[#007a91] mb-4 uppercase mt-2 tracking-tight">
                   {courseDetails.title}
                 </h1>
 
                 <div className="flex items-center gap-6 border-b border-gray-200">
                   <button
                     onClick={() => setActiveTab("info")}
-                    className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all ${
+                    className={`flex items-center gap-2 px-2 py-3 border-b-2 transition-all text-sm md:text-base font-medium ${
                       activeTab === "info"
-                        ? "border-[#002b2b] text-[#002b2b] font-semibold"
+                        ? "border-[#002b2b] text-[#002b2b]"
                         : "border-transparent text-gray-500 hover:text-[#002b2b]"
                     }`}
                   >
@@ -502,9 +547,9 @@ const ImamNabawiDetails = () => {
                   </button>
                   <button
                     onClick={() => setActiveTab("reviews")}
-                    className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all ${
+                    className={`flex items-center gap-2 px-2 py-3 border-b-2 transition-all text-sm md:text-base font-medium ${
                       activeTab === "reviews"
-                        ? "border-[#002b2b] text-[#002b2b] font-semibold"
+                        ? "border-[#002b2b] text-[#002b2b]"
                         : "border-transparent text-gray-500 hover:text-[#002b2b]"
                     }`}
                   >
@@ -513,242 +558,136 @@ const ImamNabawiDetails = () => {
                 </div>
 
                 {activeTab === "reviews" && (
-                  <div className="mt-4 p-4 bg-gray-50 rounded-xl">
-                    <p className="text-gray-500 text-center">
+                  <div className="mt-4 p-8 bg-white rounded-2xl shadow-sm border border-gray-100 text-center">
+                    <FaCommentDots className="text-4xl text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500 text-sm font-medium">
                       No reviews yet. Be the first to review!
                     </p>
                   </div>
                 )}
               </div>
 
-              <div className="pt-4">
-                <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
+              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h2 className="text-xl font-bold text-[#00ADD2] mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-6 bg-[#00ADD2] rounded-full inline-block"></span>
                   ABOUT COURSE
                 </h2>
-                <h3 className="text-lg font-bold text-[#007a91] mb-2">
+                <h3 className="text-lg font-bold text-[#007a91] mb-3">
                   {courseDetails.subtitle}
                 </h3>
-                <p className="text-gray-700 leading-relaxed text-[15px]">
+                <p className="text-gray-600 leading-relaxed text-[15px]">
                   {courseDetails.description}
                 </p>
               </div>
 
-              <div className="bg-white rounded-3xl p-8 space-y-4 shadow-sm">
-                <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
+              <div className="bg-white rounded-2xl p-6 md:p-8 space-y-5 shadow-sm border border-gray-100">
+                <h2 className="text-xl font-bold text-[#00ADD2] mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-6 bg-[#00ADD2] rounded-full inline-block"></span>
                   WHAT YOU WILL GAIN
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {courseDetails.objectives.map((objective, index) => (
                     <div
                       key={index}
-                      className="flex items-start gap-3 p-1 rounded-xl"
+                      className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
                     >
                       <FaAngleDoubleRight className="text-[#00ADD2] text-base flex-shrink-0 mt-1" />
-                      <span className="text-gray-700 text-sm font-medium">
+                      <span className="text-gray-700 text-sm font-medium leading-relaxed">
                         {objective}
                       </span>
                     </div>
                   ))}
                 </div>
-                <p className="text-sm text-gray-600 mt-2 italic">
-                  {courseDetails.extraObjectivesNote}
+                <p className="text-sm text-[#007a91] mt-4 italic font-medium bg-teal-50 p-3 rounded-lg border border-teal-100">
+                  ✨ {courseDetails.extraObjectivesNote}
                 </p>
               </div>
 
-              <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-3xl p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md">
                 <div>
-                  <h3 className="text-xl font-bold text-[#002b2b]">
+                  <h3 className="text-xl md:text-2xl font-bold text-[#002b2b]">
                     Ready To Apply Your Course
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-600 text-sm mt-2 font-medium">
                     Enroll now and start your structured learning journey.
                   </p>
                 </div>
-                <Link to="/admission-now">
-                  <button className="bg-[#002b2b] hover:bg-teal-900 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all">
+                <Link to="/admission-now" className="w-full sm:w-auto">
+                  <button className="w-full bg-[#002b2b] hover:bg-teal-900 text-white font-bold px-8 py-3.5 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
                     Start Now
                   </button>
                 </Link>
               </div>
 
-              <div>
-                <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
+              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h2 className="text-xl font-bold text-[#00ADD2] mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-6 bg-[#00ADD2] rounded-full inline-block"></span>
                   TARGET AUDIENCE
                 </h2>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {courseDetails.targetAudience.map((feature, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-2 text-gray-700"
+                      className="flex items-center gap-3 text-gray-700 bg-gray-50 p-2.5 rounded-lg border border-gray-100"
                     >
-                      <span className="text-[#00ADD2] text-xs">●</span>
-                      <span className="text-sm">{feature}</span>
+                      <span className="text-[#00ADD2] text-lg">●</span>
+                      <span className="text-sm font-medium">{feature}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div>
-                <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
+              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h2 className="text-xl font-bold text-[#00ADD2] mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-6 bg-[#00ADD2] rounded-full inline-block"></span>
                   MATERIALS INCLUDED
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4 text-sm">
                   {courseDetails.materials.map((item, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <span className="text-[#00ADD2] mt-1 font-bold">✔</span>
-                      <span className="text-[#002b2b]">{item}</span>
+                    <div
+                      key={index}
+                      className="flex items-start gap-2 bg-gray-50 p-3 rounded-lg border border-gray-100"
+                    >
+                      <span className="text-green-500 mt-1 font-bold">✔</span>
+                      <span className="text-gray-700 font-medium">{item}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* COURSE VIDEOS */}
-              <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border-2 border-teal-100">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-8 bg-[#00ADD2] rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    Course Videos (42 Sessions)
-                  </h2>
-                </div>
-
-                {!loggedStudent ? (
-                  <div className="max-w-md mx-auto">
-                    <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-6 border-2 border-teal-200 shadow-sm">
-                      <div className="text-center mb-5">
-                        <div className="w-16 h-16 bg-[#002b2b] rounded-full mx-auto flex items-center justify-center mb-3">
-                          <FaPlayCircle className="text-3xl text-white" />
-                        </div>
-                        <h3 className="font-bold text-[#002b2b] text-lg mb-1">
-                          🔐 Login to watch videos
-                        </h3>
-                        <p className="text-xs text-gray-600">
-                          Use your Student ID + password provided by admin
-                        </p>
-                      </div>
-
-                      <form onSubmit={handleLogin} className="space-y-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            🆔 Student ID
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="e.g., ID"
-                            value={loginIdentifier}
-                            onChange={(e) => setLoginIdentifier(e.target.value)}
-                            className="w-full px-4 py-2.5 border-2 border-teal-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">
-                            🔑 Password
-                          </label>
-                          <input
-                            type="password"
-                            placeholder="Enter password"
-                            value={loginPassword}
-                            onChange={(e) => setLoginPassword(e.target.value)}
-                            className="w-full px-4 py-2.5 border-2 border-teal-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                          />
-                        </div>
-                        <button
-                          type="submit"
-                          disabled={loginLoading}
-                          className="w-full bg-[#002b2b] hover:bg-teal-900 text-white font-bold py-3 rounded-lg disabled:opacity-50 transition"
-                        >
-                          {loginLoading ? "⏳ লোড হচ্ছে..." : "🚀 লগইন করুন"}
-                        </button>
-                      </form>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="bg-gradient-to-r from-[#004d4d] to-[#006666] text-white rounded-xl p-4 mb-5 flex justify-between items-center flex-wrap gap-3">
-                      <div>
-                        <p className="text-sm font-bold">
-                          👋 স্বাগতম, {loggedStudent.name}
-                        </p>
-                        <p className="text-xs opacity-90 mt-0.5">
-                          🆔 {loggedStudent.studentId || "-"} • 📱{" "}
-                          {loggedStudent.phone} • 🎬 {courseVideos.length}{" "}
-                          Videos
-                        </p>
-                      </div>
-                      <button
-                        onClick={handleLogout}
-                        className="bg-red-500 hover:bg-red-600 text-white text-xs px-4 py-2 rounded-lg font-bold transition"
-                      >
-                        Logout
-                      </button>
-                    </div>
-
-                    {courseVideos.length === 0 ? (
-                      <div className="text-center py-10">
-                        <FaPlayCircle className="text-6xl text-gray-300 mx-auto mb-3" />
-                        <p className="text-sm text-gray-500">
-                          Videos are being uploaded. Please check back soon.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                        {courseVideos.map((video, index) => (
-                          <div
-                            key={video._id || index}
-                            onClick={() => setActiveVideo(video)}
-                            className="group block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer"
-                          >
-                            <div className="relative aspect-video bg-gray-200 overflow-hidden">
-                              <YoutubeThumbImg
-                                url={video.url}
-                                alt={video.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
-                              />
-                              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                                <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
-                                  <FaPlayCircle className="text-3xl" />
-                                </div>
-                              </div>
-                              <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                                {index + 1}
-                              </div>
-                            </div>
-                            <div className="p-3 bg-white">
-                              <p className="text-sm font-semibold text-[#002b2b] truncate">
-                                {video.title}
-                              </p>
-                              <p className="text-[10px] text-gray-500 mt-0.5">
-                                ▶ Click to watch
-                              </p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-
               {/* COURSE FEE */}
-              <div>
-                <h2 className="text-xl font-bold text-[#00ADD2] mb-4">
+              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h2 className="text-xl font-bold text-[#00ADD2] mb-4 flex items-center gap-2">
+                  <span className="w-1.5 h-6 bg-[#00ADD2] rounded-full inline-block"></span>
                   COURSE FEE
                 </h2>
                 <div className="space-y-3 text-sm">
                   <div className="flex items-start gap-3">
-                    <FaCheckCircle className="text-[#00ADD2] mt-1" />
-                    <span className="block text-[#002b2b] font-medium">
+                    <FaCheckCircle className="text-[#00ADD2] mt-1 text-lg" />
+                    <span className="block text-[#002b2b] font-bold text-base">
                       {courseDetails.feeStructure.monthly}
                     </span>
                   </div>
-                  <div className="mt-4 p-4 bg-cyan-50 rounded-xl border border-cyan-200">
-                    <h3 className="font-bold text-cyan-800 text-sm mb-2">
-                      {courseDetails.feeStructure.oneTime.title}
-                    </h3>
-                    <p className="text-xs text-gray-700 leading-relaxed">
-                      {courseDetails.feeStructure.oneTime.description}
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-3 text-xs">
-                      <span className="text-green-600 font-bold">
+                  <div className="mt-4 p-6 bg-gradient-to-br from-cyan-50 to-white rounded-xl border border-cyan-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <h3 className="font-bold text-cyan-900 text-lg">
+                          {courseDetails.feeStructure.oneTime.title}
+                        </h3>
+                        <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase animate-pulse">
+                          Website Launch Offer
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 leading-relaxed max-w-lg">
+                        {courseDetails.feeStructure.oneTime.description}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end bg-white px-4 py-2 rounded-lg border border-cyan-100 shadow-sm">
+                      <span className="text-gray-400 line-through text-sm font-medium">
+                        {courseDetails.feeStructure.oneTime.originalPrice}
+                      </span>
+
+                      <span className="text-green-600 font-extrabold text-3xl">
                         {courseDetails.feeStructure.oneTime.offer}
                       </span>
                     </div>
@@ -757,51 +696,55 @@ const ImamNabawiDetails = () => {
               </div>
 
               {/* Why This Course? */}
-              <div className="bg-white rounded-3xl shadow-xl p-6 md:p-12 border border-gray-100">
-                <div className="text-center mb-6">
-                  <h2 className="text-2xl md:text-4xl font-bold mb-3 text-[#00ADD2]">
+              <div className="bg-gradient-to-br from-[#002b2b] to-[#004d4d] rounded-2xl shadow-xl p-8 md:p-12 text-white relative overflow-hidden">
+                <div className="absolute -top-10 -right-10 opacity-10">
+                  <FaBook className="text-[150px]" />
+                </div>
+                <div className="text-center mb-6 relative z-10">
+                  <h2 className="text-2xl md:text-3xl font-bold mb-3 text-yellow-400">
                     Why This Course?
                   </h2>
                   <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
                 </div>
-                <p className="text-gray-700 text-center max-w-3xl mx-auto text-base leading-relaxed">
+                <p className="text-gray-200 text-center max-w-3xl mx-auto text-base leading-relaxed relative z-10 font-medium">
                   {whyDescription}
                 </p>
               </div>
 
               {/* VIDEO GALLERY */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <div className="w-1.5 h-8 bg-yellow-500 rounded-full"></div>
+                  <h2 className="text-xl md:text-2xl font-bold text-[#00ADD2]">
                     Video Gallery
                   </h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                   {videoGallery.map((video) => (
                     <div
                       key={video.id}
                       onClick={() => setActiveVideo(video)}
-                      className="group block overflow-hidden rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer"
+                      className="group block overflow-hidden rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer bg-white transform hover:-translate-y-1"
                     >
                       <div className="relative aspect-video bg-gray-200 overflow-hidden">
                         <YoutubeThumbImg
                           url={video.url}
                           alt={video.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
                         />
                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                          <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
-                            <FaPlayCircle className="text-3xl" />
+                          <div className="w-12 h-12 bg-[#008080] rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
+                            <FaPlayCircle className="text-2xl" />
                           </div>
                         </div>
                       </div>
-                      <div className="p-3 bg-white">
-                        <p className="text-sm font-semibold text-[#002b2b] truncate">
+                      <div className="p-3.5">
+                        <p className="text-sm font-bold text-[#002b2b] truncate">
                           {video.title}
                         </p>
-                        <p className="text-[10px] text-gray-500 mt-0.5">
-                          ▶ Click to watch
+                        <p className="text-[10px] text-gray-500 mt-1 font-medium flex items-center gap-1">
+                          <FaPlayCircle className="text-[#00ADD2]" /> Click to
+                          watch
                         </p>
                       </div>
                     </div>
@@ -810,128 +753,168 @@ const ImamNabawiDetails = () => {
               </div>
 
               {/* FAQ */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">FAQ</h2>
+                  <div className="w-1.5 h-8 bg-yellow-500 rounded-full"></div>
+                  <h2 className="text-xl md:text-2xl font-bold text-[#00ADD2]">
+                    FAQ
+                  </h2>
                 </div>
                 <div className="space-y-4">
                   {faqs.map((faq, index) => (
                     <div
                       key={index}
-                      className="border border-gray-200 rounded-xl overflow-hidden"
+                      className={`border rounded-xl overflow-hidden transition-all duration-300 ${
+                        openFaq === index
+                          ? "border-[#00ADD2] shadow-md bg-white"
+                          : "border-gray-200 bg-gray-50 hover:bg-gray-100"
+                      }`}
                     >
                       <button
                         onClick={() => toggleFaq(index)}
-                        className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 text-left transition-colors cursor-pointer"
+                        className="w-full flex items-center justify-between p-4 md:p-5 text-left cursor-pointer"
                       >
-                        <span className="font-bold text-[#002b2b]">
+                        <span
+                          className={`font-bold text-sm md:text-base pr-4 ${openFaq === index ? "text-[#007a91]" : "text-[#002b2b]"}`}
+                        >
                           {index + 1}. {faq.question}
                         </span>
-                        {openFaq === index ? (
-                          <FaChevronUp className="text-gray-500" />
-                        ) : (
-                          <FaChevronDown className="text-gray-500" />
-                        )}
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${openFaq === index ? "bg-[#00ADD2] text-white" : "bg-white text-[#00ADD2] border border-gray-200"}`}
+                        >
+                          {openFaq === index ? (
+                            <FaChevronUp size={12} />
+                          ) : (
+                            <FaChevronDown size={12} />
+                          )}
+                        </div>
                       </button>
-                      {openFaq === index && (
-                        <div className="p-4 bg-white border-t border-gray-200 text-gray-700">
+                      <div
+                        className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                          openFaq === index
+                            ? "max-h-96 opacity-100"
+                            : "max-h-0 opacity-0"
+                        }`}
+                      >
+                        <div className="p-4 md:p-5 pt-0 border-t border-gray-100 text-gray-600 text-sm leading-relaxed">
                           {faq.answer}
                         </div>
-                      )}
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* RIGHT SIDEBAR */}
-            <div className="space-y-6">
-              <div
-                onClick={() => setActiveVideo(videoGallery[0])}
-                className="block relative group overflow-hidden rounded-2xl shadow-sm border border-gray-100 cursor-pointer aspect-video"
-              >
-                <YoutubeThumbImg
-                  url="https://youtu.be/6gMZDMTMEDk"
-                  alt="Promo"
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 pointer-events-none"
-                />
-                <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-colors group-hover:bg-black/40">
-                  <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
-                    <FaPlayCircle className="text-3xl" />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl p-6 text-center shadow-sm border border-[#007a91]">
-                <h1 className="text-2xl font-bold text-[#007a91] mb-6">
-                  ENROLL NOW
-                </h1>
-                <div className="flex items-center justify-center mb-6 relative">
-                  <Link
-                    to="/course/kids/quidaelders/enrollbnagla"
-                    className="w-1/2"
-                  >
-                    <button className="w-full bg-[#007a91] text-white font-bold py-3 text-xs rounded-l-md hover:opacity-90 transition">
-                      Bangla Version
-                    </button>
-                  </Link>
-                  <div className="absolute w-9 h-9 bg-white rounded-full flex items-center justify-center text-[#002b2b] font-medium shadow-md z-10 text-[10px]">
-                    Or
-                  </div>
-                  <Link
-                    to="/enroll/quidaelders/english-version"
-                    className="w-1/2"
-                  >
-                    <button className="w-full bg-[#003d3d] text-white font-bold py-3 text-xs rounded-r-md hover:opacity-90 transition">
-                      English Version
-                    </button>
-                  </Link>
-                </div>
-                <div className="space-y-3 text-left px-1 text-[#002b2b]">
-                  <div className="flex items-center gap-2 text-[15px]">
-                    <span className="font-medium">Course Level:</span>{" "}
-                    <span className="font-bold">All Levels</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[15px]">
-                    <span className="font-medium">Enrolled:</span>{" "}
-                    <span className="font-bold">180</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-[15px]">
-                    <span className="font-medium">Last Updated:</span>{" "}
-                    <span className="font-bold">09/07/2026</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-                <h3 className="text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
-                  Faculty
-                </h3>
-                <div className="space-y-4">
-                  {instructors.map((instructor) => (
-                    <div
-                      key={instructor.id}
-                      className="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-50 border-b border-gray-100 last:border-none"
-                    >
-                      <img
-                        src={instructor.image}
-                        alt={instructor.name}
-                        className="w-12 h-12 rounded-full object-cover border border-yellow-500 flex-shrink-0"
-                      />
-                      <div className="overflow-hidden">
-                        <h4 className="font-bold text-sm text-[#002b2b] truncate">
-                          {instructor.name}
-                        </h4>
-                        <p className="text-xs text-gray-600 truncate">
-                          {instructor.title}
-                        </p>
-                        <p className="text-[11px] text-gray-500 truncate">
-                          {instructor.subtitle}
-                        </p>
-                      </div>
+            {/* RIGHT SIDEBAR (Scrolls naturally now) */}
+            <div className="space-y-6 lg:mt-0 mt-8">
+              <div className="space-y-6">
+                <div
+                  onClick={() => setActiveVideo(videoGallery[0])}
+                  className="block relative group overflow-hidden rounded-2xl shadow-lg border border-gray-100 cursor-pointer aspect-video transform hover:scale-[1.02] transition-transform duration-300"
+                >
+                  <YoutubeThumbImg
+                    url="https://youtu.be/6gMZDMTMEDk"
+                    alt="Promo"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 pointer-events-none"
+                  />
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center transition-colors group-hover:bg-black/40">
+                    <div className="w-16 h-16 bg-[#008080]/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-xl text-white transition-transform group-hover:scale-110 border-4 border-white/20">
+                      <FaPlayCircle className="text-4xl ml-1" />
                     </div>
-                  ))}
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl p-6 shadow-xl border-t-4 border-[#007a91]">
+                  <h1 className="text-xl md:text-2xl font-extrabold text-[#007a91] mb-6 text-center tracking-wide">
+                    ENROLL NOW
+                  </h1>
+
+                  {/* Price Highlight */}
+                  <div className="bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-xl p-4 mb-6 text-center shadow-inner">
+                    <p className="text-xs text-green-700 font-bold uppercase tracking-wider mb-1">
+                      Special Discount
+                    </p>
+                    <div className="flex items-center justify-center gap-3">
+                      <span className="text-gray-400 line-through text-lg">
+                        {courseDetails.feeStructure.oneTime.originalPrice}
+                      </span>
+                      <span className="text-green-600 font-black text-3xl">
+                        {courseDetails.feeStructure.oneTime.offer}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-center mb-6 relative">
+                    <Link to="/admission-now" className="w-1/2">
+                      <button className="w-full bg-[#007a91] hover:bg-[#006a7e] text-white font-bold py-3.5 text-xs md:text-sm rounded-l-xl transition-all shadow-md">
+                        Bangla
+                      </button>
+                    </Link>
+                    <div className="absolute w-8 h-8 md:w-10 md:h-10 bg-white rounded-full flex items-center justify-center text-[#002b2b] font-bold shadow-md z-10 text-[10px] md:text-xs border-2 border-gray-100">
+                      Or
+                    </div>
+                    <Link to="/admission-now" className="w-1/2">
+                      <button className="w-full bg-[#003d3d] hover:bg-[#002b2b] text-white font-bold py-3.5 text-xs md:text-sm rounded-r-xl transition-all shadow-md">
+                        English
+                      </button>
+                    </Link>
+                  </div>
+
+                  <div className="space-y-4 text-left px-1 text-[#002b2b] bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <div className="flex items-center justify-between text-sm md:text-base border-b border-gray-200 pb-2">
+                      <span className="font-medium text-gray-500 flex items-center gap-2">
+                        <FaBook className="text-gray-400" /> Course Level:
+                      </span>{" "}
+                      <span className="font-bold text-[#007a91]">
+                        All Levels
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm md:text-base border-b border-gray-200 pb-2">
+                      <span className="font-medium text-gray-500 flex items-center gap-2">
+                        <FaUserTie className="text-gray-400" /> Enrolled:
+                      </span>{" "}
+                      <span className="font-bold text-green-600">180+</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm md:text-base">
+                      <span className="font-medium text-gray-500 flex items-center gap-2">
+                        <FaInfoCircle className="text-gray-400" /> Updated:
+                      </span>{" "}
+                      <span className="font-bold">09/07/2026</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                  <h3 className="text-lg font-bold text-[#002b2b] mb-4 border-b pb-2 flex items-center gap-2">
+                    <FaUserTie className="text-[#00ADD2]" /> Faculty
+                  </h3>
+                  <div className="space-y-4">
+                    {instructors.map((instructor) => (
+                      <div
+                        key={instructor.id}
+                        className="flex items-center gap-4 p-4 rounded-xl bg-gray-50 border border-gray-100 hover:shadow-md transition-shadow"
+                      >
+                        <img
+                          src={instructor.image}
+                          alt="Instructor"
+                          className="w-16 h-16 rounded-full object-cover border-2 border-yellow-400 flex-shrink-0 shadow-sm"
+                        />
+                        <div className="overflow-hidden">
+                          {/* dangerouslySetInnerHTML for <br> tag support */}
+                          <h4
+                            className="font-bold text-sm text-[#002b2b] leading-tight"
+                            dangerouslySetInnerHTML={{
+                              __html: instructor.name,
+                            }}
+                          />
+                          <p className="text-xs text-gray-500 mt-1 font-medium bg-white inline-block px-2 py-0.5 rounded border border-gray-200">
+                            {instructor.title}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -939,26 +922,25 @@ const ImamNabawiDetails = () => {
         </div>
       </div>
 
-      {/* ✅ ভিডিও প্লেয়ার মোডাল (পপআপ) */}
+      {/* ✅ ভিডিও প্লেয়ার মোডাল (পপআপ) with Security */}
       {activeVideo && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-fadeIn"
           onClick={() => setActiveVideo(null)}
         >
           <div
-            className="relative w-full max-w-5xl bg-black rounded-xl overflow-hidden shadow-2xl"
+            className="relative w-full max-w-5xl bg-black rounded-xl overflow-hidden shadow-2xl border border-gray-800"
             onClick={(e) => e.stopPropagation()}
             onContextMenu={(e) => e.preventDefault()}
           >
             <button
               onClick={() => setActiveVideo(null)}
-              className="absolute top-2 right-2 z-20 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full cursor-pointer shadow-lg"
+              className="absolute top-3 right-3 z-20 bg-red-600 hover:bg-red-700 text-white p-2.5 rounded-full cursor-pointer shadow-lg transition-transform hover:scale-110"
             >
-              <FaTimes />
+              <FaTimes size={18} />
             </button>
 
             <div className="relative aspect-video w-full bg-black overflow-hidden">
-              {/* সিকিউরিটি ফিল্টার */}
               <div
                 className={`w-full h-full transition-all duration-300 ${!isWindowFocused || showSecurityWarning ? "blur-2xl brightness-50 pointer-events-none" : ""}`}
               >
@@ -973,38 +955,38 @@ const ImamNabawiDetails = () => {
                 ></iframe>
               </div>
 
-              {/* সিকিউরিটি ওভারলে */}
               {(!isWindowFocused || showSecurityWarning) && (
-                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/60 text-white p-4 text-center">
-                  <FaShieldAlt className="text-6xl text-red-500 mb-4 animate-pulse" />
-                  <h2 className="text-2xl font-bold mb-2">
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/70 text-white p-4 text-center backdrop-blur-md">
+                  <FaShieldAlt className="text-7xl text-red-500 mb-6 animate-pulse" />
+                  <h2 className="text-3xl font-bold mb-3">
                     ভিডিও লক করা হয়েছে!
                   </h2>
-                  <p className="text-sm max-w-md">
+                  <p className="text-base max-w-md text-gray-300 leading-relaxed">
                     আপনি অন্য ট্যাবে গেছেন বা স্ক্রিন রেকর্ডিং টুল ওপেন করেছেন।
                     ভিডিও দেখতে অনুগ্রহ করে এই ট্যাবে ফিরে আসুন।
                   </p>
                 </div>
               )}
 
-              {/* মুভিং ওয়াটারমার্ক */}
               <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-10 opacity-30">
-                <div className="absolute top-1/4 left-1/4 text-white font-mono text-xl font-bold tracking-widest drop-shadow-md animate-[ping_4s_ease-in-out_infinite]">
+                <div className="absolute top-1/4 left-1/4 text-white font-mono text-xl md:text-3xl font-bold tracking-widest drop-shadow-lg animate-[ping_4s_ease-in-out_infinite]">
                   ID: {loggedStudent?.studentId || "STUDENT"}
                 </div>
-                <div className="absolute bottom-1/4 right-1/4 text-white font-mono text-xl font-bold tracking-widest drop-shadow-md animate-[bounce_5s_infinite]">
+                <div className="absolute bottom-1/4 right-1/4 text-white font-mono text-xl md:text-3xl font-bold tracking-widest drop-shadow-lg animate-[bounce_5s_infinite]">
                   PHONE: {loggedStudent?.phone || "01XXXXXXXXX"}
                 </div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/50 font-bold text-4xl rotate-12">
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/40 font-extrabold text-5xl md:text-7xl rotate-12 drop-shadow-2xl">
                   Tarbiyah Academy
                 </div>
               </div>
             </div>
 
-            <div className="p-4 bg-gray-900 text-white flex justify-between items-center">
-              <h3 className="font-bold text-lg">{activeVideo.title}</h3>
-              <div className="flex items-center gap-1 text-[10px] text-gray-400">
-                <FaShieldAlt /> Protected Content
+            <div className="p-4 md:p-5 bg-[#1a1a1a] text-white flex justify-between items-center border-t border-gray-800">
+              <h3 className="font-bold text-base md:text-xl truncate pr-4">
+                {activeVideo.title}
+              </h3>
+              <div className="flex items-center gap-1.5 text-xs text-gray-400 font-semibold bg-gray-800 px-3 py-1 rounded-full">
+                <FaShieldAlt className="text-green-500" /> Protected Content
               </div>
             </div>
           </div>

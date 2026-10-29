@@ -20,6 +20,11 @@ import {
   FaPrint,
   FaSync,
   FaExchangeAlt,
+  FaPlayCircle,
+  FaTimes,
+  FaShieldAlt,
+  FaChevronDown,
+  FaChevronUp,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -27,7 +32,75 @@ import SupportChatWidget from "./SupportChatWidget";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";
 
-// ✅ Source label helper
+// ✅ ৪০ হাদিসের ভিডিওর ফলব্যাক লিস্ট
+const HADITH_40_VIDEOS = [
+  { title: "Session 1", url: "https://youtu.be/hox2-9CszHg" },
+  { title: "Session 2", url: "https://youtu.be/t0AvtmKesfM" },
+  { title: "Session 3", url: "https://youtu.be/kYMpEvhGbvA" },
+  { title: "Session 4", url: "https://youtu.be/EAan2kTwB_Q" },
+  { title: "Session 5", url: "https://youtu.be/Ltiwcq9JDo0" },
+  { title: "Session 6", url: "https://youtu.be/YnoknCA_TfA" },
+  { title: "Session 7", url: "https://youtu.be/9PrFwap8ckM" },
+  { title: "Session 8", url: "https://youtu.be/e676nmgauqk" },
+  { title: "Session 9", url: "https://youtu.be/Pvci3YmiI-M" },
+  { title: "Session 10", url: "https://youtu.be/RlgHYR5AQ4w" },
+  { title: "Session 11", url: "https://youtu.be/uGVy85PDRHc" },
+  { title: "Session 12", url: "https://youtu.be/lKcUyubyvig" },
+  { title: "Session 13", url: "https://youtu.be/eBdmiDTiVE4" },
+  { title: "Session 14", url: "https://youtu.be/lCZfdO-1YKs" },
+  { title: "Session 15", url: "https://youtu.be/ZApcxoda6Uk" },
+  { title: "Session 16", url: "https://youtu.be/3m_a1HLGWGw" },
+  { title: "Session 17", url: "https://youtu.be/tJ9pjkMF0l4" },
+  { title: "Session 18", url: "https://youtu.be/tIj9WPS6NIw" },
+  { title: "Session 19", url: "https://youtu.be/l6lXJnj6bSk" },
+  { title: "Session 20", url: "https://youtu.be/zzb-nv74tC4" },
+  { title: "Session 21", url: "https://youtu.be/prd_6g4z7I8" },
+  { title: "Session 22", url: "https://youtu.be/JHHGMNCIuMQ" },
+  { title: "Session 23", url: "https://youtu.be/veMS_XpzuJI" },
+  { title: "Session 24", url: "https://youtu.be/rHG9GXK3ngQ" },
+  { title: "Session 25", url: "https://youtu.be/qQdObp3lXB4" },
+  { title: "Session 26", url: "https://youtu.be/HEdnZ2bGzZs" },
+  { title: "Session 27", url: "https://youtu.be/G4JcKcrlRJA" },
+  { title: "Session 28", url: "https://youtu.be/_ecH-mt66mM" },
+  { title: "Session 29", url: "https://youtu.be/zPQ8PwR4yXQ" },
+  { title: "Session 30", url: "https://youtu.be/jbsO30E7pMk" },
+  { title: "Session 31", url: "https://youtu.be/E-q_jmgCZ98" },
+  { title: "Session 32", url: "https://youtu.be/MT2wp0ST0Jw" },
+  { title: "Session 33", url: "https://youtu.be/wEtQ1bp8GP4" },
+  { title: "Session 34", url: "https://youtu.be/yvxxKwQGG54" },
+  { title: "Session 35", url: "https://youtu.be/fEnQz0M-nm4" },
+  { title: "Session 36", url: "https://youtu.be/lAFpYripOSs" },
+  { title: "Session 37", url: "https://youtu.be/PB4OXS4K7aM" },
+  { title: "Session 38", url: "https://youtu.be/kMNu2n6pBLI" },
+  { title: "Session 39", url: "https://youtu.be/dOP7jFBD2pk" },
+  { title: "Session 40", url: "https://youtu.be/aIIVg7Bes-M" },
+  { title: "Session 41", url: "https://youtu.be/aH1P2ymRAiM" },
+  { title: "Session 42", url: "https://youtu.be/Wk9EC1vkPts" },
+];
+
+// ✅ ৮টি মডিউলের টাইটেল (স্ক্রিনশট অনুযায়ী)
+const MODULE_TITLES = [
+  "01. নিয়ত, ঈমান ও ইসলামের মৌলিক পক্ষ",
+  "02. তাকওয়া ও আত্মশুদ্ধি",
+  "03. ইবাদত ও আল্লাহর আনুগত্য",
+  "04. হালাল-হারাম ও শরীয়তের বিধান",
+  "05. উত্তম চরিত্র ও আত্মসংযম",
+  "06. মানুষের অধিকার ও সামাজিক দায়িত্ব",
+  "07. কল্যাণ, ন্যায়বিচার ও সংস্কার",
+  "08. আল্লাহর রহমত ও পরকাল",
+];
+
+// ✅ ভিডিওগুলোকে ৮টি মডিউলে ভাগ করার লজিক (প্রতি মডিউলে ৫টি, শেষে ৭টি)
+const GROUPED_MODULES = MODULE_TITLES.map((title, index) => {
+  const start = index * 5;
+  const end = index === 7 ? 42 : start + 5; // ৮ম মডিউলে বাকি সব ভিডিও থাকবে
+  return {
+    moduleId: index,
+    title: title,
+    videos: HADITH_40_VIDEOS.slice(start, end),
+  };
+});
+
 const getSourceLabel = (src) => {
   if (src === "basic_tazweed_students") return "Basic Tazweed";
   if (src === "najera_batch_students") return "Najera Batch";
@@ -35,13 +108,40 @@ const getSourceLabel = (src) => {
   return "Regular Student";
 };
 
-// ✅ Source badge color helper
 const getSourceColor = (src) => {
   if (src === "basic_tazweed_students") return "bg-green-100 text-green-700";
   if (src === "najera_batch_students") return "bg-purple-100 text-purple-700";
   if (src === "batch_students") return "bg-indigo-100 text-indigo-700";
   return "bg-blue-100 text-blue-700";
 };
+
+const extractYoutubeId = (url) => {
+  if (!url) return "";
+  const match = url.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|v\/))([^&?/]+)/,
+  );
+  return match ? match[1] : "";
+};
+
+const getYoutubeThumb = (url, quality = "maxresdefault") => {
+  const id = extractYoutubeId(url);
+  if (!id) return "";
+  return `https://img.youtube.com/vi/${id}/${quality}.jpg`;
+};
+
+const YoutubeThumbImg = ({ url, alt, className }) => (
+  <img
+    src={getYoutubeThumb(url, "maxresdefault")}
+    alt={alt}
+    className={className}
+    onError={(e) => {
+      if (!e.target.dataset.fallback) {
+        e.target.dataset.fallback = "true";
+        e.target.src = getYoutubeThumb(url, "hqdefault");
+      }
+    }}
+  />
+);
 
 const StudentDashboard = () => {
   const { user, logOut } = useAuth();
@@ -88,6 +188,84 @@ const StudentDashboard = () => {
 
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(false);
+
+  // ✅ ভিডিও প্লেয়ার স্টেট
+  const [courseVideos, setCourseVideos] = useState([]);
+  const [activeVideo, setActiveVideo] = useState(null);
+
+  // ✅ সিকিউরিটি স্টেট
+  const [isWindowFocused, setIsWindowFocused] = useState(true);
+  const [showSecurityWarning, setShowSecurityWarning] = useState(false);
+
+  // ✅ অ্যাডভান্সড সিকিউরিটি ইফেক্ট (স্ক্রিন শেয়ার, স্ক্রিন রেকর্ড এবং স্ক্রিনশট ব্লক)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setIsWindowFocused(false);
+        if (activeVideo) setShowSecurityWarning(true);
+      } else {
+        setIsWindowFocused(true);
+        setShowSecurityWarning(false);
+      }
+    };
+
+    const handleBlur = () => {
+      setTimeout(() => {
+        if (
+          document.activeElement &&
+          document.activeElement.tagName === "IFRAME"
+        ) {
+          return;
+        }
+        setIsWindowFocused(false);
+        if (activeVideo) setShowSecurityWarning(true);
+      }, 200);
+    };
+
+    const handleFocus = () => {
+      setIsWindowFocused(true);
+      setShowSecurityWarning(false);
+    };
+
+    const handleKeyDown = (e) => {
+      if (
+        e.key === "PrintScreen" ||
+        (e.metaKey && e.shiftKey && ["3", "4", "5"].includes(e.key)) ||
+        (e.ctrlKey && e.shiftKey && ["S", "s"].includes(e.key)) ||
+        (e.ctrlKey && e.key === "p") ||
+        e.key === "F12"
+      ) {
+        e.preventDefault();
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(
+              "Screenshot Blocked by Security Policy!",
+            );
+          }
+        } catch (err) {}
+
+        Swal.fire({
+          icon: "warning",
+          title: "সতর্কতা!",
+          text: "ভিডিও কন্টেন্ট স্ক্রিনশট বা রেকর্ড করা কঠোরভাবে নিষিদ্ধ।",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleBlur);
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleBlur);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [activeVideo]);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isStudentLoggedIn");
@@ -242,6 +420,9 @@ const StudentDashboard = () => {
         };
         localStorage.setItem("studentInfo", JSON.stringify(stored));
         localStorage.setItem("loginSource", finalSource);
+
+        // ✅ ভিডিও ফেচ করা
+        fetchVideos(data, finalSource);
       } else {
         console.warn("⚠️ Student not found:", d.message);
       }
@@ -251,6 +432,73 @@ const StudentDashboard = () => {
       console.error("❌ Fetch error:", e);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchVideos = async (studentData, source) => {
+    try {
+      const params = new URLSearchParams();
+      if (studentData._id) params.append("id", studentData._id);
+      if (studentData.studentId)
+        params.append("studentId", studentData.studentId);
+      if (studentData.phone) params.append("phone", studentData.phone);
+      if (studentData.name && studentData.name !== "Student")
+        params.append("name", studentData.name);
+
+      const res = await fetch(
+        `${API_BASE}/student/my-academic?${params.toString()}`,
+      );
+      const d = await res.json();
+
+      let fetchedVideos = d.videos || [];
+
+      // ✅ FALLBACK: যদি API থেকে ভিডিও না আসে কিন্তু কোর্স "Imam Nabawi" হয়
+      const courseName = String(
+        studentData.course ||
+          studentData.batchCourse ||
+          studentData.class ||
+          "",
+      ).toLowerCase();
+      const isHadithCourse =
+        courseName.includes("imam nabawi") || courseName.includes("40 hadith");
+
+      if (fetchedVideos.length === 0 && isHadithCourse) {
+        console.log(
+          "⚠️ my-academic returned 0 videos. Using hardcoded fallback for Imam Nabawi.",
+        );
+        fetchedVideos = HADITH_40_VIDEOS.map((v, i) => ({
+          _id: `fallback_${i}`,
+          title: v.title,
+          url: v.url,
+        }));
+      }
+
+      if (fetchedVideos.length > 0) {
+        console.log(`🎬 Loaded ${fetchedVideos.length} videos for dashboard`);
+        setCourseVideos(fetchedVideos);
+      } else {
+        console.log("ℹ️ No videos found for this student.");
+      }
+    } catch (err) {
+      console.warn("⚠️ Failed to load videos. Checking fallback...");
+      const courseName = String(
+        studentData.course ||
+          studentData.batchCourse ||
+          studentData.class ||
+          "",
+      ).toLowerCase();
+      if (
+        courseName.includes("imam nabawi") ||
+        courseName.includes("40 hadith")
+      ) {
+        setCourseVideos(
+          HADITH_40_VIDEOS.map((v, i) => ({
+            _id: `fallback_${i}`,
+            title: v.title,
+            url: v.url,
+          })),
+        );
+      }
     }
   };
 
@@ -407,7 +655,10 @@ const StudentDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div
+      className="min-h-screen bg-gray-50 flex flex-col select-none"
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <div className="md:hidden bg-white border-b border-gray-200 p-3 flex justify-between items-center">
         <h1 className="text-sm font-bold text-gray-800">Student Dashboard</h1>
         <button
@@ -556,6 +807,8 @@ const StudentDashboard = () => {
               studentInfo={studentInfo}
               courses={courses}
               loadingCourses={loadingCourses}
+              courseVideos={courseVideos}
+              onVideoClick={(video) => setActiveVideo(video)}
               onRefresh={() =>
                 fetchFullStudentData(
                   studentInfo._id || studentInfo.studentId,
@@ -566,6 +819,77 @@ const StudentDashboard = () => {
           )}
         </main>
       </div>
+
+      {/* ✅ ভিডিও প্লেয়ার মোডাল (পপআপ) with Full Security */}
+      {activeVideo && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setActiveVideo(null)}
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          <div
+            className="relative w-full max-w-5xl bg-black rounded-xl overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setActiveVideo(null)}
+              className="absolute top-2 right-2 z-20 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full cursor-pointer shadow-lg"
+            >
+              <FaTimes />
+            </button>
+
+            <div className="relative aspect-video w-full bg-black overflow-hidden">
+              <div
+                className={`w-full h-full transition-all duration-300 ${!isWindowFocused || showSecurityWarning ? "blur-2xl brightness-50 pointer-events-none" : ""}`}
+              >
+                <iframe
+                  src={`https://www.youtube.com/embed/${extractYoutubeId(activeVideo.url)}?autoplay=1&modestbranding=1&rel=0&showinfo=0`}
+                  title={activeVideo.title}
+                  className="w-full h-full border-none pointer-events-auto"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  disablePictureInPicture
+                  controlsList="nodownload"
+                ></iframe>
+              </div>
+
+              {/* সিকিউরিটি ওভারলে */}
+              {(!isWindowFocused || showSecurityWarning) && (
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/60 text-white p-4 text-center">
+                  <FaShieldAlt className="text-6xl text-red-500 mb-4 animate-pulse" />
+                  <h2 className="text-2xl font-bold mb-2">
+                    ভিডিও লক করা হয়েছে!
+                  </h2>
+                  <p className="text-sm max-w-md">
+                    আপনি অন্য ট্যাবে গেছেন বা স্ক্রিন রেকর্ডিং টুল ওপেন করেছেন।
+                    ভিডিও দেখতে অনুগ্রহ করে এই ট্যাবে ফিরে আসুন।
+                  </p>
+                </div>
+              )}
+
+              {/* মুভিং ওয়াটারমার্ক */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-10 opacity-30">
+                <div className="absolute top-1/4 left-1/4 text-white font-mono text-xl font-bold tracking-widest drop-shadow-md animate-[ping_4s_ease-in-out_infinite]">
+                  ID: {studentInfo?.studentId || "STUDENT"}
+                </div>
+                <div className="absolute bottom-1/4 right-1/4 text-white font-mono text-xl font-bold tracking-widest drop-shadow-md animate-[bounce_5s_infinite]">
+                  PHONE: {studentInfo?.phone || "01XXXXXXXXX"}
+                </div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white/50 font-bold text-4xl rotate-12">
+                  Tarbiyah Academy
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-900 text-white flex justify-between items-center">
+              <h3 className="font-bold text-lg">{activeVideo.title}</h3>
+              <div className="flex items-center gap-1 text-[10px] text-gray-400">
+                <FaShieldAlt /> Protected Content
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ✅ Support Chat Widget — Floating Button */}
       <SupportChatWidget />
@@ -580,10 +904,15 @@ const DashboardContent = ({
   studentInfo,
   courses,
   loadingCourses,
+  courseVideos,
+  onVideoClick,
   onRefresh,
 }) => {
   const navigate = useNavigate();
   const [paymentTab, setPaymentTab] = useState("summary");
+
+  // ✅ মডিউল ওপেন/ক্লোজ করার স্টেট (প্রথম মডিউল ডিফল্ট ওপেন থাকবে)
+  const [openModule, setOpenModule] = useState(0);
 
   const totalBill = Number(studentInfo.courseFee) || 0;
   const totalPaid = Number(studentInfo.paidAmount) || 0;
@@ -591,6 +920,10 @@ const DashboardContent = ({
 
   const courseDisplayValue =
     studentInfo.course || studentInfo.batchCourse || studentInfo.class || "N/A";
+
+  // ✅ ভিডিওগুলো গ্রুপ করা (ফলব্যাক লিস্টের জন্য)
+  // নোট: যদি ড্যাশবোর্ডে API থেকে ভিডিও আসে, তবে সেগুলোও ৫টি করে মডিউলে ভাগ হবে
+  const displayModules = GROUPED_MODULES;
 
   return (
     <div className="space-y-4">
@@ -895,6 +1228,83 @@ const DashboardContent = ({
         </div>
       </div>
 
+      {/* ✅ Recorded Course Videos Section (Module Wise) */}
+      {courseVideos.length > 0 && (
+        <div className="bg-white border-2 border-teal-100 rounded-xl shadow-sm p-4 md:p-6 mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-1.5 h-6 bg-[#00ADD2] rounded-full"></div>
+            <h2 className="text-xl font-bold text-[#00ADD2]">
+              🎬 Course Modules & Videos
+            </h2>
+          </div>
+
+          <div className="space-y-4">
+            {displayModules.map((module, mIndex) => (
+              <div
+                key={mIndex}
+                className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm"
+              >
+                {/* মডিউল হেডার (ক্লিক করলে ওপেন/ক্লোজ হবে) */}
+                <button
+                  onClick={() =>
+                    setOpenModule(openModule === mIndex ? null : mIndex)
+                  }
+                  className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-[#e6f7f9] transition-colors text-left"
+                >
+                  <span className="font-bold text-[#002b2b] text-[15px]">
+                    {module.title}
+                  </span>
+                  <span className="text-[#00ADD2]">
+                    {openModule === mIndex ? (
+                      <FaChevronUp />
+                    ) : (
+                      <FaChevronDown />
+                    )}
+                  </span>
+                </button>
+
+                {/* মডিউলের ভেতরের ভিডিও গ্রিড */}
+                {openModule === mIndex && (
+                  <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-white border-t border-gray-100">
+                    {module.videos.map((video, index) => (
+                      <div
+                        key={video._id || index}
+                        onClick={() => onVideoClick(video)}
+                        className="group block overflow-hidden rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer bg-white"
+                      >
+                        <div className="relative aspect-video bg-gray-200 overflow-hidden">
+                          <YoutubeThumbImg
+                            url={video.url}
+                            alt={video.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
+                          />
+                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
+                              <FaPlayCircle className="text-2xl" />
+                            </div>
+                          </div>
+                          <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                            {video.title.replace("Session ", "")}
+                          </div>
+                        </div>
+                        <div className="p-3">
+                          <p className="text-sm font-semibold text-[#002b2b] truncate">
+                            {video.title}
+                          </p>
+                          <p className="text-[10px] text-gray-500 mt-0.5">
+                            ▶ Click to watch
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <PaymentSection
         paymentTab={paymentTab}
         setPaymentTab={setPaymentTab}
@@ -908,7 +1318,7 @@ const DashboardContent = ({
 };
 
 // ==========================================
-// Payment Section
+// Payment Section (Unchanged)
 // ==========================================
 const PaymentSection = ({
   paymentTab,
