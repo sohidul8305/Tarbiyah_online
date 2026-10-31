@@ -382,7 +382,7 @@ const ImamNabawiDetails = () => {
       bn: "ইমাম নববীর ৪০ হাদিসের রেকর্ডেড কোর্স",
     }),
     description: t({
-      en: "Imam Nawawi's collection of 40 Hadiths presents the core teachings of Islam—belief, worship, character, ethics, and daily life—in a concise yet profound manner. In this recorded course, each hadith is explained with Arabic text, word meanings, translation, commentary, and practical application in an easy and clear style. The course is designed for self-paced learning from anywhere, at any time.",
+      en: "Imam Nawawi's collection of 40 Hadiths presents the core teachings of Islam belief, worship, character, ethics, and daily life in a concise yet profound manner. In this recorded course, each hadith is explained with Arabic text, word meanings, translation, commentary, and practical application in an easy and clear style. The course is designed for self-paced learning from anywhere, at any time.",
       bn: "ইমাম নববী (রহ.) সংকলিত ৪০ হাদিস ইসলামের মৌলিক শিক্ষা, আকীদাহ, ইবাদত, আখলাক, চরিত্র গঠন এবং দৈনন্দিন জীবনের গুরুত্বপূর্ণ বিষয়গুলোকে সংক্ষিপ্ত অথচ গভীরভাবে তুলে ধরেছে। এই রেকর্ডেড কোর্সে প্রতিটি হাদিসের আরবি পাঠ, শব্দার্থ, অনুবাদ, ব্যাখ্যা, শিক্ষা ও বাস্তব জীবনে প্রয়োগ সহজ ও প্রাঞ্জলভাবে উপস্থাপন করা হবে। নিজের সুবিধামতো সময়ে, যেকোনো স্থান থেকে, ধাপে ধাপে ৪০ হাদিস অধ্যয়ন করার জন্য কোর্সটি বিশেষভাবে সাজানো হয়েছে।",
     }),
     objectives: [
