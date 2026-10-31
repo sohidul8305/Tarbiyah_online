@@ -475,8 +475,8 @@ const ImamNabawiDetails = () => {
   };
 
   const whyDescription = t({
-    en: "Imam Nabawi's 40 Hadiths is not just a collection of hadiths; it is a concise and rich curriculum of the fundamental teachings of Islam. Through this course, you will be able to learn the teachings of Hadith in easy language and find ways to implement them in your own life.",
-    bn: "ইমাম নববীর ৪০ হাদিস শুধু একটি হাদিস সংকলন নয়; বরং ইসলামের মৌলিক শিক্ষার একটি সংক্ষিপ্ত ও সমৃদ্ধ পাঠ্যক্রম। এই কোর্সের মাধ্যমে আপনি সহজ ভাষায় হাদিসের শিক্ষা জানতে পারবেন এবং তা নিজের জীবনে বাস্তবায়নের পথ খুঁজে পাবেন।",
+    en: "Imam Nawawi's 40 Hadiths is not just a collection. It is a concise yet deep reading of the fundamental teachings of Islam, Aqidah, worship, Akhlaq, and important aspects of daily life. In this course, you will learn the teachings of Hadith in easy language and find ways to apply them in your own life.",
+    bn: "ইমাম নববী ৪০ হাদিস শুধু একটি সংকলন নয়। এটি ইসলামের মৌলিক শিক্ষা, আকিদা, ইবাদত, আখলাক ও দৈনন্দিন জীবনের গুরুত্বপূর্ণ বিষয়ের সংক্ষিপ্ত অথচ গভীর পাঠ। এই কোর্সে সহজ ভাষায় হাদিসের শিক্ষা জানবেন এবং নিজের জীবনে প্রয়োগের পথ খুঁজে পাবেন।",
   });
 
   const videoGallery = [
@@ -700,6 +700,48 @@ const ImamNabawiDetails = () => {
                 </p>
               </div>
 
+              {/* ✅ NEW SECTION: What You Will Get in Each Session (From Screenshot) */}
+              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h2 className="text-xl font-bold text-[#00ADD2] mb-6 flex items-center gap-2">
+                  <span className="w-1.5 h-6 bg-[#00ADD2] rounded-full inline-block"></span>
+                  {t({
+                    en: "WHAT YOU WILL GET IN EACH SESSION",
+                    bn: "প্রতিটি সেশনে যা পাবেন",
+                  })}
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    t({
+                      en: "Arabic text of the Hadith",
+                      bn: "হাদিসের আরবি পাঠ",
+                    }),
+                    t({
+                      en: "Word meanings and translation",
+                      bn: "শব্দার্থ ও অনুবাদ",
+                    }),
+                    t({
+                      en: "Explanation and necessary discussion",
+                      bn: "ব্যাখ্যা ও প্রয়োজনীয় আলোচনা",
+                    }),
+                    t({
+                      en: "Guidance on practical application in real life",
+                      bn: "বাস্তব জীবনে প্রয়োগের দিকনির্দেশনা",
+                    }),
+                  ].map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 p-4 rounded-xl bg-gray-50 border border-gray-100 hover:shadow-md transition-shadow"
+                    >
+                      {/* ছবির মতো সবুজ/টিল রঙের চেকমার্ক */}
+                      <FaCheckCircle className="text-[#008080] text-xl flex-shrink-0" />
+                      <span className="text-gray-700 text-sm font-semibold">
+                        {item}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-2xl p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md">
                 <div>
                   <h3 className="text-xl md:text-2xl font-bold text-[#002b2b]">
@@ -894,7 +936,10 @@ const ImamNabawiDetails = () => {
                 </div>
                 <div className="text-center mb-6 relative z-10">
                   <h2 className="text-2xl md:text-3xl font-bold mb-3 text-yellow-400">
-                    {t({ en: "Why This Course?", bn: "কেন এই কোর্স?" })}
+                    {t({
+                      en: "Why Attend This Course?",
+                      bn: "এই কোর্স কেন করবেন",
+                    })}
                   </h2>
                   <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
                 </div>
