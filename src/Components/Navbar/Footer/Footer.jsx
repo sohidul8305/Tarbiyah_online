@@ -94,12 +94,6 @@ const Footer = () => {
             >
               {t({ en: "Donate", bn: "ডোনেট" })}
             </a>
-            <a
-              href="/course/diploma/details"
-              className="hover:text-teal-300 transition-colors truncate sm:col-span-2"
-            >
-              {t({ en: "Diploma Details", bn: "ডিপ্লোমা বিস্তারিত" })}
-            </a>
           </div>
         </div>
 
