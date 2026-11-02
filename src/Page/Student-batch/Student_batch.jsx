@@ -50,13 +50,11 @@ const API_URL = "https://api.tarbiyahonline.com";
 
 // ✅ Department → Courses mapping
 const COURSE_OPTIONS_BY_DEPT = {
-  Elders: ["Bakarah Hifz", "Basic Tajweed (Level-1)", "Najera"],
-  "Quran Studies": [
-    "Qaida Nurani",
-    "Nazera Quran",
-    "Hifzul Quran",
-    "Hifz Revision",
-    "One-to-One Quran Learning",
+  Elders: [
+    "Qayidah Nuraniyah",
+    "Najera",
+    "Basic Tajweed",
+    "Surah Baqarah Hifz",
   ],
   Alimiya: ["Alimiyah for Kids", "Alimiyah Program"],
   Diploma: ["Diploma in Islamic Studies", "Certificate"],

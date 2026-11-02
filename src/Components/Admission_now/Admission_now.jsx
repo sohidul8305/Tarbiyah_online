@@ -9,10 +9,10 @@ const DEPARTMENT_MAP = {
   alemiyah: "Alimiya",
   "quran-studies": "Quran Studies",
   "quran-elders": "Elders",
-  "recorded-courses": "Diploma", // 👈 নতুন লাইন
+  "recorded-courses": "Diploma",
 };
 
-// ✅ Batch Schedule Constants (Quran Studies only) — OUTSIDE component
+// ✅ Batch Schedule Constants (Quran Studies only)
 const BATCH_SCHEDULES = {
   regular: {
     label: "Regular Batch",
@@ -31,7 +31,7 @@ const Admission_now = () => {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    // Personal Information
+    // Personal
     name: "",
     nationalId: "",
     dateOfBirth: "",
@@ -39,7 +39,7 @@ const Admission_now = () => {
     phoneNumber: "",
     email: "",
 
-    // Family Information
+    // Family
     fatherName: "",
     motherName: "",
     guardianPhone: "",
@@ -48,23 +48,21 @@ const Admission_now = () => {
     presentAddress: "",
     permanentAddress: "",
 
-    // Additional Information
+    // Additional
     gender: "",
     occupation: "",
     maritalStatus: "",
 
-    // Course Selection
+    // Course
     selectedDepartment: "",
     selectedCourses: [],
 
-    // ✅ Quran Studies Batch Schedule
+    // Batch
     batchType: "",
     batchSchedule: "",
 
-    // ✅ Payment Screenshot (required for offline)
+    // Payment
     paymentScreenshot: "",
-
-    // Payment Information
     paymentMethod: "",
     paymentType: "",
     transactionId: "",
@@ -161,7 +159,7 @@ const Admission_now = () => {
         {
           id: "qs1",
           name: "Qaida Noorani (Bangla Medium)",
-          duration: " Flexible",
+          duration: "Flexible",
           admissionFee: 1000,
           monthlyFee: 1000,
           totalOneTime: 1000 + 1000 * 2,
@@ -171,7 +169,7 @@ const Admission_now = () => {
         {
           id: "qs1i",
           name: "Qaida Noorani (International)",
-          duration: " Flexible",
+          duration: "Flexible",
           admissionFee: 2000,
           monthlyFee: 2000,
           totalOneTime: 2000 + 2000 * 2,
@@ -254,48 +252,63 @@ const Admission_now = () => {
       name: "Quran for Elders",
       courses: [
         {
-          id: "qe1",
-          name: "Qaida Nooraniya",
+          id: "qe-qayidah",
+          name: "Qayidah Nuraniyah",
           duration: "4 Months",
           admissionFee: 1000,
-          monthlyFee: 1000,
+          courseFee: 4000,
           totalOneTime: 5000,
-          discount: 500,
-          price: 4500,
+          price: 5000,
+          discount: 0,
+          classDays: "Sat & Sun",
+          classTimes: ["6:00 – 7:30 AM", "3:00 – 4:30 PM", "8:00 – 9:30 PM"],
+          autoBatchBase: "Qayidah Nuraniyah Batch-03",
+          isEldersCourse: true,
         },
         {
-          id: "qe2",
-          name: "Quran Nazera",
+          id: "qe-najera",
+          name: "Najera",
           duration: "4 Months",
           admissionFee: 1000,
-          monthlyFee: 1000,
+          courseFee: 4000,
           totalOneTime: 5000,
-          discount: 500,
-          price: 4500,
+          price: 5000,
+          discount: 0,
+          classDays: "Sat, Mon & Wed",
+          classTimes: ["6:00 – 7:30 AM", "3:00 – 4:30 PM", "8:00 – 9:30 PM"],
+          autoBatchBase: "Najerah Batch-02",
+          isEldersCourse: true,
         },
         {
-          id: "qe4",
-          name: "Basic Tajweed (Level-1)",
+          id: "qe-tajweed",
+          name: "Basic Tajweed",
           duration: "4 Months",
           admissionFee: 1000,
-          monthlyFee: 1000,
+          courseFee: 4000,
           totalOneTime: 5000,
-          discount: 500,
-          price: 4500,
+          price: 5000,
+          discount: 0,
+          classDays: "Sun & Tue",
+          classTimes: ["6:00 – 7:30 AM", "3:00 – 4:30 PM", "8:00 – 9:30 PM"],
+          autoBatchBase: "Tajweed Batch-06",
+          isEldersCourse: true,
         },
         {
-          id: "qe6",
-          name: "Bakarah Hifz",
+          id: "qe-baqarah",
+          name: "Surah Baqarah Hifz",
           duration: "6 Months",
           admissionFee: 1000,
-          monthlyFee: 1000,
-          totalOneTime: 6000,
-          discount: 500,
-          price: 5500,
+          courseFee: 6000,
+          totalOneTime: 7000,
+          price: 7000,
+          discount: 0,
+          classDays: "Sun & Tue",
+          classTimes: ["6:00 – 7:30 AM", "3:00 – 4:30 PM", "8:00 – 9:30 PM"],
+          autoBatchBase: "Surah Baqarah Hifz Batch-02",
+          isEldersCourse: true,
         },
       ],
     },
-
     "recorded-courses": {
       name: "Recorded Courses",
       courses: [
@@ -328,6 +341,49 @@ const Admission_now = () => {
     },
   };
 
+  // ============================================================
+  // HELPERS
+  // ============================================================
+  const getCurrentCourses = () =>
+    departments[formData.selectedDepartment]?.courses || [];
+
+  // ✅ Gender-aware Elders batch name
+  const getEldersBatchName = (genderOverride = null) => {
+    if (formData.selectedDepartment !== "quran-elders") return "";
+    const course = getCurrentCourses().find((c) =>
+      formData.selectedCourses.includes(c.id),
+    );
+    if (!course?.autoBatchBase) return "";
+    const gender = genderOverride ?? formData.gender;
+    const suffix =
+      gender === "female"
+        ? "Female"
+        : gender === "male"
+          ? "Male"
+          : "Male/Female";
+    return `${course.autoBatchBase} (${suffix})`;
+  };
+
+  const calculateTotal = () => {
+    let total = 0;
+    const currentCourses = getCurrentCourses();
+    formData.selectedCourses.forEach((courseId) => {
+      const course = currentCourses.find((c) => c.id === courseId);
+      if (course) total += course.price || course.totalOneTime || 0;
+    });
+    return total;
+  };
+
+  const getSelectedCourseDetails = () => {
+    const currentCourses = getCurrentCourses();
+    return formData.selectedCourses
+      .map((courseId) => currentCourses.find((c) => c.id === courseId))
+      .filter(Boolean);
+  };
+
+  // ============================================================
+  // FORM HANDLERS
+  // ============================================================
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -355,10 +411,7 @@ const Admission_now = () => {
         batchSchedule: "",
       });
     } else {
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
+      setFormData({ ...formData, [name]: value });
     }
   };
 
@@ -379,22 +432,12 @@ const Admission_now = () => {
   const handleDateChange = (e) => {
     const dob = e.target.value;
     if (dob) {
-      const age = calculateAge(dob);
-      setFormData({
-        ...formData,
-        dateOfBirth: dob,
-        age: age,
-      });
+      setFormData({ ...formData, dateOfBirth: dob, age: calculateAge(dob) });
     } else {
-      setFormData({
-        ...formData,
-        dateOfBirth: "",
-        age: "",
-      });
+      setFormData({ ...formData, dateOfBirth: "", age: "" });
     }
   };
 
-  // ✅ Image upload with canvas compression
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -440,10 +483,7 @@ const Admission_now = () => {
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
         const compressed = canvas.toDataURL("image/jpeg", 0.8);
-        setFormData((prev) => ({
-          ...prev,
-          paymentScreenshot: compressed,
-        }));
+        setFormData((prev) => ({ ...prev, paymentScreenshot: compressed }));
       };
       img.src = reader.result;
     };
@@ -451,7 +491,7 @@ const Admission_now = () => {
   };
 
   // ============================================================
-  // ✅ validateStep — FIXED (duplicate lines removed)
+  // VALIDATION
   // ============================================================
   const validateStep = (currentStep) => {
     const missing = [];
@@ -460,9 +500,14 @@ const Admission_now = () => {
       if (!formData.selectedDepartment) missing.push("Department");
       if (formData.selectedCourses.length === 0)
         missing.push("At least 1 Course");
+
       if (formData.selectedDepartment === "quran-studies") {
         if (!formData.batchType) missing.push("Batch Type (Regular/Overseas)");
         if (!formData.batchSchedule) missing.push("Time Slot");
+      }
+
+      if (formData.selectedDepartment === "quran-elders") {
+        if (!formData.batchSchedule) missing.push("Class Time Slot");
       }
     }
 
@@ -497,9 +542,6 @@ const Admission_now = () => {
     return missing;
   };
 
-  // ============================================================
-  // handleNext — warning UI
-  // ============================================================
   const handleNext = () => {
     const missing = validateStep(step);
 
@@ -520,42 +562,13 @@ const Admission_now = () => {
       });
       return;
     }
-
     setStep(step + 1);
   };
 
-  const handlePrevious = () => {
-    setStep(step - 1);
-  };
-
-  const getCurrentCourses = () => {
-    return departments[formData.selectedDepartment]?.courses || [];
-  };
-
-  const calculateTotal = () => {
-    let total = 0;
-    const currentCourses = getCurrentCourses();
-    formData.selectedCourses.forEach((courseId) => {
-      const course = currentCourses.find((c) => c.id === courseId);
-      if (course) {
-        total += course.price || course.totalOneTime || 0;
-      }
-    });
-    return total;
-  };
-
-  const getSelectedCourseDetails = () => {
-    const currentCourses = getCurrentCourses();
-    return formData.selectedCourses
-      .map((courseId) => {
-        const course = currentCourses.find((c) => c.id === courseId);
-        return course || null;
-      })
-      .filter(Boolean);
-  };
+  const handlePrevious = () => setStep(step - 1);
 
   // ============================================================
-  // SSLCommerz Payment Handler
+  // SSL COMMERZ PAYMENT
   // ============================================================
   const handleSSLCommerzPayment = async () => {
     const missing = [
@@ -616,7 +629,11 @@ const Admission_now = () => {
           phone: formData.phoneNumber,
           course: selectedCourseNames.join(", "),
           department: departmentName,
-          batchType: formData.batchType || "",
+          // ✅ Gender-aware batch for elders
+          batchType:
+            formData.selectedDepartment === "quran-elders"
+              ? getEldersBatchName()
+              : formData.batchType || "",
           batchSchedule: formData.batchSchedule || "",
           paymentScreenshot: formData.paymentScreenshot || "",
           fatherName: formData.fatherName,
@@ -633,7 +650,6 @@ const Admission_now = () => {
           occupation: formData.occupation,
           maritalStatus: formData.maritalStatus,
           country: "BD",
-          // ✅ Payment fields
           courseFee: calculateTotal(),
           paymentType: "online",
           paymentMethod: "SSLCommerz",
@@ -673,7 +689,7 @@ const Admission_now = () => {
   };
 
   // ============================================================
-  // handleSubmit
+  // SUBMIT
   // ============================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -734,7 +750,11 @@ const Admission_now = () => {
           formData.selectedDepartment ||
           "Not Specified",
         department: departmentName,
-        batchType: formData.batchType || "",
+        // ✅ Gender-aware batch for elders
+        batchType:
+          formData.selectedDepartment === "quran-elders"
+            ? getEldersBatchName()
+            : formData.batchType || "",
         batchSchedule: formData.batchSchedule || "",
         paymentScreenshot: formData.paymentScreenshot || "",
         fatherName: formData.fatherName || "",
@@ -753,7 +773,7 @@ const Admission_now = () => {
         transactionId: formData.transactionId || "",
         paidAmount: formData.paidAmount || "",
         paymentRemarks: formData.paymentRemarks || "",
-        paymentStatus: paymentStatus,
+        paymentStatus,
         status: "Pending",
         admissionDate: new Date().toISOString(),
       };
@@ -769,7 +789,6 @@ const Admission_now = () => {
 
       const data = await response.json();
       if (data.success) {
-        // ⬇️ এই ৮ লাইন কোড এখানে বসাবেন ⬇️
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({
           event: "generate_lead",
@@ -777,7 +796,18 @@ const Admission_now = () => {
           lead_type: "admission",
           course_name: selectedCourseNames.join(", ") || departmentName,
         });
-        // ⬆️ এখান পর্যন্ত ⬆️
+
+        // ✅ Batch info line — conditional for elders
+        const batchInfoHtml =
+          formData.selectedDepartment === "quran-elders" &&
+          formData.batchSchedule
+            ? `<p><strong>Auto Batch:</strong> ${getEldersBatchName()} • ${formData.batchSchedule}</p>`
+            : formData.batchType
+              ? `<p><strong>Batch:</strong> ${
+                  BATCH_SCHEDULES[formData.batchType]?.label
+                } (${formData.batchSchedule})</p>`
+              : "";
+
         Swal.fire({
           icon: "success",
           title: "🎉 Admission Completed!",
@@ -788,13 +818,7 @@ const Admission_now = () => {
               <p><strong>Email:</strong> ${formData.email}</p>
               <p><strong>Department:</strong> ${departmentName}</p>
               <p><strong>Course:</strong> ${selectedCourseNames.join(", ") || "N/A"}</p>
-              ${
-                formData.batchType
-                  ? `<p><strong>Batch:</strong> ${
-                      BATCH_SCHEDULES[formData.batchType]?.label
-                    } (${formData.batchSchedule})</p>`
-                  : ""
-              }
+              ${batchInfoHtml}
               <p><strong>Payment Method:</strong> ${formData.paymentMethod || "N/A"}</p>
               <p><strong>Transaction ID:</strong> ${formData.transactionId || "N/A"}</p>
               <p><strong>Payment Status:</strong> ${paymentStatus}</p>
@@ -870,6 +894,11 @@ const Admission_now = () => {
       setLoading(false);
     }
   };
+
+  // ============================================================
+  // RENDER
+  // ============================================================
+  const isEldersFee = formData.selectedDepartment === "quran-elders";
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -989,6 +1018,19 @@ const Admission_now = () => {
                               )}
                             </h4>
 
+                            {/* ✅ Class Days + Times (elders only) */}
+                            {course.classDays && (
+                              <p className="text-[11px] text-blue-700 font-semibold mt-0.5">
+                                📅 {course.classDays}
+                              </p>
+                            )}
+                            {course.classTimes &&
+                              course.classTimes.length > 0 && (
+                                <p className="text-[10px] text-gray-600">
+                                  🕐 {course.classTimes.join(" • ")}
+                                </p>
+                              )}
+
                             <div className="flex justify-between items-center mt-1">
                               <span className="text-xs text-gray-500">
                                 Duration: {course.duration}
@@ -1011,6 +1053,12 @@ const Admission_now = () => {
                                   >
                                     ৳{course.price.toLocaleString()}
                                   </span>
+                                  {course.isEldersCourse && (
+                                    <p className="text-[9px] text-gray-500 mt-0.5">
+                                      Admission ৳{course.admissionFee} + Course
+                                      ৳{course.courseFee}
+                                    </p>
+                                  )}
                                   {course.originalPrice > course.price && (
                                     <p className="text-[10px] text-green-600 font-semibold">
                                       🎉 Website Launch Offer — Save ৳
@@ -1040,10 +1088,7 @@ const Admission_now = () => {
               {formData.selectedDepartment === "quran-studies" && (
                 <div
                   className="mt-6 p-4 rounded-lg border-2"
-                  style={{
-                    backgroundColor: "#f0f9fa",
-                    borderColor: "#00ADD2",
-                  }}
+                  style={{ backgroundColor: "#f0f9fa", borderColor: "#00ADD2" }}
                 >
                   <h3
                     className="font-semibold text-lg mb-1"
@@ -1123,7 +1168,6 @@ const Admission_now = () => {
                                 value={slot}
                                 checked={formData.batchSchedule === slot}
                                 onChange={handleInputChange}
-                                disabled={course.isComingSoon}
                                 className="h-4 w-4"
                               />
                               <span className="text-sm">{slot}</span>
@@ -1150,6 +1194,95 @@ const Admission_now = () => {
                 </div>
               )}
 
+              {/* ✅ Quran for Elders Time Slot */}
+              {formData.selectedDepartment === "quran-elders" && (
+                <div
+                  className="mt-6 p-4 rounded-lg border-2"
+                  style={{ backgroundColor: "#f0f9fa", borderColor: "#00ADD2" }}
+                >
+                  <h3
+                    className="font-semibold text-lg mb-1"
+                    style={{ color: "#00ADD2" }}
+                  >
+                    🕐 Class Time Selection
+                  </h3>
+                  <p className="text-xs text-gray-600 mb-4">
+                    All times are in <strong>Bangladesh Time (BST)</strong>.
+                    Choose your preferred slot — you will be auto-enrolled into
+                    the running batch.
+                  </p>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Time Slot *
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                      {[
+                        "6:00 – 7:30 AM",
+                        "3:00 – 4:30 PM",
+                        "8:00 – 9:30 PM",
+                      ].map((slot) => (
+                        <label
+                          key={slot}
+                          className="flex items-center gap-2 p-2.5 border-2 rounded-lg cursor-pointer hover:bg-white transition"
+                          style={{
+                            borderColor:
+                              formData.batchSchedule === slot
+                                ? "#00ADD2"
+                                : "#d1d5db",
+                            backgroundColor:
+                              formData.batchSchedule === slot
+                                ? "#e6f7f9"
+                                : "transparent",
+                          }}
+                        >
+                          <input
+                            type="radio"
+                            name="batchSchedule"
+                            value={slot}
+                            checked={formData.batchSchedule === slot}
+                            onChange={handleInputChange}
+                            className="h-4 w-4"
+                          />
+                          <span className="text-sm font-medium">{slot}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {formData.batchSchedule &&
+                    formData.selectedCourses.length > 0 && (
+                      <div
+                        className="mt-3 p-3 rounded-lg border border-[#b3e5ec]"
+                        style={{ backgroundColor: "#e6f7f9" }}
+                      >
+                        <p className="text-xs text-gray-700">
+                          <strong>Course:</strong>{" "}
+                          {getCurrentCourses().find((c) =>
+                            formData.selectedCourses.includes(c.id),
+                          )?.name || ""}
+                        </p>
+                        <p className="text-xs text-gray-700">
+                          <strong>Time Slot:</strong> {formData.batchSchedule}
+                        </p>
+                        <p className="text-xs text-gray-700">
+                          <strong>Auto Batch:</strong>{" "}
+                          <span className="text-[#004d4d] font-bold">
+                            {getEldersBatchName()}
+                          </span>
+                        </p>
+                        {!formData.gender && (
+                          <p className="text-[10px] text-orange-600 mt-1">
+                            ⚠️ আপনার ব্যাচ (Male / Female) পরের ধাপে gender
+                            সিলেক্ট করলে নির্ধারিত হবে।
+                          </p>
+                        )}
+                      </div>
+                    )}
+                </div>
+              )}
+
+              {/* Selected Courses Summary */}
               {formData.selectedCourses.length > 0 && (
                 <div
                   className="p-4 rounded-lg mt-4"
@@ -1528,7 +1661,10 @@ const Admission_now = () => {
                           <th className="px-3 py-2 text-left">Course</th>
                           <th className="px-3 py-2 text-left">Duration</th>
                           <th className="px-3 py-2 text-left">Admission</th>
-                          <th className="px-3 py-2 text-left">Monthly</th>
+                          {/* ✅ Conditional header */}
+                          <th className="px-3 py-2 text-left">
+                            {isEldersFee ? "Course Fee" : "Monthly"}
+                          </th>
                           <th className="px-3 py-2 text-left">One-Time</th>
                           <th className="px-3 py-2 text-left">Save</th>
                         </tr>
@@ -1547,7 +1683,10 @@ const Admission_now = () => {
                               ৳{course.admissionFee?.toLocaleString() || 0}
                             </td>
                             <td className="px-3 py-2">
-                              ৳{course.monthlyFee?.toLocaleString() || 0}
+                              {/* ✅ Conditional value */}
+                              {isEldersFee
+                                ? `৳${course.courseFee?.toLocaleString() || 0}`
+                                : `৳${course.monthlyFee?.toLocaleString() || 0}`}
                             </td>
                             <td className="px-3 py-2 font-bold text-[#00ADD2]">
                               ৳
@@ -1582,8 +1721,8 @@ const Admission_now = () => {
                     </table>
                   </div>
                   <p className="text-xs text-gray-500 mt-2">
-                    * One-Time payment includes admission + all monthly fees
-                    with applicable discount.
+                    * One-Time payment includes admission + course fees with
+                    applicable discount.
                   </p>
                 </div>
               )}
@@ -1765,7 +1904,7 @@ const Admission_now = () => {
                   )}
                 </div>
 
-                {/* ✅ Payment Proof — Transaction ID + Screenshot (Combined) */}
+                {/* Payment Proof */}
                 {formData.paymentMethod !== "ssl" && (
                   <div className="col-span-2">
                     <label className="block text-sm font-bold text-gray-800 mb-3">
@@ -1773,7 +1912,6 @@ const Admission_now = () => {
                       <span className="text-red-600 font-semibold">*</span>
                     </label>
 
-                    {/* Instruction Card */}
                     <div className="rounded-xl overflow-hidden border-2 border-[#00ADD2] shadow-sm mb-4">
                       <div
                         className="px-4 py-2.5 flex items-center gap-2"
@@ -1853,7 +1991,7 @@ const Admission_now = () => {
                       </div>
                     </div>
 
-                    {/* ✅ 1️⃣ Transaction ID Field */}
+                    {/* Transaction ID */}
                     <div className="mb-4">
                       <label className="block text-sm font-bold text-gray-800 mb-2">
                         🔑 Transaction ID{" "}
@@ -1877,7 +2015,7 @@ const Admission_now = () => {
                       </p>
                     </div>
 
-                    {/* ✅ 2️⃣ Payment Screenshot Upload */}
+                    {/* Screenshot Upload */}
                     <div>
                       <label className="block text-sm font-bold text-gray-800 mb-2">
                         📸 Payment Screenshot{" "}
@@ -1991,6 +2129,7 @@ const Admission_now = () => {
                 </div>
               )}
 
+              {/* Payment Summary */}
               <div
                 className="p-4 rounded-lg border"
                 style={{ backgroundColor: "#f0f9fa", borderColor: "#00ADD2" }}
@@ -2012,15 +2151,33 @@ const Admission_now = () => {
                       : "-"}
                   </span>
                 </div>
-                {formData.batchType && (
-                  <div className="flex justify-between">
-                    <span>Batch:</span>
-                    <span className="font-semibold">
-                      {BATCH_SCHEDULES[formData.batchType]?.label} (
-                      {formData.batchSchedule})
-                    </span>
-                  </div>
-                )}
+
+                {/* ✅ Non-elders batch */}
+                {formData.batchType &&
+                  formData.selectedDepartment !== "quran-elders" && (
+                    <div className="flex justify-between">
+                      <span>Batch:</span>
+                      <span className="font-semibold">
+                        {BATCH_SCHEDULES[formData.batchType]?.label} (
+                        {formData.batchSchedule})
+                      </span>
+                    </div>
+                  )}
+
+                {/* ✅ Elders gender-aware batch */}
+                {formData.selectedDepartment === "quran-elders" &&
+                  formData.batchSchedule && (
+                    <div className="flex justify-between">
+                      <span>Auto Batch:</span>
+                      <span
+                        className="font-semibold"
+                        style={{ color: "#00ADD2" }}
+                      >
+                        {getEldersBatchName()}
+                      </span>
+                    </div>
+                  )}
+
                 <div className="flex justify-between">
                   <span>Payment Method:</span>
                   <span className="font-semibold">
