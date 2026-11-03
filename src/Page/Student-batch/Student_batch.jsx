@@ -1451,6 +1451,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
         `${API_URL}/api/batch-students/all?batchId=${encodeURIComponent(batchId)}`,
       );
       const data = await res.json();
+      console.log(`🔍 Fetching students for BatchID: ${batchId}`, data);
       setDbStudents(data.success ? data.students || [] : []);
     } catch (e) {
       console.error("❌ fetchDbStudents error:", e);

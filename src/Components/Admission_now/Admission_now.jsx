@@ -356,8 +356,14 @@ const Admission_now = () => {
     );
     if (!course?.autoBatchBase) return "";
 
-    // ✅ শুধু "Qayidah Nuraniyah Batch-03" রিটার্ন করবে, কোনো Male/Female যুক্ত হবে না
-    return course.autoBatchBase;
+    // ✅ Gender অনুযায়ী Batch Name
+    let genderSuffix = "";
+    if (formData.gender === "male") genderSuffix = " (Male)";
+    else if (formData.gender === "female") genderSuffix = " (Female)";
+
+    if (!genderSuffix) return course.autoBatchBase;
+
+    return course.autoBatchBase + genderSuffix;
   };
 
   const calculateTotal = () => {
