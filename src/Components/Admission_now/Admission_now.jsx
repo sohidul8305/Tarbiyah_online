@@ -348,20 +348,16 @@ const Admission_now = () => {
     departments[formData.selectedDepartment]?.courses || [];
 
   // ✅ Gender-aware Elders batch name
-  const getEldersBatchName = (genderOverride = null) => {
+  // ✅ Gender-aware Elders batch name (MODIFIED - No Gender Suffix)
+  const getEldersBatchName = () => {
     if (formData.selectedDepartment !== "quran-elders") return "";
     const course = getCurrentCourses().find((c) =>
       formData.selectedCourses.includes(c.id),
     );
     if (!course?.autoBatchBase) return "";
-    const gender = genderOverride ?? formData.gender;
-    const suffix =
-      gender === "female"
-        ? "Female"
-        : gender === "male"
-          ? "Male"
-          : "Male/Female";
-    return `${course.autoBatchBase} (${suffix})`;
+
+    // ✅ শুধু "Qayidah Nuraniyah Batch-03" রিটার্ন করবে, কোনো Male/Female যুক্ত হবে না
+    return course.autoBatchBase;
   };
 
   const calculateTotal = () => {

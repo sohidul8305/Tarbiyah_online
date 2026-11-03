@@ -420,20 +420,22 @@ const Student_batch = () => {
     if (!adminDepartment || adminDepartment === "All") return true;
 
     const target = String(adminDepartment).toLowerCase().trim();
-
-    // 🔥 Priority 1: exact department field (সবচেয়ে নির্ভরযোগ্য)
     const batchDept = String(batch.department || "")
       .toLowerCase()
       .trim();
 
-    if (batchDept) {
-      return batchDept === target; // ✅ Strict match
+    // ✅ ফ্লেক্সিবল ম্যাচিং (যেমন: "elders" এবং "elders department" দুটোই ম্যাচ করবে)
+    if (
+      batchDept &&
+      (batchDept === target ||
+        batchDept.includes(target) ||
+        target.includes(batchDept))
+    ) {
+      return true;
     }
 
-    // 🔥 Priority 2: department field নেই (পুরনো batch) — course name দেখে
-    const keywords = DEPT_COURSE_KEYWORDS[adminDepartment];
-    if (!keywords) return false;
-
+    // যদি department ফিল্ড না থাকে, তবে course name দেখে ম্যাচ করবে
+    const keywords = DEPT_COURSE_KEYWORDS[adminDepartment] || [];
     const courseStr = String(batch.course || "").toLowerCase();
     const nameStr = String(batch.name || "").toLowerCase();
     const combined = courseStr + " " + nameStr;
