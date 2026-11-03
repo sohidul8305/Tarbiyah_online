@@ -2955,6 +2955,87 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
                     <InfoRow label="Videos" value={videos.length} />
                   </div>
                 </div>
+                {/* ✅ নতুন যোগ করা হলো: Enrolled Students Overview */}
+                <div className="bg-white rounded-xl border border-gray-200 p-4 mt-4">
+                  <p className="text-sm font-bold text-gray-800 mb-3 flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <FaUserGraduate className="text-indigo-600" /> Enrolled
+                      Students Overview
+                    </span>
+                    <span className="text-[10px] bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full">
+                      Total: {students.length}
+                    </span>
+                  </p>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="bg-gray-50 text-gray-600 border-b border-gray-200">
+                          <th className="px-2 py-2 text-left font-bold">
+                            Name
+                          </th>
+                          <th className="px-2 py-2 text-left font-bold">
+                            Student ID
+                          </th>
+                          <th className="px-2 py-2 text-left font-bold">
+                            Father's Name
+                          </th>
+                          <th className="px-2 py-2 text-left font-bold">
+                            Phone
+                          </th>
+                          <th className="px-2 py-2 text-left font-bold">
+                            Payment
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {students.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan="5"
+                              className="text-center py-4 text-gray-500 italic"
+                            >
+                              No students enrolled in this batch yet.
+                            </td>
+                          </tr>
+                        ) : (
+                          students.map((stu) => (
+                            <tr
+                              key={stu._id}
+                              className="hover:bg-gray-50 transition-colors"
+                            >
+                              <td className="px-2 py-2 font-semibold text-gray-800">
+                                {stu.name}
+                              </td>
+                              <td className="px-2 py-2 text-gray-600 font-mono">
+                                {stu.studentId || "N/A"}
+                              </td>
+                              <td className="px-2 py-2 text-gray-600">
+                                {stu.fatherName || stu.guardianName || "N/A"}
+                              </td>
+                              <td className="px-2 py-2 text-gray-600">
+                                {stu.phone || "N/A"}
+                              </td>
+                              <td className="px-2 py-2">
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-[9px] font-semibold ${
+                                    stu.paymentStatus === "Paid"
+                                      ? "bg-green-100 text-green-700"
+                                      : stu.paymentStatus === "Partial"
+                                        ? "bg-yellow-100 text-yellow-700"
+                                        : "bg-red-100 text-red-700"
+                                  }`}
+                                >
+                                  {stu.paymentStatus || "Unpaid"}
+                                </span>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
                 <div className="bg-white rounded-xl border border-gray-200 p-4">
                   <p className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
