@@ -923,7 +923,47 @@ const DashboardContent = ({
 
   // ✅ ভিডিওগুলো গ্রুপ করা (ফলব্যাক লিস্টের জন্য)
   // নোট: যদি ড্যাশবোর্ডে API থেকে ভিডিও আসে, তবে সেগুলোও ৫টি করে মডিউলে ভাগ হবে
-  const displayModules = GROUPED_MODULES;
+  // ✅ স্টুডেন্ট আসলে ইমাম নববী ৪০ হাদিস কোর্সে এনরোল কিনা চেক
+  const isHadithStudent = React.useMemo(() => {
+    const courseName = String(
+      studentInfo.course || studentInfo.batchCourse || studentInfo.class || "",
+    ).toLowerCase();
+    return (
+      courseName.includes("imam nabawi") ||
+      courseName.includes("40 hadith") ||
+      courseName.includes("hadiths") ||
+      courseName.includes("হাদিস")
+    );
+  }, [studentInfo.course, studentInfo.batchCourse, studentInfo.class]);
+
+  // ✅ আসল courseVideos থেকে module বানানো (হার্ডকোড ৪২টি ভিডিও বাদ)
+  const displayModules = React.useMemo(() => {
+    if (!courseVideos || courseVideos.length === 0) return [];
+
+    // ইমাম নববী কোর্স হলে ৮টি বাংলা টাইটেল ব্যবহার করবো
+    if (isHadithStudent && courseVideos.length >= 40) {
+      return MODULE_TITLES.map((title, index) => {
+        const start = index * 5;
+        const end = index === 7 ? courseVideos.length : start + 5;
+        return {
+          moduleId: index,
+          title,
+          videos: courseVideos.slice(start, end),
+        };
+      }).filter((m) => m.videos.length > 0);
+    }
+
+    // অন্য কোর্সের (যেমন Surah Baqarah) জন্য generic module
+    const modules = [];
+    for (let i = 0; i < courseVideos.length; i += 5) {
+      modules.push({
+        moduleId: Math.floor(i / 5),
+        title: `Module ${Math.floor(i / 5) + 1}`,
+        videos: courseVideos.slice(i, i + 5),
+      });
+    }
+    return modules;
+  }, [courseVideos, isHadithStudent]);
 
   return (
     <div className="space-y-4">
@@ -1229,81 +1269,83 @@ const DashboardContent = ({
       </div>
 
       {/* ✅ Recorded Course Videos Section (Module Wise) */}
-      {courseVideos.length > 0 && (
-        <div className="bg-white border-2 border-teal-100 rounded-xl shadow-sm p-4 md:p-6 mb-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-1.5 h-6 bg-[#00ADD2] rounded-full"></div>
-            <h2 className="text-xl font-bold text-[#00ADD2]">
-              🎬 Course Modules & Videos
-            </h2>
-          </div>
+      {isHadithStudent &&
+        courseVideos.length > 0 &&
+        displayModules.length > 0 && (
+          <div className="bg-white border-2 border-teal-100 rounded-xl shadow-sm p-4 md:p-6 mb-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-1.5 h-6 bg-[#00ADD2] rounded-full"></div>
+              <h2 className="text-xl font-bold text-[#00ADD2]">
+                🎬 Course Modules & Videos
+              </h2>
+            </div>
 
-          <div className="space-y-4">
-            {displayModules.map((module, mIndex) => (
-              <div
-                key={mIndex}
-                className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm"
-              >
-                {/* মডিউল হেডার (ক্লিক করলে ওপেন/ক্লোজ হবে) */}
-                <button
-                  onClick={() =>
-                    setOpenModule(openModule === mIndex ? null : mIndex)
-                  }
-                  className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-[#e6f7f9] transition-colors text-left"
+            <div className="space-y-4">
+              {displayModules.map((module, mIndex) => (
+                <div
+                  key={mIndex}
+                  className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm"
                 >
-                  <span className="font-bold text-[#002b2b] text-[15px]">
-                    {module.title}
-                  </span>
-                  <span className="text-[#00ADD2]">
-                    {openModule === mIndex ? (
-                      <FaChevronUp />
-                    ) : (
-                      <FaChevronDown />
-                    )}
-                  </span>
-                </button>
+                  {/* মডিউল হেডার (ক্লিক করলে ওপেন/ক্লোজ হবে) */}
+                  <button
+                    onClick={() =>
+                      setOpenModule(openModule === mIndex ? null : mIndex)
+                    }
+                    className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-[#e6f7f9] transition-colors text-left"
+                  >
+                    <span className="font-bold text-[#002b2b] text-[15px]">
+                      {module.title}
+                    </span>
+                    <span className="text-[#00ADD2]">
+                      {openModule === mIndex ? (
+                        <FaChevronUp />
+                      ) : (
+                        <FaChevronDown />
+                      )}
+                    </span>
+                  </button>
 
-                {/* মডিউলের ভেতরের ভিডিও গ্রিড */}
-                {openModule === mIndex && (
-                  <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-white border-t border-gray-100">
-                    {module.videos.map((video, index) => (
-                      <div
-                        key={video._id || index}
-                        onClick={() => onVideoClick(video)}
-                        className="group block overflow-hidden rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer bg-white"
-                      >
-                        <div className="relative aspect-video bg-gray-200 overflow-hidden">
-                          <YoutubeThumbImg
-                            url={video.url}
-                            alt={video.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
-                          />
-                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
-                              <FaPlayCircle className="text-2xl" />
+                  {/* মডিউলের ভেতরের ভিডিও গ্রিড */}
+                  {openModule === mIndex && (
+                    <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-white border-t border-gray-100">
+                      {module.videos.map((video, index) => (
+                        <div
+                          key={video._id || index}
+                          onClick={() => onVideoClick(video)}
+                          className="group block overflow-hidden rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer bg-white"
+                        >
+                          <div className="relative aspect-video bg-gray-200 overflow-hidden">
+                            <YoutubeThumbImg
+                              url={video.url}
+                              alt={video.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
+                            />
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                              <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
+                                <FaPlayCircle className="text-2xl" />
+                              </div>
+                            </div>
+                            <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                              {video.title.replace("Session ", "")}
                             </div>
                           </div>
-                          <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                            {video.title.replace("Session ", "")}
+                          <div className="p-3">
+                            <p className="text-sm font-semibold text-[#002b2b] truncate">
+                              {video.title}
+                            </p>
+                            <p className="text-[10px] text-gray-500 mt-0.5">
+                              ▶ Click to watch
+                            </p>
                           </div>
                         </div>
-                        <div className="p-3">
-                          <p className="text-sm font-semibold text-[#002b2b] truncate">
-                            {video.title}
-                          </p>
-                          <p className="text-[10px] text-gray-500 mt-0.5">
-                            ▶ Click to watch
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       <PaymentSection
         paymentTab={paymentTab}
