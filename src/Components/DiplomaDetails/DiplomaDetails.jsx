@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router";
 import BannerImg from "../../image/diplomacover.png";
 import CourseImg from "../../image/diplomathumball.png";
-// Swiper and required modules
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination } from "swiper/modules";
 import ProfessorImg from "../../image/profile.jpg";
@@ -43,7 +42,7 @@ import {
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 
-// --- Language Hook ---
+// ---------- Language Hook ----------
 export const useLanguage = () => {
   const [language, setLanguage] = useState(
     () => localStorage.getItem("language") || "en",
@@ -63,7 +62,7 @@ export const useLanguage = () => {
 
   return { language, t };
 };
-// ---------------------------------------------------------
+// -----------------------------------
 
 const DiplomaDetails = () => {
   const { t } = useLanguage();
@@ -83,7 +82,7 @@ const DiplomaDetails = () => {
     setOpenSemester(openSemester === index ? null : index);
   };
 
-  // Instructors
+  // ---------- Instructors ----------
   const instructors = [
     {
       id: 1,
@@ -166,10 +165,7 @@ const DiplomaDetails = () => {
         en: "Writer, Islamic writer and thinker",
         bn: "লেখক, ইসলামিক লেখক ও চিন্তাবিদ",
       }),
-      subtitle: t({
-        en: "Subject: Seerah",
-        bn: "বিষয়: সীরাহ",
-      }),
+      subtitle: t({ en: "Subject: Seerah", bn: "বিষয়: সীরাহ" }),
       image: JakariyamasudImg,
     },
     {
@@ -244,7 +240,7 @@ const DiplomaDetails = () => {
     },
   ];
 
-  // ✅ NEW Semester data (from your file)
+  // ---------- Semesters ----------
   const semestersData = [
     {
       title: t({ en: "1st Year - Semester 1", bn: "১ম বর্ষ - সেমিস্টার ১" }),
@@ -395,7 +391,7 @@ const DiplomaDetails = () => {
     },
   ];
 
-  // Program Structure data
+  // ---------- Program Structure ----------
   const programStructure = {
     duration: t({ en: "2 Years (6 Semesters)", bn: "২ বছর (৬ সেমিস্টার)" }),
     classMethod: t({ en: "Online (Zoom)", bn: "অনলাইন (জুম)" }),
@@ -458,7 +454,7 @@ const DiplomaDetails = () => {
     },
   ];
 
-  // Testimonials (stay Bengali)
+  // ---------- Testimonials ----------
   const testimonials = [
     {
       id: 1,
@@ -483,7 +479,7 @@ const DiplomaDetails = () => {
       name: "TAHMINA TARIN",
       designation: "STUDENT ID: TDIS23B6056, BATCH: 5&6",
       quote:
-        "লাস্ট সেমিস্টার এ আমার সবচেয়ে ভালো লেগেছে কমপারেটিভ রিলিজিওন। উস্তাদ ডঃ আবু বকর যাকারিয়া এতো সুন্দর করে ভেঙ্গে ভেঙ্গে দ্বীন, ধর্ম, রিলিজিওন এর পার্থক্য এবং বিভিন্ন ধর্মগুলো এতো নিখুঁত ভাবে উপস্থাপন করেছেন যে আমাদের মন এবং মস্তিষ্কে তা গভীরভাবে গেথে গিয়েছে। আলহামদুলিল্লাহ।",
+        "লাস্ট সেমিস্টার এ আমার সবচেয়ে ভালো লেগেছে কমপারেটিভ রিলিজিওন। উস্তাদ ডঃ আবু বকর যাকারিয়া এতো সুন্দর করে ভেঙ্গে ভেঙ্গে দ্বীন, ধর্ম, রিলিজিওন এর পার্থক্য এবং বিভিন্ন ধর্মগুলো এতো নিখুঁত ভাবে উপস্থাপন করেছেন যে আমাদের মন এবং মস্তিষ্কে তা গভীরভাবে গেথে গিয়েছে। আলহামদুলিল্লাহ। আমি শ্রদ্ধেয় উস্তাদগণের দীর্ঘায়ু কামনা করছি। পাশাপাশি তারবিয়া একাডেমি কে ধন্যবাদ জানাবো আমাদের জন্য এতো সুন্দর, ওয়েল অর্গানাইজড একটা কোর্স করার সুযোগ করে দেওয়ার জন্য। জাযাকুমুল্লাহ খাইরান।",
       image:
         "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
@@ -493,7 +489,7 @@ const DiplomaDetails = () => {
       designation:
         "স্টুডেন্ট: ৫ম সেমিস্টার, ডিপার্টমেন্ট: ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
       quote:
-        "আলহামদুলিল্লাহ আমাদের সকল উস্তায খুবই বিনয়ের সাথে ক্লাস বুঝিয়ে দিয়ে থাকেন, বিশেষ করে উস্তায ডঃ যুবায়েরের ইহসান তার ক্লাসে পড়া বুঝিয়ে দেন এবং পড়াগুলো ক্লাসেই আদায় করে নেন।",
+        "আলহামদুলিল্লাহ আমাদের সকল উস্তায খুবই বিনয়ের সাথে ক্লাস বুঝিয়ে দিয়ে থাকেন, বিশেষ করে উস্তায ডঃ যুবায়েরের ইহসান তার ক্লাসে পড়া বুঝিয়ে দেন এবং পড়াগুলো ক্লাসেই আদায় করে নেন। মাঝে মাঝে গুগল ফর্মে HW দিয়ে থাকেন। উস্তাযের পড়ানোর এই নিয়ম নীতি আমার কাছে খুবই ভালো লাগে।",
       image:
         "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
@@ -503,7 +499,7 @@ const DiplomaDetails = () => {
       designation:
         "Former Assistant Professor, Dept. of CSE, BUBT (স্টুডেন্ট: ১ম সেমিস্টার, ডিপ্লোমা ইন ইসলামিক স্টাডিজ)",
       quote:
-        "হাদিস- ক্লাসের রেকর্ড অনেক গোছানো, নোট আছে। সিরাহ কোর্সের মতই সমসাময়িক বিষয়ে হাদিসগুলোর প্রয়োগ বুঝতে পেরেছি। এই কোর্সের বড় একটা ভালো দিক- প্রতিটা লেসনের শেষে Sample Question আছে।",
+        "হাদিস- ক্লাসের রেকর্ড অনেক গোছানো, নোট আছে। সিরাহ কোর্সের মতই সমসাময়িক বিষয়ে হাদিসগুলোর প্রয়োগ বুঝতে পেরেছি। এই কোর্সের বড় একটা ভালো দিক- প্রতিটা লেসনের শেষে Sample Question আছে। এতে করে পরীক্ষা ভীতি দূর হয়েছে। আলহামদুলিল্লাহ।",
       image:
         "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
@@ -512,13 +508,13 @@ const DiplomaDetails = () => {
       name: "জান্নাতি মহল মিলোরা",
       designation: "শিক্ষার্থী: ডিপ্লোমা ইন ইসলামিক স্টাডিজ, ২য় সেমিস্টার",
       quote:
-        "আলহামদুলিল্লাহ প্রত্যেক ওস্তাদের ক্লাস অত্যন্ত আনন্দের সাথে করছি। আমি মহান আল্লাহ তায়ালার কাছে শুকরিয়া জ্ঞাপন করছি যে আল্লাহ তায়ালা আমাকে এই কোর্স করার তৌফিক দান করেছেন।",
+        "আলহামদুলিল্লাহ প্রত্যেক ওস্তাদের ক্লাস অত্যন্ত আনন্দের সাথে করছি। আমার কাছে প্রত্যেক ওস্তাদকেই ভীষণ ভালো লাগে এবং আমি মহান আল্লাহ তায়ালার কাছে শুকরিয়া জ্ঞাপন করছি যে আল্লাহ তায়ালা আমাকে এই কোর্স করার তৌফিক দান করেছেন।",
       image:
         "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
   ];
 
-  // Video Gallery
+  // ---------- Video Gallery ----------
   const videoGallery = [
     {
       id: 1,
@@ -558,7 +554,7 @@ const DiplomaDetails = () => {
     },
   ];
 
-  // FAQ
+  // ---------- FAQ ----------
   const faqs = [
     {
       question: t({
@@ -660,7 +656,7 @@ const DiplomaDetails = () => {
 
           {/* MAIN GRID */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-            {/* ============= LEFT / MAIN COLUMN ============= */}
+            {/* =========== LEFT / MAIN COLUMN =========== */}
             <div className="lg:col-span-2 space-y-6">
               {/* Banner */}
               <img
@@ -730,8 +726,7 @@ const DiplomaDetails = () => {
                 </div>
               )}
 
-              {/* ===== ABOUT COURSE ===== */}
-              {/* ===== ABOUT COURSE ===== */}
+              {/* ===== ABOUT COURSE (নতুন বাইলিঙ্গুয়াল কনটেন্ট) ===== */}
               <div className="p-4 sm:p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
@@ -739,7 +734,6 @@ const DiplomaDetails = () => {
                     {t({ en: "ABOUT COURSE", bn: "কোর্স সম্পর্কে" })}
                   </h2>
                 </div>
-
                 <div className="space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
                   <p>
                     {t({
@@ -747,42 +741,36 @@ const DiplomaDetails = () => {
                       bn: "বর্তমান যুগে জ্ঞান, প্রযুক্তি ও সভ্যতার ব্যাপক অগ্রগতির পাশাপাশি মানুষের জীবনে নৈতিকতা, আত্মিক উন্নয়ন এবং সঠিক জীবনদর্শনের প্রয়োজনীয়তা ক্রমেই বৃদ্ধি পাচ্ছে। ব্যক্তি, পরিবার ও সমাজের সুন্দর ও কল্যাণময় বিকাশের জন্য প্রয়োজন বিশুদ্ধ ঈমান, প্রামাণ্য জ্ঞান এবং ইসলামের সঠিক উপলব্ধি।",
                     })}
                   </p>
-
                   <p>
                     {t({
                       en: "Both Muslim men and women need to develop their lives in accordance with the teachings and values of Islam. However, amid the demands and changing realities of modern life, it is often difficult for many people to pursue Islamic knowledge in a structured and continuous manner. This creates an increasing need for sound knowledge of Aqeedah, worship, the Qur'an and Hadith, Seerah, Islamic history, and other aspects of daily life.",
                       bn: "একজন মুসলিম নারী ও পুরুষ উভয়েরই জীবনের প্রতিটি ক্ষেত্রে ইসলামের শিক্ষা ও মূল্যবোধের আলোকে নিজেকে পরিচালিত করা প্রয়োজন। কিন্তু ব্যস্ত ও পরিবর্তনশীল জীবনের বাস্তবতায় অনেকের পক্ষেই সুসংহত ও ধারাবাহিকভাবে ইসলামি জ্ঞান অর্জন করা সম্ভব হয়ে ওঠে না। ফলে আকীদাহ, ইবাদত, কুরআন-হাদীস, সীরাত, ইসলামের ইতিহাস এবং দৈনন্দিন জীবনের বিভিন্ন বিষয়ে সঠিক জ্ঞান অর্জনের প্রয়োজন অনুভূত হয়।",
                     })}
                   </p>
-
                   <p>
                     {t({
                       en: "With this need in mind, Tarbiyah Online's \"Diploma in Islamic Studies\" is a structured, systematic, and authentic Islamic learning program. It is not merely a program for earning a diploma; rather, it is a meaningful academic journey of developing knowledge, faith, practice, and character in the light of the Qur'an and Sunnah.",
                       bn: "এই প্রয়োজনকে সামনে রেখে তারবিয়াহ অনলাইনের “Diploma in Islamic Studies” একটি সুসংহত, ধারাবাহিক ও প্রামাণ্য ইসলামি শিক্ষাপ্রোগ্রাম। এটি শুধু একটি ডিপ্লোমা অর্জনের কোর্স নয়; বরং কুরআন ও সুন্নাহর আলোকে জ্ঞান, ঈমান, আমল এবং ব্যক্তিত্বের বিকাশের একটি সুন্দর শিক্ষাযাত্রা।",
                     })}
                   </p>
-
                   <p>
                     {t({
                       en: "The program offers a systematic study of Qur'an Studies and Tajweed, Islamic Aqeedah, Fiqhul Ibadah, Hadith Studies, the Seerah of the Prophet Muhammad ﷺ, Islamic History, the Arabic Language, and other important areas of Islamic knowledge. Beginning with foundational subjects and progressing through important areas of study, the curriculum aims to help students build a strong and balanced foundation in Islamic knowledge.",
                       bn: "এই প্রোগ্রামে কুরআন স্টাডিজ ও তাজউইদ, ইসলামি আকীদাহ, ফিকহুল ইবাদাহ, হাদীস স্টাডিজ, সীরাতুন্নবী ﷺ, ইসলামের ইতিহাস, আরবি ভাষা এবং অন্যান্য গুরুত্বপূর্ণ ইসলামি বিষয়সমূহ ধারাবাহিকভাবে অধ্যয়নের সুযোগ রয়েছে। মৌলিক জ্ঞান থেকে শুরু করে বিভিন্ন গুরুত্বপূর্ণ বিষয়ে পর্যায়ক্রমে শিক্ষা প্রদানের মাধ্যমে শিক্ষার্থীদের একটি সুদৃঢ় ও ভারসাম্যপূর্ণ ইসলামি জ্ঞানের ভিত্তি গড়ে তোলার চেষ্টা করা হয়।",
                     })}
                   </p>
-
                   <p>
                     {t({
                       en: "Tarbiyah Online believes that authentic Islamic knowledge does more than provide information—it shapes a person's thoughts, character, behaviour, and outlook on life. The combination of sound knowledge and faith helps a Muslim live with greater awareness and contribute positively to the well-being of the family, society, and the Ummah.",
                       bn: "তারবিয়াহ অনলাইন বিশ্বাস করে, প্রামাণ্য ইসলামি জ্ঞান একজন মানুষকে শুধু তথ্যসমৃদ্ধ করে না; বরং তার চিন্তা, চরিত্র, আচরণ ও জীবনদৃষ্টিকে প্রভাবিত করে। সঠিক জ্ঞান ও ঈমানের সমন্বয় একজন মুসলিমকে নিজের জীবনকে সুন্দরভাবে পরিচালিত করতে এবং পরিবার, সমাজ ও উম্মাহর কল্যাণে ইতিবাচক ভূমিকা রাখতে সহায়তা করে।",
                     })}
                   </p>
-
                   <p>
                     {t({
                       en: "Diploma in Islamic Studies is a meaningful educational journey for both men and women—an opportunity to develop oneself as a conscious, responsible, and principled Muslim through authentic knowledge, sound faith, and the practical application of Islamic teachings in everyday life.",
                       bn: "Diploma in Islamic Studies নারী ও পুরুষ উভয়ের জন্য এমন একটি শিক্ষাযাত্রা—যেখানে প্রামাণ্য জ্ঞান, বিশুদ্ধ ঈমান এবং বাস্তব জীবনে ইসলামের শিক্ষার প্রয়োগের মাধ্যমে একজন সচেতন, দায়িত্বশীল ও আদর্শবান মুসলিম হিসেবে নিজেকে গড়ে তোলার সুযোগ রয়েছে।",
                     })}
                   </p>
-
                   <p className="font-semibold text-[#002b2b] text-center pt-2 italic">
                     {t({
                       en: "A meaningful journey of knowledge, faith, and practice.",
@@ -850,8 +838,8 @@ const DiplomaDetails = () => {
                 </div>
                 <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                   {t({
-                    en: "The Men's Diploma in Islamic Studies is a comprehensive two-year online program, specially designed for men—enabling them to pursue institutional Islamic education from home, even amid busy and responsibility-filled lives.",
-                    bn: "মেনস ডিপ্লোমা ইন ইসলামিক স্টাডিজ একটি পূর্ণাঙ্গ দ্বিবার্ষিক অনলাইন প্রোগ্রাম, যা বিশেষভাবে পুরুষদের জন্য ডিজাইন করা হয়েছে—যাতে তারা ব্যস্ত ও দায়িত্বপূর্ণ জীবনযাপনের মধ্যেও ঘরে বসে প্রাতিষ্ঠানিক ইসলামি শিক্ষা গ্রহণ করতে পারেন।",
+                    en: "The Diploma in Islamic Studies is a comprehensive two-year online program, specially designed for both men and women—enabling them to pursue institutional Islamic education from home, even amid busy and responsibility-filled lives.",
+                    bn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ একটি পূর্ণাঙ্গ দ্বিবার্ষিক অনলাইন প্রোগ্রাম, যা বিশেষভাবে নারী-পুরুষ উভয়ের জন্য ডিজাইন করা হয়েছে—যাতে তারা ব্যস্ত ও দায়িত্বপূর্ণ জীবনযাপনের মধ্যেও ঘরে বসে প্রাতিষ্ঠানিক ইসলামি শিক্ষা গ্রহণ করতে পারেন।",
                   })}
                 </p>
                 <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
@@ -894,7 +882,7 @@ const DiplomaDetails = () => {
                 </p>
               </div>
 
-              {/* ===== MISSION (Updated with your content) ===== */}
+              {/* ===== MISSION ===== */}
               <div className="bg-gradient-to-br from-[#002b2b] to-[#003d3d] rounded-3xl p-4 sm:p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
@@ -902,29 +890,39 @@ const DiplomaDetails = () => {
                     {t({ en: "MISSION", bn: "মিশন" })}
                   </h2>
                 </div>
-                <div className="space-y-4 text-white leading-relaxed text-sm sm:text-base">
-                  <p>
+                <ul className="space-y-3 text-white text-sm sm:text-base">
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-400 font-bold">»</span>
                     {t({
-                      en: "In the present era, alongside the massive advancement of knowledge, technology, and civilization, the need for morality, spiritual development, and the right life philosophy in human life is increasingly growing. For the beautiful and welfare-oriented development of individuals, families, and society, pure faith (Iman), authentic knowledge, and the correct understanding of Islam are essential.",
-                      bn: "বর্তমান যুগে জ্ঞান, প্রযুক্তি ও সভ্যতার ব্যাপক অগ্রগতির পাশাপাশি মানুষের জীবনে নৈতিকতা, আত্মিক উন্নয়ন এবং সঠিক জীবনদর্শনের প্রয়োজনীয়তা ক্রমেই বৃদ্ধি পাচ্ছে। ব্যক্তি, পরিবার ও সমাজের সুন্দর ও কল্যাণময় বিকাশের জন্য প্রয়োজন বিশুদ্ধ ঈমান, প্রামাণ্য জ্ঞান এবং ইসলামের সঠিক উপলব্ধি।",
+                      en: "To provide Muslim men and women with simple, structured, and institutional Islamic education, from foundational to advanced levels",
+                      bn: "মৌলিক থেকে উন্নত স্তর পর্যন্ত মুসলিম নারী-পুরুষের জন্য সহজ, সুশৃঙ্খল ও প্রাতিষ্ঠানিক ইসলামি শিক্ষা প্রদান করা",
                     })}
-                  </p>
-                  <p>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-400 font-bold">»</span>
                     {t({
-                      en: "Both Muslim men and women need to guide themselves in every aspect of life in the light of Islamic teachings and values. But in the reality of busy and changing lives, it is not possible for many to acquire Islamic knowledge in a structured and continuous manner. As a result, the need to acquire correct knowledge in Aqidah, worship, Qur'an-Hadith, Seerah, Islamic history, and various aspects of daily life is felt.",
-                      bn: "একজন মুসলিম নারী ও পুরুষ উভয়েরই জীবনের প্রতিটি ক্ষেত্রে ইসলামের শিক্ষা ও মূল্যবোধের আলোকে নিজেকে পরিচালিত করা প্রয়োজন। কিন্তু ব্যস্ত ও পরিবর্তনশীল জীবনের বাস্তবতায় অনেকের পক্ষেই সুসংহত ও ধারাবাহিকভাবে ইসলামি জ্ঞান অর্জন করা সম্ভব হয়ে ওঠে না। ফলে আকীদাহ, ইবাদত, কুরআন-হাদীস, সীরাত, ইসলামের ইতিহাস এবং দৈনন্দিন জীবনের বিভিন্ন বিষয়ে সঠিক জ্ঞান অর্জনের প্রয়োজন অনুভূত হয়।",
+                      en: "Memorizing and explaining authentic hadiths",
+                      bn: "প্রামাণ্য হাদিস মুখস্থ করা ও ব্যাখ্যা করা",
                     })}
-                  </p>
-                  <p>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-400 font-bold">»</span>
                     {t({
-                      en: "Keeping this need in mind, Tarbiyah Online's 'Diploma in Islamic Studies' is being conducted as a structured, continuous, and authentic Islamic education program.",
-                      bn: "এই প্রয়োজনকে সামনে রেখে তারবিয়াহ অনলাইনের “Diploma in Islamic Studies” একটি সুসংহত, ধারাবাহিক ও প্রামাণ্য ইসলামি শিক্ষা প্রোগ্রাম হিসেবে পরিচালিত হচ্ছে।",
+                      en: "Learning about the correct creed",
+                      bn: "সঠিক আকীদাহ সম্পর্কে জানা",
                     })}
-                  </p>
-                </div>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-400 font-bold">»</span>
+                    {t({
+                      en: "Acquire reading, writing and speaking skills in Arabic",
+                      bn: "আরবি ভাষায় পড়া, লেখা ও কথা বলার দক্ষতা অর্জন",
+                    })}
+                  </li>
+                </ul>
               </div>
 
-              {/* ===== VISION (Updated with your content) ===== */}
+              {/* ===== VISION (নতুন বাইলিঙ্গুয়াল কনটেন্ট) ===== */}
               <div className="bg-gradient-to-br from-[#003d3d] to-[#004d4d] rounded-3xl p-4 sm:p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
@@ -933,25 +931,37 @@ const DiplomaDetails = () => {
                   </h2>
                 </div>
                 <div className="space-y-4 text-white leading-relaxed text-sm sm:text-base">
-                  <p className="text-center text-base sm:text-lg">
-                    <span className="block text-xl sm:text-2xl mb-2">
+                  <p>
+                    {t({
+                      en: "Allah, the Almighty, says in the Holy Qur'an:",
+                      bn: "আল্লাহ পবিত্র কুরআনে বলেন-",
+                    })}
+                  </p>
+                  <p className="text-center text-base sm:text-lg font-semibold">
+                    <span className="block text-xl sm:text-2xl mb-2" dir="rtl">
                       اِنَّ الدِّیۡنَ عِنۡدَ اللّٰهِ الۡاِسۡلَامُ
                     </span>
                     {t({
-                      en: '"Indeed, the religion in the sight of Allah is Islam." — Al-Imran (3:19)',
-                      bn: '"নিশ্চয় ইসলাম আল্লাহর মনোনীত জীবন ব্যবস্থা।" — আল ইমরান (৩:১৯)',
+                      en: '"Indeed, the religion in the sight of Allah is Islam." (Surah Aal-e-Imran, 3:19)',
+                      bn: '"নিশ্চয় ইসলাম আল্লাহর মনোনীত জীবন ব্যবস্থা"। (আল ইমরান, ৩:১৯)',
                     })}
                   </p>
                   <p>
                     {t({
-                      en: "Yet people, in the name of success in conventional social systems, have moved far away from the religion. People are falling behind Allah-given success in pursuit of worldly so-called success. Meanwhile, many are becoming interested in learning the religion to achieve Allah-given success. But many, despite their interest, cannot learn the religion due to being generally educated, age, and the complexity of religious education platforms. Again, many think, if only they had the opportunity to learn the religion institutionally after crossing the age limit.",
-                      bn: "অথচ মানুষ প্রচলিত সমাজ ব্যবস্থায় সফলতা অর্জনের নামে দ্বীন থেকে বহু দূরে। মানুষ পার্থিব তথাকথিত সফলতা অর্জনের জন্য আল্লাহ প্রদত্ত সফলতা থেকে পিছিয়ে যাচ্ছে। এর মাঝে অনেকে আবার আল্লাহ প্রদত্ত সফলতা অর্জনের জন্য দ্বীন শিক্ষার প্রতি আগ্রহী হয়ে উঠছেন। কিন্তু অনেকে জেনারেল শিক্ষিত, বয়স ও দ্বীন শিক্ষার প্লাটফর্মের জটিলতার কারণে আগ্রহ থাকার পরেও দ্বীন শিখতে পারছেন না। আবার অনেকে ভাবছেন বয়সের গন্ডি পেরিয়ে যদি প্রাতিষ্ঠানিকভাবে দ্বীন শিক্ষার সুযোগ পেতেন।",
+                      en: "Yet, in the pursuit of success within the prevailing social system, many people have drifted far away from the Deen. In striving for worldly and so-called success, people are gradually falling behind in attaining the true success prescribed by Allah.",
+                      bn: "অথচ মানুষ প্রচলিত সমাজ ব্যবস্থায় সফলতা অর্জনের নামে দ্বীন থেকে বহু দূরে। মানুষ পার্থিব তথাকথিত সফলতা অর্জনের জন্য আল্লাহ প্রদত্ত সফলতা থেকে পিছিয়ে যাচ্ছে।",
                     })}
                   </p>
                   <p>
                     {t({
-                      en: "Considering all these things, 'Tarbiyah Academy' has launched the online-based 'Diploma in Islamic Studies' program with a time-appropriate decision for those thirsty for religious knowledge.",
-                      bn: "এসব কিছু বিবেচনা করে “তারবিয়্যাহ একাডেমী” দ্বীনের জ্ঞানপিপাসুদের জন্য যুগোপযোগী সিদ্ধান্ত নিয়ে চালু করেছে অনলাইনভিত্তিক “ডিপ্লোমা ইন ইসলামিক স্টাডিজ” প্রোগ্রাম।",
+                      en: "At the same time, many individuals are becoming increasingly interested in learning about the Deen in order to attain the success granted by Allah. However, despite having a genuine desire to learn, many are unable to pursue Islamic education due to their general educational background, age, and the complexities associated with accessing suitable platforms for learning the Deen. Many others also wish that, regardless of their age, they could have the opportunity to pursue Islamic education in a structured and institutional manner.",
+                      bn: "এর মাঝে অনেকে আবার আল্লাহ প্রদত্ত সফলতা অর্জনের জন্য দ্বীন শিক্ষার প্রতি আগ্রহী হয়ে উঠছেন। কিন্তু অনেকে জেনারেল শিক্ষিত, বয়স ও দ্বীন শিক্ষার প্লাটফর্মের জটিলতার কারণে আগ্রহ থাকার পরেও দ্বীন শিখতে পারছেন না। আবার অনেকে ভাবছেন বয়সের গন্ডি পেরিয়ে যদি প্রাতিষ্ঠানিক ভাবে দ্বীন শিক্ষার সুযোগ পেতেন।",
+                    })}
+                  </p>
+                  <p>
+                    {t({
+                      en: 'Taking all these realities into consideration, Tarbiyah Academy has taken a timely and contemporary initiative by launching the online-based "Diploma in Islamic Studies" program for those who are eager to acquire Islamic knowledge. In this program, brothers and sisters from general education backgrounds, various professions, and different age groups will have the opportunity to acquire authentic Islamic knowledge, InshaAllah.',
+                      bn: "এসব কিছু বিবেচনা করে “তারবিয়্যাহ একাডেমী” দ্বীনের জ্ঞানপিপাসুদের জন্য যুগোপযোগী সিদ্ধান্ত নিয়ে চালু করেছে অনলাইনভিত্তিক “ডিপ্লোমা ইন ইসলামিক স্টাডিজ” প্রোগ্রাম। এখানে জেনারেল শিক্ষিত, বিভিন্ন শ্রেণী-পেশা ও বিভিন্ন বয়সী ভাইবোনেরা অংশগ্রহণ করে প্রকৃত দ্বীনের জ্ঞান অর্জনের সুযোগ পাবেন, ইনশাআল্লাহ।",
                     })}
                   </p>
                 </div>
@@ -987,8 +997,8 @@ const DiplomaDetails = () => {
                       bn: "ডিপ্লোমা থেকে উচ্চতর একাডেমিক ডিগ্রিতে অগ্রসর হওয়ার সুযোগ",
                     }),
                     t({
-                      en: "Specialized courses in Qur'an, Hadith, Fiqh, Aqidah, Sirah, Arabic, along with personal development, entrepreneurship, business, management, leadership, and skill development tailored for men",
-                      bn: "কুরআন, হাদিস, ফিকহ, আকীদাহ, সীরাহ, আরবি সহ পুরুষদের জন্য উপযোগী ব্যক্তিগত উন্নয়ন, উদ্যোক্তা, ব্যবসা, ব্যবস্থাপনা, নেতৃত্ব ও দক্ষতা উন্নয়ন বিষয়ে বিশেষ কোর্স",
+                      en: "Specialized courses in Qur'an, Hadith, Fiqh, Aqidah, Sirah, Arabic, along with personal development, entrepreneurship, business, management, leadership, and skill development",
+                      bn: "কুরআন, হাদিস, ফিকহ, আকীদাহ, সীরাহ, আরবি সহ ব্যক্তিগত উন্নয়ন, উদ্যোক্তা, ব্যবসা, ব্যবস্থাপনা, নেতৃত্ব ও দক্ষতা উন্নয়ন বিষয়ে বিশেষ কোর্স",
                     }),
                     t({
                       en: "Regular homework, midterm, and final examinations",
@@ -1103,7 +1113,6 @@ const DiplomaDetails = () => {
                   </table>
                 </div>
 
-                {/* Curriculum */}
                 <h3 className="text-lg sm:text-xl font-bold text-[#00ADD2] mb-4">
                   {t({ en: "Curriculum", bn: "পাঠ্যসূচি" })}
                 </h3>
@@ -1176,8 +1185,8 @@ const DiplomaDetails = () => {
                   <li className="flex items-start gap-2">
                     <span className="text-yellow-500 font-bold">»</span>
                     {t({
-                      en: "An Islamic perspective on women and family life",
-                      bn: "নারী ও পারিবারিক জীবন সম্পর্কে ইসলামি দৃষ্টিভঙ্গি",
+                      en: "An Islamic perspective on family and social life",
+                      bn: "পারিবারিক ও সামাজিক জীবন সম্পর্কে ইসলামি দৃষ্টিভঙ্গি",
                     })}
                   </li>
                   <li className="flex items-start gap-2">
@@ -1241,8 +1250,8 @@ const DiplomaDetails = () => {
                         </td>
                         <td className="py-3 px-2 sm:px-4">
                           {t({
-                            en: "Working men, professionals, expatriate men, and those planning higher Islamic studies",
-                            bn: "চাকরিজীবী, পেশাজীবী, প্রবাসী পুরুষ এবং যারা উচ্চতর ইসলামি শিক্ষা গ্রহণের পরিকল্পনা করছেন",
+                            en: "Working professionals, expatriates, students, and those planning higher Islamic studies",
+                            bn: "চাকরিজীবী, পেশাজীবী, প্রবাসী, শিক্ষার্থী এবং যারা উচ্চতর ইসলামি শিক্ষা গ্রহণের পরিকল্পনা করছেন",
                           })}
                         </td>
                       </tr>
@@ -1989,7 +1998,7 @@ const DiplomaDetails = () => {
               </div>
             </div>
 
-            {/* ============= RIGHT SIDEBAR ============= */}
+            {/* =========== RIGHT SIDEBAR =========== */}
             <div className="space-y-4">
               {/* Video Thumbnail */}
               <a
