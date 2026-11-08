@@ -968,10 +968,7 @@ const DiplomaDetails = () => {
                       en: "Curriculum structured in alignment with university B.A. (Honours) in Islamic Studies frameworks",
                       bn: "বিশ্ববিদ্যালয়ের বি.এ. (অনার্স) ইন ইসলামিক স্টাডিজ ফ্রেমওয়ার্কের সাথে সামঞ্জস্যপূর্ণ পাঠক্রম",
                     }),
-                    t({
-                      en: "Opportunity to progress from Diploma to higher academic degrees",
-                      bn: "ডিপ্লোমা থেকে উচ্চতর একাডেমিক ডিগ্রিতে অগ্রসর হওয়ার সুযোগ",
-                    }),
+
                     t({
                       en: "Specialized courses in Qur'an, Hadith, Fiqh, Aqidah, Sirah, Arabic, along with personal development, entrepreneurship, business, management, leadership, and skill development",
                       bn: "কুরআন, হাদিস, ফিকহ, আকীদাহ, সীরাহ, আরবি সহ ব্যক্তিগত উন্নয়ন, উদ্যোক্তা, ব্যবসা, ব্যবস্থাপনা, নেতৃত্ব ও দক্ষতা উন্নয়ন বিষয়ে বিশেষ কোর্স",

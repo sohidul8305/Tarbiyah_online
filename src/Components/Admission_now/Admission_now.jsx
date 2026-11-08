@@ -804,11 +804,13 @@ const Admission_now = () => {
           formData.selectedDepartment === "quran-elders" &&
           formData.batchSchedule
             ? `<p><strong>Auto Batch:</strong> ${getEldersBatchName()} • ${formData.batchSchedule}</p>`
-            : formData.batchType
-              ? `<p><strong>Batch:</strong> ${
-                  BATCH_SCHEDULES[formData.batchType]?.label
-                } (${formData.batchSchedule})</p>`
-              : "";
+            : formData.selectedDepartment === "islamic-studies"
+              ? `<p><strong>Auto Batch:</strong> Batch-16 • 8:00 PM – 10:00 PM (Any 3 days/week)</p>`
+              : formData.batchType
+                ? `<p><strong>Batch:</strong> ${
+                    BATCH_SCHEDULES[formData.batchType]?.label
+                  } (${formData.batchSchedule})</p>`
+                : "";
 
         Swal.fire({
           icon: "success",
@@ -1195,6 +1197,15 @@ const Admission_now = () => {
                   )}
                 </div>
               )}
+              {/* ✅ Diploma auto batch */}
+              {formData.selectedDepartment === "islamic-studies" && (
+                <div className="flex justify-between">
+                  <span>Auto Batch:</span>
+                  <span className="font-semibold" style={{ color: "#00ADD2" }}>
+                    Batch-16 • 8 PM – 10 PM
+                  </span>
+                </div>
+              )}
 
               {/* ✅ Quran for Elders Time Slot */}
               {formData.selectedDepartment === "quran-elders" && (
@@ -1281,6 +1292,44 @@ const Admission_now = () => {
                         )}
                       </div>
                     )}
+                </div>
+              )}
+
+              {/* ✅ Diploma Auto-Batch Info */}
+              {formData.selectedDepartment === "islamic-studies" && (
+                <div
+                  className="mt-6 p-4 rounded-lg border-2"
+                  style={{ backgroundColor: "#f0f9fa", borderColor: "#00ADD2" }}
+                >
+                  <h3
+                    className="font-semibold text-lg mb-1"
+                    style={{ color: "#00ADD2" }}
+                  >
+                    🎓 Auto Batch Enrollment
+                  </h3>
+                  <p className="text-xs text-gray-600 mb-3">
+                    You will be <strong>automatically enrolled</strong> into the
+                    running batch after admission — no manual batch selection
+                    needed.
+                  </p>
+
+                  <div className="bg-white p-3 rounded-lg border border-[#b3e5ec] space-y-1.5">
+                    <p className="text-sm text-gray-700">
+                      <strong>Batch Name:</strong>{" "}
+                      <span className="text-[#004d4d] font-bold">Batch-16</span>
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      <strong>Class Time:</strong> 8:00 PM – 10:00 PM
+                      (Bangladesh Time)
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      <strong>Class Days:</strong> Any 3 days/week
+                    </p>
+                    <p className="text-xs text-blue-700 mt-1">
+                      ℹ️ Exact class days will be announced in your batch
+                      WhatsApp group.
+                    </p>
+                  </div>
                 </div>
               )}
 
