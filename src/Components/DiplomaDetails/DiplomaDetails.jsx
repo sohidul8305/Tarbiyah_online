@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router";
 import BannerImg from "../../image/diplomacover.png";
 import CourseImg from "../../image/diplomathumball.png";
@@ -43,11 +43,9 @@ import {
 import Footer from "../Navbar/Footer/Footer";
 import Navbar from "../Navbar/Navbar";
 
-// --- Language Hook (kept inside for self‑containment) ---
-import { useState as useStateHook, useEffect } from "react";
-
+// --- Language Hook ---
 export const useLanguage = () => {
-  const [language, setLanguage] = useStateHook(
+  const [language, setLanguage] = useState(
     () => localStorage.getItem("language") || "en",
   );
 
@@ -55,16 +53,13 @@ export const useLanguage = () => {
     const handleStorageChange = () => {
       setLanguage(localStorage.getItem("language") || "en");
     };
-
     window.addEventListener("languageChange", handleStorageChange);
     return () => {
       window.removeEventListener("languageChange", handleStorageChange);
     };
   }, []);
 
-  const t = (translations) => {
-    return translations[language] || translations["en"];
-  };
+  const t = (translations) => translations[language] || translations["en"];
 
   return { language, t };
 };
@@ -75,7 +70,7 @@ const DiplomaDetails = () => {
 
   const [openSemester, setOpenSemester] = useState(0);
   const [activeTab, setActiveTab] = useState("info");
-  // ⬇️ এই ৭ লাইন কোড বসাবেন ⬇️
+
   useEffect(() => {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
@@ -83,12 +78,12 @@ const DiplomaDetails = () => {
       course_name: "Diploma in Islamic Studies",
     });
   }, []);
-  // ⬆️ এখান পর্যন্ত ⬆️
+
   const toggleSemester = (index) => {
     setOpenSemester(openSemester === index ? null : index);
   };
 
-  // Instructors (fully translated)
+  // Instructors
   const instructors = [
     {
       id: 1,
@@ -180,10 +175,7 @@ const DiplomaDetails = () => {
     {
       id: 8,
       name: "Ustad Hossain Mohammad Hridoy",
-      title: t({
-        en: "Coordinator",
-        bn: "সমন্বয়ক",
-      }),
+      title: t({ en: "Coordinator", bn: "সমন্বয়ক" }),
       subtitle: t({
         en: "Department of Islamic Studies, Tarbiyah Education Network",
         bn: "ইসলামিক স্টাডিজ বিভাগ, তারবিয়াহ এডুকেশন নেটওয়ার্ক",
@@ -193,10 +185,7 @@ const DiplomaDetails = () => {
     {
       id: 9,
       name: "Ustad Abdullah Al Mamun",
-      title: t({
-        en: "Faculty",
-        bn: "অনুষদ সদস্য",
-      }),
+      title: t({ en: "Faculty", bn: "অনুষদ সদস্য" }),
       subtitle: t({
         en: "Tarbiyah Education Network",
         bn: "তারবিয়াহ এডুকেশন নেটওয়ার্ক",
@@ -206,10 +195,7 @@ const DiplomaDetails = () => {
     {
       id: 10,
       name: "Ustad Abu Noman",
-      title: t({
-        en: "Coordinator",
-        bn: "সমন্বয়ক",
-      }),
+      title: t({ en: "Coordinator", bn: "সমন্বয়ক" }),
       subtitle: t({
         en: "Department of Quranic Studies, Tarbiyah Education Network",
         bn: "কুরআনিক স্টাডিজ বিভাগ, তারবিয়াহ এডুকেশন নেটওয়ার্ক",
@@ -219,10 +205,7 @@ const DiplomaDetails = () => {
     {
       id: 11,
       name: "Dr Abdullah Al kafi",
-      title: t({
-        en: "Senior Faculty",
-        bn: "সিনিয়র অনুষদ সদস্য",
-      }),
+      title: t({ en: "Senior Faculty", bn: "সিনিয়র অনুষদ সদস্য" }),
       subtitle: t({
         en: "Diploma In Islamic Studies",
         bn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
@@ -232,10 +215,7 @@ const DiplomaDetails = () => {
     {
       id: 12,
       name: "Emam Hussain",
-      title: t({
-        en: "Junior Faculty",
-        bn: "জুনিয়র অনুষদ সদস্য",
-      }),
+      title: t({ en: "Junior Faculty", bn: "জুনিয়র অনুষদ সদস্য" }),
       subtitle: t({
         en: "Diploma In Islamic Studies",
         bn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
@@ -245,10 +225,7 @@ const DiplomaDetails = () => {
     {
       id: 13,
       name: "Sarder Al Mahmud",
-      title: t({
-        en: "Faculty",
-        bn: "অনুষদ সদস্য",
-      }),
+      title: t({ en: "Faculty", bn: "অনুষদ সদস্য" }),
       subtitle: t({
         en: "Diploma In Islamic Studies",
         bn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
@@ -258,10 +235,7 @@ const DiplomaDetails = () => {
     {
       id: 14,
       name: "Sayed Al Amin",
-      title: t({
-        en: "Junior Faculty",
-        bn: "জুনিয়র অনুষদ সদস্য",
-      }),
+      title: t({ en: "Junior Faculty", bn: "জুনিয়র অনুষদ সদস্য" }),
       subtitle: t({
         en: "Diploma In Islamic Studies",
         bn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
@@ -270,197 +244,152 @@ const DiplomaDetails = () => {
     },
   ];
 
-  // Semesters (fully translated)
+  // ✅ NEW Semester data (from your file)
   const semestersData = [
     {
-      title: t({
-        en: "1st Year - Semester 1",
-        bn: "১ম বর্ষ - সেমিস্টার ১",
-      }),
+      title: t({ en: "1st Year - Semester 1", bn: "১ম বর্ষ - সেমিস্টার ১" }),
       subjects: [
         t({
-          en: "Qur'anic Studies 01 (Qaʿidah Nūrāniyyah & Principles of Makharij and Sifāt)",
-          bn: "কুরআনিক স্টাডিজ ০১ (ক্বায়েদা নূরানিয়্যাহ ও মাখরাজ ও সিফাতের নিয়মাবলী)",
+          en: "101 – Qa'idah Nooraniyah and Basic Tajweed",
+          bn: "১০১ – ক্বায়েদা নূরানিয়্যাহ ও প্রাথমিক তাজবীদ",
         }),
         t({
-          en: "Islamic Creed (Aqidah) 01 (Foundations of Tawḥīd)",
-          bn: "ইসলামিক ক্রিড (আকীদাহ) ০১ (তাওহীদের ভিত্তি)",
+          en: "102 – Fundamentals of Aqeedah",
+          bn: "১০২ – আকীদাহর মৌলিক বিষয়",
+        }),
+        t({ en: "103 – Fiqh of Taharah", bn: "১০৩ – পবিত্রতার ফিকহ" }),
+        t({
+          en: "104 – Imam Nawawi's 40 Hadith",
+          bn: "১০৪ – ইমাম নববীর ৪০ হাদিস",
         }),
         t({
-          en: "Islamic Jurisprudence (Fiqh) 01 (Introduction to Fiqh and Madhhab)",
-          bn: "ইসলামিক ফিকহ ০১ (ফিকহ ও মাযহাবের পরিচয়)",
+          en: "105 – The Makkan Life of the Prophet (ﷺ)",
+          bn: "১০৫ – নবী (ﷺ)-এর মক্কী জীবন",
         }),
         t({
-          en: "Islamic Jurisprudence (Fiqh) 02 (Fiqh of Purification)",
-          bn: "ইসলামিক ফিকহ ০২ (পবিত্রতার ফিকহ)",
-        }),
-        t({
-          en: "Tazkiyah 01 (Ḥilyat Ṭālib al-ʿIlm – Etiquettes of a Student of Knowledge)",
-          bn: "তাযকিয়াহ ০১ (হিলয়াত তালিব আল-ইলম – জ্ঞানার্থীর আদব)",
-        }),
-        t({
-          en: "Qur'anic Language 01 (Madinah Arabic Reader, Book 01)",
-          bn: "কুরআনিক ভাষা ০১ (মদিনা আরবি রিডার, বই ০১)",
+          en: "106 – Madinah Arabic Reader-1",
+          bn: "১০৬ – মদিনা আরবি রিডার-১",
         }),
       ],
     },
     {
-      title: t({
-        en: "1st Year - Semester 2",
-        bn: "১ম বর্ষ - সেমিস্টার ২",
-      }),
+      title: t({ en: "1st Year - Semester 2", bn: "১ম বর্ষ - সেমিস্টার ২" }),
       subjects: [
+        t({ en: "201 – Nazirah Juz 'Amma", bn: "২০১ – নাযিরাহ জুয 'আম্মা" }),
         t({
-          en: "Qur'anic Studies 02 (Correct Recitation of the Qur'an – Sūrah al-Baqarah & Juz' ʿAmma)",
-          bn: "কুরআনিক স্টাডিজ ০২ (সঠিক তিলাওয়াত – সূরা বাকারাহ ও জুয 'আম্মা)",
+          en: "202 – Aqeedah of the Saved Sect",
+          bn: "২০২ – নাজাতপ্রাপ্ত দলের আকীদাহ",
+        }),
+        t({ en: "203 – Fiqh of Salah", bn: "২০৩ – সালাতের ফিকহ" }),
+        t({
+          en: "204 – Mukhtasar Sahih al-Bukhari",
+          bn: "২০৪ – মুখতাসার সহীহ আল-বুখারী",
         }),
         t({
-          en: "Islamic Creed (Aqidah) 02 (Tawḥīd al-Asmā' wa al-Ṣifāt)",
-          bn: "ইসলামিক ক্রিড (আকীদাহ) ০২ (তাওহীদ আল-আসমা ওয়াস সিফাত)",
+          en: "205 – The Madinan Life of the Prophet (ﷺ)",
+          bn: "২০৫ – নবী (ﷺ)-এর মাদানী জীবন",
         }),
         t({
-          en: "Hadith Studies 01 (Mustalaḥ al-Ḥadīth – Hadith Terminology)",
-          bn: "হাদিস স্টাডিজ ০১ (মুস্তালাহ আল-হাদিস – হাদিসের পরিভাষা)",
-        }),
-        t({
-          en: "Islamic Jurisprudence (Fiqh) 03 (Fiqh of Ṣalāh and Ṣiyām)",
-          bn: "ইসলামিক ফিকহ ০৩ (সালাত ও সিয়ামের ফিকহ)",
-        }),
-        t({
-          en: "Islamic History 01 (Sīrah of the Prophet ﷺ – Makkan Period)",
-          bn: "ইসলামের ইতিহাস ০১ (নবী ﷺ এর সীরাহ – মক্কী জীবন)",
-        }),
-        t({
-          en: "Qur'anic Language 02 (Madinah Arabic Reader, Book 02)",
-          bn: "কুরআনিক ভাষা ০২ (মদিনা আরবি রিডার, বই ০২)",
+          en: "206 – Madinah Arabic Reader-2",
+          bn: "২০৬ – মদিনা আরবি রিডার-২",
         }),
       ],
     },
     {
-      title: t({
-        en: "1st Year - Semester 3",
-        bn: "১ম বর্ষ - সেমিস্টার ৩",
-      }),
+      title: t({ en: "1st Year - Semester 3", bn: "১ম বর্ষ - সেমিস্টার ৩" }),
       subjects: [
         t({
-          en: "Qur'anic Studies 03 (ʿUlūm al-Qur'an & Principles of Understanding the Qur'an)",
-          bn: "কুরআনিক স্টাডিজ ০৩ (উলূম আল-কুরআন ও কুরআন বোঝার নিয়মাবলী)",
+          en: "301 – Nazirah Juz' Tabarak",
+          bn: "৩০১ – নাযিরাহ জুয তাবারাক",
         }),
         t({
-          en: "Hadith Studies 02 (Tadabbur of Hadith – The Ideal Believer)",
-          bn: "হাদিস স্টাডিজ ০২ (হাদিসের তাদাব্বুর – আদর্শ মুমিন)",
+          en: "302 – Fiqh al-Asma wa al-Sifat",
+          bn: "৩০২ – ফিকহ আল-আসমা ওয়াস সিফাত",
         }),
+        t({ en: "303 – Fiqh of Zakah", bn: "৩০৩ – যাকাতের ফিকহ" }),
         t({
-          en: "Islamic Creed (Aqidah) 03 (Articles of Faith – Arkān al-Īmān)",
-          bn: "ইসলামিক ক্রিড (আকীদাহ) ০৩ (ঈমানের স্তম্ভ – আরকান আল-ঈমান)",
+          en: "304 – Mukhtasar Sahih al-Bukhari",
+          bn: "৩০৪ – মুখতাসার সহীহ আল-বুখারী",
         }),
+        t({ en: "305 – Khulafa' al-Rashidun", bn: "৩০৫ – খুলাফায়ে রাশিদীন" }),
         t({
-          en: "Islamic Jurisprudence (Fiqh) 04 (Fiqh of Zakāh and Ḥajj)",
-          bn: "ইসলামিক ফিকহ ০৪ (যাকাত ও হজের ফিকহ)",
-        }),
-        t({
-          en: "Islamic History 02 (Sīrah of the Prophet ﷺ – Madinan Period)",
-          bn: "ইসলামের ইতিহাস ০২ (নবী ﷺ এর সীরাহ – মাদানী জীবন)",
-        }),
-        t({
-          en: "Qur'anic Language 03 (Madinah Arabic Reader, Book 03)",
-          bn: "কুরআনিক ভাষা ০৩ (মদিনা আরবি রিডার, বই ০৩)",
+          en: "306 – Madinah Arabic Reader-3",
+          bn: "৩০৬ – মদিনা আরবি রিডার-৩",
         }),
       ],
     },
     {
-      title: t({
-        en: "2nd Year - Semester 4",
-        bn: "২য় বর্ষ - সেমিস্টার ৪",
-      }),
+      title: t({ en: "2nd Year - Semester 4", bn: "২য় বর্ষ - সেমিস্টার ৪" }),
       subjects: [
         t({
-          en: "Qur'anic Studies 04 (Tafsīr & Tadabbur of Sūrah Yā-Sīn)",
-          bn: "কুরআনিক স্টাডিজ ০৪ (তাফসীর ও তাদাব্বুর – সূরা ইয়াসীন)",
+          en: "401 – Nazirah: Surah al-Baqarah",
+          bn: "৪০১ – নাযিরাহ: সূরা আল-বাকারাহ",
+        }),
+        t({ en: "402 – Firqah Batilah", bn: "৪০২ – ফিরকাহ বাতিলাহ" }),
+        t({
+          en: "403 – Fiqh of Fasting and Hajj",
+          bn: "৪০৩ – সিয়াম ও হজের ফিকহ",
         }),
         t({
-          en: "Hadith Studies 03 (Imam Nawawi's Forty Hadith – Explanation & Application)",
-          bn: "হাদিস স্টাডিজ ০৩ (ইমাম নববীর চল্লিশ হাদিস – ব্যাখ্যা ও প্রয়োগ)",
+          en: "404 – Mukhtasar Sahih al-Bukhari",
+          bn: "৪০৪ – মুখতাসার সহীহ আল-বুখারী",
         }),
         t({
-          en: "Islamic Creed (Aqidah) 04 (Core Principles of Islamic Belief)",
-          bn: "ইসলামিক ক্রিড (আকীদাহ) ০৪ (ইসলামি বিশ্বাসের মূলনীতি)",
+          en: "405 – The Umayyad and Abbasid Caliphates",
+          bn: "৪০৫ – উমাইয়া ও আব্বাসীয় খিলাফত",
         }),
         t({
-          en: "Islamic Jurisprudence (Fiqh) 05 (Fiqh of Marriage and Divorce)",
-          bn: "ইসলামিক ফিকহ ০৫ (বিবাহ ও তালাকের ফিকহ)",
-        }),
-        t({
-          en: "Islamic History 03 (Lives of the Companions – The Rightly Guided Caliphs)",
-          bn: "ইসলামের ইতিহাস ০৩ (সাহাবীদের জীবন – খুলাফায়ে রাশিদীন)",
-        }),
-        t({
-          en: "Qur'anic Language 04 (Madinah Arabic Reader, Book 04)",
-          bn: "কুরআনিক ভাষা ০৪ (মদিনা আরবি রিডার, বই ০৪)",
+          en: "406 – Madinah Arabic Reader-4",
+          bn: "৪০৬ – মদিনা আরবি রিডার-৪",
         }),
       ],
     },
     {
-      title: t({
-        en: "2nd Year - Semester 5",
-        bn: "২য় বর্ষ - সেমিস্টার ৫",
-      }),
+      title: t({ en: "2nd Year - Semester 5", bn: "২য় বর্ষ - সেমিস্টার ৫" }),
       subjects: [
+        t({ en: "501 – Principles of Qur'an", bn: "৫০১ – কুরআনের মূলনীতি" }),
         t({
-          en: "Qur'anic Studies 05 (Qur'anic Word View – Sūrah al-Naml)",
-          bn: "কুরআনিক স্টাডিজ ০৫ (কুরআনিক দৃষ্টিভঙ্গি – সূরা নামল)",
+          en: "502 – Comparative Religion",
+          bn: "৫০২ – তুলনামূলক ধর্মতত্ত্ব",
+        }),
+        t({ en: "503 – Fiqhul Muamalat", bn: "৫০৩ – ফিকহুল মুআমালাত" }),
+        t({
+          en: "504 – Mukhtasar Sahih al-Bukhari",
+          bn: "৫০৪ – মুখতাসার সহীহ আল-বুখারী",
         }),
         t({
-          en: "Islamic Creed (Aqidah) 05 (Islamic Sects and World Religions)",
-          bn: "ইসলামিক ক্রিড (আকীদাহ) ০৫ (ইসলামি ফিরকা ও বিশ্ব ধর্ম)",
+          en: "505 – Principles of Da'wah and the Da'i",
+          bn: "৫০৫ – দাওয়াহ ও দায়ীর মূলনীতি",
         }),
         t({
-          en: "Islamic Jurisprudence (Fiqh) 06 (Fiqh of Transactions – Muʿāmalāt)",
-          bn: "ইসলামিক ফিকহ ০৬ (লেনদেনের ফিকহ – মুআমালাত)",
-        }),
-        t({
-          en: "Islamic History 04 (Lives of the Companions – Faith-Inspired Lives)",
-          bn: "ইসলামের ইতিহাস ০৪ (সাহাবীদের জীবন – ঈমান-প্রেরিত জীবন)",
-        }),
-        t({
-          en: "Qur'anic Language 05 (Madinah Arabic Reader, Book 05)",
-          bn: "কুরআনিক ভাষা ০৫ (মদিনা আরবি রিডার, বই ০৫)",
-        }),
-        t({
-          en: "Life Hacks 01 (Marital Life, Emotional Intelligence & Conflict Resolution)",
-          bn: "লাইফ হ্যাকস ০১ (দাম্পত্য জীবন, আবেগীয় বুদ্ধিমত্তা ও সংঘাত নিরসন)",
+          en: "506 – Madinah Arabic Reader-5",
+          bn: "৫০৬ – মদিনা আরবি রিডার-৫",
         }),
       ],
     },
     {
-      title: t({
-        en: "2nd Year - Semester 6",
-        bn: "২য় বর্ষ - সেমিস্টার ৬",
-      }),
+      title: t({ en: "2nd Year - Semester 6", bn: "২য় বর্ষ - সেমিস্টার ৬" }),
       subjects: [
         t({
-          en: "Qur'anic Studies 06 (Tafsīr & Tadabbur of Sūrah al-Kahf)",
-          bn: "কুরআনিক স্টাডিজ ০৬ (তাফসীর ও তাদাব্বুর – সূরা কাহফ)",
+          en: "601 – Tafsir al-Qur'an: Surah al-Kahf",
+          bn: "৬০১ – তাফসীর আল-কুরআন: সূরা আল-কাহফ",
+        }),
+        t({ en: "602 – Principles of Fiqh", bn: "৬০২ – ফিকহের মূলনীতি" }),
+        t({
+          en: "603 – Law of Inheritance and Penal Code",
+          bn: "৬০৩ – উত্তরাধিকার আইন ও দণ্ডবিধি",
         }),
         t({
-          en: "Islamic Creed (Aqidah) 06 (Islam and Contemporary Ideologies)",
-          bn: "ইসলামিক ক্রিড (আকীদাহ) ০৬ (ইসলাম ও সমসাময়িক মতবাদ)",
+          en: "604 – Mukhtasar Sahih al-Bukhari",
+          bn: "৬০৪ – মুখতাসার সহীহ আল-বুখারী",
         }),
         t({
-          en: "Islamic Jurisprudence (Fiqh) 07 (Fiqh of Family & Inheritance Law)",
-          bn: "ইসলামিক ফিকহ ০৭ (পরিবার ও উত্তরাধিকার আইনের ফিকহ)",
+          en: "605 – Productive Muslim (Philosophy of a Successful Muslim Life)",
+          bn: "৬০৫ – প্রোডাক্টিভ মুসলিম (সফল মুসলিম জীবনের দর্শন)",
         }),
         t({
-          en: "Qur'anic Language 06 (Madinah Arabic Reader, Book 06)",
-          bn: "কুরআনিক ভাষা ০৬ (মদিনা আরবি রিডার, বই ০৬)",
-        }),
-        t({
-          en: "Tazkiyah 02 (Al-Dā' wa al-Dawā' – The Disease and the Cure of the Soul)",
-          bn: "তাযকিয়াহ ০২ (আল-দা ওয়াল দাওয়া – রোগ ও আত্মার নিরাময়)",
-        }),
-        t({
-          en: "Life Hacks 02 (Productive Muslim – Life Philosophy of a Successful Muslim)",
-          bn: "লাইফ হ্যাকস ০২ (প্রোডাক্টিভ মুসলিম – সফল মুসলিমের জীবনদর্শন)",
+          en: "606 – Madinah Arabic Reader-6",
+          bn: "৬০৬ – মদিনা আরবি রিডার-৬",
         }),
       ],
     },
@@ -468,14 +397,8 @@ const DiplomaDetails = () => {
 
   // Program Structure data
   const programStructure = {
-    duration: t({
-      en: "2 Years (6 Semesters)",
-      bn: "২ বছর (৬ সেমিস্টার)",
-    }),
-    classMethod: t({
-      en: "Online (Zoom)",
-      bn: "অনলাইন (জুম)",
-    }),
+    duration: t({ en: "2 Years (6 Semesters)", bn: "২ বছর (৬ সেমিস্টার)" }),
+    classMethod: t({ en: "Online (Zoom)", bn: "অনলাইন (জুম)" }),
     time: t({
       en: "8:00 PM – 10:00 PM (Bangladesh Time)",
       bn: "রাত ৮:০০ – ১০:০০ (বাংলাদেশ সময়)",
@@ -484,10 +407,7 @@ const DiplomaDetails = () => {
       en: "3 Days (2 Classes per day)",
       bn: "৩ দিন (প্রতিদিন ২টি ক্লাস)",
     }),
-    sessionsPerSemester: t({
-      en: "96 Sessions",
-      bn: "৯৬টি সেশন",
-    }),
+    sessionsPerSemester: t({ en: "96 Sessions", bn: "৯৬টি সেশন" }),
     language: t({
       en: "Bangla (with Arabic & English terminology)",
       bn: "বাংলা (আরবি ও ইংরেজি পরিভাষা সহ)",
@@ -497,9 +417,7 @@ const DiplomaDetails = () => {
   const prospectusLink =
     "https://acrobat.adobe.com/id/urn:aaid:sc:ap:6475bc81-d81e-455d-9716-81cdba6bf4f4";
 
-  const handleDownloadPDF = () => {
-    window.open(prospectusLink, "_blank");
-  };
+  const handleDownloadPDF = () => window.open(prospectusLink, "_blank");
 
   const whyFeatures = [
     {
@@ -518,10 +436,7 @@ const DiplomaDetails = () => {
     },
     {
       icon: <FaVideo />,
-      text: t({
-        en: "Live and Recorded Classes",
-        bn: "লাইভ ও রেকর্ডেড ক্লাস",
-      }),
+      text: t({ en: "Live and Recorded Classes", bn: "লাইভ ও রেকর্ডেড ক্লাস" }),
     },
     {
       icon: <FaHeadset />,
@@ -532,10 +447,7 @@ const DiplomaDetails = () => {
     },
     {
       icon: <FaCertificate />,
-      text: t({
-        en: "Ijazah and Certificate",
-        bn: "ইজাযাহ ও সার্টিফিকেট",
-      }),
+      text: t({ en: "Ijazah and Certificate", bn: "ইজাযাহ ও সার্টিফিকেট" }),
     },
     {
       icon: <FaGlobe />,
@@ -546,7 +458,7 @@ const DiplomaDetails = () => {
     },
   ];
 
-  // ----- TESTIMONIALS (রিভিউ সেকশন - বাংলায় থাকবে, ট্রান্সলেট করা হবে না) -----
+  // Testimonials (stay Bengali)
   const testimonials = [
     {
       id: 1,
@@ -571,7 +483,7 @@ const DiplomaDetails = () => {
       name: "TAHMINA TARIN",
       designation: "STUDENT ID: TDIS23B6056, BATCH: 5&6",
       quote:
-        "লাস্ট সেমিস্টার এ আমার সবচেয়ে ভালো লেগেছে কমপারেটিভ রিলিজিওন। উস্তাদ ডঃ আবু বকর যাকারিয়া এতো সুন্দর করে ভেঙ্গে ভেঙ্গে দ্বীন, ধর্ম, রিলিজিওন এর পার্থক্য এবং বিভিন্ন ধর্মগুলো এতো নিখুঁত ভাবে উপস্থাপন করেছেন যে আমাদের মন এবং মস্তিষ্কে তা গভীরভাবে গেথে গিয়েছে। আলহামদুলিল্লাহ। আমি শ্রদ্ধেয় উস্তাদগণের দীর্ঘায়ু কামনা করছি। পাশাপাশি তারবিয়া একাডেমি কে ধন্যবাদ জানাবো আমাদের জন্য এতো সুন্দর, ওয়েল অর্গানাইজড একটা কোর্স করার সুযোগ করে দেওয়ার জন্য। জাযাকুমুল্লাহ খাইরান।",
+        "লাস্ট সেমিস্টার এ আমার সবচেয়ে ভালো লেগেছে কমপারেটিভ রিলিজিওন। উস্তাদ ডঃ আবু বকর যাকারিয়া এতো সুন্দর করে ভেঙ্গে ভেঙ্গে দ্বীন, ধর্ম, রিলিজিওন এর পার্থক্য এবং বিভিন্ন ধর্মগুলো এতো নিখুঁত ভাবে উপস্থাপন করেছেন যে আমাদের মন এবং মস্তিষ্কে তা গভীরভাবে গেথে গিয়েছে। আলহামদুলিল্লাহ।",
       image:
         "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
@@ -581,7 +493,7 @@ const DiplomaDetails = () => {
       designation:
         "স্টুডেন্ট: ৫ম সেমিস্টার, ডিপার্টমেন্ট: ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
       quote:
-        "আলহামদুলিল্লাহ আমাদের সকল উস্তায খুবই বিনয়ের সাথে ক্লাস বুঝিয়ে দিয়ে থাকেন, বিশেষ করে উস্তায ডঃ যুবায়েরের ইহসান তার ক্লাসে পড়া বুঝিয়ে দেন এবং পড়াগুলো ক্লাসেই আদায় করে নেন। মাঝে মাঝে গুগল ফর্মে HW দিয়ে থাকেন। উস্তাযের পড়ানোর এই নিয়ম নীতি আমার কাছে খুবই ভালো লাগে।",
+        "আলহামদুলিল্লাহ আমাদের সকল উস্তায খুবই বিনয়ের সাথে ক্লাস বুঝিয়ে দিয়ে থাকেন, বিশেষ করে উস্তায ডঃ যুবায়েরের ইহসান তার ক্লাসে পড়া বুঝিয়ে দেন এবং পড়াগুলো ক্লাসেই আদায় করে নেন।",
       image:
         "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
@@ -591,62 +503,62 @@ const DiplomaDetails = () => {
       designation:
         "Former Assistant Professor, Dept. of CSE, BUBT (স্টুডেন্ট: ১ম সেমিস্টার, ডিপ্লোমা ইন ইসলামিক স্টাডিজ)",
       quote:
-        "হাদিস- ক্লাসের রেকর্ড অনেক গোছানো, নোট আছে। সিরাহ কোর্সের মতই সমসাময়িক বিষয়ে হাদিসগুলোর প্রয়োগ বুঝতে পেরেছি। এই কোর্সের বড় একটা ভালো দিক- প্রতিটা লেসনের শেষে Sample Question আছে। এতে করে পরীক্ষা ভীতি দূর হয়েছে। আলহামদুলিল্লাহ।",
+        "হাদিস- ক্লাসের রেকর্ড অনেক গোছানো, নোট আছে। সিরাহ কোর্সের মতই সমসাময়িক বিষয়ে হাদিসগুলোর প্রয়োগ বুঝতে পেরেছি। এই কোর্সের বড় একটা ভালো দিক- প্রতিটা লেসনের শেষে Sample Question আছে।",
       image:
         "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
     {
       id: 6,
       name: "জান্নাতি মহল মিলোরা",
-      designation: "শিক্ষার্থী: ডিপ্লোমা ইন ইসলামিক স্টাডিজ, ২য় সেমিস্টার",
+      designation: "শিক্ষার্থী: ডিপ্লোমা ইন ইসলামিক স্টাডিজ, ২য় সেমিস্টার",
       quote:
-        "আলহামদুলিল্লাহ প্রত্যেক ওস্তাদের ক্লাস অত্যন্ত আনন্দের সাথে করছি। আমার কাছে প্রত্যেক ওস্তাদকেই ভীষণ ভালো লাগে এবং আমি মহান আল্লাহ তায়ালার কাছে শুকরিয়া জ্ঞাপন করছি যে আল্লাহ তায়ালা আমাকে এই কোর্স করার তৌফিক দান করেছেন।",
+        "আলহামদুলিল্লাহ প্রত্যেক ওস্তাদের ক্লাস অত্যন্ত আনন্দের সাথে করছি। আমি মহান আল্লাহ তায়ালার কাছে শুকরিয়া জ্ঞাপন করছি যে আল্লাহ তায়ালা আমাকে এই কোর্স করার তৌফিক দান করেছেন।",
       image:
         "https://i.ibb.co.com/wZ84kzn4/hijab-woman-no-face-photo-avatar-free-vector.jpg",
     },
   ];
 
-  // Video Gallery (titles translated)
+  // Video Gallery
   const videoGallery = [
     {
       id: 1,
       title: t({ en: "Video 1", bn: "ভিডিও ১" }),
       thumbnail: "https://img.youtube.com/vi/OFXVzYi_lLo/hqdefault.jpg",
-      url: "https://youtu.be/OFXVzYi_lLo?si=v8LJgLRS1s6ypf3f",
+      url: "https://youtu.be/OFXVzYi_lLo",
     },
     {
       id: 2,
       title: t({ en: "Video 2", bn: "ভিডিও ২" }),
       thumbnail: "https://img.youtube.com/vi/4cTt9SmRK_8/hqdefault.jpg",
-      url: "https://youtu.be/4cTt9SmRK_8?si=gRlG1LmO8waoSBvO",
+      url: "https://youtu.be/4cTt9SmRK_8",
     },
     {
       id: 3,
       title: t({ en: "Video 3", bn: "ভিডিও ৩" }),
       thumbnail: "https://img.youtube.com/vi/RiUeYS8DWAA/hqdefault.jpg",
-      url: "https://youtu.be/RiUeYS8DWAA?si=iIA_9r6RTpasEym7",
+      url: "https://youtu.be/RiUeYS8DWAA",
     },
     {
       id: 4,
       title: t({ en: "Video 4", bn: "ভিডিও ৪" }),
       thumbnail: "https://img.youtube.com/vi/KR59dFBOpbg/hqdefault.jpg",
-      url: "https://youtu.be/KR59dFBOpbg?si=y9NSXGXuPvF6k8jn",
+      url: "https://youtu.be/KR59dFBOpbg",
     },
     {
       id: 5,
       title: t({ en: "Video 5", bn: "ভিডিও ৫" }),
       thumbnail: "https://img.youtube.com/vi/dorXizH7iR0/hqdefault.jpg",
-      url: "https://youtu.be/dorXizH7iR0?si=3TZq3s6rA_j2uJI4",
+      url: "https://youtu.be/dorXizH7iR0",
     },
     {
       id: 6,
       title: t({ en: "Video 6", bn: "ভিডিও ৬" }),
       thumbnail: "https://img.youtube.com/vi/_IU75TfdGTM/hqdefault.jpg",
-      url: "https://youtu.be/_IU75TfdGTM?si=5DtS6m13OhmHOxOU",
+      url: "https://youtu.be/_IU75TfdGTM",
     },
   ];
 
-  // FAQ Data (translated)
+  // FAQ
   const faqs = [
     {
       question: t({
@@ -704,8 +616,8 @@ const DiplomaDetails = () => {
         bn: "আপনাদের কোর্স ফি তুলনামূলক বেশি কেন?",
       }),
       answer: t({
-        en: "We do not just provide video courses; we ensure renowned Islamic scholars from reputed universities, an advanced curriculum, regular assessments, live classes, academic support, and quality education. This integrated system maintains the standard of the course.",
-        bn: "আমরা শুধু ভিডিও কোর্স প্রদান করি না; দেশের স্বনামধন্য বিশ্ববিদ্যালয়ের ইসলামিক স্কলার, উন্নত কারিকুলাম, নিয়মিত মূল্যায়ন, লাইভ ক্লাস, একাডেমিক সাপোর্ট এবং মানসম্মত শিক্ষা নিশ্চিত করি। এই সমন্বিত ব্যবস্থার কারণেই কোর্সের মান বজায় রাখা সম্ভব হয়।",
+        en: "We do not just provide video courses; we ensure renowned Islamic scholars, an advanced curriculum, regular assessments, live classes, academic support, and quality education. This integrated system maintains the standard of the course.",
+        bn: "আমরা শুধু ভিডিও কোর্স প্রদান করি না; দেশের স্বনামধন্য ইসলামিক স্কলার, উন্নত কারিকুলাম, নিয়মিত মূল্যায়ন, লাইভ ক্লাস, একাডেমিক সাপোর্ট এবং মানসম্মত শিক্ষা নিশ্চিত করি।",
       }),
     },
     {
@@ -733,157 +645,188 @@ const DiplomaDetails = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <Navbar />
-      <div className="py-8 px-4 sm:px-6 lg:px-8">
+      <div className="py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Back Button */}
           <Link
             to="/course/diploma"
-            className="inline-flex items-center gap-2 text-[#002b2b] hover:text-yellow-600 mb-6 transition-colors group"
+            className="inline-flex items-center gap-2 text-[#002b2b] hover:text-yellow-600 mb-4 sm:mb-6 transition-colors group"
           >
             <FaArrowLeft className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">
-              {t({
-                en: "Back to Diploma Page",
-                bn: "ডিপ্লোমা পেজে ফিরে যান",
-              })}
+            <span className="font-medium text-sm sm:text-base">
+              {t({ en: "Back to Diploma Page", bn: "ডিপ্লোমা পেজে ফিরে যান" })}
             </span>
           </Link>
 
-          {/* Hero Section */}
-          <img
-            src={BannerImg}
-            alt={t({
-              en: "Diploma Banner",
-              bn: "ডিপ্লোমা ব্যানার",
-            })}
-            className="w-full max-w-3xl h-15 sm:h-25 md:h-40 object-cover rounded-2xl border border-gray-100 ml-8 mr-72"
-          />
-
-          {/* Course Info Section - Below Banner */}
-          <div className="ml-8 mr-72">
-            {/* Share & Wishlist */}
-            <div className="flex items-center gap-4 py-3">
-              <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
-                <FaShare className="text-lg" />
-                <span className="font-medium">
-                  {t({ en: "Share", bn: "শেয়ার" })}
-                </span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
-                <FaBookmark className="text-lg" />
-                <span className="font-medium">
-                  {t({ en: "Wishlist", bn: "উইশলিস্ট" })}
-                </span>
-              </button>
-            </div>
-
-            {/* Course Title */}
-            <h1 className="text-2xl font-bold text-[#007a91] mb-3">
-              {t({
-                en: "Diploma In Islamic Studies",
-                bn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
-              })}
-            </h1>
-
-            {/* Course Info & Reviews Tabs */}
-            <div className="flex items-center gap-6 border-b border-gray-200">
-              <button
-                onClick={() => setActiveTab("info")}
-                className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all ${
-                  activeTab === "info"
-                    ? "border-[#002b2b] text-[#002b2b] font-semibold"
-                    : "border-transparent text-gray-500 hover:text-[#002b2b]"
-                }`}
-              >
-                <FaInfoCircle />
-                <span>{t({ en: "Course Info", bn: "কোর্স তথ্য" })}</span>
-              </button>
-              <button
-                onClick={() => setActiveTab("reviews")}
-                className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all ${
-                  activeTab === "reviews"
-                    ? "border-[#002b2b] text-[#002b2b] font-semibold"
-                    : "border-transparent text-gray-500 hover:text-[#002b2b]"
-                }`}
-              >
-                <FaCommentDots />
-                <span>{t({ en: "Reviews", bn: "রিভিউ" })}</span>
-              </button>
-            </div>
-
-            {/* Tab Content */}
-            {activeTab === "reviews" && (
-              <div className="mt-4 p-4 bg-gray-50 rounded-xl">
-                <p className="text-gray-500 text-center">
-                  {t({
-                    en: "No reviews yet. Be the first to review!",
-                    bn: "এখনো কোনো রিভিউ নেই। প্রথম রিভিউ দিন!",
-                  })}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Main Content Layout: Left 2 Columns, Right 1 Column */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Content - 2 Columns */}
+          {/* MAIN GRID */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            {/* ============= LEFT / MAIN COLUMN ============= */}
             <div className="lg:col-span-2 space-y-6">
-              {/* ABOUT COURSE */}
-              <div className="p-8 mt-10">
+              {/* Banner */}
+              <img
+                src={BannerImg}
+                alt={t({ en: "Diploma Banner", bn: "ডিপ্লোমা ব্যানার" })}
+                className="w-full h-auto max-h-40 sm:max-h-48 md:max-h-56 object-cover rounded-2xl border border-gray-100"
+              />
+
+              {/* Share & Wishlist */}
+              <div className="flex items-center gap-4 py-2">
+                <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
+                  <FaShare className="text-lg" />
+                  <span className="font-medium text-sm sm:text-base">
+                    {t({ en: "Share", bn: "শেয়ার" })}
+                  </span>
+                </button>
+                <button className="flex items-center gap-2 text-gray-600 hover:text-[#002b2b] transition-colors">
+                  <FaBookmark className="text-lg" />
+                  <span className="font-medium text-sm sm:text-base">
+                    {t({ en: "Wishlist", bn: "উইশলিস্ট" })}
+                  </span>
+                </button>
+              </div>
+
+              {/* Course Title */}
+              <h1 className="text-xl sm:text-2xl font-bold text-[#007a91]">
+                {t({
+                  en: "Diploma In Islamic Studies",
+                  bn: "ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
+                })}
+              </h1>
+
+              {/* Tabs */}
+              <div className="flex items-center gap-6 border-b border-gray-200">
+                <button
+                  onClick={() => setActiveTab("info")}
+                  className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all text-sm sm:text-base ${
+                    activeTab === "info"
+                      ? "border-[#002b2b] text-[#002b2b] font-semibold"
+                      : "border-transparent text-gray-500 hover:text-[#002b2b]"
+                  }`}
+                >
+                  <FaInfoCircle />
+                  <span>{t({ en: "Course Info", bn: "কোর্স তথ্য" })}</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab("reviews")}
+                  className={`flex items-center gap-2 px-1 py-3 border-b-2 transition-all text-sm sm:text-base ${
+                    activeTab === "reviews"
+                      ? "border-[#002b2b] text-[#002b2b] font-semibold"
+                      : "border-transparent text-gray-500 hover:text-[#002b2b]"
+                  }`}
+                >
+                  <FaCommentDots />
+                  <span>{t({ en: "Reviews", bn: "রিভিউ" })}</span>
+                </button>
+              </div>
+
+              {activeTab === "reviews" && (
+                <div className="p-4 bg-gray-50 rounded-xl">
+                  <p className="text-gray-500 text-center text-sm sm:text-base">
+                    {t({
+                      en: "No reviews yet. Be the first to review!",
+                      bn: "এখনো কোনো রিভিউ নেই। প্রথম রিভিউ দিন!",
+                    })}
+                  </p>
+                </div>
+              )}
+
+              {/* ===== ABOUT COURSE ===== */}
+              {/* ===== ABOUT COURSE ===== */}
+              <div className="p-4 sm:p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({ en: "ABOUT COURSE", bn: "কোর্স সম্পর্কে" })}
                   </h2>
                 </div>
-                <p className="text-gray-700 leading-relaxed text-lg">
-                  {t({
-                    en: "Men bear an immense responsibility in the formation of family, society, and civilization. Within them lie the strengths of leadership, wisdom, decisiveness, and a commitment to establishing justice. However, amid the chaotic currents of modern life, these fundamental qualities often fade due to a lack of proper knowledge and a growing distance from the firm foundation of faith (Iman). Now is the time to return to the roots—to rebuild oneself through the integration of authentic knowledge, a clear framework, and faith-driven consciousness.",
-                    bn: "পরিবার, সমাজ ও সভ্যতা গঠনে পুরুষদের অপরিসীম দায়িত্ব। তাদের মধ্যে নেতৃত্ব, প্রজ্ঞা, সিদ্ধান্ত গ্রহণের ক্ষমতা এবং ন্যায় প্রতিষ্ঠার প্রতিশ্রুতি নিহিত থাকে। তবে আধুনিক জীবনের বিশৃঙ্খল স্রোতে সঠিক জ্ঞানের অভাব ও ঈমানের দৃঢ় ভিত্তি থেকে দূরবর্তীতার কারণে এই মৌলিক গুণাবলী প্রায়শই ম্লান হয়ে যায়। এখন সময় এসেছে শিকড়ে ফিরে আসার—প্রামাণ্য জ্ঞান, স্পষ্ট কাঠামো ও ঈমান-চালিত চেতনার সমন্বয়ে নিজেকে পুনর্গঠন করার।",
-                  })}
-                </p>
-                <p className="text-gray-700 leading-relaxed text-lg mt-4">
-                  {t({
-                    en: "Tarbiyah Online's 'Men's Diploma in Islamic Studies' is an academic journey designed to revive this sense of dignity and responsibility. This program is not merely a diploma; rather, it is a structured framework for shaping the character of a responsible Muslim man. Through authentic Islamic teachings, students are given the opportunity to reconstruct their personality, intellect, and leadership skills. Through this program, Tarbiyah Online opens a knowledge-based horizon for men—one where a bridge of balance is formed between deen and dunya, and where students emerge as enlightened guides for their families, society, and the Ummah.",
-                    bn: "তারবিয়াহ অনলাইনের 'মেনস ডিপ্লোমা ইন ইসলামিক স্টাডিজ' একটি একাডেমিক যাত্রা যা মর্যাদা ও দায়িত্ববোধকে পুনরুজ্জীবিত করার জন্য ডিজাইন করা হয়েছে। এই প্রোগ্রামটি কেবল একটি ডিপ্লোমা নয়; বরং এটি একজন দায়িত্বশীল মুসলিম পুরুষের চরিত্র গঠনের একটি সুসংহত কাঠামো। প্রামাণ্য ইসলামি শিক্ষার মাধ্যমে শিক্ষার্থীদের তাদের ব্যক্তিত্ব, বুদ্ধি ও নেতৃত্বের দক্ষতা পুনর্গঠনের সুযোগ দেওয়া হয়। এই প্রোগ্রামের মাধ্যমে তারবিয়াহ অনলাইন পুরুষদের জন্য জ্ঞান-ভিত্তিক একটি দিগন্ত উন্মোচন করে—যেখানে দ্বীন ও দুনিয়ার মধ্যে ভারসাম্যের সেতু তৈরি হয় এবং শিক্ষার্থীরা তাদের পরিবার, সমাজ ও উম্মাহর জন্য আলোকিত পথপ্রদর্শক হিসেবে আবির্ভূত হয়।",
-                  })}
-                </p>
+
+                <div className="space-y-4 text-gray-700 leading-relaxed text-sm sm:text-base md:text-lg">
+                  <p>
+                    {t({
+                      en: "In an age of rapid advancement in knowledge, technology, and civilization, the need for moral values, spiritual development, and a sound understanding of life has become increasingly important. The healthy development of individuals, families, and society requires sound faith, authentic knowledge, and a correct understanding of Islam.",
+                      bn: "বর্তমান যুগে জ্ঞান, প্রযুক্তি ও সভ্যতার ব্যাপক অগ্রগতির পাশাপাশি মানুষের জীবনে নৈতিকতা, আত্মিক উন্নয়ন এবং সঠিক জীবনদর্শনের প্রয়োজনীয়তা ক্রমেই বৃদ্ধি পাচ্ছে। ব্যক্তি, পরিবার ও সমাজের সুন্দর ও কল্যাণময় বিকাশের জন্য প্রয়োজন বিশুদ্ধ ঈমান, প্রামাণ্য জ্ঞান এবং ইসলামের সঠিক উপলব্ধি।",
+                    })}
+                  </p>
+
+                  <p>
+                    {t({
+                      en: "Both Muslim men and women need to develop their lives in accordance with the teachings and values of Islam. However, amid the demands and changing realities of modern life, it is often difficult for many people to pursue Islamic knowledge in a structured and continuous manner. This creates an increasing need for sound knowledge of Aqeedah, worship, the Qur'an and Hadith, Seerah, Islamic history, and other aspects of daily life.",
+                      bn: "একজন মুসলিম নারী ও পুরুষ উভয়েরই জীবনের প্রতিটি ক্ষেত্রে ইসলামের শিক্ষা ও মূল্যবোধের আলোকে নিজেকে পরিচালিত করা প্রয়োজন। কিন্তু ব্যস্ত ও পরিবর্তনশীল জীবনের বাস্তবতায় অনেকের পক্ষেই সুসংহত ও ধারাবাহিকভাবে ইসলামি জ্ঞান অর্জন করা সম্ভব হয়ে ওঠে না। ফলে আকীদাহ, ইবাদত, কুরআন-হাদীস, সীরাত, ইসলামের ইতিহাস এবং দৈনন্দিন জীবনের বিভিন্ন বিষয়ে সঠিক জ্ঞান অর্জনের প্রয়োজন অনুভূত হয়।",
+                    })}
+                  </p>
+
+                  <p>
+                    {t({
+                      en: "With this need in mind, Tarbiyah Online's \"Diploma in Islamic Studies\" is a structured, systematic, and authentic Islamic learning program. It is not merely a program for earning a diploma; rather, it is a meaningful academic journey of developing knowledge, faith, practice, and character in the light of the Qur'an and Sunnah.",
+                      bn: "এই প্রয়োজনকে সামনে রেখে তারবিয়াহ অনলাইনের “Diploma in Islamic Studies” একটি সুসংহত, ধারাবাহিক ও প্রামাণ্য ইসলামি শিক্ষাপ্রোগ্রাম। এটি শুধু একটি ডিপ্লোমা অর্জনের কোর্স নয়; বরং কুরআন ও সুন্নাহর আলোকে জ্ঞান, ঈমান, আমল এবং ব্যক্তিত্বের বিকাশের একটি সুন্দর শিক্ষাযাত্রা।",
+                    })}
+                  </p>
+
+                  <p>
+                    {t({
+                      en: "The program offers a systematic study of Qur'an Studies and Tajweed, Islamic Aqeedah, Fiqhul Ibadah, Hadith Studies, the Seerah of the Prophet Muhammad ﷺ, Islamic History, the Arabic Language, and other important areas of Islamic knowledge. Beginning with foundational subjects and progressing through important areas of study, the curriculum aims to help students build a strong and balanced foundation in Islamic knowledge.",
+                      bn: "এই প্রোগ্রামে কুরআন স্টাডিজ ও তাজউইদ, ইসলামি আকীদাহ, ফিকহুল ইবাদাহ, হাদীস স্টাডিজ, সীরাতুন্নবী ﷺ, ইসলামের ইতিহাস, আরবি ভাষা এবং অন্যান্য গুরুত্বপূর্ণ ইসলামি বিষয়সমূহ ধারাবাহিকভাবে অধ্যয়নের সুযোগ রয়েছে। মৌলিক জ্ঞান থেকে শুরু করে বিভিন্ন গুরুত্বপূর্ণ বিষয়ে পর্যায়ক্রমে শিক্ষা প্রদানের মাধ্যমে শিক্ষার্থীদের একটি সুদৃঢ় ও ভারসাম্যপূর্ণ ইসলামি জ্ঞানের ভিত্তি গড়ে তোলার চেষ্টা করা হয়।",
+                    })}
+                  </p>
+
+                  <p>
+                    {t({
+                      en: "Tarbiyah Online believes that authentic Islamic knowledge does more than provide information—it shapes a person's thoughts, character, behaviour, and outlook on life. The combination of sound knowledge and faith helps a Muslim live with greater awareness and contribute positively to the well-being of the family, society, and the Ummah.",
+                      bn: "তারবিয়াহ অনলাইন বিশ্বাস করে, প্রামাণ্য ইসলামি জ্ঞান একজন মানুষকে শুধু তথ্যসমৃদ্ধ করে না; বরং তার চিন্তা, চরিত্র, আচরণ ও জীবনদৃষ্টিকে প্রভাবিত করে। সঠিক জ্ঞান ও ঈমানের সমন্বয় একজন মুসলিমকে নিজের জীবনকে সুন্দরভাবে পরিচালিত করতে এবং পরিবার, সমাজ ও উম্মাহর কল্যাণে ইতিবাচক ভূমিকা রাখতে সহায়তা করে।",
+                    })}
+                  </p>
+
+                  <p>
+                    {t({
+                      en: "Diploma in Islamic Studies is a meaningful educational journey for both men and women—an opportunity to develop oneself as a conscious, responsible, and principled Muslim through authentic knowledge, sound faith, and the practical application of Islamic teachings in everyday life.",
+                      bn: "Diploma in Islamic Studies নারী ও পুরুষ উভয়ের জন্য এমন একটি শিক্ষাযাত্রা—যেখানে প্রামাণ্য জ্ঞান, বিশুদ্ধ ঈমান এবং বাস্তব জীবনে ইসলামের শিক্ষার প্রয়োগের মাধ্যমে একজন সচেতন, দায়িত্বশীল ও আদর্শবান মুসলিম হিসেবে নিজেকে গড়ে তোলার সুযোগ রয়েছে।",
+                    })}
+                  </p>
+
+                  <p className="font-semibold text-[#002b2b] text-center pt-2 italic">
+                    {t({
+                      en: "A meaningful journey of knowledge, faith, and practice.",
+                      bn: "জ্ঞান, ঈমান ও আমলের সমন্বয়ে—একটি সুন্দর ও অর্থবহ ইসলামি শিক্ষাযাত্রা।",
+                    })}
+                  </p>
+                </div>
               </div>
 
-              {/* EARN A CERTIFICATE */}
-              <div className="bg-white rounded-3xl p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-sm">
+              {/* ===== EARN A CERTIFICATE ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 shadow-sm">
                 <div>
-                  <h3 className="text-xl font-bold text-[#00ADD2] mb-2">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#00ADD2] mb-2">
                     {t({
                       en: "EARN A CERTIFICATE",
                       bn: "সার্টিফিকেট অর্জন করুন",
                     })}
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-600 text-xs sm:text-sm">
                     {t({
                       en: "Add this certificate to your resume to demonstrate your skills & increase your chances of getting noticed.",
                       bn: "আপনার দক্ষতা প্রদর্শন ও নজরে আসার সম্ভাবনা বাড়াতে এই সার্টিফিকেট আপনার জীবনবৃত্তান্তে যুক্ত করুন।",
                     })}
                   </p>
                 </div>
-                <div className="w-48 h-32 bg-gray-100 rounded-xl border border-dashed border-gray-300 flex items-center justify-center text-gray-400 text-xs text-center p-2">
+                <div className="w-40 h-28 sm:w-48 sm:h-32 bg-gray-100 rounded-xl border border-dashed border-gray-300 flex items-center justify-center overflow-hidden">
                   <img
                     src={Certificate}
                     alt={t({ en: "Certificate", bn: "সার্টিফিকেট" })}
+                    className="w-full h-full object-contain"
                   />
                 </div>
               </div>
 
-              {/* Ready To Apply Your Course */}
-              <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-3xl p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* ===== Ready To Apply ===== */}
+              <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-3xl p-4 sm:p-6 border border-teal-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-bold text-[#002b2b]">
+                  <h3 className="text-lg sm:text-xl font-bold text-[#002b2b]">
                     {t({
                       en: "Ready To Apply Your Course",
                       bn: "আপনার কোর্সে আবেদন করতে প্রস্তুত",
                     })}
                   </h3>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-gray-600 text-xs sm:text-sm">
                     {t({
                       en: "Enroll now and start your structured learning journey.",
                       bn: "এখনই নিবন্ধন করুন এবং আপনার সুশৃঙ্খল শিক্ষাযাত্রা শুরু করুন।",
@@ -897,130 +840,128 @@ const DiplomaDetails = () => {
                 </Link>
               </div>
 
-              {/* WHAT YOU WILL GAIN */}
-              <div className="bg-white rounded-3xl p-8 space-y-4 shadow-sm">
+              {/* ===== WHAT YOU WILL GAIN ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 space-y-4 shadow-sm">
                 <div className="flex items-center gap-3 mb-2">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    {t({
-                      en: "WHAT YOU WILL GAIN",
-                      bn: "আপনি কী পাবেন",
-                    })}
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
+                    {t({ en: "WHAT YOU WILL GAIN", bn: "আপনি কী পাবেন" })}
                   </h2>
                 </div>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                   {t({
-                    en: "The <strong>Men's Diploma in Islamic Studies</strong> is a comprehensive two-year online program, specially designed for men—enabling them to pursue institutional Islamic education from home, even amid busy and responsibility-filled lives.",
-                    bn: "<strong>মেনস ডিপ্লোমা ইন ইসলামিক স্টাডিজ</strong> একটি পূর্ণাঙ্গ দ্বিবার্ষিক অনলাইন প্রোগ্রাম, যা বিশেষভাবে পুরুষদের জন্য ডিজাইন করা হয়েছে—যাতে তারা ব্যস্ত ও দায়িত্বপূর্ণ জীবনযাপনের মধ্যেও ঘরে বসে প্রাতিষ্ঠানিক ইসলামি শিক্ষা গ্রহণ করতে পারেন।",
+                    en: "The Men's Diploma in Islamic Studies is a comprehensive two-year online program, specially designed for men—enabling them to pursue institutional Islamic education from home, even amid busy and responsibility-filled lives.",
+                    bn: "মেনস ডিপ্লোমা ইন ইসলামিক স্টাডিজ একটি পূর্ণাঙ্গ দ্বিবার্ষিক অনলাইন প্রোগ্রাম, যা বিশেষভাবে পুরুষদের জন্য ডিজাইন করা হয়েছে—যাতে তারা ব্যস্ত ও দায়িত্বপূর্ণ জীবনযাপনের মধ্যেও ঘরে বসে প্রাতিষ্ঠানিক ইসলামি শিক্ষা গ্রহণ করতে পারেন।",
                   })}
                 </p>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                   {t({
-                    en: "This is not merely a course; it is a <strong>bridge between self-development, leadership, and academic excellence</strong>.",
-                    bn: "এটি কেবল একটি কোর্স নয়; এটি <strong>আত্ম-উন্নয়ন, নেতৃত্ব ও একাডেমিক শ্রেষ্ঠত্বের মধ্যে একটি সেতু</strong>।",
+                    en: "This is not merely a course; it is a bridge between self-development, leadership, and academic excellence.",
+                    bn: "এটি কেবল একটি কোর্স নয়; এটি আত্ম-উন্নয়ন, নেতৃত্ব ও একাডেমিক শ্রেষ্ঠত্বের মধ্যে একটি সেতু।",
                   })}
                 </p>
-                <p className="text-gray-700 font-semibold text-[#002b2b]">
+                <p className="text-gray-700 font-semibold text-[#002b2b] text-sm sm:text-base">
                   {t({
                     en: 'Program Slogan: "Seminary to Academia; Diploma to Honours"',
                     bn: 'প্রোগ্রাম স্লোগান: "মাদ্রাসা থেকে একাডেমিয়া; ডিপ্লোমা থেকে অনার্স"',
                   })}
                 </p>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                   {t({
-                    en: "Upon successful completion of this diploma, students will be eligible for <strong>direct university credit transfer</strong> and may enroll in a <strong>B.A. (Honours) in Islamic Studies</strong> program.",
-                    bn: "এই ডিপ্লোমা সফলভাবে সম্পন্ন করার পর শিক্ষার্থীরা <strong>সরাসরি বিশ্ববিদ্যালয়ের ক্রেডিট ট্রান্সফার</strong> এর যোগ্য হবে এবং <strong>বি.এ. (অনার্স) ইন ইসলামিক স্টাডিজ</strong> প্রোগ্রামে ভর্তি হতে পারবে।",
+                    en: "Upon successful completion of this diploma, students will be eligible for direct university credit transfer and may enroll in a B.A. (Honours) in Islamic Studies program.",
+                    bn: "এই ডিপ্লোমা সফলভাবে সম্পন্ন করার পর শিক্ষার্থীরা সরাসরি বিশ্ববিদ্যালয়ের ক্রেডিট ট্রান্সফার এর যোগ্য হবে এবং বি.এ. (অনার্স) ইন ইসলামিক স্টাডিজ প্রোগ্রামে ভর্তি হতে পারবে।",
                   })}
                 </p>
-                <p className="text-gray-700 leading-relaxed">
-                  {t({
-                    en: "In essence, a student will obtain <strong>two internationally recognized academic credentials</strong>:",
-                    bn: "মূলত, একজন শিক্ষার্থী <strong>দুটি আন্তর্জাতিকভাবে স্বীকৃত একাডেমিক শংসাপত্র</strong> লাভ করবে:",
-                  })}
-                </p>
-                <ul className="list-disc list-inside space-y-1 text-gray-700 pl-2">
+                <ul className="list-disc list-inside space-y-1 text-gray-700 pl-2 text-sm sm:text-base">
                   <li>
                     {t({
-                      en: "A <strong>Diploma in Islamic Studies</strong> from Tarbiyah Online",
-                      bn: "তারবিয়াহ অনলাইন থেকে <strong>ডিপ্লোমা ইন ইসলামিক স্টাডিজ</strong>",
+                      en: "A Diploma in Islamic Studies from Tarbiyah Online",
+                      bn: "তারবিয়াহ অনলাইন থেকে ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
                     })}
                   </li>
                   <li>
                     {t({
-                      en: "Eligibility for <strong>credit transfer toward a B.A. (Honours) in Islamic Studies</strong> in the future",
-                      bn: "ভবিষ্যতে <strong>বি.এ. (অনার্স) ইন ইসলামিক স্টাডিজ</strong> এর জন্য ক্রেডিট ট্রান্সফারের যোগ্যতা",
+                      en: "Eligibility for credit transfer toward a B.A. (Honours) in Islamic Studies in the future",
+                      bn: "ভবিষ্যতে বি.এ. (অনার্স) ইন ইসলামিক স্টাডিজ এর জন্য ক্রেডিট ট্রান্সফারের যোগ্যতা",
                     })}
                   </li>
                 </ul>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                   {t({
-                    en: "As a result, students will be able to progress step by step toward <strong>Honours, Master's, MPhil, and PhD levels</strong>, in shā' Allāh.",
-                    bn: "ফলস্বরূপ, শিক্ষার্থীরা ধাপে ধাপে <strong>অনার্স, মাস্টার্স, এমফিল ও পিএইচডি স্তর</strong> অর্জনের দিকে অগ্রসর হতে পারবে, ইনশাআল্লাহ।",
+                    en: "As a result, students will be able to progress step by step toward Honours, Master's, MPhil, and PhD levels, in shā' Allāh.",
+                    bn: "ফলস্বরূপ, শিক্ষার্থীরা ধাপে ধাপে অনার্স, মাস্টার্স, এমফিল ও পিএইচডি স্তর অর্জনের দিকে অগ্রসর হতে পারবে, ইনশাআল্লাহ।",
                   })}
                 </p>
               </div>
 
-              {/* MISSION */}
-              <div className="bg-gradient-to-br from-[#002b2b] to-[#003d3d] rounded-3xl p-8">
+              {/* ===== MISSION (Updated with your content) ===== */}
+              <div className="bg-gradient-to-br from-[#002b2b] to-[#003d3d] rounded-3xl p-4 sm:p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-white">
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">
                     {t({ en: "MISSION", bn: "মিশন" })}
                   </h2>
                 </div>
-                <ul className="space-y-3 text-white">
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-400 font-bold">»</span>
+                <div className="space-y-4 text-white leading-relaxed text-sm sm:text-base">
+                  <p>
                     {t({
-                      en: "To provide men with simple, structured, and institutional Islamic education, from foundational to advanced levels",
-                      bn: "মৌলিক থেকে উন্নত স্তর পর্যন্ত পুরুষদের জন্য সহজ, সুশৃঙ্খল ও প্রাতিষ্ঠানিক ইসলামি শিক্ষা প্রদান করা",
+                      en: "In the present era, alongside the massive advancement of knowledge, technology, and civilization, the need for morality, spiritual development, and the right life philosophy in human life is increasingly growing. For the beautiful and welfare-oriented development of individuals, families, and society, pure faith (Iman), authentic knowledge, and the correct understanding of Islam are essential.",
+                      bn: "বর্তমান যুগে জ্ঞান, প্রযুক্তি ও সভ্যতার ব্যাপক অগ্রগতির পাশাপাশি মানুষের জীবনে নৈতিকতা, আত্মিক উন্নয়ন এবং সঠিক জীবনদর্শনের প্রয়োজনীয়তা ক্রমেই বৃদ্ধি পাচ্ছে। ব্যক্তি, পরিবার ও সমাজের সুন্দর ও কল্যাণময় বিকাশের জন্য প্রয়োজন বিশুদ্ধ ঈমান, প্রামাণ্য জ্ঞান এবং ইসলামের সঠিক উপলব্ধি।",
                     })}
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-400 font-bold">»</span>
+                  </p>
+                  <p>
                     {t({
-                      en: "Memorizing and explaining authentic hadiths",
-                      bn: "প্রামাণ্য হাদিস মুখস্থ করা ও ব্যাখ্যা করা",
+                      en: "Both Muslim men and women need to guide themselves in every aspect of life in the light of Islamic teachings and values. But in the reality of busy and changing lives, it is not possible for many to acquire Islamic knowledge in a structured and continuous manner. As a result, the need to acquire correct knowledge in Aqidah, worship, Qur'an-Hadith, Seerah, Islamic history, and various aspects of daily life is felt.",
+                      bn: "একজন মুসলিম নারী ও পুরুষ উভয়েরই জীবনের প্রতিটি ক্ষেত্রে ইসলামের শিক্ষা ও মূল্যবোধের আলোকে নিজেকে পরিচালিত করা প্রয়োজন। কিন্তু ব্যস্ত ও পরিবর্তনশীল জীবনের বাস্তবতায় অনেকের পক্ষেই সুসংহত ও ধারাবাহিকভাবে ইসলামি জ্ঞান অর্জন করা সম্ভব হয়ে ওঠে না। ফলে আকীদাহ, ইবাদত, কুরআন-হাদীস, সীরাত, ইসলামের ইতিহাস এবং দৈনন্দিন জীবনের বিভিন্ন বিষয়ে সঠিক জ্ঞান অর্জনের প্রয়োজন অনুভূত হয়।",
                     })}
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-400 font-bold">»</span>
+                  </p>
+                  <p>
                     {t({
-                      en: "Learning about the correct creed",
-                      bn: "সঠিক আকীদাহ সম্পর্কে জানা",
+                      en: "Keeping this need in mind, Tarbiyah Online's 'Diploma in Islamic Studies' is being conducted as a structured, continuous, and authentic Islamic education program.",
+                      bn: "এই প্রয়োজনকে সামনে রেখে তারবিয়াহ অনলাইনের “Diploma in Islamic Studies” একটি সুসংহত, ধারাবাহিক ও প্রামাণ্য ইসলামি শিক্ষা প্রোগ্রাম হিসেবে পরিচালিত হচ্ছে।",
                     })}
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-400 font-bold">»</span>
-                    {t({
-                      en: "Acquire reading, writing and speaking skills in Arabic",
-                      bn: "আরবি ভাষায় পড়া, লেখা ও কথা বলার দক্ষতা অর্জন",
-                    })}
-                  </li>
-                </ul>
+                  </p>
+                </div>
               </div>
 
-              {/* VISION */}
-              <div className="bg-gradient-to-br from-[#003d3d] to-[#004d4d] rounded-3xl p-8">
+              {/* ===== VISION (Updated with your content) ===== */}
+              <div className="bg-gradient-to-br from-[#003d3d] to-[#004d4d] rounded-3xl p-4 sm:p-6 md:p-8">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-white">
-                    {t({ en: "VISION", bn: "দৃষ্টি" })}
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">
+                    {t({ en: "VISION", bn: "ভিশন" })}
                   </h2>
                 </div>
-                <p className="text-white leading-relaxed">
-                  {t({
-                    en: '"To empower Muslim men through authentic Islamic education, moral integrity, and intellectual excellence—so that they may serve as guardians within their families, representatives of justice in society, and carriers of light and goodness within the Ummah."',
-                    bn: '"প্রামাণ্য ইসলামি শিক্ষা, নৈতিক সততা ও বুদ্ধিবৃত্তিক শ্রেষ্ঠত্বের মাধ্যমে মুসলিম পুরুষদের ক্ষমতায়ন করা—যাতে তারা তাদের পরিবারে অভিভাবক, সমাজে ন্যায়ের প্রতিনিধি এবং উম্মাহর মধ্যে আলো ও কল্যাণের বাহক হিসেবে কাজ করতে পারে।"',
-                  })}
-                </p>
+                <div className="space-y-4 text-white leading-relaxed text-sm sm:text-base">
+                  <p className="text-center text-base sm:text-lg">
+                    <span className="block text-xl sm:text-2xl mb-2">
+                      اِنَّ الدِّیۡنَ عِنۡدَ اللّٰهِ الۡاِسۡلَامُ
+                    </span>
+                    {t({
+                      en: '"Indeed, the religion in the sight of Allah is Islam." — Al-Imran (3:19)',
+                      bn: '"নিশ্চয় ইসলাম আল্লাহর মনোনীত জীবন ব্যবস্থা।" — আল ইমরান (৩:১৯)',
+                    })}
+                  </p>
+                  <p>
+                    {t({
+                      en: "Yet people, in the name of success in conventional social systems, have moved far away from the religion. People are falling behind Allah-given success in pursuit of worldly so-called success. Meanwhile, many are becoming interested in learning the religion to achieve Allah-given success. But many, despite their interest, cannot learn the religion due to being generally educated, age, and the complexity of religious education platforms. Again, many think, if only they had the opportunity to learn the religion institutionally after crossing the age limit.",
+                      bn: "অথচ মানুষ প্রচলিত সমাজ ব্যবস্থায় সফলতা অর্জনের নামে দ্বীন থেকে বহু দূরে। মানুষ পার্থিব তথাকথিত সফলতা অর্জনের জন্য আল্লাহ প্রদত্ত সফলতা থেকে পিছিয়ে যাচ্ছে। এর মাঝে অনেকে আবার আল্লাহ প্রদত্ত সফলতা অর্জনের জন্য দ্বীন শিক্ষার প্রতি আগ্রহী হয়ে উঠছেন। কিন্তু অনেকে জেনারেল শিক্ষিত, বয়স ও দ্বীন শিক্ষার প্লাটফর্মের জটিলতার কারণে আগ্রহ থাকার পরেও দ্বীন শিখতে পারছেন না। আবার অনেকে ভাবছেন বয়সের গন্ডি পেরিয়ে যদি প্রাতিষ্ঠানিকভাবে দ্বীন শিক্ষার সুযোগ পেতেন।",
+                    })}
+                  </p>
+                  <p>
+                    {t({
+                      en: "Considering all these things, 'Tarbiyah Academy' has launched the online-based 'Diploma in Islamic Studies' program with a time-appropriate decision for those thirsty for religious knowledge.",
+                      bn: "এসব কিছু বিবেচনা করে “তারবিয়্যাহ একাডেমী” দ্বীনের জ্ঞানপিপাসুদের জন্য যুগোপযোগী সিদ্ধান্ত নিয়ে চালু করেছে অনলাইনভিত্তিক “ডিপ্লোমা ইন ইসলামিক স্টাডিজ” প্রোগ্রাম।",
+                    })}
+                  </p>
+                </div>
               </div>
 
-              {/* KEY FEATURES OF THE PROGRAM */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== KEY FEATURES ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({
                       en: "KEY FEATURES OF THE PROGRAM",
                       bn: "প্রোগ্রামের মূল বৈশিষ্ট্য",
@@ -1079,84 +1020,82 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* PROGRAM STRUCTURE */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== PROGRAM STRUCTURE ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    {t({
-                      en: "PROGRAM STRUCTURE",
-                      bn: "প্রোগ্রামের কাঠামো",
-                    })}
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
+                    {t({ en: "PROGRAM STRUCTURE", bn: "প্রোগ্রামের কাঠামো" })}
                   </h2>
                 </div>
 
-                {/* Program Structure Table */}
                 <div className="overflow-x-auto mb-8">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-left border-collapse text-sm">
                     <thead>
                       <tr className="border-b-2 border-gray-200 text-[#00ADD2]">
-                        <th className="py-3 px-4 font-bold">
+                        <th className="py-3 px-2 sm:px-4 font-bold">
                           {t({ en: "Item", bn: "বিষয়" })}
                         </th>
-                        <th className="py-3 px-4 font-bold">
+                        <th className="py-3 px-2 sm:px-4 font-bold">
                           {t({ en: "Description", bn: "বর্ণনা" })}
                         </th>
                       </tr>
                     </thead>
                     <tbody className="text-gray-700">
                       <tr className="border-b border-gray-100">
-                        <td className="py-3 px-4 font-semibold">
+                        <td className="py-3 px-2 sm:px-4 font-semibold">
                           {t({ en: "Duration", bn: "মেয়াদ" })}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-2 sm:px-4">
                           {programStructure.duration}
                         </td>
                       </tr>
                       <tr className="border-b border-gray-100">
-                        <td className="py-3 px-4 font-semibold">
+                        <td className="py-3 px-2 sm:px-4 font-semibold">
                           {t({ en: "Class Method", bn: "ক্লাস পদ্ধতি" })}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-2 sm:px-4">
                           {programStructure.classMethod}
                         </td>
                       </tr>
                       <tr className="border-b border-gray-100">
-                        <td className="py-3 px-4 font-semibold">
+                        <td className="py-3 px-2 sm:px-4 font-semibold">
                           {t({ en: "Time", bn: "সময়" })}
                         </td>
-                        <td className="py-3 px-4">{programStructure.time}</td>
+                        <td className="py-3 px-2 sm:px-4">
+                          {programStructure.time}
+                        </td>
                       </tr>
                       <tr className="border-b border-gray-100">
-                        <td className="py-3 px-4 font-semibold">
+                        <td className="py-3 px-2 sm:px-4 font-semibold">
                           {t({
                             en: "Classes per Week",
                             bn: "প্রতি সপ্তাহে ক্লাস",
                           })}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-2 sm:px-4">
                           {programStructure.classesPerWeek}
                         </td>
                       </tr>
                       <tr className="border-b border-gray-100">
-                        <td className="py-3 px-4 font-semibold">
+                        <td className="py-3 px-2 sm:px-4 font-semibold">
                           {t({
                             en: "Sessions per Semester",
                             bn: "প্রতি সেমিস্টারে সেশন",
                           })}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-2 sm:px-4">
                           {programStructure.sessionsPerSemester}
                         </td>
                       </tr>
                       <tr>
-                        <td className="py-3 px-4 font-semibold">
+                        <td className="py-3 px-2 sm:px-4 font-semibold">
                           {t({
                             en: "Language of Instruction",
                             bn: "শিক্ষার ভাষা",
                           })}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-2 sm:px-4">
                           {programStructure.language}
                         </td>
                       </tr>
@@ -1164,11 +1103,11 @@ const DiplomaDetails = () => {
                   </table>
                 </div>
 
-                {/* Curriculum Section */}
-                <h3 className="text-xl font-bold text-[#00ADD2] mb-4">
+                {/* Curriculum */}
+                <h3 className="text-lg sm:text-xl font-bold text-[#00ADD2] mb-4">
                   {t({ en: "Curriculum", bn: "পাঠ্যসূচি" })}
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {semestersData.map((sem, index) => (
                     <div
                       key={index}
@@ -1176,24 +1115,24 @@ const DiplomaDetails = () => {
                     >
                       <button
                         onClick={() => toggleSemester(index)}
-                        className="w-full flex items-center justify-between p-5 bg-gray-50 hover:bg-gray-100 text-left font-bold text-[#002b2b] transition-colors"
+                        className="w-full flex items-center justify-between p-4 sm:p-5 bg-gray-50 hover:bg-gray-100 text-left font-bold text-[#002b2b] transition-colors"
                       >
-                        <span className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                        <span className="flex items-center gap-2 text-sm sm:text-base">
+                          <span className="w-2 h-2 rounded-full bg-yellow-500 shrink-0"></span>
                           {sem.title}
                         </span>
                         {openSemester === index ? (
-                          <FaChevronUp className="text-gray-500" />
+                          <FaChevronUp className="text-gray-500 shrink-0" />
                         ) : (
-                          <FaChevronDown className="text-gray-500" />
+                          <FaChevronDown className="text-gray-500 shrink-0" />
                         )}
                       </button>
                       {openSemester === index && (
-                        <div className="p-5 bg-white border-t border-gray-200 space-y-2">
+                        <div className="p-4 sm:p-5 bg-white border-t border-gray-200 space-y-2">
                           {sem.subjects.map((sub, sIndex) => (
                             <div
                               key={sIndex}
-                              className="flex items-start gap-2 text-gray-700 text-sm py-1 border-b border-gray-50 last:border-none"
+                              className="flex items-start gap-2 text-gray-700 text-xs sm:text-sm py-1 border-b border-gray-50 last:border-none"
                             >
                               <span className="text-yellow-500 font-bold">
                                 ✔
@@ -1208,18 +1147,18 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* WHAT STUDENTS WILL GAIN */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== WHAT STUDENTS WILL GAIN ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({
                       en: "WHAT STUDENTS WILL GAIN",
                       bn: "শিক্ষার্থীরা কী পাবে",
                     })}
                   </h2>
                 </div>
-                <ul className="space-y-3 text-gray-700">
+                <ul className="space-y-3 text-gray-700 text-sm sm:text-base">
                   <li className="flex items-start gap-2">
                     <span className="text-yellow-500 font-bold">»</span>
                     {t({
@@ -1258,11 +1197,11 @@ const DiplomaDetails = () => {
                 </ul>
               </div>
 
-              {/* ADMISSION REQUIREMENTS */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== ADMISSION REQUIREMENTS ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({
                       en: "ADMISSION REQUIREMENTS",
                       bn: "ভর্তির প্রয়োজনীয়তা",
@@ -1270,26 +1209,26 @@ const DiplomaDetails = () => {
                   </h2>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-left border-collapse text-sm">
                     <thead>
                       <tr className="border-b-2 border-gray-200 text-[#002b2b]">
-                        <th className="py-3 px-4 font-bold">
+                        <th className="py-3 px-2 sm:px-4 font-bold">
                           {t({ en: "Requirement", bn: "শর্ত" })}
                         </th>
-                        <th className="py-3 px-4 font-bold">
+                        <th className="py-3 px-2 sm:px-4 font-bold">
                           {t({ en: "Details", bn: "বিবরণ" })}
                         </th>
                       </tr>
                     </thead>
                     <tbody className="text-gray-700">
                       <tr className="border-b border-gray-100">
-                        <td className="py-3 px-4 font-semibold">
+                        <td className="py-3 px-2 sm:px-4 font-semibold">
                           {t({
                             en: "Minimum Education",
                             bn: "সর্বনিম্ন শিক্ষাগত যোগ্যতা",
                           })}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-2 sm:px-4">
                           {t({
                             en: "HSC / Alim / A-Levels / Equivalent",
                             bn: "এইচএসসি / আলিম / এ-লেভেল / সমতুল্য",
@@ -1297,10 +1236,10 @@ const DiplomaDetails = () => {
                         </td>
                       </tr>
                       <tr>
-                        <td className="py-3 px-4 font-semibold">
+                        <td className="py-3 px-2 sm:px-4 font-semibold">
                           {t({ en: "Suitable For", bn: "যাদের জন্য উপযুক্ত" })}
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-2 sm:px-4">
                           {t({
                             en: "Working men, professionals, expatriate men, and those planning higher Islamic studies",
                             bn: "চাকরিজীবী, পেশাজীবী, প্রবাসী পুরুষ এবং যারা উচ্চতর ইসলামি শিক্ষা গ্রহণের পরিকল্পনা করছেন",
@@ -1312,56 +1251,53 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* FEE STRUCTURE (BDT) */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== FEE STRUCTURE ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#002b2b]">
-                    {t({
-                      en: "FEE STRUCTURE (BDT)",
-                      bn: "ফি কাঠামো (বিডিটি)",
-                    })}
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#002b2b]">
+                    {t({ en: "FEE STRUCTURE (BDT)", bn: "ফি কাঠামো (বিডিটি)" })}
                   </h2>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-left border-collapse text-sm">
                     <thead>
                       <tr className="border-b-2 border-gray-200 text-[#00ADD2]">
-                        <th className="py-3 px-4 font-bold">
+                        <th className="py-3 px-2 sm:px-4 font-bold">
                           {t({ en: "Item", bn: "বিষয়" })}
                         </th>
-                        <th className="py-3 px-4 font-bold">
+                        <th className="py-3 px-2 sm:px-4 font-bold">
                           {t({ en: "Amount", bn: "পরিমাণ" })}
                         </th>
                       </tr>
                     </thead>
                     <tbody className="text-gray-700">
                       <tr>
-                        <td className="py-3 px-4 font-semibold">
+                        <td className="py-3 px-2 sm:px-4 font-semibold">
                           {t({
                             en: "Per Semester Fee",
                             bn: "প্রতি সেমিস্টার ফি",
                           })}
                         </td>
-                        <td className="py-3 px-4">12,000 TK</td>
+                        <td className="py-3 px-2 sm:px-4">12,000 TK</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
               </div>
 
-              {/* SCHOLARSHIP OPPORTUNITIES */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== SCHOLARSHIP ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({
                       en: "SCHOLARSHIP OPPORTUNITIES",
                       bn: "স্কলারশিপের সুযোগ",
                     })}
                   </h2>
                 </div>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
                   {t({
                     en: "Need- and merit-based scholarships are available for academically talented and financially disadvantaged students. (Funded through donations and Zakat funds)",
                     bn: "শিক্ষাগতভাবে প্রতিভাবান ও আর্থিকভাবে অস্বচ্ছল শিক্ষার্থীদের জন্য প্রয়োজন- ও মেধাভিত্তিক স্কলারশিপ পাওয়া যায়। (দান ও যাকাত তহবিলের মাধ্যমে অর্থায়িত)",
@@ -1369,24 +1305,21 @@ const DiplomaDetails = () => {
                 </p>
               </div>
 
-              {/* ADMISSION PROCESS */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== ADMISSION PROCESS ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
-                    {t({
-                      en: "ADMISSION PROCESS",
-                      bn: "ভর্তি প্রক্রিয়া",
-                    })}
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
+                    {t({ en: "ADMISSION PROCESS", bn: "ভর্তি প্রক্রিয়া" })}
                   </h2>
                 </div>
-                <div className="space-y-3 text-gray-700">
+                <div className="space-y-3 text-gray-700 text-sm sm:text-base">
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-500 font-bold">➪</span>
                     <span>
                       {t({
-                        en: 'Apply online at: <a href="http://www.tarbiyahonline.com/admission-now" target="_blank" rel="noreferrer" class="text-teal-600 underline hover:text-teal-800">www.tarbiyahonline.com/apply</a>',
-                        bn: 'অনলাইনে আবেদন করুন: <a href="http://www.tarbiyahonline.com/admission-now" target="_blank" rel="noreferrer" class="text-teal-600 underline hover:text-teal-800">www.tarbiyahonline.com/apply</a>',
+                        en: "Apply online at: www.tarbiyahonline.com/apply",
+                        bn: "অনলাইনে আবেদন করুন: www.tarbiyahonline.com/apply",
                       })}
                     </span>
                   </div>
@@ -1420,18 +1353,18 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* ASSESSMENT & CERTIFICATION */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== ASSESSMENT ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({
                       en: "ASSESSMENT & CERTIFICATION",
                       bn: "মূল্যায়ন ও সার্টিফিকেশন",
                     })}
                   </h2>
                 </div>
-                <div className="space-y-3 text-gray-700">
+                <div className="space-y-3 text-gray-700 text-sm sm:text-base">
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-500 font-bold">➪</span>
                     <span>
@@ -1471,18 +1404,18 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* CODE OF CONDUCT & ACADEMIC POLICY */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== CODE OF CONDUCT ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({
                       en: "CODE OF CONDUCT & ACADEMIC POLICY",
                       bn: "আচরণবিধি ও একাডেমিক নীতি",
                     })}
                   </h2>
                 </div>
-                <div className="space-y-3 text-gray-700">
+                <div className="space-y-3 text-gray-700 text-sm sm:text-base">
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-500 font-bold">➪</span>
                     <span>
@@ -1531,18 +1464,18 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* OTHER PROGRAMS & ACTIVITIES */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== OTHER PROGRAMS ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({
                       en: "OTHER PROGRAMS & ACTIVITIES",
                       bn: "অন্যান্য প্রোগ্রাম ও কার্যক্রম",
                     })}
                   </h2>
                 </div>
-                <div className="space-y-3 text-gray-700">
+                <div className="space-y-3 text-gray-700 text-sm sm:text-base">
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-500 font-bold">➪</span>
                     <span>
@@ -1565,8 +1498,8 @@ const DiplomaDetails = () => {
                     <span className="text-yellow-500 font-bold">➪</span>
                     <span>
                       {t({
-                        en: "In addition to academic programs, cultural and educational activities are arranged to nurture children's intellectual and cognitive development",
-                        bn: "একাডেমিক প্রোগ্রামের পাশাপাশি শিশুদের বুদ্ধিবৃত্তিক ও জ্ঞানীয় বিকাশের জন্য সাংস্কৃতিক ও শিক্ষামূলক কার্যক্রমের ব্যবস্থা রয়েছে",
+                        en: "Cultural and educational activities for children's intellectual development",
+                        bn: "শিশুদের বুদ্ধিবৃত্তিক বিকাশের জন্য সাংস্কৃতিক ও শিক্ষামূলক কার্যক্রম",
                       })}
                     </span>
                   </div>
@@ -1609,24 +1542,24 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* INSTITUTIONAL POLICY STATEMENT */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== INSTITUTIONAL POLICY ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({
                       en: "INSTITUTIONAL POLICY STATEMENT",
                       bn: "প্রাতিষ্ঠানিক নীতি বিবৃতি",
                     })}
                   </h2>
                 </div>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-gray-700 leading-relaxed mb-4 text-sm sm:text-base">
                   {t({
-                    en: "Tarbiyah Academy firmly believes in positivity and inclusivity. Equal opportunities, facilities, and rights are ensured for all students in both academic and co-curricular matters. Recognizing that students have diverse needs, Tarbiyah Academy remains committed to addressing those needs responsibly.",
-                    bn: "তারবিয়াহ একাডেমি ইতিবাচকতা ও অন্তর্ভুক্তিতে দৃঢ়ভাবে বিশ্বাস করে। একাডেমিক ও সহ-পাঠ্যক্রমিক বিষয়ে সকল শিক্ষার্থীর জন্য সমান সুযোগ, সুবিধা ও অধিকার নিশ্চিত করা হয়। শিক্ষার্থীদের বিভিন্ন চাহিদা রয়েছে তা স্বীকার করে তারবিয়াহ একাডেমি দায়িত্বের সাথে সেই চাহিদা পূরণে প্রতিশ্রুতিবদ্ধ।",
+                    en: "Tarbiyah Academy firmly believes in positivity and inclusivity. Equal opportunities, facilities, and rights are ensured for all students in both academic and co-curricular matters.",
+                    bn: "তারবিয়াহ একাডেমি ইতিবাচকতা ও অন্তর্ভুক্তিতে দৃঢ়ভাবে বিশ্বাস করে। একাডেমিক ও সহ-পাঠ্যক্রমিক বিষয়ে সকল শিক্ষার্থীর জন্য সমান সুযোগ, সুবিধা ও অধিকার নিশ্চিত করা হয়।",
                   })}
                 </p>
-                <div className="space-y-2 text-gray-700">
+                <div className="space-y-2 text-gray-700 text-sm sm:text-base">
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-500 font-bold">➪</span>
                     <span>
@@ -1684,18 +1617,18 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* DISCIPLINE & ATTENDANCE REGULATIONS */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== DISCIPLINE ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({
                       en: "DISCIPLINE & ATTENDANCE REGULATIONS",
                       bn: "শৃঙ্খলা ও উপস্থিতি বিধিমালা",
                     })}
                   </h2>
                 </div>
-                <div className="space-y-3 text-gray-700">
+                <div className="space-y-3 text-gray-700 text-sm sm:text-base">
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-500 font-bold">➪</span>
                     <span>
@@ -1753,24 +1686,24 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* HOMEWORK & ASSIGNMENTS */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== HOMEWORK ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({
                       en: "HOMEWORK & ASSIGNMENTS",
                       bn: "হোমওয়ার্ক ও অ্যাসাইনমেন্ট",
                     })}
                   </h2>
                 </div>
-                <div className="space-y-3 text-gray-700">
+                <div className="space-y-3 text-gray-700 text-sm sm:text-base">
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-500 font-bold">➪</span>
                     <span>
                       {t({
-                        en: "Education is not limited to classroom instruction alone. Recognizing the diverse means of learning, Tarbiyah Academy provides students with various academic activities and processes.",
-                        bn: "শিক্ষা কেবল শ্রেণিকক্ষের নির্দেশনার মধ্যে সীমাবদ্ধ নয়। শিক্ষার বিভিন্ন মাধ্যমকে স্বীকৃতি দিয়ে তারবিয়াহ একাডেমি শিক্ষার্থীদের বিভিন্ন একাডেমিক কার্যক্রম ও প্রক্রিয়া প্রদান করে।",
+                        en: "Education is not limited to classroom instruction alone. Tarbiyah Academy provides students with various academic activities and processes.",
+                        bn: "শিক্ষা কেবল শ্রেণিকক্ষের নির্দেশনার মধ্যে সীমাবদ্ধ নয়। তারবিয়াহ একাডেমি শিক্ষার্থীদের বিভিন্ন একাডেমিক কার্যক্রম ও প্রক্রিয়া প্রদান করে।",
                       })}
                     </span>
                   </div>
@@ -1795,18 +1728,18 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* GENERAL E-SAFETY POLICY */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== E-SAFETY ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({
                       en: "GENERAL E-SAFETY POLICY",
                       bn: "সাধারণ ই-সুরক্ষা নীতি",
                     })}
                   </h2>
                 </div>
-                <div className="space-y-3 text-gray-700">
+                <div className="space-y-3 text-gray-700 text-sm sm:text-base">
                   <div className="flex items-start gap-2">
                     <span className="text-yellow-500 font-bold">➪</span>
                     <span>
@@ -1882,10 +1815,10 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* ========== কেন তারবিয়াহ ডিপ্লোমা ========== */}
-              <div className="bg-gradient-to-br text-black rounded-3xl shadow-2xl p-6 md:p-12">
+              {/* ===== WHY TARBIYAH ===== */}
+              <div className="bg-gradient-to-br text-black rounded-3xl shadow-2xl p-4 sm:p-6 md:p-12">
                 <div className="text-center mb-10">
-                  <h2 className="text-2xl md:text-4xl font-bold mb-3 text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl md:text-4xl font-bold mb-3 text-[#00ADD2]">
                     {t({
                       en: "Why Tarbiyah Diploma in Islamic Studies?",
                       bn: "কেন তারবিয়াহ ডিপ্লোমা ইন ইসলামিক স্ট্রাডিজ ?",
@@ -1893,17 +1826,16 @@ const DiplomaDetails = () => {
                   </h2>
                   <div className="w-24 h-1 bg-yellow-400 mx-auto rounded-full"></div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
                   {whyFeatures.map((feature, index) => (
                     <div
                       key={index}
-                      className="bg-gray-50 border border-gray-200 backdrop-blur-sm p-5 rounded-2xl flex items-center gap-4 hover:bg-gray-100 transition-all shadow-md"
+                      className="bg-gray-50 border border-gray-200 backdrop-blur-sm p-4 sm:p-5 rounded-2xl flex items-center gap-3 sm:gap-4 hover:bg-gray-100 transition-all shadow-md"
                     >
-                      <div className="w-12 h-12 rounded-xl bg-yellow-500/20 text-yellow-600 flex items-center justify-center shrink-0 text-xl">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-yellow-500/20 text-yellow-600 flex items-center justify-center shrink-0 text-lg sm:text-xl">
                         {feature.icon}
                       </div>
-                      <h3 className="text-base md:text-lg font-semibold text-black">
+                      <h3 className="text-sm sm:text-base md:text-lg font-semibold text-black">
                         {feature.text}
                       </h3>
                     </div>
@@ -1911,16 +1843,14 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* ====== শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা (Student Reviews) ====== */}
-              {/* এই অংশটি বাংলায় থাকবে, ট্রান্সলেট করা হবে না */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== TESTIMONIALS ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     শিক্ষার্থী ও অভিভাবকদের অভিজ্ঞতা
                   </h2>
                 </div>
-
                 <Swiper
                   modules={[Autoplay, Pagination]}
                   spaceBetween={20}
@@ -1931,10 +1861,7 @@ const DiplomaDetails = () => {
                     disableOnInteraction: false,
                     reverseDirection: true,
                   }}
-                  pagination={{
-                    clickable: true,
-                    dynamicBullets: true,
-                  }}
+                  pagination={{ clickable: true, dynamicBullets: true }}
                   breakpoints={{
                     640: { slidesPerView: 2 },
                     1024: { slidesPerView: 3 },
@@ -1979,15 +1906,15 @@ const DiplomaDetails = () => {
                 </Swiper>
               </div>
 
-              {/* ====== ভিডিও গ্যালারি ====== */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== VIDEO GALLERY ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({ en: "Video Gallery", bn: "ভিডিও গ্যালারি" })}
                   </h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {videoGallery.map((video) => (
                     <a
                       key={video.id}
@@ -2018,11 +1945,11 @@ const DiplomaDetails = () => {
                 </div>
               </div>
 
-              {/* ====== FAQ ====== */}
-              <div className="bg-white rounded-3xl p-8 shadow-sm">
+              {/* ===== FAQ ===== */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 md:p-8 shadow-sm">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-1 h-8 bg-yellow-500 rounded-full"></div>
-                  <h2 className="text-2xl font-bold text-[#00ADD2]">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#00ADD2]">
                     {t({ en: "FAQ", bn: "প্রায়শই জিজ্ঞাসিত প্রশ্ন" })}
                   </h2>
                 </div>
@@ -2042,17 +1969,17 @@ const DiplomaDetails = () => {
                         }
                         className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 text-left transition-colors"
                       >
-                        <span className="font-bold text-[#002b2b]">
+                        <span className="font-bold text-[#002b2b] text-sm sm:text-base pr-2">
                           {index + 1}. {faq.question}
                         </span>
                         {openSemester === `faq-${index}` ? (
-                          <FaChevronUp className="text-gray-500" />
+                          <FaChevronUp className="text-gray-500 shrink-0" />
                         ) : (
-                          <FaChevronDown className="text-gray-500" />
+                          <FaChevronDown className="text-gray-500 shrink-0" />
                         )}
                       </button>
                       {openSemester === `faq-${index}` && (
-                        <div className="p-4 bg-white border-t border-gray-200 text-gray-700">
+                        <div className="p-4 bg-white border-t border-gray-200 text-gray-700 text-sm sm:text-base">
                           {faq.answer}
                         </div>
                       )}
@@ -2062,11 +1989,11 @@ const DiplomaDetails = () => {
               </div>
             </div>
 
-            {/* Right Sidebar - 1 Column */}
-            <div className="space-y-4 -mt-[305px]">
-              {/* YouTube Video Thumbnail */}
+            {/* ============= RIGHT SIDEBAR ============= */}
+            <div className="space-y-4">
+              {/* Video Thumbnail */}
               <a
-                href="https://youtu.be/66DgxQACWd4?si=J6UgGDOVUQ4pU6nf"
+                href="https://youtu.be/66DgxQACWd4"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block relative group overflow-hidden rounded-2xl shadow-md cursor-pointer"
@@ -2088,13 +2015,13 @@ const DiplomaDetails = () => {
                 </div>
               </a>
 
-              {/* Pricing & Enrollment Card */}
-              <div className="bg-white rounded-3xl text-center">
+              {/* Pricing Card */}
+              <div className="bg-white rounded-3xl text-center p-4 sm:p-6 shadow-sm border border-gray-100">
                 <div className="text-3xl font-bold text-[#002b2b] mb-4">
                   ৳ 12,000
                 </div>
                 <Link to="/admission-now">
-                  <button className="w-full bg-[#008080] hover:bg-[#006666] text-white font-bold py-3 rounded-xl shadow-md transition-all mb-4">
+                  <button className="w-full bg-[#008080] hover:bg-[#006666] text-white font-bold py-3 rounded-xl shadow-md transition-all mb-3">
                     {t({ en: "Enroll Now", bn: "এখনই নিবন্ধন করুন" })}
                   </button>
                 </Link>
@@ -2106,12 +2033,12 @@ const DiplomaDetails = () => {
                 </button>
               </div>
 
-              {/* Instructors List */}
-              <div className="bg-white rounded-3xl">
-                <h3 className="text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
+              {/* Instructors */}
+              <div className="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-gray-100">
+                <h3 className="text-lg sm:text-xl font-bold text-[#002b2b] mb-4 border-b pb-2">
                   {t({ en: "Faculty", bn: "অনুষদ" })}
                 </h3>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {instructors.map((instructor) => (
                     <div
                       key={instructor.id}
