@@ -99,7 +99,7 @@ const Admission_now = () => {
         {
           id: "is1",
           name: "Diploma in Islamic Studies",
-          duration: "1 Year",
+          duration: "4 Months",
           admissionFee: 0,
           monthlyFee: 0,
           totalOneTime: 12000,

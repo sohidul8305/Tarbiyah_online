@@ -850,36 +850,12 @@ const DiplomaDetails = () => {
                 </p>
                 <p className="text-gray-700 font-semibold text-[#002b2b] text-sm sm:text-base">
                   {t({
-                    en: 'Program Slogan: "Seminary to Academia; Diploma to Honours"',
-                    bn: 'প্রোগ্রাম স্লোগান: "মাদ্রাসা থেকে একাডেমিয়া; ডিপ্লোমা থেকে অনার্স"',
+                    en: 'Program Slogan: "Seminary to Academia; Basic to Advance"',
+                    bn: 'প্রোগ্রাম স্লোগান: "মাদ্রাসা থেকে একাডেমিয়া; শুরু থেকে উচ্চ "',
                   })}
                 </p>
-                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
-                  {t({
-                    en: "Upon successful completion of this diploma, students will be eligible for direct university credit transfer and may enroll in a B.A. (Honours) in Islamic Studies program.",
-                    bn: "এই ডিপ্লোমা সফলভাবে সম্পন্ন করার পর শিক্ষার্থীরা সরাসরি বিশ্ববিদ্যালয়ের ক্রেডিট ট্রান্সফার এর যোগ্য হবে এবং বি.এ. (অনার্স) ইন ইসলামিক স্টাডিজ প্রোগ্রামে ভর্তি হতে পারবে।",
-                  })}
-                </p>
-                <ul className="list-disc list-inside space-y-1 text-gray-700 pl-2 text-sm sm:text-base">
-                  <li>
-                    {t({
-                      en: "A Diploma in Islamic Studies from Tarbiyah Online",
-                      bn: "তারবিয়াহ অনলাইন থেকে ডিপ্লোমা ইন ইসলামিক স্টাডিজ",
-                    })}
-                  </li>
-                  <li>
-                    {t({
-                      en: "Eligibility for credit transfer toward a B.A. (Honours) in Islamic Studies in the future",
-                      bn: "ভবিষ্যতে বি.এ. (অনার্স) ইন ইসলামিক স্টাডিজ এর জন্য ক্রেডিট ট্রান্সফারের যোগ্যতা",
-                    })}
-                  </li>
-                </ul>
-                <p className="text-gray-700 leading-relaxed text-sm sm:text-base">
-                  {t({
-                    en: "As a result, students will be able to progress step by step toward Honours, Master's, MPhil, and PhD levels, in shā' Allāh.",
-                    bn: "ফলস্বরূপ, শিক্ষার্থীরা ধাপে ধাপে অনার্স, মাস্টার্স, এমফিল ও পিএইচডি স্তর অর্জনের দিকে অগ্রসর হতে পারবে, ইনশাআল্লাহ।",
-                  })}
-                </p>
+
+                <ul className="list-disc list-inside space-y-1 text-gray-700 pl-2 text-sm sm:text-base"></ul>
               </div>
 
               {/* ===== MISSION ===== */}
@@ -1196,13 +1172,6 @@ const DiplomaDetails = () => {
                       bn: "আধুনিক বিশ্বে ইসলামি চিন্তার প্রাসঙ্গিকতা বোঝা",
                     })}
                   </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-yellow-500 font-bold">»</span>
-                    {t({
-                      en: "Academic preparation for higher education",
-                      bn: "উচ্চশিক্ষার জন্য একাডেমিক প্রস্তুতি",
-                    })}
-                  </li>
                 </ul>
               </div>
 
@@ -1239,8 +1208,8 @@ const DiplomaDetails = () => {
                         </td>
                         <td className="py-3 px-2 sm:px-4">
                           {t({
-                            en: "HSC / Alim / A-Levels / Equivalent",
-                            bn: "এইচএসসি / আলিম / এ-লেভেল / সমতুল্য",
+                            en: "18+ years of age. Anyone who wishes to learn the Deen may apply — no prior Islamic education required.",
+                            bn: "১৮+ বয়স। দ্বীন শিখতে ইচ্ছুক যে কেউ আবেদন করতে পারবেন — পূর্বে দ্বীনি শিক্ষার কোনো প্রয়োজন নেই।",
                           })}
                         </td>
                       </tr>
@@ -1405,7 +1374,7 @@ const DiplomaDetails = () => {
                     <span className="text-yellow-500 font-bold">➪</span>
                     <span>
                       {t({
-                        en: "Students will receive Diploma Certificates from Tarbiyah Online and the affiliated university",
+                        en: "Students will receive Diploma Certificates from Tarbiyah Online",
                         bn: "শিক্ষার্থীরা তারবিয়াহ অনলাইন এবং সংশ্লিষ্ট বিশ্ববিদ্যালয় থেকে ডিপ্লোমা সার্টিফিকেট পাবে",
                       })}
                     </span>
