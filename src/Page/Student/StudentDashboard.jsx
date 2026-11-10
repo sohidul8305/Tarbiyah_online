@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
+import { quizData } from "./quizData";
 import {
   FaUser,
   FaUniversity,
@@ -25,6 +26,7 @@ import {
   FaShieldAlt,
   FaChevronDown,
   FaChevronUp,
+  FaLock,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -910,6 +912,70 @@ const DashboardContent = ({
 }) => {
   const navigate = useNavigate();
   const [paymentTab, setPaymentTab] = useState("summary");
+  // ✅ কুইজ ও লক সিস্টেমের স্টেট
+  const [unlockedVideos, setUnlockedVideos] = useState(1); // ডিফল্ট ১টি আনলকড
+  const [quizScores, setQuizScores] = useState({}); // কোন ভিডিওতে কত মার্ক
+  const [activeQuiz, setActiveQuiz] = useState(null); // কোন কুইজ ওপেন আছে
+  const [currentAnswers, setCurrentAnswers] = useState({}); // ইউজারের সিলেক্ট করা উত্তর
+
+  // ✅ LocalStorage থেকে সেভ করা ডাটা লোড করা (স্টুডেন্ট আইডি দিয়ে)
+  useEffect(() => {
+    const studentKey = studentInfo?._id || studentInfo?.studentId || "guest";
+    const saved = localStorage.getItem(`quiz_progress_${studentKey}`);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setUnlockedVideos(parsed.unlockedVideos || 1);
+        setQuizScores(parsed.quizScores || {});
+      } catch (e) {}
+    }
+  }, [studentInfo]);
+
+  // ✅ কুইজ সাবমিট করার লজিক
+  const handleQuizSubmit = (videoIndex) => {
+    const quiz = quizData[videoIndex];
+    if (!quiz) return;
+
+    let correctCount = 0;
+    quiz.questions.forEach((q, idx) => {
+      if (currentAnswers[idx] === q.ans) correctCount++;
+    });
+
+    // স্কোর আপডেট
+    const newScores = { ...quizScores, [videoIndex]: correctCount };
+    setQuizScores(newScores);
+
+    // পাস মার্ক: ২০ এর মধ্যে ১০ (৫০%)
+    const isPassed = correctCount >= 5;
+    let newUnlocked = unlockedVideos;
+
+    // পাস করলে পরবর্তী ভিডিও আনলক হবে
+    if (isPassed && videoIndex + 1 >= unlockedVideos) {
+      newUnlocked = videoIndex + 2;
+      setUnlockedVideos(newUnlocked);
+    }
+
+    // সেভ করা
+    const studentKey = studentInfo?._id || studentInfo?.studentId || "guest";
+    localStorage.setItem(
+      `quiz_progress_${studentKey}`,
+      JSON.stringify({ unlockedVideos: newUnlocked, quizScores: newScores }),
+    );
+
+    Swal.fire({
+      icon: isPassed ? "success" : "error",
+      title: isPassed ? "🎉 অভিনন্দন!" : "😔 আবার চেষ্টা করুন",
+      text: `আপনি ${correctCount} টি সঠিক উত্তর দিয়েছেন (মোট ১০টি)। ${
+        isPassed
+          ? "পরবর্তী ভিডিও আনলক হয়েছে!"
+          : "পাস করতে কমপক্ষে ১০ নম্বর প্রয়োজন।"
+      }`,
+      confirmButtonText: "ঠিক আছে",
+    });
+
+    setActiveQuiz(null);
+    setCurrentAnswers({});
+  };
 
   // ✅ মডিউল ওপেন/ক্লোজ করার স্টেট (প্রথম মডিউল ডিফল্ট ওপেন থাকবে)
   const [openModule, setOpenModule] = useState(0);
@@ -1308,37 +1374,100 @@ const DashboardContent = ({
                   {/* মডিউলের ভেতরের ভিডিও গ্রিড */}
                   {openModule === mIndex && (
                     <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-white border-t border-gray-100">
-                      {module.videos.map((video, index) => (
-                        <div
-                          key={video._id || index}
-                          onClick={() => onVideoClick(video)}
-                          className="group block overflow-hidden rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 cursor-pointer bg-white"
-                        >
-                          <div className="relative aspect-video bg-gray-200 overflow-hidden">
-                            <YoutubeThumbImg
-                              url={video.url}
-                              alt={video.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 pointer-events-none"
-                            />
-                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                              <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
-                                <FaPlayCircle className="text-2xl" />
+                      {module.videos.map((video, index) => {
+                        // গ্লোবাল ইনডেক্স বের করা
+                        const globalIndex = courseVideos.findIndex(
+                          (v) => v._id === video._id || v.url === video.url,
+                        );
+                        const isUnlocked = globalIndex < unlockedVideos;
+                        const hasQuiz = !!quizData[globalIndex];
+                        const score = quizScores[globalIndex];
+
+                        return (
+                          <div
+                            key={video._id || index}
+                            className={`group block overflow-hidden rounded-xl shadow-sm border transition-all duration-300 bg-white relative ${
+                              isUnlocked
+                                ? "border-gray-100 hover:shadow-xl"
+                                : "border-red-200 opacity-90"
+                            }`}
+                          >
+                            <div
+                              onClick={() => {
+                                if (isUnlocked) {
+                                  onVideoClick(video);
+                                } else {
+                                  Swal.fire(
+                                    "লক করা আছে!",
+                                    "এই ভিডিওটি দেখতে হলে আগের ভিডিওর কুইজ পাস করুন।",
+                                    "warning",
+                                  );
+                                }
+                              }}
+                              className={`relative aspect-video bg-gray-200 overflow-hidden ${isUnlocked ? "cursor-pointer" : "cursor-not-allowed"}`}
+                            >
+                              <YoutubeThumbImg
+                                url={video.url}
+                                alt={video.title}
+                                className={`w-full h-full object-cover transition-transform duration-300 pointer-events-none ${isUnlocked ? "group-hover:scale-105" : "blur-sm grayscale"}`}
+                              />
+
+                              {/* ওভারলে */}
+                              <div
+                                className={`absolute inset-0 flex items-center justify-center transition-colors ${isUnlocked ? "bg-black/20 group-hover:bg-black/40" : "bg-black/60"}`}
+                              >
+                                {isUnlocked ? (
+                                  <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center shadow-lg text-white transition-transform group-hover:scale-110">
+                                    <FaPlayCircle className="text-2xl" />
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col items-center">
+                                    <FaLock className="text-3xl text-gray-300 mb-2" />
+                                    <span className="text-[10px] font-bold text-white bg-red-600 px-2 py-0.5 rounded-full">
+                                      Locked
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                                {video.title.replace("Session ", "")}
                               </div>
                             </div>
-                            <div className="absolute top-2 left-2 bg-black/70 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-                              {video.title.replace("Session ", "")}
+
+                            <div className="p-3">
+                              <p
+                                className={`text-sm font-semibold truncate ${isUnlocked ? "text-[#002b2b]" : "text-gray-500"}`}
+                              >
+                                {video.title}
+                              </p>
+
+                              {/* কুইজ বাটন বা স্কোর */}
+                              {isUnlocked && hasQuiz && (
+                                <div className="mt-3 pt-2 border-t border-gray-100">
+                                  {score !== undefined ? (
+                                    <div className="flex justify-between items-center bg-green-50 text-green-700 px-2 py-1.5 rounded text-xs font-bold">
+                                      <span>কুইজ সম্পন্ন</span>
+                                      <span>{score}/20</span>
+                                    </div>
+                                  ) : (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setActiveQuiz(globalIndex);
+                                        setCurrentAnswers({});
+                                      }}
+                                      className="w-full bg-[#00ADD2] hover:bg-[#008c9e] text-white text-xs font-bold py-1.5 rounded transition-colors"
+                                    >
+                                      📝 কুইজ দিন
+                                    </button>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
-                          <div className="p-3">
-                            <p className="text-sm font-semibold text-[#002b2b] truncate">
-                              {video.title}
-                            </p>
-                            <p className="text-[10px] text-gray-500 mt-0.5">
-                              ▶ Click to watch
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -1346,7 +1475,68 @@ const DashboardContent = ({
             </div>
           </div>
         )}
+      {/* ✅ কুইজ মোডাল */}
+      {activeQuiz !== null && quizData[activeQuiz] && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-start justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl my-8">
+            <div className="bg-[#00ADD2] text-white p-4 rounded-t-xl flex justify-between items-center sticky top-0 z-10">
+              <h2 className="font-bold text-lg">
+                {quizData[activeQuiz].title} - কুইজ
+              </h2>
+              <button
+                onClick={() => setActiveQuiz(null)}
+                className="text-white hover:text-red-200 text-2xl font-bold"
+              >
+                &times;
+              </button>
+            </div>
 
+            <div className="p-6 space-y-6">
+              {quizData[activeQuiz].questions.map((q, qIndex) => (
+                <div
+                  key={qIndex}
+                  className="bg-gray-50 p-4 rounded-lg border border-gray-200"
+                >
+                  <p className="font-semibold text-gray-800 mb-3">
+                    {qIndex + 1}. {q.q}
+                  </p>
+                  <div className="space-y-2">
+                    {q.options.map((opt, optIndex) => (
+                      <label
+                        key={optIndex}
+                        className="flex items-center gap-3 p-2 rounded hover:bg-gray-100 cursor-pointer"
+                      >
+                        <input
+                          type="radio"
+                          name={`q_${qIndex}`}
+                          checked={currentAnswers[qIndex] === optIndex}
+                          onChange={() =>
+                            setCurrentAnswers({
+                              ...currentAnswers,
+                              [qIndex]: optIndex,
+                            })
+                          }
+                          className="w-4 h-4 text-[#00ADD2]"
+                        />
+                        <span className="text-sm text-gray-700">{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="p-4 bg-gray-50 border-t border-gray-200 rounded-b-xl flex justify-end">
+              <button
+                onClick={() => handleQuizSubmit(activeQuiz)}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-bold"
+              >
+                সাবমিট করুন
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <PaymentSection
         paymentTab={paymentTab}
         setPaymentTab={setPaymentTab}

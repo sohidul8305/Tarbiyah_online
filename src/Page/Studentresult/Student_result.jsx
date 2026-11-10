@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../Provider/AuthProvider";
 import Swal from "sweetalert2";
+import { quizData } from "../../Page/Student/quizData"; // ✅ পাথ ঠিক আছে কিনা চেক করে নিন
 import {
   FaUser,
   FaUniversity,
@@ -51,6 +52,9 @@ const Student_result = () => {
   const [fetchError, setFetchError] = useState(null);
   const [department, setDepartment] = useState("");
 
+  // ✅ লোকাল কুইজের স্কোর রাখার স্টেট (কম্পোনেন্টের ভেতরে)
+  const [localQuizzes, setLocalQuizzes] = useState([]);
+
   const [studentInfo, setStudentInfo] = useState({
     _id: "",
     studentId: "",
@@ -80,7 +84,6 @@ const Student_result = () => {
     try {
       setFetchError(null);
 
-      // ✅ student এর department না থাকলে সব show হবে
       let url;
       if (dept) {
         url = `${API_BASE}/student/academic/${encodeURIComponent(dept)}`;
@@ -106,9 +109,6 @@ const Student_result = () => {
             totalPdfs: d.materials.pdfs?.length || 0,
           },
         });
-        console.log(
-          `✅ Loaded: Exams=${d.materials.exams?.length || 0}, Quizzes=${d.materials.quizzes?.length || 0}`,
-        );
       } else {
         console.warn("⚠️ No materials found");
       }
@@ -122,7 +122,7 @@ const Student_result = () => {
   };
 
   // ============================================================
-  // ✅ Load student + fetch results
+  // ✅ Load student + fetch results + local quizzes
   // ============================================================
   useEffect(() => {
     const savedInfo = localStorage.getItem("studentInfo");
@@ -153,6 +153,30 @@ const Student_result = () => {
       loginSource: parsed.loginSource || "",
     };
     setStudentInfo(info);
+
+    // ✅ লোকাল স্টোরেজ থেকে কুইজের স্কোর লোড করা
+    const studentKey = parsed._id || parsed.studentId || "guest";
+    const savedProgress = localStorage.getItem(`quiz_progress_${studentKey}`);
+    if (savedProgress) {
+      try {
+        const { quizScores = {} } = JSON.parse(savedProgress);
+        const mappedQuizzes = Object.keys(quizScores).map((key) => {
+          const index = parseInt(key, 10);
+          const quizInfo = quizData[index];
+          return {
+            _id: `local_quiz_${index}`,
+            title: quizInfo ? quizInfo.title : `Quiz - Video ${index + 1}`,
+            marks: quizScores[key],
+            totalMarks: quizInfo ? quizInfo.questions.length : 10,
+            date: "Completed",
+            isLocal: true,
+          };
+        });
+        setLocalQuizzes(mappedQuizzes);
+      } catch (e) {
+        console.error("Local quiz parse error:", e);
+      }
+    }
 
     const dept = getStudentDepartment(parsed);
     setDepartment(dept);
@@ -224,15 +248,21 @@ const Student_result = () => {
     },
   ];
 
-  // Stats
+  // ============================================================
+  // ✅ Data Combine & Calculation
+  // ============================================================
   const exams = academicData.exams;
-  const quizzes = academicData.quizzes;
+  // ✅ API এর কুইজ + লোকাল কুইজ একসাথে করা
+  const allQuizzes = [...localQuizzes, ...academicData.quizzes];
 
-  // ============================================================
-  // ✅ Marks calculation
-  // ============================================================
   const calcPercent = (m) => {
-    if (!m.marks || !m.totalMarks || m.totalMarks === 0) return null;
+    if (
+      m.marks === undefined ||
+      m.marks === null ||
+      !m.totalMarks ||
+      m.totalMarks === 0
+    )
+      return null;
     return Math.round((m.marks / m.totalMarks) * 100);
   };
 
@@ -261,21 +291,16 @@ const Student_result = () => {
   };
 
   // Stats
-  const totalExamsWithMarks = exams.filter(
-    (e) => e.marks !== null && e.marks !== undefined,
-  ).length;
-  const totalExamsPending = exams.length - totalExamsWithMarks;
   const passedExams = exams.filter((e) => {
     const p = calcPercent(e);
     return p !== null && p >= 40;
   }).length;
-  const failedExams = exams.filter((e) => {
-    const p = calcPercent(e);
-    return p !== null && p < 40;
-  }).length;
 
-  // CGPA
-  const gradesWithMarks = exams.filter((e) => calcPercent(e) !== null);
+  // ✅ CGPA হিসাবের জন্য পরীক্ষা এবং কুইজ দুটোই যোগ করা হলো
+  const gradesWithMarks = [...exams, ...allQuizzes].filter(
+    (e) => calcPercent(e) !== null,
+  );
+
   const cgpa =
     gradesWithMarks.length > 0
       ? (
@@ -449,7 +474,7 @@ const Student_result = () => {
             <div className="flex flex-wrap gap-2 border-b border-gray-200 pb-3 text-sm">
               {[
                 { id: "exam", label: `📊 Exams (${exams.length})` },
-                { id: "quiz", label: `📝 Quizzes (${quizzes.length})` },
+                { id: "quiz", label: `📝 Quizzes (${allQuizzes.length})` }, // ✅ allQuizzes ব্যবহার করা হলো
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -575,15 +600,16 @@ const Student_result = () => {
                   <MdOutlineQuiz className="text-blue-600" /> Quiz Test Results
                 </h2>
                 <span className="text-xs text-[#00ADD2] font-bold bg-[#e6f7f9] px-3 py-1 rounded-full">
-                  Total: {quizzes.length}
+                  Total: {allQuizzes.length}
                 </span>
               </div>
 
-              {quizzes.length === 0 ? (
+              {/* ✅ allQuizzes ব্যবহার করা হলো */}
+              {allQuizzes.length === 0 ? (
                 <EmptyResult
                   icon={<MdOutlineQuiz />}
                   title="No quiz results yet"
-                  subtitle="Quiz scores will appear here once published"
+                  subtitle="Quiz scores will appear here once you complete them from the dashboard"
                 />
               ) : (
                 <div className="overflow-x-auto">
@@ -598,7 +624,7 @@ const Student_result = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {quizzes.map((quiz, i) => {
+                      {allQuizzes.map((quiz, i) => {
                         const pct = calcPercent(quiz);
                         const grade = getGrade(pct);
                         return (
@@ -610,14 +636,14 @@ const Student_result = () => {
                               {String(i + 1).padStart(2, "0")}
                             </td>
                             <td className="p-3">
-                              <a
-                                href={quiz.url}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="font-medium text-gray-800 hover:text-[#00ADD2]"
-                              >
+                              <span className="font-medium text-gray-800">
                                 {quiz.title}
-                              </a>
+                              </span>
+                              {quiz.isLocal && (
+                                <span className="ml-2 text-[10px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">
+                                  Video Quiz
+                                </span>
+                              )}
                             </td>
                             <td className="p-3 text-xs text-gray-500">
                               {quiz.date || "—"}
