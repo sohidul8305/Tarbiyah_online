@@ -81,6 +81,135 @@ const New_admission = () => {
     password: "",
     roll: "",
   });
+
+  // ✅ Helper: Payment screenshot download (base64 → file)
+  const downloadScreenshot = (admission) => {
+    const screenshot = admission.paymentScreenshot;
+    if (!screenshot) {
+      Swal.fire({
+        icon: "warning",
+        title: "No Screenshot",
+        text: "এই student এর কোনো payment screenshot নেই।",
+      });
+      return;
+    }
+
+    try {
+      // base64 data URL হলে সরাসরি download
+      const link = document.createElement("a");
+      link.href = screenshot;
+      const safeName = String(admission.name || "student")
+        .replace(/[^a-zA-Z0-9]/g, "_")
+        .slice(0, 30);
+      link.download = `payment_${safeName}_${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error("Download error:", err);
+      // Fallback: new tab এ open
+      window.open(screenshot, "_blank");
+    }
+  };
+
+  // ✅ Helper: CSV export (all admissions)
+  const exportToCSV = () => {
+    if (filteredAdmissions.length === 0) {
+      Swal.fire({
+        icon: "info",
+        title: "No Data",
+        text: "Export করার জন্য কোনো student নেই।",
+      });
+      return;
+    }
+
+    const headers = [
+      "Student Name",
+      "Student ID",
+      "Phone",
+      "Email",
+      "Department",
+      "Course",
+      "Batch",
+      "Father Name",
+      "Mother Name",
+      "Guardian Phone",
+      "Present Address",
+      "Permanent Address",
+      "NID/Birth Reg",
+      "Gender",
+      "Age",
+      "Payment Method",
+      "Transaction ID",
+      "Course Fee",
+      "Paid Amount",
+      "Due Amount",
+      "Payment Status",
+      "Admission Status",
+      "Applied Date",
+      "Has Screenshot",
+    ];
+
+    const escapeCell = (val) => {
+      const s = String(val ?? "").replace(/"/g, '""');
+      return `"${s}"`;
+    };
+
+    const rows = filteredAdmissions.map((a) => [
+      a.name,
+      a.studentId || "",
+      a.phone,
+      a.email,
+      a.sourceLabel || a.department || "",
+      a.course,
+      a.batch || "",
+      a.fatherName,
+      a.motherName,
+      a.guardianPhone,
+      a.address,
+      a.permanentAddress,
+      a.dobOrNid,
+      a.gender,
+      a.age,
+      a.paymentMethod,
+      a.transactionId,
+      a.courseFee || 0,
+      a.paidAmount || 0,
+      a.dueAmount || 0,
+      a.paymentStatus,
+      a.status,
+      a.date,
+      a.paymentScreenshot ? "Yes" : "No",
+    ]);
+
+    const csvContent =
+      "\uFEFF" + // BOM for Excel
+      [headers, ...rows]
+        .map((row) => row.map(escapeCell).join(","))
+        .join("\r\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = `admissions_${adminDepartment || "all"}_${
+      new Date().toISOString().split("T")[0]
+    }.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    Swal.fire({
+      icon: "success",
+      title: "✅ Exported!",
+      text: `${filteredAdmissions.length} students এর data CSV ফাইলে download হয়েছে।`,
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  };
   const [approving, setApproving] = useState(false);
 
   // ============================================================
@@ -807,6 +936,14 @@ const New_admission = () => {
                 <FaSync size={10} className={loading ? "animate-spin" : ""} />{" "}
                 Refresh
               </button>
+
+              <button
+                onClick={exportToCSV}
+                className="bg-green-600 hover:bg-green-700 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold flex items-center gap-1"
+                title="Export all admissions to CSV"
+              >
+                📥 Export CSV
+              </button>
               <button
                 onClick={handleLogout}
                 className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-3 py-1.5 rounded-lg font-bold"
@@ -947,7 +1084,7 @@ const New_admission = () => {
                             Status
                           </th>
                           <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
-                            Payment
+                            Fee / Due
                           </th>
                           <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                             Actions
@@ -1004,13 +1141,30 @@ const New_admission = () => {
                               </span>
                             </td>
                             <td className="px-3 py-2">
-                              <span
-                                className={`text-[8px] px-1.5 py-0.5 rounded-full ${getPaymentColor(
-                                  a.paymentStatus,
-                                )}`}
-                              >
-                                {a.paymentStatus}
-                              </span>
+                              <div className="flex flex-col gap-0.5">
+                                <span
+                                  className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold w-fit ${getPaymentColor(
+                                    a.paymentStatus,
+                                  )}`}
+                                >
+                                  {a.paymentStatus}
+                                </span>
+                                {Number(a.courseFee) > 0 && (
+                                  <span className="text-[9px] text-gray-700">
+                                    ৳
+                                    {Number(a.paidAmount || 0).toLocaleString()}
+                                    <span className="text-gray-400">
+                                      {" "}
+                                      / ৳{Number(a.courseFee).toLocaleString()}
+                                    </span>
+                                  </span>
+                                )}
+                                {Number(a.dueAmount) > 0 && (
+                                  <span className="text-[9px] text-red-600 font-bold">
+                                    Due: ৳{Number(a.dueAmount).toLocaleString()}
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="px-3 py-2">
                               <div className="flex items-center gap-1">
@@ -1021,6 +1175,18 @@ const New_admission = () => {
                                 >
                                   <FaEye size={12} />
                                 </button>
+
+                                {/* ✅ NEW — Quick download screenshot */}
+                                {hasValue(a.paymentScreenshot) && (
+                                  <button
+                                    onClick={() => downloadScreenshot(a)}
+                                    className="text-green-600 hover:text-green-800 p-0.5"
+                                    title="Download Screenshot"
+                                  >
+                                    ⬇️
+                                  </button>
+                                )}
+
                                 <button
                                   onClick={() => handleDelete(a.id)}
                                   className="text-red-600 hover:text-red-800 p-0.5"
@@ -1411,6 +1577,34 @@ const New_admission = () => {
                             </span>
                           </div>
                         )}
+
+                        {hasAmount(selectedAdmission.dueAmount) && (
+                          <div className="flex justify-between gap-2 bg-red-50 px-2 py-1.5 rounded border border-red-200">
+                            <span className="text-red-700 font-semibold">
+                              Due Amount
+                            </span>
+                            <span className="font-bold text-red-600">
+                              ৳
+                              {Number(
+                                selectedAdmission.dueAmount,
+                              ).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+
+                        {hasAmount(selectedAdmission.courseFee) && (
+                          <div className="flex justify-between gap-2">
+                            <span className="text-gray-500">
+                              Total Course Fee
+                            </span>
+                            <span className="font-semibold">
+                              ৳
+                              {Number(
+                                selectedAdmission.courseFee,
+                              ).toLocaleString()}
+                            </span>
+                          </div>
+                        )}
                         {hasAmount(selectedAdmission.dueAmount) && (
                           <div className="flex justify-between gap-2">
                             <span className="text-gray-500">Due Amount</span>
@@ -1471,16 +1665,28 @@ const New_admission = () => {
                   {/* ✅ Payment Screenshot */}
                   {hasValue(selectedAdmission.paymentScreenshot) && (
                     <div className="bg-green-50 rounded-lg p-4 border-2 border-green-300">
-                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center justify-between">
+                      <h4 className="font-semibold text-gray-800 mb-3 flex items-center justify-between gap-2 flex-wrap">
                         <span>💳 Payment Screenshot</span>
-                        <a
-                          href={selectedAdmission.paymentScreenshot}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[10px] bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-semibold"
-                        >
-                          🔍 Full View
-                        </a>
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={selectedAdmission.paymentScreenshot}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[10px] bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 rounded font-semibold"
+                          >
+                            🔍 Full View
+                          </a>
+                          {/* ✅ NEW — Download button */}
+                          <button
+                            onClick={() =>
+                              downloadScreenshot(selectedAdmission)
+                            }
+                            className="text-[10px] bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-semibold flex items-center gap-1"
+                            title="Download screenshot"
+                          >
+                            ⬇️ Download
+                          </button>
+                        </div>
                       </h4>
                       <div className="flex justify-center">
                         <a
@@ -1497,11 +1703,11 @@ const New_admission = () => {
                         </a>
                       </div>
                       <p className="text-xs text-green-700 text-center mt-2 font-medium">
-                        ✓ Click image to view full size
+                        ✓ Click image to view full size • ⬇️ Download button
+                        দিয়ে save করুন
                       </p>
                     </div>
                   )}
-
                   {/* ✅ Approve Section (Pending হলে দেখাবে) */}
                   {selectedAdmission.status !== "Approved" && (
                     <div className="bg-green-50 rounded-lg p-4 border-2 border-green-300">

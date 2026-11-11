@@ -732,10 +732,14 @@ const Admission_now = () => {
         })
         .filter(Boolean);
 
-      const paymentStatus =
-        formData.paidAmount && parseFloat(formData.paidAmount) > 0
-          ? "Paid"
-          : "Unpaid";
+      // ✅ সঠিক fee + paid + due calculation
+      const totalFee = calculateTotal();
+      const paid = parseFloat(formData.paidAmount) || 0;
+      const due = Math.max(totalFee - paid, 0);
+
+      let paymentStatus = "Unpaid";
+      if (totalFee > 0 && due === 0) paymentStatus = "Paid";
+      else if (paid > 0) paymentStatus = "Partial";
 
       const departmentName =
         DEPARTMENT_MAP[formData.selectedDepartment] ||
@@ -752,7 +756,6 @@ const Admission_now = () => {
           formData.selectedDepartment ||
           "Not Specified",
         department: departmentName,
-        // ✅ Gender-aware batch for elders
         batchType:
           formData.selectedDepartment === "quran-elders"
             ? getEldersBatchName()
@@ -770,10 +773,16 @@ const Admission_now = () => {
         occupation: formData.occupation || "",
         maritalStatus: formData.maritalStatus || "",
         age: formData.age || "",
+
+        // ✅ NEW — fee details
+        courseFee: totalFee, // মোট fee (যেমন 4000)
+        paidAmount: paid, // কত দিল (যেমন 2000)
+        dueAmount: due, // কত বাকি (যেমন 2000)
+        scholarshipAmount: 0, // ডিফল্ট
+
         paymentMethod: formData.paymentMethod || "",
         paymentType: formData.paymentType || "",
         transactionId: formData.transactionId || "",
-        paidAmount: formData.paidAmount || "",
         paymentRemarks: formData.paymentRemarks || "",
         paymentStatus,
         status: "Pending",
