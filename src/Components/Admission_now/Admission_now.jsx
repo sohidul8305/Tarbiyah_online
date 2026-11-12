@@ -471,6 +471,7 @@ const Admission_now = () => {
         const maxSize = 1000;
         let width = img.width;
         let height = img.height;
+
         if (width > height) {
           if (width > maxSize) {
             height = (height * maxSize) / width;
@@ -482,11 +483,15 @@ const Admission_now = () => {
             height = maxSize;
           }
         }
+
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
-        // ⬅️ 0.8 → 0.85        setFormData((prev) => ({ ...prev, paymentScreenshot: compressed }));
+
+        // ✅ এখানেই আসল কাজ — এটা ছাড়া কিছুই সেভ হয় না
+        const compressed = canvas.toDataURL("image/jpeg", 0.85);
+        setFormData((prev) => ({ ...prev, paymentScreenshot: compressed }));
       };
       img.src = reader.result;
     };
@@ -654,7 +659,6 @@ const Admission_now = () => {
           guardianPhone: formData.guardianPhone,
           occupation: formData.occupation,
           maritalStatus: formData.maritalStatus,
-          country: "BD",
           courseFee: calculateTotal(),
           paymentType: "online",
           paymentMethod: "SSLCommerz",
@@ -1515,9 +1519,6 @@ const Admission_now = () => {
                     placeholder="e.g. Bangladesh, Saudi Arabia, USA..."
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    আপনি যে দেশে থাকেন সেটা লিখুন
-                  </p>
                 </div>
 
                 <div>

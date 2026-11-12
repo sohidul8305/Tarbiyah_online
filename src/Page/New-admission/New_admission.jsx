@@ -32,9 +32,7 @@ const API_BASE = "https://api.tarbiyahonline.com/api";
 const isRealId = (id) =>
   !!id && !String(id).toLowerCase().startsWith("pending_");
 
-// ============================================================
 // ✅ Helper: Only show a field if it has a real value
-// ============================================================
 const hasValue = (v) => {
   if (v === null || v === undefined) return false;
   const s = String(v).trim();
@@ -71,9 +69,11 @@ const New_admission = () => {
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterPayment, setFilterPayment] = useState("All");
 
-  // ✅ Modal state (শুধু একবার declare)
+  // ✅ Modal state
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedAdmission, setSelectedAdmission] = useState(null);
+  const [showImageLightbox, setShowImageLightbox] = useState(false);
+  const [lightboxImage, setLightboxImage] = useState("");
 
   // ✅ Approve form state
   const [approveForm, setApproveForm] = useState({
@@ -165,6 +165,7 @@ const New_admission = () => {
       });
     }
   };
+
   // ✅ Helper: CSV export (all admissions)
   const exportToCSV = () => {
     if (filteredAdmissions.length === 0) {
@@ -184,6 +185,7 @@ const New_admission = () => {
       "Department",
       "Course",
       "Batch",
+      "Country",
       "Father Name",
       "Mother Name",
       "Guardian Phone",
@@ -216,6 +218,7 @@ const New_admission = () => {
       a.sourceLabel || a.department || "",
       a.course,
       a.batch || "",
+      a.country || "",
       a.fatherName,
       a.motherName,
       a.guardianPhone,
@@ -236,7 +239,7 @@ const New_admission = () => {
     ]);
 
     const csvContent =
-      "\uFEFF" + // BOM for Excel
+      "\uFEFF" +
       [headers, ...rows]
         .map((row) => row.map(escapeCell).join(","))
         .join("\r\n");
@@ -263,6 +266,7 @@ const New_admission = () => {
       showConfirmButton: false,
     });
   };
+
   const [approving, setApproving] = useState(false);
 
   // ============================================================
@@ -439,7 +443,6 @@ const New_admission = () => {
 
     const isPendingId = !isRealId(admission.studentId);
 
-    // ✅ Default values দিয়ে form সেট করি
     setApproveForm({
       studentId: isPendingId ? generateStudentId() : admission.studentId,
       password: "student123S@",
@@ -447,7 +450,6 @@ const New_admission = () => {
     });
     setShowDetailsModal(true);
 
-    // ✅ Approved হলে backend থেকে real password fetch করি
     if (admission.status === "Approved") {
       try {
         const res = await fetch(`${API_BASE}/students/details/${admission.id}`);
@@ -462,10 +464,10 @@ const New_admission = () => {
         }
       } catch (err) {
         console.warn("⚠️ Could not fetch student credentials:", err.message);
-        // Silent fail — modal আগের values দিয়েই দেখাবে
       }
     }
   };
+
   // ============================================================
   // ✅ Approve Student Handler
   // ============================================================
@@ -505,7 +507,6 @@ const New_admission = () => {
       const data = await res.json();
 
       if (data.success) {
-        // Local state update
         setAdmissions((prev) =>
           prev.map((a) =>
             a.id === selectedAdmission.id
@@ -709,7 +710,8 @@ const New_admission = () => {
       (a.name || "").toLowerCase().includes(term) ||
       (a.phone || "").includes(searchTerm) ||
       (a.studentId || "").toLowerCase().includes(term) ||
-      (a.course || "").toLowerCase().includes(term);
+      (a.course || "").toLowerCase().includes(term) ||
+      (a.country || "").toLowerCase().includes(term);
 
     const matchesStatus = filterStatus === "All" || a.status === filterStatus;
     const matchesPayment =
@@ -1071,7 +1073,7 @@ const New_admission = () => {
                     <FaSearch className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
                     <input
                       type="text"
-                      placeholder="Search by name / phone / student ID..."
+                      placeholder="Search by name / phone / student ID / country..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -1128,6 +1130,9 @@ const New_admission = () => {
                             Source
                           </th>
                           <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
+                            Country
+                          </th>
+                          <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
                             Course
                           </th>
                           <th className="px-3 py-2 text-left text-[10px] font-bold text-gray-600 uppercase">
@@ -1176,6 +1181,11 @@ const New_admission = () => {
                                 )}`}
                               >
                                 {a.sourceLabel}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2">
+                              <span className="text-[10px] font-semibold text-gray-700">
+                                {hasValue(a.country) ? a.country : "—"}
                               </span>
                             </td>
                             <td className="px-3 py-2 text-xs text-gray-600 max-w-[200px]">
@@ -1229,7 +1239,6 @@ const New_admission = () => {
                                   <FaEye size={12} />
                                 </button>
 
-                                {/* ✅ NEW — Quick download screenshot */}
                                 {hasValue(a.paymentScreenshot) && (
                                   <button
                                     onClick={() => downloadScreenshot(a)}
@@ -1317,11 +1326,15 @@ const New_admission = () => {
                         {getStatusIcon(selectedAdmission.status)}{" "}
                         {selectedAdmission.status}
                       </span>
+                      {hasValue(selectedAdmission.country) && (
+                        <span className="text-[10px] px-2 py-1 rounded-full font-semibold bg-blue-100 text-blue-700">
+                          🌍 {selectedAdmission.country}
+                        </span>
+                      )}
                     </div>
                   </div>
 
-                  {/* ✅ Student ID — শুধু APPROVED হলে দেখাবে (real TAR ID থাকলে) */}
-                  {/* ✅ Already Approved — Login Credentials সহ */}
+                  {/* ✅ Already Approved */}
                   {selectedAdmission.status === "Approved" && (
                     <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-4 border-2 border-blue-300">
                       <h4 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
@@ -1329,7 +1342,6 @@ const New_admission = () => {
                       </h4>
 
                       <div className="bg-white rounded-lg p-3 space-y-2 border border-blue-200">
-                        {/* Student ID */}
                         {isRealId(selectedAdmission.studentId) && (
                           <div className="flex justify-between gap-2 items-center">
                             <span className="text-xs text-gray-500 font-semibold">
@@ -1341,7 +1353,6 @@ const New_admission = () => {
                           </div>
                         )}
 
-                        {/* Password */}
                         <div className="flex justify-between gap-2 items-center">
                           <span className="text-xs text-gray-500 font-semibold">
                             🔑 Password
@@ -1351,7 +1362,6 @@ const New_admission = () => {
                           </span>
                         </div>
 
-                        {/* Roll (optional) */}
                         {approveForm.roll && (
                           <div className="flex justify-between gap-2 items-center">
                             <span className="text-xs text-gray-500 font-semibold">
@@ -1374,6 +1384,7 @@ const New_admission = () => {
                       </p>
                     </div>
                   )}
+
                   {/* Personal Info */}
                   {(hasValue(selectedAdmission.fatherName) ||
                     hasValue(selectedAdmission.motherName) ||
@@ -1412,10 +1423,7 @@ const New_admission = () => {
                           </div>
                         )}
                         {hasValue(selectedAdmission.age) && (
-                          <div
-                            className="flex justify-between g
-                          ap-2"
-                          >
+                          <div className="flex justify-between gap-2">
                             <span className="text-gray-500">Age</span>
                             <span className="font-semibold">
                               {selectedAdmission.age}
@@ -1645,30 +1653,6 @@ const New_admission = () => {
                           </div>
                         )}
 
-                        {hasAmount(selectedAdmission.courseFee) && (
-                          <div className="flex justify-between gap-2">
-                            <span className="text-gray-500">
-                              Total Course Fee
-                            </span>
-                            <span className="font-semibold">
-                              ৳
-                              {Number(
-                                selectedAdmission.courseFee,
-                              ).toLocaleString()}
-                            </span>
-                          </div>
-                        )}
-                        {hasAmount(selectedAdmission.dueAmount) && (
-                          <div className="flex justify-between gap-2">
-                            <span className="text-gray-500">Due Amount</span>
-                            <span className="font-semibold text-red-600">
-                              ৳
-                              {Number(
-                                selectedAdmission.dueAmount,
-                              ).toLocaleString()}
-                            </span>
-                          </div>
-                        )}
                         {hasValue(selectedAdmission.transactionId) && (
                           <div className="flex justify-between gap-2">
                             <span className="text-gray-500">
@@ -1715,61 +1699,67 @@ const New_admission = () => {
                     </div>
                   )}
 
-                  {/* ✅ Payment Screenshot */}
+                  {/* ✅ Payment Screenshot — ENLARGED + LIGHTBOX */}
                   {hasValue(selectedAdmission.paymentScreenshot) && (
                     <div className="bg-green-50 rounded-lg p-4 border-2 border-green-300">
                       <h4 className="font-semibold text-gray-800 mb-3 flex items-center justify-between gap-2 flex-wrap">
                         <span>💳 Payment Screenshot</span>
                         <div className="flex items-center gap-2">
-                          <a
-                            href={selectedAdmission.paymentScreenshot}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[10px] bg-gray-600 hover:bg-gray-700 text-white px-2 py-1 rounded font-semibold"
+                          <button
+                            onClick={() => {
+                              setLightboxImage(
+                                selectedAdmission.paymentScreenshot,
+                              );
+                              setShowImageLightbox(true);
+                            }}
+                            className="text-[10px] bg-gray-700 hover:bg-gray-800 text-white px-2 py-1 rounded font-semibold"
                           >
-                            🔍 Full View
-                          </a>
-                          {/* ✅ NEW — Download button */}
+                            🔍 Full Screen
+                          </button>
                           <button
                             onClick={() =>
                               downloadScreenshot(selectedAdmission)
                             }
                             className="text-[10px] bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-semibold flex items-center gap-1"
-                            title="Download screenshot"
                           >
                             ⬇️ Download
                           </button>
                         </div>
                       </h4>
-                      <div className="flex justify-center bg-gray-100 rounded-lg p-2">
-                        <a
-                          href={selectedAdmission.paymentScreenshot}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          title="Click to open full size"
-                          className="block w-full"
-                        >
-                          <img
-                            src={selectedAdmission.paymentScreenshot}
-                            alt="Payment Proof"
-                            className="w-full max-h-[500px] object-contain rounded-lg border-2 border-green-400 shadow-md cursor-pointer hover:shadow-lg transition"
-                          />
-                        </a>
+
+                      <div className="bg-white rounded-lg p-2 border-2 border-green-300">
+                        <img
+                          src={selectedAdmission.paymentScreenshot}
+                          alt="Payment Proof"
+                          onClick={() => {
+                            setLightboxImage(
+                              selectedAdmission.paymentScreenshot,
+                            );
+                            setShowImageLightbox(true);
+                          }}
+                          title="Click to zoom full screen"
+                          className="w-full h-auto max-h-[700px] object-contain rounded-lg cursor-zoom-in hover:opacity-95 transition"
+                        />
                       </div>
-                      <p className="text-xs text-green-700 text-center mt-2 font-medium">
-                        ✓ Click image to view full size • ⬇️ Download button
-                        দিয়ে save করুন
-                      </p>
+
+                      <div className="mt-2 flex items-center justify-between flex-wrap gap-2">
+                        <p className="text-xs text-green-700 font-medium">
+                          ✓ ছবিতে click করলে পুরো স্ক্রিনে বড় হবে
+                        </p>
+                        <p className="text-[10px] text-gray-500">
+                          বা "🔍 Full Screen" বাটনে চাপুন
+                        </p>
+                      </div>
                     </div>
                   )}
-                  {/* ✅ Approve Section (Pending হলে দেখাবে) */}
+
+                  {/* ✅ Approve Section */}
                   {selectedAdmission.status !== "Approved" && (
                     <div className="bg-green-50 rounded-lg p-4 border-2 border-green-300">
                       <h4 className="font-bold text-green-800 mb-3 flex items-center gap-2">
                         ✅ Approve Student
                       </h4>
 
-                      {/* Student ID — একমাত্র input এখানে */}
                       <div className="mb-3">
                         <label className="block text-xs font-semibold text-gray-700 mb-1">
                           Student ID <span className="text-red-500">*</span>
@@ -1805,7 +1795,6 @@ const New_admission = () => {
                         </p>
                       </div>
 
-                      {/* Password */}
                       <div className="mb-3">
                         <label className="block text-xs font-semibold text-gray-700 mb-1">
                           Password <span className="text-red-500">*</span>
@@ -1844,7 +1833,7 @@ const New_admission = () => {
                     </div>
                   )}
 
-                  {/* ✅ Already Approved — real TAR ID থাকলে দেখাবে */}
+                  {/* ✅ Already Approved (bottom) */}
                   {selectedAdmission.status === "Approved" && (
                     <div className="bg-blue-50 rounded-lg p-3 border border-blue-300">
                       <p className="text-xs text-blue-800 font-semibold flex items-center gap-2 flex-wrap">
@@ -1874,6 +1863,32 @@ const New_admission = () => {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ✅ Full-Screen Image Lightbox */}
+      {showImageLightbox && lightboxImage && (
+        <div
+          className="fixed inset-0 z-[999] bg-black/95 flex items-center justify-center p-2"
+          onClick={() => setShowImageLightbox(false)}
+        >
+          <button
+            onClick={() => setShowImageLightbox(false)}
+            className="absolute top-4 right-4 text-white text-2xl hover:text-red-400 z-10 bg-red-600 hover:bg-red-700 rounded-full w-12 h-12 flex items-center justify-center shadow-lg font-bold"
+            title="Close (Esc)"
+          >
+            ✕
+          </button>
+          <img
+            src={lightboxImage}
+            alt="Payment Screenshot - Full View"
+            className="max-w-[98vw] max-h-[98vh] object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+
+          <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-xs bg-black/70 px-4 py-2 rounded-full">
+            📸 Click outside বা ✕ চাপলে বন্ধ হবে
+          </p>
         </div>
       )}
     </div>
