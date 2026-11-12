@@ -1741,17 +1741,18 @@ const New_admission = () => {
                           </button>
                         </div>
                       </h4>
-                      <div className="flex justify-center">
+                      <div className="flex justify-center bg-gray-100 rounded-lg p-2">
                         <a
                           href={selectedAdmission.paymentScreenshot}
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Click to open full size"
+                          className="block w-full"
                         >
                           <img
                             src={selectedAdmission.paymentScreenshot}
                             alt="Payment Proof"
-                            className="max-w-full max-h-64 object-contain rounded-lg border-2 border-green-400 shadow-md cursor-pointer hover:shadow-lg transition"
+                            className="w-full max-h-[500px] object-contain rounded-lg border-2 border-green-400 shadow-md cursor-pointer hover:shadow-lg transition"
                           />
                         </a>
                       </div>

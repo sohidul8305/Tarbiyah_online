@@ -38,6 +38,7 @@ const Admission_now = () => {
     age: "",
     phoneNumber: "",
     email: "",
+    country: "",
 
     // Family
     fatherName: "",
@@ -72,6 +73,7 @@ const Admission_now = () => {
     nagodNumber: "",
     rocketNumber: "",
     merchantNumber: "",
+    country: "",
     bankAccount: "",
   });
 
@@ -466,7 +468,7 @@ const Admission_now = () => {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        const maxSize = 400;
+        const maxSize = 1000;
         let width = img.width;
         let height = img.height;
         if (width > height) {
@@ -484,8 +486,7 @@ const Admission_now = () => {
         canvas.height = height;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, width, height);
-        const compressed = canvas.toDataURL("image/jpeg", 0.8);
-        setFormData((prev) => ({ ...prev, paymentScreenshot: compressed }));
+        // ⬅️ 0.8 → 0.85        setFormData((prev) => ({ ...prev, paymentScreenshot: compressed }));
       };
       img.src = reader.result;
     };
@@ -520,6 +521,7 @@ const Admission_now = () => {
       if (!formData.dateOfBirth) missing.push("Date of Birth");
       if (!formData.phoneNumber?.trim()) missing.push("Phone Number");
       if (!formData.email?.trim()) missing.push("Email");
+      if (!formData.country?.trim()) missing.push("Country"); // ⬅️ NEW
       if (!formData.gender) missing.push("Gender");
     }
 
@@ -629,6 +631,7 @@ const Admission_now = () => {
           password: generatedPassword,
           studentId: generatedId,
           phone: formData.phoneNumber,
+          country: formData.country || "Bangladesh", // ⬅️ NEW
           course: selectedCourseNames.join(", "),
           department: departmentName,
           // ✅ Gender-aware batch for elders
@@ -760,6 +763,7 @@ const Admission_now = () => {
           formData.selectedDepartment === "quran-elders"
             ? getEldersBatchName()
             : formData.batchType || "",
+        country: formData.country || "Bangladesh", // ⬅️ NEW
         batchSchedule: formData.batchSchedule || "",
         paymentScreenshot: formData.paymentScreenshot || "",
         fatherName: formData.fatherName || "",
@@ -861,6 +865,7 @@ const Admission_now = () => {
           age: "",
           phoneNumber: "",
           email: "",
+          country: "",
           fatherName: "",
           motherName: "",
           guardianPhone: "",
@@ -1484,7 +1489,6 @@ const Admission_now = () => {
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
-
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Email *
@@ -1496,6 +1500,24 @@ const Admission_now = () => {
                     onChange={handleInputChange}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
+                </div>
+
+                {/* ⬇️ NEW — Country field */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Country *
+                  </label>
+                  <input
+                    type="text"
+                    name="country"
+                    value={formData.country}
+                    onChange={handleInputChange}
+                    placeholder="e.g. Bangladesh, Saudi Arabia, USA..."
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    আপনি যে দেশে থাকেন সেটা লিখুন
+                  </p>
                 </div>
 
                 <div>
