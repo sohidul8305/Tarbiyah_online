@@ -82,10 +82,10 @@ const New_admission = () => {
     roll: "",
   });
 
-  // ✅ Helper: Payment screenshot download (base64 → file)
   const downloadScreenshot = (admission) => {
     const screenshot = admission.paymentScreenshot;
-    if (!screenshot) {
+
+    if (!screenshot || typeof screenshot !== "string" || !screenshot.trim()) {
       Swal.fire({
         icon: "warning",
         title: "No Screenshot",
@@ -95,23 +95,76 @@ const New_admission = () => {
     }
 
     try {
-      // base64 data URL হলে সরাসরি download
-      const link = document.createElement("a");
-      link.href = screenshot;
       const safeName = String(admission.name || "student")
         .replace(/[^a-zA-Z0-9]/g, "_")
         .slice(0, 30);
-      link.download = `payment_${safeName}_${Date.now()}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (err) {
-      console.error("Download error:", err);
-      // Fallback: new tab এ open
+      const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, "-")
+        .slice(0, 19);
+
+      // Case A: HTTP URL
+      if (
+        screenshot.startsWith("http://") ||
+        screenshot.startsWith("https://")
+      ) {
+        const link = document.createElement("a");
+        link.href = screenshot;
+        link.target = "_blank";
+        link.download = `payment_${safeName}_${timestamp}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+
+      // Case B: Base64 — Blob use করি
+      if (screenshot.startsWith("data:")) {
+        const mimeMatch = screenshot.match(/^data:([^;]+);base64,/);
+        const mime = mimeMatch ? mimeMatch[1] : "image/jpeg";
+        const ext = mime.includes("png")
+          ? "png"
+          : mime.includes("gif")
+            ? "gif"
+            : mime.includes("webp")
+              ? "webp"
+              : "jpg";
+
+        const base64Data = screenshot.split(",")[1];
+        if (!base64Data) throw new Error("Invalid base64 payload");
+
+        const byteString = atob(base64Data);
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        for (let i = 0; i < byteString.length; i++) {
+          ia[i] = byteString.charCodeAt(i);
+        }
+
+        const blob = new Blob([ab], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `payment_${safeName}_${timestamp}.${ext}`;
+        document.body.appendChild(link);
+        link.click();
+
+        setTimeout(() => {
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        }, 500);
+        return;
+      }
+
       window.open(screenshot, "_blank");
+    } catch (err) {
+      console.error("❌ Download error:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Download Failed",
+        text: err.message,
+      });
     }
   };
-
   // ✅ Helper: CSV export (all admissions)
   const exportToCSV = () => {
     if (filteredAdmissions.length === 0) {
