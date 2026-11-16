@@ -524,9 +524,16 @@ const Admission_now = () => {
       if (!formData.nationalId?.trim())
         missing.push("National ID / Birth Reg No.");
       if (!formData.dateOfBirth) missing.push("Date of Birth");
-      if (!formData.phoneNumber?.trim()) missing.push("Phone Number");
+
+      // ✅ International phone validation — country code সহ কমপক্ষে ৮ digit
+      if (!formData.phoneNumber?.trim()) {
+        missing.push("Phone Number");
+      } else if (formData.phoneNumber.replace(/\D/g, "").length < 8) {
+        missing.push("Valid Phone Number (with country code, min 8 digits)");
+      }
+
       if (!formData.email?.trim()) missing.push("Email");
-      if (!formData.country?.trim()) missing.push("Country"); // ⬅️ NEW
+      if (!formData.country?.trim()) missing.push("Country");
       if (!formData.gender) missing.push("Gender");
     }
 
@@ -1480,18 +1487,27 @@ const Admission_now = () => {
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>
-
+                {/* Step 2: Personal Info — Phone Number Field */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Phone Number *
+                    <span className="text-[10px] text-gray-500 ml-1">
+                      (with country code)
+                    </span>
                   </label>
                   <input
                     type="tel"
                     name="phoneNumber"
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
+                    placeholder="+880 1612 559911  |  +966 50 123 4567  |  +1 555 123 4567"
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
+                  <p className="text-[11px] text-gray-500 mt-1">
+                    📱 যেকোনো দেশের নাম্বার দিতে পারবেন — অবশ্যই{" "}
+                    <strong>country code</strong> সহ (যেমন: +880..., +966...,
+                    +971...)
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -1617,12 +1633,16 @@ const Admission_now = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Guardian's Phone Number *
+                    <span className="text-[10px] text-gray-500 ml-1">
+                      (with country code)
+                    </span>
                   </label>
                   <input
                     type="tel"
                     name="guardianPhone"
                     value={formData.guardianPhone}
                     onChange={handleInputChange}
+                    placeholder="+880... / +966... / +971..."
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#00ADD2] focus:ring-[#00ADD2] p-2 border"
                   />
                 </div>

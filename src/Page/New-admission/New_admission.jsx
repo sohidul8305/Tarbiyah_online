@@ -26,6 +26,9 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
+// ✅ NEW — Update Student Modal
+import UpdateStudentModal from "../../Page/New-admission/UpdateStudentModal";
+
 const API_BASE = "https://api.tarbiyahonline.com/api";
 
 // ✅ Helper: check if ID is real (not pending_xxx)
@@ -74,6 +77,9 @@ const New_admission = () => {
   const [selectedAdmission, setSelectedAdmission] = useState(null);
   const [showImageLightbox, setShowImageLightbox] = useState(false);
   const [lightboxImage, setLightboxImage] = useState("");
+
+  // ✅ NEW — Update Student Modal state
+  const [editingStudent, setEditingStudent] = useState(null);
 
   // ✅ Approve form state
   const [approveForm, setApproveForm] = useState({
@@ -1231,6 +1237,7 @@ const New_admission = () => {
                             </td>
                             <td className="px-3 py-2">
                               <div className="flex items-center gap-1">
+                                {/* View Details */}
                                 <button
                                   onClick={() => openDetailsModal(a)}
                                   className="text-blue-600 hover:text-blue-800 p-0.5"
@@ -1239,6 +1246,16 @@ const New_admission = () => {
                                   <FaEye size={12} />
                                 </button>
 
+                                {/* ✅ NEW — Update / Edit */}
+                                <button
+                                  onClick={() => setEditingStudent(a)}
+                                  className="text-orange-600 hover:text-orange-800 p-0.5"
+                                  title="Update Information"
+                                >
+                                  ✏️
+                                </button>
+
+                                {/* Download Screenshot */}
                                 {hasValue(a.paymentScreenshot) && (
                                   <button
                                     onClick={() => downloadScreenshot(a)}
@@ -1249,6 +1266,7 @@ const New_admission = () => {
                                   </button>
                                 )}
 
+                                {/* Delete */}
                                 <button
                                   onClick={() => handleDelete(a.id)}
                                   className="text-red-600 hover:text-red-800 p-0.5"
@@ -1850,8 +1868,17 @@ const New_admission = () => {
                     </div>
                   )}
 
-                  {/* Close Button */}
+                  {/* ✅ Close + Update Buttons */}
                   <div className="flex gap-2 flex-wrap">
+                    <button
+                      onClick={() => {
+                        setShowDetailsModal(false);
+                        setEditingStudent(selectedAdmission);
+                      }}
+                      className="flex-1 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold text-sm"
+                    >
+                      ✏️ Update Information
+                    </button>
                     <button
                       onClick={() => setShowDetailsModal(false)}
                       className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-semibold text-sm"
@@ -1890,6 +1917,18 @@ const New_admission = () => {
             📸 Click outside বা ✕ চাপলে বন্ধ হবে
           </p>
         </div>
+      )}
+
+      {/* ✅ NEW — Update Student Modal */}
+      {editingStudent && (
+        <UpdateStudentModal
+          student={editingStudent}
+          onClose={() => setEditingStudent(null)}
+          onSaved={() => {
+            setEditingStudent(null);
+            fetchAdmissions();
+          }}
+        />
       )}
     </div>
   );
