@@ -339,7 +339,7 @@ const New_admission = () => {
             course: r.course || "",
             subject: r.subject || r.course || "",
             class: r.class || r.course || "",
-            phone: r.parentPhone || r.guardianPhone || "",
+            phone: r.phone || r.parentPhone || r.guardianPhone || "",
             email: r.email || "",
             address: r.address || "",
             permanentAddress: r.permanentAddress || "",
@@ -1924,9 +1924,25 @@ const New_admission = () => {
         <UpdateStudentModal
           student={editingStudent}
           onClose={() => setEditingStudent(null)}
-          onSaved={() => {
+          onSaved={(data) => {
+            console.log("✅ onSaved received:", data);
+
+            // ✅ Option A: Direct state update (immediate, no fetch needed)
+            if (data.student) {
+              setAdmissions((prev) =>
+                prev.map((a) =>
+                  String(a.id) === String(data.student._id) ||
+                  String(a._id) === String(data.student._id)
+                    ? { ...a, ...data.student }
+                    : a,
+                ),
+              );
+            }
+
             setEditingStudent(null);
-            fetchAdmissions();
+
+            // ✅ Option B: Also fetch as backup (in case backend has more fields)
+            setTimeout(() => fetchAdmissions(), 500);
           }}
         />
       )}
