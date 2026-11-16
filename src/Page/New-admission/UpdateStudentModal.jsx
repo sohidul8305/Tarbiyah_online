@@ -1,8 +1,7 @@
-// src/Page/Admin/new-admission/UpdateStudentModal.jsx
+// src/Page/New-admission/UpdateStudentModal.jsx
 import React, { useState } from "react";
 import Swal from "sweetalert2";
 
-// ✅ Same base as New_admission.jsx
 const API_BASE = "https://api.tarbiyahonline.com/api";
 
 const UpdateStudentModal = ({ student, onClose, onSaved }) => {
@@ -26,7 +25,14 @@ const UpdateStudentModal = ({ student, onClose, onSaved }) => {
     paymentStatus: student.paymentStatus || "Unpaid",
     status: student.status || "Pending",
   });
+
   const [saving, setSaving] = useState(false);
+  const [debugLog, setDebugLog] = useState([]);
+
+  const log = (msg) => {
+    console.log(msg);
+    setDebugLog((p) => [...p, `${new Date().toLocaleTimeString()}: ${msg}`]);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,47 +40,88 @@ const UpdateStudentModal = ({ student, onClose, onSaved }) => {
   };
 
   const handleSave = async () => {
+    setDebugLog([]);
+    log("🚀 Save clicked");
+
     // ✅ Validation
     if (!form.name.trim()) {
+      log("❌ Name empty");
       Swal.fire("Missing", "Name is required", "warning");
       return;
     }
     if (!form.phone.trim()) {
+      log("❌ Phone empty");
       Swal.fire("Missing", "Phone is required", "warning");
       return;
     }
 
-    setSaving(true);
-    try {
-      // ✅ _id priority, fallback to studentId
-      const id = student._id || student.id || student.studentId;
-      if (!id) {
-        throw new Error("Student ID is missing");
-      }
+    // ✅ Resolve ID
+    const id = student._id || student.id || student.studentId;
+    log(`🆔 Resolved ID: ${id}`);
 
-      const res = await fetch(`${API_BASE}/students/update/${id}`, {
+    if (!id) {
+      log("❌ No ID found on student object");
+      Swal.fire("Error", "Student ID missing — cannot update", "error");
+      return;
+    }
+
+    setSaving(true);
+    const url = `${API_BASE}/students/update/${id}`;
+    log(`📡 PATCH → ${url}`);
+
+    try {
+      const res = await fetch(url, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+
+      log(`📥 Status: ${res.status} ${res.statusText}`);
+
       const data = await res.json();
+      log(`📦 Response: ${JSON.stringify(data)}`);
 
       if (data.success) {
+        log("✅ Backend says SUCCESS");
         Swal.fire({
           icon: "success",
           title: "✅ Updated!",
-          text: "Student information updated successfully",
-          timer: 1500,
+          html: `
+            <p>Student information updated successfully</p>
+            <p style="font-size:11px;color:#666;margin-top:8px">
+              Fields: ${(data.updatedFields || []).join(", ")}
+            </p>
+          `,
+          timer: 1800,
           showConfirmButton: false,
         });
-        onSaved?.(data);
+
+        // ✅ Give backend time to write to DB, then refresh
+        setTimeout(() => {
+          log("🔄 Calling onSaved()");
+          onSaved?.(data);
+        }, 800);
       } else {
-        Swal.fire("Failed", data.message || "Update failed", "error");
+        log(`❌ Backend FAILED: ${data.message}`);
+        Swal.fire({
+          icon: "error",
+          title: "Update Failed",
+          html: `
+            <p style="color:#dc2626">${data.message || "Unknown error"}</p>
+            <p style="font-size:11px;color:#666;margin-top:8px">
+              Status: ${res.status}
+            </p>
+          `,
+        });
+        setSaving(false);
       }
     } catch (err) {
-      console.error("❌ Update error:", err);
-      Swal.fire("Error", err.message || "Network error", "error");
-    } finally {
+      log(`💥 Exception: ${err.message}`);
+      Swal.fire({
+        icon: "error",
+        title: "Network / Parse Error",
+        text: err.message,
+      });
       setSaving(false);
     }
   };
@@ -95,22 +142,14 @@ const UpdateStudentModal = ({ student, onClose, onSaved }) => {
           </h2>
           <button
             onClick={onClose}
-            className="text-white text-2xl leading-none hover:opacity-80"
-            title="Close"
+            className="text-white text-2xl hover:opacity-80"
           >
             ×
           </button>
         </div>
 
-        {/* Body */}
+        {/* Form */}
         <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* ===== Personal Info ===== */}
-          <div className="md:col-span-2">
-            <h3 className="text-sm font-bold text-[#004d4d] border-b pb-1 mb-2">
-              👤 Personal Information
-            </h3>
-          </div>
-
           <Input
             label="Full Name *"
             name="name"
@@ -122,7 +161,7 @@ const UpdateStudentModal = ({ student, onClose, onSaved }) => {
             name="phone"
             value={form.phone}
             onChange={handleChange}
-            placeholder="+880... / +966... / +971..."
+            placeholder="+880... / +966..."
           />
           <Input
             label="Email"
@@ -151,26 +190,6 @@ const UpdateStudentModal = ({ student, onClose, onSaved }) => {
             onChange={handleChange}
             options={["male", "female", "other"]}
           />
-          <Select
-            label="Marital Status"
-            name="maritalStatus"
-            value={form.maritalStatus}
-            onChange={handleChange}
-            options={["single", "married", "divorced", "widowed"]}
-          />
-          <Input
-            label="Occupation"
-            name="occupation"
-            value={form.occupation}
-            onChange={handleChange}
-          />
-
-          {/* ===== Family ===== */}
-          <div className="md:col-span-2 mt-2">
-            <h3 className="text-sm font-bold text-[#004d4d] border-b pb-1 mb-2">
-              👨‍👩‍👧 Family Information
-            </h3>
-          </div>
           <Input
             label="Father's Name"
             name="fatherName"
@@ -189,13 +208,20 @@ const UpdateStudentModal = ({ student, onClose, onSaved }) => {
             value={form.guardianPhone}
             onChange={handleChange}
           />
+          <Select
+            label="Marital Status"
+            name="maritalStatus"
+            value={form.maritalStatus}
+            onChange={handleChange}
+            options={["single", "married", "divorced", "widowed"]}
+          />
+          <Input
+            label="Occupation"
+            name="occupation"
+            value={form.occupation}
+            onChange={handleChange}
+          />
 
-          {/* ===== Address ===== */}
-          <div className="md:col-span-2 mt-2">
-            <h3 className="text-sm font-bold text-[#004d4d] border-b pb-1 mb-2">
-              🏠 Address
-            </h3>
-          </div>
           <div className="md:col-span-2">
             <Textarea
               label="Present Address"
@@ -213,12 +239,6 @@ const UpdateStudentModal = ({ student, onClose, onSaved }) => {
             />
           </div>
 
-          {/* ===== Fee ===== */}
-          <div className="md:col-span-2 mt-2">
-            <h3 className="text-sm font-bold text-[#004d4d] border-b pb-1 mb-2">
-              💳 Fee & Payment
-            </h3>
-          </div>
           <Input
             label="Course Fee (৳)"
             name="courseFee"
@@ -256,6 +276,20 @@ const UpdateStudentModal = ({ student, onClose, onSaved }) => {
           />
         </div>
 
+        {/* ✅ DEBUG LOG — সব output এখানে visible হবে */}
+        {debugLog.length > 0 && (
+          <div className="px-5 pb-3">
+            <div className="bg-gray-900 text-green-400 text-xs font-mono p-3 rounded-lg max-h-40 overflow-y-auto">
+              <p className="text-yellow-400 font-bold mb-1">🔍 Debug Log:</p>
+              {debugLog.map((l, i) => (
+                <p key={i} className="leading-tight">
+                  {l}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Footer */}
         <div className="px-5 py-3 border-t flex justify-end gap-3 sticky bottom-0 bg-white">
           <button
@@ -279,9 +313,6 @@ const UpdateStudentModal = ({ student, onClose, onSaved }) => {
   );
 };
 
-// ═══════════════════════════════════════
-// Small Reusable Input Components
-// ═══════════════════════════════════════
 const Input = ({ label, ...p }) => (
   <div>
     <label className="block text-xs font-semibold text-gray-700 mb-1">
@@ -289,7 +320,7 @@ const Input = ({ label, ...p }) => (
     </label>
     <input
       {...p}
-      className="w-full border rounded-md px-3 py-2 text-sm focus:border-[#004d4d] focus:ring-1 focus:ring-[#004d4d] outline-none disabled:bg-gray-100"
+      className="w-full border rounded-md px-3 py-2 text-sm focus:border-[#004d4d] focus:ring-1 focus:ring-[#004d4d] outline-none"
     />
   </div>
 );
