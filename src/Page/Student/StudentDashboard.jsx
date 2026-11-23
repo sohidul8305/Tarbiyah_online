@@ -977,7 +977,7 @@ const DashboardContent = ({
     setCurrentAnswers({});
   };
 
-  // ✅ মডিউল ওপেন/ক্লোজ করার স্টেট (প্রথম মডিউল ডিফল্ট ওপেন থাকবে)
+  // ✅ মডিউল ওপেন/ক্লোজ করার স্টেট (প্রথম মডিউল ডিফল্ট থাকবে)
   const [openModule, setOpenModule] = useState(0);
 
   const totalBill = Number(studentInfo.courseFee) || 0;
