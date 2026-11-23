@@ -27,6 +27,8 @@ import {
   FaChevronDown,
   FaChevronUp,
   FaLock,
+  FaFilePdf,
+  FaDownload,
 } from "react-icons/fa";
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
@@ -80,7 +82,88 @@ const HADITH_40_VIDEOS = [
   { title: "Session 42", url: "https://youtu.be/Wk9EC1vkPts" },
 ];
 
-// ✅ ৮টি মডিউলের টাইটেল (স্ক্রিনশট অনুযায়ী)
+// ✅ Google Drive PDF Links
+const HADITH_LECTURE_SHEETS = [
+  {
+    id: 1,
+    title: "লেকচার সীট ০১",
+    driveId: "1HoZi22cho-9eh8QtmvLqP6Ho7GgXbWUt",
+  },
+  {
+    id: 2,
+    title: "লেকচার সীট ০২",
+    driveId: "1N0r07RLBd2Bf3591Z5Yw6gxKgOr4HbpQ",
+  },
+  {
+    id: 3,
+    title: "লেকচার সীট ০৩",
+    driveId: "1TzWcTdyyR906iaS67H8gCculPEeB5gdi",
+  },
+  {
+    id: 4,
+    title: "লেকচার সীট ০৪",
+    driveId: "1wyhCK7ZDi7mmg2fPxeC3JstqfLdmiVs4",
+  },
+  {
+    id: 5,
+    title: "লেকচার সীট ০৫",
+    driveId: "1yZAJY3quq6LWPizrUPn99fwnrHUjoi6G",
+  },
+  {
+    id: 6,
+    title: "লেকচার সীট ০৬",
+    driveId: "1mVXtd_0T9mCxtPR-Tf-oI7jtAxkdzhjv",
+  },
+  {
+    id: 7,
+    title: "লেকচার সীট ০৭",
+    driveId: "1Y3H4b9yC0u5rJL01g-DYVby34ZtYJxJy",
+  },
+  {
+    id: 8,
+    title: "লেকচার সীট ০৮",
+    driveId: "1Phh6jKlWH35N6Dg2OzbZTyNLYMkL7wDQ",
+  },
+  {
+    id: 9,
+    title: "লেকচার সীট ০৯",
+    driveId: "1ucYnj_MLVJWdz6aa6vnM3qtFYnWCZIQ7",
+  },
+  {
+    id: 10,
+    title: "লেকচার সীট ১০",
+    driveId: "1II9kyKNW63GR_gCfzB4-n7b6Ihwt8jY3",
+  },
+  {
+    id: 11,
+    title: "লেকচার সীট ১১",
+    driveId: "118wp8DZpMoYViC-zTMH59o83objE-xBG",
+  },
+  {
+    id: 12,
+    title: "লেকচার সীট ১২",
+    driveId: "1lTai1HIieuG-B2vjtdUsjxfvDkGlaDCa",
+  },
+  {
+    id: 13,
+    title: "লেকচার সীট ১৩",
+    driveId: "1SupQlbLj026D_aNuPF_yFmVfB6TA0tvt",
+  },
+  {
+    id: 14,
+    title: "লেকচার সীট ১৪",
+    driveId: "1-8Q8vV7gZYWCXga86TOWt7ff7GbuGCng",
+  },
+];
+
+// ✅ Google Drive URL Helpers
+const getDrivePreviewUrl = (driveId) =>
+  `https://drive.google.com/file/d/${driveId}/preview`;
+
+const getDriveDownloadUrl = (driveId) =>
+  `https://drive.google.com/uc?export=download&id=${driveId}`;
+
+// ✅ ৮টি মডিউলের টাইটেল
 const MODULE_TITLES = [
   "01. নিয়ত, ঈমান ও ইসলামের মৌলিক পক্ষ",
   "02. তাকওয়া ও আত্মশুদ্ধি",
@@ -91,17 +174,6 @@ const MODULE_TITLES = [
   "07. কল্যাণ, ন্যায়বিচার ও সংস্কার",
   "08. আল্লাহর রহমত ও পরকাল",
 ];
-
-// ✅ ভিডিওগুলোকে ৮টি মডিউলে ভাগ করার লজিক (প্রতি মডিউলে ৫টি, শেষে ৭টি)
-const GROUPED_MODULES = MODULE_TITLES.map((title, index) => {
-  const start = index * 5;
-  const end = index === 7 ? 42 : start + 5; // ৮ম মডিউলে বাকি সব ভিডিও থাকবে
-  return {
-    moduleId: index,
-    title: title,
-    videos: HADITH_40_VIDEOS.slice(start, end),
-  };
-});
 
 const getSourceLabel = (src) => {
   if (src === "basic_tazweed_students") return "Basic Tazweed";
@@ -190,16 +262,12 @@ const StudentDashboard = () => {
 
   const [courses, setCourses] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(false);
-
-  // ✅ ভিডিও প্লেয়ার স্টেট
   const [courseVideos, setCourseVideos] = useState([]);
   const [activeVideo, setActiveVideo] = useState(null);
-
-  // ✅ সিকিউরিটি স্টেট
   const [isWindowFocused, setIsWindowFocused] = useState(true);
   const [showSecurityWarning, setShowSecurityWarning] = useState(false);
 
-  // ✅ অ্যাডভান্সড সিকিউরিটি ইফেক্ট (স্ক্রিন শেয়ার, স্ক্রিন রেকর্ড এবং স্ক্রিনশট ব্লক)
+  // ✅ সিকিউরিটি
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
@@ -343,10 +411,7 @@ const StudentDashboard = () => {
 
       if (d.success && d.student) {
         const data = d.student;
-
-        if (data.password) {
-          delete data.password;
-        }
+        if (data.password) delete data.password;
 
         const finalSource = d.source || resolvedSource;
         console.log(`✅ Found in ${finalSource}:`, data.name);
@@ -423,7 +488,6 @@ const StudentDashboard = () => {
         localStorage.setItem("studentInfo", JSON.stringify(stored));
         localStorage.setItem("loginSource", finalSource);
 
-        // ✅ ভিডিও ফেচ করা
         fetchVideos(data, finalSource);
       } else {
         console.warn("⚠️ Student not found:", d.message);
@@ -454,7 +518,6 @@ const StudentDashboard = () => {
 
       let fetchedVideos = d.videos || [];
 
-      // ✅ FALLBACK: যদি API থেকে ভিডিও না আসে কিন্তু কোর্স "Imam Nabawi" হয়
       const courseName = String(
         studentData.course ||
           studentData.batchCourse ||
@@ -558,9 +621,6 @@ const StudentDashboard = () => {
                 teacher: "",
                 duration: "",
               }));
-              console.log(
-                `✅ Fallback: ${loadedCourses.length} courses from course string`,
-              );
             }
           }
         }
@@ -822,7 +882,7 @@ const StudentDashboard = () => {
         </main>
       </div>
 
-      {/* ✅ ভিডিও প্লেয়ার মোডাল (পপআপ) with Full Security */}
+      {/* ✅ ভিডিও প্লেয়ার মোডাল */}
       {activeVideo && (
         <div
           className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
@@ -855,12 +915,11 @@ const StudentDashboard = () => {
                 ></iframe>
               </div>
 
-              {/* সিকিউরিটি ওভারলে */}
               {(!isWindowFocused || showSecurityWarning) && (
                 <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/60 text-white p-4 text-center">
                   <FaShieldAlt className="text-6xl text-red-500 mb-4 animate-pulse" />
                   <h2 className="text-2xl font-bold mb-2">
-                    ভিডিও লক করা হয়েছে!
+                    ভিডিও লক করা হয়েছে!
                   </h2>
                   <p className="text-sm max-w-md">
                     আপনি অন্য ট্যাবে গেছেন বা স্ক্রিন রেকর্ডিং টুল ওপেন করেছেন।
@@ -869,7 +928,6 @@ const StudentDashboard = () => {
                 </div>
               )}
 
-              {/* মুভিং ওয়াটারমার্ক */}
               <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-10 opacity-30">
                 <div className="absolute top-1/4 left-1/4 text-white font-mono text-xl font-bold tracking-widest drop-shadow-md animate-[ping_4s_ease-in-out_infinite]">
                   ID: {studentInfo?.studentId || "STUDENT"}
@@ -893,7 +951,6 @@ const StudentDashboard = () => {
         </div>
       )}
 
-      {/* ✅ Support Chat Widget — Floating Button */}
       <SupportChatWidget />
     </div>
   );
@@ -912,13 +969,11 @@ const DashboardContent = ({
 }) => {
   const navigate = useNavigate();
   const [paymentTab, setPaymentTab] = useState("summary");
-  // ✅ কুইজ ও লক সিস্টেমের স্টেট
-  const [unlockedVideos, setUnlockedVideos] = useState(1); // ডিফল্ট ১টি আনলকড
-  const [quizScores, setQuizScores] = useState({}); // কোন ভিডিওতে কত মার্ক
-  const [activeQuiz, setActiveQuiz] = useState(null); // কোন কুইজ ওপেন আছে
-  const [currentAnswers, setCurrentAnswers] = useState({}); // ইউজারের সিলেক্ট করা উত্তর
+  const [unlockedVideos, setUnlockedVideos] = useState(1);
+  const [quizScores, setQuizScores] = useState({});
+  const [activeQuiz, setActiveQuiz] = useState(null);
+  const [currentAnswers, setCurrentAnswers] = useState({});
 
-  // ✅ LocalStorage থেকে সেভ করা ডাটা লোড করা (স্টুডেন্ট আইডি দিয়ে)
   useEffect(() => {
     const studentKey = studentInfo?._id || studentInfo?.studentId || "guest";
     const saved = localStorage.getItem(`quiz_progress_${studentKey}`);
@@ -931,7 +986,6 @@ const DashboardContent = ({
     }
   }, [studentInfo]);
 
-  // ✅ কুইজ সাবমিট করার লজিক
   const handleQuizSubmit = (videoIndex) => {
     const quiz = quizData[videoIndex];
     if (!quiz) return;
@@ -941,21 +995,17 @@ const DashboardContent = ({
       if (currentAnswers[idx] === q.ans) correctCount++;
     });
 
-    // স্কোর আপডেট
     const newScores = { ...quizScores, [videoIndex]: correctCount };
     setQuizScores(newScores);
 
-    // পাস মার্ক: ২০ এর মধ্যে ১০ (৫০%)
     const isPassed = correctCount >= 5;
     let newUnlocked = unlockedVideos;
 
-    // পাস করলে পরবর্তী ভিডিও আনলক হবে
     if (isPassed && videoIndex + 1 >= unlockedVideos) {
       newUnlocked = videoIndex + 2;
       setUnlockedVideos(newUnlocked);
     }
 
-    // সেভ করা
     const studentKey = studentInfo?._id || studentInfo?.studentId || "guest";
     localStorage.setItem(
       `quiz_progress_${studentKey}`,
@@ -965,10 +1015,10 @@ const DashboardContent = ({
     Swal.fire({
       icon: isPassed ? "success" : "error",
       title: isPassed ? "🎉 অভিনন্দন!" : "😔 আবার চেষ্টা করুন",
-      text: `আপনি ${correctCount} টি সঠিক উত্তর দিয়েছেন (মোট ১০টি)। ${
+      text: `আপনি ${correctCount} টি সঠিক উত্তর দিয়েছেন (মোট ১০টি)। ${
         isPassed
-          ? "পরবর্তী ভিডিও আনলক হয়েছে!"
-          : "পাস করতে কমপক্ষে ১০ নম্বর প্রয়োজন।"
+          ? "পরবর্তী ভিডিও আনলক হয়েছে!"
+          : "পাস করতে কমপক্ষে ১০ নম্বর প্রয়োজন।"
       }`,
       confirmButtonText: "ঠিক আছে",
     });
@@ -977,7 +1027,6 @@ const DashboardContent = ({
     setCurrentAnswers({});
   };
 
-  // ✅ মডিউল ওপেন/ক্লোজ করার স্টেট (প্রথম মডিউল ডিফল্ট থাকবে)
   const [openModule, setOpenModule] = useState(0);
 
   const totalBill = Number(studentInfo.courseFee) || 0;
@@ -987,9 +1036,6 @@ const DashboardContent = ({
   const courseDisplayValue =
     studentInfo.course || studentInfo.batchCourse || studentInfo.class || "N/A";
 
-  // ✅ ভিডিওগুলো গ্রুপ করা (ফলব্যাক লিস্টের জন্য)
-  // নোট: যদি ড্যাশবোর্ডে API থেকে ভিডিও আসে, তবে সেগুলোও ৫টি করে মডিউলে ভাগ হবে
-  // ✅ স্টুডেন্ট আসলে ইমাম নববী ৪০ হাদিস কোর্সে এনরোল কিনা চেক
   const isHadithStudent = React.useMemo(() => {
     const courseName = String(
       studentInfo.course || studentInfo.batchCourse || studentInfo.class || "",
@@ -1002,11 +1048,9 @@ const DashboardContent = ({
     );
   }, [studentInfo.course, studentInfo.batchCourse, studentInfo.class]);
 
-  // ✅ আসল courseVideos থেকে module বানানো (হার্ডকোড ৪২টি ভিডিও বাদ)
   const displayModules = React.useMemo(() => {
     if (!courseVideos || courseVideos.length === 0) return [];
 
-    // ইমাম নববী কোর্স হলে ৮টি বাংলা টাইটেল ব্যবহার করবো
     if (isHadithStudent && courseVideos.length >= 40) {
       return MODULE_TITLES.map((title, index) => {
         const start = index * 5;
@@ -1019,7 +1063,6 @@ const DashboardContent = ({
       }).filter((m) => m.videos.length > 0);
     }
 
-    // অন্য কোর্সের (যেমন Surah Baqarah) জন্য generic module
     const modules = [];
     for (let i = 0; i < courseVideos.length; i += 5) {
       modules.push({
@@ -1334,7 +1377,7 @@ const DashboardContent = ({
         </div>
       </div>
 
-      {/* ✅ Recorded Course Videos Section (Module Wise) */}
+      {/* ✅ Recorded Course Videos Section */}
       {isHadithStudent &&
         courseVideos.length > 0 &&
         displayModules.length > 0 && (
@@ -1352,7 +1395,6 @@ const DashboardContent = ({
                   key={mIndex}
                   className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm"
                 >
-                  {/* মডিউল হেডার (ক্লিক করলে ওপেন/ক্লোজ হবে) */}
                   <button
                     onClick={() =>
                       setOpenModule(openModule === mIndex ? null : mIndex)
@@ -1371,11 +1413,9 @@ const DashboardContent = ({
                     </span>
                   </button>
 
-                  {/* মডিউলের ভেতরের ভিডিও গ্রিড */}
                   {openModule === mIndex && (
                     <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-white border-t border-gray-100">
                       {module.videos.map((video, index) => {
-                        // গ্লোবাল ইনডেক্স বের করা
                         const globalIndex = courseVideos.findIndex(
                           (v) => v._id === video._id || v.url === video.url,
                         );
@@ -1412,7 +1452,6 @@ const DashboardContent = ({
                                 className={`w-full h-full object-cover transition-transform duration-300 pointer-events-none ${isUnlocked ? "group-hover:scale-105" : "blur-sm grayscale"}`}
                               />
 
-                              {/* ওভারলে */}
                               <div
                                 className={`absolute inset-0 flex items-center justify-center transition-colors ${isUnlocked ? "bg-black/20 group-hover:bg-black/40" : "bg-black/60"}`}
                               >
@@ -1442,7 +1481,6 @@ const DashboardContent = ({
                                 {video.title}
                               </p>
 
-                              {/* কুইজ বাটন বা স্কোর */}
                               {isUnlocked && hasQuiz && (
                                 <div className="mt-3 pt-2 border-t border-gray-100">
                                   {score !== undefined ? (
@@ -1475,6 +1513,74 @@ const DashboardContent = ({
             </div>
           </div>
         )}
+
+      {/* ✅ ইমাম নববী ৪০ হাদিস — লেকচার সীট (PDF) — Google Drive */}
+      {isHadithStudent && (
+        <div className="bg-white border-2 border-amber-100 rounded-xl shadow-sm p-4 md:p-6 mb-6">
+          <div className="flex flex-wrap items-center gap-3 mb-5">
+            <div className="w-1.5 h-6 bg-amber-500 rounded-full"></div>
+            <h2 className="text-xl font-bold text-amber-700">
+              📄 লেকচার সীট (Lecture Sheets)
+            </h2>
+
+            <span className="text-[11px] bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full font-bold">
+              ১৪টি PDF
+            </span>
+            <span className="text-[10px] text-gray-500 ml-auto">
+              ইমাম নববী ৪০ হাদিস কোর্সের জন্য
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {HADITH_LECTURE_SHEETS.map((sheet) => (
+              <div
+                key={sheet.id}
+                className="border border-gray-200 rounded-lg p-3 hover:shadow-md hover:border-amber-300 transition-all bg-gray-50 flex items-center justify-between gap-2"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <FaFilePdf className="text-red-500 text-2xl shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-800 truncate">
+                      {sheet.title}
+                    </p>
+                    <p className="text-[10px] text-gray-400">
+                      PDF • লেকচার সীট
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0">
+                  <a
+                    href={getDrivePreviewUrl(sheet.driveId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-blue-500 hover:bg-blue-600 text-white text-[11px] px-2.5 py-1.5 rounded transition-colors"
+                    title="অনলাইনে দেখুন"
+                  >
+                    দেখুন
+                  </a>
+
+                  <a
+                    href={getDriveDownloadUrl(sheet.driveId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#00ADD2] hover:bg-[#008c9e] text-white text-[11px] px-2.5 py-1.5 rounded flex items-center gap-1 transition-colors"
+                    title="ডাউনলোড করুন"
+                  >
+                    <FaDownload size={9} /> ডাউনলোড
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 p-2 bg-amber-50 border border-amber-200 rounded text-[11px] text-amber-800">
+            💡 <strong>নোট:</strong> প্রতিটি লেকচার সীট ক্লাসের বিষয়বস্তুর
+            সারসংক্ষেপ। যেকোনো সমস্যা হলে Support-এ যোগাযোগ করুন।
+          </div>
+        </div>
+      )}
+
       {/* ✅ কুইজ মোডাল */}
       {activeQuiz !== null && quizData[activeQuiz] && (
         <div className="fixed inset-0 z-50 bg-black/80 flex items-start justify-center p-4 overflow-y-auto">
@@ -1537,6 +1643,7 @@ const DashboardContent = ({
           </div>
         </div>
       )}
+
       <PaymentSection
         paymentTab={paymentTab}
         setPaymentTab={setPaymentTab}
@@ -1550,7 +1657,7 @@ const DashboardContent = ({
 };
 
 // ==========================================
-// Payment Section (Unchanged)
+// Payment Section
 // ==========================================
 const PaymentSection = ({
   paymentTab,
