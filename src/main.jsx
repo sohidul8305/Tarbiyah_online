@@ -6,6 +6,7 @@ import "./index.css";
 
 import AuthProvider from "./Provider/AuthProvider";
 import { router } from "./router/router";
+import FloatingWhatsApp from "./Components/FloatingWhatsApp/FloatingWhatsApp";
 
 console.log("🔥 App starting...");
 
@@ -13,6 +14,7 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
       <RouterProvider router={router} />
+      <FloatingWhatsApp />
     </AuthProvider>
   </StrictMode>,
 );
