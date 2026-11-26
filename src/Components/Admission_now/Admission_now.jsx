@@ -73,7 +73,6 @@ const Admission_now = () => {
     nagodNumber: "",
     rocketNumber: "",
     merchantNumber: "",
-    country: "",
     bankAccount: "",
   });
 
@@ -160,7 +159,7 @@ const Admission_now = () => {
       courses: [
         {
           id: "qs1",
-          name: "Qaida Noorani (Bangla Medium)",
+          name: "Qaida Noorani (Regular )",
           duration: "Flexible",
           admissionFee: 1000,
           monthlyFee: 1000,
@@ -168,29 +167,10 @@ const Admission_now = () => {
           discount: 0,
           price: 2000,
         },
-        {
-          id: "qs1i",
-          name: "Qaida Noorani (International)",
-          duration: "Flexible",
-          admissionFee: 2000,
-          monthlyFee: 2000,
-          totalOneTime: 2000 + 2000 * 2,
-          discount: 0,
-          price: 4000,
-        },
-        {
-          id: "qs2",
-          name: "Nazera Quran (Bangla Medium)",
-          duration: "Flexible",
-          admissionFee: 1000,
-          monthlyFee: 1000,
-          totalOneTime: 1000 + 1000 * 3,
-          discount: 0,
-          price: 2000,
-        },
+
         {
           id: "qs2i",
-          name: "Nazera Quran (Expatriate)",
+          name: "Nazera Quran (Regular )",
           duration: "Flexible",
           admissionFee: 2000,
           monthlyFee: 2000,
@@ -200,18 +180,18 @@ const Admission_now = () => {
         },
         {
           id: "qs3",
-          name: "Hifzul Quran",
-          duration: "2 Years",
+          name: "Hifzul Quran (Regular)",
+          duration: "Flexible",
           admissionFee: 2000,
           monthlyFee: 2000,
           totalOneTime: 2000 + 2000 * 24,
           discount: 0,
-          price: 50000,
+          price: 2000,
         },
         {
           id: "qs4",
-          name: "Hifz Revision (One to One) - Bangla Medium",
-          duration: "6 Months",
+          name: "Hifzul Revision",
+          duration: "Flexible",
           admissionFee: 2000,
           monthlyFee: 2000,
           totalOneTime: 2000 + 2000 * 6,
@@ -219,28 +199,19 @@ const Admission_now = () => {
           price: 14000,
         },
         {
-          id: "qs4i",
-          name: "Hifz Revision (One to One) - International",
-          duration: "6 Months",
+          id: "qs6",
+          name: "Najera + Hifz",
+          duration: "Flexible",
           admissionFee: 2000,
           monthlyFee: 2000,
-          totalOneTime: 2000 + 2000 * 6,
+          totalOneTime: 2000 + 2000 * 3,
           discount: 0,
-          price: 14000,
+          price: 4000,
         },
+
         {
           id: "qs5",
-          name: "One-to-One Program (Bangla Medium)",
-          duration: "Flexible",
-          admissionFee: 1000,
-          monthlyFee: 5000,
-          totalOneTime: 1000 + 5000 * 6,
-          discount: 0,
-          price: 31000,
-        },
-        {
-          id: "qs5i",
-          name: "One-to-One Program (International)",
+          name: "One-to-One Program (Regular)",
           duration: "Flexible",
           admissionFee: 1000,
           monthlyFee: 5000,
@@ -930,28 +901,33 @@ const Admission_now = () => {
   const isEldersFee = formData.selectedDepartment === "quran-elders";
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 overflow-x-hidden">
       <Navbar />
       <div
-        className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-6 border-t-4 mb-20 mt-10"
+        className="max-w-4xl mx-3 sm:mx-6 lg:mx-auto bg-white rounded-lg shadow-xl p-4 sm:p-6 border-t-4 mb-12 sm:mb-20 mt-6 sm:mt-10"
         style={{ borderColor: "#00ADD2" }}
       >
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold" style={{ color: "#00ADD2" }}>
+        <div className="text-center mb-6 sm:mb-8">
+          <h1
+            className="text-2xl sm:text-3xl md:text-4xl font-bold"
+            style={{ color: "#00ADD2" }}
+          >
             Tarbiyah Online Madrasha
           </h1>
-          <p className="text-gray-600 mt-2">Trusted Islamic Education</p>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">
+            Trusted Islamic Education
+          </p>
         </div>
 
         <h2
-          className="text-2xl font-bold text-center mb-6"
+          className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6"
           style={{ color: "#00ADD2" }}
         >
           Admission Form
         </h2>
 
         {/* Progress Steps */}
-        <div className="flex justify-between mb-8">
+        <div className="flex justify-between gap-1 sm:gap-2 mb-6 sm:mb-8">
           {[
             { n: 1, label: "Course Selection" },
             { n: 2, label: "Personal Info" },
@@ -963,11 +939,13 @@ const Admission_now = () => {
               className={`flex-1 text-center ${step >= s.n ? "text-[#00ADD2]" : "text-gray-400"}`}
             >
               <div
-                className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${step >= s.n ? "bg-[#00ADD2] text-white" : "bg-gray-300"}`}
+                className={`w-7 h-7 sm:w-8 sm:h-8 text-sm mx-auto rounded-full flex items-center justify-center ${step >= s.n ? "bg-[#00ADD2] text-white" : "bg-gray-300"}`}
               >
                 {s.n}
               </div>
-              <span className="text-sm">{s.label}</span>
+              <span className="block mt-1 text-[10px] leading-tight sm:text-sm">
+                {s.label}
+              </span>
             </div>
           ))}
         </div>
@@ -977,7 +955,7 @@ const Admission_now = () => {
           {step === 1 && (
             <div className="space-y-4">
               <h2
-                className="text-xl font-semibold mb-4"
+                className="text-lg sm:text-xl font-semibold mb-4"
                 style={{ color: "#00ADD2" }}
               >
                 Department & Course Selection
@@ -1060,7 +1038,7 @@ const Admission_now = () => {
                                 </p>
                               )}
 
-                            <div className="flex justify-between items-center mt-1">
+                            <div className="flex flex-wrap justify-between items-center gap-2 mt-1">
                               <span className="text-xs text-gray-500">
                                 Duration: {course.duration}
                               </span>
@@ -1224,7 +1202,7 @@ const Admission_now = () => {
               )}
               {/* ✅ Diploma auto batch */}
               {formData.selectedDepartment === "islamic-studies" && (
-                <div className="flex justify-between">
+                <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
                   <span>Auto Batch:</span>
                   <span className="font-semibold" style={{ color: "#00ADD2" }}>
                     Batch-16 • 8 PM – 10 PM
@@ -1254,7 +1232,7 @@ const Admission_now = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Select Time Slot *
                     </label>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       {[
                         "6:00 – 7:30 AM",
                         "3:00 – 4:30 PM",
@@ -1428,7 +1406,7 @@ const Admission_now = () => {
           {step === 2 && (
             <div className="space-y-4">
               <h2
-                className="text-xl font-semibold mb-4"
+                className="text-lg sm:text-xl font-semibold mb-4"
                 style={{ color: "#00ADD2" }}
               >
                 Personal Information
@@ -1573,7 +1551,7 @@ const Admission_now = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between mt-6">
+              <div className="flex justify-between gap-3 mt-6">
                 <button
                   type="button"
                   onClick={handlePrevious}
@@ -1597,7 +1575,7 @@ const Admission_now = () => {
           {step === 3 && (
             <div className="space-y-4">
               <h2
-                className="text-xl font-semibold mb-4"
+                className="text-lg sm:text-xl font-semibold mb-4"
                 style={{ color: "#00ADD2" }}
               >
                 Family & Address Information
@@ -1660,7 +1638,7 @@ const Admission_now = () => {
                   />
                 </div>
 
-                <div className="col-span-2">
+                <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">
                     Present Address *
                   </label>
@@ -1673,7 +1651,7 @@ const Admission_now = () => {
                   />
                 </div>
 
-                <div className="col-span-2">
+                <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">
                     Permanent Address *
                   </label>
@@ -1687,7 +1665,7 @@ const Admission_now = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between mt-6">
+              <div className="flex justify-between gap-3 mt-6">
                 <button
                   type="button"
                   onClick={handlePrevious}
@@ -1711,7 +1689,7 @@ const Admission_now = () => {
           {step === 4 && (
             <div className="space-y-4">
               <h2
-                className="text-xl font-semibold mb-4"
+                className="text-lg sm:text-xl font-semibold mb-4"
                 style={{ color: "#00ADD2" }}
               >
                 Payment Information
@@ -1758,7 +1736,7 @@ const Admission_now = () => {
                     Fee Details for Selected Courses
                   </h4>
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full min-w-[560px] text-xs sm:text-sm">
                       <thead>
                         <tr className="bg-[#e6f7f9]">
                           <th className="px-3 py-2 text-left">Course</th>
@@ -1868,7 +1846,7 @@ const Admission_now = () => {
 
                 {(formData.paymentMethod === "bkash" ||
                   formData.paymentMethod === "nagod") && (
-                  <div className="col-span-2">
+                  <div className="md:col-span-2">
                     <div
                       className="p-3 rounded-lg"
                       style={{
@@ -1898,7 +1876,7 @@ const Admission_now = () => {
                 )}
 
                 {formData.paymentMethod === "bank" && (
-                  <div className="col-span-2">
+                  <div className="md:col-span-2">
                     <div
                       className="p-3 rounded-lg border"
                       style={{
@@ -1909,7 +1887,7 @@ const Admission_now = () => {
                       <h4 className="font-bold" style={{ color: "#00ADD2" }}>
                         🏦 Bank Information:
                       </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2 text-sm break-words">
                         <div>
                           <p>
                             <span className="font-semibold">Account Name:</span>{" "}
@@ -2009,7 +1987,7 @@ const Admission_now = () => {
 
                 {/* Payment Proof */}
                 {formData.paymentMethod !== "ssl" && (
-                  <div className="col-span-2">
+                  <div className="md:col-span-2">
                     <label className="block text-sm font-bold text-gray-800 mb-3">
                       📎 Payment Proof{" "}
                       <span className="text-red-600 font-semibold">*</span>
@@ -2193,7 +2171,7 @@ const Admission_now = () => {
                   </div>
                 )}
 
-                <div className="col-span-2">
+                <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">
                     Payment Remarks
                   </label>
@@ -2240,13 +2218,13 @@ const Admission_now = () => {
                 <h4 className="font-semibold" style={{ color: "#00ADD2" }}>
                   Payment Summary
                 </h4>
-                <div className="flex justify-between mt-2">
+                <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 mt-2">
                   <span>Total Course Fee:</span>
                   <span className="font-bold" style={{ color: "#00ADD2" }}>
                     ৳{calculateTotal().toLocaleString()}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
                   <span>Selected Department:</span>
                   <span className="font-semibold">
                     {formData.selectedDepartment
@@ -2258,7 +2236,7 @@ const Admission_now = () => {
                 {/* ✅ Non-elders batch */}
                 {formData.batchType &&
                   formData.selectedDepartment !== "quran-elders" && (
-                    <div className="flex justify-between">
+                    <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
                       <span>Batch:</span>
                       <span className="font-semibold">
                         {BATCH_SCHEDULES[formData.batchType]?.label} (
@@ -2270,7 +2248,7 @@ const Admission_now = () => {
                 {/* ✅ Elders gender-aware batch */}
                 {formData.selectedDepartment === "quran-elders" &&
                   formData.batchSchedule && (
-                    <div className="flex justify-between">
+                    <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
                       <span>Auto Batch:</span>
                       <span
                         className="font-semibold"
@@ -2281,7 +2259,7 @@ const Admission_now = () => {
                     </div>
                   )}
 
-                <div className="flex justify-between">
+                <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
                   <span>Payment Method:</span>
                   <span className="font-semibold">
                     {formData.paymentMethod === "bkash"
@@ -2297,13 +2275,13 @@ const Admission_now = () => {
                               : "-"}
                   </span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
                   <span>Payment Status:</span>
                   <span className="text-green-600 font-semibold">Pending</span>
                 </div>
               </div>
 
-              <div className="flex justify-between mt-6">
+              <div className="flex justify-between gap-3 mt-6">
                 <button
                   type="button"
                   onClick={handlePrevious}
@@ -2314,7 +2292,7 @@ const Admission_now = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="text-white px-8 py-2 rounded-md hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="text-white px-5 sm:px-8 py-2 rounded-md hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ backgroundColor: "#00ADD2" }}
                 >
                   {loading ? "Processing..." : "Submit Admission"}
