@@ -26,7 +26,7 @@ import {
 import { MdDashboard } from "react-icons/md";
 import { FiMenu, FiX } from "react-icons/fi";
 
-// ✅ NEW — Update Student Modal
+// ✅ NEW — Update Student Moda
 import UpdateStudentModal from "../../Page/New-admission/UpdateStudentModal";
 
 const API_BASE = "https://api.tarbiyahonline.com/api";

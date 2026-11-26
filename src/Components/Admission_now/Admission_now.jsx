@@ -68,6 +68,9 @@ const BATCH_SCHEDULES = {
   },
 };
 
+// ✅ Quran Studies-এ একজন সর্বোচ্চ কয়টি course নিতে পারবে
+const MAX_QURAN_STUDIES_COURSES = 2;
+
 const Admission_now = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -103,6 +106,7 @@ const Admission_now = () => {
     // Batch
     batchType: "",
     batchSchedule: "",
+    courseSchedules: {}, // Quran Studies: { courseId: timeSlot }
 
     // Payment
     paymentScreenshot: "",
@@ -246,7 +250,7 @@ const Admission_now = () => {
           monthlyFee: 2000,
           totalOneTime: 2000 + 2000 * 24,
           discount: 0,
-          price: 4000,
+          price: 2000,
           batchType: "regular",
           slotGroup: "hifz",
           classDays: "Regular Batch • Tue – Fri",
@@ -259,7 +263,7 @@ const Admission_now = () => {
           monthlyFee: 2000,
           totalOneTime: 2000 + 2000 * 6,
           discount: 0,
-          price: 4000,
+          price: 14000,
           batchType: "regular",
           slotGroup: "hifz",
           classDays: "Regular Batch • Tue – Fri",
@@ -423,21 +427,41 @@ const Admission_now = () => {
     return course.autoBatchBase + genderSuffix;
   };
 
-  // ✅ Quran Studies: selected course + তার time slot group
-  const getQuranStudiesCourse = () => {
-    if (formData.selectedDepartment !== "quran-studies") return null;
-    return (
-      getCurrentCourses().find((c) =>
-        formData.selectedCourses.includes(c.id),
-      ) || null
-    );
+  // ✅ Quran Studies helpers (একাধিক course, প্রতিটার আলাদা time slot)
+  const getQuranStudiesCourses = () => {
+    if (formData.selectedDepartment !== "quran-studies") return [];
+    return getSelectedCourseDetails();
   };
 
-  const getQuranStudiesSlotGroup = () => {
-    const course = getQuranStudiesCourse();
-    if (!course) return null;
-    return BATCH_SCHEDULES[course.batchType]?.groups[course.slotGroup] || null;
+  const getSlotGroupFor = (course) =>
+    BATCH_SCHEDULES[course?.batchType]?.groups[course?.slotGroup] || null;
+
+  // selected courses + slots থেকে batchType / batchSchedule string বানায়
+  // ১টা course হলে আগের মতোই: batchType "regular", batchSchedule "6:00 AM - 8:00 AM"
+  const buildQuranStudiesBatch = (courseIds, schedules) => {
+    const courses = courseIds
+      .map((id) =>
+        departments["quran-studies"].courses.find((c) => c.id === id),
+      )
+      .filter(Boolean);
+    const types = [...new Set(courses.map((c) => c.batchType))];
+    const batchType = types.join(", ");
+    const batchSchedule =
+      courses.length === 1
+        ? schedules[courses[0].id] || ""
+        : courses.every((c) => schedules[c.id])
+          ? courses.map((c) => `${c.name}: ${schedules[c.id]}`).join(" | ")
+          : "";
+    return { batchType, batchSchedule };
   };
+
+  // "regular, overseas" → "Regular Batch + Overseas Batch"
+  const getBatchTypeLabel = (batchType) =>
+    (batchType || "")
+      .split(", ")
+      .map((k) => BATCH_SCHEDULES[k]?.label)
+      .filter(Boolean)
+      .join(" + ");
 
   const calculateTotal = () => {
     let total = 0;
@@ -466,14 +490,28 @@ const Admission_now = () => {
       type === "checkbox" &&
       formData.selectedDepartment === "quran-studies"
     ) {
-      const course = departments["quran-studies"].courses.find(
-        (c) => c.id === value,
-      );
+      if (
+        checked &&
+        formData.selectedCourses.length >= MAX_QURAN_STUDIES_COURSES
+      ) {
+        Swal.fire({
+          icon: "info",
+          title: `সর্বোচ্চ ${MAX_QURAN_STUDIES_COURSES}টি course`,
+          text: `একসাথে সর্বোচ্চ ${MAX_QURAN_STUDIES_COURSES}টি course সিলেক্ট করতে পারবেন। নতুন course নিতে আগেরটি থেকে টিক তুলে দিন।`,
+          confirmButtonColor: "#00ADD2",
+        });
+        return;
+      }
+      const selectedCourses = checked
+        ? [...formData.selectedCourses, value]
+        : formData.selectedCourses.filter((id) => id !== value);
+      const courseSchedules = { ...formData.courseSchedules };
+      if (!checked) delete courseSchedules[value];
       setFormData({
         ...formData,
-        selectedCourses: checked ? [value] : [],
-        batchType: checked && course ? course.batchType : "",
-        batchSchedule: "",
+        selectedCourses,
+        courseSchedules,
+        ...buildQuranStudiesBatch(selectedCourses, courseSchedules),
       });
     } else if (type === "checkbox") {
       if (checked) {
@@ -498,6 +536,7 @@ const Admission_now = () => {
         batchType:
           value === "quran-studies" && firstCourse ? firstCourse.batchType : "",
         batchSchedule: "",
+        courseSchedules: {},
       });
     } else {
       setFormData({ ...formData, [name]: value });
@@ -595,8 +634,10 @@ const Admission_now = () => {
         missing.push("At least 1 Course");
 
       if (formData.selectedDepartment === "quran-studies") {
-        if (!formData.batchType) missing.push("Batch Type (Regular/Overseas)");
-        if (!formData.batchSchedule) missing.push("Time Slot");
+        getQuranStudiesCourses().forEach((course) => {
+          if (!formData.courseSchedules?.[course.id])
+            missing.push(`Time Slot — ${course.name}`);
+        });
       }
 
       if (formData.selectedDepartment === "quran-elders") {
@@ -916,9 +957,9 @@ const Admission_now = () => {
             : formData.selectedDepartment === "islamic-studies"
               ? `<p><strong>Auto Batch:</strong> Batch-16 • 8:00 PM – 10:00 PM (Any 3 days/week)</p>`
               : formData.batchType
-                ? `<p><strong>Batch:</strong> ${
-                    BATCH_SCHEDULES[formData.batchType]?.label
-                  } (${formData.batchSchedule})</p>`
+                ? `<p><strong>Batch:</strong> ${getBatchTypeLabel(
+                    formData.batchType,
+                  )} (${formData.batchSchedule})</p>`
                 : "";
 
         Swal.fire({
@@ -974,6 +1015,7 @@ const Admission_now = () => {
           selectedCourses: [],
           batchType: "",
           batchSchedule: "",
+          courseSchedules: {},
           paymentScreenshot: "",
           paymentMethod: "",
           paymentType: "",
@@ -1205,7 +1247,7 @@ const Admission_now = () => {
                 </div>
               )}
 
-              {/* ✅ Quran Studies Batch Schedule */}
+              {/* ✅ Quran Studies Batch Schedule (প্রতিটা course-এর আলাদা slot) */}
               {formData.selectedDepartment === "quran-studies" && (
                 <div
                   className="mt-6 p-4 rounded-lg border-2"
@@ -1217,123 +1259,99 @@ const Admission_now = () => {
                   >
                     🕐 Batch Schedule Selection
                   </h3>
-                  <p className="text-xs text-gray-600 mb-4">
+                  <p className="text-xs text-gray-600 mb-1">
                     All times are in <strong>Bangladesh Time (BST)</strong>.
-                    Please select your preferred batch and time slot.
+                    Please select a time slot for each selected course.
+                  </p>
+                  <p className="text-xs text-blue-700 mb-4">
+                    ℹ️ একসাথে সর্বোচ্চ {MAX_QURAN_STUDIES_COURSES}টি course নিতে
+                    পারবেন — সব course-এর ফি একবারে পেমেন্ট হবে।
                   </p>
 
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Select Batch Type *
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {Object.entries(BATCH_SCHEDULES).map(([key, batch]) => (
-                        <label
-                          key={key}
-                          className="flex items-center gap-2 p-3 border-2 rounded-lg cursor-pointer hover:bg-white transition"
-                          style={{
-                            borderColor:
-                              formData.batchType === key
-                                ? "#00ADD2"
-                                : "#d1d5db",
-                          }}
-                        >
-                          <input
-                            type="radio"
-                            name="batchType"
-                            value={key}
-                            checked={formData.batchType === key}
-                            onChange={(e) => {
-                              const type = e.target.value;
-                              const current = getQuranStudiesCourse();
-                              const firstOfType = departments[
-                                "quran-studies"
-                              ].courses.find((c) => c.batchType === type);
-                              setFormData({
-                                ...formData,
-                                batchType: type,
-                                batchSchedule: "",
-                                selectedCourses:
-                                  current?.batchType === type
-                                    ? formData.selectedCourses
-                                    : firstOfType
-                                      ? [firstOfType.id]
-                                      : [],
-                              });
-                            }}
-                            className="h-4 w-4"
-                          />
-                          <div>
-                            <p className="font-semibold text-sm">
-                              {batch.label}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              {batch.days}
-                            </p>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {formData.batchType && getQuranStudiesSlotGroup() && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Select Time Slot (Bangladesh Time) *{" "}
-                        <span className="text-xs text-[#00ADD2] font-semibold">
-                          — {getQuranStudiesSlotGroup().label} •{" "}
-                          {BATCH_SCHEDULES[formData.batchType].days}
-                        </span>
-                      </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {getQuranStudiesSlotGroup().slots.map((slot) => (
-                          <label
-                            key={slot}
-                            className="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-white transition"
-                            style={{
-                              borderColor:
-                                formData.batchSchedule === slot
-                                  ? "#00ADD2"
-                                  : "#d1d5db",
-                              backgroundColor:
-                                formData.batchSchedule === slot
-                                  ? "#e6f7f9"
-                                  : "transparent",
-                            }}
-                          >
-                            <input
-                              type="radio"
-                              name="batchSchedule"
-                              value={slot}
-                              checked={formData.batchSchedule === slot}
-                              onChange={handleInputChange}
-                              className="h-4 w-4"
-                            />
-                            <span className="text-sm">{slot}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {!getQuranStudiesCourse() && (
+                  {getQuranStudiesCourses().length === 0 && (
                     <p className="text-xs text-orange-600">
                       ⚠️ Time slot দেখতে উপরে একটি course সিলেক্ট করুন।
                     </p>
                   )}
 
-                  {formData.batchType && formData.batchSchedule && (
+                  <div className="space-y-4">
+                    {getQuranStudiesCourses().map((course) => {
+                      const batch = BATCH_SCHEDULES[course.batchType];
+                      const group = getSlotGroupFor(course);
+                      if (!batch || !group) return null;
+                      const chosen = formData.courseSchedules?.[course.id];
+                      return (
+                        <div
+                          key={course.id}
+                          className="bg-white p-3 rounded-lg border border-[#b3e5ec]"
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 mb-2">
+                            <p className="font-semibold text-sm text-gray-800">
+                              {course.name}
+                            </p>
+                            <p className="text-xs text-[#00ADD2] font-semibold">
+                              {batch.label} • {batch.days}
+                            </p>
+                          </div>
+                          <label className="block text-xs font-medium text-gray-700 mb-2">
+                            Select Time Slot (Bangladesh Time) *
+                          </label>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {group.slots.map((slot) => (
+                              <label
+                                key={slot}
+                                className="flex items-center gap-2 p-2 border rounded-lg cursor-pointer hover:bg-[#f0f9fa] transition"
+                                style={{
+                                  borderColor:
+                                    chosen === slot ? "#00ADD2" : "#d1d5db",
+                                  backgroundColor:
+                                    chosen === slot ? "#e6f7f9" : "transparent",
+                                }}
+                              >
+                                <input
+                                  type="radio"
+                                  name={`batchSchedule-${course.id}`}
+                                  value={slot}
+                                  checked={chosen === slot}
+                                  onChange={() => {
+                                    const courseSchedules = {
+                                      ...formData.courseSchedules,
+                                      [course.id]: slot,
+                                    };
+                                    setFormData({
+                                      ...formData,
+                                      courseSchedules,
+                                      ...buildQuranStudiesBatch(
+                                        formData.selectedCourses,
+                                        courseSchedules,
+                                      ),
+                                    });
+                                  }}
+                                  className="h-4 w-4"
+                                />
+                                <span className="text-sm">{slot}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {formData.batchSchedule && (
                     <div
                       className="mt-3 p-2 rounded-lg"
                       style={{ backgroundColor: "#e6f7f9" }}
                     >
-                      <p className="text-xs">
-                        <strong>Selected:</strong>{" "}
-                        {getQuranStudiesCourse()?.name} •{" "}
-                        {BATCH_SCHEDULES[formData.batchType].label} •{" "}
-                        {BATCH_SCHEDULES[formData.batchType].days} •{" "}
-                        {formData.batchSchedule}
-                      </p>
+                      <p className="text-xs font-semibold mb-1">Selected:</p>
+                      {getQuranStudiesCourses().map((course) => (
+                        <p key={course.id} className="text-xs">
+                          • {course.name} —{" "}
+                          {BATCH_SCHEDULES[course.batchType]?.label} •{" "}
+                          {BATCH_SCHEDULES[course.batchType]?.days} •{" "}
+                          {formData.courseSchedules?.[course.id]}
+                        </p>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -2378,7 +2396,7 @@ const Admission_now = () => {
                     <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5">
                       <span>Batch:</span>
                       <span className="font-semibold">
-                        {BATCH_SCHEDULES[formData.batchType]?.label} (
+                        {getBatchTypeLabel(formData.batchType)} (
                         {formData.batchSchedule})
                       </span>
                     </div>
