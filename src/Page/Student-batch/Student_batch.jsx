@@ -56,6 +56,16 @@ const COURSE_OPTIONS_BY_DEPT = {
     "Basic Tajweed",
     "Surah Baqarah Hifz",
   ],
+  "Quran Studies": [
+    "Qaida Nurani (Regular)",
+    "Qaida Nurani (Overseas)",
+    "Najera Quran (Regular)",
+    "Hifzul Quran (Regular)",
+    "Hifzul Revision (Regular)",
+    "Najera + Hifz (Overseas)",
+    "One-to-One (Regular)",
+    "One-to-One (Overseas)",
+  ],
   Alimiya: ["Alimiyah for Kids", "Alimiyah Program"],
   Diploma: ["Diploma in Islamic Studies", "Certificate"],
 };
@@ -410,7 +420,16 @@ const Student_batch = () => {
       "quran for elders",
       "basic tazweed",
     ],
-    "Quran Studies": ["quran studies", "hifzul quran", "tarbiyah quran"],
+    "Quran Studies": [
+      "quran studies",
+      "hifzul quran",
+      "tarbiyah quran",
+      "qaida nurani",
+      "najera quran",
+      "hifzul revision",
+      "najera + hifz",
+      "one-to-one",
+    ],
     Alimiya: ["alimiya", "dawra", "tafsir", "fiqh", "hadith"],
     Diploma: ["diploma"],
   };
@@ -433,6 +452,10 @@ const Student_batch = () => {
     ) {
       return true;
     }
+
+    // ✅ department আছে কিন্তু মেলেনি → অন্য department-এর batch
+    // (যেমন Quran Studies-এর "Qaida Nurani" batch যেন Elders admin-এ না দেখায়)
+    if (batchDept) return false;
 
     // যদি department ফিল্ড না থাকে, তবে course name দেখে ম্যাচ করবে
     const keywords = DEPT_COURSE_KEYWORDS[adminDepartment] || [];
@@ -3188,6 +3211,11 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
                             {stu.course && (
                               <p className="text-[10px] text-indigo-600 font-semibold truncate mt-0.5">
                                 {stu.course}
+                              </p>
+                            )}
+                            {stu.batchSchedule && (
+                              <p className="text-[10px] text-teal-700 font-semibold flex items-center gap-1 mt-0.5">
+                                <FaClock size={9} /> {stu.batchSchedule}
                               </p>
                             )}
                           </div>
