@@ -42,6 +42,10 @@ const BATCH_SCHEDULES = {
         label: "Hifz",
         slots: ["6:00 AM - 8:00 AM", "6:00 PM - 8:00 PM", "9:00 PM - 11:00 PM"],
       },
+      oneToOne: {
+        label: "One-to-One",
+        slots: ["6:00 AM - 8:00 AM", "6:00 PM - 8:00 PM", "9:00 PM - 11:00 PM"],
+      },
     },
   },
   overseas: {
@@ -272,6 +276,19 @@ const Admission_now = () => {
           batchType: "overseas",
           slotGroup: "najeraHifz",
           classDays: "Overseas Batch • Sat & Sun",
+        },
+        {
+          id: "qs5r",
+          name: "One-to-One (Regular)",
+          duration: "Flexible",
+          admissionFee: 1000,
+          monthlyFee: 5000,
+          totalOneTime: 1000 + 5000 * 6,
+          discount: 0,
+          price: 5000,
+          batchType: "regular",
+          slotGroup: "oneToOne",
+          classDays: "Regular Batch • Tue – Fri",
         },
         {
           id: "qs5",
