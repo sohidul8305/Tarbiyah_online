@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { FiX } from "react-icons/fi";
 
-// ✅ WhatsApp নম্বর — শুরুতে 0 বাদ দিয়ে 88 দিয়ে লিখুন, কোনো + বা space নয়
+// ✅ WhatsApp নম্বর — শুরতে 0 বাদ দিয়ে 88 দিয়ে লিখুন, কোনো + বা space নয়
 const WHATSAPP_NUMBER = "8801302642468";
 const WHATSAPP_MESSAGE =
   "আসসালামু আলাইকুম! Tarbiyah Online Madrasha সম্পর্কে জানতে চাই।";
