@@ -1845,6 +1845,61 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
   const totalCollected = students.reduce((sum, s) => sum + calcPaid(s), 0);
   const totalDue = students.reduce((sum, s) => sum + calcDue(s), 0);
 
+  /* ---------- ✅ Class Time (admission form-এ যে time বেছে নিয়েছে) ---------- */
+  const normTxt = (x) =>
+    String(x || "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+
+  // ১ course: "6:00 AM - 8:00 AM"
+  // ২ course: "Qaida Nurani (Regular): 6:00 AM - 8:00 AM | Hifzul Quran (Regular): 9:00 PM - 11:00 PM"
+  // → এই batch-এর course-এর time-টাই নেওয়া হবে
+  const getStudentSlot = (stu) => {
+    const raw = String(stu?.batchSchedule || "").trim();
+    if (!raw) return "";
+    const isMulti = raw.includes(": ") && !/^\d/.test(raw);
+    if (!isMulti) return raw;
+    const parts = raw.split(" | ");
+    for (const part of parts) {
+      const idx = part.indexOf(": ");
+      if (idx === -1) continue;
+      if (normTxt(part.slice(0, idx)) === normTxt(batch?.course)) {
+        return part.slice(idx + 2).trim();
+      }
+    }
+    return raw;
+  };
+
+  // batch schedule: "Regular Batch • Tue – Fri | slot1 / slot2 / ..."
+  const batchSlots = (() => {
+    const sch = String(batch?.schedule || "");
+    const i = sch.indexOf(" | ");
+    if (i === -1) return [];
+    return sch
+      .slice(i + 3)
+      .split(" / ")
+      .map((t) => t.trim())
+      .filter(Boolean);
+  })();
+
+  const slotSummary = (() => {
+    const counts = {};
+    let noSlot = 0;
+    students.forEach((stu) => {
+      const slot = getStudentSlot(stu);
+      if (slot) counts[slot] = (counts[slot] || 0) + 1;
+      else noSlot++;
+    });
+    const list = batchSlots.map((slot) => ({ slot, count: counts[slot] || 0 }));
+    Object.keys(counts).forEach((slot) => {
+      if (!batchSlots.includes(slot)) list.push({ slot, count: counts[slot] });
+    });
+    if (noSlot > 0 && list.length > 0)
+      list.push({ slot: "Time দেওয়া নেই", count: noSlot, empty: true });
+    return list;
+  })();
+
   /* ---------- Attendance draft ---------- */
   useEffect(() => {
     if (section !== "attendance" || !batch || !attendanceClassId) return;
@@ -2970,6 +3025,36 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
                       value={batch.teacher || "Not Assigned"}
                     />
                     <InfoRow label="Schedule" value={batch.schedule || "N/A"} />
+                    {slotSummary.length > 0 && (
+                      <div className="border-b border-gray-100 pb-2">
+                        <p className="text-gray-500 mb-1.5">
+                          Time অনুযায়ী Students
+                        </p>
+                        <div className="space-y-1">
+                          {slotSummary.map(({ slot, count, empty }) => (
+                            <div
+                              key={slot}
+                              className={`flex justify-between items-center gap-2 rounded-md px-2 py-1 border ${
+                                empty
+                                  ? "bg-gray-50 border-gray-200"
+                                  : "bg-teal-50 border-teal-100"
+                              }`}
+                            >
+                              <span
+                                className={`flex items-center gap-1 font-semibold ${
+                                  empty ? "text-gray-500" : "text-teal-800"
+                                }`}
+                              >
+                                <FaClock size={9} /> {slot}
+                              </span>
+                              <span className="text-[10px] font-bold bg-white text-teal-700 px-2 py-0.5 rounded-full border border-teal-100 whitespace-nowrap">
+                                {count} জন
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <InfoRow label="Classes" value={classesList.length} />
                     <InfoRow
                       label="Exams/Quizzes/PDF"
@@ -3001,6 +3086,9 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
                             Student ID
                           </th>
                           <th className="px-2 py-2 text-left font-bold">
+                            Class Time
+                          </th>
+                          <th className="px-2 py-2 text-left font-bold">
                             Father's Name
                           </th>
                           <th className="px-2 py-2 text-left font-bold">
@@ -3015,7 +3103,7 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
                         {students.length === 0 ? (
                           <tr>
                             <td
-                              colSpan="5"
+                              colSpan="6"
                               className="text-center py-4 text-gray-500 italic"
                             >
                               No students enrolled in this batch yet.
@@ -3032,6 +3120,15 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
                               </td>
                               <td className="px-2 py-2 text-gray-600 font-mono">
                                 {stu.studentId || "N/A"}
+                              </td>
+                              <td className="px-2 py-2 whitespace-nowrap">
+                                {getStudentSlot(stu) ? (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-teal-50 text-teal-700 border border-teal-100 px-2 py-0.5 rounded-full">
+                                    <FaClock size={8} /> {getStudentSlot(stu)}
+                                  </span>
+                                ) : (
+                                  <span className="text-gray-400">—</span>
+                                )}
                               </td>
                               <td className="px-2 py-2 text-gray-600">
                                 {stu.fatherName || stu.guardianName || "N/A"}
@@ -3213,9 +3310,10 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
                                 {stu.course}
                               </p>
                             )}
-                            {stu.batchSchedule && (
+                            {getStudentSlot(stu) && (
                               <p className="text-[10px] text-teal-700 font-semibold flex items-center gap-1 mt-0.5">
-                                <FaClock size={9} /> {stu.batchSchedule}
+                                <FaClock size={9} /> Class Time:{" "}
+                                {getStudentSlot(stu)}
                               </p>
                             )}
                           </div>
@@ -3694,6 +3792,12 @@ const ClassLMSView = ({ batchId, onBack, adminInfo, adminDepartment }) => {
                                 </p>
                                 <p className="text-[10px] text-gray-500 truncate">
                                   {stu.studentId}
+                                  {getStudentSlot(stu) && (
+                                    <span className="text-teal-700 font-semibold">
+                                      {" "}
+                                      • {getStudentSlot(stu)}
+                                    </span>
+                                  )}
                                 </p>
                               </div>
                             </div>
